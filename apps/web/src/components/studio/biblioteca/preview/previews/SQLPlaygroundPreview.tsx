@@ -14,27 +14,12 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { PreviewComponentProps, PreviewDefinition, PropDocumentation } from '../types';
-
-/**
- * Tipos para la base de datos simulada
- */
-interface TableSchema {
-  nombre: string;
-  columnas: {
-    nombre: string;
-    tipo: 'INTEGER' | 'TEXT' | 'REAL' | 'DATE' | 'BOOLEAN';
-    primaryKey?: boolean;
-    nullable?: boolean;
-  }[];
-  datos: Record<string, unknown>[];
-}
-
-interface QueryResult {
-  columnas: string[];
-  filas: unknown[][];
-  tiempoMs: number;
-  filasAfectadas?: number;
-}
+import {
+  ejecutarSQL,
+  compararResultados,
+  type TableSchema,
+  type QueryResult,
+} from '../hooks/useSQLEngine';
 
 interface SQLPlaygroundExampleData {
   instruccion: string;
@@ -43,193 +28,7 @@ interface SQLPlaygroundExampleData {
   consultaEsperada?: string;
   pistas?: string[];
   mostrarEsquema?: boolean;
-  permitirDDL?: boolean;
   altura?: number;
-}
-
-/**
- * Motor SQL simplificado para consultas básicas
- */
-function ejecutarSQL(
-  sql: string,
-  tablas: TableSchema[],
-): { resultado?: QueryResult; error?: string } {
-  const sqlNormalizado = sql.trim().toUpperCase();
-  const sqlOriginal = sql.trim();
-
-  try {
-    // SELECT básico
-    if (sqlNormalizado.startsWith('SELECT')) {
-      return ejecutarSelect(sqlOriginal, tablas);
-    }
-
-    // INSERT
-    if (sqlNormalizado.startsWith('INSERT')) {
-      return { error: 'INSERT no está habilitado en este playground' };
-    }
-
-    // UPDATE
-    if (sqlNormalizado.startsWith('UPDATE')) {
-      return { error: 'UPDATE no está habilitado en este playground' };
-    }
-
-    // DELETE
-    if (sqlNormalizado.startsWith('DELETE')) {
-      return { error: 'DELETE no está habilitado en este playground' };
-    }
-
-    return { error: 'Consulta no reconocida. Solo SELECT está habilitado.' };
-  } catch (e) {
-    return { error: `Error de sintaxis: ${(e as Error).message}` };
-  }
-}
-
-function ejecutarSelect(
-  sql: string,
-  tablas: TableSchema[],
-): { resultado?: QueryResult; error?: string } {
-  const inicio = performance.now();
-
-  // Parser muy simplificado para SELECT
-  const matchFrom = sql.match(/FROM\s+(\w+)/i);
-  if (!matchFrom || !matchFrom[1]) {
-    return { error: 'Falta la cláusula FROM' };
-  }
-
-  const nombreTabla = matchFrom[1].toLowerCase();
-  const tabla = tablas.find((t) => t.nombre.toLowerCase() === nombreTabla);
-
-  if (!tabla) {
-    return { error: `Tabla "${nombreTabla}" no encontrada` };
-  }
-
-  // Extraer columnas seleccionadas
-  const matchSelect = sql.match(/SELECT\s+(.+?)\s+FROM/i);
-  if (!matchSelect || !matchSelect[1]) {
-    return { error: 'Error en la cláusula SELECT' };
-  }
-
-  const columnasStr = matchSelect[1].trim();
-  let columnasSeleccionadas: string[];
-
-  if (columnasStr === '*') {
-    columnasSeleccionadas = tabla.columnas.map((c) => c.nombre);
-  } else {
-    columnasSeleccionadas = columnasStr.split(',').map((c) => c.trim());
-  }
-
-  // Verificar que las columnas existen
-  const columnasTabla = tabla.columnas.map((c) => c.nombre.toLowerCase());
-  for (const col of columnasSeleccionadas) {
-    if (!columnasTabla.includes(col.toLowerCase()) && col !== '*') {
-      return { error: `Columna "${col}" no existe en la tabla "${tabla.nombre}"` };
-    }
-  }
-
-  // Filtrar datos (WHERE básico)
-  let datosFiltrados = [...tabla.datos];
-  const matchWhere = sql.match(/WHERE\s+(.+?)(?:ORDER|LIMIT|GROUP|$)/i);
-
-  if (matchWhere && matchWhere[1]) {
-    const condicion = matchWhere[1].trim();
-    datosFiltrados = filtrarPorCondicion(datosFiltrados, condicion);
-  }
-
-  // ORDER BY básico
-  const matchOrder = sql.match(/ORDER\s+BY\s+(\w+)(?:\s+(ASC|DESC))?/i);
-  if (matchOrder && matchOrder[1]) {
-    const columnaOrden = matchOrder[1];
-    const direccion = matchOrder[2]?.toUpperCase() === 'DESC' ? -1 : 1;
-    datosFiltrados.sort((a, b) => {
-      const valA = a[columnaOrden];
-      const valB = b[columnaOrden];
-      if (valA === valB) return 0;
-      if (valA === null || valA === undefined) return 1;
-      if (valB === null || valB === undefined) return -1;
-      return valA < valB ? -direccion : direccion;
-    });
-  }
-
-  // LIMIT básico
-  const matchLimit = sql.match(/LIMIT\s+(\d+)/i);
-  if (matchLimit && matchLimit[1]) {
-    const limite = parseInt(matchLimit[1], 10);
-    datosFiltrados = datosFiltrados.slice(0, limite);
-  }
-
-  // Construir resultado
-  const filas = datosFiltrados.map((fila) => columnasSeleccionadas.map((col) => fila[col] ?? null));
-
-  const fin = performance.now();
-
-  return {
-    resultado: {
-      columnas: columnasSeleccionadas,
-      filas,
-      tiempoMs: Math.round((fin - inicio) * 100) / 100,
-    },
-  };
-}
-
-function filtrarPorCondicion(
-  datos: Record<string, unknown>[],
-  condicion: string,
-): Record<string, unknown>[] {
-  // Parser muy básico de condiciones
-  // Soporta: columna = valor, columna > valor, columna < valor, columna LIKE '%valor%'
-
-  const matchIgual = condicion.match(/(\w+)\s*=\s*['"]?([^'"]+)['"]?/i);
-  if (matchIgual) {
-    const columna = matchIgual[1] ?? '';
-    const valor = matchIgual[2] ?? '';
-    if (columna && valor) {
-      return datos.filter((fila) => {
-        const valFila = fila[columna];
-        if (typeof valFila === 'number') {
-          return valFila === parseFloat(valor);
-        }
-        return String(valFila).toLowerCase() === valor.toLowerCase();
-      });
-    }
-  }
-
-  const matchMayor = condicion.match(/(\w+)\s*>\s*(\d+(?:\.\d+)?)/i);
-  if (matchMayor) {
-    const columna = matchMayor[1] ?? '';
-    const valor = matchMayor[2] ?? '';
-    if (columna && valor) {
-      return datos.filter((fila) => {
-        const valFila = fila[columna];
-        return typeof valFila === 'number' && valFila > parseFloat(valor);
-      });
-    }
-  }
-
-  const matchMenor = condicion.match(/(\w+)\s*<\s*(\d+(?:\.\d+)?)/i);
-  if (matchMenor) {
-    const columna = matchMenor[1] ?? '';
-    const valor = matchMenor[2] ?? '';
-    if (columna && valor) {
-      return datos.filter((fila) => {
-        const valFila = fila[columna];
-        return typeof valFila === 'number' && valFila < parseFloat(valor);
-      });
-    }
-  }
-
-  const matchLike = condicion.match(/(\w+)\s+LIKE\s+['"]%?([^%'"]+)%?['"]/i);
-  if (matchLike) {
-    const columna = matchLike[1] ?? '';
-    const patron = matchLike[2] ?? '';
-    if (columna && patron) {
-      return datos.filter((fila) => {
-        const valFila = fila[columna];
-        return String(valFila).toLowerCase().includes(patron.toLowerCase());
-      });
-    }
-  }
-
-  return datos;
 }
 
 /**
@@ -268,10 +67,7 @@ function SQLPlaygroundPreviewComponent({ exampleData }: PreviewComponentProps): 
       if (data.consultaEsperada) {
         const { resultado: resEsperado } = ejecutarSQL(data.consultaEsperada, data.tablas);
         if (resEsperado) {
-          const coincide =
-            JSON.stringify(res.columnas) === JSON.stringify(resEsperado.columnas) &&
-            JSON.stringify(res.filas) === JSON.stringify(resEsperado.filas);
-          setVerificado(coincide);
+          setVerificado(compararResultados(res, resEsperado));
         }
       }
     }
@@ -579,13 +375,6 @@ const propsDocumentation: PropDocumentation[] = [
     description: 'Si se muestra el esquema de tablas',
     required: false,
     defaultValue: 'true',
-  },
-  {
-    name: 'permitirDDL',
-    type: 'boolean',
-    description: 'Si se permiten comandos DDL (CREATE, ALTER, DROP)',
-    required: false,
-    defaultValue: 'false',
   },
   {
     name: 'altura',

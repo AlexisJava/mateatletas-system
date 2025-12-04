@@ -7,13 +7,14 @@ import {
   Plus,
   Search,
   Filter,
-  Sparkles,
   BookOpen,
   Clock,
   CheckCircle2,
   AlertCircle,
   Loader2,
   Library,
+  Trash2,
+  X,
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -134,7 +135,13 @@ function StatCard({
   );
 }
 
-function CursoCard({ curso }: { curso: CursoListItem }) {
+function CursoCard({
+  curso,
+  onEliminar,
+}: {
+  curso: CursoListItem;
+  onEliminar?: (curso: CursoListItem) => void;
+}) {
   const estadoConfig = ESTADO_CONFIG[curso.estado];
   const casaConfig = CASA_CONFIG[curso.casa];
   const mundoConfig = MUNDO_CONFIG[curso.mundo];
@@ -148,6 +155,12 @@ function CursoCard({ curso }: { curso: CursoListItem }) {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
+  };
+
+  const handleEliminar = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onEliminar?.(curso);
   };
 
   return (
@@ -179,13 +192,25 @@ function CursoCard({ curso }: { curso: CursoListItem }) {
               </span>
             </div>
           </div>
-          <div
-            className={`flex items-center gap-1 px-2 py-1 rounded-full ${estadoConfig.bgColor} ${estadoConfig.borderColor} border`}
-          >
-            <Icon className={`w-3 h-3 ${estadoConfig.color}`} />
-            <span className={`text-[10px] font-semibold ${estadoConfig.color}`}>
-              {estadoConfig.label}
-            </span>
+          <div className="flex items-center gap-2">
+            {/* Boton eliminar solo para DRAFT */}
+            {curso.estado === 'DRAFT' && onEliminar && (
+              <button
+                onClick={handleEliminar}
+                className="p-1.5 rounded-lg bg-red-500/10 text-red-400 opacity-0 group-hover:opacity-100 hover:bg-red-500/20 transition-all"
+                title="Eliminar borrador"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+            <div
+              className={`flex items-center gap-1 px-2 py-1 rounded-full ${estadoConfig.bgColor} ${estadoConfig.borderColor} border`}
+            >
+              <Icon className={`w-3 h-3 ${estadoConfig.color}`} />
+              <span className={`text-[10px] font-semibold ${estadoConfig.color}`}>
+                {estadoConfig.label}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -221,6 +246,78 @@ function CursoCard({ curso }: { curso: CursoListItem }) {
   );
 }
 
+function ConfirmDeleteModal({
+  curso,
+  onConfirm,
+  onCancel,
+  isDeleting,
+}: {
+  curso: CursoListItem;
+  onConfirm: () => void;
+  onCancel: () => void;
+  isDeleting: boolean;
+}) {
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="bg-slate-800 rounded-xl border border-slate-700 max-w-md w-full shadow-2xl">
+        <div className="p-4 border-b border-slate-700 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-white">Eliminar Borrador</h3>
+          <button
+            onClick={onCancel}
+            disabled={isDeleting}
+            className="p-1 rounded hover:bg-slate-700 text-slate-400 disabled:opacity-50"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="p-4">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-red-500/20">
+              <Trash2 className="w-5 h-5 text-red-400" />
+            </div>
+            <div>
+              <p className="text-white mb-1">
+                ¿Estás seguro que querés eliminar el curso{' '}
+                <span className="font-semibold">&quot;{curso.nombre}&quot;</span>?
+              </p>
+              <p className="text-sm text-slate-400">
+                Esta acción no se puede deshacer. Se eliminarán todas las semanas y recursos
+                asociados.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3">
+            <button
+              onClick={onCancel}
+              disabled={isDeleting}
+              className="px-4 py-2 text-sm text-slate-300 hover:text-white border border-slate-600 rounded-lg hover:border-slate-500 transition-colors disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={isDeleting}
+              className="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Eliminando...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4" />
+                  Eliminar
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // PÁGINA PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -234,6 +331,10 @@ export default function StudioPage() {
   // Filtros
   const [filtroEstado, setFiltroEstado] = useState<EstadoCurso | null>(null);
   const [busqueda, setBusqueda] = useState('');
+
+  // Estado para eliminacion
+  const [cursoAEliminar, setCursoAEliminar] = useState<CursoListItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -262,6 +363,24 @@ export default function StudioPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Funcion para eliminar curso
+  const handleEliminarCurso = useCallback(async () => {
+    if (!cursoAEliminar) return;
+
+    setIsDeleting(true);
+    try {
+      await apiClient.delete(`/studio/cursos/${cursoAEliminar.id}`);
+      setCursoAEliminar(null);
+      // Refrescar datos
+      await fetchData();
+    } catch (err) {
+      console.error('Error al eliminar curso:', err);
+      setError('Error al eliminar el curso');
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [cursoAEliminar, fetchData]);
 
   // Filtrar cursos por búsqueda
   const cursosFiltrados = cursos.filter((curso) =>
@@ -427,12 +546,22 @@ export default function StudioPage() {
             {/* Grid de cursos */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {cursosFiltrados.map((curso) => (
-                <CursoCard key={curso.id} curso={curso} />
+                <CursoCard key={curso.id} curso={curso} onEliminar={setCursoAEliminar} />
               ))}
             </div>
           </>
         )}
       </div>
+
+      {/* Modal de confirmacion de eliminacion */}
+      {cursoAEliminar && (
+        <ConfirmDeleteModal
+          curso={cursoAEliminar}
+          onConfirm={handleEliminarCurso}
+          onCancel={() => setCursoAEliminar(null)}
+          isDeleting={isDeleting}
+        />
+      )}
     </div>
   );
 }

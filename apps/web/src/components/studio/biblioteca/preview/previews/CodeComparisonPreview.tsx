@@ -4,7 +4,9 @@ import React, { ReactElement, useState, useCallback, useRef, useEffect } from 'r
 import Editor, { DiffEditor, DiffOnMount } from '@monaco-editor/react';
 import { ArrowLeftRight, Eye, EyeOff, Copy, CheckCheck } from 'lucide-react';
 import { PreviewComponentProps, PreviewDefinition, PropDocumentation } from '../types';
-import type { editor } from 'monaco-editor';
+
+// Tipo para el editor diff de Monaco (inferido del callback DiffOnMount)
+type DiffEditorInstance = Parameters<DiffOnMount>[0];
 
 /**
  * Datos de ejemplo tipados para CodeComparison
@@ -38,7 +40,7 @@ function CodeComparisonPreviewComponent({
   const [mostrarCambios, setMostrarCambios] = useState(data.mostrarDiferencias !== false);
   const [copiedSide, setCopiedSide] = useState<'left' | 'right' | null>(null);
   const [diffEditorMounted, setDiffEditorMounted] = useState(false);
-  const diffEditorRef = useRef<editor.IStandaloneDiffEditor | null>(null);
+  const diffEditorRef = useRef<DiffEditorInstance | null>(null);
 
   // Cleanup del DiffEditor al desmontar o cambiar de vista
   useEffect(() => {

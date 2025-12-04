@@ -3,6 +3,12 @@
 import React, { ReactElement, useState, useCallback, useRef, useEffect } from 'react';
 import { Terminal, RotateCcw, Maximize2, Minimize2, Info, CheckCircle2 } from 'lucide-react';
 import { PreviewComponentProps, PreviewDefinition, PropDocumentation } from '../types';
+import {
+  navegarA,
+  crearComandosBasicos,
+  sistemaArchivosPorDefecto,
+  type FileSystemNode,
+} from '../hooks/useTerminalFileSystem';
 
 /**
  * Tipos para TerminalEmulator
@@ -20,13 +26,6 @@ interface TerminalLine {
   timestamp?: number;
 }
 
-interface FileSystemNode {
-  nombre: string;
-  tipo: 'archivo' | 'directorio';
-  contenido?: string;
-  hijos?: FileSystemNode[];
-}
-
 interface TerminalEmulatorExampleData {
   instruccion: string;
   prompt?: string;
@@ -37,63 +36,6 @@ interface TerminalEmulatorExampleData {
   objetivoComando?: string;
   explicacion?: string;
 }
-
-/**
- * Sistema de archivos simulado por defecto
- */
-const sistemaArchivosPorDefecto: FileSystemNode = {
-  nombre: '/',
-  tipo: 'directorio',
-  hijos: [
-    {
-      nombre: 'home',
-      tipo: 'directorio',
-      hijos: [
-        {
-          nombre: 'usuario',
-          tipo: 'directorio',
-          hijos: [
-            {
-              nombre: 'documentos',
-              tipo: 'directorio',
-              hijos: [
-                { nombre: 'notas.txt', tipo: 'archivo', contenido: 'Mis notas importantes\n' },
-                {
-                  nombre: 'codigo.js',
-                  tipo: 'archivo',
-                  contenido: 'console.log("Hola mundo!");\n',
-                },
-              ],
-            },
-            {
-              nombre: 'proyectos',
-              tipo: 'directorio',
-              hijos: [
-                { nombre: 'web', tipo: 'directorio', hijos: [] },
-                { nombre: 'app', tipo: 'directorio', hijos: [] },
-              ],
-            },
-            {
-              nombre: '.bashrc',
-              tipo: 'archivo',
-              contenido: '# Configuración de bash\nexport PATH=$PATH:/usr/local/bin\n',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      nombre: 'etc',
-      tipo: 'directorio',
-      hijos: [{ nombre: 'config.conf', tipo: 'archivo', contenido: '[settings]\ntheme=dark\n' }],
-    },
-    {
-      nombre: 'tmp',
-      tipo: 'directorio',
-      hijos: [],
-    },
-  ],
-};
 
 /**
  * Preview interactivo del componente TerminalEmulator

@@ -42,3 +42,6 @@ export { RegexTesterPreview } from './RegexTesterPreview';
 export { AlgorithmVizPreview } from './AlgorithmVizPreview';
 export { DataStructureVizPreview } from './DataStructureVizPreview';
 export { TerminalEmulatorPreview } from './TerminalEmulatorPreview';
+export { PracticeModePreview } from './PracticeModePreview';
+export { ChallengeModePreview } from './ChallengeModePreview';
+export { PortfolioPreview } from './PortfolioPreview';

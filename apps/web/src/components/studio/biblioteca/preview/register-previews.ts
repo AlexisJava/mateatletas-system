@@ -45,6 +45,11 @@ import { RegexTesterPreview } from './previews/RegexTesterPreview';
 import { AlgorithmVizPreview } from './previews/AlgorithmVizPreview';
 import { DataStructureVizPreview } from './previews/DataStructureVizPreview';
 import { TerminalEmulatorPreview } from './previews/TerminalEmulatorPreview';
+import { PracticeModePreview } from './previews/PracticeModePreview';
+import { ChallengeModePreview } from './previews/ChallengeModePreview';
+import { PortfolioPreview } from './previews/PortfolioPreview';
+import { LuaPlaygroundPreview } from './previews/LuaPlaygroundPreview';
+import { JavaScriptPlaygroundPreview } from './previews/JavaScriptPlaygroundPreview';
 
 // Registrar previews de componentes implementados
 registerPreview('MultipleChoice', MultipleChoicePreview);
@@ -84,10 +89,13 @@ registerPreview('RegexTester', RegexTesterPreview);
 registerPreview('AlgorithmViz', AlgorithmVizPreview);
 registerPreview('DataStructureViz', DataStructureVizPreview);
 registerPreview('TerminalEmulator', TerminalEmulatorPreview);
+registerPreview('PracticeMode', PracticeModePreview);
+registerPreview('ChallengeMode', ChallengeModePreview);
+registerPreview('Portfolio', PortfolioPreview);
+registerPreview('LuaPlayground', LuaPlaygroundPreview);
+registerPreview('JavaScriptPlayground', JavaScriptPlaygroundPreview);
 
 // Log para desarrollo
 if (process.env.NODE_ENV === 'development') {
-  console.log(
-    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs, OrderSequence, Slider, ToggleSwitch, NumberInput, TextInput, Hotspot, Timeline, SortingBins, ScaleBalance, PieChart, BarGraph, AudioPlayer, ImageGallery, Quiz, ProgressTracker, DocumentViewer, Rubric, BadgeDisplay, Checkpoint, StepAnimation, TracePath, DrawShape, FunctionGrapher, CodeEditor, CodePlayground, CodeComparison, SyntaxHighlight, SQLPlayground, RegexTester, AlgorithmViz, DataStructureViz, TerminalEmulator',
-  );
+  console.log('[Studio] 42 previews registrados');
 }
