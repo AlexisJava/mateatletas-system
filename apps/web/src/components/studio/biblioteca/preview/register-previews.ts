@@ -40,6 +40,11 @@ import { CodeEditorPreview } from './previews/CodeEditorPreview';
 import { CodePlaygroundPreview } from './previews/CodePlaygroundPreview';
 import { CodeComparisonPreview } from './previews/CodeComparisonPreview';
 import { SyntaxHighlightPreview } from './previews/SyntaxHighlightPreview';
+import { SQLPlaygroundPreview } from './previews/SQLPlaygroundPreview';
+import { RegexTesterPreview } from './previews/RegexTesterPreview';
+import { AlgorithmVizPreview } from './previews/AlgorithmVizPreview';
+import { DataStructureVizPreview } from './previews/DataStructureVizPreview';
+import { TerminalEmulatorPreview } from './previews/TerminalEmulatorPreview';
 
 // Registrar previews de componentes implementados
 registerPreview('MultipleChoice', MultipleChoicePreview);
@@ -74,10 +79,15 @@ registerPreview('CodeEditor', CodeEditorPreview);
 registerPreview('CodePlayground', CodePlaygroundPreview);
 registerPreview('CodeComparison', CodeComparisonPreview);
 registerPreview('SyntaxHighlight', SyntaxHighlightPreview);
+registerPreview('SQLPlayground', SQLPlaygroundPreview);
+registerPreview('RegexTester', RegexTesterPreview);
+registerPreview('AlgorithmViz', AlgorithmVizPreview);
+registerPreview('DataStructureViz', DataStructureVizPreview);
+registerPreview('TerminalEmulator', TerminalEmulatorPreview);
 
 // Log para desarrollo
 if (process.env.NODE_ENV === 'development') {
   console.log(
-    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs, OrderSequence, Slider, ToggleSwitch, NumberInput, TextInput, Hotspot, Timeline, SortingBins, ScaleBalance, PieChart, BarGraph, AudioPlayer, ImageGallery, Quiz, ProgressTracker, DocumentViewer, Rubric, BadgeDisplay, Checkpoint, StepAnimation, TracePath, DrawShape, FunctionGrapher, CodeEditor, CodePlayground, CodeComparison, SyntaxHighlight',
+    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs, OrderSequence, Slider, ToggleSwitch, NumberInput, TextInput, Hotspot, Timeline, SortingBins, ScaleBalance, PieChart, BarGraph, AudioPlayer, ImageGallery, Quiz, ProgressTracker, DocumentViewer, Rubric, BadgeDisplay, Checkpoint, StepAnimation, TracePath, DrawShape, FunctionGrapher, CodeEditor, CodePlayground, CodeComparison, SyntaxHighlight, SQLPlayground, RegexTester, AlgorithmViz, DataStructureViz, TerminalEmulator',
   );
 }

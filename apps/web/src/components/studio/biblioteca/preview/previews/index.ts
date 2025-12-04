@@ -37,3 +37,8 @@ export { CodeEditorPreview } from './CodeEditorPreview';
 export { CodePlaygroundPreview } from './CodePlaygroundPreview';
 export { CodeComparisonPreview } from './CodeComparisonPreview';
 export { SyntaxHighlightPreview } from './SyntaxHighlightPreview';
+export { SQLPlaygroundPreview } from './SQLPlaygroundPreview';
+export { RegexTesterPreview } from './RegexTesterPreview';
+export { AlgorithmVizPreview } from './AlgorithmVizPreview';
+export { DataStructureVizPreview } from './DataStructureVizPreview';
+export { TerminalEmulatorPreview } from './TerminalEmulatorPreview';
