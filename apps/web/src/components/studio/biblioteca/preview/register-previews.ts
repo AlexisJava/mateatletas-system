@@ -36,6 +36,10 @@ import { StepAnimationPreview } from './previews/StepAnimationPreview';
 import { TracePathPreview } from './previews/TracePathPreview';
 import { DrawShapePreview } from './previews/DrawShapePreview';
 import { FunctionGrapherPreview } from './previews/FunctionGrapherPreview';
+import { CodeEditorPreview } from './previews/CodeEditorPreview';
+import { CodePlaygroundPreview } from './previews/CodePlaygroundPreview';
+import { CodeComparisonPreview } from './previews/CodeComparisonPreview';
+import { SyntaxHighlightPreview } from './previews/SyntaxHighlightPreview';
 
 // Registrar previews de componentes implementados
 registerPreview('MultipleChoice', MultipleChoicePreview);
@@ -66,10 +70,14 @@ registerPreview('StepAnimation', StepAnimationPreview);
 registerPreview('TracePath', TracePathPreview);
 registerPreview('DrawShape', DrawShapePreview);
 registerPreview('FunctionGrapher', FunctionGrapherPreview);
+registerPreview('CodeEditor', CodeEditorPreview);
+registerPreview('CodePlayground', CodePlaygroundPreview);
+registerPreview('CodeComparison', CodeComparisonPreview);
+registerPreview('SyntaxHighlight', SyntaxHighlightPreview);
 
 // Log para desarrollo
 if (process.env.NODE_ENV === 'development') {
   console.log(
-    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs, OrderSequence, Slider, ToggleSwitch, NumberInput, TextInput, Hotspot, Timeline, SortingBins, ScaleBalance, PieChart, BarGraph, AudioPlayer, ImageGallery, Quiz, ProgressTracker, DocumentViewer, Rubric, BadgeDisplay, Checkpoint, StepAnimation, TracePath, DrawShape, FunctionGrapher',
+    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs, OrderSequence, Slider, ToggleSwitch, NumberInput, TextInput, Hotspot, Timeline, SortingBins, ScaleBalance, PieChart, BarGraph, AudioPlayer, ImageGallery, Quiz, ProgressTracker, DocumentViewer, Rubric, BadgeDisplay, Checkpoint, StepAnimation, TracePath, DrawShape, FunctionGrapher, CodeEditor, CodePlayground, CodeComparison, SyntaxHighlight',
   );
 }

@@ -33,3 +33,7 @@ export { StepAnimationPreview } from './StepAnimationPreview';
 export { TracePathPreview } from './TracePathPreview';
 export { DrawShapePreview } from './DrawShapePreview';
 export { FunctionGrapherPreview } from './FunctionGrapherPreview';
+export { CodeEditorPreview } from './CodeEditorPreview';
+export { CodePlaygroundPreview } from './CodePlaygroundPreview';
+export { CodeComparisonPreview } from './CodeComparisonPreview';
+export { SyntaxHighlightPreview } from './SyntaxHighlightPreview';
