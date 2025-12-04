@@ -28,6 +28,14 @@ import { AudioPlayerPreview } from './previews/AudioPlayerPreview';
 import { ImageGalleryPreview } from './previews/ImageGalleryPreview';
 import { QuizPreview } from './previews/QuizPreview';
 import { ProgressTrackerPreview } from './previews/ProgressTrackerPreview';
+import { DocumentViewerPreview } from './previews/DocumentViewerPreview';
+import { RubricPreview } from './previews/RubricPreview';
+import { BadgeDisplayPreview } from './previews/BadgeDisplayPreview';
+import { CheckpointPreview } from './previews/CheckpointPreview';
+import { StepAnimationPreview } from './previews/StepAnimationPreview';
+import { TracePathPreview } from './previews/TracePathPreview';
+import { DrawShapePreview } from './previews/DrawShapePreview';
+import { FunctionGrapherPreview } from './previews/FunctionGrapherPreview';
 
 // Registrar previews de componentes implementados
 registerPreview('MultipleChoice', MultipleChoicePreview);
@@ -50,10 +58,18 @@ registerPreview('AudioPlayer', AudioPlayerPreview);
 registerPreview('ImageGallery', ImageGalleryPreview);
 registerPreview('Quiz', QuizPreview);
 registerPreview('ProgressTracker', ProgressTrackerPreview);
+registerPreview('DocumentViewer', DocumentViewerPreview);
+registerPreview('Rubric', RubricPreview);
+registerPreview('BadgeDisplay', BadgeDisplayPreview);
+registerPreview('Checkpoint', CheckpointPreview);
+registerPreview('StepAnimation', StepAnimationPreview);
+registerPreview('TracePath', TracePathPreview);
+registerPreview('DrawShape', DrawShapePreview);
+registerPreview('FunctionGrapher', FunctionGrapherPreview);
 
 // Log para desarrollo
 if (process.env.NODE_ENV === 'development') {
   console.log(
-    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs, OrderSequence, Slider, ToggleSwitch, NumberInput, TextInput, Hotspot, Timeline, SortingBins, ScaleBalance, PieChart, BarGraph, AudioPlayer, ImageGallery, Quiz, ProgressTracker',
+    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs, OrderSequence, Slider, ToggleSwitch, NumberInput, TextInput, Hotspot, Timeline, SortingBins, ScaleBalance, PieChart, BarGraph, AudioPlayer, ImageGallery, Quiz, ProgressTracker, DocumentViewer, Rubric, BadgeDisplay, Checkpoint, StepAnimation, TracePath, DrawShape, FunctionGrapher',
   );
 }
