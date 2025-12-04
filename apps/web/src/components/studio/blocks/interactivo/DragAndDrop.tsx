@@ -238,7 +238,7 @@ export const DragAndDrop: React.FC<StudioBlockProps<DragAndDropConfig>> = ({
   onComplete,
   onProgress,
 }) => {
-  const { classes } = useStudioTheme();
+  useStudioTheme();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [state, setState] = useState<DragAndDropState>({
@@ -361,6 +361,7 @@ export const DragAndDrop: React.FC<StudioBlockProps<DragAndDropConfig>> = ({
   const handleTouchStart = useCallback((elementId: string, e: React.TouchEvent) => {
     e.preventDefault();
     const touch = e.touches[0];
+    if (!touch) return;
     setTouchDragElement(elementId);
     setTouchPosition({ x: touch.clientX, y: touch.clientY });
   }, []);
@@ -369,23 +370,25 @@ export const DragAndDrop: React.FC<StudioBlockProps<DragAndDropConfig>> = ({
     const handleTouchMove = (e: TouchEvent) => {
       if (!touchDragElement) return;
       e.preventDefault();
-      const touch = e.touches[0];
-      setTouchPosition({ x: touch.clientX, y: touch.clientY });
+      const touchPoint = e.touches[0];
+      if (!touchPoint) return;
+      setTouchPosition({ x: touchPoint.clientX, y: touchPoint.clientY });
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
       if (!touchDragElement || !containerRef.current) return;
 
-      const touch = e.changedTouches[0];
+      const touchPoint = e.changedTouches[0];
+      if (!touchPoint) return;
       const dropZones = containerRef.current.querySelectorAll('[data-testid^="dropzone-"]');
 
       dropZones.forEach((zone) => {
         const rect = zone.getBoundingClientRect();
         if (
-          touch.clientX >= rect.left &&
-          touch.clientX <= rect.right &&
-          touch.clientY >= rect.top &&
-          touch.clientY <= rect.bottom
+          touchPoint.clientX >= rect.left &&
+          touchPoint.clientX <= rect.right &&
+          touchPoint.clientY >= rect.top &&
+          touchPoint.clientY <= rect.bottom
         ) {
           const zoneId = zone.getAttribute('data-testid')?.replace('dropzone-', '');
           if (zoneId) {
