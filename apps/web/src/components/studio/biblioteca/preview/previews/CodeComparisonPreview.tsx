@@ -1,9 +1,10 @@
 'use client';
 
-import React, { ReactElement, useState, useCallback } from 'react';
-import Editor, { DiffEditor } from '@monaco-editor/react';
+import React, { ReactElement, useState, useCallback, useRef, useEffect } from 'react';
+import Editor, { DiffEditor, DiffOnMount } from '@monaco-editor/react';
 import { ArrowLeftRight, Eye, EyeOff, Copy, CheckCheck } from 'lucide-react';
 import { PreviewComponentProps, PreviewDefinition, PropDocumentation } from '../types';
+import type { editor } from 'monaco-editor';
 
 /**
  * Datos de ejemplo tipados para CodeComparison
@@ -36,6 +37,34 @@ function CodeComparisonPreviewComponent({
   const [vistaUnificada, setVistaUnificada] = useState(false);
   const [mostrarCambios, setMostrarCambios] = useState(data.mostrarDiferencias !== false);
   const [copiedSide, setCopiedSide] = useState<'left' | 'right' | null>(null);
+  const [diffEditorMounted, setDiffEditorMounted] = useState(false);
+  const diffEditorRef = useRef<editor.IStandaloneDiffEditor | null>(null);
+
+  // Cleanup del DiffEditor al desmontar o cambiar de vista
+  useEffect(() => {
+    return () => {
+      if (diffEditorRef.current) {
+        try {
+          diffEditorRef.current.dispose();
+        } catch {
+          // Ignorar errores de dispose si ya fue disposed
+        }
+        diffEditorRef.current = null;
+      }
+    };
+  }, []);
+
+  // Reset mounted state cuando cambia la vista
+  useEffect(() => {
+    if (!vistaUnificada) {
+      setDiffEditorMounted(false);
+    }
+  }, [vistaUnificada]);
+
+  const handleDiffEditorMount: DiffOnMount = useCallback((editor) => {
+    diffEditorRef.current = editor;
+    setDiffEditorMounted(true);
+  }, []);
 
   const handleCopy = useCallback(
     async (side: 'left' | 'right') => {
@@ -141,6 +170,7 @@ function CodeComparisonPreviewComponent({
             original={codigoIzq}
             modified={codigoDer}
             theme="vs-dark"
+            onMount={handleDiffEditorMount}
             options={{
               readOnly: true,
               renderSideBySide: false,
