@@ -18,6 +18,16 @@ import { SliderPreview } from './previews/SliderPreview';
 import { ToggleSwitchPreview } from './previews/ToggleSwitchPreview';
 import { NumberInputPreview } from './previews/NumberInputPreview';
 import { TextInputPreview } from './previews/TextInputPreview';
+import { HotspotPreview } from './previews/HotspotPreview';
+import { TimelinePreview } from './previews/TimelinePreview';
+import { SortingBinsPreview } from './previews/SortingBinsPreview';
+import { ScaleBalancePreview } from './previews/ScaleBalancePreview';
+import { PieChartPreview } from './previews/PieChartPreview';
+import { BarGraphPreview } from './previews/BarGraphPreview';
+import { AudioPlayerPreview } from './previews/AudioPlayerPreview';
+import { ImageGalleryPreview } from './previews/ImageGalleryPreview';
+import { QuizPreview } from './previews/QuizPreview';
+import { ProgressTrackerPreview } from './previews/ProgressTrackerPreview';
 
 // Registrar previews de componentes implementados
 registerPreview('MultipleChoice', MultipleChoicePreview);
@@ -30,10 +40,20 @@ registerPreview('Slider', SliderPreview);
 registerPreview('ToggleSwitch', ToggleSwitchPreview);
 registerPreview('NumberInput', NumberInputPreview);
 registerPreview('TextInput', TextInputPreview);
+registerPreview('Hotspot', HotspotPreview);
+registerPreview('Timeline', TimelinePreview);
+registerPreview('SortingBins', SortingBinsPreview);
+registerPreview('ScaleBalance', ScaleBalancePreview);
+registerPreview('PieChart', PieChartPreview);
+registerPreview('BarGraph', BarGraphPreview);
+registerPreview('AudioPlayer', AudioPlayerPreview);
+registerPreview('ImageGallery', ImageGalleryPreview);
+registerPreview('Quiz', QuizPreview);
+registerPreview('ProgressTracker', ProgressTrackerPreview);
 
 // Log para desarrollo
 if (process.env.NODE_ENV === 'development') {
   console.log(
-    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs, OrderSequence, Slider, ToggleSwitch, NumberInput, TextInput',
+    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs, OrderSequence, Slider, ToggleSwitch, NumberInput, TextInput, Hotspot, Timeline, SortingBins, ScaleBalance, PieChart, BarGraph, AudioPlayer, ImageGallery, Quiz, ProgressTracker',
   );
 }
