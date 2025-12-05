@@ -1065,6 +1065,90 @@ const EDITORES_CODIGO: ComponenteData[] = [
     habilitado: true,
     orden: 60,
   },
+  {
+    tipo: 'LuaPlayground',
+    nombre: 'Playground Lua',
+    descripcion:
+      'Entorno de ejecución Lua/Luau para Roblox con consola interactiva',
+    categoria: CategoriaComponente.EDITOR_CODIGO,
+    icono: '🌙',
+    configSchema: {},
+    ejemploConfig: {
+      instruccion: 'Escribe un programa en Lua que salude al mundo',
+      codigoInicial: `-- Mi primer programa en Lua
+local nombre = "Mundo"
+
+-- Usa print() para mostrar el saludo
+print("Hola " .. nombre)
+
+-- Prueba con variables numéricas
+local edad = 10
+print("Tengo " .. edad .. " años")`,
+      codigoSolucion: `-- Solución
+local nombre = "Mundo"
+print("¡Hola " .. nombre .. "!")
+
+local edad = 10
+print("Tengo " .. edad .. " años")`,
+      mostrarConsola: true,
+      alturaEditor: 200,
+      pistas: [
+        'Usa print() para mostrar texto en la consola',
+        'El operador .. concatena strings en Lua',
+        'Las variables locales se declaran con "local"',
+      ],
+      explicacion:
+        'Lua es un lenguaje de scripting ligero y potente. Es muy usado en videojuegos (Roblox, World of Warcraft) y sistemas embebidos.',
+    },
+    implementado: true,
+    habilitado: true,
+    orden: 96,
+  },
+  {
+    tipo: 'JavaScriptPlayground',
+    nombre: 'Playground JavaScript',
+    descripcion: 'Entorno de ejecución JavaScript interactivo con consola',
+    categoria: CategoriaComponente.EDITOR_CODIGO,
+    icono: '⚡',
+    configSchema: {},
+    ejemploConfig: {
+      instruccion: 'Escribe un programa en JavaScript que calcule el factorial',
+      codigoInicial: `// Mi primer programa en JavaScript
+const nombre = "Mundo";
+
+// Usa console.log() para mostrar mensajes
+console.log("¡Hola " + nombre + "!");
+
+// Prueba con template literals (ES6)
+const edad = 10;
+console.log(\`Tengo \${edad} años\`);
+
+// Prueba con arrays
+const numeros = [1, 2, 3, 4, 5];
+const dobles = numeros.map(n => n * 2);
+console.log("Dobles:", dobles);`,
+      codigoSolucion: `// Solución: Factorial
+function factorial(n) {
+  if (n <= 1) return 1;
+  return n * factorial(n - 1);
+}
+
+console.log("Factorial de 5:", factorial(5));
+console.log("Factorial de 10:", factorial(10));`,
+      mostrarConsola: true,
+      alturaEditor: 220,
+      pistas: [
+        'Usa console.log() para mostrar resultados en la consola',
+        'Los template literals usan backticks (`) y ${} para variables',
+        'Las arrow functions se escriben: (param) => resultado',
+      ],
+      explicacion:
+        'JavaScript es el lenguaje de la web. Permite crear sitios interactivos, aplicaciones móviles y servidores.',
+    },
+    implementado: true,
+    habilitado: true,
+    orden: 97,
+  },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
