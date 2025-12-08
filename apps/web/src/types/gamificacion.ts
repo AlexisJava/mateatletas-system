@@ -1,86 +1,51 @@
-import type { Logro } from '@mateatletas/contracts';
-import { logroSchema, logrosListSchema } from '@mateatletas/contracts';
-
-export type { Logro };
-
-// ============================================
-// TIPOS EXTENDIDOS (modelos completos del backend)
-// ============================================
+import type { Logro as ContractsLogro } from '@mateatletas/contracts';
 
 /**
- * LogroEstudiante - Modelo completo de Prisma
- * Representa la relación estudiante-logro con fecha de desbloqueo
+ * Tipos para el sistema de gamificación
+ * Usados por la API de gamificación y componentes relacionados
  */
-export interface LogroEstudiante {
-  id: string;
-  estudiante_id: string;
-  logro_id: string;
-  fecha_desbloqueo: Date;
-  visto: boolean;
-  logro: Logro; // Relación con el logro completo
-}
 
-/**
- * RecursosEstudiante - Modelo completo de Prisma
- * Contiene XP, monedas y otros recursos del estudiante
- */
 export interface RecursosEstudiante {
-  // Campos de Prisma
-  id: string;
-  estudiante_id: string;
-  xp_total: number;
-  monedas_total: number;
-  ultima_actualizacion: Date;
-  createdAt: Date;
-  updatedAt: Date;
-
-  // Campos calculados que el backend agrega
-  nivel: number;
-  xp_progreso: number;
-  xp_necesario: number;
-  porcentaje_nivel: number;
+  xp_actual: number;
+  xp_siguiente_nivel: number;
+  nivel_actual: number;
+  monedas: number;
+  gemas: number;
+  puntos_totales: number;
 }
 
-/**
- * RachaEstudiante - Modelo completo de Prisma
- * Seguimiento de días consecutivos de actividad
- */
-export interface RachaEstudiante {
-  id: string;
-  estudiante_id: string;
-  racha_actual: number;
-  racha_maxima: number;
-  ultima_actividad: Date | null;
-  inicio_racha_actual: Date | null;
-  total_dias_activos: number;
-  updated_at: Date;
-}
-
-/**
- * TransaccionRecurso - Modelo completo de Prisma
- * Historial de cambios en recursos del estudiante
- */
 export interface TransaccionRecurso {
   id: string;
-  recursos_estudiante_id: string;
-  tipo_recurso: 'XP' | 'MONEDAS' | 'GEMAS';
+  tipo: 'XP' | 'MONEDAS' | 'GEMAS';
   cantidad: number;
-  razon: string;
-  fecha: Date;
-  createdAt: Date;
-  metadata?: Record<string, unknown>;
+  motivo: string;
+  fecha: string;
+  balance_anterior: number;
+  balance_nuevo: number;
 }
 
-/**
- * ProgresoLogros - Para hooks que agrupan logros por categoría
- * Usado en useLogros para mostrar progreso de logros desbloqueados
- */
+export interface RachaEstudiante {
+  dias_consecutivos: number;
+  mejor_racha: number;
+  ultima_actividad: string;
+  activo_hoy: boolean;
+}
+
+export interface LogroEstudiante {
+  id: string;
+  logro: ContractsLogro;
+  desbloqueado: boolean;
+  fecha_desbloqueo?: string;
+  progreso_actual?: number;
+  progreso_objetivo?: number;
+}
+
 export interface ProgresoLogros {
   total: number;
   desbloqueados: number;
   porcentaje: number;
-  total_logros: number; // Alias de total
-  logros_desbloqueados: number; // Alias de desbloqueados
+  total_logros: number;
+  logros_desbloqueados: number;
   por_categoria: Record<
     string,
     {
@@ -92,43 +57,14 @@ export interface ProgresoLogros {
 }
 
 /**
- * NotificacionLogro - Para sistema de notificaciones
- * Usado en useNotificacionesLogros para mostrar logros recién desbloqueados
+ * Normaliza logros del backend al formato esperado por el frontend
  */
-export interface NotificacionLogro {
-  logro: LogroEstudiante;
-  recompensas: {
-    monedas: number;
-    xp: number;
-  };
-  timestamp: Date;
-  mostrada: boolean;
-}
-
-// ============================================
-// NOTA: LogroConRecompensas y LogroUI ya no son necesarios
-// Los campos monedas_recompensa, xp_recompensa, secreto, titulo y extras
-// ahora están incluidos en el tipo base Logro del contrato
-// ============================================
-
-// ============================================
-// NORMALIZADORES
-// ============================================
-
-export function normalizarLogro(raw: Logro): Logro {
-  const validado = logroSchema.parse(raw);
-
-  if (validado.fecha_desbloqueo && typeof validado.fecha_desbloqueo === 'string') {
-    return {
-      ...validado,
-      fecha_desbloqueo: new Date(validado.fecha_desbloqueo),
-    };
-  }
-
-  return validado;
-}
-
-export function normalizarLogros(raw: Logro[]): Logro[] {
-  const validados = logrosListSchema.parse(raw);
-  return validados.map(normalizarLogro);
+export function normalizarLogros<T extends ContractsLogro>(logros: T[]): T[] {
+  return logros.map((logro) => ({
+    ...logro,
+    // Asegurar que los campos opcionales tengan valores por defecto
+    icono: logro.icono || '🏆',
+    puntos_recompensa: logro.puntos_recompensa || 0,
+    monedas_recompensa: logro.monedas_recompensa || 0,
+  }));
 }

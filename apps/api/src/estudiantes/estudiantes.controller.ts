@@ -8,7 +8,6 @@ import {
   Param,
   Query,
   UseGuards,
-  BadRequestException,
   Request,
 } from '@nestjs/common';
 import { EstudiantesFacadeService } from './estudiantes-facade.service';
@@ -99,89 +98,6 @@ export class EstudiantesController {
   }
 
   /**
-   * PATCH /estudiantes/avatar - Actualizar avatar 3D Ready Player Me del estudiante logueado
-   * @param req - Request con usuario autenticado
-   * @param body - { avatarUrl: string }
-   * @returns Estudiante actualizado
-   */
-  @Patch('avatar')
-  @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
-  async actualizarAvatar3D(
-    @Request() req: RequestWithAuthUser,
-    @Body() body: { avatarUrl: string },
-  ) {
-    const estudianteId = req.user.id;
-
-    // Validar que sea URL válida de Ready Player Me
-    if (!body.avatarUrl || !body.avatarUrl.includes('readyplayer.me')) {
-      throw new BadRequestException('URL de avatar inválida');
-    }
-
-    // Actualizar avatar 3D sin validación de ownership (el estudiante actualiza su propio avatar)
-    const resultado = await this.estudiantesService.updateAvatar3D(
-      estudianteId,
-      body.avatarUrl,
-    );
-
-    return resultado;
-  }
-
-  /**
-   * PATCH /estudiantes/animacion - Actualizar animación idle del estudiante logueado
-   * @param req - Request con usuario autenticado
-   * @param body - { animacion_idle_url: string }
-   * @returns Estudiante actualizado
-   */
-  @Patch('animacion')
-  @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
-  async actualizarAnimacion(
-    @Request() req: RequestWithAuthUser,
-    @Body() body: { animacion_idle_url: string },
-  ) {
-    const estudianteId = req.user.id;
-
-    // Validar que sea URL válida
-    if (!body.animacion_idle_url || !body.animacion_idle_url.includes('.glb')) {
-      throw new BadRequestException('URL de animación inválida');
-    }
-
-    // Actualizar animación idle
-    const resultado = await this.estudiantesService.updateAnimacionIdle(
-      estudianteId,
-      body.animacion_idle_url,
-    );
-
-    return resultado;
-  }
-
-  /**
-   * GET /estudiantes/mi-avatar - Obtener avatar del estudiante logueado
-   * @param req - Request con usuario autenticado
-   * @returns { avatarUrl: string, tiene_avatar: boolean }
-   */
-  @Get('mi-avatar')
-  @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
-  async obtenerMiAvatar(@Request() req: RequestWithAuthUser) {
-    const estudianteId = req.user.id;
-
-    // Buscar directamente sin ownership check (el estudiante accede a sus propios datos)
-    const estudiante = await this.estudiantesService.findOneById(estudianteId);
-
-    if (estudiante.avatarUrl) {
-    }
-
-    const resultado = {
-      avatarUrl: estudiante.avatarUrl,
-      tiene_avatar: !!estudiante.avatarUrl,
-    };
-
-    return resultado;
-  }
-
-  /**
    * GET /estudiantes/mi-proxima-clase - Obtener próxima clase del estudiante logueado
    * @param req - Request con usuario autenticado
    * @returns Información de la próxima clase o null si no hay ninguna
@@ -194,9 +110,6 @@ export class EstudiantesController {
 
     const resultado =
       await this.estudiantesService.obtenerProximaClase(estudianteId);
-
-    if (resultado) {
-    }
 
     return resultado;
   }
