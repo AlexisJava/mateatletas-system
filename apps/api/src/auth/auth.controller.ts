@@ -31,6 +31,7 @@ import { GetUser } from './decorators/get-user.decorator';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { AuthUser } from './interfaces';
 import { RequireCsrf } from '../common/decorators';
+import { Public } from './decorators/public.decorator';
 
 /**
  * Controlador de autenticación
@@ -90,6 +91,7 @@ export class AuthController {
     description: 'El email ya está registrado',
   })
   @ApiBody({ type: RegisterDto })
+  @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() registerDto: RegisterDto) {
@@ -135,6 +137,7 @@ export class AuthController {
     description: 'Credenciales inválidas',
   })
   @ApiBody({ type: LoginDto })
+  @Public()
   @Post('login')
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @RequireCsrf() // ✅ Proteger login de CSRF (solo formularios web)
@@ -197,6 +200,7 @@ export class AuthController {
       'Credenciales inválidas o estudiante sin credenciales configuradas',
   })
   @ApiBody({ type: LoginEstudianteDto })
+  @Public()
   @Post('estudiante/login')
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
@@ -364,6 +368,7 @@ export class AuthController {
       'Token MFA inválido/expirado o código de verificación incorrecto',
   })
   @ApiBody({ type: CompleteMfaLoginDto })
+  @Public()
   @Post('complete-mfa-login')
   @HttpCode(HttpStatus.OK)
   async completeMfaLogin(

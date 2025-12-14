@@ -12,7 +12,9 @@ import { ColoniaService } from './colonia.service';
 import { CreateInscriptionDto } from './dto/create-inscription.dto';
 import { MercadoPagoWebhookGuard } from '../pagos/guards/mercadopago-webhook.guard';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
+@Public()
 @Controller('colonia')
 export class ColoniaController {
   private readonly logger = new Logger(ColoniaController.name);

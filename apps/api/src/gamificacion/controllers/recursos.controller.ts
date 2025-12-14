@@ -9,9 +9,12 @@ import {
 import { RecursosService } from '../services/recursos.service';
 import { RachaService } from '../services/racha.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles, Role } from '../../auth/decorators/roles.decorator';
 
 @Controller('gamificacion/recursos')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
 export class RecursosController {
   constructor(
     private recursosService: RecursosService,

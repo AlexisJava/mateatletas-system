@@ -17,6 +17,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { TipoProducto } from '@prisma/client';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role, Roles } from '../auth/decorators/roles.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 
 /**
  * Controller para gestionar productos del catálogo
@@ -35,6 +36,7 @@ export class ProductosController {
    * - tipo: 'Suscripcion' | 'Curso' | 'RecursoDigital'
    * - soloActivos: 'true' | 'false' (default: true)
    */
+  @Public()
   @Get()
   async findAll(
     @Query('tipo') tipo?: TipoProducto,
@@ -49,6 +51,7 @@ export class ProductosController {
    * Obtiene solo cursos disponibles para inscripción
    * Endpoint público
    */
+  @Public()
   @Get('cursos')
   async findCursosDisponibles() {
     return this.productosService.findCursosDisponibles();
@@ -59,6 +62,7 @@ export class ProductosController {
    * Obtiene solo planes de suscripción disponibles
    * Endpoint público
    */
+  @Public()
   @Get('suscripciones')
   async findSuscripciones() {
     return this.productosService.findSuscripciones();
@@ -69,6 +73,7 @@ export class ProductosController {
    * Obtiene detalles de un producto específico
    * Endpoint público
    */
+  @Public()
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.productosService.findById(id);

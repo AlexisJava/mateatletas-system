@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 // Core & Infrastructure Modules
 import { CoreModule } from './core/core.module';
@@ -90,6 +92,14 @@ import { StudioModule } from './studio/studio.module';
     StudioModule, // Planificador de Cursos
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // APP_GUARD global: Todos los endpoints requieren JWT por defecto
+    // Usar @Public() para marcar endpoints que no requieren autenticación
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

@@ -6,6 +6,7 @@ import {
   PrismaHealthIndicator,
 } from '@nestjs/terminus';
 import { PrismaService } from '../core/database/prisma.service';
+import { Public } from '../auth/decorators/public.decorator';
 
 /**
  * Health Check Controller
@@ -17,6 +18,7 @@ import { PrismaService } from '../core/database/prisma.service';
  * - GET /health/ready - Readiness probe (¿puede recibir tráfico?)
  * - GET /health/live - Liveness probe (¿está vivo el proceso?)
  */
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(
@@ -83,7 +85,7 @@ export class HealthController {
    * - 503 si el proceso está colgado/muerto
    */
   @Get('live')
-  async live(): Promise<{ status: string; timestamp: string; uptime: number }> {
+  live(): { status: string; timestamp: string; uptime: number } {
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),

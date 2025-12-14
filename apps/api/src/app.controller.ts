@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
+import { Public } from './auth/decorators/public.decorator';
 
 /**
  * AppController - Root Controller
@@ -9,6 +10,7 @@ import { AppService } from './app.service';
  *
  * Para health checks completos, usar HealthModule en /health
  */
+@Public()
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}

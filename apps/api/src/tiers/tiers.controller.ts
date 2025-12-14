@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { TierNombre } from '@prisma/client';
 import { TiersService } from './tiers.service';
+import { Public } from '../auth/decorators/public.decorator';
 
 /**
  * Controller para gestión de Tiers - Sistema Mateatletas 2026
@@ -14,6 +15,7 @@ import { TiersService } from './tiers.service';
  * Endpoints públicos para consultar información de tiers.
  * Los endpoints de cambio de tier están en el módulo de inscripciones.
  */
+@Public()
 @Controller('tiers')
 export class TiersController {
   constructor(private readonly tiersService: TiersService) {}

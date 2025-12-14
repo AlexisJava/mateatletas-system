@@ -11,9 +11,12 @@ import {
 } from '@nestjs/common';
 import { LogrosService } from '../services/logros.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles, Role } from '../../auth/decorators/roles.decorator';
 
 @Controller('gamificacion/logros')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
 export class LogrosController {
   constructor(private logrosService: LogrosService) {}
 

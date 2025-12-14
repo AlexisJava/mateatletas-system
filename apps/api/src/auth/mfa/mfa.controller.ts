@@ -16,13 +16,13 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import * as bcrypt from 'bcrypt';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
 import { Role } from '../../domain/constants';
 import { MfaService } from './mfa.service';
 import { EnableMfaDto, VerifyMfaDto } from './dto/mfa.dto';
-import { CompleteMfaLoginDto } from './dto/complete-mfa-login.dto';
 
 /**
  * MFA Controller
@@ -152,9 +152,8 @@ export class MfaController {
     this.logger.log(`🔐 Habilitando MFA para usuario: ${userId}`);
 
     // Hash backup codes antes de guardar
-    const bcrypt = require('bcrypt');
     const hashedBackupCodes = await Promise.all(
-      backupCodes.map(async (code) => bcrypt.hash(code, 12)),
+      backupCodes.map((code) => bcrypt.hash(code, 12)),
     );
 
     await this.mfaService.enableMfa(userId, secret, token, hashedBackupCodes);
@@ -219,7 +218,7 @@ export class MfaController {
    * @returns true si el código es válido
    */
   @Post('verify')
-  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests/minuto
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests/minuto - Previene brute force de códigos TOTP
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Verificar código MFA',

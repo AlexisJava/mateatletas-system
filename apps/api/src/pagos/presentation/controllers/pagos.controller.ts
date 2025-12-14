@@ -30,6 +30,7 @@ import { Roles, Role } from '../../../auth/decorators/roles.decorator';
 import { GetUser } from '../../../auth/decorators/get-user.decorator';
 import { AuthUser } from '../../../auth/interfaces';
 import { MercadoPagoWebhookGuard } from '../../guards/mercadopago-webhook.guard';
+import { Public } from '../../../auth/decorators/public.decorator';
 
 /**
  * PagosController - Presentation Layer
@@ -376,6 +377,7 @@ export class PagosController {
    * - Procesa automáticamente membresías y cursos pagados
    * - NO requiere autenticación JWT (es un webhook externo)
    */
+  @Public()
   @Post('webhook')
   @UseGuards(MercadoPagoWebhookGuard)
   @HttpCode(HttpStatus.OK)

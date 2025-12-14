@@ -26,6 +26,7 @@ import { MercadoPagoWebhookGuard } from '../pagos/guards/mercadopago-webhook.gua
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
 import { WebhookQueueService } from '../queues/webhook-queue.service';
 import { WebhookIdempotencyService } from '../pagos/services/webhook-idempotency.service';
+import { Public } from '../auth/decorators/public.decorator';
 
 interface RequestWithUser extends Request {
   user: {
@@ -48,6 +49,7 @@ export class Inscripciones2026Controller {
    * POST /inscripciones-2026
    * Crea una nueva inscripción 2026 (público)
    */
+  @Public()
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
@@ -171,6 +173,7 @@ export class Inscripciones2026Controller {
    * 5. Retornar 200 OK inmediatamente (<50ms total) ✅
    * 6. Worker procesa en background (800-1200ms, no bloquea endpoint) ✅
    */
+  @Public()
   @Post('webhook')
   @UseGuards(WebhookRateLimitGuard, MercadoPagoWebhookGuard)
   @HttpCode(HttpStatus.OK)
