@@ -7,6 +7,11 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { Request, Response } from 'express';
+
+interface HttpError extends Error {
+  status?: number;
+}
 
 /**
  * PerformanceLoggingInterceptor - Monitoreo de Latencia (PASO 3.4)
@@ -50,9 +55,10 @@ export class PerformanceLoggingInterceptor implements NestInterceptor {
   private readonly SLOW_THRESHOLD = 1000; // 1 segundo
   private readonly CRITICAL_THRESHOLD = 3000; // 3 segundos
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest();
-    const { method, url } = request;
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const method = request.method;
+    const url = request.url;
     const startTime = Date.now();
 
     return next.handle().pipe(
@@ -60,7 +66,7 @@ export class PerformanceLoggingInterceptor implements NestInterceptor {
         next: () => {
           this.logPerformance(context, startTime, method, url);
         },
-        error: (error) => {
+        error: (error: HttpError) => {
           this.logPerformance(context, startTime, method, url, error);
         },
       }),
@@ -72,11 +78,11 @@ export class PerformanceLoggingInterceptor implements NestInterceptor {
     startTime: number,
     method: string,
     url: string,
-    error?: any,
+    error?: HttpError,
   ): void {
-    const response = context.switchToHttp().getResponse();
+    const response = context.switchToHttp().getResponse<Response>();
     const latency = Date.now() - startTime;
-    const statusCode = error ? error.status || 500 : response.statusCode;
+    const statusCode = error ? (error.status ?? 500) : response.statusCode;
 
     // Construir mensaje de log
     const logMessage = `${method} ${url} - ${latency}ms - ${statusCode}`;

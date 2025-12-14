@@ -33,7 +33,7 @@ import Redis from 'ioredis';
 export class RedisService implements OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
   private readonly client: Redis;
-  private readonly isAvailable: boolean = false;
+  private _isAvailable = false;
 
   constructor(private readonly configService: ConfigService) {
     // Prioridad 1: REDIS_URL (Railway, Heroku, etc.)
@@ -86,19 +86,19 @@ export class RedisService implements OnModuleDestroy {
       // Event listeners
       this.client.on('connect', () => {
         this.logger.log('✅ Conectado a Redis correctamente');
-        (this as any).isAvailable = true;
+        this._isAvailable = true;
       });
 
       this.client.on('error', (error: Error) => {
         this.logger.warn(
           `⚠️  Redis error: ${error.message}. Fallback a DB activado.`,
         );
-        (this as any).isAvailable = false;
+        this._isAvailable = false;
       });
 
       this.client.on('close', () => {
         this.logger.warn('⚠️  Conexión a Redis cerrada');
-        (this as any).isAvailable = false;
+        this._isAvailable = false;
       });
 
       // Intentar conectar
@@ -297,6 +297,6 @@ export class RedisService implements OnModuleDestroy {
    * @returns boolean
    */
   isRedisAvailable(): boolean {
-    return this.isAvailable;
+    return this._isAvailable;
   }
 }

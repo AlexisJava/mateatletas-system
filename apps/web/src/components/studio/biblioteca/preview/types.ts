@@ -3,9 +3,9 @@ import { BloqueMetadata, BloqueCategoria } from '../../blocks/types';
 
 /**
  * Tipo base para datos de ejemplo - permite cualquier estructura
+ * Usa unknown para type-safety, el código consumidor debe validar
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ExampleData = Record<string, any>;
+export type ExampleData = Record<string, unknown>;
 
 /**
  * Props para el componente de preview de un bloque

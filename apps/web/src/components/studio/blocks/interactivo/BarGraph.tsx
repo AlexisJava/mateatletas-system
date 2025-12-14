@@ -50,8 +50,7 @@ export function BarGraph({
   }, [config.datos]);
 
   const handleBarClick = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (data: any) => {
+    (data: BarGraphDato | null | undefined) => {
       if (!isInteractive || !hasCorrectBar) return;
       if (data?.id) {
         setBarraSeleccionada(data.id);

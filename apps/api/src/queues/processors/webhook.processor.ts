@@ -49,10 +49,10 @@ export class WebhookProcessor {
    * Procesa webhook de MercadoPago en background
    *
    * @param job - Job con datos del webhook
-   * @returns Promise<any>
+   * @returns Promise con resultado del procesamiento
    */
   @Process('process-webhook')
-  async processWebhook(job: Job<MercadoPagoWebhookDto>): Promise<any> {
+  async processWebhook(job: Job<MercadoPagoWebhookDto>): Promise<unknown> {
     const { data: webhookData } = job;
     const paymentId = webhookData.data?.id;
 
@@ -104,10 +104,10 @@ export class WebhookProcessor {
    * Evento cuando un job se completa exitosamente
    *
    * @param job - Job completado
-   * @param result - Resultado del procesamiento
+   * @param _result - Resultado del procesamiento (no usado en logging)
    */
   @OnQueueCompleted()
-  onCompleted(job: Job<MercadoPagoWebhookDto>, result: any): void {
+  onCompleted(job: Job<MercadoPagoWebhookDto>, _result: unknown): void {
     const paymentId = job.data?.data?.id;
     const duration = Date.now() - job.timestamp;
 

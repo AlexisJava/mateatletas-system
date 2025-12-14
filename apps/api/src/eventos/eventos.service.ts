@@ -233,7 +233,6 @@ export class EventosService {
    * Obtener eventos de la Vista Agenda (próximos días agrupados)
    */
   async getVistaAgenda(docenteId: string) {
-    const ahora = new Date();
     const hace7Dias = new Date();
     hace7Dias.setDate(hace7Dias.getDate() - 7);
     const enUnMes = new Date();
@@ -244,12 +243,18 @@ export class EventosService {
       fechaFin: enUnMes,
     });
 
-    // Agrupar por días
-    const grupos = {
-      hoy: [] as any[],
-      manana: [] as any[],
-      proximos7Dias: [] as any[],
-      masAdelante: [] as any[],
+    // Agrupar por días - tipo inferido de findAll
+    type EventoConRelaciones = Awaited<ReturnType<typeof this.findAll>>[number];
+    const grupos: {
+      hoy: EventoConRelaciones[];
+      manana: EventoConRelaciones[];
+      proximos7Dias: EventoConRelaciones[];
+      masAdelante: EventoConRelaciones[];
+    } = {
+      hoy: [],
+      manana: [],
+      proximos7Dias: [],
+      masAdelante: [],
     };
 
     const hoy = new Date();
@@ -560,10 +565,10 @@ export class EventosService {
   }
 
   private serializeArray<T>(items: T[] | undefined): Prisma.InputJsonValue {
-    return JSON.parse(JSON.stringify(items ?? []));
+    return JSON.parse(JSON.stringify(items ?? [])) as Prisma.InputJsonValue;
   }
 
   private serializeObject<T>(item: T): Prisma.InputJsonValue {
-    return JSON.parse(JSON.stringify(item));
+    return JSON.parse(JSON.stringify(item)) as Prisma.InputJsonValue;
   }
 }

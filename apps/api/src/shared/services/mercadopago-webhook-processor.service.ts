@@ -30,16 +30,23 @@ export interface PaymentContext {
 }
 
 /**
+ * Interfaz base para pagos que tienen un ID
+ */
+export interface PaymentWithId {
+  id: string;
+}
+
+/**
  * Callback para buscar el pago en la base de datos
  */
-export type FindPaymentCallback<T = any> = (
+export type FindPaymentCallback<T extends PaymentWithId = PaymentWithId> = (
   parsedReference: ReturnType<typeof parseLegacyExternalReference>,
 ) => Promise<T | null>;
 
 /**
  * Callback para actualizar el pago en la base de datos
  */
-export type UpdatePaymentCallback<T = any> = (
+export type UpdatePaymentCallback<T extends PaymentWithId = PaymentWithId> = (
   pago: T,
   context: PaymentContext,
 ) => Promise<WebhookProcessingResult>;
@@ -94,7 +101,7 @@ export class MercadoPagoWebhookProcessorService {
    * @param updatePayment - Callback para actualizar el pago
    * @returns Resultado del procesamiento
    */
-  async processWebhook<T = any>(
+  async processWebhook<T extends PaymentWithId = PaymentWithId>(
     webhookData: MercadoPagoWebhookDto,
     expectedType: TipoExternalReference,
     findPayment: FindPaymentCallback<T>,
@@ -167,7 +174,7 @@ export class MercadoPagoWebhookProcessorService {
       }
 
       this.logger.log('Pago encontrado en base de datos', {
-        pagoId: (pago as any).id,
+        pagoId: pago.id,
       });
 
       // 7. Actualizar pago usando callback del dominio
