@@ -150,6 +150,10 @@ model Estudiante {
   niveles_por_mundo    EstudianteMundoNivel[]
   tests_ubicacion      TestUbicacionResultado[]
 
+  // Índices de performance para rankings y listados
+  @@index([puntos_totales(sort: Desc)], name: "idx_estudiantes_puntos_ranking")
+  @@index([casaId, puntos_totales(sort: Desc)], name: "idx_estudiantes_casa_ranking")
+  @@index([tutor_id, apellido], name: "idx_estudiantes_tutor_listado")
   @@map("estudiantes")
 }
 
@@ -273,6 +277,8 @@ model Mundo {
 
   // Nota: Relación con planificaciones se agregará en SLICE 5
 
+  // Índice de performance para filtros de mundos activos
+  @@index([activo], name: "idx_mundos_activo")
   @@map("mundos")
 }
 
@@ -951,6 +957,8 @@ model AsistenciaClaseGrupo {
   @@index([clase_grupo_id])
   @@index([estudiante_id])
   @@index([fecha])
+  // Índice de performance para filtros por estado de asistencia
+  @@index([estado], name: "idx_asistencias_estado")
   @@map("asistencias_clase_grupo")
 }
 
@@ -2507,6 +2515,10 @@ model Logro {
   // Relaciones
   logros_estudiantes LogroEstudiante[]
 
+  // Índices de performance para agrupaciones y filtros
+  @@index([categoria], name: "idx_logros_categoria")
+  @@index([rareza], name: "idx_logros_rareza")
+  @@index([activo], name: "idx_logros_activo")
   @@map("logros_gamificacion")
 }
 

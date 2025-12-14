@@ -9,17 +9,17 @@
 -- The new architecture uses token-based password reset which is more secure.
 
 -- Remove from Tutor table
-ALTER TABLE "Tutor" DROP COLUMN IF EXISTS "password_temporal";
-ALTER TABLE "Tutor" DROP COLUMN IF EXISTS "debe_cambiar_password";
+ALTER TABLE "tutores" DROP COLUMN IF EXISTS "password_temporal";
+ALTER TABLE "tutores" DROP COLUMN IF EXISTS "debe_cambiar_password";
 
 -- Remove from Estudiante table
-ALTER TABLE "Estudiante" DROP COLUMN IF EXISTS "password_temporal";
-ALTER TABLE "Estudiante" DROP COLUMN IF EXISTS "debe_cambiar_password";
+ALTER TABLE "estudiantes" DROP COLUMN IF EXISTS "password_temporal";
+ALTER TABLE "estudiantes" DROP COLUMN IF EXISTS "debe_cambiar_password";
 
 -- Remove from Docente table
-ALTER TABLE "Docente" DROP COLUMN IF EXISTS "password_temporal";
-ALTER TABLE "Docente" DROP COLUMN IF EXISTS "debe_cambiar_password";
+ALTER TABLE "docentes" DROP COLUMN IF EXISTS "password_temporal";
+ALTER TABLE "docentes" DROP COLUMN IF EXISTS "debe_cambiar_password";
 
 -- Remove from Admin table
-ALTER TABLE "Admin" DROP COLUMN IF EXISTS "password_temporal";
-ALTER TABLE "Admin" DROP COLUMN IF EXISTS "debe_cambiar_password";
+ALTER TABLE "admins" DROP COLUMN IF EXISTS "password_temporal";
+ALTER TABLE "admins" DROP COLUMN IF EXISTS "debe_cambiar_password";
