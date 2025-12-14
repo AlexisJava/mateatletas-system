@@ -12,10 +12,14 @@ describe('ClasesReservasService', () => {
   let service: ClasesReservasService;
   let prisma: PrismaService;
 
+  // Usar fecha futura para evitar validación "clase ya comenzó"
+  const futureDate = new Date();
+  futureDate.setMonth(futureDate.getMonth() + 1);
+
   const mockClase = {
     id: 'clase-1',
     estado: 'Programada',
-    fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
+    fecha_hora_inicio: futureDate,
     cupos_ocupados: 5,
     cupos_maximo: 20,
     producto_id: null,

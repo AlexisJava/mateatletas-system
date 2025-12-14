@@ -39,6 +39,9 @@ describe('DocenteStatsService', () => {
             progresoEstudiantePlanificacion: {
               findMany: jest.fn(),
             },
+            progresoEstudianteActividad: {
+              findMany: jest.fn(),
+            },
             $queryRaw: jest.fn(),
           },
         },
@@ -152,6 +155,9 @@ describe('DocenteStatsService', () => {
       jest
         .spyOn(prisma.progresoEstudiantePlanificacion, 'findMany')
         .mockResolvedValue([]);
+      jest
+        .spyOn(prisma.progresoEstudianteActividad, 'findMany')
+        .mockResolvedValue([]);
 
       const result = await service.getEstadisticasCompletas('docente-123');
 
@@ -185,6 +191,9 @@ describe('DocenteStatsService', () => {
       jest
         .spyOn(prisma.progresoEstudiantePlanificacion, 'findMany')
         .mockResolvedValue([]);
+      jest
+        .spyOn(prisma.progresoEstudianteActividad, 'findMany')
+        .mockResolvedValue([]);
 
       const result = await service.getEstadisticasCompletas('docente-123');
 
@@ -214,8 +223,12 @@ describe('DocenteStatsService', () => {
         ] as any);
       jest.spyOn(prisma.puntoObtenido, 'findMany').mockResolvedValue([]);
       jest.spyOn(prisma.asistenciaClaseGrupo, 'findMany').mockResolvedValue([]);
-      // ProgresoEstudiantePlanificacion será implementado en FASE 2
-      // Por ahora el método retorna los primeros 20 estudiantes como placeholder
+      jest
+        .spyOn(prisma.progresoEstudiantePlanificacion, 'findMany')
+        .mockResolvedValue([]);
+      jest
+        .spyOn(prisma.progresoEstudianteActividad, 'findMany')
+        .mockResolvedValue([]);
 
       const result = await service.getEstadisticasCompletas('docente-123');
 

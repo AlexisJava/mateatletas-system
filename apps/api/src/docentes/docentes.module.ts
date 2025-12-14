@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { DocentesController } from './docentes.controller';
-import { DocentesPublicController } from './docentes-public.controller';
 import { DocentesService } from './docentes.service';
 import { PrismaService } from '../core/database/prisma.service';
 
@@ -12,7 +11,7 @@ import { DocenteStatsService } from './services/docente-stats.service';
 import { DocentesFacade } from './services/docentes-facade.service';
 
 @Module({
-  controllers: [DocentesController, DocentesPublicController],
+  controllers: [DocentesController],
   providers: [
     DocentesService,
     PrismaService,
