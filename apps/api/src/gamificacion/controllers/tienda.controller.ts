@@ -5,6 +5,7 @@ import {
   Patch,
   Body,
   Param,
+  ParseUUIDPipe,
   Query,
   UseGuards,
   HttpCode,
@@ -81,7 +82,7 @@ export class TiendaController {
    * @returns Curso con toda su información
    */
   @Get('catalogo/:id')
-  async obtenerCurso(@Param('id') id: string) {
+  async obtenerCurso(@Param('id', ParseUUIDPipe) id: string) {
     return this.tiendaService.obtenerCurso(id);
   }
 
@@ -141,7 +142,7 @@ export class TiendaController {
   @Roles(Role.ESTUDIANTE)
   async actualizarProgreso(
     @GetUser() user: AuthUser,
-    @Param('cursoId') cursoId: string,
+    @Param('cursoId', ParseUUIDPipe) cursoId: string,
     @Body() body: ActualizarProgresoDto,
   ) {
     const estudianteId = user.id;
@@ -212,7 +213,7 @@ export class TiendaController {
   @HttpCode(HttpStatus.OK)
   async aprobarCanje(
     @GetUser() user: AuthUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() body: AprobarCanjeDto,
   ) {
     const tutorId = user.id;
@@ -245,7 +246,7 @@ export class TiendaController {
   @HttpCode(HttpStatus.OK)
   async rechazarCanje(
     @GetUser() user: AuthUser,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() body: RechazarCanjeDto,
   ) {
     const tutorId = user.id;

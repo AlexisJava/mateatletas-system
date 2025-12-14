@@ -5,6 +5,7 @@ import {
   Patch,
   Body,
   Param,
+  ParseUUIDPipe,
   UseGuards,
   Request,
   HttpCode,
@@ -75,7 +76,7 @@ export class Inscripciones2026Controller {
    */
   @Get(':id')
   @UseGuards(JwtAuthGuard, InscripcionOwnershipGuard)
-  async getById(@Param('id') id: string) {
+  async getById(@Param('id', ParseUUIDPipe) id: string) {
     return this.inscripciones2026Service.getInscripcionById(id);
   }
 
@@ -85,7 +86,7 @@ export class Inscripciones2026Controller {
    */
   @Get('tutor/:tutorId')
   @UseGuards(JwtAuthGuard)
-  async getByTutor(@Param('tutorId') tutorId: string) {
+  async getByTutor(@Param('tutorId', ParseUUIDPipe) tutorId: string) {
     return this.inscripciones2026Service.getInscripcionesByTutor(tutorId);
   }
 
@@ -117,7 +118,7 @@ export class Inscripciones2026Controller {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async updateEstado(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() body: { estado: string; razon: string },
     @Request() req: RequestWithUser,
   ) {

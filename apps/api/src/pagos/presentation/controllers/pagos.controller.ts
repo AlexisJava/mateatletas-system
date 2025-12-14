@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Query,
   Param,
+  ParseUUIDPipe,
   UseGuards,
   NotFoundException,
   Headers,
@@ -114,7 +115,7 @@ export class PagosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TUTOR)
   async obtenerEstadoMembresia(
-    @Param('id') membresiaId: string,
+    @Param('id', ParseUUIDPipe) membresiaId: string,
     @GetUser() user: AuthUser,
   ) {
     return await this.pagosTutorService.obtenerEstadoMembresia(
@@ -131,7 +132,7 @@ export class PagosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TUTOR, Role.ADMIN)
   async activarMembresiaManual(
-    @Param('id') membresiaId: string,
+    @Param('id', ParseUUIDPipe) membresiaId: string,
     @GetUser() user: AuthUser,
   ) {
     return await this.pagosTutorService.activarMembresiaManual(
@@ -430,7 +431,7 @@ export class PagosController {
   @ApiOperation({ summary: 'Verificar morosidad de un tutor' })
   @ApiResponse({ status: 200, description: 'Estado de morosidad obtenido' })
   async verificarMorosidadTutor(
-    @Param('tutorId') tutorId: string,
+    @Param('tutorId', ParseUUIDPipe) tutorId: string,
     @GetUser() user: AuthUser,
   ) {
     // Si es tutor, solo puede ver su propia información
@@ -469,7 +470,9 @@ export class PagosController {
     summary: 'Verificar acceso de estudiante según estado de pagos',
   })
   @ApiResponse({ status: 200, description: 'Estado de acceso del estudiante' })
-  async verificarAccesoEstudiante(@Param('estudianteId') estudianteId: string) {
+  async verificarAccesoEstudiante(
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+  ) {
     return await this.verificacionMorosidadService.verificarAccesoEstudiante(
       estudianteId,
     );
@@ -507,7 +510,7 @@ export class PagosController {
     description: 'Estudiante no encontrado o sin inscripciones pendientes',
   })
   async registrarPagoManual(
-    @Param('estudianteId') estudianteId: string,
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
     @GetUser() user: AuthUser,
   ) {
     return await this.pagosFacade.registrarPagoManual({

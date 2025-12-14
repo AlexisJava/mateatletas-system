@@ -5,6 +5,7 @@ import {
   Post,
   Body,
   Param,
+  ParseUUIDPipe,
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -49,7 +50,7 @@ export class SemanasController {
   @ApiOperation({ summary: 'Listar semanas de un curso' })
   @ApiParam({ name: 'cursoId', description: 'ID del curso' })
   @ApiResponse({ status: 200, description: 'Lista de semanas' })
-  async listar(@Param('cursoId') cursoId: string) {
+  async listar(@Param('cursoId', ParseUUIDPipe) cursoId: string) {
     return this.obtenerSemanaService.listarPorCurso(cursoId);
   }
 
@@ -60,7 +61,7 @@ export class SemanasController {
   @ApiResponse({ status: 200, description: 'Semana encontrada' })
   @ApiResponse({ status: 404, description: 'Semana no encontrada' })
   async obtener(
-    @Param('cursoId') cursoId: string,
+    @Param('cursoId', ParseUUIDPipe) cursoId: string,
     @Param('numero', ParseIntPipe) numero: number,
   ) {
     return this.obtenerSemanaService.ejecutar(cursoId, numero);
@@ -74,7 +75,7 @@ export class SemanasController {
   @ApiResponse({ status: 400, description: 'Validación fallida' })
   @ApiResponse({ status: 404, description: 'Semana no encontrada' })
   async guardar(
-    @Param('cursoId') cursoId: string,
+    @Param('cursoId', ParseUUIDPipe) cursoId: string,
     @Param('numero', ParseIntPipe) numero: number,
     @Body() dto: GuardarSemanaDto,
   ) {
@@ -88,7 +89,7 @@ export class SemanasController {
   @ApiResponse({ status: 200, description: 'Resultado de validación' })
   @ApiResponse({ status: 404, description: 'Curso no encontrado' })
   async validar(
-    @Param('cursoId') cursoId: string,
+    @Param('cursoId', ParseUUIDPipe) cursoId: string,
     @Param('numero', ParseIntPipe) numero: number,
     @Body() dto: ValidarSemanaDto,
   ) {

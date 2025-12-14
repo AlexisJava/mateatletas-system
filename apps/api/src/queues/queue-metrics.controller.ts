@@ -1,6 +1,14 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { WebhookQueueService } from './webhook-queue.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles, Role } from '../auth/decorators/roles.decorator';
 
 /**
  * QueueMetricsController - Dashboard de Métricas de Queue (PASO 3.4)
@@ -10,15 +18,17 @@ import { WebhookQueueService } from './webhook-queue.service';
  * - GET /queues/metrics/failed - Jobs fallidos (dead letter queue)
  *
  * SEGURIDAD:
- * Por ahora sin autenticación para desarrollo.
- * En producción, agregar @UseGuards(AdminGuard) para restringir acceso.
+ * Requiere autenticación JWT y rol ADMIN.
  *
  * USO:
- * curl http://localhost:3001/api/queues/metrics/stats
+ * curl -H "Authorization: Bearer <token>" http://localhost:3001/api/queues/metrics/stats
  *
  * @controller queues/metrics
  */
 @ApiTags('Queue Metrics')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 @Controller('queues/metrics')
 export class QueueMetricsController {
   constructor(private readonly webhookQueueService: WebhookQueueService) {}

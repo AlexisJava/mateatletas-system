@@ -5,6 +5,7 @@ import {
   Patch,
   Delete,
   Param,
+  ParseUUIDPipe,
   Body,
   UseGuards,
   Query,
@@ -67,7 +68,7 @@ export class ClasesController {
   @Patch(':id/cancelar')
   @Roles(Role.ADMIN, Role.DOCENTE)
   async cancelarClase(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Req() req: RequestWithAuthUser,
   ) {
     // 📌 Decisión 2025-01: mantenemos PATCH /clases/:id/cancelar como endpoint oficial
@@ -88,7 +89,7 @@ export class ClasesController {
    */
   @Delete(':id')
   @Roles(Role.ADMIN)
-  async eliminarClase(@Param('id') id: string) {
+  async eliminarClase(@Param('id', ParseUUIDPipe) id: string) {
     return this.clasesService.eliminarClase(id);
   }
 
@@ -99,7 +100,7 @@ export class ClasesController {
   @Post(':id/asignar-estudiantes')
   @Roles(Role.ADMIN)
   async asignarEstudiantes(
-    @Param('id') claseId: string,
+    @Param('id', ParseUUIDPipe) claseId: string,
     @Body() dto: AsignarEstudiantesDto,
   ) {
     return this.clasesService.asignarEstudiantesAClase(
@@ -161,7 +162,7 @@ export class ClasesController {
   @Post(':id/reservar')
   @Roles(Role.TUTOR)
   async reservarClase(
-    @Param('id') claseId: string,
+    @Param('id', ParseUUIDPipe) claseId: string,
     @Body() dto: ReservarClaseDto,
     @Req() req: RequestWithAuthUser,
   ) {
@@ -176,7 +177,7 @@ export class ClasesController {
   @Delete('reservas/:id')
   @Roles(Role.TUTOR)
   async cancelarReserva(
-    @Param('id') inscripcionId: string,
+    @Param('id', ParseUUIDPipe) inscripcionId: string,
     @Req() req: RequestWithAuthUser,
   ) {
     const tutorId = req.user.id;
@@ -209,7 +210,7 @@ export class ClasesController {
   @Post(':id/asistencia')
   @Roles(Role.DOCENTE)
   async registrarAsistencia(
-    @Param('id') claseId: string,
+    @Param('id', ParseUUIDPipe) claseId: string,
     @Body() dto: RegistrarAsistenciaDto,
     @Req() req: RequestWithAuthUser,
   ) {
@@ -226,7 +227,7 @@ export class ClasesController {
    */
   @Get(':id/estudiantes')
   @Roles(Role.ADMIN)
-  async obtenerEstudiantes(@Param('id') claseId: string) {
+  async obtenerEstudiantes(@Param('id', ParseUUIDPipe) claseId: string) {
     return this.clasesService.obtenerEstudiantesDeClase(claseId);
   }
 
@@ -236,7 +237,7 @@ export class ClasesController {
    */
   @Get(':id')
   @Roles(Role.ADMIN, Role.DOCENTE, Role.TUTOR)
-  async obtenerClase(@Param('id') id: string) {
+  async obtenerClase(@Param('id', ParseUUIDPipe) id: string) {
     return this.clasesService.obtenerClase(id);
   }
 
@@ -256,7 +257,7 @@ export class ClasesController {
    */
   @Get('metadata/rutas-curriculares/:id')
   @Roles(Role.ADMIN, Role.DOCENTE, Role.TUTOR)
-  async obtenerRutaCurricular(@Param('id') id: string) {
+  async obtenerRutaCurricular(@Param('id', ParseUUIDPipe) id: string) {
     return this.clasesService.obtenerRutaCurricularPorId(id);
   }
 }

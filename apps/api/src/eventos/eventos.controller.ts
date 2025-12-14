@@ -5,6 +5,7 @@ import {
   Body,
   Patch,
   Param,
+  ParseUUIDPipe,
   Delete,
   UseGuards,
   Query,
@@ -195,7 +196,10 @@ export class EventosController {
    * GET /eventos/:id
    */
   @Get(':id')
-  async findOne(@Param('id') id: string, @GetUser('id') docenteId: string) {
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetUser('id') docenteId: string,
+  ) {
     return this.eventosService.findOne(id, docenteId);
   }
 
@@ -209,7 +213,7 @@ export class EventosController {
    */
   @Patch('tareas/:id')
   async updateTarea(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @GetUser('id') docenteId: string,
     @Body() updateTareaDto: UpdateTareaDto,
   ) {
@@ -224,7 +228,7 @@ export class EventosController {
    */
   @Patch('recordatorios/:id')
   async updateRecordatorio(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @GetUser('id') docenteId: string,
     @Body() updateRecordatorioDto: UpdateRecordatorioDto,
   ) {
@@ -243,7 +247,7 @@ export class EventosController {
    */
   @Patch('notas/:id')
   async updateNota(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @GetUser('id') docenteId: string,
     @Body() updateNotaDto: UpdateNotaDto,
   ) {
@@ -258,7 +262,7 @@ export class EventosController {
    */
   @Patch(':id/fechas')
   async updateFechas(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @GetUser('id') docenteId: string,
     @Body() body: { fecha_inicio: string; fecha_fin: string },
   ) {
@@ -278,7 +282,10 @@ export class EventosController {
    * DELETE /eventos/:id
    */
   @Delete(':id')
-  async remove(@Param('id') id: string, @GetUser('id') docenteId: string) {
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetUser('id') docenteId: string,
+  ) {
     await this.eventosService.remove(id, docenteId);
     return { message: 'Evento eliminado correctamente' };
   }

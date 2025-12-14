@@ -4,6 +4,7 @@ import {
   Put,
   Post,
   Param,
+  ParseUUIDPipe,
   Body,
   UseGuards,
   ParseIntPipe,
@@ -27,7 +28,7 @@ export class EditorController {
   @Get('cursos/:cursoId/semanas/:semanaNum')
   @Roles(Role.ADMIN)
   async cargarSemana(
-    @Param('cursoId') cursoId: string,
+    @Param('cursoId', ParseUUIDPipe) cursoId: string,
     @Param('semanaNum', ParseIntPipe) semanaNum: number,
   ): Promise<SemanaEditorResponse> {
     return this.editorService.cargarSemana(cursoId, semanaNum);
@@ -36,7 +37,7 @@ export class EditorController {
   @Put('cursos/:cursoId/semanas/:semanaNum')
   @Roles(Role.ADMIN)
   async guardarSemana(
-    @Param('cursoId') cursoId: string,
+    @Param('cursoId', ParseUUIDPipe) cursoId: string,
     @Param('semanaNum', ParseIntPipe) semanaNum: number,
     @Body() data: GuardarSemanaDto,
   ): Promise<SemanaEditorResponse> {

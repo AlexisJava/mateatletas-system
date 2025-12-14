@@ -9,6 +9,7 @@ import {
   Post,
   Body,
   Param,
+  ParseUUIDPipe,
   Query,
   UseGuards,
   HttpCode,
@@ -38,7 +39,7 @@ export class RecursosController {
   @Get(':estudianteId')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerRecursos(
-    @Param('estudianteId') estudianteId: string,
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
   ): Promise<RecursosEstudiante> {
     return await this.recursosService.obtenerOCrearRecursos(estudianteId);
   }
@@ -63,7 +64,7 @@ export class RecursosController {
   @Get(':estudianteId/historial')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerHistorial(
-    @Param('estudianteId') estudianteId: string,
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
     @Query('tipo') tipo?: TipoRecurso,
     @Query('limit') limit?: number,
   ): Promise<TransaccionRecurso[]> {

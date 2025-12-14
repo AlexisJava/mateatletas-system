@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Param,
+  ParseUUIDPipe,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -70,7 +71,9 @@ export class CasasController {
    * GET /api/casas/:id
    */
   @Get(':id')
-  findOne(@Param('id') id: string): ReturnType<CasasService['findOne']> {
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): ReturnType<CasasService['findOne']> {
     return this.casasService.findOne(id);
   }
 
@@ -80,7 +83,7 @@ export class CasasController {
    */
   @Get(':id/ranking')
   getRankingInterno(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): ReturnType<CasasService['getRankingInterno']> {
     return this.casasService.getRankingInterno(id);
   }
@@ -92,7 +95,7 @@ export class CasasController {
   @Post(':id/recalcular-puntos')
   @HttpCode(HttpStatus.OK)
   recalcularPuntos(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): ReturnType<CasasService['recalcularPuntos']> {
     return this.casasService.recalcularPuntos(id);
   }

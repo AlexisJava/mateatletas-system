@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
 import { DocentesService } from './docentes.service';
@@ -107,7 +108,7 @@ export class DocentesController {
    */
   @Get(':id')
   @Roles(Role.ADMIN)
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.docentesService.findById(id);
   }
 
@@ -119,7 +120,10 @@ export class DocentesController {
    */
   @Patch(':id')
   @Roles(Role.ADMIN)
-  async update(@Param('id') id: string, @Body() updateDto: UpdateDocenteDto) {
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateDto: UpdateDocenteDto,
+  ) {
     return this.docentesService.update(id, updateDto);
   }
 
@@ -132,7 +136,7 @@ export class DocentesController {
   @Post(':id/reasignar-clases')
   @Roles(Role.ADMIN)
   async reasignarClases(
-    @Param('id') fromDocenteId: string,
+    @Param('id', ParseUUIDPipe) fromDocenteId: string,
     @Body() dto: ReasignarClasesDto,
   ) {
     return this.docentesService.reasignarClases(fromDocenteId, dto.toDocenteId);
@@ -146,7 +150,7 @@ export class DocentesController {
    */
   @Delete(':id')
   @Roles(Role.ADMIN)
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.docentesService.remove(id);
   }
 }

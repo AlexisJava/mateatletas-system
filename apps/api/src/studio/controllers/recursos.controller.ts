@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   UseGuards,
   UseInterceptors,
   UploadedFile,
@@ -81,7 +82,7 @@ export class RecursosController {
   @ApiOperation({ summary: 'Obtener información de un recurso' })
   @ApiResponse({ status: 200, description: 'Recurso encontrado' })
   @ApiResponse({ status: 404, description: 'Recurso no encontrado' })
-  async obtener(@Param('id') id: string) {
+  async obtener(@Param('id', ParseUUIDPipe) id: string) {
     const recurso = await this.prisma.recursoStudio.findUnique({
       where: { id },
     });
@@ -98,7 +99,7 @@ export class RecursosController {
   @ApiOperation({ summary: 'Eliminar recurso' })
   @ApiResponse({ status: 204, description: 'Recurso eliminado' })
   @ApiResponse({ status: 404, description: 'Recurso no encontrado' })
-  async eliminar(@Param('id') id: string) {
+  async eliminar(@Param('id', ParseUUIDPipe) id: string) {
     await this.eliminarRecursoService.ejecutar(id);
   }
 }

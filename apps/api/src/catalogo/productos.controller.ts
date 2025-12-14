@@ -5,6 +5,7 @@ import {
   Body,
   Patch,
   Param,
+  ParseUUIDPipe,
   Delete,
   Query,
   UseGuards,
@@ -69,7 +70,7 @@ export class ProductosController {
    * Endpoint público
    */
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.productosService.findById(id);
   }
 
@@ -94,7 +95,7 @@ export class ProductosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDto: ActualizarProductoDto,
   ) {
     return this.productosService.update(id, updateDto);
@@ -113,7 +114,7 @@ export class ProductosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async remove(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Query('hardDelete') hardDelete?: string,
   ) {
     const permanent = hardDelete === 'true';

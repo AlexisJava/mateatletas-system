@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Param,
+  ParseUUIDPipe,
   Query,
   UseGuards,
   Body,
@@ -37,7 +38,9 @@ export class LogrosController {
    * Obtener logros desbloqueados por estudiante
    */
   @Get('estudiante/:estudianteId')
-  async obtenerLogrosEstudiante(@Param('estudianteId') estudianteId: string) {
+  async obtenerLogrosEstudiante(
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+  ) {
     return this.logrosService.obtenerLogrosEstudiante(estudianteId);
   }
 
@@ -46,7 +49,9 @@ export class LogrosController {
    * Obtener progreso general de logros
    */
   @Get('estudiante/:estudianteId/progreso')
-  async obtenerProgreso(@Param('estudianteId') estudianteId: string) {
+  async obtenerProgreso(
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+  ) {
     const [progreso, porCategoria, porRareza] = await Promise.all([
       this.logrosService.obtenerProgresoLogros(estudianteId),
       this.logrosService.obtenerLogrosPorCategoria(estudianteId),
@@ -65,7 +70,9 @@ export class LogrosController {
    * Obtener logros no vistos (notificaciones)
    */
   @Get('estudiante/:estudianteId/no-vistos')
-  async obtenerLogrosNoVistos(@Param('estudianteId') estudianteId: string) {
+  async obtenerLogrosNoVistos(
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+  ) {
     return this.logrosService.obtenerLogrosNoVistos(estudianteId);
   }
 
@@ -75,8 +82,8 @@ export class LogrosController {
    */
   @Patch('estudiante/:estudianteId/:logroId/visto')
   async marcarLogroVisto(
-    @Param('estudianteId') estudianteId: string,
-    @Param('logroId') logroId: string,
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('logroId', ParseUUIDPipe) logroId: string,
   ) {
     await this.logrosService.marcarLogroVisto(estudianteId, logroId);
     return { success: true };

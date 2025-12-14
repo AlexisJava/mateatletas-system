@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Param,
+  ParseUUIDPipe,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -74,7 +75,7 @@ export class OnboardingController {
   @ApiParam({ name: 'estudianteId', description: 'ID del estudiante' })
   @ApiResponse({ status: 200, description: 'Estado del onboarding' })
   @ApiResponse({ status: 404, description: 'Inscripción no encontrada' })
-  async getEstado(@Param('estudianteId') estudianteId: string) {
+  async getEstado(@Param('estudianteId', ParseUUIDPipe) estudianteId: string) {
     const estado =
       await this.onboardingService.getEstadoOnboarding(estudianteId);
     return { estado };
@@ -90,7 +91,7 @@ export class OnboardingController {
   @ApiResponse({ status: 200, description: 'Onboarding iniciado' })
   @ApiResponse({ status: 400, description: 'Ya fue iniciado' })
   @ApiResponse({ status: 404, description: 'Inscripción no encontrada' })
-  async iniciar(@Param('estudianteId') estudianteId: string) {
+  async iniciar(@Param('estudianteId', ParseUUIDPipe) estudianteId: string) {
     const estado = await this.onboardingService.iniciarOnboarding(estudianteId);
     return { estado, mensaje: 'Onboarding iniciado correctamente' };
   }
@@ -106,7 +107,7 @@ export class OnboardingController {
   @ApiResponse({ status: 400, description: 'Selección inválida' })
   @ApiResponse({ status: 404, description: 'Inscripción no encontrada' })
   async seleccionarMundos(
-    @Param('estudianteId') estudianteId: string,
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
     @Body() dto: SeleccionarMundosDto,
   ) {
     const estado = await this.onboardingService.seleccionarMundos(
@@ -127,7 +128,7 @@ export class OnboardingController {
   @ApiResponse({ status: 200, description: 'Test registrado' })
   @ApiResponse({ status: 404, description: 'Estudiante no encontrado' })
   async registrarTest(
-    @Param('estudianteId') estudianteId: string,
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
     @Body() dto: RegistrarTestDto,
   ) {
     const resultado = await this.onboardingService.registrarResultadoTest(
@@ -155,7 +156,9 @@ export class OnboardingController {
   @ApiResponse({ status: 200, description: 'Casa confirmada' })
   @ApiResponse({ status: 400, description: 'Estado incorrecto' })
   @ApiResponse({ status: 404, description: 'Inscripción no encontrada' })
-  async confirmarCasa(@Param('estudianteId') estudianteId: string) {
+  async confirmarCasa(
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+  ) {
     const estado = await this.onboardingService.confirmarCasa(estudianteId);
     return { estado, mensaje: 'Casa confirmada correctamente' };
   }
@@ -171,7 +174,7 @@ export class OnboardingController {
   @ApiResponse({ status: 400, description: 'Estado incorrecto' })
   @ApiResponse({ status: 404, description: 'Inscripción no encontrada' })
   async guardarAvatar(
-    @Param('estudianteId') estudianteId: string,
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
     @Body() dto: GuardarAvatarDto,
   ) {
     const avatarConfig: AvatarConfig = {
@@ -199,7 +202,9 @@ export class OnboardingController {
   @ApiParam({ name: 'estudianteId', description: 'ID del estudiante' })
   @ApiResponse({ status: 200, description: 'Progreso del onboarding' })
   @ApiResponse({ status: 404, description: 'Inscripción no encontrada' })
-  async getProgreso(@Param('estudianteId') estudianteId: string) {
+  async getProgreso(
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+  ) {
     const progreso =
       await this.onboardingService.getProgresoOnboarding(estudianteId);
     return { progreso };

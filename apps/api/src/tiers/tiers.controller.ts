@@ -1,4 +1,10 @@
-import { Controller, Get, Param, ParseEnumPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseEnumPipe,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { TierNombre } from '@prisma/client';
 import { TiersService } from './tiers.service';
 
@@ -37,7 +43,7 @@ export class TiersController {
    * Obtiene un tier por su ID
    */
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.tiersService.findOne(id);
   }
 }

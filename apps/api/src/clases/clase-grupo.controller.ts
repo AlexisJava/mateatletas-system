@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseUUIDPipe,
   UseGuards,
   Request,
   NotFoundException,
@@ -124,7 +125,7 @@ export class ClaseGrupoController {
     description: 'No tienes permiso para acceder a este grupo',
   })
   async getDetalleCompleto(
-    @Param('id') claseGrupoId: string,
+    @Param('id', ParseUUIDPipe) claseGrupoId: string,
     @Request() req: RequestWithAuthUser,
   ) {
     // El servicio valida que el docente sea el titular

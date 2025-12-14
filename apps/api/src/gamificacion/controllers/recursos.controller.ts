@@ -2,15 +2,13 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   Param,
+  ParseUUIDPipe,
   UseGuards,
-  Request,
 } from '@nestjs/common';
 import { RecursosService } from '../services/recursos.service';
 import { RachaService } from '../services/racha.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { AgregarRecursoDto } from '../dto/transaccion-recurso.dto';
 
 @Controller('gamificacion/recursos')
 @UseGuards(JwtAuthGuard)
@@ -25,7 +23,9 @@ export class RecursosController {
    * Obtener recursos completos con nivel
    */
   @Get(':estudianteId')
-  async obtenerRecursos(@Param('estudianteId') estudianteId: string) {
+  async obtenerRecursos(
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+  ) {
     const recursos =
       await this.recursosService.obtenerRecursosConNivel(estudianteId);
     const racha = await this.rachaService.obtenerEstadisticas(estudianteId);
@@ -41,7 +41,9 @@ export class RecursosController {
    * Obtener historial de transacciones
    */
   @Get(':estudianteId/historial')
-  async obtenerHistorial(@Param('estudianteId') estudianteId: string) {
+  async obtenerHistorial(
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+  ) {
     return this.recursosService.obtenerHistorial(estudianteId);
   }
 
@@ -50,7 +52,9 @@ export class RecursosController {
    * Registrar actividad del día (actualiza racha)
    */
   @Post(':estudianteId/racha')
-  async registrarActividad(@Param('estudianteId') estudianteId: string) {
+  async registrarActividad(
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+  ) {
     return this.rachaService.registrarActividad(estudianteId);
   }
 
@@ -59,7 +63,9 @@ export class RecursosController {
    * Obtener estadísticas de racha
    */
   @Get(':estudianteId/racha')
-  async obtenerRacha(@Param('estudianteId') estudianteId: string) {
+  async obtenerRacha(
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+  ) {
     return this.rachaService.obtenerEstadisticas(estudianteId);
   }
 }

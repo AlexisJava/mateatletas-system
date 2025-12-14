@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  ParseUUIDPipe,
   Query,
   UseGuards,
   HttpCode,
@@ -98,7 +99,7 @@ export class CursosController {
   @ApiOperation({ summary: 'Obtener curso completo por ID' })
   @ApiResponse({ status: 200, description: 'Curso encontrado' })
   @ApiResponse({ status: 404, description: 'Curso no encontrado' })
-  async obtener(@Param('id') id: string) {
+  async obtener(@Param('id', ParseUUIDPipe) id: string) {
     return this.obtenerCursoService.ejecutar(id);
   }
 
@@ -106,7 +107,10 @@ export class CursosController {
   @ApiOperation({ summary: 'Actualizar curso' })
   @ApiResponse({ status: 200, description: 'Curso actualizado' })
   @ApiResponse({ status: 404, description: 'Curso no encontrado' })
-  async actualizar(@Param('id') id: string, @Body() dto: ActualizarCursoDto) {
+  async actualizar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ActualizarCursoDto,
+  ) {
     return this.actualizarCursoService.ejecutar(id, dto);
   }
 
@@ -116,7 +120,7 @@ export class CursosController {
   @ApiResponse({ status: 204, description: 'Curso eliminado' })
   @ApiResponse({ status: 400, description: 'Curso no está en estado DRAFT' })
   @ApiResponse({ status: 404, description: 'Curso no encontrado' })
-  async eliminar(@Param('id') id: string) {
+  async eliminar(@Param('id', ParseUUIDPipe) id: string) {
     await this.eliminarCursoService.ejecutar(id);
   }
 }

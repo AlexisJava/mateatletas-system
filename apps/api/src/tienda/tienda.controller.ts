@@ -10,6 +10,7 @@ import {
   Put,
   Body,
   Param,
+  ParseUUIDPipe,
   Query,
   UseGuards,
   HttpCode,
@@ -74,7 +75,7 @@ export class TiendaController {
   @Put('categorias/:id')
   @Roles(Role.ADMIN)
   async actualizarCategoria(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() data: UpdateCategoriaItem,
   ): Promise<CategoriaItem> {
     return await this.tiendaService.actualizarCategoria(id, data);
@@ -117,7 +118,7 @@ export class TiendaController {
   @Get('items/:id')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerItemPorId(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<ItemTiendaConCategoria> {
     return await this.tiendaService.obtenerItemPorId(id);
   }
@@ -139,7 +140,7 @@ export class TiendaController {
   @Put('items/:id')
   @Roles(Role.ADMIN)
   async actualizarItem(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() data: UpdateItemTienda,
   ): Promise<ItemTienda> {
     return await this.tiendaService.actualizarItem(id, data);
@@ -156,7 +157,7 @@ export class TiendaController {
   @Get('inventario/:estudianteId')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerInventario(
-    @Param('estudianteId') estudianteId: string,
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
   ): Promise<InventarioEstudianteResponse> {
     return await this.tiendaService.obtenerInventario(estudianteId);
   }
@@ -169,8 +170,8 @@ export class TiendaController {
   @HttpCode(HttpStatus.OK)
   @Roles(Role.ESTUDIANTE)
   async equiparItem(
-    @Param('estudianteId') estudianteId: string,
-    @Param('itemId') itemId: string,
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('itemId', ParseUUIDPipe) itemId: string,
   ): Promise<ItemObtenido> {
     return await this.tiendaService.equiparItem(estudianteId, itemId);
   }
@@ -197,7 +198,7 @@ export class TiendaController {
   @Get('compras/:estudianteId')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerHistorialCompras(
-    @Param('estudianteId') estudianteId: string,
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
   ): Promise<CompraResponse[]> {
     return await this.tiendaService.obtenerHistorialCompras(estudianteId);
   }

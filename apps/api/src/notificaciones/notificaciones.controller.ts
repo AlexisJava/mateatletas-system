@@ -1,10 +1,10 @@
 import {
   Controller,
   Get,
-  Post,
   Patch,
   Delete,
   Param,
+  ParseUUIDPipe,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -50,7 +50,7 @@ export class NotificacionesController {
    */
   @Patch(':id/leer')
   async marcarComoLeida(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @GetUser('id') docenteId: string,
   ) {
     return this.notificacionesService.marcarComoLeida(id, docenteId);
@@ -75,7 +75,10 @@ export class NotificacionesController {
    * Eliminar una notificación
    */
   @Delete(':id')
-  async remove(@Param('id') id: string, @GetUser('id') docenteId: string) {
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetUser('id') docenteId: string,
+  ) {
     await this.notificacionesService.remove(id, docenteId);
     return { message: 'Notificación eliminada correctamente' };
   }

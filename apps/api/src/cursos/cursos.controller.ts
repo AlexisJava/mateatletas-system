@@ -5,6 +5,7 @@ import {
   Body,
   Patch,
   Param,
+  ParseUUIDPipe,
   Delete,
   UseGuards,
 } from '@nestjs/common';
@@ -49,7 +50,7 @@ export class CursosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   createModulo(
-    @Param('productoId') productoId: string,
+    @Param('productoId', ParseUUIDPipe) productoId: string,
     @Body() createModuloDto: CreateModuloDto,
   ) {
     return this.cursosService.createModulo(productoId, createModuloDto);
@@ -61,7 +62,9 @@ export class CursosController {
    * Público (para que estudiantes puedan ver estructura)
    */
   @Get('productos/:productoId/modulos')
-  findModulosByProducto(@Param('productoId') productoId: string) {
+  findModulosByProducto(
+    @Param('productoId', ParseUUIDPipe) productoId: string,
+  ) {
     return this.cursosService.findModulosByProducto(productoId);
   }
 
@@ -70,7 +73,7 @@ export class CursosController {
    * Obtener un módulo específico con sus lecciones
    */
   @Get('modulos/:id')
-  findOneModulo(@Param('id') id: string) {
+  findOneModulo(@Param('id', ParseUUIDPipe) id: string) {
     return this.cursosService.findOneModulo(id);
   }
 
@@ -83,7 +86,7 @@ export class CursosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   updateModulo(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateModuloDto: UpdateModuloDto,
   ) {
     return this.cursosService.updateModulo(id, updateModuloDto);
@@ -97,7 +100,7 @@ export class CursosController {
   @Delete('modulos/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  removeModulo(@Param('id') id: string) {
+  removeModulo(@Param('id', ParseUUIDPipe) id: string) {
     return this.cursosService.removeModulo(id);
   }
 
@@ -111,7 +114,7 @@ export class CursosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   reordenarModulos(
-    @Param('productoId') productoId: string,
+    @Param('productoId', ParseUUIDPipe) productoId: string,
     @Body() dto: ReordenarModulosDto,
   ) {
     return this.cursosService.reordenarModulos(productoId, dto.orden);
@@ -130,7 +133,7 @@ export class CursosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   createLeccion(
-    @Param('moduloId') moduloId: string,
+    @Param('moduloId', ParseUUIDPipe) moduloId: string,
     @Body() createLeccionDto: CreateLeccionDto,
   ) {
     return this.cursosService.createLeccion(moduloId, createLeccionDto);
@@ -142,7 +145,7 @@ export class CursosController {
    * Público (para estudiantes)
    */
   @Get('modulos/:moduloId/lecciones')
-  findLeccionesByModulo(@Param('moduloId') moduloId: string) {
+  findLeccionesByModulo(@Param('moduloId', ParseUUIDPipe) moduloId: string) {
     return this.cursosService.findLeccionesByModulo(moduloId);
   }
 
@@ -153,7 +156,7 @@ export class CursosController {
    */
   @Get('lecciones/:id')
   @UseGuards(JwtAuthGuard)
-  findOneLeccion(@Param('id') id: string) {
+  findOneLeccion(@Param('id', ParseUUIDPipe) id: string) {
     return this.cursosService.findOneLeccion(id);
   }
 
@@ -166,7 +169,7 @@ export class CursosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   updateLeccion(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateLeccionDto: UpdateLeccionDto,
   ) {
     return this.cursosService.updateLeccion(id, updateLeccionDto);
@@ -180,7 +183,7 @@ export class CursosController {
   @Delete('lecciones/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  removeLeccion(@Param('id') id: string) {
+  removeLeccion(@Param('id', ParseUUIDPipe) id: string) {
     return this.cursosService.removeLeccion(id);
   }
 
@@ -194,7 +197,7 @@ export class CursosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   reordenarLecciones(
-    @Param('moduloId') moduloId: string,
+    @Param('moduloId', ParseUUIDPipe) moduloId: string,
     @Body() dto: ReordenarLeccionesDto,
   ) {
     return this.cursosService.reordenarLecciones(moduloId, dto.orden);
@@ -212,7 +215,7 @@ export class CursosController {
   @Post('lecciones/:id/completar')
   @UseGuards(JwtAuthGuard)
   completarLeccion(
-    @Param('id') leccionId: string,
+    @Param('id', ParseUUIDPipe) leccionId: string,
     @GetUser() user: AuthUser,
     @Body() completarDto: CompletarLeccionDto,
   ) {
@@ -231,7 +234,7 @@ export class CursosController {
   @Get('productos/:productoId/progreso')
   @UseGuards(JwtAuthGuard)
   getProgresoCurso(
-    @Param('productoId') productoId: string,
+    @Param('productoId', ParseUUIDPipe) productoId: string,
     @GetUser() user: AuthUser,
   ) {
     return this.cursosService.getProgresoCurso(productoId, user.id);
@@ -245,7 +248,7 @@ export class CursosController {
   @Get('productos/:productoId/siguiente-leccion')
   @UseGuards(JwtAuthGuard)
   getSiguienteLeccion(
-    @Param('productoId') productoId: string,
+    @Param('productoId', ParseUUIDPipe) productoId: string,
     @GetUser() user: AuthUser,
   ) {
     return this.cursosService.getSiguienteLeccion(productoId, user.id);

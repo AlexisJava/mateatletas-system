@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Param,
   ParseEnumPipe,
+  ParseUUIDPipe,
   Patch,
   Post,
   Put,
@@ -94,7 +95,7 @@ export class AdminController {
    * Rol: Admin
    */
   @Patch('alertas/:id/resolver')
-  async resolverAlerta(@Param('id') id: string) {
+  async resolverAlerta(@Param('id', ParseUUIDPipe) id: string) {
     return this.adminService.resolverAlerta(id);
   }
 
@@ -104,7 +105,7 @@ export class AdminController {
    * Rol: Admin
    */
   @Get('alertas/:id/sugerencia')
-  async sugerirSolucion(@Param('id') id: string) {
+  async sugerirSolucion(@Param('id', ParseUUIDPipe) id: string) {
     return this.adminService.sugerirSolucion(id);
   }
 
@@ -164,7 +165,7 @@ export class AdminController {
   })
   @HttpCode(HttpStatus.OK)
   async resetearPassword(
-    @Param('usuarioId') usuarioId: string,
+    @Param('usuarioId', ParseUUIDPipe) usuarioId: string,
     @Body() dto: ResetPasswordDto,
   ) {
     return this.adminService.resetearPasswordUsuario(
@@ -209,7 +210,7 @@ export class AdminController {
    */
   @Post('usuarios/:id/role')
   async cambiarRolUsuario(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body('role', new ParseEnumPipe(Role)) role: Role,
   ) {
     return this.adminService.changeUserRole(id, role);
@@ -222,7 +223,7 @@ export class AdminController {
    */
   @Put('usuarios/:id/roles')
   async actualizarRolesUsuario(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body('roles') roles: Role[],
   ) {
     // Validar que al menos haya un rol
@@ -238,7 +239,7 @@ export class AdminController {
    * Rol: Admin
    */
   @Delete('usuarios/:id')
-  async eliminarUsuario(@Param('id') id: string) {
+  async eliminarUsuario(@Param('id', ParseUUIDPipe) id: string) {
     return this.adminService.deleteUser(id);
   }
 
@@ -278,7 +279,7 @@ export class AdminController {
    */
   @Get('rutas-curriculares/:id')
   @Roles(Role.ADMIN, Role.DOCENTE)
-  async obtenerRuta(@Param('id') id: string) {
+  async obtenerRuta(@Param('id', ParseUUIDPipe) id: string) {
     return this.rutasService.obtenerPorId(id);
   }
 
@@ -299,7 +300,7 @@ export class AdminController {
    */
   @Patch('rutas-curriculares/:id')
   async actualizarRuta(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ActualizarRutaDto,
   ) {
     return this.rutasService.actualizar(id, dto);
@@ -312,7 +313,7 @@ export class AdminController {
    * Solo elimina si no tiene clases asociadas
    */
   @Delete('rutas-curriculares/:id')
-  async eliminarRuta(@Param('id') id: string) {
+  async eliminarRuta(@Param('id', ParseUUIDPipe) id: string) {
     return this.rutasService.eliminar(id);
   }
 
@@ -336,7 +337,7 @@ export class AdminController {
    * Rol: Admin
    */
   @Get('sectores/:id')
-  async obtenerSector(@Param('id') id: string) {
+  async obtenerSector(@Param('id', ParseUUIDPipe) id: string) {
     return this.sectoresRutasService.obtenerSector(id);
   }
 
@@ -357,7 +358,7 @@ export class AdminController {
    */
   @Put('sectores/:id')
   async actualizarSector(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() data: UpdateSectorDto,
   ) {
     return this.sectoresRutasService.actualizarSector(id, data);
@@ -369,7 +370,7 @@ export class AdminController {
    * Rol: Admin
    */
   @Delete('sectores/:id')
-  async eliminarSector(@Param('id') id: string) {
+  async eliminarSector(@Param('id', ParseUUIDPipe) id: string) {
     return this.sectoresRutasService.eliminarSector(id);
   }
 
@@ -389,7 +390,7 @@ export class AdminController {
    * Rol: Admin
    */
   @Get('rutas-especialidad/:id')
-  async obtenerRutaEspecialidad(@Param('id') id: string) {
+  async obtenerRutaEspecialidad(@Param('id', ParseUUIDPipe) id: string) {
     return this.sectoresRutasService.obtenerRuta(id);
   }
 
@@ -410,7 +411,7 @@ export class AdminController {
    */
   @Put('rutas-especialidad/:id')
   async actualizarRutaEspecialidad(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() data: UpdateRutaEspecialidadDto,
   ) {
     return this.sectoresRutasService.actualizarRuta(id, data);
@@ -422,7 +423,7 @@ export class AdminController {
    * Rol: Admin
    */
   @Delete('rutas-especialidad/:id')
-  async eliminarRutaEspecialidad(@Param('id') id: string) {
+  async eliminarRutaEspecialidad(@Param('id', ParseUUIDPipe) id: string) {
     return this.sectoresRutasService.eliminarRuta(id);
   }
 
@@ -432,7 +433,9 @@ export class AdminController {
    * Rol: Admin
    */
   @Get('docentes/:docenteId/rutas')
-  async obtenerRutasDocente(@Param('docenteId') docenteId: string) {
+  async obtenerRutasDocente(
+    @Param('docenteId', ParseUUIDPipe) docenteId: string,
+  ) {
     return this.sectoresRutasService.obtenerRutasDocente(docenteId);
   }
 
@@ -443,7 +446,7 @@ export class AdminController {
    */
   @Put('docentes/:docenteId/rutas')
   async asignarRutasDocente(
-    @Param('docenteId') docenteId: string,
+    @Param('docenteId', ParseUUIDPipe) docenteId: string,
     @Body() data: AsignarRutasDocenteDto,
   ) {
     return this.sectoresRutasService.asignarRutasDocente(docenteId, data);
@@ -456,8 +459,8 @@ export class AdminController {
    */
   @Post('docentes/:docenteId/rutas/:rutaId')
   async agregarRutaDocente(
-    @Param('docenteId') docenteId: string,
-    @Param('rutaId') rutaId: string,
+    @Param('docenteId', ParseUUIDPipe) docenteId: string,
+    @Param('rutaId', ParseUUIDPipe) rutaId: string,
   ) {
     return this.sectoresRutasService.agregarRutaDocente(docenteId, rutaId);
   }
@@ -469,8 +472,8 @@ export class AdminController {
    */
   @Delete('docentes/:docenteId/rutas/:rutaId')
   async eliminarRutaDocente(
-    @Param('docenteId') docenteId: string,
-    @Param('rutaId') rutaId: string,
+    @Param('docenteId', ParseUUIDPipe) docenteId: string,
+    @Param('rutaId', ParseUUIDPipe) rutaId: string,
   ) {
     return this.sectoresRutasService.eliminarRutaDocente(docenteId, rutaId);
   }
@@ -545,7 +548,7 @@ export class AdminController {
     summary: 'Obtener detalle de un grupo',
     description: 'Obtiene un ClaseGrupo con todos sus detalles e inscripciones',
   })
-  async obtenerClaseGrupo(@Param('id') id: string) {
+  async obtenerClaseGrupo(@Param('id', ParseUUIDPipe) id: string) {
     return this.claseGruposService.obtenerClaseGrupo(id);
   }
 
@@ -560,7 +563,7 @@ export class AdminController {
     description: 'Actualiza los datos de un ClaseGrupo existente',
   })
   async actualizarClaseGrupo(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ActualizarClaseGrupoDto,
   ) {
     return this.claseGruposService.actualizarClaseGrupo(id, dto);
@@ -577,7 +580,7 @@ export class AdminController {
     description: 'Inscribe uno o más estudiantes en un ClaseGrupo existente',
   })
   async agregarEstudiantesAGrupo(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() body: { estudiantes_ids: string[] },
   ) {
     return this.claseGruposService.agregarEstudiantes(id, body.estudiantes_ids);
@@ -594,8 +597,8 @@ export class AdminController {
     description: 'Elimina la inscripción de un estudiante en un ClaseGrupo',
   })
   async removerEstudianteDeGrupo(
-    @Param('id') id: string,
-    @Param('estudianteId') estudianteId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
   ) {
     return this.claseGruposService.removerEstudiante(id, estudianteId);
   }
@@ -610,7 +613,7 @@ export class AdminController {
     summary: 'Eliminar un grupo de clases',
     description: 'Desactiva un ClaseGrupo (soft delete)',
   })
-  async eliminarClaseGrupo(@Param('id') id: string) {
+  async eliminarClaseGrupo(@Param('id', ParseUUIDPipe) id: string) {
     return this.claseGruposService.eliminarClaseGrupo(id);
   }
 
@@ -626,7 +629,7 @@ export class AdminController {
       'Registra la asistencia de estudiantes para una fecha específica',
   })
   async registrarAsistencias(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RegistrarAsistenciasDto,
   ) {
     return this.asistenciasService.registrarAsistencias(id, dto);
@@ -644,7 +647,7 @@ export class AdminController {
       'Lista las asistencias de un ClaseGrupo para una fecha específica',
   })
   async obtenerAsistenciasPorFecha(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Query('fecha') fecha: string,
   ) {
     return this.asistenciasService.obtenerAsistenciasPorFecha(id, fecha);
@@ -661,7 +664,7 @@ export class AdminController {
     description: 'Lista el historial completo de asistencias de un ClaseGrupo',
   })
   async obtenerHistorialAsistencias(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Query() filtros: FiltrosHistorialAsistenciasDto,
   ) {
     return this.asistenciasService.obtenerHistorialAsistencias(id, filtros);
@@ -678,7 +681,7 @@ export class AdminController {
     description: 'Actualiza el estado u observaciones de una asistencia',
   })
   async actualizarAsistencia(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ActualizarAsistenciaDto,
   ) {
     return this.asistenciasService.actualizarAsistencia(id, dto);
@@ -696,8 +699,8 @@ export class AdminController {
       'Obtiene las estadísticas de asistencia de un estudiante en un ClaseGrupo',
   })
   async obtenerEstadisticasEstudiante(
-    @Param('id') id: string,
-    @Param('estudianteId') estudianteId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
   ) {
     return this.asistenciasService.obtenerEstadisticasEstudiante(
       id,
