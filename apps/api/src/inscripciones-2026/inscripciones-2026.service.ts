@@ -24,7 +24,6 @@ import { TutorCreationService } from '../shared/services/tutor-creation.service'
 import {
   CreateInscripcion2026Dto,
   CreateInscripcion2026Response,
-  TipoInscripcion2026,
   MundoSTEAM,
   CourseSelectionDto,
   TutorDataDto,
@@ -245,7 +244,6 @@ export class Inscripciones2026Service {
           dni: tutorDto.dni,
           cuil: tutorDto.cuil,
           password_hash: hashedPassword,
-          debe_cambiar_password: false,
           debe_completar_perfil: false,
           ha_completado_onboarding: true,
           roles: DEFAULT_ROLES.TUTOR,
@@ -311,7 +309,6 @@ export class Inscripciones2026Service {
           nivelEscolar: 'Primaria',
           username,
           password_hash: await bcrypt.hash(pin, 12),
-          debe_cambiar_password: true,
           roles: DEFAULT_ROLES.ESTUDIANTE,
         },
       });

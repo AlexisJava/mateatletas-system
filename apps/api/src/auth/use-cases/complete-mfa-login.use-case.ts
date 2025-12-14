@@ -23,7 +23,6 @@ export interface CompleteMfaLoginResult {
     telefono: string | null;
     role: string;
     roles: string[];
-    debe_cambiar_password: boolean;
   };
 }
 
@@ -123,7 +122,6 @@ export class CompleteMfaLoginUseCase {
         telefono: admin.telefono ?? null,
         role: Role.ADMIN,
         roles: finalRoles,
-        debe_cambiar_password: admin.debe_cambiar_password,
       },
     };
   }
@@ -135,7 +133,7 @@ export class CompleteMfaLoginUseCase {
     let payload: MfaTokenPayload;
 
     try {
-      payload = this.jwtService.verify(mfaToken) as MfaTokenPayload;
+      payload = this.jwtService.verify(mfaToken);
     } catch {
       throw new UnauthorizedException('Token MFA inválido o expirado');
     }

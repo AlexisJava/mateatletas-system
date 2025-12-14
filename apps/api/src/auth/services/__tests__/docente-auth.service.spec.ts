@@ -27,7 +27,6 @@ describe('DocenteAuthService', () => {
     fecha_registro: new Date('2024-01-01'),
     titulo: 'Licenciada en Matemáticas',
     bio: 'Profesora con 10 años de experiencia',
-    debe_cambiar_password: false,
     roles: 'Docente',
   };
 

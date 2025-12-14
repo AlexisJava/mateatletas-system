@@ -42,7 +42,6 @@ export interface EstudianteLoginResult {
     } | null;
     role: Role;
     roles: Role[];
-    debe_cambiar_password: boolean;
   };
 }
 
@@ -168,7 +167,6 @@ export class EstudianteAuthService {
         tutor: estudiante.tutor,
         role: Role.ESTUDIANTE,
         roles: finalRoles,
-        debe_cambiar_password: estudiante.debe_cambiar_password,
       },
     };
   }

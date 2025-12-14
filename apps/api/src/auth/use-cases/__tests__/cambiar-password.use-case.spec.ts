@@ -7,7 +7,6 @@
  * - Cambiar contraseña para cualquier tipo de usuario
  * - Verificar contraseña actual antes de cambiar
  * - Soportar Estudiante, Tutor, Docente y Admin
- * - Limpiar password_temporal y marcar debe_cambiar_password = false
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
@@ -65,8 +64,6 @@ describe('CambiarPasswordUseCase', () => {
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
         id: 'est-123',
         password_hash: hashedPassword,
-        password_temporal: 'temp-pass',
-        debe_cambiar_password: true,
       });
       mockPrismaService.estudiante.update.mockResolvedValueOnce({});
 
@@ -82,8 +79,6 @@ describe('CambiarPasswordUseCase', () => {
         where: { id: 'est-123' },
         data: expect.objectContaining({
           password_hash: expect.any(String),
-          password_temporal: null,
-          debe_cambiar_password: false,
           fecha_ultimo_cambio: expect.any(Date),
         }),
       });
@@ -101,8 +96,6 @@ describe('CambiarPasswordUseCase', () => {
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce({
         id: 'tutor-123',
         password_hash: hashedPassword,
-        password_temporal: null,
-        debe_cambiar_password: false,
       });
       mockPrismaService.tutor.update.mockResolvedValueOnce({});
 
@@ -117,8 +110,6 @@ describe('CambiarPasswordUseCase', () => {
         where: { id: 'tutor-123' },
         data: expect.objectContaining({
           password_hash: expect.any(String),
-          password_temporal: null,
-          debe_cambiar_password: false,
         }),
       });
     });
@@ -136,8 +127,6 @@ describe('CambiarPasswordUseCase', () => {
       mockPrismaService.docente.findUnique.mockResolvedValueOnce({
         id: 'docente-123',
         password_hash: hashedPassword,
-        password_temporal: 'temp-123',
-        debe_cambiar_password: true,
       });
       mockPrismaService.docente.update.mockResolvedValueOnce({});
 
@@ -165,8 +154,6 @@ describe('CambiarPasswordUseCase', () => {
       mockPrismaService.admin.findUnique.mockResolvedValueOnce({
         id: 'admin-123',
         password_hash: hashedPassword,
-        password_temporal: null,
-        debe_cambiar_password: false,
       });
       mockPrismaService.admin.update.mockResolvedValueOnce({});
 
@@ -208,8 +195,6 @@ describe('CambiarPasswordUseCase', () => {
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
         id: 'est-wrong',
         password_hash: hashedPassword,
-        password_temporal: null,
-        debe_cambiar_password: false,
       });
 
       await expect(
@@ -224,8 +209,6 @@ describe('CambiarPasswordUseCase', () => {
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
         id: 'est-no-hash',
         password_hash: null, // Sin password hash
-        password_temporal: null,
-        debe_cambiar_password: false,
       });
 
       await expect(
@@ -246,8 +229,6 @@ describe('CambiarPasswordUseCase', () => {
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
         id: 'est-rounds',
         password_hash: hashedPassword,
-        password_temporal: null,
-        debe_cambiar_password: false,
       });
       mockPrismaService.estudiante.update.mockResolvedValueOnce({});
 
@@ -266,33 +247,7 @@ describe('CambiarPasswordUseCase', () => {
     });
 
     /**
-     * TEST 9: should_clear_password_temporal
-     */
-    it('should_clear_password_temporal', async () => {
-      const passwordActual = 'temp-password';
-      const hashedPassword = await bcrypt.hash(passwordActual, BCRYPT_ROUNDS);
-
-      mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
-        id: 'est-temp',
-        password_hash: hashedPassword,
-        password_temporal: 'visible-temp-password', // Tiene password temporal
-        debe_cambiar_password: true,
-      });
-      mockPrismaService.estudiante.update.mockResolvedValueOnce({});
-
-      await useCase.execute('est-temp', passwordActual, 'new-password');
-
-      expect(mockPrismaService.estudiante.update).toHaveBeenCalledWith({
-        where: { id: 'est-temp' },
-        data: expect.objectContaining({
-          password_temporal: null, // Debe ser limpiado
-          debe_cambiar_password: false, // Debe ser false
-        }),
-      });
-    });
-
-    /**
-     * TEST 10: should_update_fecha_ultimo_cambio
+     * TEST 9: should_update_fecha_ultimo_cambio
      */
     it('should_update_fecha_ultimo_cambio', async () => {
       const passwordActual = 'current-pass';
@@ -301,8 +256,6 @@ describe('CambiarPasswordUseCase', () => {
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
         id: 'est-fecha',
         password_hash: hashedPassword,
-        password_temporal: null,
-        debe_cambiar_password: false,
       });
       mockPrismaService.estudiante.update.mockResolvedValueOnce({});
 
@@ -332,8 +285,6 @@ describe('CambiarPasswordUseCase', () => {
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
         id: 'est-response',
         password_hash: hashedPassword,
-        password_temporal: null,
-        debe_cambiar_password: false,
       });
       mockPrismaService.estudiante.update.mockResolvedValueOnce({});
 

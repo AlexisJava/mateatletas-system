@@ -20,8 +20,6 @@ describe('DocenteCommandService', () => {
     id: 'docente-123',
     email: 'juan@example.com',
     password_hash: 'hashed_password',
-    password_temporal: null,
-    debe_cambiar_password: false,
     nombre: 'Juan',
     apellido: 'Pérez',
     titulo: 'Licenciado en Matemáticas',
@@ -96,76 +94,6 @@ describe('DocenteCommandService', () => {
       expect(result).not.toHaveProperty('password_hash');
       expect(result).not.toHaveProperty('generatedPassword'); // No se generó
       expect(result.nombre).toBe('Juan');
-    });
-
-    it('should auto-generate password if not provided', async () => {
-      jest.spyOn(validator, 'validarEmailUnico').mockResolvedValue();
-      jest.spyOn(prisma.docente, 'create').mockResolvedValue({
-        ...mockDocente,
-        password_temporal: 'GeneratedPass123!',
-        debe_cambiar_password: true,
-      });
-
-      const createDto = {
-        email: 'juan@example.com',
-        // Sin password
-        nombre: 'Juan',
-        apellido: 'Pérez',
-        titulo: 'Licenciado',
-      };
-
-      const result = await service.create(createDto);
-
-      expect(result).toHaveProperty('generatedPassword', 'GeneratedPass123!');
-      expect(result.debe_cambiar_password).toBe(true);
-    });
-
-    it('should set debe_cambiar_password=true when password is auto-generated', async () => {
-      jest.spyOn(validator, 'validarEmailUnico').mockResolvedValue();
-      jest.spyOn(prisma.docente, 'create').mockResolvedValue({
-        ...mockDocente,
-        debe_cambiar_password: true,
-      });
-
-      const createDto = {
-        email: 'juan@example.com',
-        nombre: 'Juan',
-        apellido: 'Pérez',
-        titulo: 'Licenciado',
-      };
-
-      await service.create(createDto);
-
-      expect(prisma.docente.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            debe_cambiar_password: true,
-          }),
-        }),
-      );
-    });
-
-    it('should set debe_cambiar_password=false when password is provided', async () => {
-      jest.spyOn(validator, 'validarEmailUnico').mockResolvedValue();
-      jest.spyOn(prisma.docente, 'create').mockResolvedValue(mockDocente);
-
-      const createDto = {
-        email: 'juan@example.com',
-        password: 'MyPass123!',
-        nombre: 'Juan',
-        apellido: 'Pérez',
-        titulo: 'Licenciado',
-      };
-
-      await service.create(createDto);
-
-      expect(prisma.docente.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            debe_cambiar_password: false,
-          }),
-        }),
-      );
     });
 
     it('should throw ConflictException if email is already in use', async () => {

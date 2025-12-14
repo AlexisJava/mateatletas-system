@@ -1,17 +1,9 @@
-import {
-  Injectable,
-  Logger,
-  ConflictException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { PrismaClient, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { MercadoPagoService } from '../pagos/mercadopago.service';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
-import {
-  MercadoPagoPayment,
-  MercadoPagoWebhookPayload,
-} from '../pagos/types/mercadopago.types';
+import { MercadoPagoPayment } from '../pagos/types/mercadopago.types';
 import {
   parseLegacyExternalReference,
   TipoExternalReference,
@@ -75,15 +67,6 @@ interface CursoData {
   time_slot: string;
   precio_base: number;
   precio_con_descuento: number;
-}
-
-/**
- * Preferencia de MercadoPago para colonia
- */
-interface MercadoPagoPreferenceResponse {
-  init_point: string;
-  sandbox_init_point: string;
-  [key: string]: unknown;
 }
 
 /**
@@ -570,7 +553,6 @@ export class ColoniaService {
           password_hash: passwordHash,
           dni: dto.dni || null,
           telefono: dto.telefono,
-          debe_cambiar_password: false,
           debe_completar_perfil: false,
           ha_completado_onboarding: true,
           roles: DEFAULT_ROLES.TUTOR,

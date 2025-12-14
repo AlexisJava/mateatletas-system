@@ -18,8 +18,6 @@ type TipoUsuario = 'estudiante' | 'tutor' | 'docente' | 'admin';
 interface UserPasswordData {
   id: string;
   password_hash: string | null;
-  password_temporal: string | null;
-  debe_cambiar_password: boolean;
 }
 
 /**
@@ -36,7 +34,6 @@ export interface CambiarPasswordResult {
  * RESPONSABILIDAD ÚNICA:
  * - Cambiar contraseña para cualquier tipo de usuario
  * - Verificar contraseña actual antes de actualizar
- * - Limpiar password_temporal y flag debe_cambiar_password
  *
  * SEGURIDAD:
  * - Usa bcrypt con 12 rounds (NIST SP 800-63B 2025)
@@ -96,8 +93,6 @@ export class CambiarPasswordUseCase {
     const selectFields = {
       id: true,
       password_hash: true,
-      password_temporal: true,
-      debe_cambiar_password: true,
     };
 
     // Intentar estudiante
@@ -167,8 +162,6 @@ export class CambiarPasswordUseCase {
   ): Promise<void> {
     const updateData = {
       password_hash: nuevoHash,
-      password_temporal: null,
-      debe_cambiar_password: false,
       fecha_ultimo_cambio: new Date(),
     };
 

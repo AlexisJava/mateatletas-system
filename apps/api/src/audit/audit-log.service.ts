@@ -572,7 +572,6 @@ export class AuditLogService {
     const sensitiveFields = [
       'password',
       'password_hash',
-      'password_temporal',
       'mfa_secret',
       'mfa_backup_codes',
       'token',

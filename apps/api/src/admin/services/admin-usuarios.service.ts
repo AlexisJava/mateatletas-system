@@ -100,7 +100,6 @@ export class AdminUsuariosService {
       role: finalRoles[0], // First role for backward compatibility
       roles: finalRoles,
       activo: true,
-      password_temporal: tutor.password_temporal || undefined, // Mostrar solo si existe
       createdAt: tutor.createdAt,
       updatedAt: tutor.updatedAt,
       _count: {
@@ -138,7 +137,6 @@ export class AdminUsuariosService {
       role: finalRoles[0],
       roles: finalRoles,
       activo: true,
-      password_temporal: docente.password_temporal || undefined,
       createdAt: docente.createdAt,
       updatedAt: docente.updatedAt,
       _count: {
@@ -168,7 +166,6 @@ export class AdminUsuariosService {
       role: finalRoles[0],
       roles: finalRoles,
       activo: true,
-      password_temporal: admin.password_temporal || undefined,
       createdAt: admin.createdAt,
       updatedAt: admin.updatedAt,
       _count: {

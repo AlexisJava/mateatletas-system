@@ -11,8 +11,6 @@ describe('DocenteQueryService', () => {
     id: 'docente-123',
     email: 'juan@example.com',
     password_hash: 'hashed_password',
-    password_temporal: null,
-    debe_cambiar_password: false,
     nombre: 'Juan',
     apellido: 'Pérez',
     titulo: 'Licenciado en Matemáticas',

@@ -139,7 +139,6 @@ export class AuthService {
           bio: true,
           createdAt: true,
           updatedAt: true,
-          debe_cambiar_password: true,
         },
       });
 
@@ -194,7 +193,6 @@ export class AuthService {
           tutor_id: true,
           createdAt: true,
           updatedAt: true,
-          debe_cambiar_password: true,
         },
       });
 
@@ -222,7 +220,6 @@ export class AuthService {
         ha_completado_onboarding: true,
         createdAt: true,
         updatedAt: true,
-        debe_cambiar_password: true,
       },
     });
 
@@ -254,8 +251,6 @@ export class AuthService {
       select: {
         id: true,
         password_hash: true,
-        password_temporal: true,
-        debe_cambiar_password: true,
       },
     });
 
@@ -271,8 +266,6 @@ export class AuthService {
         select: {
           id: true,
           password_hash: true,
-          password_temporal: true,
-          debe_cambiar_password: true,
         },
       });
       tipoUsuario = 'tutor';
@@ -283,8 +276,6 @@ export class AuthService {
           select: {
             id: true,
             password_hash: true,
-            password_temporal: true,
-            debe_cambiar_password: true,
           },
         });
         tipoUsuario = 'docente';
@@ -295,8 +286,6 @@ export class AuthService {
             select: {
               id: true,
               password_hash: true,
-              password_temporal: true,
-              debe_cambiar_password: true,
             },
           });
           tipoUsuario = 'admin';
@@ -326,8 +315,6 @@ export class AuthService {
     // 4. Actualizar el usuario
     const updateData = {
       password_hash: nuevoHash,
-      password_temporal: null,
-      debe_cambiar_password: false,
       fecha_ultimo_cambio: new Date(),
     };
 
@@ -478,7 +465,6 @@ export class AuthService {
         telefono: admin.telefono ?? null,
         role: Role.ADMIN,
         roles: finalRoles,
-        debe_cambiar_password: admin.debe_cambiar_password,
       },
     };
   }

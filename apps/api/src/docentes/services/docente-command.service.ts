@@ -30,7 +30,6 @@ export class DocenteCommandService {
    * Crea un nuevo docente en el sistema
    * - Auto-genera contraseña segura si no se provee
    * - Hashea la contraseña con bcrypt
-   * - Marca debe_cambiar_password si se generó automáticamente
    * @param createDto - Datos del docente a crear
    * @returns El docente creado (sin password_hash) + generatedPassword si se auto-generó
    */
@@ -51,7 +50,6 @@ export class DocenteCommandService {
       data: {
         email: createDto.email,
         password_hash: hashedPassword,
-        // password_temporal removido - solo se retorna en la respuesta
         nombre: createDto.nombre,
         apellido: createDto.apellido,
         titulo: createDto.titulo,
@@ -62,9 +60,6 @@ export class DocenteCommandService {
         disponibilidad_horaria: createDto.disponibilidad_horaria || {},
         nivel_educativo: createDto.nivel_educativo || [],
         estado: createDto.estado || 'activo',
-        // Si se generó la contraseña = debe cambiarla
-        // Si el admin la proporcionó = no necesita cambiarla
-        debe_cambiar_password: wasGenerated,
       },
     });
 

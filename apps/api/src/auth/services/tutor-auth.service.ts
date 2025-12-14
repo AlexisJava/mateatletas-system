@@ -25,7 +25,6 @@ export interface TutorLoginResult {
     ha_completado_onboarding: boolean;
     role: Role;
     roles: Role[];
-    debe_cambiar_password: boolean;
   };
 }
 
@@ -138,7 +137,6 @@ export class TutorAuthService {
         ha_completado_onboarding: tutor.ha_completado_onboarding,
         role: Role.TUTOR,
         roles: finalRoles,
-        debe_cambiar_password: tutor.debe_cambiar_password,
       },
     };
   }

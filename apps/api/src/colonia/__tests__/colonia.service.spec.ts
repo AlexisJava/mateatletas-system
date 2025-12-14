@@ -55,7 +55,6 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
     dni: '12345678',
     telefono: '1234567890',
     roles: JSON.parse('["tutor"]'),
-    debe_cambiar_password: false,
     debe_completar_perfil: false,
     ha_completado_onboarding: true,
     createdAt: new Date(),
@@ -735,7 +734,6 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
         password_hash: 'hashed_password',
         dni: '12345678',
         telefono: '1234567890',
-        debe_cambiar_password: false,
         debe_completar_perfil: false,
         ha_completado_onboarding: true,
       });

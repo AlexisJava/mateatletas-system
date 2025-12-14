@@ -85,8 +85,6 @@ export interface UserByIdResult<T extends AnyUser = AnyUser> {
 export interface UserPasswordData {
   id: string;
   password_hash: string | null;
-  password_temporal: string | null;
-  debe_cambiar_password: boolean;
 }
 
 /**
@@ -115,8 +113,6 @@ export interface EstudianteWithRelations extends Estudiante {
 const PASSWORD_FIELDS_SELECT = {
   id: true,
   password_hash: true,
-  password_temporal: true,
-  debe_cambiar_password: true,
 } as const;
 
 /**
@@ -133,7 +129,6 @@ const TUTOR_PROFILE_SELECT = {
   ha_completado_onboarding: true,
   createdAt: true,
   updatedAt: true,
-  debe_cambiar_password: true,
 } as const;
 
 /**
@@ -148,7 +143,6 @@ const DOCENTE_PROFILE_SELECT = {
   bio: true,
   createdAt: true,
   updatedAt: true,
-  debe_cambiar_password: true,
 } as const;
 
 /**
@@ -181,7 +175,6 @@ const ESTUDIANTE_PROFILE_SELECT = {
   tutor_id: true,
   createdAt: true,
   updatedAt: true,
-  debe_cambiar_password: true,
 } as const;
 
 // ============================================================================
@@ -576,8 +569,6 @@ export class UserLookupService {
     userType: UserType,
     data: {
       password_hash: string;
-      password_temporal: null;
-      debe_cambiar_password: false;
       fecha_ultimo_cambio: Date;
     },
   ): Promise<void> {

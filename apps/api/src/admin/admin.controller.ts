@@ -139,14 +139,14 @@ export class AdminController {
   }
 
   /**
-   * Obtener credenciales de todos los usuarios
+   * Obtener listado de todos los usuarios
    * GET /api/admin/credenciales
    * Rol: Admin
-   * Retorna todos los usuarios con sus credenciales temporales
+   * Retorna todos los usuarios del sistema
    */
   @Get('credenciales')
   async obtenerCredenciales() {
-    return this.adminService.obtenerTodasLasCredenciales();
+    return this.adminService.obtenerListadoUsuarios();
   }
 
   /**
@@ -154,7 +154,7 @@ export class AdminController {
    * POST /api/admin/credenciales/:usuarioId/reset
    * Rol: Admin
    *
-   * Genera una nueva contraseña temporal y marca debe_cambiar_password = true
+   * Genera una nueva contraseña temporal para el usuario
    * Funciona para Tutores, Estudiantes y Docentes
    */
   @Post('credenciales/:usuarioId/reset')

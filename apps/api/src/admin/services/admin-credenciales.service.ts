@@ -31,7 +31,8 @@ export interface ResetPasswordResponse {
     email?: string | null;
     username?: string | null;
   };
-  password_temporal: string;
+  /** Contraseña generada (solo se retorna en la respuesta, NO se guarda en BD) */
+  nuevaPassword: string;
 }
 
 /**
@@ -52,11 +53,11 @@ export class AdminCredencialesService {
 
   /**
    * Resetear contraseña de un usuario específico
-   * Genera nueva contraseña temporal y marca debe_cambiar_password = true
+   * Genera nueva contraseña y actualiza el hash en la BD
    *
    * @param usuarioId - ID del usuario
    * @param tipoUsuario - Tipo de usuario (tutor, estudiante, docente)
-   * @returns Información del usuario y nueva contraseña temporal
+   * @returns Información del usuario y nueva contraseña (para comunicar al usuario)
    *
    * @throws NotFoundException si el usuario no existe
    * @throws InternalServerErrorException si falla el hash de la contraseña
@@ -105,8 +106,6 @@ export class AdminCredencialesService {
               where: { id: usuarioId },
               data: {
                 password_hash: hashedPassword,
-                // password_temporal removido - solo se retorna en la respuesta
-                debe_cambiar_password: true,
               },
               select: {
                 id: true,
@@ -122,8 +121,6 @@ export class AdminCredencialesService {
               where: { id: usuarioId },
               data: {
                 password_hash: hashedPassword,
-                // password_temporal removido - solo se retorna en la respuesta
-                debe_cambiar_password: true,
               },
               select: {
                 id: true,
@@ -139,8 +136,6 @@ export class AdminCredencialesService {
               where: { id: usuarioId },
               data: {
                 password_hash: hashedPassword,
-                // password_temporal removido - solo se retorna en la respuesta
-                debe_cambiar_password: true,
               },
               select: {
                 id: true,
@@ -177,7 +172,7 @@ export class AdminCredencialesService {
       return {
         message: 'Contraseña reseteada exitosamente',
         usuario,
-        password_temporal: nuevaPassword,
+        nuevaPassword,
       };
     } catch (error) {
       // Re-throw si ya es una excepción de NestJS
@@ -220,7 +215,7 @@ export class AdminCredencialesService {
             usuarioId: u.id,
             tipoUsuario: u.tipoUsuario,
             usuario: resultado.usuario,
-            password_temporal: resultado.password_temporal,
+            nuevaPassword: resultado.nuevaPassword,
           };
         } catch (error) {
           this.logger.warn(`Failed to reset password for user ${u.id}`, {
@@ -254,12 +249,12 @@ export class AdminCredencialesService {
   }
 
   /**
-   * Obtener todas las credenciales de usuarios con password temporal
-   * Útil para generar planillas de acceso inicial
+   * Obtener listado de usuarios del sistema
+   * Útil para gestión administrativa
    *
-   * @returns Credenciales de tutores, estudiantes y docentes
+   * @returns Listado de tutores, estudiantes y docentes
    */
-  async obtenerTodasLasCredenciales() {
+  async obtenerListadoUsuarios() {
     try {
       const [tutores, estudiantes, docentes] = await Promise.all([
         this.prisma.tutor.findMany({
@@ -269,8 +264,6 @@ export class AdminCredencialesService {
             apellido: true,
             email: true,
             username: true,
-            password_temporal: true,
-            debe_cambiar_password: true,
             createdAt: true,
           },
           orderBy: { createdAt: 'desc' },
@@ -281,8 +274,6 @@ export class AdminCredencialesService {
             nombre: true,
             apellido: true,
             username: true,
-            password_temporal: true,
-            debe_cambiar_password: true,
             createdAt: true,
             tutor: {
               select: {
@@ -299,8 +290,6 @@ export class AdminCredencialesService {
             nombre: true,
             apellido: true,
             email: true,
-            password_temporal: true,
-            debe_cambiar_password: true,
             createdAt: true,
           },
           orderBy: { createdAt: 'desc' },
@@ -316,8 +305,6 @@ export class AdminCredencialesService {
           usuario:
             t.username ||
             `${t.nombre.toLowerCase()}.${t.apellido.toLowerCase()}`,
-          password_temporal: t.password_temporal,
-          estado: t.debe_cambiar_password ? 'Pendiente' : 'Contraseña Cambiada',
           fecha_creacion: t.createdAt,
         })),
         estudiantes: estudiantes.map((e) => ({
@@ -326,8 +313,6 @@ export class AdminCredencialesService {
           nombre: e.nombre,
           apellido: e.apellido,
           usuario: e.username,
-          password_temporal: e.password_temporal,
-          estado: e.debe_cambiar_password ? 'Pendiente' : 'Contraseña Cambiada',
           tutor: `${e.tutor.nombre} ${e.tutor.apellido}`,
           fecha_creacion: e.createdAt,
         })),
@@ -337,17 +322,15 @@ export class AdminCredencialesService {
           nombre: d.nombre,
           apellido: d.apellido,
           usuario: `${d.nombre.toLowerCase()}.${d.apellido.toLowerCase()}`,
-          password_temporal: d.password_temporal,
-          estado: d.debe_cambiar_password ? 'Pendiente' : 'Contraseña Cambiada',
           fecha_creacion: d.createdAt,
         })),
       };
     } catch (error) {
-      this.logger.error('Failed to fetch credentials', {
+      this.logger.error('Failed to fetch users', {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
       throw new InternalServerErrorException(
-        'Error al obtener las credenciales',
+        'Error al obtener el listado de usuarios',
       );
     }
   }

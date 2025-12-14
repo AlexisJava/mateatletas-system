@@ -47,7 +47,6 @@ describe('AuthService - Post-Refactor Tests', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     roles: null,
-    debe_cambiar_password: false,
   };
 
   const mockDocente = {
@@ -58,7 +57,6 @@ describe('AuthService - Post-Refactor Tests', () => {
     apellido: 'González',
     titulo: 'Profesora de Matemáticas',
     bio: 'Especialista en álgebra',
-    debe_cambiar_password: false,
     createdAt: new Date(),
     updatedAt: new Date(),
     roles: null,
@@ -77,7 +75,6 @@ describe('AuthService - Post-Refactor Tests', () => {
     mfa_enabled: false,
     mfa_secret: null,
     mfa_backup_codes: [],
-    debe_cambiar_password: false,
     dni: null,
     telefono: null,
   };
@@ -99,7 +96,6 @@ describe('AuthService - Post-Refactor Tests', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     roles: null,
-    debe_cambiar_password: true,
   };
 
   beforeEach(async () => {
@@ -328,8 +324,6 @@ describe('AuthService - Post-Refactor Tests', () => {
       prisma.estudiante.findUnique.mockResolvedValue({
         id: 'est-123',
         password_hash: 'old_hash',
-        password_temporal: null,
-        debe_cambiar_password: true,
       } as any);
       prisma.estudiante.update.mockResolvedValue({} as any);
 
@@ -353,8 +347,6 @@ describe('AuthService - Post-Refactor Tests', () => {
       prisma.tutor.findUnique.mockResolvedValue({
         id: 'tutor-123',
         password_hash: 'old_hash',
-        password_temporal: null,
-        debe_cambiar_password: false,
       } as any);
       prisma.tutor.update.mockResolvedValue({} as any);
 
@@ -372,8 +364,6 @@ describe('AuthService - Post-Refactor Tests', () => {
       prisma.estudiante.findUnique.mockResolvedValue({
         id: 'est-123',
         password_hash: 'old_hash',
-        password_temporal: null,
-        debe_cambiar_password: true,
       } as any);
       passwordService.verify.mockResolvedValue(false);
 

@@ -74,7 +74,6 @@ describe('LoginEstudianteUseCase', () => {
         puntos_totales: 100,
         nivel_actual: 5,
         roles: '["estudiante"]',
-        debe_cambiar_password: false,
         tutor: {
           id: 'tutor-123',
           nombre: 'María',
@@ -137,7 +136,6 @@ describe('LoginEstudianteUseCase', () => {
         puntos_totales: 500,
         nivel_actual: 10,
         roles: '["estudiante"]',
-        debe_cambiar_password: false,
         tutor: null,
         casa: null,
       };
@@ -300,7 +298,6 @@ describe('LoginEstudianteUseCase', () => {
         nombre: 'Success',
         apellido: 'Student',
         roles: '["estudiante"]',
-        debe_cambiar_password: false,
         tutor: null,
         casa: null,
       };
@@ -345,7 +342,6 @@ describe('LoginEstudianteUseCase', () => {
         puntos_totales: 250,
         nivel_actual: 7,
         roles: '["estudiante"]',
-        debe_cambiar_password: true,
         tutor: {
           id: 'tutor-1',
           nombre: 'Tutor',
@@ -386,7 +382,6 @@ describe('LoginEstudianteUseCase', () => {
       expect(result.user).toHaveProperty('casa');
       expect(result.user).toHaveProperty('tutor');
       expect(result.user).toHaveProperty('role');
-      expect(result.user).toHaveProperty('debe_cambiar_password');
     });
 
     /**
@@ -403,7 +398,6 @@ describe('LoginEstudianteUseCase', () => {
         nombre: 'No',
         apellido: 'Email',
         roles: '["estudiante"]',
-        debe_cambiar_password: false,
         tutor: null,
         casa: null,
       };

@@ -20,11 +20,6 @@ model Tutor {
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
   /// Se maneja solo en backend para seguridad
   password_hash             String
-  /// Password temporal en texto plano - se muestra al admin al crear el tutor
-  /// Se borra después del primer cambio de contraseña
-  password_temporal         String?
-  /// Indica si el tutor debe cambiar su contraseña en el próximo login
-  debe_cambiar_password     Boolean                 @default(true)
   /// Indica si el tutor debe completar su perfil (datos personales adicionales)
   debe_completar_perfil     Boolean                 @default(false)
   /// Fecha del último cambio de contraseña
@@ -113,11 +108,6 @@ model Estudiante {
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
   /// Permite que el estudiante acceda al portal con sus propias credenciales
   password_hash             String?
-  /// PIN temporal en texto plano - se muestra al tutor/admin al crear el estudiante
-  /// Se borra después del primer cambio de contraseña
-  password_temporal         String?
-  /// Indica si el estudiante debe cambiar su PIN en el próximo login
-  debe_cambiar_password     Boolean                       @default(true)
   /// Fecha del último cambio de contraseña
   fecha_ultimo_cambio       DateTime?
   /// Roles asignados al estudiante (normalmente solo ["estudiante"])
@@ -475,9 +465,6 @@ model Docente {
   email                       String              @unique
   /// Hash bcrypt de la contraseña
   password_hash               String
-  /// Password temporal en texto plano - se muestra al admin al crear el docente
-  /// Se borra después del primer cambio de contraseña
-  password_temporal           String?
   /// Nombre del docente
   nombre                      String
   /// Apellido del docente
@@ -508,10 +495,6 @@ model Docente {
   roles                       Json                @default("[\"docente\"]")
   /// Teléfono de contacto (opcional)
   telefono                    String?
-  /// Indica si el docente debe cambiar su contraseña en el próximo login
-  /// true = contraseña temporal (generada por admin)
-  /// false = contraseña elegida por el docente
-  debe_cambiar_password       Boolean             @default(true)
   /// Fecha del último cambio de contraseña
   fecha_ultimo_cambio         DateTime?
   clases                      Clase[]
@@ -534,11 +517,6 @@ model Admin {
   email                 String    @unique
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
   password_hash         String
-  /// Password temporal en texto plano - se muestra al crear el admin
-  /// Se borra después del primer cambio de contraseña
-  password_temporal     String?
-  /// Indica si el admin debe cambiar su contraseña en el próximo login
-  debe_cambiar_password Boolean   @default(true)
   /// Fecha del último cambio de contraseña
   fecha_ultimo_cambio   DateTime?
   /// Nombre del admin

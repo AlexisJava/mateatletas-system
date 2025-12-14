@@ -152,7 +152,6 @@ describe('CompleteMfaLoginUseCase', () => {
         mfa_secret: 'JBSWY3DPEHPK3PXP',
         mfa_backup_codes: [],
         roles: '["admin"]',
-        debe_cambiar_password: false,
       };
 
       mockPrismaService.admin.findUnique.mockResolvedValueOnce(mockAdmin);
@@ -219,7 +218,6 @@ describe('CompleteMfaLoginUseCase', () => {
         mfa_secret: 'SECRET',
         mfa_backup_codes: [hashedBackupCode, 'other-hashed-code'],
         roles: '["admin"]',
-        debe_cambiar_password: false,
       };
 
       mockPrismaService.admin.findUnique.mockResolvedValueOnce(mockAdmin);
@@ -290,7 +288,6 @@ describe('CompleteMfaLoginUseCase', () => {
         mfa_secret: 'SECRET',
         mfa_backup_codes: [],
         roles: '["admin"]',
-        debe_cambiar_password: true,
       };
 
       mockPrismaService.admin.findUnique.mockResolvedValueOnce(mockAdmin);
@@ -308,7 +305,6 @@ describe('CompleteMfaLoginUseCase', () => {
       expect(result.user).toHaveProperty('telefono');
       expect(result.user).toHaveProperty('role');
       expect(result.user).toHaveProperty('roles');
-      expect(result.user).toHaveProperty('debe_cambiar_password');
     });
   });
 
@@ -333,7 +329,6 @@ describe('CompleteMfaLoginUseCase', () => {
         mfa_secret: 'SECRET',
         mfa_backup_codes: [],
         roles: '["admin"]',
-        debe_cambiar_password: false,
       });
 
       (authenticator.verify as jest.Mock).mockReturnValueOnce(true);

@@ -46,7 +46,6 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
     telefono: '+5491123456789',
     dni: '12345678',
     password_hash: 'hashed-password',
-    debe_cambiar_password: true,
     debe_completar_perfil: false,
     roles: ['tutor'],
     createdAt: new Date(),

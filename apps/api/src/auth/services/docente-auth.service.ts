@@ -23,7 +23,6 @@ export interface DocenteLoginResult {
     bio: string | null;
     role: Role;
     roles: Role[];
-    debe_cambiar_password: boolean;
   };
 }
 
@@ -128,7 +127,6 @@ export class DocenteAuthService {
         bio: docente.bio,
         role: Role.DOCENTE,
         roles: finalRoles,
-        debe_cambiar_password: docente.debe_cambiar_password,
       },
     };
   }

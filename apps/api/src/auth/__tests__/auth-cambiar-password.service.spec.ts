@@ -122,15 +122,13 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       expect(typeof service.cambiarPassword).toBe('function');
     });
 
-    it('debería borrar password_temporal después del cambio', async () => {
+    it('debería actualizar password hash y fecha de cambio', async () => {
       // Arrange
       const passwordActualTexto = '1234';
       const mockEstudiante = {
         id: 'est123',
         username: 'juan.perez',
         password_hash: await bcrypt.hash(passwordActualTexto, 10),
-        password_temporal: passwordActualTexto,
-        debe_cambiar_password: true,
       };
 
       jest
@@ -141,8 +139,6 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         .spyOn(prisma.estudiante, 'update')
         .mockResolvedValue({
           ...mockEstudiante,
-          password_temporal: null,
-          debe_cambiar_password: false,
         } as any);
 
       // Act
@@ -156,8 +152,6 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       expect(updateSpy).toHaveBeenCalledWith({
         where: { id: 'est123' },
         data: expect.objectContaining({
-          password_temporal: null,
-          debe_cambiar_password: false,
           fecha_ultimo_cambio: expect.any(Date),
         }),
       });
@@ -172,8 +166,6 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         id: 'est123',
         username: 'juan.perez',
         password_hash: await bcrypt.hash(passwordActualTexto, 10),
-        password_temporal: passwordActualTexto,
-        debe_cambiar_password: true,
       };
 
       jest
@@ -187,8 +179,6 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
           return {
             ...mockEstudiante,
             password_hash: nuevoHashGuardado,
-            password_temporal: null,
-            debe_cambiar_password: false,
           } as any;
         },
       );
@@ -226,7 +216,6 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         id: 'est123',
         username: 'juan.perez',
         password_hash: await bcrypt.hash('1234', 10),
-        password_temporal: '1234',
       };
 
       jest
@@ -249,7 +238,6 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       const mockEstudiante = {
         id: 'est123',
         password_hash: await bcrypt.hash('1234', 10),
-        password_temporal: '1234',
       };
 
       jest
@@ -287,8 +275,6 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         id: 'tutor123',
         username: 'padre.perez',
         password_hash: await bcrypt.hash('TempPass123', 10),
-        password_temporal: 'TempPass123',
-        debe_cambiar_password: true,
       };
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
@@ -298,8 +284,6 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
 
       const updateSpy = jest.spyOn(prisma.tutor, 'update').mockResolvedValue({
         ...mockTutor,
-        password_temporal: null,
-        debe_cambiar_password: false,
       } as any);
 
       // Act & Assert
@@ -315,74 +299,6 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       } catch (error) {
         expect(error).toBeDefined();
       }
-    });
-  });
-
-  describe('loginWithUsername - debe_cambiar_password flag', () => {
-    it.skip('debería incluir debe_cambiar_password en la respuesta del login', async () => {
-      // Arrange
-      const mockEstudiante = {
-        id: 'est123',
-        username: 'juan.perez',
-        password_hash: await bcrypt.hash('1234', 10),
-        password_temporal: '1234',
-        debe_cambiar_password: true,
-        roles: JSON.stringify(['estudiante']),
-        nombre: 'Juan',
-        apellido: 'Pérez',
-        edad: 10,
-        nivel_escolar: 'Primaria',
-        avatar_url: 'avatar.png',
-        puntos_totales: 0,
-        equipo: null,
-        tutor: { id: 'tutor1', nombre: 'Padre', apellido: 'Pérez' },
-      };
-
-      jest
-        .spyOn(prisma.estudiante, 'findUnique')
-        .mockResolvedValue(mockEstudiante as any);
-
-      // Act
-      const resultado = await service.loginWithUsername('juan.perez', '1234');
-
-      // Assert
-      expect(resultado).toBeDefined();
-      expect(resultado.user).toBeDefined();
-      expect(resultado.user.debe_cambiar_password).toBe(true);
-    });
-
-    it.skip('debería retornar false si el usuario ya cambió su password', async () => {
-      // Arrange
-      const mockEstudiante = {
-        id: 'est123',
-        username: 'juan.perez',
-        password_hash: await bcrypt.hash('Password123', 10),
-        password_temporal: null,
-        debe_cambiar_password: false,
-        roles: JSON.stringify(['estudiante']),
-        nombre: 'Juan',
-        apellido: 'Pérez',
-        edad: 10,
-        nivel_escolar: 'Primaria',
-        avatar_url: 'avatar.png',
-        puntos_totales: 0,
-        equipo: null,
-        tutor: { id: 'tutor1', nombre: 'Padre', apellido: 'Pérez' },
-      };
-
-      jest
-        .spyOn(prisma.estudiante, 'findUnique')
-        .mockResolvedValue(mockEstudiante as any);
-
-      // Act
-      const resultado = await service.loginWithUsername(
-        'juan.perez',
-        'Password123',
-      );
-
-      // Assert
-      expect(resultado).toBeDefined();
-      expect(resultado.user.debe_cambiar_password).toBe(false);
     });
   });
 });

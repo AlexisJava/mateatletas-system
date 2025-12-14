@@ -96,7 +96,6 @@ describe('LoginUseCase', () => {
         fecha_registro: new Date(),
         ha_completado_onboarding: true,
         roles: '["tutor"]',
-        debe_cambiar_password: false,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(mockTutor);
@@ -189,7 +188,6 @@ describe('LoginUseCase', () => {
         titulo: 'Profesora de Matemáticas',
         bio: 'Docente con 10 años de experiencia',
         roles: '["docente"]',
-        debe_cambiar_password: false,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(null);
@@ -228,7 +226,6 @@ describe('LoginUseCase', () => {
         telefono: '9999999999',
         roles: '["admin"]',
         mfa_enabled: false,
-        debe_cambiar_password: false,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(null);
@@ -261,7 +258,6 @@ describe('LoginUseCase', () => {
         apellido: 'MFA',
         roles: '["admin"]',
         mfa_enabled: true,
-        debe_cambiar_password: false,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(null);
@@ -351,7 +347,6 @@ describe('LoginUseCase', () => {
         apellido: 'Pérez',
         roles: '["tutor"]',
         ha_completado_onboarding: true,
-        debe_cambiar_password: false,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(mockTutor);
@@ -389,7 +384,6 @@ describe('LoginUseCase', () => {
         apellido: 'User',
         roles: '["tutor"]',
         ha_completado_onboarding: true,
-        debe_cambiar_password: false,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(mockTutor);
@@ -463,7 +457,6 @@ describe('LoginUseCase', () => {
         fecha_registro: new Date(),
         ha_completado_onboarding: false,
         roles: '["tutor"]',
-        debe_cambiar_password: true,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(mockTutor);
@@ -486,7 +479,6 @@ describe('LoginUseCase', () => {
       expect(result.user).toHaveProperty('ha_completado_onboarding');
       expect(result.user).toHaveProperty('role');
       expect(result.user).toHaveProperty('roles');
-      expect(result.user).toHaveProperty('debe_cambiar_password');
     });
   });
 });

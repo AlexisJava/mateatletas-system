@@ -43,7 +43,6 @@ interface TutorLoginResult {
     ha_completado_onboarding: boolean;
     role: string;
     roles: string[];
-    debe_cambiar_password: boolean;
   };
 }
 
@@ -61,7 +60,6 @@ interface DocenteLoginResult {
     bio: string | null;
     role: string;
     roles: string[];
-    debe_cambiar_password: boolean;
   };
 }
 
@@ -80,7 +78,6 @@ interface AdminLoginResult {
     telefono: string | null;
     role: string;
     roles: string[];
-    debe_cambiar_password: boolean;
   };
 }
 
@@ -297,7 +294,6 @@ export class LoginUseCase {
           ha_completado_onboarding: user.ha_completado_onboarding,
           role: Role.TUTOR,
           roles: finalUserRoles,
-          debe_cambiar_password: user.debe_cambiar_password,
         },
       };
     }
@@ -314,7 +310,6 @@ export class LoginUseCase {
           bio: user.bio ?? null,
           role: Role.DOCENTE,
           roles: finalUserRoles,
-          debe_cambiar_password: user.debe_cambiar_password,
         },
       };
     }
@@ -332,9 +327,6 @@ export class LoginUseCase {
         telefono: isAdminUser(user) ? (user.telefono ?? null) : null,
         role: Role.ADMIN,
         roles: finalUserRoles,
-        debe_cambiar_password: isAdminUser(user)
-          ? user.debe_cambiar_password
-          : false,
       },
     };
   }

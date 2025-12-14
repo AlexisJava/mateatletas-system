@@ -16,7 +16,6 @@ interface TutorProfile {
   ha_completado_onboarding?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  debe_cambiar_password?: boolean;
   role: string;
 }
 
@@ -32,7 +31,6 @@ interface DocenteProfile {
   bio?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
-  debe_cambiar_password?: boolean;
   role: string;
 }
 
@@ -67,7 +65,6 @@ interface EstudianteProfile {
   tutor_id?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
-  debe_cambiar_password?: boolean;
   role: string;
 }
 
@@ -111,17 +108,26 @@ export class GetProfileUseCase {
     const normalizedRole = role.toLowerCase();
 
     // Docente
-    if (normalizedRole === 'docente' || role === Role.DOCENTE) {
+    if (
+      normalizedRole === 'docente' ||
+      normalizedRole === Role.DOCENTE.toLowerCase()
+    ) {
       return this.getDocenteProfile(userId);
     }
 
     // Admin
-    if (normalizedRole === 'admin' || role === Role.ADMIN) {
+    if (
+      normalizedRole === 'admin' ||
+      normalizedRole === Role.ADMIN.toLowerCase()
+    ) {
       return this.getAdminProfile(userId);
     }
 
     // Estudiante
-    if (normalizedRole === 'estudiante' || role === Role.ESTUDIANTE) {
+    if (
+      normalizedRole === 'estudiante' ||
+      normalizedRole === Role.ESTUDIANTE.toLowerCase()
+    ) {
       return this.getEstudianteProfile(userId);
     }
 
@@ -146,7 +152,6 @@ export class GetProfileUseCase {
         ha_completado_onboarding: true,
         createdAt: true,
         updatedAt: true,
-        debe_cambiar_password: true,
         // IMPORTANTE: NO incluir password_hash
       },
     });
@@ -176,7 +181,6 @@ export class GetProfileUseCase {
         bio: true,
         createdAt: true,
         updatedAt: true,
-        debe_cambiar_password: true,
         // IMPORTANTE: NO incluir password_hash
       },
     });
@@ -241,7 +245,6 @@ export class GetProfileUseCase {
         tutor_id: true,
         createdAt: true,
         updatedAt: true,
-        debe_cambiar_password: true,
         // IMPORTANTE: NO incluir password_hash
       },
     });

@@ -26,7 +26,6 @@ describe('TutorAuthService', () => {
     password_hash: 'hashed-password',
     fecha_registro: new Date('2024-01-01'),
     ha_completado_onboarding: true,
-    debe_cambiar_password: false,
     roles: 'Tutor',
   };
 

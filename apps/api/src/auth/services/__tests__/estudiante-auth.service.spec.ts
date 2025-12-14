@@ -43,7 +43,6 @@ describe('EstudianteAuthService', () => {
     puntos_totales: 100,
     nivel_actual: 2,
     password_hash: 'hashed-password',
-    debe_cambiar_password: false,
     roles: 'Estudiante',
     tutor: mockTutor,
     casa: mockCasa,

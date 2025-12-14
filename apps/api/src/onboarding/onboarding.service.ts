@@ -223,7 +223,7 @@ export class OnboardingService {
 
     // Verificar si debe bajar de casa (puntaje < 30)
     let bajoDeCasa = false;
-    let casaOriginalId: string | null = estudiante.casaId;
+    const casaOriginalId: string | null = estudiante.casaId;
     let casaAsignadaId: string | null = estudiante.casaId;
 
     if (puntaje < 30 && estudiante.casa) {
@@ -389,8 +389,7 @@ export class OnboardingService {
     });
 
     // Mundos seleccionados de la inscripción
-    const mundosSeleccionados = (inscripcion.mundos_seleccionados ??
-      []) as string[];
+    const mundosSeleccionados = inscripcion.mundos_seleccionados ?? [];
     const testsPendientes = Math.max(
       0,
       mundosSeleccionados.length - testsCompletados,
@@ -462,8 +461,7 @@ export class OnboardingService {
       return;
     }
 
-    const mundosSeleccionados = (inscripcion.mundos_seleccionados ??
-      []) as string[];
+    const mundosSeleccionados = inscripcion.mundos_seleccionados ?? [];
     const testsCompletados = await this.prisma.testUbicacionResultado.count({
       where: { estudiante_id: estudianteId },
     });

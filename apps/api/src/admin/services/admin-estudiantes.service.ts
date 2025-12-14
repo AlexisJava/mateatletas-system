@@ -6,11 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { BCRYPT_ROUNDS } from '../../common/constants/security.constants';
-import {
-  BUSINESS_RULES,
-  esEdadValida,
-  getMensajeErrorEdad,
-} from '../../domain/constants';
+import { esEdadValida, getMensajeErrorEdad } from '../../domain/constants';
 import * as bcrypt from 'bcrypt';
 import {
   generateEstudianteUsername,
@@ -582,8 +578,6 @@ export class AdminEstudiantesService {
             telefono: dto.telefonoTutor,
             dni: dto.dniTutor,
             password_hash: tutorPasswordHash,
-            // password_temporal removido - solo se retorna en la respuesta
-            debe_cambiar_password: true,
             debe_completar_perfil: false,
             roles: ['tutor'],
           },
@@ -605,8 +599,6 @@ export class AdminEstudiantesService {
           nivelEscolar: dto.nivelEscolar,
           tutor_id: tutor.id,
           password_hash: estudiantePinHash,
-          // password_temporal removido - solo se retorna en la respuesta
-          debe_cambiar_password: true,
           sector_id: dto.sectorId,
           casaId: dto.casaId || null,
           puntos_totales: dto.puntosIniciales ?? 0,
@@ -629,92 +621,5 @@ export class AdminEstudiantesService {
         pin: estudiantePin,
       },
     };
-  }
-
-  /**
-   * Obtener listado de usuarios que aún no han cambiado su contraseña
-   *
-   * NOTA: Las passwords temporales ya NO se guardan en la BD por seguridad.
-   * Este método ahora solo lista usuarios pendientes de cambio de contraseña,
-   * pero NO puede mostrar las passwords (fueron entregadas solo al crear).
-   */
-  async obtenerCredencialesTemporales() {
-    // Obtener estudiantes pendientes de cambio de password
-    const estudiantes = await this.prisma.estudiante.findMany({
-      where: {
-        debe_cambiar_password: true,
-      },
-      select: {
-        id: true,
-        username: true,
-        nombre: true,
-        apellido: true,
-        createdAt: true,
-        sector: {
-          select: {
-            nombre: true,
-          },
-        },
-        tutor: {
-          select: {
-            nombre: true,
-            apellido: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    // Obtener tutores pendientes de cambio de password
-    const tutores = await this.prisma.tutor.findMany({
-      where: {
-        debe_cambiar_password: true,
-      },
-      select: {
-        id: true,
-        username: true,
-        nombre: true,
-        apellido: true,
-        email: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    // Formatear estudiantes
-    const estudiantesMapped = estudiantes.map((est) => ({
-      id: est.id,
-      username: est.username || '',
-      passwordTemporal: '[NO DISPONIBLE - Ver respuesta de creación]',
-      nombreCompleto: `${est.nombre} ${est.apellido}`,
-      sector: est.sector?.nombre || 'Sin sector',
-      rol: 'ESTUDIANTE',
-      tutorNombre: `${est.tutor.nombre} ${est.tutor.apellido}`,
-      tutorEmail: est.tutor.email,
-      createdAt: est.createdAt,
-    }));
-
-    // Formatear tutores
-    const tutoresMapped = tutores.map((tutor) => ({
-      id: tutor.id,
-      username: tutor.username || '',
-      passwordTemporal: '[NO DISPONIBLE - Ver respuesta de creación]',
-      nombreCompleto: `${tutor.nombre} ${tutor.apellido}`,
-      sector: 'N/A',
-      rol: 'TUTOR',
-      tutorNombre: 'N/A',
-      tutorEmail: tutor.email,
-      createdAt: tutor.createdAt,
-    }));
-
-    // Combinar y ordenar por fecha
-    return [...estudiantesMapped, ...tutoresMapped].sort((a, b) => {
-      return b.createdAt.getTime() - a.createdAt.getTime();
-    });
   }
 }

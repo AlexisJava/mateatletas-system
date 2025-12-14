@@ -25,7 +25,6 @@ describe('AdminAuthService', () => {
     fecha_registro: new Date('2024-01-01'),
     mfa_enabled: false,
     mfa_secret: null,
-    debe_cambiar_password: false,
     roles: 'Admin',
   };
 
@@ -236,7 +235,6 @@ describe('AdminAuthService', () => {
           fecha_registro: new Date(),
           role: Role.ADMIN,
           roles: [Role.ADMIN],
-          debe_cambiar_password: false,
         },
       };
       expect(isMfaRequired(loginResponse)).toBe(false);

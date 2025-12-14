@@ -46,7 +46,6 @@ export interface LoginEstudianteResult {
     casa: CasaData | null;
     tutor: TutorData | null;
     role: string;
-    debe_cambiar_password: boolean;
   };
 }
 
@@ -162,7 +161,6 @@ export class LoginEstudianteUseCase {
         casa: estudiante.casa,
         tutor: estudiante.tutor,
         role: Role.ESTUDIANTE,
-        debe_cambiar_password: estudiante.debe_cambiar_password,
       },
     };
   }

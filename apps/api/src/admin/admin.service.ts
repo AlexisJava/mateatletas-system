@@ -292,11 +292,11 @@ export class AdminService {
   }
 
   /**
-   * Obtener todas las credenciales de usuarios
+   * Obtener listado de usuarios del sistema
    * DELEGACIÓN: AdminCredencialesService
    */
-  async obtenerTodasLasCredenciales() {
-    return this.credencialesService.obtenerTodasLasCredenciales();
+  async obtenerListadoUsuarios() {
+    return this.credencialesService.obtenerListadoUsuarios();
   }
 
   /**

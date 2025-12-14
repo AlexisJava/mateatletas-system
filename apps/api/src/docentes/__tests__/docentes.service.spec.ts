@@ -48,7 +48,6 @@ describe('DocentesService', () => {
     disponibilidad_horaria: { lunes: ['09:00-12:00'], martes: ['14:00-18:00'] },
     nivel_educativo: ['Secundario', 'Universitario'],
     estado: 'activo',
-    debe_cambiar_password: false,
     createdAt: new Date('2025-01-01T10:00:00Z'),
     updatedAt: new Date('2025-01-01T10:00:00Z'),
   };
@@ -99,7 +98,6 @@ describe('DocentesService', () => {
           data: {
             ...dto,
             password_hash,
-            debe_cambiar_password: !dto.password,
             especialidades: dto.especialidades || [],
             disponibilidad_horaria: dto.disponibilidad_horaria || {},
             nivel_educativo: dto.nivel_educativo || [],
@@ -298,7 +296,6 @@ describe('DocentesService', () => {
         data: expect.objectContaining({
           email: 'nuevo@test.com',
           password_hash: 'hashed_password_12345',
-          debe_cambiar_password: false, // Provided password = no need to change
         }),
       });
     });
@@ -313,7 +310,6 @@ describe('DocentesService', () => {
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
       jest.spyOn(prisma.docente, 'create').mockResolvedValue({
         ...mockDocente,
-        debe_cambiar_password: true,
       } as any);
 
       // Act
@@ -324,11 +320,6 @@ describe('DocentesService', () => {
       expect(bcrypt.hash).toHaveBeenCalledWith(generatedPassword, 12);
       expect(result).toHaveProperty('generatedPassword', generatedPassword); // Must return generated password
       expect(result).not.toHaveProperty('password_hash'); // Security check
-      expect(prisma.docente.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          debe_cambiar_password: true, // Auto-generated = must change
-        }),
-      });
     });
 
     it('should throw ConflictException if email already exists', async () => {

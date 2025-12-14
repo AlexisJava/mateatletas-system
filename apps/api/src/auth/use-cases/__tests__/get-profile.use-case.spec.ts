@@ -63,7 +63,6 @@ describe('GetProfileUseCase', () => {
         ha_completado_onboarding: true,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-06-01'),
-        debe_cambiar_password: false,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(mockTutor);
@@ -90,7 +89,6 @@ describe('GetProfileUseCase', () => {
         bio: 'Docente con 10 años de experiencia',
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-06-01'),
-        debe_cambiar_password: false,
       };
 
       mockPrismaService.docente.findUnique.mockResolvedValueOnce(mockDocente);
@@ -144,7 +142,6 @@ describe('GetProfileUseCase', () => {
         tutor_id: 'tutor-1',
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-06-01'),
-        debe_cambiar_password: false,
       };
 
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce(

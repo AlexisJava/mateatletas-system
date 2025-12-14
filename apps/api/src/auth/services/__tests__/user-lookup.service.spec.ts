@@ -14,8 +14,6 @@ describe('UserLookupService', () => {
     nombre: 'Juan',
     apellido: 'Perez',
     password_hash: '$2b$12$hashedpassword',
-    password_temporal: null,
-    debe_cambiar_password: false,
     ha_completado_onboarding: true,
     dni: '12345678',
     telefono: '1234567890',
@@ -31,8 +29,6 @@ describe('UserLookupService', () => {
     nombre: 'Maria',
     apellido: 'Garcia',
     password_hash: '$2b$12$hashedpassword',
-    password_temporal: null,
-    debe_cambiar_password: false,
     titulo: 'Profesora de Matematicas',
     bio: 'Experta en algebra',
     roles: JSON.stringify(['docente']),
@@ -46,8 +42,6 @@ describe('UserLookupService', () => {
     nombre: 'Carlos',
     apellido: 'Lopez',
     password_hash: '$2b$12$hashedpassword',
-    password_temporal: null,
-    debe_cambiar_password: false,
     fecha_registro: new Date(),
     dni: '87654321',
     telefono: '0987654321',
@@ -66,8 +60,6 @@ describe('UserLookupService', () => {
     nombre: 'Pedro',
     apellido: 'Martinez',
     password_hash: '$2b$12$hashedpassword',
-    password_temporal: null,
-    debe_cambiar_password: false,
     edad: 12,
     nivelEscolar: 'Primaria',
     tutor_id: 'tutor-123',
@@ -269,8 +261,6 @@ describe('UserLookupService', () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
         id: 'estudiante-123',
         password_hash: '$2b$12$hash',
-        password_temporal: null,
-        debe_cambiar_password: false,
       } as never);
 
       const result = await service.findByIdForPasswordChange('estudiante-123');
@@ -284,8 +274,6 @@ describe('UserLookupService', () => {
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue({
         id: 'tutor-123',
         password_hash: '$2b$12$hash',
-        password_temporal: null,
-        debe_cambiar_password: false,
       } as never);
 
       const result = await service.findByIdForPasswordChange('tutor-123');
@@ -300,8 +288,6 @@ describe('UserLookupService', () => {
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue({
         id: 'docente-123',
         password_hash: '$2b$12$hash',
-        password_temporal: null,
-        debe_cambiar_password: false,
       } as never);
 
       const result = await service.findByIdForPasswordChange('docente-123');
@@ -317,8 +303,6 @@ describe('UserLookupService', () => {
       jest.spyOn(prisma.admin, 'findUnique').mockResolvedValue({
         id: 'admin-123',
         password_hash: '$2b$12$hash',
-        password_temporal: null,
-        debe_cambiar_password: false,
       } as never);
 
       const result = await service.findByIdForPasswordChange('admin-123');
@@ -394,7 +378,6 @@ describe('UserLookupService', () => {
         ha_completado_onboarding: true,
         createdAt: new Date(),
         updatedAt: new Date(),
-        debe_cambiar_password: false,
       } as never);
 
       const result = await service.getProfile('tutor-123', 'tutor');
@@ -413,7 +396,6 @@ describe('UserLookupService', () => {
         bio: 'Bio',
         createdAt: new Date(),
         updatedAt: new Date(),
-        debe_cambiar_password: false,
       } as never);
 
       const result = await service.getProfile('docente-123', 'docente');
@@ -454,7 +436,6 @@ describe('UserLookupService', () => {
         tutor_id: 'tutor-123',
         createdAt: new Date(),
         updatedAt: new Date(),
-        debe_cambiar_password: false,
       } as never);
 
       const result = await service.getProfile('estudiante-123', 'estudiante');
@@ -537,8 +518,6 @@ describe('UserLookupService', () => {
   describe('updatePasswordData', () => {
     const updateData = {
       password_hash: '$2b$12$newhash',
-      password_temporal: null as null,
-      debe_cambiar_password: false as false,
       fecha_ultimo_cambio: new Date(),
     };
 

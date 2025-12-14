@@ -29,7 +29,6 @@ describe('AuthOrchestratorService', () => {
       ha_completado_onboarding: true,
       role: Role.TUTOR,
       roles: [Role.TUTOR],
-      debe_cambiar_password: false,
     },
   };
 
@@ -47,7 +46,6 @@ describe('AuthOrchestratorService', () => {
       fecha_registro: new Date(),
       role: Role.DOCENTE,
       roles: [Role.DOCENTE],
-      debe_cambiar_password: false,
     },
   };
 
@@ -61,7 +59,6 @@ describe('AuthOrchestratorService', () => {
       fecha_registro: new Date(),
       role: Role.ADMIN,
       roles: [Role.ADMIN],
-      debe_cambiar_password: false,
     },
   };
 
@@ -83,7 +80,6 @@ describe('AuthOrchestratorService', () => {
       tutor: null,
       role: Role.ESTUDIANTE,
       roles: [Role.ESTUDIANTE],
-      debe_cambiar_password: false,
     },
   };
 

@@ -86,7 +86,6 @@ describe('AuthController', () => {
         telefono: null,
         role: 'Tutor',
         roles: [Role.TUTOR] as Role[],
-        debe_cambiar_password: false,
       };
 
       authOrchestrator.login.mockResolvedValue({
@@ -161,7 +160,6 @@ describe('AuthController', () => {
         },
         role: 'Estudiante',
         roles: [Role.ESTUDIANTE] as Role[],
-        debe_cambiar_password: false,
       };
 
       authOrchestrator.loginEstudiante.mockResolvedValue({
