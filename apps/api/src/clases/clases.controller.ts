@@ -50,14 +50,12 @@ export class ClasesController {
     @Query('fechaHasta') fechaHasta?: string,
     @Query('estado') estado?: 'Programada' | 'Cancelada',
     @Query('docenteId') docenteId?: string,
-    @Query('rutaCurricularId') rutaCurricularId?: string,
   ) {
     return this.clasesService.listarTodasLasClases({
       fechaDesde: fechaDesde ? new Date(fechaDesde) : undefined,
       fechaHasta: fechaHasta ? new Date(fechaHasta) : undefined,
       estado,
       docenteId,
-      rutaCurricularId,
     });
   }
 
@@ -239,25 +237,5 @@ export class ClasesController {
   @Roles(Role.ADMIN, Role.DOCENTE, Role.TUTOR)
   async obtenerClase(@Param('id', ParseUUIDPipe) id: string) {
     return this.clasesService.obtenerClase(id);
-  }
-
-  /**
-   * Listar rutas curriculares (para formularios)
-   * GET /api/clases/rutas-curriculares
-   */
-  @Get('metadata/rutas-curriculares')
-  @Roles(Role.ADMIN, Role.DOCENTE, Role.TUTOR)
-  async listarRutasCurriculares() {
-    return this.clasesService.listarRutasCurriculares();
-  }
-
-  /**
-   * Obtener una ruta curricular por ID
-   * GET /api/clases/metadata/rutas-curriculares/:id
-   */
-  @Get('metadata/rutas-curriculares/:id')
-  @Roles(Role.ADMIN, Role.DOCENTE, Role.TUTOR)
-  async obtenerRutaCurricular(@Param('id', ParseUUIDPipe) id: string) {
-    return this.clasesService.obtenerRutaCurricularPorId(id);
   }
 }

@@ -28,7 +28,6 @@ export class ClaseStatsService {
     fechaDesde?: Date;
     fechaHasta?: Date;
     docenteId?: string;
-    rutaCurricularId?: string;
   }) {
     const where: Prisma.ClaseWhereInput = {};
 
@@ -39,8 +38,6 @@ export class ClaseStatsService {
     }
 
     if (filtros?.docenteId) where.docente_id = filtros.docenteId;
-    if (filtros?.rutaCurricularId)
-      where.ruta_curricular_id = filtros.rutaCurricularId;
 
     // Obtener todas las clases según filtros
     const clases = await this.prisma.clase.findMany({

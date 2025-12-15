@@ -16,7 +16,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { RutasCurricularesService } from './rutas-curriculares.service';
 import { SectoresRutasService } from './services/sectores-rutas.service';
 import { ClaseGruposService } from './clase-grupos.service';
 import { AsistenciasService } from './asistencias.service';
@@ -24,8 +23,6 @@ import { ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
-import { CrearRutaDto } from './dto/crear-ruta.dto';
-import { ActualizarRutaDto } from './dto/actualizar-ruta.dto';
 import { CrearAlertaDto } from './dto/crear-alerta.dto';
 import { CreateSectorDto, UpdateSectorDto } from './dto/sector.dto';
 import {
@@ -53,7 +50,6 @@ import {
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
-    private readonly rutasService: RutasCurricularesService,
     private readonly sectoresRutasService: SectoresRutasService,
     private readonly claseGruposService: ClaseGruposService,
     private readonly asistenciasService: AsistenciasService,
@@ -255,66 +251,6 @@ export class AdminController {
       dto.claseId,
       dto.descripcion,
     );
-  }
-
-  // ========================================
-  // GESTIÓN DE RUTAS CURRICULARES
-  // ========================================
-
-  /**
-   * Listar todas las rutas curriculares
-   * GET /api/admin/rutas-curriculares
-   * Rol: Admin, Docente (también necesitan ver rutas)
-   */
-  @Get('rutas-curriculares')
-  @Roles(Role.ADMIN, Role.DOCENTE)
-  async listarRutas() {
-    return this.rutasService.listarTodas();
-  }
-
-  /**
-   * Obtener una ruta curricular por ID
-   * GET /api/admin/rutas-curriculares/:id
-   * Rol: Admin, Docente
-   */
-  @Get('rutas-curriculares/:id')
-  @Roles(Role.ADMIN, Role.DOCENTE)
-  async obtenerRuta(@Param('id', ParseUUIDPipe) id: string) {
-    return this.rutasService.obtenerPorId(id);
-  }
-
-  /**
-   * Crear nueva ruta curricular
-   * POST /api/admin/rutas-curriculares
-   * Rol: Admin
-   */
-  @Post('rutas-curriculares')
-  async crearRuta(@Body() dto: CrearRutaDto) {
-    return this.rutasService.crear(dto);
-  }
-
-  /**
-   * Actualizar ruta curricular
-   * PATCH /api/admin/rutas-curriculares/:id
-   * Rol: Admin
-   */
-  @Patch('rutas-curriculares/:id')
-  async actualizarRuta(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: ActualizarRutaDto,
-  ) {
-    return this.rutasService.actualizar(id, dto);
-  }
-
-  /**
-   * Eliminar ruta curricular
-   * DELETE /api/admin/rutas-curriculares/:id
-   * Rol: Admin
-   * Solo elimina si no tiene clases asociadas
-   */
-  @Delete('rutas-curriculares/:id')
-  async eliminarRuta(@Param('id', ParseUUIDPipe) id: string) {
-    return this.rutasService.eliminar(id);
   }
 
   // ============================================================================

@@ -28,14 +28,9 @@ export class AdminAlertasService {
         clase: {
           select: {
             id: true,
+            nombre: true,
             fecha_hora_inicio: true,
             duracion_minutos: true,
-            rutaCurricular: {
-              select: {
-                nombre: true,
-                color: true,
-              },
-            },
           },
         },
       },
@@ -52,10 +47,9 @@ export class AdminAlertasService {
       estudiante: alerta.estudiante,
       clase: {
         id: alerta.clase.id,
+        nombre: alerta.clase.nombre,
         fecha_hora_inicio: alerta.clase.fecha_hora_inicio,
         duracion_minutos: alerta.clase.duracion_minutos,
-        rutaCurricular: alerta.clase.rutaCurricular?.nombre ?? 'Sin ruta',
-        color: alerta.clase.rutaCurricular?.color ?? '#6B7280',
       },
       createdAt: alerta.createdAt,
     }));
@@ -102,11 +96,7 @@ export class AdminAlertasService {
         },
         clase: {
           select: {
-            rutaCurricular: {
-              select: {
-                nombre: true,
-              },
-            },
+            nombre: true,
           },
         },
       },
@@ -151,11 +141,7 @@ export class AdminAlertasService {
         },
         clase: {
           select: {
-            rutaCurricular: {
-              select: {
-                nombre: true,
-              },
-            },
+            nombre: true,
           },
         },
       },
@@ -171,18 +157,18 @@ export class AdminAlertasService {
   private generarSugerenciaEstatica(alerta: {
     descripcion: string;
     estudiante: { nivelEscolar: string };
-    clase: { rutaCurricular: { nombre: string } | null };
+    clase: { nombre: string };
   }): string {
     const nivel = alerta.estudiante.nivelEscolar;
-    const ruta = alerta.clase.rutaCurricular?.nombre || 'General';
+    const claseNombre = alerta.clase.nombre || 'General';
 
     // Sugerencias basadas en patrones comunes
     if (alerta.descripcion.toLowerCase().includes('ausente')) {
-      return `Contactar al tutor para verificar el motivo de la ausencia. Considerar reprogramar la clase o asignar material de recuperación para ${ruta}.`;
+      return `Contactar al tutor para verificar el motivo de la ausencia. Considerar reprogramar la clase o asignar material de recuperación para ${claseNombre}.`;
     }
 
     if (alerta.descripcion.toLowerCase().includes('dificultad')) {
-      return `Revisar los prerequisitos de ${ruta} para ${nivel}. Considerar sesión de refuerzo individual o ajustar el ritmo del contenido.`;
+      return `Revisar los prerequisitos de ${claseNombre} para ${nivel}. Considerar sesión de refuerzo individual o ajustar el ritmo del contenido.`;
     }
 
     if (alerta.descripcion.toLowerCase().includes('comportamiento')) {
@@ -190,6 +176,6 @@ export class AdminAlertasService {
     }
 
     // Sugerencia genérica
-    return `Revisar el progreso del estudiante en ${ruta}. Contactar al tutor para obtener más contexto y determinar si se requiere intervención adicional.`;
+    return `Revisar el progreso del estudiante en ${claseNombre}. Contactar al tutor para obtener más contexto y determinar si se requiere intervención adicional.`;
   }
 }

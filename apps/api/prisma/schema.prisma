@@ -147,8 +147,8 @@ model Estudiante {
   EstudianteInscripcion2026 EstudianteInscripcion2026[]
 
   /// ONBOARDING 2026
-  niveles_por_mundo    EstudianteMundoNivel[]
-  tests_ubicacion      TestUbicacionResultado[]
+  niveles_por_mundo EstudianteMundoNivel[]
+  tests_ubicacion   TestUbicacionResultado[]
 
   // Índices de performance para rankings y listados
   @@index([puntos_totales(sort: Desc)], name: "idx_estudiantes_puntos_ranking")
@@ -518,38 +518,38 @@ model Docente {
 /// Tienen acceso completo al dashboard administrativo
 model Admin {
   /// Identificador único del admin (CUID)
-  id                    String    @id @default(cuid())
+  id                  String    @id @default(cuid())
   /// Email único del admin - usado para autenticación
-  email                 String    @unique
+  email               String    @unique
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
-  password_hash         String
+  password_hash       String
   /// Fecha del último cambio de contraseña
-  fecha_ultimo_cambio   DateTime?
+  fecha_ultimo_cambio DateTime?
   /// Nombre del admin
-  nombre                String
+  nombre              String
   /// Apellido del admin
-  apellido              String
+  apellido            String
   /// Fecha en que el admin fue creado
-  fecha_registro        DateTime  @default(now())
+  fecha_registro      DateTime  @default(now())
   /// Timestamp de creación del registro
-  createdAt             DateTime  @default(now())
+  createdAt           DateTime  @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt             DateTime  @updatedAt
+  updatedAt           DateTime  @updatedAt
   /// DNI del admin (opcional)
-  dni                   String?
+  dni                 String?
   /// Roles asignados al admin (puede ser admin y docente simultáneamente)
   /// Ejemplo: ["admin", "docente"]
-  roles                 Json      @default("[\"admin\"]")
+  roles               Json      @default("[\"admin\"]")
   /// Teléfono del admin (opcional)
-  telefono              String?
+  telefono            String?
   /// Secret TOTP para MFA (Multi-Factor Authentication)
   /// Guardado encriptado en DB para seguridad
-  mfa_secret            String?
+  mfa_secret          String?
   /// Indica si MFA está habilitado para este admin
-  mfa_enabled           Boolean   @default(false)
+  mfa_enabled         Boolean   @default(false)
   /// Códigos de backup para MFA (hasheados con bcrypt)
   /// Array de strings - cada código es de un solo uso
-  mfa_backup_codes      String[]  @default([])
+  mfa_backup_codes    String[]  @default([])
 
   @@map("admins")
 }
@@ -668,68 +668,44 @@ model InscripcionCurso {
   @@map("inscripciones_curso")
 }
 
-/// Modelo para rutas curriculares (temas/categorías de clases)
-/// Representa los temas o áreas de conocimiento de las clases
-model RutaCurricular {
-  /// Identificador único de la ruta
-  id          String       @id @default(cuid())
-  /// Nombre de la ruta (ej: "Lógica", "Álgebra", "Geometría")
-  nombre      String       @unique
-  /// Color hexadecimal para identificación visual (opcional)
-  color       String?
-  /// Descripción de la ruta curricular
-  descripcion String?
-  /// Timestamp de creación del registro
-  createdAt   DateTime     @default(now())
-  /// Timestamp de última actualización del registro
-  updatedAt   DateTime     @updatedAt
-  clases      Clase[]
-  claseGrupos ClaseGrupo[]
-
-  @@map("rutas_curriculares")
-}
-
 /// Modelo para clases programadas
 /// Representa una clase en vivo programada por un admin
 model Clase {
   /// Identificador único de la clase
-  id                 String             @id @default(cuid())
-  /// ID de la ruta curricular (tema de la clase) - OPCIONAL
-  ruta_curricular_id String?
+  id                String             @id @default(cuid())
   /// ID del docente asignado a la clase
-  docente_id         String
+  docente_id        String
   /// Fecha y hora de inicio de la clase
-  fecha_hora_inicio  DateTime
+  fecha_hora_inicio DateTime
   /// Duración de la clase en minutos
-  duracion_minutos   Int
+  duracion_minutos  Int
   /// Estado de la clase (Programada, Cancelada)
-  estado             EstadoClase        @default(Programada)
+  estado            EstadoClase        @default(Programada)
   /// Cupo máximo de estudiantes
-  cupos_maximo       Int
+  cupos_maximo      Int
   /// Cupos ocupados actualmente
-  cupos_ocupados     Int                @default(0)
+  cupos_ocupados    Int                @default(0)
   /// ID del producto curso (opcional - si null es clase de suscripción general)
   /// Si tiene valor, solo estudiantes con InscripcionCurso activa pueden reservar
-  producto_id        String?
+  producto_id       String?
   /// Timestamp de creación del registro
-  createdAt          DateTime           @default(now())
+  createdAt         DateTime           @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt          DateTime           @updatedAt
+  updatedAt         DateTime           @updatedAt
   /// Descripción o grupo de la clase (ej: "Niños 6-7 años", "Grupo A", "Preparación olimpiadas")
-  descripcion        String?
+  descripcion       String?
   /// Nombre o tema de la clase (ej: "Godot", "Scratch", "Preparación Olimpiadas")
-  nombre             String
+  nombre            String
   /// ID del sector (Matemática o Programación) - OPCIONAL
-  sector_id          String?
-  alertas            Alerta[]
-  asistencias        Asistencia[]
-  docente            Docente            @relation(fields: [docente_id], references: [id])
-  producto           Producto?          @relation(fields: [producto_id], references: [id])
-  rutaCurricular     RutaCurricular?    @relation(fields: [ruta_curricular_id], references: [id])
-  sector             Sector?            @relation(fields: [sector_id], references: [id])
-  eventos            Evento[]
-  inscripciones      InscripcionClase[]
-  puntosObtenidos    PuntoObtenido[]
+  sector_id         String?
+  alertas           Alerta[]
+  asistencias       Asistencia[]
+  docente           Docente            @relation(fields: [docente_id], references: [id])
+  producto          Producto?          @relation(fields: [producto_id], references: [id])
+  sector            Sector?            @relation(fields: [sector_id], references: [id])
+  eventos           Evento[]
+  inscripciones     InscripcionClase[]
+  puntosObtenidos   PuntoObtenido[]
 
   @@index([docente_id])
   @@index([fecha_hora_inicio])
@@ -833,9 +809,6 @@ model ClaseGrupo {
   /// ID del docente asignado
   docente_id String
 
-  /// ID de la ruta curricular (tema)
-  ruta_curricular_id String?
-
   /// ID del sector (Matemática o Programación)
   sector_id String?
 
@@ -852,10 +825,9 @@ model ClaseGrupo {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  grupo          Grupo           @relation(fields: [grupo_id], references: [id])
-  docente        Docente         @relation(fields: [docente_id], references: [id])
-  rutaCurricular RutaCurricular? @relation(fields: [ruta_curricular_id], references: [id])
-  sector         Sector?         @relation(fields: [sector_id], references: [id])
+  grupo   Grupo   @relation(fields: [grupo_id], references: [id])
+  docente Docente @relation(fields: [docente_id], references: [id])
+  sector  Sector? @relation(fields: [sector_id], references: [id])
 
   /// Estudiantes inscritos en el grupo
   inscripciones InscripcionClaseGrupo[]
@@ -1665,7 +1637,7 @@ model ConfiguracionPrecios {
   precio_pro         Decimal @default(75000) @db.Decimal(10, 2)
 
   /// Descuentos familiares
-  descuento_hermano_2    Decimal @default(12) @db.Decimal(5, 2) // 12% segundo hermano
+  descuento_hermano_2     Decimal @default(12) @db.Decimal(5, 2) // 12% segundo hermano
   descuento_hermano_3_mas Decimal @default(20) @db.Decimal(5, 2) // 20% tercer hermano en adelante
 
   /// Configuración de notificaciones
@@ -1800,8 +1772,8 @@ model Beca {
 /// Tipos de descuento aplicables
 enum TipoDescuento {
   NINGUNO
-  HERMANO_2        // 12% descuento segundo hermano
-  HERMANO_3_MAS    // 20% descuento tercer hermano en adelante
+  HERMANO_2 // 12% descuento segundo hermano
+  HERMANO_3_MAS // 20% descuento tercer hermano en adelante
   BECA
 
   @@map("tipo_descuento")

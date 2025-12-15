@@ -145,13 +145,6 @@ export class TutorQueryService {
         },
       },
       include: {
-        rutaCurricular: {
-          select: {
-            id: true,
-            nombre: true,
-            color: true,
-          },
-        },
         docente: {
           select: {
             id: true,
@@ -231,11 +224,7 @@ export class TutorQueryService {
           fechaHoraInicio,
           fechaHoraFin,
           duracionMinutos: clase.duracion_minutos,
-          rutaCurricular: {
-            id: clase.rutaCurricular?.id || '',
-            nombre: clase.rutaCurricular?.nombre || 'Clase sin ruta',
-            color: clase.rutaCurricular?.color || undefined,
-          },
+          nombre: clase.nombre,
           docente: {
             id: clase.docente.id,
             nombre: clase.docente.nombre,

@@ -86,7 +86,6 @@ export class ClaseGruposService {
             anio_lectivo: dto.anioLectivo,
             cupo_maximo: dto.cupoMaximo,
             docente_id: dto.docenteId,
-            ruta_curricular_id: dto.rutaCurricularId,
             sector_id: dto.sectorId,
             nivel: dto.nivel,
             activo: true,
@@ -98,13 +97,6 @@ export class ClaseGruposService {
                 nombre: true,
                 apellido: true,
                 email: true,
-              },
-            },
-            rutaCurricular: {
-              select: {
-                id: true,
-                nombre: true,
-                color: true,
               },
             },
             sector: {
@@ -210,13 +202,6 @@ export class ClaseGruposService {
             apellido: true,
           },
         },
-        rutaCurricular: {
-          select: {
-            id: true,
-            nombre: true,
-            color: true,
-          },
-        },
         sector: {
           select: {
             id: true,
@@ -272,14 +257,6 @@ export class ClaseGruposService {
             apellido: true,
             email: true,
             telefono: true,
-          },
-        },
-        rutaCurricular: {
-          select: {
-            id: true,
-            nombre: true,
-            color: true,
-            descripcion: true,
           },
         },
         sector: {
@@ -397,11 +374,6 @@ export class ClaseGruposService {
     if (dto.docenteId) {
       updateData.docente = { connect: { id: dto.docenteId } };
     }
-    if (dto.rutaCurricularId !== undefined) {
-      updateData.rutaCurricular = dto.rutaCurricularId
-        ? { connect: { id: dto.rutaCurricularId } }
-        : { disconnect: true };
-    }
     if (dto.sectorId !== undefined) {
       updateData.sector = dto.sectorId
         ? { connect: { id: dto.sectorId } }
@@ -423,13 +395,6 @@ export class ClaseGruposService {
                 nombre: true,
                 apellido: true,
                 email: true,
-              },
-            },
-            rutaCurricular: {
-              select: {
-                id: true,
-                nombre: true,
-                color: true,
               },
             },
             sector: {

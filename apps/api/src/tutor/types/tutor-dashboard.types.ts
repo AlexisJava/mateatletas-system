@@ -99,11 +99,7 @@ export interface ClaseProxima {
   fechaHoraInicio: Date;
   fechaHoraFin: Date;
   duracionMinutos: number;
-  rutaCurricular: {
-    id: string;
-    nombre: string;
-    color?: string;
-  };
+  nombre: string;
   docente: {
     id: string;
     nombre: string;

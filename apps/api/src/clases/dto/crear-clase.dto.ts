@@ -31,19 +31,6 @@ export class CrearClaseDto {
   nombre!: string;
 
   /**
-   * ID de la ruta curricular (Álgebra, Geometría, etc.) - OPCIONAL
-   */
-  @ApiPropertyOptional({
-    description: 'ID de la ruta curricular (opcional)',
-    example: '550e8400-e29b-41d4-a716-446655440000',
-    type: String,
-  })
-  @IsOptional()
-  @IsString({ message: 'El ID de la ruta curricular debe ser un texto' })
-  @Trim()
-  rutaCurricularId?: string;
-
-  /**
    * ID del docente que impartirá la clase
    */
   @ApiProperty({

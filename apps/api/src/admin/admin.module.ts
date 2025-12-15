@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
-import { RutasCurricularesService } from './rutas-curriculares.service';
 import { AdminStatsService } from './services/admin-stats.service';
 import { AdminAlertasService } from './services/admin-alertas.service';
 import { AdminUsuariosService } from './services/admin-usuarios.service';
@@ -27,7 +26,6 @@ import { DatabaseModule } from '../core/database/database.module';
   controllers: [AdminController],
   providers: [
     AdminService,
-    RutasCurricularesService,
     // Servicios especializados (extraídos de AdminService monolítico)
     AdminStatsService,
     AdminAlertasService,
@@ -41,7 +39,6 @@ import { DatabaseModule } from '../core/database/database.module';
   ],
   exports: [
     AdminService,
-    RutasCurricularesService,
     AdminStatsService,
     AdminAlertasService,
     AdminUsuariosService,

@@ -55,13 +55,6 @@ export class ClaseGrupoController {
         hora_inicio: '16:00',
         hora_fin: '17:30',
         cupo_maximo: 12,
-        rutaCurricular: {
-          id: 'ruta-id',
-          nombre: 'Básico 1',
-          codigo: 'B1',
-          color: '#4CAF50',
-          descripcion: 'Ruta curricular Básico 1',
-        },
         estudiantes: [
           {
             id: 'est-id',

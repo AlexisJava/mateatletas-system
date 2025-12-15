@@ -17,7 +17,6 @@ import { PrismaService } from '../../core/database/prisma.service';
  * - Listar clases con filtros y paginación
  * - Obtener detalles de clases
  * - Calendarios para tutores
- * - Rutas curriculares (con caché)
  *
  * IMPORTANTE: No ejecuta operaciones de escritura
  */
@@ -42,7 +41,6 @@ export class ClaseQueryService {
       fechaHasta?: Date;
       estado?: 'Programada' | 'Cancelada';
       docenteId?: string;
-      rutaCurricularId?: string;
     },
     page: number = 1,
     limit: number = 50,
@@ -57,8 +55,6 @@ export class ClaseQueryService {
 
     if (filtros?.estado) where.estado = filtros.estado;
     if (filtros?.docenteId) where.docente_id = filtros.docenteId;
-    if (filtros?.rutaCurricularId)
-      where.ruta_curricular_id = filtros.rutaCurricularId;
 
     const skip = (page - 1) * limit;
 
@@ -66,7 +62,6 @@ export class ClaseQueryService {
       this.prisma.clase.findMany({
         where,
         include: {
-          rutaCurricular: { select: { nombre: true, color: true } },
           docente: {
             select: {
               nombre: true,
@@ -103,8 +98,6 @@ export class ClaseQueryService {
       cupo_maximo: clase.cupos_maximo,
       cupo_disponible: clase.cupos_maximo - clase.cupos_ocupados,
       titulo: clase.nombre,
-      // Asegurar que ruta_curricular esté presente (alias)
-      ruta_curricular: clase.rutaCurricular,
     }));
 
     return {
@@ -165,7 +158,6 @@ export class ClaseQueryService {
         ],
       },
       include: {
-        rutaCurricular: { select: { nombre: true, color: true } },
         docente: { select: { nombre: true, apellido: true } },
         producto: { select: { nombre: true, tipo: true } },
         inscripciones: {
@@ -244,9 +236,6 @@ export class ClaseQueryService {
         },
       },
       include: {
-        rutaCurricular: {
-          select: { nombre: true, color: true },
-        },
         docente: {
           select: { nombre: true, apellido: true },
         },
@@ -307,7 +296,6 @@ export class ClaseQueryService {
     return this.prisma.clase.findMany({
       where,
       include: {
-        rutaCurricular: { select: { nombre: true, color: true } },
         producto: { select: { nombre: true, tipo: true } },
         inscripciones: {
           select: {
@@ -327,7 +315,6 @@ export class ClaseQueryService {
     const clase = await this.prisma.clase.findUnique({
       where: { id },
       include: {
-        rutaCurricular: true,
         docente: {
           select: { id: true, nombre: true, apellido: true, titulo: true },
         },
@@ -446,60 +433,5 @@ export class ClaseQueryService {
         tutor: inscripcion.estudiante.tutor,
       })),
     };
-  }
-
-  /**
-   * Obtener rutas curriculares (para formularios)
-   *
-   * CACHE: Este endpoint está cacheado por 10 minutos
-   * Las rutas curriculares rara vez cambian (son datos estáticos)
-   */
-  async listarRutasCurriculares() {
-    const cacheKey = 'rutas_curriculares_all';
-
-    // Intentar obtener del cache
-    const cached = await this.cacheManager.get(cacheKey);
-    if (cached) {
-      this.logger.debug('Rutas curriculares obtenidas del cache');
-      return cached;
-    }
-
-    // Si no está en cache, consultar la BD
-    const rutas = await this.prisma.rutaCurricular.findMany({
-      orderBy: { nombre: 'asc' },
-    });
-
-    // Guardar en cache por 10 minutos (600000ms)
-    await this.cacheManager.set(cacheKey, rutas, 600000);
-    this.logger.debug('Rutas curriculares guardadas en cache (10 min)');
-
-    return rutas;
-  }
-
-  /**
-   * Obtener una ruta curricular por su ID
-   *
-   * CACHE: reutiliza los mismos 10 minutos del listado general para evitar
-   * consultas repetitivas en formularios que cargan detalles puntuales.
-   */
-  async obtenerRutaCurricularPorId(id: string) {
-    const cacheKey = `ruta_curricular_${id}`;
-
-    const cached = await this.cacheManager.get(cacheKey);
-    if (cached) {
-      this.logger.debug(`Ruta curricular ${id} obtenida del cache`);
-      return cached;
-    }
-
-    const ruta = await this.prisma.rutaCurricular.findUnique({
-      where: { id },
-    });
-
-    if (!ruta) {
-      throw new NotFoundException(`Ruta curricular con ID ${id} no encontrada`);
-    }
-
-    await this.cacheManager.set(cacheKey, ruta, 600000);
-    return ruta;
   }
 }

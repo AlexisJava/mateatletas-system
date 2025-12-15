@@ -38,13 +38,6 @@ export class GruposService {
     const claseGrupo = await this.prisma.claseGrupo.findUnique({
       where: { id: claseGrupoId },
       include: {
-        rutaCurricular: {
-          select: {
-            id: true,
-            nombre: true,
-            color: true,
-          },
-        },
         inscripciones: {
           where: { fecha_baja: null }, // Solo inscritos activos
           include: {
@@ -236,7 +229,6 @@ export class GruposService {
       hora_inicio: claseGrupo.hora_inicio,
       hora_fin: claseGrupo.hora_fin,
       cupo_maximo: claseGrupo.cupo_maximo,
-      rutaCurricular: claseGrupo.rutaCurricular,
       estudiantes: estudiantesConStats,
       tareas,
       observacionesRecientes,

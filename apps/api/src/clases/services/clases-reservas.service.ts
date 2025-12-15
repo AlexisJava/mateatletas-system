@@ -116,11 +116,7 @@ export class ClasesReservasService {
         },
         include: {
           estudiante: { select: { nombre: true, apellido: true } },
-          clase: {
-            include: {
-              rutaCurricular: { select: { nombre: true } },
-            },
-          },
+          clase: true,
         },
       });
 
@@ -149,7 +145,6 @@ export class ClasesReservasService {
       include: {
         clase: {
           include: {
-            rutaCurricular: { select: { id: true, nombre: true, color: true } },
             docente: { select: { id: true, nombre: true, apellido: true } },
             sector: {
               select: { id: true, nombre: true, color: true, icono: true },
@@ -177,7 +172,6 @@ export class ClasesReservasService {
           ...reserva.clase,
           cupo_maximo: reserva.clase.cupos_maximo,
           cupo_disponible: cupoDisponible,
-          ruta_curricular: reserva.clase.rutaCurricular,
         },
       };
     });

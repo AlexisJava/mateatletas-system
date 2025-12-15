@@ -117,14 +117,6 @@ export class CrearClaseGrupoDto {
   docenteId!: string;
 
   @ApiPropertyOptional({
-    description: 'ID de la ruta curricular (tema)',
-    example: 'clt2abc456',
-  })
-  @IsOptional()
-  @IsString()
-  rutaCurricularId?: string;
-
-  @ApiPropertyOptional({
     description: 'ID del sector (Matemática o Programación)',
     example: 'clt3abc789',
   })

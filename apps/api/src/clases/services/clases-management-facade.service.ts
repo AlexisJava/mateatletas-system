@@ -38,7 +38,6 @@ export class ClasesManagementFacade {
       fechaHasta?: Date;
       estado?: 'Programada' | 'Cancelada';
       docenteId?: string;
-      rutaCurricularId?: string;
     },
     page?: number,
     limit?: number,
@@ -79,22 +78,6 @@ export class ClasesManagementFacade {
    */
   async obtenerEstudiantesDeClase(claseId: string) {
     return this.queryService.obtenerEstudiantesDeClase(claseId);
-  }
-
-  /**
-   * Obtener rutas curriculares (para formularios)
-   * CACHE: 10 minutos
-   */
-  async listarRutasCurriculares() {
-    return this.queryService.listarRutasCurriculares();
-  }
-
-  /**
-   * Obtener una ruta curricular por su ID
-   * CACHE: 10 minutos
-   */
-  async obtenerRutaCurricularPorId(id: string) {
-    return this.queryService.obtenerRutaCurricularPorId(id);
   }
 
   // ========================================
@@ -141,7 +124,6 @@ export class ClasesManagementFacade {
     fechaDesde?: Date;
     fechaHasta?: Date;
     docenteId?: string;
-    rutaCurricularId?: string;
   }) {
     return this.statsService.obtenerEstadisticasOcupacion(filtros);
   }

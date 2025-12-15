@@ -23,22 +23,6 @@ export class ClaseBusinessValidator {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * Validar que una ruta curricular existe
-   * @throws NotFoundException si no existe
-   */
-  async validarRutaCurricularExiste(rutaCurricularId: string): Promise<void> {
-    const ruta = await this.prisma.rutaCurricular.findUnique({
-      where: { id: rutaCurricularId },
-    });
-
-    if (!ruta) {
-      throw new NotFoundException(
-        `Ruta curricular con ID ${rutaCurricularId} no encontrada`,
-      );
-    }
-  }
-
-  /**
    * Validar que un docente existe
    * @throws NotFoundException si no existe
    */

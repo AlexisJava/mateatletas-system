@@ -73,15 +73,6 @@ export interface ObservacionRecienteDto {
 }
 
 /**
- * Ruta curricular del grupo
- */
-export interface RutaCurricularDto {
-  id: string;
-  nombre: string;
-  color: string | null;
-}
-
-/**
  * Estadísticas generales del grupo
  */
 export interface StatsGrupoDto {
@@ -113,7 +104,6 @@ export interface GrupoDetalleCompletoDto {
   hora_inicio: string;
   hora_fin: string;
   cupo_maximo: number;
-  rutaCurricular: RutaCurricularDto | null;
 
   // Estudiantes con estadísticas completas
   estudiantes: EstudianteConStatsDto[];

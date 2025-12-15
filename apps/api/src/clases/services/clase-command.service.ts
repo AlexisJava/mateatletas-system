@@ -30,10 +30,6 @@ export class ClaseCommandService {
    */
   async programarClase(dto: CrearClaseDto) {
     // 1. Validaciones de existencia
-    if (dto.rutaCurricularId) {
-      await this.validator.validarRutaCurricularExiste(dto.rutaCurricularId);
-    }
-
     await this.validator.validarDocenteExiste(dto.docenteId);
 
     if (dto.sectorId) {
@@ -52,7 +48,6 @@ export class ClaseCommandService {
     const clase = await this.prisma.clase.create({
       data: {
         nombre: dto.nombre,
-        ruta_curricular_id: dto.rutaCurricularId || null,
         docente_id: dto.docenteId,
         sector_id: dto.sectorId || null,
         fecha_hora_inicio: fechaInicio,
@@ -64,7 +59,6 @@ export class ClaseCommandService {
         producto_id: dto.productoId ?? null,
       },
       include: {
-        rutaCurricular: { select: { nombre: true, color: true } },
         docente: { select: { nombre: true, apellido: true } },
         producto: {
           select: { nombre: true, tipo: true },
@@ -93,9 +87,6 @@ export class ClaseCommandService {
       where: { id },
       include: {
         inscripciones: true,
-        rutaCurricular: {
-          select: { nombre: true },
-        },
       },
     });
 
@@ -119,7 +110,6 @@ export class ClaseCommandService {
           cupos_ocupados: 0, // Liberar todos los cupos
         },
         include: {
-          rutaCurricular: { select: { nombre: true } },
           docente: { select: { nombre: true, apellido: true } },
         },
       }),
@@ -128,7 +118,7 @@ export class ClaseCommandService {
       this.notificacionesService.notificarClaseCancelada(
         clase.docente_id,
         id,
-        `${clase.rutaCurricular?.nombre || 'Clase'} - ${clase.fecha_hora_inicio.toLocaleDateString()}`,
+        `${clase.nombre || 'Clase'} - ${clase.fecha_hora_inicio.toLocaleDateString()}`,
       ),
     ]);
 

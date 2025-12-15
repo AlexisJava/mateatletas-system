@@ -70,7 +70,6 @@ export class ClasesService {
       fechaHasta?: Date;
       estado?: 'Programada' | 'Cancelada';
       docenteId?: string;
-      rutaCurricularId?: string;
     },
     page?: number,
     limit?: number,
@@ -119,22 +118,6 @@ export class ClasesService {
    */
   async obtenerClase(id: string) {
     return this.managementFacade.obtenerClase(id);
-  }
-
-  /**
-   * Obtener rutas curriculares (para formularios)
-   * DELEGACIÓN: ClasesManagementFacade → ClaseQueryService
-   */
-  async listarRutasCurriculares() {
-    return this.managementFacade.listarRutasCurriculares();
-  }
-
-  /**
-   * Obtener detalles de una ruta curricular específica
-   * DELEGACIÓN: ClasesManagementFacade → ClaseQueryService
-   */
-  async obtenerRutaCurricularPorId(id: string) {
-    return this.managementFacade.obtenerRutaCurricularPorId(id);
   }
 
   /**
