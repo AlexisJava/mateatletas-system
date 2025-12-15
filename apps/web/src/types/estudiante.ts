@@ -25,6 +25,9 @@ export type {
   Equipo,
 };
 
+// Alias: El backend usa "Equipo" pero el frontend lo llama "Casa"
+export type Casa = Equipo;
+
 // Alias para compatibilidad con código legacy
 export type CreateEstudianteData = CreateEstudianteDto;
 export type UpdateEstudianteData = UpdateEstudianteDto;
@@ -33,7 +36,7 @@ export type UpdateEstudianteData = UpdateEstudianteDto;
  * Parámetros de query para filtrar estudiantes
  */
 export interface QueryEstudiantesParams {
-  equipo_id?: string;
+  casa_id?: string;
   nivel_escolar?: string;
   page?: number;
   limit?: number;

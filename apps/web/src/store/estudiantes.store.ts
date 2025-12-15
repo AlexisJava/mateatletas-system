@@ -5,7 +5,7 @@ import type {
   CreateEstudianteData,
   UpdateEstudianteData,
   QueryEstudiantesParams,
-  Equipo,
+  Casa,
 } from '@/types/estudiante';
 
 /**
@@ -15,7 +15,7 @@ interface EstudiantesState {
   // Datos
   estudiantes: Estudiante[];
   estudianteActual: Estudiante | null;
-  equipos: Equipo[];
+  casas: Casa[];
 
   // UI State
   isLoading: boolean;
@@ -35,7 +35,7 @@ interface EstudiantesState {
   createEstudiante: (_data: CreateEstudianteData) => Promise<Estudiante>;
   updateEstudiante: (_id: string, _data: UpdateEstudianteData) => Promise<void>;
   deleteEstudiante: (_id: string) => Promise<void>;
-  fetchEquipos: () => Promise<void>;
+  fetchCasas: () => Promise<void>;
   clearError: () => void;
   setEstudianteActual: (_estudiante: Estudiante | null) => void;
 }
@@ -48,7 +48,7 @@ export const useEstudiantesStore = create<EstudiantesState>((set) => ({
   // Estado inicial
   estudiantes: [],
   estudianteActual: null,
-  equipos: [],
+  casas: [],
   isLoading: false,
   isCreating: false,
   isUpdating: false,
@@ -180,16 +180,16 @@ export const useEstudiantesStore = create<EstudiantesState>((set) => ({
   },
 
   /**
-   * Obtiene todos los equipos disponibles
+   * Obtiene todas las casas disponibles
    */
-  fetchEquipos: async () => {
+  fetchCasas: async () => {
     try {
-      const equipos = await estudiantesApi.getEquipos();
-      set({ equipos });
+      const casas = await estudiantesApi.getCasas();
+      set({ casas });
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       set({
-        error: err.response?.data?.message || 'Error al cargar equipos',
+        error: err.response?.data?.message || 'Error al cargar casas',
       });
     }
   },

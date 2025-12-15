@@ -17,7 +17,7 @@ import type {
   QueryEstudiantesParams,
   EstudiantesResponse,
   EstadisticasEstudiantes,
-  Equipo,
+  Casa,
 } from '@/types/estudiante';
 import { normalizarEstudiante, normalizarEstudiantes } from '@/types/estudiante';
 import {
@@ -226,15 +226,16 @@ export const estudiantesApi = {
   },
 
   /**
-   * Obtener todos los equipos disponibles
-   * @returns Lista de equipos
+   * Obtener todas las casas disponibles
+   * @returns Lista de casas
    */
-  getEquipos: async (): Promise<Equipo[]> => {
+  getCasas: async (): Promise<Casa[]> => {
     try {
-      const response = await apiClient.get<Equipo[]>('/equipos');
+      // El backend usa /equipos pero el frontend lo expone como casas
+      const response = await apiClient.get<Casa[]>('/equipos');
       return equiposListSchema.parse(response);
     } catch (error) {
-      console.error('Error al obtener los equipos de estudiantes:', error);
+      console.error('Error al obtener las casas:', error);
       throw error;
     }
   },

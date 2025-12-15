@@ -15,18 +15,18 @@ import type { Estudiante } from '@/types/estudiante';
  */
 export default function EstudiantesPage() {
   const router = useRouter();
-  const { estudiantes, isLoading, equipos, fetchEstudiantes, fetchEquipos, deleteEstudiante } =
+  const { estudiantes, isLoading, casas, fetchEstudiantes, fetchCasas, deleteEstudiante } =
     useEstudiantesStore();
 
   const [filtroNivel, setFiltroNivel] = useState('');
-  const [filtroEquipo, setFiltroEquipo] = useState('');
+  const [filtroCasa, setFiltroCasa] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [estudianteEdit, setEstudianteEdit] = useState<Estudiante | null>(null);
 
   useEffect(() => {
     fetchEstudiantes();
-    fetchEquipos();
-  }, [fetchEstudiantes, fetchEquipos]);
+    fetchCasas();
+  }, [fetchEstudiantes, fetchCasas]);
 
   const handleDelete = async (id: string) => {
     if (confirm('¿Estás seguro de eliminar este estudiante?')) {
@@ -57,7 +57,7 @@ export default function EstudiantesPage() {
     // Filtrar valores undefined o null
     if (!e) return false;
     if (filtroNivel && e.nivel_escolar !== filtroNivel) return false;
-    if (filtroEquipo && e.equipo_id !== filtroEquipo) return false;
+    if (filtroCasa && e.equipo_id !== filtroCasa) return false;
     return true;
   });
 
@@ -112,16 +112,16 @@ export default function EstudiantesPage() {
                   onChange={(e) => setFiltroNivel(e.target.value)}
                 />
                 <Select
-                  label="Filtrar por equipo"
+                  label="Filtrar por casa"
                   options={[
-                    { value: '', label: 'Todos los equipos' },
-                    ...(equipos || []).map((eq) => ({
-                      value: eq.id,
-                      label: eq.nombre,
+                    { value: '', label: 'Todas las casas' },
+                    ...(casas || []).map((casa: { id: string; nombre: string }) => ({
+                      value: casa.id,
+                      label: casa.nombre,
                     })),
                   ]}
-                  value={filtroEquipo}
-                  onChange={(e) => setFiltroEquipo(e.target.value)}
+                  value={filtroCasa}
+                  onChange={(e) => setFiltroCasa(e.target.value)}
                 />
               </div>
             </div>

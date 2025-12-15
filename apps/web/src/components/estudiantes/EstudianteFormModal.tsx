@@ -31,18 +31,18 @@ export function EstudianteFormModal({
   estudiante,
   onSuccess,
 }: EstudianteFormModalProps) {
-  const { createEstudiante, updateEstudiante, equipos, fetchEquipos, isCreating, isUpdating } =
+  const { createEstudiante, updateEstudiante, casas, fetchCasas, isCreating, isUpdating } =
     useEstudiantesStore();
 
   const isEdit = !!estudiante;
   const isLoading = isCreating || isUpdating;
 
-  // Cargar equipos al abrir el modal
+  // Cargar casas al abrir el modal
   useEffect(() => {
     if (isOpen) {
-      fetchEquipos();
+      fetchCasas();
     }
-  }, [isOpen, fetchEquipos]);
+  }, [isOpen, fetchCasas]);
 
   // Form state
   const [formData, setFormData] = useState<EstudianteFormState>({
@@ -230,15 +230,15 @@ export function EstudianteFormModal({
         </div>
 
         <Select
-          label="Equipo (Opcional)"
+          label="Casa (Opcional)"
           name="equipo_id"
-          options={(equipos || []).map((eq) => ({
-            value: eq.id,
-            label: eq.nombre,
+          options={(casas || []).map((casa: { id: string; nombre: string }) => ({
+            value: casa.id,
+            label: casa.nombre,
           }))}
           value={formData.equipo_id}
           onChange={handleChange}
-          placeholder="Sin equipo"
+          placeholder="Sin casa"
         />
 
         <Input
