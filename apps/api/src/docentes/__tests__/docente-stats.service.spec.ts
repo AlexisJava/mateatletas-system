@@ -29,6 +29,7 @@ describe('DocenteStatsService', () => {
             },
             asistenciaClaseGrupo: {
               findMany: jest.fn(),
+              groupBy: jest.fn(),
             },
             puntoObtenido: {
               findMany: jest.fn(),
@@ -172,22 +173,24 @@ describe('DocenteStatsService', () => {
       jest.spyOn(prisma.inscripcionClaseGrupo, 'findMany').mockResolvedValue([
         { estudiante_id: 'est-1', clase_grupo_id: 'grupo-1' },
         { estudiante_id: 'est-2', clase_grupo_id: 'grupo-1' },
-      ] as any);
+      ] as never);
       jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue([
         { id: 'est-1', nombre: 'Juan', apellido: 'Perez', fotoUrl: null },
         { id: 'est-2', nombre: 'Maria', apellido: 'Gomez', fotoUrl: null },
-      ] as any);
+      ] as never);
       jest
         .spyOn(prisma.claseGrupo, 'findMany')
         .mockResolvedValue([
           { id: 'grupo-1', nombre: 'Grupo A', codigo: 'GA', cupo_maximo: 10 },
-        ] as any);
+        ] as never);
       jest.spyOn(prisma.puntoObtenido, 'findMany').mockResolvedValue([
         { estudiante_id: 'est-1', puntos: 100 },
         { estudiante_id: 'est-1', puntos: 50 },
         { estudiante_id: 'est-2', puntos: 80 },
-      ] as any);
+      ] as never);
       jest.spyOn(prisma.asistenciaClaseGrupo, 'findMany').mockResolvedValue([]);
+      // Mock groupBy para las optimizaciones N+1
+      jest.spyOn(prisma.asistenciaClaseGrupo, 'groupBy').mockResolvedValue([]);
       jest
         .spyOn(prisma.progresoEstudiantePlanificacion, 'findMany')
         .mockResolvedValue([]);
@@ -211,18 +214,20 @@ describe('DocenteStatsService', () => {
       jest.spyOn(prisma.inscripcionClaseGrupo, 'findMany').mockResolvedValue([
         { estudiante_id: 'est-1', clase_grupo_id: 'grupo-1' },
         { estudiante_id: 'est-2', clase_grupo_id: 'grupo-1' },
-      ] as any);
+      ] as never);
       jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue([
         { id: 'est-1', nombre: 'Juan', apellido: 'Perez', fotoUrl: null },
         { id: 'est-2', nombre: 'Maria', apellido: 'Gomez', fotoUrl: null },
-      ] as any);
+      ] as never);
       jest
         .spyOn(prisma.claseGrupo, 'findMany')
         .mockResolvedValue([
           { id: 'grupo-1', nombre: 'Grupo A', codigo: 'GA', cupo_maximo: 10 },
-        ] as any);
+        ] as never);
       jest.spyOn(prisma.puntoObtenido, 'findMany').mockResolvedValue([]);
       jest.spyOn(prisma.asistenciaClaseGrupo, 'findMany').mockResolvedValue([]);
+      // Mock groupBy para las optimizaciones N+1
+      jest.spyOn(prisma.asistenciaClaseGrupo, 'groupBy').mockResolvedValue([]);
       jest
         .spyOn(prisma.progresoEstudiantePlanificacion, 'findMany')
         .mockResolvedValue([]);

@@ -609,43 +609,78 @@ export class DocenteStatsService {
     });
   }
 
+  /**
+   * Calcula estudiantes con asistencia perfecta (100%) y >= 3 asistencias
+   *
+   * OPTIMIZACIÓN N+1:
+   * - ANTES: N queries (1 por estudiante)
+   * - AHORA: 1 query con groupBy + agregación
+   */
   private async calcularAsistenciaPerfecta(
     estudiantesUnicos: EstudianteConGrupos[],
     docenteId: string,
   ) {
-    const asistenciasPorEstudiante = await Promise.all(
-      estudiantesUnicos.map(async (est) => {
-        const asistencias = await this.prisma.asistenciaClaseGrupo.findMany({
-          where: {
-            estudiante_id: est.id,
-            claseGrupo: {
-              docente_id: docenteId,
-            },
-          },
-          select: {
-            estado: true,
-          },
-        });
+    const estudiantesIds = estudiantesUnicos.map((e) => e.id);
 
-        const total = asistencias.length;
-        const presentes = asistencias.filter(
-          (a) => a.estado === 'Presente',
-        ).length;
-        const porcentaje =
-          total > 0 ? Math.round((presentes / total) * 100) : 0;
+    if (estudiantesIds.length === 0) {
+      return [];
+    }
 
-        return {
-          estudiante_id: est.id,
-          nombre: est.nombre,
-          apellido: est.apellido,
-          fotoUrl: est.fotoUrl,
-          grupos: est.grupos,
-          total_asistencias: total,
-          presentes,
-          porcentaje_asistencia: porcentaje,
-        };
-      }),
+    // Query 1: Obtener IDs de claseGrupo del docente
+    const clasesGrupoDocente = await this.prisma.claseGrupo.findMany({
+      where: { docente_id: docenteId, activo: true },
+      select: { id: true },
+    });
+    const clasesGrupoIds = clasesGrupoDocente.map((c) => c.id);
+
+    if (clasesGrupoIds.length === 0) {
+      return [];
+    }
+
+    // Query 2: Agregación de asistencias por estudiante (1 query para todos)
+    const asistenciasAgregadas = await this.prisma.asistenciaClaseGrupo.groupBy(
+      {
+        by: ['estudiante_id', 'estado'],
+        where: {
+          estudiante_id: { in: estudiantesIds },
+          clase_grupo_id: { in: clasesGrupoIds },
+        },
+        _count: { id: true },
+      },
     );
+
+    // Procesar agregación en memoria
+    const statsMap = new Map<string, { total: number; presentes: number }>();
+
+    asistenciasAgregadas.forEach((row) => {
+      const current = statsMap.get(row.estudiante_id) || {
+        total: 0,
+        presentes: 0,
+      };
+      current.total += row._count.id;
+      if (row.estado === 'Presente') {
+        current.presentes += row._count.id;
+      }
+      statsMap.set(row.estudiante_id, current);
+    });
+
+    // Mapear resultados con datos de estudiantes
+    const asistenciasPorEstudiante = estudiantesUnicos.map((est) => {
+      const stats = statsMap.get(est.id) || { total: 0, presentes: 0 };
+      const porcentaje =
+        stats.total > 0 ? Math.round((stats.presentes / stats.total) * 100) : 0;
+
+      return {
+        estudiante_id: est.id,
+        nombre: est.nombre,
+        apellido: est.apellido,
+        fotoUrl: est.fotoUrl,
+        grupos: est.grupos,
+        total_asistencias: stats.total,
+        presentes: stats.presentes,
+        porcentaje_asistencia: porcentaje,
+      };
+    });
 
     return asistenciasPorEstudiante
       .filter(
@@ -685,6 +720,13 @@ export class DocenteStatsService {
       .slice(0, 20);
   }
 
+  /**
+   * Calcula ranking de grupos por puntos y asistencia
+   *
+   * OPTIMIZACIÓN N+1:
+   * - ANTES: N queries (1 por grupo para asistencias)
+   * - AHORA: 1 query con groupBy para todas las asistencias
+   */
   private async calcularRankingGrupos(
     docenteId: string,
     inscripciones: Array<{ estudiante_id: string; clase_grupo_id: string }>,
@@ -703,7 +745,13 @@ export class DocenteStatsService {
       },
     });
 
-    // Obtener puntos por estudiante
+    const gruposIds = gruposDelDocente.map((g) => g.id);
+
+    if (gruposIds.length === 0) {
+      return [];
+    }
+
+    // Query 1: Obtener puntos por estudiante (ya optimizado)
     const puntosObtenidosRaw = await this.prisma.puntoObtenido.findMany({
       where: {
         estudiante_id: {
@@ -725,6 +773,35 @@ export class DocenteStatsService {
       );
     });
 
+    // Query 2: Agregación de asistencias por grupo (1 query para todos)
+    const asistenciasAgregadas = await this.prisma.asistenciaClaseGrupo.groupBy(
+      {
+        by: ['clase_grupo_id', 'estado'],
+        where: {
+          clase_grupo_id: { in: gruposIds },
+        },
+        _count: { id: true },
+      },
+    );
+
+    // Procesar agregación en memoria
+    const asistenciasPorGrupo = new Map<
+      string,
+      { total: number; presentes: number }
+    >();
+
+    asistenciasAgregadas.forEach((row) => {
+      const current = asistenciasPorGrupo.get(row.clase_grupo_id) || {
+        total: 0,
+        presentes: 0,
+      };
+      current.total += row._count.id;
+      if (row.estado === 'Presente') {
+        current.presentes += row._count.id;
+      }
+      asistenciasPorGrupo.set(row.clase_grupo_id, current);
+    });
+
     // Obtener inscripciones por grupo
     const inscripcionesPorGrupo = new Map<string, string[]>();
     inscripciones.forEach((insc) => {
@@ -734,47 +811,38 @@ export class DocenteStatsService {
       inscripcionesPorGrupo.get(insc.clase_grupo_id)!.push(insc.estudiante_id);
     });
 
-    const rankingGrupos = await Promise.all(
-      gruposDelDocente.map(async (grupo) => {
-        const estudiantesIdsGrupo = inscripcionesPorGrupo.get(grupo.id) || [];
+    // Mapear resultados (sin queries adicionales)
+    const rankingGrupos = gruposDelDocente.map((grupo) => {
+      const estudiantesIdsGrupo = inscripcionesPorGrupo.get(grupo.id) || [];
 
-        // Sumar puntos totales del grupo
-        let puntosGrupoTotal = 0;
-        estudiantesIdsGrupo.forEach((estId) => {
-          puntosGrupoTotal += puntosPorEstudiante.get(estId) || 0;
-        });
+      // Sumar puntos totales del grupo (en memoria)
+      let puntosGrupoTotal = 0;
+      estudiantesIdsGrupo.forEach((estId) => {
+        puntosGrupoTotal += puntosPorEstudiante.get(estId) || 0;
+      });
 
-        // Calcular asistencia promedio del grupo
-        const asistenciasGrupo =
-          await this.prisma.asistenciaClaseGrupo.findMany({
-            where: {
-              clase_grupo_id: grupo.id,
-            },
-            select: {
-              estado: true,
-            },
-          });
+      // Obtener asistencia del grupo (desde agregación)
+      const asistenciasGrupo = asistenciasPorGrupo.get(grupo.id) || {
+        total: 0,
+        presentes: 0,
+      };
+      const porcentajeAsistenciaGrupo =
+        asistenciasGrupo.total > 0
+          ? Math.round(
+              (asistenciasGrupo.presentes / asistenciasGrupo.total) * 100,
+            )
+          : 0;
 
-        const totalAsistencias = asistenciasGrupo.length;
-        const presentesGrupo = asistenciasGrupo.filter(
-          (a) => a.estado === 'Presente',
-        ).length;
-        const porcentajeAsistenciaGrupo =
-          totalAsistencias > 0
-            ? Math.round((presentesGrupo / totalAsistencias) * 100)
-            : 0;
-
-        return {
-          grupo_id: grupo.id,
-          nombre: grupo.nombre,
-          codigo: grupo.codigo,
-          estudiantes_activos: estudiantesIdsGrupo.length,
-          cupo_maximo: grupo.cupo_maximo,
-          puntos_totales: puntosGrupoTotal,
-          asistencia_promedio: porcentajeAsistenciaGrupo,
-        };
-      }),
-    );
+      return {
+        grupo_id: grupo.id,
+        nombre: grupo.nombre,
+        codigo: grupo.codigo,
+        estudiantes_activos: estudiantesIdsGrupo.length,
+        cupo_maximo: grupo.cupo_maximo,
+        puntos_totales: puntosGrupoTotal,
+        asistencia_promedio: porcentajeAsistenciaGrupo,
+      };
+    });
 
     // Ordenar grupos por puntos totales
     rankingGrupos.sort((a, b) => b.puntos_totales - a.puntos_totales);
@@ -782,39 +850,65 @@ export class DocenteStatsService {
     return rankingGrupos;
   }
 
+  /**
+   * Calcula asistencia por estudiante
+   *
+   * OPTIMIZACIÓN N+1:
+   * - ANTES: N queries (1 por estudiante)
+   * - AHORA: 1 query con groupBy para todas las asistencias
+   */
   private async calcularAsistenciaPorEstudiante(
     estudiantesUnicos: EstudianteConGrupos[],
     _estudiantesIds: string[],
   ): Promise<AsistenciaEstudiante[]> {
-    return await Promise.all(
-      estudiantesUnicos.map(async (est) => {
-        const asistencias = await this.prisma.asistenciaClaseGrupo.findMany({
-          where: {
-            estudiante_id: est.id,
-          },
-          select: {
-            estado: true,
-          },
-        });
+    const estudiantesIds = estudiantesUnicos.map((e) => e.id);
 
-        const total = asistencias.length;
-        const presentes = asistencias.filter(
-          (a) => a.estado === 'Presente',
-        ).length;
-        const porcentaje =
-          total > 0 ? Math.round((presentes / total) * 100) : 0;
+    if (estudiantesIds.length === 0) {
+      return [];
+    }
 
-        return {
-          estudiante_id: est.id,
-          nombre: est.nombre,
-          apellido: est.apellido,
-          fotoUrl: est.fotoUrl,
-          grupos: est.grupos,
-          total_asistencias: total,
-          presentes,
-          porcentaje_asistencia: porcentaje,
-        };
-      }),
+    // Query 1: Agregación de asistencias por estudiante (1 query para todos)
+    const asistenciasAgregadas = await this.prisma.asistenciaClaseGrupo.groupBy(
+      {
+        by: ['estudiante_id', 'estado'],
+        where: {
+          estudiante_id: { in: estudiantesIds },
+        },
+        _count: { id: true },
+      },
     );
+
+    // Procesar agregación en memoria
+    const statsMap = new Map<string, { total: number; presentes: number }>();
+
+    asistenciasAgregadas.forEach((row) => {
+      const current = statsMap.get(row.estudiante_id) || {
+        total: 0,
+        presentes: 0,
+      };
+      current.total += row._count.id;
+      if (row.estado === 'Presente') {
+        current.presentes += row._count.id;
+      }
+      statsMap.set(row.estudiante_id, current);
+    });
+
+    // Mapear resultados con datos de estudiantes (sin queries adicionales)
+    return estudiantesUnicos.map((est) => {
+      const stats = statsMap.get(est.id) || { total: 0, presentes: 0 };
+      const porcentaje =
+        stats.total > 0 ? Math.round((stats.presentes / stats.total) * 100) : 0;
+
+      return {
+        estudiante_id: est.id,
+        nombre: est.nombre,
+        apellido: est.apellido,
+        fotoUrl: est.fotoUrl,
+        grupos: est.grupos,
+        total_asistencias: stats.total,
+        presentes: stats.presentes,
+        porcentaje_asistencia: porcentaje,
+      };
+    });
   }
 }

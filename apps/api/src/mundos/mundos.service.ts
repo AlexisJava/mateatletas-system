@@ -151,6 +151,10 @@ export class MundosService {
 
   /**
    * Obtiene estadisticas de los mundos
+   *
+   * OPTIMIZACIÓN N+1:
+   * - ANTES: N queries (1 count por mundo)
+   * - AHORA: 1 query con groupBy para contar todos
    */
   async getEstadisticas(): Promise<EstadisticasMundos> {
     const mundos = await this.prisma.mundo.findMany({
@@ -158,31 +162,35 @@ export class MundosService {
       orderBy: { orden: 'asc' },
     });
 
-    // Contar estudiantes por mundo
-    const conteos = await Promise.all(
-      mundos.map(async (mundo) => {
-        const count = await this.prisma.cicloMundoSeleccionado2026.count({
-          where: { mundo: mundo.tipo },
-        });
-        return { tipo: mundo.tipo, count };
-      }),
-    );
+    // Query única: Contar estudiantes por mundo usando groupBy
+    const conteosAgrupados =
+      await this.prisma.cicloMundoSeleccionado2026.groupBy({
+        by: ['mundo'],
+        _count: { id: true },
+      });
 
-    const totalEstudiantes = conteos.reduce((sum, c) => sum + c.count, 0);
+    // Crear mapa de conteos para acceso O(1)
+    const conteosMap = new Map<MundoTipo, number>();
+    conteosAgrupados.forEach((row) => {
+      conteosMap.set(row.mundo, row._count.id);
+    });
+
+    // Calcular total
+    const totalEstudiantes = conteosAgrupados.reduce(
+      (sum, c) => sum + c._count.id,
+      0,
+    );
 
     return {
       totalMundos: mundos.length,
       totalEstudiantes,
-      mundos: mundos.map((mundo) => {
-        const conteo = conteos.find((c) => c.tipo === mundo.tipo);
-        return {
-          id: mundo.id,
-          tipo: mundo.tipo,
-          nombre: mundo.nombre,
-          icono: mundo.icono,
-          cantidadEstudiantes: conteo?.count ?? 0,
-        };
-      }),
+      mundos: mundos.map((mundo) => ({
+        id: mundo.id,
+        tipo: mundo.tipo,
+        nombre: mundo.nombre,
+        icono: mundo.icono,
+        cantidadEstudiantes: conteosMap.get(mundo.tipo) ?? 0,
+      })),
     };
   }
 }

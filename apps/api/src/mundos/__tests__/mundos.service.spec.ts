@@ -76,6 +76,7 @@ describe('MundosService', () => {
     cicloMundoSeleccionado2026: {
       findMany: jest.fn(),
       count: jest.fn(),
+      groupBy: jest.fn(),
     },
   };
 
@@ -261,10 +262,12 @@ describe('MundosService', () => {
   describe('getEstadisticas', () => {
     it('should_return_estadisticas_de_todos_los_mundos', async () => {
       mockPrismaService.mundo.findMany.mockResolvedValue(mockMundos);
-      mockPrismaService.cicloMundoSeleccionado2026.count
-        .mockResolvedValueOnce(100) // Matematica
-        .mockResolvedValueOnce(80) // Programacion
-        .mockResolvedValueOnce(50); // Ciencias
+      // Ahora usa groupBy en lugar de count (optimización N+1)
+      mockPrismaService.cicloMundoSeleccionado2026.groupBy.mockResolvedValue([
+        { mundo: MundoTipo.MATEMATICA, _count: { id: 100 } },
+        { mundo: MundoTipo.PROGRAMACION, _count: { id: 80 } },
+        { mundo: MundoTipo.CIENCIAS, _count: { id: 50 } },
+      ]);
 
       const resultado = await service.getEstadisticas();
 
@@ -275,10 +278,11 @@ describe('MundosService', () => {
 
     it('should_include_cantidad_estudiantes_per_mundo', async () => {
       mockPrismaService.mundo.findMany.mockResolvedValue(mockMundos);
-      mockPrismaService.cicloMundoSeleccionado2026.count
-        .mockResolvedValueOnce(100)
-        .mockResolvedValueOnce(80)
-        .mockResolvedValueOnce(50);
+      mockPrismaService.cicloMundoSeleccionado2026.groupBy.mockResolvedValue([
+        { mundo: MundoTipo.MATEMATICA, _count: { id: 100 } },
+        { mundo: MundoTipo.PROGRAMACION, _count: { id: 80 } },
+        { mundo: MundoTipo.CIENCIAS, _count: { id: 50 } },
+      ]);
 
       const resultado = await service.getEstadisticas();
 
@@ -289,7 +293,9 @@ describe('MundosService', () => {
 
     it('should_return_zero_estudiantes_when_no_selections', async () => {
       mockPrismaService.mundo.findMany.mockResolvedValue(mockMundos);
-      mockPrismaService.cicloMundoSeleccionado2026.count.mockResolvedValue(0);
+      mockPrismaService.cicloMundoSeleccionado2026.groupBy.mockResolvedValue(
+        [],
+      );
 
       const resultado = await service.getEstadisticas();
 
