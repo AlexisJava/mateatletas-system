@@ -61,12 +61,6 @@ export class GamificacionService {
                 nombre: true,
                 fecha_hora_inicio: true,
                 estado: true,
-                rutaCurricular: {
-                  select: {
-                    nombre: true,
-                    color: true,
-                  },
-                },
                 docente: {
                   select: {
                     nombre: true,
@@ -89,12 +83,6 @@ export class GamificacionService {
                 id: true,
                 nombre: true,
                 fecha_hora_inicio: true,
-                rutaCurricular: {
-                  select: {
-                    nombre: true,
-                    color: true,
-                  },
-                },
               },
             },
           },
@@ -110,7 +98,7 @@ export class GamificacionService {
     const nivelInfo = await this.getNivelInfo(estudiante.puntos_totales);
 
     // Calcular puntos totales basados en asistencias
-    const puntosAsistencia =
+    const _puntosAsistencia =
       estudiante.asistencias.filter(
         (a) => a.estado === EstadoAsistencia.Presente,
       ).length * 10;
@@ -132,13 +120,6 @@ export class GamificacionService {
         descripcion: true,
         fecha_hora_inicio: true,
         estado: true,
-        rutaCurricular: {
-          select: {
-            nombre: true,
-            descripcion: true,
-            color: true,
-          },
-        },
         docente: {
           select: {
             nombre: true,
@@ -264,89 +245,18 @@ export class GamificacionService {
   }
 
   /**
-   * Obtener progreso por ruta curricular
-   *
-   * OPTIMIZACIÓN N+1 QUERY:
-   * - ANTES: 1 + (N × 2) queries (1 rutas + N counts clases + N counts asistencias)
-   * - AHORA: 3 queries totales (rutas + agregación clases + agregación asistencias)
-   *
-   * PERFORMANCE:
-   * - Con 10 rutas: 21 queries → 3 queries (85% reducción)
-   * - Con 20 rutas: 41 queries → 3 queries (93% reducción)
+   * Obtener progreso por clase del estudiante
+   * (Anteriormente usaba rutas curriculares, ahora simplificado)
    */
-  async getProgresoEstudiante(estudianteId: string) {
-    // Query 1: Obtener todas las rutas
-    const rutas = await this.prisma.rutaCurricular.findMany({
-      select: {
-        id: true,
-        nombre: true,
-        color: true,
-      },
-    });
-
-    // Query 2: Agregación de clases totales por ruta (1 query en lugar de N)
-    const clasesTotalesPorRuta = await this.prisma.clase.groupBy({
-      by: ['ruta_curricular_id'],
-      _count: {
-        id: true,
-      },
-    });
-
-    // Query 3: Agregación de asistencias por ruta (1 query en lugar de N)
-    const asistenciasPorRuta = await this.prisma.asistencia.groupBy({
-      by: ['clase_id'],
-      where: {
-        estudiante_id: estudianteId,
-        estado: EstadoAsistencia.Presente,
-      },
-      _count: {
-        id: true,
-      },
-    });
-
-    // Obtener mapeo de clase_id → ruta_id
-    const clasesConRuta = await this.prisma.clase.findMany({
-      where: {
-        id: {
-          in: asistenciasPorRuta.map((a) => a.clase_id),
-        },
-      },
-      select: {
-        id: true,
-        ruta_curricular_id: true,
-      },
-    });
-
-    // Crear mapeo: ruta_id → cantidad de asistencias
-    const asistenciasPorRutaMap = new Map<string, number>();
-    asistenciasPorRuta.forEach((asistencia) => {
-      const clase = clasesConRuta.find((c) => c.id === asistencia.clase_id);
-      if (clase?.ruta_curricular_id) {
-        const rutaId = clase.ruta_curricular_id;
-        const count = asistenciasPorRutaMap.get(rutaId) || 0;
-        asistenciasPorRutaMap.set(rutaId, count + asistencia._count.id);
-      }
-    });
-
-    // Mapear resultados (procesamiento en memoria, sin queries adicionales)
-    const progresoPorRuta = rutas.map((ruta) => {
-      const clasesTotales =
-        clasesTotalesPorRuta.find((c) => c.ruta_curricular_id === ruta.id)
-          ?._count.id || 0;
-      const clasesAsistidas = asistenciasPorRutaMap.get(ruta.id) || 0;
-      const porcentaje =
-        clasesTotales > 0 ? (clasesAsistidas / clasesTotales) * 100 : 0;
-
-      return {
-        ruta: ruta.nombre,
-        color: ruta.color,
-        clasesAsistidas,
-        clasesTotales,
-        porcentaje: Math.round(porcentaje),
-      };
-    });
-
-    return progresoPorRuta;
+  getProgresoEstudiante(_estudianteId: string): Array<{
+    clase: string;
+    clasesAsistidas: number;
+    clasesTotales: number;
+    porcentaje: number;
+  }> {
+    // Sistema de rutas curriculares eliminado
+    // Retorna array vacío hasta que se implemente nuevo sistema de progreso
+    return [];
   }
 
   // === DELEGATION METHODS ===
@@ -364,7 +274,7 @@ export class GamificacionService {
    * Desbloquear logro
    * @delegated LogrosService
    */
-  async desbloquearLogro(estudianteId: string, logroId: string) {
+  desbloquearLogro(estudianteId: string, logroId: string) {
     return this.logrosService.desbloquearLogro(estudianteId, logroId);
   }
 

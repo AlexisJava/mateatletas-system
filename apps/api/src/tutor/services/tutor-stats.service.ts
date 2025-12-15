@@ -13,19 +13,19 @@ import {
 // TIPOS INTERNOS (sin any ni unknown)
 // ============================================================================
 
-type InscripcionFinanciera = {
+type _InscripcionFinanciera = {
   estadoPago: string;
   precioFinal: number;
   estudianteId: string;
 };
 
-type EstudianteBasico = {
+type _EstudianteBasico = {
   id: string;
   nombre: string;
   apellido: string;
 };
 
-type PagosPendientesResult = {
+type _PagosPendientesResult = {
   id: string;
   periodo: string;
   precio_final: number;
@@ -40,15 +40,11 @@ type PagosPendientesResult = {
   } | null;
 };
 
-type ClaseConInscripcion = {
+type _ClaseConInscripcion = {
   id: string;
   fecha_hora_inicio: Date;
   duracion_minutos: number;
   estado: string;
-  rutaCurricular: {
-    nombre: string;
-    color: string | null;
-  } | null;
   docente: {
     nombre: string;
     apellido: string;
@@ -62,7 +58,7 @@ type ClaseConInscripcion = {
   }>;
 };
 
-type AsistenciaGroupBy = {
+type _AsistenciaGroupBy = {
   estado: string;
   _count: {
     estado: number;
@@ -109,12 +105,10 @@ export class TutorStatsService {
 
     for (const inscripcion of inscripciones) {
       // Sumar totales según estado
-      if (
-        inscripcion.estadoPago === 'Pendiente' ||
-        inscripcion.estadoPago === 'Vencido'
-      ) {
+      const estado = inscripcion.estadoPago as string;
+      if (estado === 'Pendiente' || estado === 'Vencido') {
         totalPendiente += Number(inscripcion.precioFinal);
-      } else if (inscripcion.estadoPago === 'Pagado') {
+      } else if (estado === 'Pagado') {
         totalPagado += Number(inscripcion.precioFinal);
       }
 
@@ -338,12 +332,6 @@ export class TutorStatsService {
         },
       },
       include: {
-        rutaCurricular: {
-          select: {
-            nombre: true,
-            color: true,
-          },
-        },
         docente: {
           select: {
             nombre: true,
@@ -395,8 +383,7 @@ export class TutorStatsService {
             minute: '2-digit',
             hour12: false,
           }),
-          nombreRuta: clase.rutaCurricular?.nombre || 'Clase sin ruta',
-          colorRuta: clase.rutaCurricular?.color || undefined,
+          nombreClase: clase.nombre,
           estudianteId: inscripcion.estudiante.id,
           estudianteNombre: `${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido}`,
           docenteNombre: `${clase.docente.nombre} ${clase.docente.apellido}`,

@@ -39,10 +39,8 @@ export class PuntosService {
         clase: {
           select: {
             id: true,
+            nombre: true,
             fecha_hora_inicio: true,
-            rutaCurricular: {
-              select: { nombre: true, color: true },
-            },
           },
         },
       },
@@ -173,7 +171,10 @@ export class PuntosService {
       where: { estudiante_id: estudianteId },
       include: {
         clase: {
-          include: { rutaCurricular: true },
+          select: {
+            id: true,
+            nombre: true,
+          },
         },
       },
     });
@@ -182,13 +183,13 @@ export class PuntosService {
       asistencias.filter((a) => a.estado === EstadoAsistencia.Presente).length *
       10;
 
-    // Puntos por ruta
-    const puntosPorRuta: Record<string, number> = {};
+    // Puntos por clase
+    const puntosPorClase: Record<string, number> = {};
     asistencias
       .filter((a) => a.estado === EstadoAsistencia.Presente)
       .forEach((a) => {
-        const rutaNombre = a.clase.rutaCurricular?.nombre || 'General';
-        puntosPorRuta[rutaNombre] = (puntosPorRuta[rutaNombre] || 0) + 10;
+        const claseNombre = a.clase.nombre || 'General';
+        puntosPorClase[claseNombre] = (puntosPorClase[claseNombre] || 0) + 10;
       });
 
     const estudiante = await this.prisma.estudiante.findUnique({
@@ -200,7 +201,7 @@ export class PuntosService {
       total: estudiante?.puntos_totales || 0,
       asistencia: puntosAsistencia,
       extras: (estudiante?.puntos_totales || 0) - puntosAsistencia,
-      porRuta: puntosPorRuta,
+      porClase: puntosPorClase,
     };
   }
 }

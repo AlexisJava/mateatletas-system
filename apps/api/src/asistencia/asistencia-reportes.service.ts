@@ -332,13 +332,8 @@ export class AsistenciaReportesService {
         clase: {
           select: {
             id: true,
+            nombre: true,
             fecha_hora_inicio: true,
-            rutaCurricular: {
-              select: {
-                nombre: true,
-                color: true,
-              },
-            },
           },
         },
       },
@@ -373,10 +368,8 @@ export class AsistenciaReportesService {
         },
         clase: {
           select: {
+            nombre: true,
             fecha_hora_inicio: true,
-            rutaCurricular: {
-              select: { nombre: true, color: true },
-            },
           },
         },
       },
@@ -437,31 +430,26 @@ export class AsistenciaReportesService {
       .sort((a, b) => b.asistencias - a.asistencias)
       .slice(0, 10);
 
-    // 4. Attendance by curriculum path
-    const porRuta: Record<
-      string,
-      { presentes: number; total: number; color: string }
-    > = {};
+    // 4. Attendance by class name
+    const porClase: Record<string, { presentes: number; total: number }> = {};
 
     todasAsistencias.forEach((a) => {
-      const rutaNombre = a.clase.rutaCurricular?.nombre ?? 'Sin ruta';
-      if (!porRuta[rutaNombre]) {
-        porRuta[rutaNombre] = {
+      const claseNombre = a.clase.nombre || 'Sin nombre';
+      if (!porClase[claseNombre]) {
+        porClase[claseNombre] = {
           presentes: 0,
           total: 0,
-          color: a.clase.rutaCurricular?.color || '#6B7280', // Default color if null
         };
       }
 
-      porRuta[rutaNombre].total++;
+      porClase[claseNombre].total++;
       if (a.estado === EstadoAsistencia.Presente) {
-        porRuta[rutaNombre].presentes++;
+        porClase[claseNombre].presentes++;
       }
     });
 
-    const porRutaArray = Object.entries(porRuta).map(([nombre, data]) => ({
-      ruta: nombre,
-      color: data.color,
+    const porClaseArray = Object.entries(porClase).map(([nombre, data]) => ({
+      clase: nombre,
       presentes: data.presentes,
       total: data.total,
       porcentaje:
@@ -494,7 +482,7 @@ export class AsistenciaReportesService {
       },
       asistencia_semanal: porSemana,
       top_estudiantes: topEstudiantes,
-      por_ruta_curricular: porRutaArray,
+      por_clase: porClaseArray,
     };
   }
 }

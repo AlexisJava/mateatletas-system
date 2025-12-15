@@ -115,7 +115,14 @@ export class LogrosService {
   /**
    * Desbloquear logro
    */
-  async desbloquearLogro(estudianteId: string, logroId: string) {
+  desbloquearLogro(
+    estudianteId: string,
+    logroId: string,
+  ): {
+    success: boolean;
+    logro: string;
+    estudiante: string;
+  } {
     // Por ahora solo simulado
     // En producción, guardar en tabla LogrosEstudiante
     return {
@@ -169,18 +176,21 @@ export class LogrosService {
    * Verificar logros desbloqueados al completar una actividad
    * Retorna array de logros recién desbloqueados
    */
-  async verificarLogrosActividad(
-    estudianteId: string,
-    actividadId: string,
+  verificarLogrosActividad(
+    _estudianteId: string,
+    _actividadId: string,
     metricas: {
       estrellas: number;
       porcentaje_aciertos: number;
       tiempo_minutos: number;
       primer_intento: boolean;
     },
-  ): Promise<
-    Array<{ id: string; nombre: string; descripcion: string; puntos: number }>
-  > {
+  ): Array<{
+    id: string;
+    nombre: string;
+    descripcion: string;
+    puntos: number;
+  }> {
     const logrosDesbloqueados: Array<{
       id: string;
       nombre: string;
@@ -188,34 +198,8 @@ export class LogrosService {
       puntos: number;
     }> = [];
 
-    // Verificar actividades completadas
-    const actividadesCompletadas =
-      await this.prisma.progresoEstudianteActividad.count({
-        where: {
-          estudiante_id: estudianteId,
-          completado: true,
-        },
-      });
-
-    // Primera actividad completada
-    if (actividadesCompletadas === 1) {
-      logrosDesbloqueados.push({
-        id: 'primera-actividad',
-        nombre: 'Primera Actividad',
-        descripcion: 'Completaste tu primera actividad',
-        puntos: 50,
-      });
-    }
-
-    // 10 actividades completadas
-    if (actividadesCompletadas === 10) {
-      logrosDesbloqueados.push({
-        id: '10-actividades',
-        nombre: '10 Actividades Completadas',
-        descripcion: 'Completaste 10 actividades',
-        puntos: 150,
-      });
-    }
+    // Sistema de actividades (Planificaciones) no implementado
+    // Los logros de actividades se agregarán cuando se implemente el nuevo sistema
 
     // Perfeccionista (3 estrellas en primer intento)
     if (metricas.estrellas === 3 && metricas.primer_intento) {

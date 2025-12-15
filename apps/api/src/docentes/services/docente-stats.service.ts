@@ -191,17 +191,18 @@ export class DocenteStatsService {
     const [
       topEstudiantesCompleto,
       estudiantesAsistenciaPerfecta,
-      estudiantesSinTareas,
       rankingGrupos,
     ] = await Promise.all([
       this.calcularTopEstudiantesPorPuntos(estudiantesUnicos, estudiantes),
       this.calcularAsistenciaPerfecta(estudiantesUnicos, docenteId),
-      this.calcularEstudiantesSinTareas(
-        estudiantesUnicos,
-        estudiantesIdsUnicos,
-      ),
       this.calcularRankingGrupos(docenteId, inscripciones, gruposIds),
     ]);
+
+    // Sistema de tareas no implementado - cálculo síncrono
+    const estudiantesSinTareas = this.calcularEstudiantesSinTareas(
+      estudiantesUnicos,
+      estudiantesIdsUnicos,
+    );
 
     return {
       topEstudiantesPorPuntos: topEstudiantesCompleto,
@@ -691,33 +692,13 @@ export class DocenteStatsService {
       .slice(0, 10);
   }
 
-  private async calcularEstudiantesSinTareas(
-    estudiantesUnicos: EstudianteConGrupos[],
-    estudiantesIdsUnicos: string[],
-  ) {
-    const progresoActividades =
-      await this.prisma.progresoEstudianteActividad.findMany({
-        where: {
-          estudiante_id: {
-            in: estudiantesIdsUnicos,
-          },
-          iniciado: true,
-        },
-        select: {
-          estudiante_id: true,
-        },
-        distinct: ['estudiante_id'],
-      });
-
-    const estudiantesConProgreso = new Set(
-      progresoActividades.map(
-        (p: { estudiante_id: string }) => p.estudiante_id,
-      ),
-    );
-
-    return estudiantesUnicos
-      .filter((est) => !estudiantesConProgreso.has(est.id))
-      .slice(0, 20);
+  private calcularEstudiantesSinTareas(
+    _estudiantesUnicos: EstudianteConGrupos[],
+    _estudiantesIdsUnicos: string[],
+  ): EstudianteConGrupos[] {
+    // Sistema de tareas (Planificaciones) no implementado
+    // Retorna array vacío hasta que se implemente el nuevo sistema
+    return [];
   }
 
   /**

@@ -132,7 +132,6 @@ model Estudiante {
   puntosObtenidos           PuntoObtenido[]
   inscripciones_mensuales   InscripcionMensual[]
   becas                     Beca[]
-  progresosActividades      ProgresoEstudianteActividad[]
   recursos                  RecursosEstudiante?
   itemsObtenidos            ItemObtenido[]
 
@@ -274,8 +273,6 @@ model Mundo {
   /// ONBOARDING 2026 - Relaciones
   estudiantes_nivel EstudianteMundoNivel[]
   tests_ubicacion   TestUbicacionResultado[]
-
-  // Nota: Relación con planificaciones se agregará en SLICE 5
 
   // Índice de performance para filtros de mundos activos
   @@index([activo], name: "idx_mundos_activo")
@@ -509,7 +506,6 @@ model Docente {
   eventos                     Evento[]
   notificaciones              Notificacion[]
   puntosOtorgados             PuntoObtenido[]     @relation("PuntosOtorgados")
-  asignacionesPlanificaciones AsignacionDocente[]
 
   @@map("docentes")
 }
@@ -755,9 +751,6 @@ model Grupo {
   /// Comisiones (instancias operativas) de este grupo
   comisiones ClaseGrupo[]
 
-  /// Planificaciones mensuales dirigidas a este grupo
-  planificaciones PlanificacionMensual[]
-
   @@index([codigo])
   @@index([activo])
   @@map("grupos")
@@ -834,12 +827,6 @@ model ClaseGrupo {
 
   /// Registros de asistencia del grupo
   asistencias AsistenciaClaseGrupo[]
-
-  /// Asignaciones de planificaciones mensuales
-  asignacionesPlanificaciones AsignacionDocente[]
-
-  /// Asignaciones de actividades semanales
-  asignacionesActividades AsignacionActividadEstudiante[]
 
   @@index([docente_id])
   @@index([dia_semana])
@@ -1817,325 +1804,6 @@ enum DiaSemana {
   DOMINGO
 
   @@map("dia_semana")
-}
-
-// ============================================================================
-// SISTEMA DE PLANIFICACIONES MENSUALES
-// ============================================================================
-
-/// Catálogo de planificaciones mensuales creadas por Admin
-/// Una planificación = 1 mes completo para un código de grupo (B1, B2, B3)
-model PlanificacionMensual {
-  /// Identificador único
-  id String @id @default(cuid())
-
-  // ===== TARGETING: A QUÉ GRUPO VA DIRIGIDA =====
-  /// ID del grupo pedagógico al que aplica (B1, B2, B3, A1, etc.)
-  grupo_id String
-
-  /// Mes (1-12)
-  mes Int
-
-  /// Año (2025, 2026, etc.)
-  anio Int
-
-  // ===== CONTENIDO =====
-  /// Título de la planificación
-  titulo String // "Multiplicaciones - Marzo 2025"
-
-  /// Descripción general del mes
-  descripcion String
-
-  /// Temática principal del mes
-  tematica_principal String // "Multiplicaciones", "Fracciones", "Geometría"
-
-  /// Objetivos de aprendizaje del mes
-  objetivos_aprendizaje String[]
-
-  // ===== METADATA =====
-  /// Estado de la planificación
-  estado EstadoPlanificacion @default(BORRADOR)
-
-  /// Fecha en que se publicó (visible para docentes)
-  fecha_publicacion DateTime?
-
-  /// Notas para docentes (instrucciones generales)
-  notas_docentes String?
-
-  // ===== RELACIONES =====
-  /// Grupo pedagógico al que pertenece
-  grupo Grupo @relation(fields: [grupo_id], references: [id])
-
-  /// Actividades semanales de esta planificación
-  actividades ActividadSemanal[]
-
-  /// Asignaciones que hicieron los docentes
-  asignaciones AsignacionDocente[]
-
-  // ===== AUDITORÍA =====
-  created_by_admin_id String
-  created_at          DateTime @default(now())
-  updated_at          DateTime @updatedAt
-
-  /// Solo UNA planificación por grupo por mes
-  @@unique([grupo_id, mes, anio])
-  @@index([grupo_id, mes, anio])
-  @@index([estado])
-  @@map("planificaciones_mensuales")
-}
-
-/// Estados posibles de una planificación
-enum EstadoPlanificacion {
-  BORRADOR // Admin está armándola, no visible para docentes
-  PUBLICADA // Visible para docentes, pueden asignar
-  ARCHIVADA // Mes pasado, solo lectura
-
-  @@map("estado_planificacion")
-}
-
-/// Nivel de dificultad de una actividad
-enum NivelDificultad {
-  BASICO
-  INTERMEDIO
-  AVANZADO
-  OLIMPICO
-
-  @@map("nivel_dificultad")
-}
-
-/// Actividad semanal dentro de una planificación mensual
-/// Cada semana tiene UNA actividad principal (juego/ejercicio)
-model ActividadSemanal {
-  /// Identificador único
-  id String @id @default(cuid())
-
-  /// Planificación a la que pertenece
-  planificacion_id String
-
-  // ===== UBICACIÓN TEMPORAL =====
-  /// Número de semana dentro del mes (1, 2, 3, 4)
-  semana_numero Int
-
-  /// Título de la semana
-  titulo String // "Semana 1: Tablas del 1 al 3"
-
-  /// Descripción de la actividad
-  descripcion String
-
-  // ===== COMPONENTE REACT =====
-  /// Nombre del componente React que se va a renderizar
-  componente_nombre String // "JuegoTablasMultiplicar"
-
-  /// Props que recibe el componente (JSON flexible)
-  componente_props Json // { "tablas": [1,2,3], "nivel": "basico" }
-
-  // ===== CONFIGURACIÓN PEDAGÓGICA =====
-  /// Nivel de dificultad
-  nivel_dificultad NivelDificultad
-
-  /// Tiempo estimado en minutos
-  tiempo_estimado_minutos Int
-
-  /// Puntos de gamificación que se pueden obtener
-  puntos_gamificacion Int
-
-  // ===== INSTRUCCIONES =====
-  /// Instrucciones para el docente
-  instrucciones_docente String
-
-  /// Instrucciones para el estudiante
-  instrucciones_estudiante String
-
-  // ===== RECURSOS ADICIONALES =====
-  /// URLs de recursos (PDFs, videos, links)
-  recursos_url Json? // [{ "tipo": "pdf", "titulo": "Guía", "url": "..." }]
-
-  /// Orden dentro de la planificación (para futuras expansiones)
-  orden Int @default(1)
-
-  // ===== RELACIONES =====
-  planificacion PlanificacionMensual @relation(fields: [planificacion_id], references: [id], onDelete: Cascade)
-
-  /// Asignaciones de esta actividad específica
-  asignacionesActividad AsignacionActividadEstudiante[]
-
-  /// Progreso de estudiantes en esta actividad
-  progresosEstudiantes ProgresoEstudianteActividad[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@index([planificacion_id, semana_numero])
-  @@map("actividades_semanales")
-}
-
-/// Asignación de una planificación completa por un docente a su grupo
-/// El docente "activa" la planificación del mes para su grupo
-model AsignacionDocente {
-  /// Identificador único
-  id String @id @default(cuid())
-
-  /// Planificación que se asigna
-  planificacion_id String
-
-  /// Grupo al que se asigna
-  clase_grupo_id String
-
-  /// Docente que hace la asignación
-  docente_id String
-
-  // ===== CONTROL DEL DOCENTE =====
-  /// Si está activa o pausada
-  activo Boolean @default(true)
-
-  /// Fecha en que el docente activó esta planificación
-  fecha_asignacion DateTime @default(now())
-
-  /// Mensaje personalizado del docente (opcional)
-  mensaje_docente String?
-
-  /// Fecha de inicio custom (por si el docente quiere empezar antes/después)
-  fecha_inicio_custom DateTime?
-
-  // ===== RELACIONES =====
-  planificacion PlanificacionMensual @relation(fields: [planificacion_id], references: [id])
-  claseGrupo    ClaseGrupo           @relation(fields: [clase_grupo_id], references: [id])
-  docente       Docente              @relation(fields: [docente_id], references: [id])
-
-  /// Asignaciones de actividades individuales
-  asignacionesActividades AsignacionActividadEstudiante[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  /// Un docente solo puede asignar una planificación una vez a su grupo
-  @@unique([planificacion_id, clase_grupo_id])
-  @@index([clase_grupo_id, docente_id])
-  @@map("asignaciones_docente")
-}
-
-/// Asignación de una actividad semanal específica a estudiantes
-/// El docente controla CUÁNDO y A QUIÉNES asigna cada semana
-model AsignacionActividadEstudiante {
-  /// Identificador único
-  id String @id @default(cuid())
-
-  /// Asignación padre (de la planificación completa)
-  asignacion_docente_id String
-
-  /// Actividad semanal específica
-  actividad_id String
-
-  /// Grupo al que se asigna (heredado de asignacion_docente)
-  clase_grupo_id String
-
-  // ===== CONTROL TEMPORAL =====
-  /// Fecha en que se hace visible para los estudiantes
-  fecha_inicio DateTime
-
-  /// Fecha límite para completar (opcional)
-  fecha_fin DateTime?
-
-  /// Estado de la asignación
-  estado EstadoAsignacion @default(ACTIVA)
-
-  // ===== PERSONALIZACIÓN =====
-  /// Mensaje personalizado del docente para esta semana
-  mensaje_semana String?
-
-  // ===== NOTIFICACIONES =====
-  /// Si se notificó a estudiantes
-  notificado_estudiantes         Boolean   @default(false)
-  fecha_notificacion_estudiantes DateTime?
-
-  /// Si se notificó a tutores
-  notificado_tutores         Boolean   @default(false)
-  fecha_notificacion_tutores DateTime?
-
-  // ===== RELACIONES =====
-  asignacionDocente AsignacionDocente @relation(fields: [asignacion_docente_id], references: [id], onDelete: Cascade)
-  actividad         ActividadSemanal  @relation(fields: [actividad_id], references: [id])
-  claseGrupo        ClaseGrupo        @relation(fields: [clase_grupo_id], references: [id])
-
-  /// Progreso de cada estudiante
-  progresosEstudiantes ProgresoEstudianteActividad[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@index([clase_grupo_id, fecha_inicio])
-  @@index([asignacion_docente_id])
-  @@map("asignaciones_actividad_estudiante")
-}
-
-/// Estados de una asignación
-enum EstadoAsignacion {
-  ACTIVA // Disponible para los estudiantes
-  PAUSADA // Docente la pausó temporalmente
-  FINALIZADA // Ya pasó la fecha límite
-  CANCELADA // Docente la canceló
-
-  @@map("estado_asignacion")
-}
-
-/// Progreso individual de cada estudiante en cada actividad
-model ProgresoEstudianteActividad {
-  /// Identificador único
-  id String @id @default(cuid())
-
-  /// Estudiante
-  estudiante_id String
-
-  /// Actividad semanal
-  actividad_id String
-
-  /// Asignación específica (para saber de qué grupo viene)
-  asignacion_id String
-
-  // ===== ESTADO DE PROGRESO =====
-  /// Si el estudiante inició la actividad
-  iniciado     Boolean   @default(false)
-  fecha_inicio DateTime?
-
-  /// Si completó la actividad
-  completado       Boolean   @default(false)
-  fecha_completado DateTime?
-
-  // ===== MÉTRICAS =====
-  /// Puntos obtenidos
-  puntos_obtenidos Int @default(0)
-
-  /// Tiempo total jugando (en minutos)
-  tiempo_total_minutos Int @default(0)
-
-  /// Cantidad de intentos
-  intentos Int @default(0)
-
-  /// Mejor puntaje obtenido
-  mejor_puntaje Int @default(0)
-
-  // ===== ESTADO DEL JUEGO =====
-  /// Estado actual del juego (para poder continuar después)
-  /// Estructura flexible según el juego
-  estado_juego Json? // { "nivel": 5, "vidas": 2, "items_desbloqueados": [...] }
-
-  /// Respuestas detalladas (para análisis del docente)
-  respuestas_detalle Json? // [{ "pregunta": 1, "correcta": true, "tiempo_segundos": 5 }]
-
-  // ===== RELACIONES =====
-  estudiante Estudiante                    @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  actividad  ActividadSemanal              @relation(fields: [actividad_id], references: [id])
-  asignacion AsignacionActividadEstudiante @relation(fields: [asignacion_id], references: [id], onDelete: Cascade)
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  /// Un estudiante solo tiene un progreso por actividad por asignación
-  @@unique([estudiante_id, actividad_id, asignacion_id])
-  @@index([estudiante_id])
-  @@index([actividad_id])
-  @@index([asignacion_id])
-  @@map("progreso_estudiante_actividad")
 }
 
 // ============================================================================

@@ -71,8 +71,7 @@ export interface PagoPendiente {
 export interface ClaseHoy {
   id: string;
   hora: string; // HH:MM formato
-  nombreRuta: string;
-  colorRuta?: string;
+  nombreClase: string;
   estudianteId: string;
   estudianteNombre: string;
   docenteNombre: string;

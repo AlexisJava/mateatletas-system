@@ -191,11 +191,7 @@ export class EventosService {
         tarea: true,
         recordatorio: true,
         nota: true,
-        clase: {
-          include: {
-            rutaCurricular: true,
-          },
-        },
+        clase: true,
       },
       orderBy: { fecha_inicio: 'asc' },
     });
@@ -214,11 +210,7 @@ export class EventosService {
         tarea: true,
         recordatorio: true,
         nota: true,
-        clase: {
-          include: {
-            rutaCurricular: true,
-          },
-        },
+        clase: true,
       },
     });
 

@@ -100,12 +100,10 @@ export class GamificacionController {
 
   /**
    * GET /gamificacion/progreso/:estudianteId
-   * Progreso por ruta curricular
+   * Progreso por clase del estudiante
    */
   @Get('progreso/:estudianteId')
-  async getProgreso(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
-  ) {
+  getProgreso(@Param('estudianteId', ParseUUIDPipe) estudianteId: string) {
     return this.gamificacionService.getProgresoEstudiante(estudianteId);
   }
 
@@ -154,7 +152,7 @@ export class GamificacionController {
    * Desbloquear un logro manualmente (admin/testing)
    */
   @Post('logros/:logroId/desbloquear')
-  async desbloquearLogro(
+  desbloquearLogro(
     @Param('logroId', ParseUUIDPipe) logroId: string,
     @Request() req: RequestWithAuthUser,
   ) {

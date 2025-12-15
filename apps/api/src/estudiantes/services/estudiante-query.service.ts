@@ -216,7 +216,6 @@ export class EstudianteQueryService {
           include: {
             clase: {
               include: {
-                rutaCurricular: true,
                 docente: {
                   select: {
                     id: true,
@@ -237,11 +236,7 @@ export class EstudianteQueryService {
         },
         asistencias: {
           include: {
-            clase: {
-              include: {
-                rutaCurricular: true,
-              },
-            },
+            clase: true,
           },
           orderBy: {
             clase: {
@@ -342,13 +337,6 @@ export class EstudianteQueryService {
             apellido: true,
           },
         },
-        rutaCurricular: {
-          select: {
-            id: true,
-            nombre: true,
-            descripcion: true,
-          },
-        },
         grupo: {
           select: {
             id: true,
@@ -414,7 +402,6 @@ export class EstudianteQueryService {
         fecha_hora_inicio: fechaProxima,
         duracion_minutos: duracionMinutos,
         docente: proximaClaseGrupo.docente,
-        ruta_curricular: proximaClaseGrupo.rutaCurricular,
         dia_semana: proximaClaseGrupo.dia_semana,
         hora_inicio: proximaClaseGrupo.hora_inicio,
         link_meet: proximaClaseGrupo.grupo?.link_meet,
@@ -442,13 +429,6 @@ export class EstudianteQueryService {
             apellido: true,
           },
         },
-        rutaCurricular: {
-          select: {
-            id: true,
-            nombre: true,
-            descripcion: true,
-          },
-        },
       },
       orderBy: {
         fecha_hora_inicio: 'asc',
@@ -459,10 +439,10 @@ export class EstudianteQueryService {
       return {
         tipo: 'individual' as const,
         id: proximaClaseIndividual.id,
+        nombre: proximaClaseIndividual.nombre,
         fecha_hora_inicio: proximaClaseIndividual.fecha_hora_inicio,
         duracion_minutos: proximaClaseIndividual.duracion_minutos,
         docente: proximaClaseIndividual.docente,
-        ruta_curricular: proximaClaseIndividual.rutaCurricular,
         estado: proximaClaseIndividual.estado,
       };
     }
