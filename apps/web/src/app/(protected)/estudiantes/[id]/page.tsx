@@ -82,7 +82,7 @@ export default function EstudianteProfilePage() {
               {estudianteActual.equipo && (
                 <Badge variant="default">
                   <span style={{ color: estudianteActual.equipo.color_primario }}>
-                    Equipo {estudianteActual.equipo.nombre}
+                    Casa {estudianteActual.equipo.nombre}
                   </span>
                 </Badge>
               )}

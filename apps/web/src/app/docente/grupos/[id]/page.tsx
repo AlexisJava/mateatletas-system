@@ -439,7 +439,7 @@ export default function GrupoDetalleCompletoPage() {
                         />
                       </div>
 
-                      {/* Nombre + Equipo */}
+                      {/* Nombre + Casa */}
                       <div className="flex-1">
                         <h3 className="text-white font-bold text-lg">
                           {estudiante.nombre} {estudiante.apellido}

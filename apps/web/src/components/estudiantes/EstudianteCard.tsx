@@ -62,7 +62,7 @@ export function EstudianteCard({ estudiante, onEdit, onDelete, onView }: Estudia
 
         {estudiante.equipo && (
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Equipo:</span>
+            <span className="text-sm text-gray-600">Casa:</span>
             <span
               className="px-3 py-1 rounded-lg text-sm font-semibold"
               style={{

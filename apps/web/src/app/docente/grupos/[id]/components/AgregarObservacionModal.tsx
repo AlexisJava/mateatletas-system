@@ -231,7 +231,7 @@ export default function AgregarObservacionModal({
                           </p>
                           {estudiante.equipo && (
                             <p className="text-xs text-gray-400">
-                              Equipo: {estudiante.equipo.nombre}
+                              Casa: {estudiante.equipo.nombre}
                             </p>
                           )}
                         </div>
