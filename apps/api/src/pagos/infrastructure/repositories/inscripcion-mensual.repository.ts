@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, EstadoPago as PrismaEstadoPago } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { Decimal } from 'decimal.js';
 import {
@@ -12,7 +12,10 @@ import {
   InscripcionMensualConRelaciones,
   EstudianteConDescuento,
 } from '../../domain/repositories/inscripcion-mensual.repository.interface';
-import { EstadoPago, TipoDescuento } from '../../domain/types/pagos.types';
+import {
+  TipoDescuento,
+  EstadoPago as DomainEstadoPago,
+} from '../../domain/types/pagos.types';
 
 /**
  * Implementación del repositorio de Inscripciones Mensuales
@@ -94,10 +97,12 @@ export class InscripcionMensualRepository
    * Obtiene inscripciones por estado de pago
    */
   async buscarPorEstadoPago(
-    estado: EstadoPago,
+    estado: DomainEstadoPago,
     periodo?: string,
   ): Promise<InscripcionMensual[]> {
-    const where: Prisma.InscripcionMensualWhereInput = { estado_pago: estado };
+    const where: Prisma.InscripcionMensualWhereInput = {
+      estado_pago: estado as PrismaEstadoPago,
+    };
 
     if (periodo) {
       where.periodo = periodo;
@@ -153,9 +158,9 @@ export class InscripcionMensualRepository
     for (const inscripcion of inscripciones) {
       const precioFinal = new Decimal(inscripcion.precio_final.toString());
 
-      if (inscripcion.estado_pago === EstadoPago.Pagado) {
+      if (inscripcion.estado_pago === PrismaEstadoPago.Pagado) {
         totalPagado = totalPagado.plus(precioFinal);
-      } else if (inscripcion.estado_pago === EstadoPago.Pendiente) {
+      } else if (inscripcion.estado_pago === PrismaEstadoPago.Pendiente) {
         totalPendiente = totalPendiente.plus(precioFinal);
       }
     }
@@ -218,13 +223,13 @@ export class InscripcionMensualRepository
     for (const inscripcion of inscripciones) {
       const precioFinal = new Decimal(inscripcion.precio_final.toString());
 
-      if (inscripcion.estado_pago === EstadoPago.Pagado) {
+      if (inscripcion.estado_pago === PrismaEstadoPago.Pagado) {
         totalIngresos = totalIngresos.plus(precioFinal);
         cantidadPagadas++;
-      } else if (inscripcion.estado_pago === EstadoPago.Pendiente) {
+      } else if (inscripcion.estado_pago === PrismaEstadoPago.Pendiente) {
         totalPendientes = totalPendientes.plus(precioFinal);
         cantidadPendientes++;
-      } else if (inscripcion.estado_pago === EstadoPago.Vencido) {
+      } else if (inscripcion.estado_pago === PrismaEstadoPago.Vencido) {
         totalVencidos = totalVencidos.plus(precioFinal);
         cantidadVencidas++;
       }
@@ -374,13 +379,13 @@ export class InscripcionMensualRepository
    * Mapea el enum EstadoPago de Prisma al enum del Domain
    * Valida que el valor sea correcto
    */
-  private mapearEstadoPago(estadoPago: string): EstadoPago {
+  private mapearEstadoPago(estadoPago: string): DomainEstadoPago {
     // Validar que el valor sea uno de los valores válidos
-    const valoresValidos: string[] = Object.values(EstadoPago);
+    const valoresValidos: string[] = Object.values(DomainEstadoPago);
     if (!valoresValidos.includes(estadoPago)) {
       throw new Error(`Estado de pago inválido: ${estadoPago}`);
     }
-    return estadoPago as EstadoPago;
+    return estadoPago as DomainEstadoPago;
   }
 
   /**
@@ -420,7 +425,7 @@ export class InscripcionMensualRepository
   async obtenerPorTutor(
     tutorId: string,
     periodo?: string,
-    estadoPago?: EstadoPago,
+    estadoPago?: DomainEstadoPago,
   ): Promise<InscripcionMensual[]> {
     // Construir filtros dinámicamente
     const where: Prisma.InscripcionMensualWhereInput = {
@@ -432,7 +437,7 @@ export class InscripcionMensualRepository
     }
 
     if (estadoPago) {
-      where.estado_pago = estadoPago;
+      where.estado_pago = estadoPago as PrismaEstadoPago;
     }
 
     // Ejecutar query con filtros

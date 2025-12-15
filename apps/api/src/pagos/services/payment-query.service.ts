@@ -263,8 +263,10 @@ export class PaymentQueryService {
     const inscripciones =
       await this.inscripcionRepo.obtenerInscripcionesPorPeriodo(periodo);
 
-    // Filtrar solo pendientes
-    return inscripciones.filter((i) => i.estadoPago === EstadoPago.Pendiente);
+    // Filtrar solo pendientes (cast necesario por diferencia entre enum domain y Prisma)
+    return inscripciones.filter(
+      (i) => (i.estadoPago as string) === EstadoPago.Pendiente,
+    );
   }
 
   /**
