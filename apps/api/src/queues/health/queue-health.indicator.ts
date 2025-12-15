@@ -115,7 +115,7 @@ export class QueueHealthIndicator extends HealthIndicator {
    */
   private async checkRedisConnection(): Promise<boolean> {
     try {
-      const client = await this.webhookQueue.client;
+      const client = this.webhookQueue.client;
       const pong = await client.ping();
       return pong === 'PONG';
     } catch {

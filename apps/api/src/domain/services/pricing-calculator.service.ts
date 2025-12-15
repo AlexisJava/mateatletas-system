@@ -144,12 +144,13 @@ export class PricingCalculatorService {
         subtotal = numEstudiantes * PRECIOS.CICLO_2026_MENSUAL;
         break;
 
-      case 'PACK_COMPLETO':
+      case 'PACK_COMPLETO': {
         // Colonia + Ciclo 2026
         const totalColonia = this.calcularTotalColonia(cursosPerStudent, 0);
         const totalCiclo = numEstudiantes * PRECIOS.CICLO_2026_MENSUAL;
         subtotal = totalColonia + totalCiclo;
         break;
+      }
     }
 
     // Aplicar descuento por hermanos

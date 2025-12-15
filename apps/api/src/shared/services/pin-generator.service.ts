@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 
 /**
@@ -23,6 +23,7 @@ import { PrismaService } from '../../core/database/prisma.service';
 @Injectable()
 export class PinGeneratorService {
   private readonly MAX_RETRIES = 10;
+  private readonly logger = new Logger(PinGeneratorService.name);
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -69,7 +70,7 @@ export class PinGeneratorService {
       }
 
       // PIN colisionó, reintentar
-      console.warn(
+      this.logger.warn(
         `PIN collision for ${tableName}: ${pin} (attempt ${attempt + 1}/${this.MAX_RETRIES})`,
       );
     }
@@ -105,7 +106,7 @@ export class PinGeneratorService {
   async generateMultiplePins(
     count: number,
     tableName: string,
-    existsCheck: (pin: string) => Promise<any | null>,
+    existsCheck: (pin: string) => Promise<unknown>,
   ): Promise<string[]> {
     const pins: string[] = [];
     const generatedSet = new Set<string>();
