@@ -121,10 +121,12 @@ export class ValidarInscripcionUseCase {
           }
           break;
 
-        default:
+        default: {
+          const exhaustiveCheck: never = tipo_inscripcion;
           throw new BadRequestException(
-            `Tipo de inscripción inválido: ${tipo_inscripcion}`,
+            `Tipo de inscripción inválido: ${String(exhaustiveCheck)}`,
           );
+        }
       }
     });
   }
@@ -142,8 +144,12 @@ export class ValidarInscripcionUseCase {
         return 'CICLO_2026';
       case TipoInscripcion2026.PACK_COMPLETO:
         return 'PACK_COMPLETO';
-      default:
-        throw new BadRequestException(`Tipo de inscripción inválido: ${tipo}`);
+      default: {
+        const exhaustiveCheck: never = tipo;
+        throw new BadRequestException(
+          `Tipo de inscripción inválido: ${String(exhaustiveCheck)}`,
+        );
+      }
     }
   }
 }

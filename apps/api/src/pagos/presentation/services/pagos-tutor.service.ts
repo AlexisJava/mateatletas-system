@@ -12,6 +12,7 @@ import {
 } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { randomUUID } from 'crypto';
+import type { PreferenceRequest } from 'mercadopago/dist/clients/preference/commonTypes';
 
 import { PrismaService } from '../../../core/database/prisma.service';
 import { ProductosService } from '../../../catalogo/productos.service';
@@ -343,7 +344,7 @@ export class PagosTutorService {
   private async crearPreferenciaMercadoPago(
     tipo: 'membresia' | 'curso',
     entidadId: string,
-    buildData: () => any,
+    buildData: () => PreferenceRequest,
   ): Promise<PreferenciaPagoResponse> {
     if (this.mercadoPagoService.isMockMode()) {
       return this.buildMockPreference(tipo, entidadId);
