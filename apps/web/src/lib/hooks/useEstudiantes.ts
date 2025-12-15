@@ -15,7 +15,7 @@ import type {
   CreateEstudianteData,
   UpdateEstudianteData,
   QueryEstudiantesParams,
-  Equipo,
+  Casa,
   EstudiantesResponse,
 } from '@/types/estudiante';
 
@@ -28,7 +28,7 @@ export const estudiantesKeys = {
   lists: () => [...estudiantesKeys.all, 'list'] as const,
   list: (params?: QueryEstudiantesParams) => [...estudiantesKeys.lists(), params] as const,
   detail: (id: string) => [...estudiantesKeys.all, 'detail', id] as const,
-  equipos: () => [...estudiantesKeys.all, 'equipos'] as const,
+  casas: () => [...estudiantesKeys.all, 'casas'] as const,
 };
 
 // ============================================================================
@@ -71,15 +71,15 @@ export function useEstudiante(id: string, options?: { enabled?: boolean }) {
 }
 
 /**
- * Hook para obtener equipos disponibles
+ * Hook para obtener casas disponibles
  *
  * @example
- * const { data: equipos } = useEquipos();
+ * const { data: casas } = useCasas();
  */
-export function useEquipos() {
-  return useQuery<Equipo[], Error>({
-    queryKey: estudiantesKeys.equipos(),
-    queryFn: estudiantesApi.getEquipos,
+export function useCasas() {
+  return useQuery<Casa[], Error>({
+    queryKey: estudiantesKeys.casas(),
+    queryFn: estudiantesApi.getCasas,
     staleTime: 1000 * 60 * 15, // 15 minutos - datos relativamente estáticos
   });
 }
@@ -327,7 +327,7 @@ export function useEliminarEstudiante() {
  * @example
  * const {
  *   estudiantes,
- *   equipos,
+ *   casas,
  *   isLoading,
  *   crear,
  *   actualizar,
@@ -337,7 +337,7 @@ export function useEliminarEstudiante() {
 export function useEstudiantesCompleto(params?: QueryEstudiantesParams) {
   const { data: response, isLoading, error } = useEstudiantes(params);
 
-  const { data: equipos = [] } = useEquipos();
+  const { data: casas = [] } = useCasas();
 
   const crear = useCrearEstudiante();
   const actualizar = useActualizarEstudiante();
@@ -348,7 +348,7 @@ export function useEstudiantesCompleto(params?: QueryEstudiantesParams) {
     total: response?.metadata?.total ?? 0,
     page: response?.metadata?.page ?? 1,
     limit: response?.metadata?.limit ?? 10,
-    equipos,
+    casas,
     isLoading,
     error: error?.message ?? null,
     crear: (data: CreateEstudianteData) => crear.mutateAsync(data),

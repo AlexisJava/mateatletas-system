@@ -14,7 +14,7 @@ interface ColorPickerProps {
 }
 
 /**
- * Colores predefinidos para los equipos
+ * Colores predefinidos para las casas
  * Basados en la paleta de Mateatletas
  */
 const PRESET_COLORS = [

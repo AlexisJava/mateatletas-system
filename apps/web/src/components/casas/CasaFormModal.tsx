@@ -1,18 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Equipo, CreateEquipoDto } from '@/types/equipo.types';
+import type { Casa, CreateCasaDto } from '@/types/casa.types';
 import { Card, Button, Input } from '../ui';
 import ColorPicker from './ColorPicker';
 
 /**
- * Props del EquipoFormModal
+ * Props del CasaFormModal
  */
-interface EquipoFormModalProps {
+interface CasaFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (_data: CreateEquipoDto) => Promise<void>;
-  equipoToEdit?: Equipo | null;
+  onSubmit: (_data: CreateCasaDto) => Promise<void>;
+  casaToEdit?: Casa | null;
 }
 
 /**
@@ -25,23 +25,23 @@ interface FormErrors {
 }
 
 /**
- * Componente EquipoFormModal
- * Modal para crear o editar equipos
+ * Componente CasaFormModal
+ * Modal para crear o editar casas
  *
  * Características:
- * - Formulario completo de equipo
+ * - Formulario completo de casa
  * - Validación de campos
  * - Modo crear / editar
  * - Previsualización de colores
  */
-export default function EquipoFormModal({
+export default function CasaFormModal({
   isOpen,
   onClose,
   onSubmit,
-  equipoToEdit,
-}: EquipoFormModalProps) {
+  casaToEdit,
+}: CasaFormModalProps) {
   // Estado del formulario
-  const [formData, setFormData] = useState<CreateEquipoDto>({
+  const [formData, setFormData] = useState<CreateCasaDto>({
     nombre: '',
     color_primario: '#FF6B35',
     color_secundario: '#F7B801',
@@ -55,15 +55,15 @@ export default function EquipoFormModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   /**
-   * Cargar datos del equipo a editar
+   * Cargar datos de la casa a editar
    */
   useEffect(() => {
-    if (equipoToEdit) {
+    if (casaToEdit) {
       setFormData({
-        nombre: equipoToEdit.nombre,
-        color_primario: equipoToEdit.color_primario,
-        color_secundario: equipoToEdit.color_secundario,
-        icono_url: equipoToEdit.icono_url || '',
+        nombre: casaToEdit.nombre,
+        color_primario: casaToEdit.color_primario,
+        color_secundario: casaToEdit.color_secundario,
+        icono_url: casaToEdit.icono_url || '',
       });
     } else {
       // Resetear formulario al abrir en modo crear
@@ -75,7 +75,7 @@ export default function EquipoFormModal({
       });
     }
     setErrors({});
-  }, [equipoToEdit, isOpen]);
+  }, [casaToEdit, isOpen]);
 
   /**
    * Validar formato hexadecimal
@@ -92,7 +92,7 @@ export default function EquipoFormModal({
 
     // Validar nombre
     if (!formData.nombre.trim()) {
-      newErrors.nombre = 'El nombre del equipo es requerido';
+      newErrors.nombre = 'El nombre de la casa es requerido';
     } else if (formData.nombre.trim().length < 3) {
       newErrors.nombre = 'El nombre debe tener al menos 3 caracteres';
     } else if (formData.nombre.trim().length > 50) {
@@ -118,8 +118,8 @@ export default function EquipoFormModal({
   /**
    * Manejar cambios en los inputs
    */
-  const handleChange = (field: keyof CreateEquipoDto, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleChange = (field: keyof CreateCasaDto, value: string) => {
+    setFormData((prev: CreateCasaDto) => ({ ...prev, [field]: value }));
     // Limpiar error del campo al modificarlo
     if (errors[field as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -141,7 +141,7 @@ export default function EquipoFormModal({
 
     try {
       // Preparar datos (sin icono_url si está vacío)
-      const dataToSubmit: CreateEquipoDto = {
+      const dataToSubmit: CreateCasaDto = {
         nombre: formData.nombre.trim(),
         color_primario: formData.color_primario.toUpperCase(),
         color_secundario: formData.color_secundario.toUpperCase(),
@@ -154,7 +154,7 @@ export default function EquipoFormModal({
       await onSubmit(dataToSubmit);
       onClose();
     } catch (error) {
-      console.error('Error al guardar equipo:', error);
+      console.error('Error al guardar casa:', error);
       // El error se muestra a través del toast o del estado global
     } finally {
       setIsSubmitting(false);
@@ -179,12 +179,12 @@ export default function EquipoFormModal({
           {/* Header */}
           <div className="mb-6">
             <h2 className="text-3xl font-bold text-[#2a1a5e] mb-2">
-              {equipoToEdit ? 'Editar equipo' : 'Crear nuevo equipo'}
+              {casaToEdit ? 'Editar casa' : 'Crear nueva casa'}
             </h2>
             <p className="text-gray-600">
-              {equipoToEdit
-                ? 'Modifica los datos del equipo'
-                : 'Completa los datos para crear un equipo'}
+              {casaToEdit
+                ? 'Modifica los datos de la casa'
+                : 'Completa los datos para crear una casa'}
             </p>
           </div>
 
@@ -192,7 +192,7 @@ export default function EquipoFormModal({
           <div className="space-y-6">
             {/* Nombre */}
             <Input
-              label="Nombre del equipo"
+              label="Nombre de la casa"
               type="text"
               value={formData.nombre}
               onChange={(e) => handleChange('nombre', e.target.value)}
@@ -223,7 +223,7 @@ export default function EquipoFormModal({
             {/* Previsualización del banner */}
             <div>
               <label className="block text-sm font-semibold text-[#2a1a5e] mb-2">
-                Previsualización del equipo:
+                Previsualización de la casa:
               </label>
               <div
                 className="h-24 rounded-lg flex items-center justify-center shadow-lg"
@@ -232,7 +232,7 @@ export default function EquipoFormModal({
                 }}
               >
                 <h3 className="text-3xl font-bold text-white drop-shadow-lg">
-                  {formData.nombre || 'Nombre del equipo'}
+                  {formData.nombre || 'Nombre de la casa'}
                 </h3>
               </div>
             </div>
@@ -259,7 +259,7 @@ export default function EquipoFormModal({
               Cancelar
             </Button>
             <Button type="submit" variant="primary" className="flex-1" disabled={isSubmitting}>
-              {isSubmitting ? 'Guardando...' : equipoToEdit ? 'Actualizar' : 'Crear equipo'}
+              {isSubmitting ? 'Guardando...' : casaToEdit ? 'Actualizar' : 'Crear casa'}
             </Button>
           </div>
         </form>
