@@ -173,16 +173,19 @@ export class MercadoPagoWebhookGuard implements CanActivate {
 
     try {
       // 1. Validar estructura del body
-      this.validateWebhookBody(request.body);
+      this.validateWebhookBody(request.body as MercadoPagoWebhookBody);
+
+      // Cast explícito después de validación
+      const webhookBody = request.body as MercadoPagoWebhookBody;
 
       // 2. Validar live_mode (prevenir webhooks de prueba en producción)
       // IMPORTANTE: Validar ANTES de firma para fail-fast (performance + seguridad)
-      this.validateLiveMode(request.body.live_mode);
+      this.validateLiveMode(webhookBody.live_mode);
 
       // 3. Validar firma (formato 2025) usando raw body
       const validationResult = this.validateSignature(
         request.headers['x-signature'] as string,
-        request.body,
+        webhookBody,
         request.rawBody,
       );
 
@@ -195,7 +198,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       this.validateTimestamp(validationResult.timestamp);
 
       this.logger.log(
-        `✅ Webhook validado: IP=${clientIp}, type=${request.body.type}, data_id=${request.body.data?.id}, user_id=${request.body.user_id}`,
+        `✅ Webhook validado: IP=${clientIp}, type=${webhookBody.type}, data_id=${webhookBody.data?.id}, user_id=${webhookBody.user_id}`,
       );
       return true;
     } catch (error) {
@@ -422,7 +425,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
         signature: receivedSignature,
         reason: isValid ? undefined : 'Signature mismatch',
       };
-    } catch (error) {
+    } catch {
       // timingSafeEqual lanza si los buffers tienen diferente longitud
       return {
         isValid: false,

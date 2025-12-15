@@ -509,8 +509,8 @@ export class SecurityMonitoringService {
   async getSecurityHealth(): Promise<SecurityHealth> {
     const lastHour = new Date(Date.now() - 60 * 60 * 1000);
 
-    // Obtener métricas clave
-    const totalEvents = await this.prisma.auditLog.count({
+    // Obtener métricas clave (totalEvents calculado pero no usado - referencia futura)
+    await this.prisma.auditLog.count({
       where: { timestamp: { gte: lastHour } },
     });
 

@@ -107,7 +107,7 @@ export class WebhookIdempotencyService {
     // 5. Retornar resultado
     if (existing) {
       this.logger.warn(
-        `⏭️ Webhook duplicado detectado: payment_id=${paymentId}, procesado originalmente en ${existing.processed_at}`,
+        `⏭️ Webhook duplicado detectado: payment_id=${paymentId}, procesado originalmente en ${existing.processed_at.toISOString()}`,
       );
       return true;
     }
@@ -170,7 +170,7 @@ export class WebhookIdempotencyService {
         // Aún así, actualizar cache a 'true' porque sabemos que existe
         try {
           await this.redis.set(cacheKey, 'true', this.CACHE_TTL);
-        } catch (cacheError) {
+        } catch {
           // Ignorar errores de cache silenciosamente
         }
       } else {

@@ -3,11 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { CircuitBreaker } from '../common/circuit-breaker/circuit-breaker';
 import { EXTERNAL_REFERENCE_FORMATS } from '../domain/constants';
-import {
-  MercadoPagoPayment,
-  MercadoPagoPreference,
-  CreateMercadoPagoPreferenceDto,
-} from './types/mercadopago.types';
+import { MercadoPagoPayment } from './types/mercadopago.types';
 
 /**
  * Servicio dedicado a la integración con MercadoPago SDK

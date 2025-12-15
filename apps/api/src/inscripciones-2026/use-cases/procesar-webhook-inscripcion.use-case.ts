@@ -3,7 +3,6 @@ import { PrismaService } from '../../core/database/prisma.service';
 import {
   MercadoPagoWebhookProcessorService,
   PaymentContext,
-  WebhookProcessingResult,
 } from '../../shared/services/mercadopago-webhook-processor.service';
 import { WebhookIdempotencyService } from '../../pagos/services/webhook-idempotency.service';
 import { PaymentAmountValidatorService } from '../../pagos/services/payment-amount-validator.service';

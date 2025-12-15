@@ -116,7 +116,7 @@ export class TutorController {
   })
   async getDashboardResumen(
     @GetUser() user: AuthUser,
-    @Query() query: GetDashboardResumenDto,
+    @Query() _query: GetDashboardResumenDto,
   ) {
     return this.tutorService.getDashboardResumen(user.id);
   }

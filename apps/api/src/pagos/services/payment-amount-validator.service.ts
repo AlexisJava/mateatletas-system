@@ -114,7 +114,7 @@ export class PaymentAmountValidatorService {
     // 3. Guardar en cache
     try {
       await this.redis.set(cacheKey, String(expectedAmount), this.CACHE_TTL);
-    } catch (error) {
+    } catch {
       // Fallback silencioso
     }
 
@@ -178,7 +178,7 @@ export class PaymentAmountValidatorService {
     // 3. Guardar en cache
     try {
       await this.redis.set(cacheKey, String(expectedAmount), this.CACHE_TTL);
-    } catch (error) {
+    } catch {
       // Fallback silencioso
     }
 
@@ -244,7 +244,7 @@ export class PaymentAmountValidatorService {
     // 3. Guardar en cache
     try {
       await this.redis.set(cacheKey, String(expectedAmount), this.CACHE_TTL);
-    } catch (error) {
+    } catch {
       // Fallback silencioso
     }
 
@@ -311,7 +311,7 @@ export class PaymentAmountValidatorService {
     // 3. Guardar en cache
     try {
       await this.redis.set(cacheKey, String(expectedAmount), this.CACHE_TTL);
-    } catch (error) {
+    } catch {
       // Fallback silencioso
     }
 
@@ -375,7 +375,7 @@ export class PaymentAmountValidatorService {
     // 3. Guardar en cache
     try {
       await this.redis.set(cacheKey, String(expectedAmount), this.CACHE_TTL);
-    } catch (error) {
+    } catch {
       // Fallback silencioso
     }
 

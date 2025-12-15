@@ -3,12 +3,7 @@
  * Maneja XP y Monedas del estudiante
  */
 
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import type {
   RecursosEstudiante,
