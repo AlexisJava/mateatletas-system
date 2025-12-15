@@ -273,29 +273,25 @@ export class VerificadorLogrosService {
   // MÉTODOS AUXILIARES DE CONTEO
   // ==========================================
 
-  private async contarEjerciciosCompletados(
-    estudianteId: string,
-  ): Promise<number> {
+  private contarEjerciciosCompletados(_estudianteId: string): Promise<number> {
     // TODO: Implementar con el sistema de ejercicios real
     // Por ahora retorna mock
-    return 0;
+    return Promise.resolve(0);
   }
 
-  private async contarEjerciciosPerfectos(
-    estudianteId: string,
-  ): Promise<number> {
+  private contarEjerciciosPerfectos(_estudianteId: string): Promise<number> {
     // TODO: Implementar con el sistema de ejercicios real
-    return 0;
+    return Promise.resolve(0);
   }
 
-  private async contarEjerciciosRapidos(estudianteId: string): Promise<number> {
+  private contarEjerciciosRapidos(_estudianteId: string): Promise<number> {
     // TODO: Implementar con el sistema de ejercicios real
-    return 0;
+    return Promise.resolve(0);
   }
 
-  private async contarTemasCompletados(estudianteId: string): Promise<number> {
+  private contarTemasCompletados(_estudianteId: string): Promise<number> {
     // TODO: Implementar con el sistema de progreso real
-    return 0;
+    return Promise.resolve(0);
   }
 
   private async contarClasesAsistidas(estudianteId: string): Promise<number> {

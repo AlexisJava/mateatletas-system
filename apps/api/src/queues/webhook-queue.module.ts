@@ -47,7 +47,7 @@ import { Inscripciones2026Module } from '../inscripciones-2026/inscripciones-202
   imports: [
     BullModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
+      useFactory: (configService: ConfigService) => {
         // Prioridad 1: REDIS_URL (Railway, Heroku, etc.)
         const redisUrl = configService.get<string>('REDIS_URL');
 

@@ -40,7 +40,7 @@ export class AuthEventsListener {
    * - Otorgar logro de bienvenida (si aplica)
    */
   @OnEvent('user.registered')
-  async handleUserRegistered(event: UserRegisteredEvent) {
+  handleUserRegistered(event: UserRegisteredEvent) {
     this.logger.log(
       `Usuario registrado: ${event.userId} (${event.userType}) - ${event.email}`,
     );
@@ -61,7 +61,7 @@ export class AuthEventsListener {
    * - Verificar logros de racha (solo estudiantes)
    */
   @OnEvent('user.logged-in')
-  async handleUserLoggedIn(event: UserLoggedInEvent) {
+  handleUserLoggedIn(event: UserLoggedInEvent) {
     this.logger.log(
       `Usuario ${event.userType} hizo login: ${event.userId} (${event.email})`,
     );

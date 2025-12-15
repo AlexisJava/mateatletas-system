@@ -133,9 +133,7 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
    * @param context - Contexto de ejecución
    * @returns IP del cliente
    */
-  protected override async getTracker(
-    context: ExecutionContext,
-  ): Promise<string> {
+  protected override getTracker(context: ExecutionContext): Promise<string> {
     try {
       const request = context.switchToHttp().getRequest<{
         ip: string;
@@ -146,7 +144,7 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
       // Prioridad 1: X-Real-IP (configurado en nginx/proxy)
       const xRealIp = request.headers['x-real-ip'];
       if (xRealIp && typeof xRealIp === 'string') {
-        return xRealIp;
+        return Promise.resolve(xRealIp);
       }
 
       // Prioridad 2: Primer IP de X-Forwarded-For
@@ -154,25 +152,25 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
       if (xForwardedFor && typeof xForwardedFor === 'string') {
         const firstIp = xForwardedFor.split(',')[0]?.trim();
         if (firstIp) {
-          return firstIp;
+          return Promise.resolve(firstIp);
         }
       }
 
       // Prioridad 3: req.ips (Express popula esto automáticamente)
       const firstIps = request.ips?.[0];
       if (firstIps) {
-        return firstIps;
+        return Promise.resolve(firstIps);
       }
 
       // Fallback: req.ip
-      return request.ip || 'unknown';
+      return Promise.resolve(request.ip || 'unknown');
     } catch (error) {
       // Si switchToHttp() falla (test environment), retornar IP por defecto
       if (
         error instanceof TypeError &&
         error.message.includes('switchToHttp')
       ) {
-        return 'test-client';
+        return Promise.resolve('test-client');
       }
       throw error;
     }
@@ -185,7 +183,7 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
    * @param throttlerLimitDetail - Detalles del límite excedido
    * @returns Mensaje de error descriptivo
    */
-  protected override async getErrorMessage(
+  protected override getErrorMessage(
     context: ExecutionContext,
     throttlerLimitDetail: ThrottlerLimitDetail,
   ): Promise<string> {
@@ -194,11 +192,11 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
         ip: string;
       }>();
 
-      return (
+      return Promise.resolve(
         `Rate limit exceeded for webhook endpoint. ` +
-        `IP: ${request.ip}, ` +
-        `Limit: ${throttlerLimitDetail.limit} requests per ${throttlerLimitDetail.ttl / 1000} seconds. ` +
-        `Please wait before retrying.`
+          `IP: ${request.ip}, ` +
+          `Limit: ${throttlerLimitDetail.limit} requests per ${throttlerLimitDetail.ttl / 1000} seconds. ` +
+          `Please wait before retrying.`,
       );
     } catch (error) {
       // Si switchToHttp() falla (test environment), retornar mensaje genérico
@@ -206,10 +204,10 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
         error instanceof TypeError &&
         error.message.includes('switchToHttp')
       ) {
-        return (
+        return Promise.resolve(
           `Rate limit exceeded for webhook endpoint. ` +
-          `Limit: ${throttlerLimitDetail.limit} requests per ${throttlerLimitDetail.ttl / 1000} seconds. ` +
-          `Please wait before retrying.`
+            `Limit: ${throttlerLimitDetail.limit} requests per ${throttlerLimitDetail.ttl / 1000} seconds. ` +
+            `Please wait before retrying.`,
         );
       }
       throw error;

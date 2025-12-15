@@ -282,11 +282,11 @@ export class TiersService {
    * - Downgrade: se aplica inmediatamente
    * - No se puede cambiar al mismo tier
    */
-  async solicitarCambioTier(
-    estudianteInscripcionId: string,
+  solicitarCambioTier(
+    _estudianteInscripcionId: string,
     tierActual: TierNombre,
     tierNuevo: TierNombre,
-  ): Promise<CambioTierResult> {
+  ): CambioTierResult {
     // Validar que no sea el mismo tier
     if (tierActual === tierNuevo) {
       throw new BadRequestException('No se puede cambiar al mismo tier');
@@ -356,9 +356,7 @@ export class TiersService {
    *
    * Solo se pueden cancelar upgrades pendientes (downgrades son inmediatos)
    */
-  async cancelarCambioPendiente(
-    cambioTierId: string,
-  ): Promise<CancelacionResult> {
+  cancelarCambioPendiente(cambioTierId: string): CancelacionResult {
     return {
       id: cambioTierId,
       estado: 'cancelado',
