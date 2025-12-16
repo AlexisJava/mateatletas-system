@@ -741,6 +741,43 @@ npm run build
 
 ---
 
+---
+
+## Estado Actual del Proyecto (Diciembre 2025)
+
+### Métricas
+
+- 64 modelos en Prisma
+- 120+ índices de BD
+- 334 tests pasando
+- 144 endpoints protegidos con ParseUUIDPipe
+
+### Completado
+
+- ✅ FASE 0: Seguridad P0
+- ✅ Índices de performance
+- ✅ Corrección N+1 queries (4 optimizadas)
+- ✅ Limpieza código legacy (Rutas Curriculares, Planificaciones)
+- ✅ Limpieza ESLint (60 → 6 errores de config)
+- ✅ Rename equipos → casas en frontend
+
+### En Progreso
+
+- 🔄 FASE 1: Infraestructura para escalar
+
+### Pendiente
+
+- ⏳ FASE 2: Migración ciudad-mateatletas
+- ⏳ Sistema de Mundos y LMS
+- ⏳ Migración Sectores → Mundos
+
+### Modelo de Negocio 2026
+
+- **Casas**: QUANTUM (6-9), VERTEX (10-12), PULSAR (13-17)
+- **Mundos**: Matemática, Programación, Ciencias
+- **Tiers**: ARCADE ($30k), ARCADE+ ($60k), PRO ($75k)
+- **Target**: 5000 async + 200 sync para fin de 2026
+
 **Version:** 1.0.0  
 **Ultima actualizacion:** 2025-01-13  
 **Mantenedor:** Equipo Mateatletas  
