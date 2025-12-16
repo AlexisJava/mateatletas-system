@@ -1,5 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TokenBlacklistGuard } from '../auth/guards/token-blacklist.guard';
@@ -40,9 +41,12 @@ import { ThrottlerRedisStorage } from './throttler/throttler-redis.storage';
     // - Configurable via variables de entorno RATE_LIMIT_TTL y RATE_LIMIT_MAX
     // - Default: 100 req/min en producción, 1000 req/min en desarrollo
     ThrottlerModule.forRootAsync({
-      imports: [RedisModule],
-      inject: [RedisService],
-      useFactory: (redisService: RedisService) => ({
+      imports: [RedisModule, ConfigModule],
+      inject: [RedisService, ConfigService],
+      useFactory: (
+        redisService: RedisService,
+        configService: ConfigService,
+      ) => ({
         throttlers: [
           {
             ttl: parseInt(process.env.RATE_LIMIT_TTL || '60000', 10),
@@ -53,7 +57,7 @@ import { ThrottlerRedisStorage } from './throttler/throttler-redis.storage';
             ),
           },
         ],
-        storage: new ThrottlerRedisStorage(redisService),
+        storage: new ThrottlerRedisStorage(redisService, configService),
       }),
     }),
   ],

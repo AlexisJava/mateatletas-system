@@ -2,9 +2,11 @@ import { Logger } from '@nestjs/common';
 const logger = new Logger('CacheModule');
 import { Module, Global } from '@nestjs/common';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
+import { ConfigService } from '@nestjs/config';
 import Keyv from 'keyv';
 import KeyvRedis from '@keyv/redis';
 import { createClient } from 'redis';
+import { FEATURE_FLAGS } from '../../feature-flags/feature-flags.constants';
 
 /**
  * Cache Module Global
@@ -14,6 +16,10 @@ import { createClient } from 'redis';
  * - Fallback a memoria si Redis no está disponible (desarrollo)
  * - TTL default: 5 minutos (300 segundos)
  * - Max items: 1000 (en memoria)
+ *
+ * Feature Flags:
+ * - FEATURE_CACHE_ENABLED=false → Deshabilita cache completamente
+ * - FEATURE_CACHE_REDIS_ENABLED=false → Fuerza uso de memoria
  *
  * Endpoints que se benefician de cache:
  * - GET /api/catalogo (productos)
@@ -25,12 +31,34 @@ import { createClient } from 'redis';
 @Module({
   imports: [
     NestCacheModule.registerAsync({
-      useFactory: async () => {
-        const redisUrl = process.env.REDIS_URL;
-        const isProduction = process.env.NODE_ENV === 'production';
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        const redisUrl = configService.get<string>('REDIS_URL');
+        const isProduction =
+          configService.get<string>('NODE_ENV') === 'production';
 
-        // Configuración de Redis si está disponible
-        if (redisUrl) {
+        // Feature flags - default true, solo false si explícitamente 'false'
+        const cacheEnabled =
+          configService
+            .get<string>(FEATURE_FLAGS.CACHE_ENABLED)
+            ?.toLowerCase() !== 'false';
+        const cacheRedisEnabled =
+          configService
+            .get<string>(FEATURE_FLAGS.CACHE_REDIS_ENABLED)
+            ?.toLowerCase() !== 'false';
+
+        // Si cache está deshabilitado, retornar config mínima (TTL muy bajo)
+        if (!cacheEnabled) {
+          logger.warn('⚠️  Cache DESHABILITADO por feature flag');
+          return {
+            ttl: 0, // No cachear
+            max: 1,
+            isGlobal: true,
+          };
+        }
+
+        // Configuración de Redis si está disponible Y habilitado por feature flag
+        if (redisUrl && cacheRedisEnabled) {
           try {
             // Crear cliente Redis con logging de eventos
             const redisClient = createClient({ url: redisUrl });
@@ -76,7 +104,14 @@ import { createClient } from 'redis';
           }
         }
 
-        // Fallback: Cache en memoria (desarrollo o si Redis falla)
+        // Log si Redis está deshabilitado por feature flag
+        if (redisUrl && !cacheRedisEnabled) {
+          logger.warn(
+            '⚠️  Redis DESHABILITADO por feature flag, usando memoria',
+          );
+        }
+
+        // Fallback: Cache en memoria (desarrollo o si Redis falla/deshabilitado)
         logger.log(
           `🗄️  Cache en memoria (${isProduction ? 'Redis no configurado' : 'modo desarrollo'})`,
         );

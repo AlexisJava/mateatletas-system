@@ -8,6 +8,7 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { ThrottlerRedisStorage } from '../throttler-redis.storage';
 import { RedisService } from '../../../core/redis/redis.service';
 import { THROTTLER_PREFIX } from '../throttler.constants';
@@ -15,6 +16,7 @@ import { THROTTLER_PREFIX } from '../throttler.constants';
 describe('ThrottlerRedisStorage', () => {
   let storage: ThrottlerRedisStorage;
   let redisService: jest.Mocked<RedisService>;
+  let configService: jest.Mocked<ConfigService>;
 
   // Mock de RedisService
   const createMockRedisService = (): jest.Mocked<RedisService> =>
@@ -30,8 +32,15 @@ describe('ThrottlerRedisStorage', () => {
       }),
     }) as unknown as jest.Mocked<RedisService>;
 
+  // Mock de ConfigService
+  const createMockConfigService = (): jest.Mocked<ConfigService> =>
+    ({
+      get: jest.fn().mockReturnValue(undefined), // Default: feature flag enabled
+    }) as unknown as jest.Mocked<ConfigService>;
+
   beforeEach(async () => {
     redisService = createMockRedisService();
+    configService = createMockConfigService();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -39,6 +48,10 @@ describe('ThrottlerRedisStorage', () => {
         {
           provide: RedisService,
           useValue: redisService,
+        },
+        {
+          provide: ConfigService,
+          useValue: configService,
         },
       ],
     }).compile();

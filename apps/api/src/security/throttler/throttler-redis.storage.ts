@@ -9,14 +9,17 @@
  * - Fallback automático a memoria si Redis no está disponible
  * - Cleanup periódico de entradas expiradas en memoria
  * - Métricas y health status
+ * - Feature flag para deshabilitar Redis (FEATURE_THROTTLER_REDIS_ENABLED)
  *
  * @module security/throttler
  */
 
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ThrottlerStorage } from '@nestjs/throttler';
 import { ThrottlerStorageRecord } from '@nestjs/throttler/dist/throttler-storage-record.interface';
 import { RedisService } from '../../core/redis/redis.service';
+import { FEATURE_FLAGS } from '../../feature-flags/feature-flags.constants';
 import {
   MemoryFallbackEntry,
   ThrottlerStorageMetrics,
@@ -59,7 +62,10 @@ export class ThrottlerRedisStorage
     return {current, ttl}
   `;
 
-  constructor(private readonly redisService: RedisService) {
+  constructor(
+    private readonly redisService: RedisService,
+    private readonly configService: ConfigService,
+  ) {
     this.metrics = {
       redisOperations: 0,
       memoryOperations: 0,
@@ -78,11 +84,23 @@ export class ThrottlerRedisStorage
   }
 
   /**
+   * Verifica si Redis para throttler está habilitado por feature flag.
+   * Default: true. Solo false si FEATURE_THROTTLER_REDIS_ENABLED=false
+   */
+  private isThrottlerRedisEnabled(): boolean {
+    const value = this.configService.get<string>(
+      FEATURE_FLAGS.THROTTLER_REDIS_ENABLED,
+    );
+    return value?.toLowerCase() !== 'false';
+  }
+
+  /**
    * Incrementa el contador de rate limiting
    *
    * Flujo:
-   * 1. Si Redis está disponible → usar Redis (distribuido)
-   * 2. Si Redis falla → fallback a memoria (local)
+   * 1. Si feature flag deshabilitado → usar memoria
+   * 2. Si Redis está disponible → usar Redis (distribuido)
+   * 3. Si Redis falla → fallback a memoria (local)
    */
   async increment(
     key: string,
@@ -92,6 +110,12 @@ export class ThrottlerRedisStorage
     throttlerName: string,
   ): Promise<ThrottlerStorageRecord> {
     const fullKey = `${THROTTLER_PREFIX}${throttlerName}:${key}`;
+
+    // Verificar feature flag primero
+    if (!this.isThrottlerRedisEnabled()) {
+      this.logger.debug('Redis throttler disabled by feature flag');
+      return this.incrementInMemory(fullKey, ttl, limit, blockDuration);
+    }
 
     // Verificar disponibilidad de Redis
     if (!this.redisService.isRedisAvailable()) {
@@ -226,7 +250,9 @@ export class ThrottlerRedisStorage
    * Obtiene estado de salud del storage
    */
   getHealthStatus(): ThrottlerStorageHealth {
-    const redisAvailable = this.redisService.isRedisAvailable();
+    const featureFlagEnabled = this.isThrottlerRedisEnabled();
+    const redisAvailable =
+      featureFlagEnabled && this.redisService.isRedisAvailable();
     const totalOperations =
       this.metrics.redisOperations + this.metrics.memoryOperations;
     const errorRate =
@@ -234,7 +260,10 @@ export class ThrottlerRedisStorage
 
     let status: 'healthy' | 'degraded' | 'unhealthy';
 
-    if (redisAvailable && errorRate < 0.1) {
+    if (!featureFlagEnabled) {
+      // Feature flag deshabilitado = degraded (funciona pero solo local)
+      status = 'degraded';
+    } else if (redisAvailable && errorRate < 0.1) {
       status = 'healthy';
     } else if (redisAvailable || this.metrics.memoryOperations > 0) {
       status = 'degraded';
