@@ -2,6 +2,7 @@ import { Injectable, LoggerService as NestLoggerService } from '@nestjs/common';
 import * as winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import { LoggerMetadata } from './logger.types';
+import { RequestContext } from '../../observability/context/request-context';
 
 /**
  * Servicio de logging estructurado con Winston
@@ -151,6 +152,28 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
+   * Obtiene el requestId del contexto actual (AsyncLocalStorage)
+   * Retorna undefined si no hay contexto activo
+   */
+  private getRequestIdFromContext(): string | undefined {
+    return RequestContext.getRequestId();
+  }
+
+  /**
+   * Construye el objeto de metadata base incluyendo contexto y requestId
+   */
+  private buildBaseMetadata(
+    additionalMetadata?: LoggerMetadata,
+  ): Record<string, unknown> {
+    const requestId = this.getRequestIdFromContext();
+    return {
+      context: this.context,
+      ...(requestId ? { requestId } : {}),
+      ...(additionalMetadata ?? {}),
+    };
+  }
+
+  /**
    * Crear instancia de Winston Logger con transports configurados
    */
   private createLogger(): winston.Logger {
@@ -252,10 +275,7 @@ export class LoggerService implements NestLoggerService {
    */
   debug(message: string, metadata?: unknown) {
     const sanitized = this.mergeMetadata(this.sanitizeMetadata(metadata));
-    this.logger.debug(message, {
-      context: this.context,
-      ...(sanitized ?? {}),
-    });
+    this.logger.debug(message, this.buildBaseMetadata(sanitized));
   }
 
   /**
@@ -263,10 +283,7 @@ export class LoggerService implements NestLoggerService {
    */
   log(message: string, metadata?: unknown) {
     const sanitized = this.mergeMetadata(this.sanitizeMetadata(metadata));
-    this.logger.info(message, {
-      context: this.context,
-      ...(sanitized ?? {}),
-    });
+    this.logger.info(message, this.buildBaseMetadata(sanitized));
   }
 
   /**
@@ -274,10 +291,7 @@ export class LoggerService implements NestLoggerService {
    */
   warn(message: string, metadata?: unknown) {
     const sanitized = this.mergeMetadata(this.sanitizeMetadata(metadata));
-    this.logger.warn(message, {
-      context: this.context,
-      ...(sanitized ?? {}),
-    });
+    this.logger.warn(message, this.buildBaseMetadata(sanitized));
   }
 
   /**
@@ -315,9 +329,8 @@ export class LoggerService implements NestLoggerService {
     );
 
     this.logger.error(message, {
-      context: this.context,
+      ...this.buildBaseMetadata(sanitized),
       ...(trace ? { trace } : {}),
-      ...(sanitized ?? {}),
     });
   }
 
@@ -326,10 +339,7 @@ export class LoggerService implements NestLoggerService {
    */
   verbose(message: string, metadata?: unknown) {
     const sanitized = this.mergeMetadata(this.sanitizeMetadata(metadata));
-    this.logger.verbose(message, {
-      context: this.context,
-      ...(sanitized ?? {}),
-    });
+    this.logger.verbose(message, this.buildBaseMetadata(sanitized));
   }
 
   /**
@@ -339,9 +349,8 @@ export class LoggerService implements NestLoggerService {
   logEvent(event: string, metadata: unknown) {
     const sanitized = this.mergeMetadata(this.sanitizeMetadata(metadata));
     this.logger.info(event, {
-      context: this.context,
+      ...this.buildBaseMetadata(sanitized),
       eventType: 'business_event',
-      ...(sanitized ?? {}),
     });
   }
 
@@ -351,11 +360,10 @@ export class LoggerService implements NestLoggerService {
   logPerformance(operation: string, durationMs: number, metadata?: unknown) {
     const sanitized = this.mergeMetadata(this.sanitizeMetadata(metadata));
     this.logger.info(`Performance: ${operation}`, {
-      context: this.context,
+      ...this.buildBaseMetadata(sanitized),
       eventType: 'performance',
       operation,
       durationMs,
-      ...(sanitized ?? {}),
     });
   }
 
@@ -364,7 +372,7 @@ export class LoggerService implements NestLoggerService {
    */
   logDatabase(operation: string, query?: string, durationMs?: number) {
     this.logger.debug(`Database: ${operation}`, {
-      context: this.context,
+      ...this.buildBaseMetadata(),
       eventType: 'database',
       operation,
       query,
@@ -378,11 +386,10 @@ export class LoggerService implements NestLoggerService {
   logAuth(action: string, userId?: string, metadata?: unknown) {
     const sanitized = this.mergeMetadata(this.sanitizeMetadata(metadata));
     this.logger.info(`Auth: ${action}`, {
-      context: this.context,
+      ...this.buildBaseMetadata(sanitized),
       eventType: 'auth',
       action,
       userId,
-      ...(sanitized ?? {}),
     });
   }
 
@@ -402,13 +409,12 @@ export class LoggerService implements NestLoggerService {
     const sanitized = this.mergeMetadata(this.sanitizeMetadata(metadata));
 
     this.logger[level](`HTTP ${method} ${url}`, {
-      context: this.context,
+      ...this.buildBaseMetadata(sanitized),
       eventType: 'http',
       method,
       url,
       statusCode,
       durationMs,
-      ...(sanitized ?? {}),
     });
   }
 
@@ -421,7 +427,7 @@ export class LoggerService implements NestLoggerService {
     constraints: Record<string, string>,
   ) {
     this.logger.warn('Validation Error', {
-      context: this.context,
+      ...this.buildBaseMetadata(),
       eventType: 'validation',
       field,
       value,

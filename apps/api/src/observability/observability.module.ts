@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import { LoggerModule } from '../common/logger/logger.module';
+import { RequestContextMiddleware } from './context/request-context.middleware';
 
 /**
  * ObservabilityModule
@@ -11,6 +12,7 @@ import { LoggerModule } from '../common/logger/logger.module';
  * Responsabilidades:
  * - Logging estructurado global
  * - Interceptores de peticiones HTTP
+ * - Request Context propagation (AsyncLocalStorage)
  * - Métricas y trazabilidad
  *
  * Patrón: Observability Module
@@ -19,6 +21,7 @@ import { LoggerModule } from '../common/logger/logger.module';
 @Module({
   imports: [LoggerModule], // Logging estructurado global
   providers: [
+    RequestContextMiddleware,
     // Aplicar logging interceptor globalmente
     // Registra todas las peticiones HTTP con duración y metadata
     {
@@ -26,5 +29,14 @@ import { LoggerModule } from '../common/logger/logger.module';
       useClass: LoggingInterceptor,
     },
   ],
+  exports: [RequestContextMiddleware],
 })
-export class ObservabilityModule {}
+export class ObservabilityModule implements NestModule {
+  /**
+   * Configura el middleware de contexto para todas las rutas
+   * Esto establece el requestId antes de que cualquier otro middleware o handler se ejecute
+   */
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestContextMiddleware).forRoutes('*');
+  }
+}
