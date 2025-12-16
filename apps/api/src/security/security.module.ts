@@ -10,6 +10,9 @@ import { SecurityMonitoringService } from './security-monitoring.service';
 import { DatabaseModule } from '../core/database/database.module';
 import { AuthModule } from '../auth/auth.module';
 import { AuditModule } from '../audit/audit.module';
+import { RedisModule } from '../core/redis/redis.module';
+import { RedisService } from '../core/redis/redis.service';
+import { ThrottlerRedisStorage } from './throttler/throttler-redis.storage';
 
 /**
  * SecurityModule
@@ -30,19 +33,29 @@ import { AuditModule } from '../audit/audit.module';
     AuditModule, // Para AuditLogService en FraudDetectionService
     forwardRef(() => AuthModule), // Para TokenBlacklistService
     ScheduleModule.forRoot(), // Para cronjobs de SecretRotationService
-    // Rate Limiting: Protege contra brute force, DDoS y abuso de API
+    RedisModule, // Para ThrottlerRedisStorage
+    // Rate Limiting Distribuido: Protege contra brute force, DDoS y abuso de API
+    // - Usa Redis para compartir contadores entre instancias
+    // - Fallback a memoria si Redis no está disponible
     // - Configurable via variables de entorno RATE_LIMIT_TTL y RATE_LIMIT_MAX
     // - Default: 100 req/min en producción, 1000 req/min en desarrollo
-    ThrottlerModule.forRoot([
-      {
-        ttl: parseInt(process.env.RATE_LIMIT_TTL || '60000', 10), // Default: 60 segundos
-        limit: parseInt(
-          process.env.RATE_LIMIT_MAX ||
-            (process.env.NODE_ENV === 'production' ? '100' : '1000'),
-          10,
-        ),
-      },
-    ]),
+    ThrottlerModule.forRootAsync({
+      imports: [RedisModule],
+      inject: [RedisService],
+      useFactory: (redisService: RedisService) => ({
+        throttlers: [
+          {
+            ttl: parseInt(process.env.RATE_LIMIT_TTL || '60000', 10),
+            limit: parseInt(
+              process.env.RATE_LIMIT_MAX ||
+                (process.env.NODE_ENV === 'production' ? '100' : '1000'),
+              10,
+            ),
+          },
+        ],
+        storage: new ThrottlerRedisStorage(redisService),
+      }),
+    }),
   ],
   providers: [
     // Servicio de rotación automática de secrets críticos
