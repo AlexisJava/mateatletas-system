@@ -158,6 +158,8 @@ export class PagosController {
    * Calcula el precio de actividades según reglas de negocio
    */
   @Post('calcular-precio')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Calcular precio de actividades',
@@ -190,6 +192,8 @@ export class PagosController {
    * Actualiza la configuración de precios (solo admins)
    */
   @Post('configuracion/actualizar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Actualizar configuración de precios',
@@ -228,6 +232,8 @@ export class PagosController {
    * Crea inscripciones mensuales para estudiantes
    */
   @Post('inscripciones/crear')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Crear inscripciones mensuales',
@@ -264,6 +270,8 @@ export class PagosController {
    * Obtiene métricas agregadas para el dashboard
    */
   @Get('dashboard/metricas')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener métricas del dashboard',
@@ -298,6 +306,8 @@ export class PagosController {
    * Obtiene la configuración de precios actual
    */
   @Get('configuracion')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener configuración de precios actual',
@@ -316,6 +326,8 @@ export class PagosController {
    * Obtiene el historial de cambios de precios
    */
   @Get('historial-cambios')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener historial de cambios de precios',
@@ -335,6 +347,8 @@ export class PagosController {
    * Obtiene inscripciones pendientes con información de estudiantes
    */
   @Get('inscripciones/pendientes')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener inscripciones pendientes',
@@ -354,6 +368,8 @@ export class PagosController {
    * Obtiene estudiantes con descuentos aplicados
    */
   @Get('estudiantes-descuentos')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener estudiantes con descuentos',
