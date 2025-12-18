@@ -1,76 +1,107 @@
 # CLAUDE.md - Mateatletas
 
-## REGLAS OBLIGATORIAS (HOOKS LAS ENFORZAN)
+## METODOLOGÍA OBLIGATORIA
+
+### Ciclo de Trabajo
+
+AUDITORÍA → PLANIFICACIÓN → ATOMIZACIÓN → VERIFICACIÓN
+
+1. **AUDITORÍA**: Analizar antes de tocar código
+2. **PLANIFICACIÓN**: Plan completo ANTES de ejecutar
+3. **ATOMIZACIÓN**: Commits pequeños y lógicos
+4. **VERIFICACIÓN**: yarn build && yarn lint && yarn test después de cada cambio
+
+### Si algo falla
+
+- NO parches reactivos
+- Analizar CAUSA RAÍZ
+- Entender el problema completo antes de arreglar
+
+## REGLAS INQUEBRANTABLES
 
 ### TypeScript
 
-- PROHIBIDO: `any`, `unknown` sin type guard, `@ts-ignore`, `@ts-nocheck`
-- OBLIGATORIO: Tipos explicitos en funciones, interfaces para DTOs
+- ❌ PROHIBIDO: `any`, `unknown`, `@ts-ignore`, `@ts-nocheck`, `as` sin justificar
+- ✅ OBLIGATORIO: Tipos explícitos, interfaces para DTOs, generics cuando aplique
+
+### Seguridad
+
+- ParseUUIDPipe en todos los @Param de IDs
+- Nunca exponer passwords, tokens, secrets en logs/responses
+- @Public() explícito para endpoints sin auth
 
 ### Arquitectura
 
-- Clean Architecture: Controller -> Service -> Repository
-- CQRS para operaciones complejas
+- Clean Architecture: Controller → Service → Repository
+- CQRS para operaciones complejas (Query vs Command services)
+- Servicios < 400 líneas (si es más grande, dividir)
 - Un archivo = una responsabilidad
 
 ### Testing
 
-- TDD: Test primero, codigo despues
-- Coverage minimo 80% en codigo nuevo
-- Nombres descriptivos: `should_[action]_when_[condition]`
+- TDD: Test primero, código después
+- Coverage mínimo 80% en código nuevo
+- Nombres: `should_[action]_when_[condition]`
 
 ### Commits
 
-- NO commitear si hay errores de TypeScript
-- NO commitear si hay warnings de ESLint
-- Mensaje descriptivo: `tipo(scope): descripcion`
+- NO commitear con errores TypeScript
+- NO commitear con errores ESLint
+- Commits atómicos: un cambio lógico por commit
+- Mensaje: `tipo(scope): descripción`
 
 ## STACK
 
-- Backend: NestJS + Prisma + PostgreSQL
-- Frontend: Next.js 15 + React + Tailwind
-- Testing: Jest + React Testing Library
-- Deploy: Railway + Vercel
+- **Backend**: NestJS 10 + Prisma 6 + PostgreSQL 15
+- **Frontend**: Next.js 15 + React 19 + Tailwind 4
+- **Testing**: Jest + React Testing Library
+- **Cache**: Redis (Keyv) + In-Memory fallback
+- **Queues**: BullMQ
+- **Deploy**: Railway + Vercel
 
-## COMANDOS UTILES
+## COMANDOS
 
 ```bash
-npm run build          # Compilar
-npm run lint:strict    # Lint sin warnings
-npm run typecheck      # Verificar tipos
-npm run test           # Tests
-npm run validate       # Validacion completa
+yarn build           # Compilar todo
+yarn lint            # ESLint
+yarn typecheck       # Verificar tipos
+yarn test            # Tests
+yarn test:cov        # Coverage
 ```
 
-## ESTRUCTURA DEL PROYECTO
+## ESTRUCTURA
 
 ```
-mateatletas/
+mateatletas-ecosystem/
 ├── apps/
 │   ├── api/          # Backend NestJS
 │   └── web/          # Frontend Next.js
 ├── packages/
-│   └── contracts/    # DTOs y tipos compartidos
-├── docs/             # Documentacion
-└── scripts/          # Scripts de utilidad
+│   └── contracts/    # DTOs compartidos
+├── docs/             # Documentación técnica
+├── prisma/           # Schema y migraciones
+└── scripts/          # Utilidades
 ```
 
 ## CONVENCIONES
 
-### Nombres de archivos
+### Archivos
 
-- Servicios: `*.service.ts`
-- Controladores: `*.controller.ts`
-- DTOs: `*.dto.ts`
-- Tests: `*.spec.ts` o `*.test.ts`
-
-### Imports
-
-- Usar paths absolutos con alias `@/`
-- Ordenar: externos, internos, relativos
+- Servicios: `nombre.service.ts` o `nombre-query.service.ts` / `nombre-command.service.ts`
+- Controladores: `nombre.controller.ts`
+- DTOs: `nombre.dto.ts`
+- Tests: `nombre.spec.ts`
 
 ### Git
 
 - Branch principal: `main`
 - Features: `feature/nombre-descriptivo`
 - Fixes: `fix/descripcion-bug`
+
+## ANTI-PATRONES A EVITAR
+
+- ❌ God Services (>400 líneas)
+- ❌ N+1 queries (usar groupBy, include, o batch)
+- ❌ Promise.all con loops de queries individuales
+- ❌ console.log en producción (usar Logger de NestJS)
+- ❌ Parches sin entender causa raíz
