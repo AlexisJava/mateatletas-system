@@ -15,9 +15,9 @@ describe('QueueHealthIndicator', () => {
       ping: jest.fn().mockResolvedValue('PONG'),
     };
 
-    // Mock Bull Queue
+    // Mock Bull Queue - client es accedido directamente (no es una Promise)
     mockQueue = {
-      client: Promise.resolve(mockRedisClient),
+      client: mockRedisClient,
       getWaitingCount: jest.fn().mockResolvedValue(10),
       getActiveCount: jest.fn().mockResolvedValue(2),
       getFailedCount: jest.fn().mockResolvedValue(5),

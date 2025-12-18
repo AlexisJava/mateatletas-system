@@ -3,48 +3,48 @@ import { PrismaClient, TierNombre } from '@prisma/client';
 /**
  * Seed de Tiers - Sistema Mateatletas 2026
  *
- * Crea los 3 tiers de suscripcion:
- * - ARCADE: $30k - 1 mundo async, sin docente (entry-level)
- * - ARCADE_PLUS: $60k - 3 mundos async, sin docente (amplitud)
- * - PRO: $75k - 1 mundo async + 1 mundo sync con docente (profundidad)
+ * Modelo STEAM - 3 niveles de suscripción:
+ * - STEAM_LIBROS: $40k - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM_ASINCRONICO: $65k - Todo + clases grabadas
+ * - STEAM_SINCRONICO: $95k - Todo + clases en vivo con docente
  *
  * Reglas de negocio:
  * - El tier es por estudiante, no por familia
- * - Los descuentos familiares (12%/20%) aplican al total
- * - PRO requiere que mundo async != mundo sync
+ * - Descuento 10% para 2do hermano en adelante
+ * - STEAM_SINCRONICO incluye acceso a clases grupales con docente
  */
 export async function seedTiers(prisma: PrismaClient): Promise<void> {
-  console.log('🎮 Seeding Tiers 2026...');
+  console.log('🎮 Seeding Tiers STEAM 2026...');
 
   const tiers = [
     {
-      nombre: TierNombre.ARCADE,
-      precio_mensual: 30000,
-      mundos_async: 1,
+      nombre: TierNombre.STEAM_LIBROS,
+      precio_mensual: 40000,
+      mundos_async: 3, // Acceso a todos los mundos (Mate, Progra, Ciencias)
       mundos_sync: 0,
       tiene_docente: false,
-      descripcion: 'Plan inicial - 1 mundo async para explorar',
+      descripcion:
+        'Plataforma completa STEAM: Matemáticas + Programación + Ciencias',
       activo: true,
       orden: 1,
     },
     {
-      nombre: TierNombre.ARCADE_PLUS,
-      precio_mensual: 60000,
+      nombre: TierNombre.STEAM_ASINCRONICO,
+      precio_mensual: 65000,
       mundos_async: 3,
       mundos_sync: 0,
       tiene_docente: false,
-      descripcion: 'Plan amplitud - 3 mundos async para variedad',
+      descripcion: 'STEAM completo + clases grabadas asincrónicas',
       activo: true,
       orden: 2,
     },
     {
-      nombre: TierNombre.PRO,
-      precio_mensual: 75000,
-      mundos_async: 1,
+      nombre: TierNombre.STEAM_SINCRONICO,
+      precio_mensual: 95000,
+      mundos_async: 3,
       mundos_sync: 1,
       tiene_docente: true,
-      descripcion:
-        'Plan profundidad - 1 mundo async + 1 mundo sync con docente',
+      descripcion: 'STEAM completo + clases en vivo con docente',
       activo: true,
       orden: 3,
     },
@@ -66,5 +66,7 @@ export async function seedTiers(prisma: PrismaClient): Promise<void> {
     });
   }
 
-  console.log('   ✅ 3 tiers creados: ARCADE, ARCADE_PLUS, PRO');
+  console.log(
+    '   ✅ 3 tiers creados: STEAM_LIBROS, STEAM_ASINCRONICO, STEAM_SINCRONICO',
+  );
 }

@@ -50,8 +50,13 @@ interface CancelacionResult {
 }
 
 /**
- * Constantes de configuración de tiers
+ * Constantes de configuración de tiers STEAM
  * Estas constantes permiten cálculos síncronos sin necesidad de consultar DB
+ *
+ * Modelo STEAM 2026:
+ * - STEAM_LIBROS: $40k - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM_ASINCRONICO: $65k - Todo + clases grabadas
+ * - STEAM_SINCRONICO: $95k - Todo + clases en vivo con docente
  */
 const TIER_CONFIG: Record<
   TierNombre,
@@ -61,45 +66,43 @@ const TIER_CONFIG: Record<
     orden: number;
   }
 > = {
-  [TierNombre.ARCADE]: {
-    mundos_async: 1,
+  [TierNombre.STEAM_LIBROS]: {
+    mundos_async: 3, // Acceso a todos los mundos (Mate, Progra, Ciencias)
     mundos_sync: 0,
     tiene_docente: false,
-    precio_mensual: 30000,
+    precio_mensual: 40000,
     orden: 1,
   },
-  [TierNombre.ARCADE_PLUS]: {
+  [TierNombre.STEAM_ASINCRONICO]: {
     mundos_async: 3,
     mundos_sync: 0,
     tiene_docente: false,
-    precio_mensual: 60000,
+    precio_mensual: 65000,
     orden: 2,
   },
-  [TierNombre.PRO]: {
-    mundos_async: 1,
+  [TierNombre.STEAM_SINCRONICO]: {
+    mundos_async: 3,
     mundos_sync: 1,
     tiene_docente: true,
-    precio_mensual: 75000,
+    precio_mensual: 95000,
     orden: 3,
   },
 };
 
 /**
- * Descuentos familiares según cantidad de hijos
+ * Descuento familiar simplificado - 10% para 2do hermano en adelante
  */
-const DESCUENTOS_FAMILIARES: Record<number, number> = {
-  1: 0,
-  2: 12,
-};
-const DESCUENTO_3_O_MAS = 20;
+const DESCUENTO_SEGUNDO_HERMANO = 10;
 
 /**
  * Servicio para gestión de Tiers - Sistema Mateatletas 2026
  *
- * Modelo de negocio:
- * - ARCADE: $30k - 1 mundo async, 0 sync, sin docente
- * - ARCADE_PLUS: $60k - 3 mundos async, 0 sync, sin docente
- * - PRO: $75k - 1 mundo async, 1 sync, con docente
+ * Modelo STEAM:
+ * - STEAM_LIBROS: $40k - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM_ASINCRONICO: $65k - Todo + clases grabadas
+ * - STEAM_SINCRONICO: $95k - Todo + clases en vivo con docente
+ *
+ * Descuento familiar: 10% para 2do hermano en adelante
  */
 @Injectable()
 export class TiersService {
@@ -150,10 +153,12 @@ export class TiersService {
   /**
    * Calcula el precio familiar con descuentos aplicables
    *
-   * Descuentos:
-   * - 1 hijo: 0%
-   * - 2 hijos: 12%
-   * - 3+ hijos: 20%
+   * Descuento simplificado STEAM 2026:
+   * - 1 hijo: 0% (precio completo)
+   * - 2+ hijos: 10% de descuento para el 2do hermano en adelante
+   *
+   * El descuento se aplica solo al monto de los hermanos adicionales,
+   * no al primer estudiante.
    */
   calcularPrecioFamiliar(
     tiers: Pick<Tier, 'precio_mensual'>[],
@@ -170,15 +175,24 @@ export class TiersService {
     const subtotal = tiers.reduce((acc, tier) => acc + tier.precio_mensual, 0);
     const cantidadHijos = tiers.length;
 
-    let descuento_porcentaje: number;
-    if (cantidadHijos >= 3) {
-      descuento_porcentaje = DESCUENTO_3_O_MAS;
-    } else {
-      descuento_porcentaje = DESCUENTOS_FAMILIARES[cantidadHijos] ?? 0;
+    // Descuento solo aplica a partir del 2do hermano
+    // El 10% se aplica al monto de los hermanos adicionales (no al primero)
+    let descuento_monto = 0;
+    if (cantidadHijos >= 2) {
+      // Calcular el monto de los hermanos adicionales (todos menos el primero)
+      const montoHermanosAdicionales = tiers
+        .slice(1)
+        .reduce((acc, tier) => acc + tier.precio_mensual, 0);
+      descuento_monto = Math.round(
+        montoHermanosAdicionales * (DESCUENTO_SEGUNDO_HERMANO / 100),
+      );
     }
 
-    const descuento_monto = Math.round(subtotal * (descuento_porcentaje / 100));
     const total = subtotal - descuento_monto;
+
+    // Calcular porcentaje efectivo sobre el subtotal
+    const descuento_porcentaje =
+      subtotal > 0 ? Math.round((descuento_monto / subtotal) * 100) : 0;
 
     return {
       subtotal,
@@ -189,12 +203,12 @@ export class TiersService {
   }
 
   /**
-   * Valida la selección de mundos según las reglas del tier
+   * Valida la selección de mundos según las reglas del tier STEAM
    *
-   * Reglas:
-   * - ARCADE: máximo 1 mundo async, 0 sync
-   * - ARCADE_PLUS: máximo 3 mundos async, 0 sync
-   * - PRO: exactamente 1 async + 1 sync, deben ser diferentes
+   * Reglas STEAM 2026:
+   * - STEAM_LIBROS: máximo 3 mundos async, 0 sync
+   * - STEAM_ASINCRONICO: máximo 3 mundos async, 0 sync
+   * - STEAM_SINCRONICO: máximo 3 mundos async + 1 mundo sync
    *
    * @throws BadRequestException si la selección no cumple las reglas
    */
@@ -206,50 +220,42 @@ export class TiersService {
     const config = TIER_CONFIG[tierNombre];
 
     switch (tierNombre) {
-      case TierNombre.ARCADE:
+      case TierNombre.STEAM_LIBROS:
         if (mundosAsync.length > config.mundos_async) {
           throw new BadRequestException(
-            `ARCADE permite maximo ${config.mundos_async} mundo async`,
+            `STEAM_LIBROS permite máximo ${config.mundos_async} mundos async`,
           );
         }
         if (mundosSync.length > 0) {
-          throw new BadRequestException('ARCADE no incluye mundos sync');
+          throw new BadRequestException(
+            'STEAM_LIBROS no incluye clases en vivo',
+          );
         }
         break;
 
-      case TierNombre.ARCADE_PLUS:
+      case TierNombre.STEAM_ASINCRONICO:
         if (mundosAsync.length > config.mundos_async) {
           throw new BadRequestException(
-            `ARCADE_PLUS permite maximo ${config.mundos_async} mundos async`,
+            `STEAM_ASINCRONICO permite máximo ${config.mundos_async} mundos async`,
           );
         }
         if (mundosSync.length > 0) {
-          throw new BadRequestException('ARCADE_PLUS no incluye mundos sync');
+          throw new BadRequestException(
+            'STEAM_ASINCRONICO no incluye clases en vivo',
+          );
         }
         break;
 
-      case TierNombre.PRO:
-        if (mundosAsync.length !== config.mundos_async) {
+      case TierNombre.STEAM_SINCRONICO:
+        if (mundosAsync.length > config.mundos_async) {
           throw new BadRequestException(
-            `PRO permite exactamente ${config.mundos_async} mundo async`,
+            `STEAM_SINCRONICO permite máximo ${config.mundos_async} mundos async`,
           );
         }
-        if (mundosSync.length !== config.mundos_sync) {
+        if (mundosSync.length > config.mundos_sync) {
           throw new BadRequestException(
-            `PRO requiere exactamente ${config.mundos_sync} mundo sync`,
+            `STEAM_SINCRONICO permite máximo ${config.mundos_sync} mundo sync`,
           );
-        }
-        // PRO requiere que async != sync
-        if (mundosAsync.length > 0 && mundosSync.length > 0) {
-          const asyncSet = new Set(mundosAsync);
-          const haySuperposicion = mundosSync.some((mundo) =>
-            asyncSet.has(mundo),
-          );
-          if (haySuperposicion) {
-            throw new BadRequestException(
-              'PRO requiere que el mundo sync sea diferente del async',
-            );
-          }
         }
         break;
     }

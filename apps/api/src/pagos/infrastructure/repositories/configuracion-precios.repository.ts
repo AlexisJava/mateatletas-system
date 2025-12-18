@@ -12,14 +12,13 @@ import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
  * Implementación del repositorio de Configuración de Precios
  * Infrastructure Layer - Implementa interface del Domain Layer
  *
- * Sistema de Tiers 2026:
- * - Arcade: $30.000/mes - 1 mundo async
- * - Arcade+: $60.000/mes - 3 mundos async
- * - Pro: $75.000/mes - 1 mundo async + 1 mundo sync con docente
+ * Sistema de Tiers STEAM 2026:
+ * - STEAM_LIBROS: $40.000/mes - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM_ASINCRONICO: $65.000/mes - Todo + clases grabadas
+ * - STEAM_SINCRONICO: $95.000/mes - Todo + clases en vivo con docente
  *
- * Descuentos familiares:
- * - 2do hermano: 12%
- * - 3er hermano en adelante: 20%
+ * Descuento familiar simplificado:
+ * - 10% para 2do hermano en adelante
  *
  * Responsabilidades:
  * - Convertir entre tipos de Prisma y tipos del Domain
@@ -137,14 +136,17 @@ export class ConfiguracionPreciosRepository
     config: Prisma.ConfiguracionPreciosGetPayload<object>,
   ): ConfiguracionPrecios {
     return {
-      // Precios por Tier (Sistema 2026)
-      precioArcade: new Decimal(config.precio_arcade.toString()),
-      precioArcadePlus: new Decimal(config.precio_arcade_plus.toString()),
-      precioPro: new Decimal(config.precio_pro.toString()),
-      // Descuentos familiares
-      descuentoHermano2: new Decimal(config.descuento_hermano_2.toString()),
-      descuentoHermano3Mas: new Decimal(
-        config.descuento_hermano_3_mas.toString(),
+      // Precios por Tier STEAM (Sistema 2026)
+      precioSteamLibros: new Decimal(config.precio_steam_libros.toString()),
+      precioSteamAsincronico: new Decimal(
+        config.precio_steam_asincronico.toString(),
+      ),
+      precioSteamSincronico: new Decimal(
+        config.precio_steam_sincronico.toString(),
+      ),
+      // Descuento familiar simplificado
+      descuentoSegundoHermano: new Decimal(
+        config.descuento_segundo_hermano.toString(),
       ),
       // Configuración de notificaciones
       diaVencimiento: config.dia_vencimiento,
@@ -162,23 +164,20 @@ export class ConfiguracionPreciosRepository
   ): Record<string, unknown> {
     const resultado: Record<string, unknown> = {};
 
-    // Precios por Tier
-    if (config.precioArcade !== undefined) {
-      resultado.precio_arcade = config.precioArcade;
+    // Precios por Tier STEAM
+    if (config.precioSteamLibros !== undefined) {
+      resultado.precio_steam_libros = config.precioSteamLibros;
     }
-    if (config.precioArcadePlus !== undefined) {
-      resultado.precio_arcade_plus = config.precioArcadePlus;
+    if (config.precioSteamAsincronico !== undefined) {
+      resultado.precio_steam_asincronico = config.precioSteamAsincronico;
     }
-    if (config.precioPro !== undefined) {
-      resultado.precio_pro = config.precioPro;
+    if (config.precioSteamSincronico !== undefined) {
+      resultado.precio_steam_sincronico = config.precioSteamSincronico;
     }
 
-    // Descuentos familiares
-    if (config.descuentoHermano2 !== undefined) {
-      resultado.descuento_hermano_2 = config.descuentoHermano2;
-    }
-    if (config.descuentoHermano3Mas !== undefined) {
-      resultado.descuento_hermano_3_mas = config.descuentoHermano3Mas;
+    // Descuento familiar simplificado
+    if (config.descuentoSegundoHermano !== undefined) {
+      resultado.descuento_segundo_hermano = config.descuentoSegundoHermano;
     }
 
     // Configuración de notificaciones
@@ -203,13 +202,12 @@ export class ConfiguracionPreciosRepository
     config: Prisma.ConfiguracionPreciosGetPayload<object>,
   ): Record<string, string | boolean | number> {
     return {
-      // Precios por Tier
-      precio_arcade: config.precio_arcade.toString(),
-      precio_arcade_plus: config.precio_arcade_plus.toString(),
-      precio_pro: config.precio_pro.toString(),
-      // Descuentos familiares
-      descuento_hermano_2: config.descuento_hermano_2.toString(),
-      descuento_hermano_3_mas: config.descuento_hermano_3_mas.toString(),
+      // Precios por Tier STEAM
+      precio_steam_libros: config.precio_steam_libros.toString(),
+      precio_steam_asincronico: config.precio_steam_asincronico.toString(),
+      precio_steam_sincronico: config.precio_steam_sincronico.toString(),
+      // Descuento familiar
+      descuento_segundo_hermano: config.descuento_segundo_hermano.toString(),
       // Configuración de notificaciones
       dia_vencimiento: config.dia_vencimiento,
       dias_antes_recordatorio: config.dias_antes_recordatorio,

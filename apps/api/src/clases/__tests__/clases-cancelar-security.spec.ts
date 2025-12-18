@@ -15,9 +15,6 @@ describe('ClaseCommandService - Cancelar Clase Security', () => {
     estado: 'Programada',
     docente_id: 'docente-123',
     fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
-    rutaCurricular: {
-      nombre: 'Matemáticas',
-    },
     inscripciones: [
       { id: 'insc-1', estudiante_id: 'est-1' },
       { id: 'insc-2', estudiante_id: 'est-2' },
@@ -100,7 +97,6 @@ describe('ClaseCommandService - Cancelar Clase Security', () => {
         ...mockClaseProgramada,
         estado: 'Cancelada',
         cupos_ocupados: 0,
-        rutaCurricular: { nombre: 'Matemáticas' },
         docente: { nombre: 'Juan', apellido: 'Perez' },
       } as any);
 
@@ -118,7 +114,6 @@ describe('ClaseCommandService - Cancelar Clase Security', () => {
           cupos_ocupados: 0,
         },
         include: {
-          rutaCurricular: { select: { nombre: true } },
           docente: { select: { nombre: true, apellido: true } },
         },
       });
@@ -133,7 +128,6 @@ describe('ClaseCommandService - Cancelar Clase Security', () => {
         ...mockClaseProgramada,
         estado: 'Cancelada',
         cupos_ocupados: 0,
-        rutaCurricular: { nombre: 'Matemáticas' },
         docente: { nombre: 'Juan', apellido: 'Perez' },
       } as any);
 
@@ -201,7 +195,6 @@ describe('ClaseCommandService - Cancelar Clase Security', () => {
         ...mockClaseProgramada,
         estado: 'Cancelada',
         cupos_ocupados: 0,
-        rutaCurricular: { nombre: 'Matemáticas' },
         docente: { nombre: 'Juan', apellido: 'Perez' },
       } as any);
 

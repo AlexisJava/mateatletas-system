@@ -1613,19 +1613,18 @@ enum PrioridadTarea {
 
 /// Configuración global de precios (Tabla singleton)
 /// Solo existe UN registro con id="singleton"
-/// Sistema de Tiers 2026: Arcade, Arcade+, Pro
+/// Sistema de Tiers STEAM 2026: STEAM_LIBROS, STEAM_ASINCRONICO, STEAM_SINCRONICO
 model ConfiguracionPrecios {
   /// ID fijo "singleton" para garantizar un solo registro
   id String @id @default("singleton")
 
-  /// Precios por Tier (Sistema 2026)
-  precio_arcade      Decimal @default(30000) @db.Decimal(10, 2)
-  precio_arcade_plus Decimal @default(60000) @db.Decimal(10, 2)
-  precio_pro         Decimal @default(75000) @db.Decimal(10, 2)
+  /// Precios por Tier STEAM (Sistema 2026)
+  precio_steam_libros      Decimal @default(40000) @db.Decimal(10, 2)
+  precio_steam_asincronico Decimal @default(65000) @db.Decimal(10, 2)
+  precio_steam_sincronico  Decimal @default(95000) @db.Decimal(10, 2)
 
-  /// Descuentos familiares
-  descuento_hermano_2     Decimal @default(12) @db.Decimal(5, 2) // 12% segundo hermano
-  descuento_hermano_3_mas Decimal @default(20) @db.Decimal(5, 2) // 20% tercer hermano en adelante
+  /// Descuento familiar simplificado
+  descuento_segundo_hermano Decimal @default(10) @db.Decimal(5, 2) // 10% para 2do hermano en adelante
 
   /// Configuración de notificaciones
   dia_vencimiento         Int     @default(15)

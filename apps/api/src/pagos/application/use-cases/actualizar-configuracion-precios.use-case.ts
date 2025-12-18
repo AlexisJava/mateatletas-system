@@ -12,14 +12,13 @@ import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
 /**
  * Use Case: Actualizar Configuración de Precios
  *
- * Sistema de Tiers 2026:
- * - Arcade: $30.000/mes - 1 mundo async
- * - Arcade+: $60.000/mes - 3 mundos async
- * - Pro: $75.000/mes - 1 mundo async + 1 mundo sync con docente
+ * Sistema STEAM 2026:
+ * - STEAM_LIBROS: $40.000/mes - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM_ASINCRONICO: $65.000/mes - Todo + clases grabadas
+ * - STEAM_SINCRONICO: $95.000/mes - Todo + clases en vivo con docente
  *
- * Descuentos familiares:
- * - 2do hermano: 12%
- * - 3er hermano en adelante: 20%
+ * Descuento familiar simplificado:
+ * - 10% para segundo hermano en adelante
  *
  * Responsabilidades (Application Layer):
  * 1. Validar que existe configuración actual
@@ -93,11 +92,11 @@ export class ActualizarConfiguracionPreciosUseCase {
    * Valida los valores de los cambios propuestos
    */
   private validarCambios(input: ActualizarConfiguracionPreciosInputDTO): void {
-    // Validar precios de Tiers no negativos
+    // Validar precios de Tiers STEAM no negativos
     const precios = [
-      input.precioArcade,
-      input.precioArcadePlus,
-      input.precioPro,
+      input.precioSteamLibros,
+      input.precioSteamAsincronico,
+      input.precioSteamSincronico,
     ].filter(Boolean);
 
     for (const precio of precios) {
@@ -106,20 +105,15 @@ export class ActualizarConfiguracionPreciosUseCase {
       }
     }
 
-    // Validar descuentos familiares (porcentajes)
-    const descuentos = [
-      { valor: input.descuentoHermano2, nombre: 'descuento segundo hermano' },
-      {
-        valor: input.descuentoHermano3Mas,
-        nombre: 'descuento tercer hermano en adelante',
-      },
-    ];
-
-    for (const descuento of descuentos) {
-      if (descuento.valor !== undefined) {
-        if (descuento.valor.lessThan(0) || descuento.valor.greaterThan(100)) {
-          throw new Error(`El ${descuento.nombre} debe estar entre 0 y 100`);
-        }
+    // Validar descuento familiar (porcentaje)
+    if (input.descuentoSegundoHermano !== undefined) {
+      if (
+        input.descuentoSegundoHermano.lessThan(0) ||
+        input.descuentoSegundoHermano.greaterThan(100)
+      ) {
+        throw new Error(
+          'El descuento para segundo hermano debe estar entre 0 y 100',
+        );
       }
     }
 
@@ -149,57 +143,49 @@ export class ActualizarConfiguracionPreciosUseCase {
   ): CambioRealizadoDTO[] {
     const cambios: CambioRealizadoDTO[] = [];
 
-    // Comparar precios de Tiers
+    // Comparar precios de Tiers STEAM
     if (
-      propuesto.precioArcade &&
-      !propuesto.precioArcade.equals(actual.precioArcade)
+      propuesto.precioSteamLibros &&
+      !propuesto.precioSteamLibros.equals(actual.precioSteamLibros)
     ) {
       cambios.push({
-        campo: 'precioArcade',
-        valorAnterior: actual.precioArcade,
-        valorNuevo: propuesto.precioArcade,
+        campo: 'precioSteamLibros',
+        valorAnterior: actual.precioSteamLibros,
+        valorNuevo: propuesto.precioSteamLibros,
       });
     }
 
     if (
-      propuesto.precioArcadePlus &&
-      !propuesto.precioArcadePlus.equals(actual.precioArcadePlus)
+      propuesto.precioSteamAsincronico &&
+      !propuesto.precioSteamAsincronico.equals(actual.precioSteamAsincronico)
     ) {
       cambios.push({
-        campo: 'precioArcadePlus',
-        valorAnterior: actual.precioArcadePlus,
-        valorNuevo: propuesto.precioArcadePlus,
-      });
-    }
-
-    if (propuesto.precioPro && !propuesto.precioPro.equals(actual.precioPro)) {
-      cambios.push({
-        campo: 'precioPro',
-        valorAnterior: actual.precioPro,
-        valorNuevo: propuesto.precioPro,
-      });
-    }
-
-    // Comparar descuentos familiares
-    if (
-      propuesto.descuentoHermano2 &&
-      !propuesto.descuentoHermano2.equals(actual.descuentoHermano2)
-    ) {
-      cambios.push({
-        campo: 'descuentoHermano2',
-        valorAnterior: actual.descuentoHermano2,
-        valorNuevo: propuesto.descuentoHermano2,
+        campo: 'precioSteamAsincronico',
+        valorAnterior: actual.precioSteamAsincronico,
+        valorNuevo: propuesto.precioSteamAsincronico,
       });
     }
 
     if (
-      propuesto.descuentoHermano3Mas &&
-      !propuesto.descuentoHermano3Mas.equals(actual.descuentoHermano3Mas)
+      propuesto.precioSteamSincronico &&
+      !propuesto.precioSteamSincronico.equals(actual.precioSteamSincronico)
     ) {
       cambios.push({
-        campo: 'descuentoHermano3Mas',
-        valorAnterior: actual.descuentoHermano3Mas,
-        valorNuevo: propuesto.descuentoHermano3Mas,
+        campo: 'precioSteamSincronico',
+        valorAnterior: actual.precioSteamSincronico,
+        valorNuevo: propuesto.precioSteamSincronico,
+      });
+    }
+
+    // Comparar descuento familiar simplificado
+    if (
+      propuesto.descuentoSegundoHermano &&
+      !propuesto.descuentoSegundoHermano.equals(actual.descuentoSegundoHermano)
+    ) {
+      cambios.push({
+        campo: 'descuentoSegundoHermano',
+        valorAnterior: actual.descuentoSegundoHermano,
+        valorNuevo: propuesto.descuentoSegundoHermano,
       });
     }
 
@@ -243,9 +229,9 @@ export class ActualizarConfiguracionPreciosUseCase {
   /**
    * Construye el objeto de actualización parcial
    *
-   * Sistema de Tiers 2026:
+   * Sistema STEAM 2026:
    * - Los precios de cada Tier son independientes
-   * - Los descuentos familiares se aplican sobre cualquier Tier
+   * - El descuento familiar se aplica sobre cualquier Tier
    *
    * CONTABILIDAD: Los precios en ARS deben ser enteros (sin centavos)
    */
@@ -254,23 +240,20 @@ export class ActualizarConfiguracionPreciosUseCase {
   ): Partial<ConfiguracionPrecios> {
     const actualizacion: Record<string, Decimal | boolean | number> = {};
 
-    // Precios por Tier
-    if (input.precioArcade) {
-      actualizacion.precioArcade = input.precioArcade;
+    // Precios por Tier STEAM
+    if (input.precioSteamLibros) {
+      actualizacion.precioSteamLibros = input.precioSteamLibros;
     }
-    if (input.precioArcadePlus) {
-      actualizacion.precioArcadePlus = input.precioArcadePlus;
+    if (input.precioSteamAsincronico) {
+      actualizacion.precioSteamAsincronico = input.precioSteamAsincronico;
     }
-    if (input.precioPro) {
-      actualizacion.precioPro = input.precioPro;
+    if (input.precioSteamSincronico) {
+      actualizacion.precioSteamSincronico = input.precioSteamSincronico;
     }
 
-    // Descuentos familiares
-    if (input.descuentoHermano2) {
-      actualizacion.descuentoHermano2 = input.descuentoHermano2;
-    }
-    if (input.descuentoHermano3Mas) {
-      actualizacion.descuentoHermano3Mas = input.descuentoHermano3Mas;
+    // Descuento familiar simplificado
+    if (input.descuentoSegundoHermano) {
+      actualizacion.descuentoSegundoHermano = input.descuentoSegundoHermano;
     }
 
     // Configuración de notificaciones
@@ -294,13 +277,12 @@ export class ActualizarConfiguracionPreciosUseCase {
     config: ConfiguracionPrecios,
   ): ConfiguracionPreciosDTO {
     return {
-      // Precios por Tier
-      precioArcade: config.precioArcade,
-      precioArcadePlus: config.precioArcadePlus,
-      precioPro: config.precioPro,
-      // Descuentos familiares
-      descuentoHermano2: config.descuentoHermano2,
-      descuentoHermano3Mas: config.descuentoHermano3Mas,
+      // Precios por Tier STEAM
+      precioSteamLibros: config.precioSteamLibros,
+      precioSteamAsincronico: config.precioSteamAsincronico,
+      precioSteamSincronico: config.precioSteamSincronico,
+      // Descuento familiar simplificado
+      descuentoSegundoHermano: config.descuentoSegundoHermano,
       // Configuración de notificaciones
       diaVencimiento: config.diaVencimiento,
       diasAntesRecordatorio: config.diasAntesRecordatorio,

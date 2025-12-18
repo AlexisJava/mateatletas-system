@@ -7,62 +7,56 @@ import { PrismaService } from '../../core/database/prisma.service';
 /**
  * Tests TDD para TiersService - Sistema Mateatletas 2026
  *
- * SLICE 3: TIERS
+ * Modelo STEAM:
+ * - STEAM_LIBROS: $40k - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM_ASINCRONICO: $65k - Todo + clases grabadas
+ * - STEAM_SINCRONICO: $95k - Todo + clases en vivo con docente
  *
- * Modelo de negocio:
- * - ARCADE: $30k - 1 mundo async, 0 sync, sin docente
- * - ARCADE_PLUS: $60k - 3 mundos async, 0 sync, sin docente
- * - PRO: $75k - 1 mundo async, 1 sync, con docente
- *
- * Descuentos familiares:
+ * Descuento familiar simplificado:
  * - 1 hijo: 0%
- * - 2 hijos: 12%
- * - 3+ hijos: 20%
- *
- * Reglas:
- * - PRO requiere que mundo async != mundo sync
+ * - 2+ hijos: 10% sobre monto de hermanos adicionales
  */
 describe('TiersService', () => {
   let service: TiersService;
   let prisma: PrismaService;
 
-  // Mock data
-  const mockTierArcade = {
-    id: 'tier-arcade-id',
-    nombre: TierNombre.ARCADE,
-    precio_mensual: 30000,
-    mundos_async: 1,
+  // Mock data - Tiers STEAM
+  const mockTierSteamLibros = {
+    id: 'tier-steam-libros-id',
+    nombre: TierNombre.STEAM_LIBROS,
+    precio_mensual: 40000,
+    mundos_async: 3,
     mundos_sync: 0,
     tiene_docente: false,
-    descripcion: 'Plan inicial',
+    descripcion: 'Plataforma completa STEAM',
     activo: true,
     orden: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
-  const mockTierArcadePlus = {
-    id: 'tier-arcade-plus-id',
-    nombre: TierNombre.ARCADE_PLUS,
-    precio_mensual: 60000,
+  const mockTierSteamAsincronico = {
+    id: 'tier-steam-asincronico-id',
+    nombre: TierNombre.STEAM_ASINCRONICO,
+    precio_mensual: 65000,
     mundos_async: 3,
     mundos_sync: 0,
     tiene_docente: false,
-    descripcion: 'Plan amplitud',
+    descripcion: 'STEAM + clases grabadas',
     activo: true,
     orden: 2,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
-  const mockTierPro = {
-    id: 'tier-pro-id',
-    nombre: TierNombre.PRO,
-    precio_mensual: 75000,
-    mundos_async: 1,
+  const mockTierSteamSincronico = {
+    id: 'tier-steam-sincronico-id',
+    nombre: TierNombre.STEAM_SINCRONICO,
+    precio_mensual: 95000,
+    mundos_async: 3,
     mundos_sync: 1,
     tiene_docente: true,
-    descripcion: 'Plan profundidad',
+    descripcion: 'STEAM + clases en vivo',
     activo: true,
     orden: 3,
     createdAt: new Date(),
@@ -98,7 +92,11 @@ describe('TiersService', () => {
   describe('findAll', () => {
     it('should_return_all_active_tiers_ordered_by_precio', async () => {
       // Arrange
-      const expectedTiers = [mockTierArcade, mockTierArcadePlus, mockTierPro];
+      const expectedTiers = [
+        mockTierSteamLibros,
+        mockTierSteamAsincronico,
+        mockTierSteamSincronico,
+      ];
       mockPrismaService.tier.findMany.mockResolvedValue(expectedTiers);
 
       // Act
@@ -106,9 +104,9 @@ describe('TiersService', () => {
 
       // Assert
       expect(result).toHaveLength(3);
-      expect(result[0].nombre).toBe(TierNombre.ARCADE);
-      expect(result[1].nombre).toBe(TierNombre.ARCADE_PLUS);
-      expect(result[2].nombre).toBe(TierNombre.PRO);
+      expect(result[0].nombre).toBe(TierNombre.STEAM_LIBROS);
+      expect(result[1].nombre).toBe(TierNombre.STEAM_ASINCRONICO);
+      expect(result[2].nombre).toBe(TierNombre.STEAM_SINCRONICO);
       expect(mockPrismaService.tier.findMany).toHaveBeenCalledWith({
         where: { activo: true },
         orderBy: { precio_mensual: 'asc' },
@@ -130,16 +128,16 @@ describe('TiersService', () => {
   describe('findByNombre', () => {
     it('should_return_tier_by_nombre', async () => {
       // Arrange
-      mockPrismaService.tier.findUnique.mockResolvedValue(mockTierArcade);
+      mockPrismaService.tier.findUnique.mockResolvedValue(mockTierSteamLibros);
 
       // Act
-      const result = await service.findByNombre(TierNombre.ARCADE);
+      const result = await service.findByNombre(TierNombre.STEAM_LIBROS);
 
       // Assert
-      expect(result).toEqual(mockTierArcade);
-      expect(result.precio_mensual).toBe(30000);
+      expect(result).toEqual(mockTierSteamLibros);
+      expect(result.precio_mensual).toBe(40000);
       expect(mockPrismaService.tier.findUnique).toHaveBeenCalledWith({
-        where: { nombre: TierNombre.ARCADE },
+        where: { nombre: TierNombre.STEAM_LIBROS },
       });
     });
 
@@ -148,27 +146,29 @@ describe('TiersService', () => {
       mockPrismaService.tier.findUnique.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.findByNombre(TierNombre.PRO)).rejects.toThrow(
-        NotFoundException,
-      );
-      await expect(service.findByNombre(TierNombre.PRO)).rejects.toThrow(
-        'Tier PRO no encontrado',
-      );
+      await expect(
+        service.findByNombre(TierNombre.STEAM_SINCRONICO),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.findByNombre(TierNombre.STEAM_SINCRONICO),
+      ).rejects.toThrow('Tier STEAM_SINCRONICO no encontrado');
     });
   });
 
   describe('findOne', () => {
     it('should_return_tier_by_id', async () => {
       // Arrange
-      mockPrismaService.tier.findUnique.mockResolvedValue(mockTierPro);
+      mockPrismaService.tier.findUnique.mockResolvedValue(
+        mockTierSteamSincronico,
+      );
 
       // Act
-      const result = await service.findOne('tier-pro-id');
+      const result = await service.findOne('tier-steam-sincronico-id');
 
       // Assert
-      expect(result).toEqual(mockTierPro);
+      expect(result).toEqual(mockTierSteamSincronico);
       expect(mockPrismaService.tier.findUnique).toHaveBeenCalledWith({
-        where: { id: 'tier-pro-id' },
+        where: { id: 'tier-steam-sincronico-id' },
       });
     });
 
@@ -186,67 +186,80 @@ describe('TiersService', () => {
   describe('calcularPrecioFamiliar', () => {
     it('should_return_full_price_for_1_student', () => {
       // Arrange
-      const tiers = [mockTierArcade]; // 1 estudiante con ARCADE
+      const tiers = [mockTierSteamLibros]; // 1 estudiante con STEAM_LIBROS
 
       // Act
       const result = service.calcularPrecioFamiliar(tiers);
 
       // Assert
-      expect(result.subtotal).toBe(30000);
+      expect(result.subtotal).toBe(40000);
       expect(result.descuento_porcentaje).toBe(0);
       expect(result.descuento_monto).toBe(0);
-      expect(result.total).toBe(30000);
+      expect(result.total).toBe(40000);
     });
 
-    it('should_apply_12_percent_discount_for_2_students', () => {
-      // Arrange
-      const tiers = [mockTierArcade, mockTierArcadePlus]; // 2 estudiantes
+    it('should_apply_10_percent_discount_on_second_sibling_only', () => {
+      // Arrange - 2 estudiantes con STEAM_LIBROS ($40k cada uno)
+      const tiers = [mockTierSteamLibros, mockTierSteamLibros];
 
       // Act
       const result = service.calcularPrecioFamiliar(tiers);
 
       // Assert
-      expect(result.subtotal).toBe(90000); // 30k + 60k
-      expect(result.descuento_porcentaje).toBe(12);
-      expect(result.descuento_monto).toBe(10800); // 90k * 0.12
-      expect(result.total).toBe(79200); // 90k - 10.8k
+      // Subtotal: $40k + $40k = $80k
+      // Descuento: 10% de $40k (solo el 2do hermano) = $4k
+      // Total: $80k - $4k = $76k
+      expect(result.subtotal).toBe(80000);
+      expect(result.descuento_monto).toBe(4000);
+      expect(result.total).toBe(76000);
     });
 
-    it('should_apply_20_percent_discount_for_3_or_more_students', () => {
-      // Arrange
-      const tiers = [mockTierArcade, mockTierArcadePlus, mockTierPro]; // 3 estudiantes
-
-      // Act
-      const result = service.calcularPrecioFamiliar(tiers);
-
-      // Assert
-      expect(result.subtotal).toBe(165000); // 30k + 60k + 75k
-      expect(result.descuento_porcentaje).toBe(20);
-      expect(result.descuento_monto).toBe(33000); // 165k * 0.20
-      expect(result.total).toBe(132000); // 165k - 33k
-    });
-
-    it('should_apply_20_percent_discount_for_4_students', () => {
-      // Arrange
+    it('should_apply_10_percent_discount_on_all_additional_siblings', () => {
+      // Arrange - 3 estudiantes: 1 STEAM_LIBROS, 1 STEAM_ASINCRONICO, 1 STEAM_SINCRONICO
       const tiers = [
-        mockTierArcade,
-        mockTierArcade,
-        mockTierArcadePlus,
-        mockTierPro,
-      ]; // 4 estudiantes
+        mockTierSteamLibros,
+        mockTierSteamAsincronico,
+        mockTierSteamSincronico,
+      ];
 
       // Act
       const result = service.calcularPrecioFamiliar(tiers);
 
       // Assert
-      expect(result.subtotal).toBe(195000); // 30k + 30k + 60k + 75k
-      expect(result.descuento_porcentaje).toBe(20);
-      expect(result.total).toBe(156000); // 195k * 0.80
+      // Subtotal: $40k + $65k + $95k = $200k
+      // Hermanos adicionales (2do y 3ro): $65k + $95k = $160k
+      // Descuento: 10% de $160k = $16k
+      // Total: $200k - $16k = $184k
+      expect(result.subtotal).toBe(200000);
+      expect(result.descuento_monto).toBe(16000);
+      expect(result.total).toBe(184000);
+    });
+
+    it('should_apply_10_percent_discount_for_4_students', () => {
+      // Arrange - 4 estudiantes todos con STEAM_LIBROS
+      const tiers = [
+        mockTierSteamLibros,
+        mockTierSteamLibros,
+        mockTierSteamLibros,
+        mockTierSteamLibros,
+      ];
+
+      // Act
+      const result = service.calcularPrecioFamiliar(tiers);
+
+      // Assert
+      // Subtotal: $40k * 4 = $160k
+      // Hermanos adicionales (2do, 3ro, 4to): $40k * 3 = $120k
+      // Descuento: 10% de $120k = $12k
+      // Total: $160k - $12k = $148k
+      expect(result.subtotal).toBe(160000);
+      expect(result.descuento_monto).toBe(12000);
+      expect(result.total).toBe(148000);
     });
 
     it('should_return_zero_for_empty_tiers_array', () => {
       // Arrange
-      const tiers: (typeof mockTierArcade)[] = [];
+      const tiers: (typeof mockTierSteamLibros)[] = [];
 
       // Act
       const result = service.calcularPrecioFamiliar(tiers);
@@ -259,44 +272,7 @@ describe('TiersService', () => {
   });
 
   describe('validarSeleccionMundos', () => {
-    it('should_allow_1_async_mundo_for_ARCADE', () => {
-      // Arrange
-      const mundosAsync = [MundoTipo.MATEMATICA];
-      const mundosSync: MundoTipo[] = [];
-
-      // Act & Assert - No debe lanzar excepcion
-      expect(() =>
-        service.validarSeleccionMundos(
-          TierNombre.ARCADE,
-          mundosAsync,
-          mundosSync,
-        ),
-      ).not.toThrow();
-    });
-
-    it('should_reject_more_than_1_async_mundo_for_ARCADE', () => {
-      // Arrange
-      const mundosAsync = [MundoTipo.MATEMATICA, MundoTipo.PROGRAMACION];
-      const mundosSync: MundoTipo[] = [];
-
-      // Act & Assert
-      expect(() =>
-        service.validarSeleccionMundos(
-          TierNombre.ARCADE,
-          mundosAsync,
-          mundosSync,
-        ),
-      ).toThrow(BadRequestException);
-      expect(() =>
-        service.validarSeleccionMundos(
-          TierNombre.ARCADE,
-          mundosAsync,
-          mundosSync,
-        ),
-      ).toThrow('ARCADE permite maximo 1 mundo async');
-    });
-
-    it('should_allow_3_async_mundos_for_ARCADE_PLUS', () => {
+    it('should_allow_3_async_mundos_for_STEAM_LIBROS', () => {
       // Arrange
       const mundosAsync = [
         MundoTipo.MATEMATICA,
@@ -308,14 +284,14 @@ describe('TiersService', () => {
       // Act & Assert - No debe lanzar excepcion
       expect(() =>
         service.validarSeleccionMundos(
-          TierNombre.ARCADE_PLUS,
+          TierNombre.STEAM_LIBROS,
           mundosAsync,
           mundosSync,
         ),
       ).not.toThrow();
     });
 
-    it('should_reject_sync_mundo_for_ARCADE_PLUS', () => {
+    it('should_reject_sync_mundo_for_STEAM_LIBROS', () => {
       // Arrange
       const mundosAsync = [MundoTipo.MATEMATICA];
       const mundosSync = [MundoTipo.PROGRAMACION];
@@ -323,114 +299,147 @@ describe('TiersService', () => {
       // Act & Assert
       expect(() =>
         service.validarSeleccionMundos(
-          TierNombre.ARCADE_PLUS,
+          TierNombre.STEAM_LIBROS,
           mundosAsync,
           mundosSync,
         ),
       ).toThrow(BadRequestException);
       expect(() =>
         service.validarSeleccionMundos(
-          TierNombre.ARCADE_PLUS,
+          TierNombre.STEAM_LIBROS,
           mundosAsync,
           mundosSync,
         ),
-      ).toThrow('ARCADE_PLUS no incluye mundos sync');
+      ).toThrow('STEAM_LIBROS no incluye clases en vivo');
     });
 
-    it('should_require_different_mundos_for_PRO_async_and_sync', () => {
+    it('should_allow_3_async_mundos_for_STEAM_ASINCRONICO', () => {
       // Arrange
-      const mundosAsync = [MundoTipo.MATEMATICA];
-      const mundosSync = [MundoTipo.PROGRAMACION]; // Diferente de async
+      const mundosAsync = [
+        MundoTipo.MATEMATICA,
+        MundoTipo.PROGRAMACION,
+        MundoTipo.CIENCIAS,
+      ];
+      const mundosSync: MundoTipo[] = [];
 
       // Act & Assert - No debe lanzar excepcion
       expect(() =>
-        service.validarSeleccionMundos(TierNombre.PRO, mundosAsync, mundosSync),
+        service.validarSeleccionMundos(
+          TierNombre.STEAM_ASINCRONICO,
+          mundosAsync,
+          mundosSync,
+        ),
       ).not.toThrow();
     });
 
-    it('should_throw_if_PRO_selects_same_mundo_for_async_and_sync', () => {
+    it('should_reject_sync_mundo_for_STEAM_ASINCRONICO', () => {
       // Arrange
       const mundosAsync = [MundoTipo.MATEMATICA];
-      const mundosSync = [MundoTipo.MATEMATICA]; // Mismo que async
+      const mundosSync = [MundoTipo.PROGRAMACION];
 
       // Act & Assert
       expect(() =>
-        service.validarSeleccionMundos(TierNombre.PRO, mundosAsync, mundosSync),
+        service.validarSeleccionMundos(
+          TierNombre.STEAM_ASINCRONICO,
+          mundosAsync,
+          mundosSync,
+        ),
       ).toThrow(BadRequestException);
       expect(() =>
-        service.validarSeleccionMundos(TierNombre.PRO, mundosAsync, mundosSync),
-      ).toThrow('PRO requiere que el mundo sync sea diferente del async');
+        service.validarSeleccionMundos(
+          TierNombre.STEAM_ASINCRONICO,
+          mundosAsync,
+          mundosSync,
+        ),
+      ).toThrow('STEAM_ASINCRONICO no incluye clases en vivo');
     });
 
-    it('should_require_exactly_1_async_and_1_sync_for_PRO', () => {
-      // Arrange - PRO con 2 mundos async (invalido)
-      const mundosAsync = [MundoTipo.MATEMATICA, MundoTipo.PROGRAMACION];
-      const mundosSync = [MundoTipo.CIENCIAS];
+    it('should_allow_3_async_and_1_sync_for_STEAM_SINCRONICO', () => {
+      // Arrange
+      const mundosAsync = [
+        MundoTipo.MATEMATICA,
+        MundoTipo.PROGRAMACION,
+        MundoTipo.CIENCIAS,
+      ];
+      const mundosSync = [MundoTipo.MATEMATICA];
 
-      // Act & Assert
+      // Act & Assert - No debe lanzar excepcion
       expect(() =>
-        service.validarSeleccionMundos(TierNombre.PRO, mundosAsync, mundosSync),
-      ).toThrow(BadRequestException);
-      expect(() =>
-        service.validarSeleccionMundos(TierNombre.PRO, mundosAsync, mundosSync),
-      ).toThrow('PRO permite exactamente 1 mundo async');
+        service.validarSeleccionMundos(
+          TierNombre.STEAM_SINCRONICO,
+          mundosAsync,
+          mundosSync,
+        ),
+      ).not.toThrow();
     });
 
-    it('should_require_1_sync_mundo_for_PRO', () => {
-      // Arrange - PRO sin mundo sync (invalido)
+    it('should_reject_more_than_1_sync_mundo_for_STEAM_SINCRONICO', () => {
+      // Arrange
       const mundosAsync = [MundoTipo.MATEMATICA];
-      const mundosSync: MundoTipo[] = [];
+      const mundosSync = [MundoTipo.PROGRAMACION, MundoTipo.CIENCIAS];
 
       // Act & Assert
       expect(() =>
-        service.validarSeleccionMundos(TierNombre.PRO, mundosAsync, mundosSync),
+        service.validarSeleccionMundos(
+          TierNombre.STEAM_SINCRONICO,
+          mundosAsync,
+          mundosSync,
+        ),
       ).toThrow(BadRequestException);
       expect(() =>
-        service.validarSeleccionMundos(TierNombre.PRO, mundosAsync, mundosSync),
-      ).toThrow('PRO requiere exactamente 1 mundo sync');
+        service.validarSeleccionMundos(
+          TierNombre.STEAM_SINCRONICO,
+          mundosAsync,
+          mundosSync,
+        ),
+      ).toThrow('STEAM_SINCRONICO permite máximo 1 mundo sync');
     });
   });
 
   describe('getCantidadMundosPorTier', () => {
-    it('should_return_1_async_0_sync_for_ARCADE', () => {
+    it('should_return_3_async_0_sync_for_STEAM_LIBROS', () => {
       // Act
-      const result = service.getCantidadMundosPorTier(TierNombre.ARCADE);
-
-      // Assert
-      expect(result.mundos_async).toBe(1);
-      expect(result.mundos_sync).toBe(0);
-    });
-
-    it('should_return_3_async_0_sync_for_ARCADE_PLUS', () => {
-      // Act
-      const result = service.getCantidadMundosPorTier(TierNombre.ARCADE_PLUS);
+      const result = service.getCantidadMundosPorTier(TierNombre.STEAM_LIBROS);
 
       // Assert
       expect(result.mundos_async).toBe(3);
       expect(result.mundos_sync).toBe(0);
     });
 
-    it('should_return_1_async_1_sync_for_PRO', () => {
+    it('should_return_3_async_0_sync_for_STEAM_ASINCRONICO', () => {
       // Act
-      const result = service.getCantidadMundosPorTier(TierNombre.PRO);
+      const result = service.getCantidadMundosPorTier(
+        TierNombre.STEAM_ASINCRONICO,
+      );
 
       // Assert
-      expect(result.mundos_async).toBe(1);
+      expect(result.mundos_async).toBe(3);
+      expect(result.mundos_sync).toBe(0);
+    });
+
+    it('should_return_3_async_1_sync_for_STEAM_SINCRONICO', () => {
+      // Act
+      const result = service.getCantidadMundosPorTier(
+        TierNombre.STEAM_SINCRONICO,
+      );
+
+      // Assert
+      expect(result.mundos_async).toBe(3);
       expect(result.mundos_sync).toBe(1);
     });
   });
 
   describe('tieneDocente', () => {
-    it('should_return_false_for_ARCADE', () => {
-      expect(service.tieneDocente(TierNombre.ARCADE)).toBe(false);
+    it('should_return_false_for_STEAM_LIBROS', () => {
+      expect(service.tieneDocente(TierNombre.STEAM_LIBROS)).toBe(false);
     });
 
-    it('should_return_false_for_ARCADE_PLUS', () => {
-      expect(service.tieneDocente(TierNombre.ARCADE_PLUS)).toBe(false);
+    it('should_return_false_for_STEAM_ASINCRONICO', () => {
+      expect(service.tieneDocente(TierNombre.STEAM_ASINCRONICO)).toBe(false);
     });
 
-    it('should_return_true_for_PRO', () => {
-      expect(service.tieneDocente(TierNombre.PRO)).toBe(true);
+    it('should_return_true_for_STEAM_SINCRONICO', () => {
+      expect(service.tieneDocente(TierNombre.STEAM_SINCRONICO)).toBe(true);
     });
   });
 
@@ -440,8 +449,8 @@ describe('TiersService', () => {
     describe('upgrade', () => {
       it('should_schedule_upgrade_for_next_month', async () => {
         // Arrange
-        const tierActual = TierNombre.ARCADE;
-        const tierNuevo = TierNombre.ARCADE_PLUS;
+        const tierActual = TierNombre.STEAM_LIBROS;
+        const tierNuevo = TierNombre.STEAM_ASINCRONICO;
         const hoy = new Date('2026-03-15');
         jest.useFakeTimers().setSystemTime(hoy);
 
@@ -463,8 +472,8 @@ describe('TiersService', () => {
 
       it('should_not_change_current_tier_until_next_month', async () => {
         // Arrange
-        const tierActual = TierNombre.ARCADE;
-        const tierNuevo = TierNombre.PRO;
+        const tierActual = TierNombre.STEAM_LIBROS;
+        const tierNuevo = TierNombre.STEAM_SINCRONICO;
 
         // Act
         const result = await service.solicitarCambioTier(
@@ -474,15 +483,15 @@ describe('TiersService', () => {
         );
 
         // Assert
-        expect(result.tier_actual).toBe(TierNombre.ARCADE);
-        expect(result.tier_pendiente).toBe(TierNombre.PRO);
+        expect(result.tier_actual).toBe(TierNombre.STEAM_LIBROS);
+        expect(result.tier_pendiente).toBe(TierNombre.STEAM_SINCRONICO);
         expect(result.cambio_aplicado).toBe(false);
       });
 
       it('should_store_pending_tier_change_with_fecha_efectiva', async () => {
         // Arrange
-        const tierActual = TierNombre.ARCADE;
-        const tierNuevo = TierNombre.ARCADE_PLUS;
+        const tierActual = TierNombre.STEAM_LIBROS;
+        const tierNuevo = TierNombre.STEAM_ASINCRONICO;
 
         // Act
         const result = await service.solicitarCambioTier(
@@ -501,8 +510,8 @@ describe('TiersService', () => {
     describe('downgrade', () => {
       it('should_apply_downgrade_immediately', async () => {
         // Arrange
-        const tierActual = TierNombre.PRO;
-        const tierNuevo = TierNombre.ARCADE_PLUS;
+        const tierActual = TierNombre.STEAM_SINCRONICO;
+        const tierNuevo = TierNombre.STEAM_ASINCRONICO;
 
         // Act
         const result = await service.solicitarCambioTier(
@@ -517,10 +526,10 @@ describe('TiersService', () => {
         expect(result.cambio_aplicado).toBe(true);
       });
 
-      it('should_remove_sync_mundo_access_immediately_on_downgrade_from_PRO', async () => {
+      it('should_remove_sync_mundo_access_immediately_on_downgrade_from_STEAM_SINCRONICO', async () => {
         // Arrange
-        const tierActual = TierNombre.PRO;
-        const tierNuevo = TierNombre.ARCADE_PLUS;
+        const tierActual = TierNombre.STEAM_SINCRONICO;
+        const tierNuevo = TierNombre.STEAM_ASINCRONICO;
 
         // Act
         const result = await service.solicitarCambioTier(
@@ -535,9 +544,9 @@ describe('TiersService', () => {
       });
 
       it('should_keep_async_mundo_access_based_on_new_tier', async () => {
-        // Arrange - PRO -> ARCADE_PLUS (3 async)
-        const tierActual = TierNombre.PRO;
-        const tierNuevo = TierNombre.ARCADE_PLUS;
+        // Arrange - STEAM_SINCRONICO -> STEAM_ASINCRONICO (3 async)
+        const tierActual = TierNombre.STEAM_SINCRONICO;
+        const tierNuevo = TierNombre.STEAM_ASINCRONICO;
 
         // Act
         const result = await service.solicitarCambioTier(
@@ -552,41 +561,41 @@ describe('TiersService', () => {
     });
 
     describe('validaciones', () => {
-      it('should_throw_if_trying_to_upgrade_to_same_tier', async () => {
+      it('should_throw_if_trying_to_upgrade_to_same_tier', () => {
         // Arrange
-        const tierActual = TierNombre.ARCADE;
-        const tierNuevo = TierNombre.ARCADE;
+        const tierActual = TierNombre.STEAM_LIBROS;
+        const tierNuevo = TierNombre.STEAM_LIBROS;
 
-        // Act & Assert
-        await expect(
+        // Act & Assert - solicitarCambioTier es síncrono
+        expect(() =>
           service.solicitarCambioTier(
             mockEstudianteInscripcionId,
             tierActual,
             tierNuevo,
           ),
-        ).rejects.toThrow(BadRequestException);
-        await expect(
+        ).toThrow(BadRequestException);
+        expect(() =>
           service.solicitarCambioTier(
             mockEstudianteInscripcionId,
             tierActual,
             tierNuevo,
           ),
-        ).rejects.toThrow('No se puede cambiar al mismo tier');
+        ).toThrow('No se puede cambiar al mismo tier');
       });
 
-      it('should_throw_if_trying_to_downgrade_to_same_tier', async () => {
+      it('should_throw_if_trying_to_downgrade_to_same_tier', () => {
         // Arrange
-        const tierActual = TierNombre.PRO;
-        const tierNuevo = TierNombre.PRO;
+        const tierActual = TierNombre.STEAM_SINCRONICO;
+        const tierNuevo = TierNombre.STEAM_SINCRONICO;
 
-        // Act & Assert
-        await expect(
+        // Act & Assert - solicitarCambioTier es síncrono
+        expect(() =>
           service.solicitarCambioTier(
             mockEstudianteInscripcionId,
             tierActual,
             tierNuevo,
           ),
-        ).rejects.toThrow(BadRequestException);
+        ).toThrow(BadRequestException);
       });
 
       it('should_allow_parent_to_cancel_pending_upgrade_before_fecha_efectiva', async () => {

@@ -11,13 +11,13 @@ import { Decimal } from '@prisma/client/runtime/library';
 
 /**
  * Tipos de descuento aplicables
- * Sistema de Tiers 2026: Descuentos familiares únicamente
+ * Sistema STEAM 2026: Descuento familiar simplificado
  * Debe coincidir exactamente con enum TipoDescuento en schema.prisma
  */
 export enum TipoDescuento {
   NINGUNO = 'NINGUNO',
-  HERMANO_2 = 'HERMANO_2', // 12% descuento segundo hermano
-  HERMANO_3_MAS = 'HERMANO_3_MAS', // 20% descuento tercer hermano en adelante
+  HERMANO_2 = 'HERMANO_2', // 10% descuento para 2do hermano en adelante
+  HERMANO_3_MAS = 'HERMANO_3_MAS', // Deprecated - ahora todo es 10%
   BECA = 'BECA',
 }
 
@@ -58,23 +58,21 @@ export type MetodoPago = 'Efectivo' | 'Transferencia' | 'MercadoPago' | 'Otro';
 
 /**
  * Configuración global de precios
- * Sistema de Tiers 2026:
- * - Arcade: $30.000/mes - 1 mundo async
- * - Arcade+: $60.000/mes - 3 mundos async
- * - Pro: $75.000/mes - 1 mundo async + 1 mundo sync con docente
+ * Sistema STEAM 2026:
+ * - STEAM_LIBROS: $40.000/mes - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM_ASINCRONICO: $65.000/mes - Todo + clases grabadas
+ * - STEAM_SINCRONICO: $95.000/mes - Todo + clases en vivo con docente
  *
- * Descuentos familiares:
- * - 2do hermano: 12%
- * - 3er hermano en adelante: 20%
+ * Descuento familiar simplificado:
+ * - 10% para 2do hermano en adelante
  */
 export interface ConfiguracionPrecios {
-  // Precios por Tier (Sistema 2026)
-  readonly precioArcade: Decimal;
-  readonly precioArcadePlus: Decimal;
-  readonly precioPro: Decimal;
-  // Descuentos familiares
-  readonly descuentoHermano2: Decimal;
-  readonly descuentoHermano3Mas: Decimal;
+  // Precios por Tier STEAM (Sistema 2026)
+  readonly precioSteamLibros: Decimal;
+  readonly precioSteamAsincronico: Decimal;
+  readonly precioSteamSincronico: Decimal;
+  // Descuento familiar simplificado
+  readonly descuentoSegundoHermano: Decimal;
   // Configuración de notificaciones
   readonly diaVencimiento: number;
   readonly diasAntesRecordatorio: number;
@@ -121,16 +119,15 @@ export interface TotalMensualOutput {
 
 /**
  * DTO para crear/actualizar configuración de precios
- * Sistema de Tiers 2026
+ * Sistema STEAM 2026
  */
 export interface ActualizarConfiguracionPreciosDto {
-  // Precios por Tier
-  readonly precioArcade?: number;
-  readonly precioArcadePlus?: number;
-  readonly precioPro?: number;
-  // Descuentos familiares
-  readonly descuentoHermano2?: number;
-  readonly descuentoHermano3Mas?: number;
+  // Precios por Tier STEAM
+  readonly precioSteamLibros?: number;
+  readonly precioSteamAsincronico?: number;
+  readonly precioSteamSincronico?: number;
+  // Descuento familiar simplificado
+  readonly descuentoSegundoHermano?: number;
   // Configuración de notificaciones
   readonly diaVencimiento?: number;
   readonly diasAntesRecordatorio?: number;

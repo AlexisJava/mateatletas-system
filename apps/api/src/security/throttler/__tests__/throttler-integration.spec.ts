@@ -8,6 +8,7 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { ThrottlerRedisStorage } from '../throttler-redis.storage';
 import { RedisService } from '../../../core/redis/redis.service';
 
@@ -59,10 +60,20 @@ describe('ThrottlerRedisStorage Integration', () => {
     // Crear dos instancias que comparten el mismo "Redis"
     const sharedRedisMock = createSharedRedisMock();
 
+    const mockConfigService = {
+      get: jest.fn((key: string) => {
+        const config: Record<string, string> = {
+          FEATURE_THROTTLER_REDIS_ENABLED: 'true',
+        };
+        return config[key];
+      }),
+    };
+
     const module1: TestingModule = await Test.createTestingModule({
       providers: [
         ThrottlerRedisStorage,
         { provide: RedisService, useValue: sharedRedisMock },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
@@ -70,6 +81,7 @@ describe('ThrottlerRedisStorage Integration', () => {
       providers: [
         ThrottlerRedisStorage,
         { provide: RedisService, useValue: sharedRedisMock },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 

@@ -43,7 +43,7 @@ describe('ClasesReservasService', () => {
     estudiante: { nombre: 'Juan', apellido: 'Pérez' },
     clase: {
       id: 'clase-1',
-      rutaCurricular: { nombre: 'Álgebra' },
+      nombre: 'Álgebra Básica',
     },
   };
 
@@ -364,14 +364,10 @@ describe('ClasesReservasService', () => {
           estudiante_id: 'est-1',
           clase: {
             id: 'clase-1',
+            nombre: 'Álgebra Básica',
             cupos_maximo: 10,
             cupos_ocupados: 4,
             fecha_hora_inicio: new Date('2025-12-01T10:00:00Z').toISOString(),
-            rutaCurricular: {
-              id: 'ruta-1',
-              nombre: 'Álgebra',
-              color: '#ff0000',
-            },
             docente: { id: 'doc-1', nombre: 'María', apellido: 'González' },
             sector: {
               id: 'sec-1',
@@ -403,9 +399,6 @@ describe('ClasesReservasService', () => {
       const claseResultado = result[0].clase as any;
       expect(claseResultado?.cupo_disponible).toBe(6);
       expect(claseResultado?.cupo_maximo).toBe(10);
-      expect(claseResultado?.ruta_curricular).toEqual(
-        mockReservas[0].clase.rutaCurricular,
-      );
     });
 
     it('should return empty array when tutor has no reservas', async () => {

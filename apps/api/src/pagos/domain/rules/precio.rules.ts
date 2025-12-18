@@ -1,14 +1,13 @@
 /**
  * Reglas de Cálculo de Precios - Core Business Logic
  *
- * Sistema de Tiers 2026:
- * - Arcade: $30.000/mes - 1 mundo async
- * - Arcade+: $60.000/mes - 3 mundos async
- * - Pro: $75.000/mes - 1 mundo async + 1 mundo sync con docente
+ * Sistema STEAM 2026:
+ * - STEAM_LIBROS: $40.000/mes - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM_ASINCRONICO: $65.000/mes - Todo + clases grabadas
+ * - STEAM_SINCRONICO: $95.000/mes - Todo + clases en vivo con docente
  *
- * Descuentos familiares:
- * - 2do hermano: 12%
- * - 3er hermano en adelante: 20%
+ * Descuento familiar simplificado:
+ * - 10% para 2do hermano en adelante
  *
  * Funciones PURAS sin efectos secundarios
  * Testeable al 100%
@@ -34,16 +33,19 @@ export type {
 };
 
 /**
- * Tipos de Tier disponibles
+ * Tipos de Tier STEAM disponibles
  */
-export type TierTipo = 'ARCADE' | 'ARCADE_PLUS' | 'PRO';
+export type TierTipo =
+  | 'STEAM_LIBROS'
+  | 'STEAM_ASINCRONICO'
+  | 'STEAM_SINCRONICO';
 
 /**
  * Input para cálculo de precio por Tier
  */
 export interface CalculoPrecioTierInput {
   readonly tier: TierTipo;
-  readonly posicionHermano: number; // 1 = primer hermano, 2 = segundo, 3+ = tercero o más
+  readonly posicionHermano: number; // 1 = primer hermano, 2+ = segundo o más
   readonly configuracion: ConfiguracionPrecios;
 }
 
@@ -52,7 +54,7 @@ export interface CalculoPrecioTierInput {
 // ============================================================================
 
 /**
- * Calcula el precio de un Tier según las reglas de negocio 2026
+ * Calcula el precio de un Tier según las reglas de negocio STEAM 2026
  *
  * Función PURA:
  * - No modifica el input
@@ -90,8 +92,8 @@ export function calcularPrecioActividad(
   input: CalculoPrecioInput,
 ): CalculoPrecioOutput {
   // Convertir input legacy a nuevo formato
-  // Usar Arcade como default (precio más bajo)
-  const precioBase = input.configuracion.precioArcade;
+  // Usar STEAM_LIBROS como default (precio más bajo)
+  const precioBase = input.configuracion.precioSteamLibros;
 
   // Calcular posición de hermano
   const posicionHermano = input.cantidadHermanos;
@@ -100,7 +102,7 @@ export function calcularPrecioActividad(
     precioBase,
     posicionHermano,
     configuracion: input.configuracion,
-    tier: 'ARCADE',
+    tier: 'STEAM_LIBROS',
   });
 }
 
@@ -109,31 +111,30 @@ export function calcularPrecioActividad(
 // ============================================================================
 
 /**
- * Obtiene el precio base según el Tier seleccionado
+ * Obtiene el precio base según el Tier STEAM seleccionado
  */
 function obtenerPrecioTier(
   tier: TierTipo,
   configuracion: ConfiguracionPrecios,
 ): Decimal {
   switch (tier) {
-    case 'ARCADE':
-      return configuracion.precioArcade;
-    case 'ARCADE_PLUS':
-      return configuracion.precioArcadePlus;
-    case 'PRO':
-      return configuracion.precioPro;
+    case 'STEAM_LIBROS':
+      return configuracion.precioSteamLibros;
+    case 'STEAM_ASINCRONICO':
+      return configuracion.precioSteamAsincronico;
+    case 'STEAM_SINCRONICO':
+      return configuracion.precioSteamSincronico;
     default:
-      return configuracion.precioArcade;
+      return configuracion.precioSteamLibros;
   }
 }
 
 /**
- * Aplica descuento familiar según posición del hermano
+ * Aplica descuento familiar simplificado STEAM 2026
  *
  * Reglas:
  * - 1er hermano: Sin descuento
- * - 2do hermano: 12% descuento
- * - 3er hermano en adelante: 20% descuento
+ * - 2do hermano en adelante: 10% descuento
  */
 function aplicarDescuentoFamiliar(params: {
   precioBase: Decimal;
@@ -143,23 +144,9 @@ function aplicarDescuentoFamiliar(params: {
 }): CalculoPrecioOutput {
   const { precioBase, posicionHermano, configuracion, tier } = params;
 
-  // REGLA 1: Tercer hermano o más - Mayor descuento (20%)
-  if (posicionHermano >= 3) {
-    const porcentajeDescuento = configuracion.descuentoHermano3Mas;
-    const descuento = precioBase.mul(porcentajeDescuento).div(100);
-    const precioFinal = precioBase.sub(descuento);
-
-    return crearResultado(
-      precioBase,
-      precioFinal,
-      TipoDescuento.HERMANO_3_MAS,
-      `Tier ${tier} - ${posicionHermano}° hermano (${porcentajeDescuento.toFixed(0)}% descuento)`,
-    );
-  }
-
-  // REGLA 2: Segundo hermano - Descuento intermedio (12%)
-  if (posicionHermano === 2) {
-    const porcentajeDescuento = configuracion.descuentoHermano2;
+  // REGLA: 2do hermano en adelante - 10% descuento
+  if (posicionHermano >= 2) {
+    const porcentajeDescuento = configuracion.descuentoSegundoHermano;
     const descuento = precioBase.mul(porcentajeDescuento).div(100);
     const precioFinal = precioBase.sub(descuento);
 
@@ -167,11 +154,11 @@ function aplicarDescuentoFamiliar(params: {
       precioBase,
       precioFinal,
       TipoDescuento.HERMANO_2,
-      `Tier ${tier} - 2° hermano (${porcentajeDescuento.toFixed(0)}% descuento)`,
+      `Tier ${tier} - ${posicionHermano}° hermano (${porcentajeDescuento.toFixed(0)}% descuento)`,
     );
   }
 
-  // REGLA 3: Primer hermano o único - Sin descuento
+  // REGLA: Primer hermano o único - Sin descuento
   return crearResultado(
     precioBase,
     precioBase,
@@ -311,7 +298,7 @@ export function calcularAhorroTotal(
 /**
  * Calcula precio con descuento familiar para una familia
  *
- * @param tier - Tipo de tier seleccionado
+ * @param tier - Tipo de tier STEAM seleccionado
  * @param cantidadHermanos - Número total de hermanos inscritos
  * @param configuracion - Configuración de precios
  * @returns Array con el precio de cada hermano

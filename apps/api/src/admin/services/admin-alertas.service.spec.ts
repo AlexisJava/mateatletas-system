@@ -19,16 +19,13 @@ describe('AdminAlertasService', () => {
       id: 'est-1',
       nombre: 'Juan',
       apellido: 'Pérez',
-      nivel_escolar: '5to Primaria',
+      nivelEscolar: '5to Primaria',
     },
     clase: {
       id: 'clase-1',
+      nombre: 'Álgebra Básica',
       fecha_hora_inicio: new Date('2025-10-15T10:00:00Z'),
       duracion_minutos: 60,
-      rutaCurricular: {
-        nombre: 'Álgebra',
-        color: '#FF5733',
-      },
     },
   };
 
@@ -73,7 +70,7 @@ describe('AdminAlertasService', () => {
       expect(result).toHaveLength(2);
       expect(result[0]).toHaveProperty('id', 'alerta-1');
       expect(result[0]).toHaveProperty('estudiante');
-      expect(result[0].clase).toHaveProperty('rutaCurricular', 'Álgebra');
+      expect(result[0].clase).toHaveProperty('nombre', 'Álgebra Básica');
     });
 
     it('should filter only unresolved alerts', async () => {
@@ -139,10 +136,9 @@ describe('AdminAlertasService', () => {
         estudiante: mockAlerta.estudiante,
         clase: {
           id: 'clase-1',
+          nombre: 'Álgebra Básica',
           fecha_hora_inicio: expect.any(Date),
           duracion_minutos: 60,
-          rutaCurricular: 'Álgebra',
-          color: '#FF5733',
         },
         createdAt: expect.any(Date),
       });
@@ -359,11 +355,7 @@ describe('AdminAlertasService', () => {
             },
             clase: {
               select: {
-                rutaCurricular: {
-                  select: {
-                    nombre: true,
-                  },
-                },
+                nombre: true,
               },
             },
           },

@@ -14,14 +14,13 @@ import { Type } from 'class-transformer';
  * DTO de Request para actualizar configuración de precios
  * Presentation Layer - Validación HTTP con class-validator
  *
- * Sistema de Tiers 2026:
- * - Arcade: $30.000/mes - 1 mundo async
- * - Arcade+: $60.000/mes - 3 mundos async
- * - Pro: $75.000/mes - 1 mundo async + 1 mundo sync con docente
+ * Sistema STEAM 2026:
+ * - STEAM_LIBROS: $40.000/mes - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM_ASINCRONICO: $65.000/mes - Todo + clases grabadas
+ * - STEAM_SINCRONICO: $95.000/mes - Todo + clases en vivo con docente
  *
- * Descuentos familiares:
- * - 2do hermano: 12%
- * - 3er hermano en adelante: 20%
+ * Descuento familiar simplificado:
+ * - 10% para segundo hermano en adelante
  *
  * IMPORTANTE:
  * - Los precios en ARS DEBEN ser números enteros (sin centavos)
@@ -37,57 +36,62 @@ export class ActualizarConfiguracionPreciosRequestDto {
   adminId!: string;
 
   // =========================================================================
-  // PRECIOS POR TIER (Sistema 2026)
+  // PRECIOS POR TIER STEAM (Sistema 2026)
   // =========================================================================
-
-  @ApiProperty({
-    description: 'Precio mensual del Tier Arcade (1 mundo async, sin docente)',
-    example: 30000,
-    required: false,
-  })
-  @IsOptional()
-  @IsInt({
-    message: 'El precio de Arcade debe ser un número entero (sin centavos)',
-  })
-  @Min(0)
-  @Type(() => Number)
-  precioArcade?: number;
 
   @ApiProperty({
     description:
-      'Precio mensual del Tier Arcade+ (3 mundos async, sin docente)',
-    example: 60000,
+      'Precio mensual del Tier STEAM Libros (Plataforma completa: Mate + Progra + Ciencias)',
+    example: 40000,
     required: false,
   })
   @IsOptional()
   @IsInt({
-    message: 'El precio de Arcade+ debe ser un número entero (sin centavos)',
+    message:
+      'El precio de STEAM Libros debe ser un número entero (sin centavos)',
   })
   @Min(0)
   @Type(() => Number)
-  precioArcadePlus?: number;
+  precioSteamLibros?: number;
 
   @ApiProperty({
     description:
-      'Precio mensual del Tier Pro (1 mundo async + 1 mundo sync con docente)',
-    example: 75000,
+      'Precio mensual del Tier STEAM Asincrónico (Todo + clases grabadas)',
+    example: 65000,
     required: false,
   })
   @IsOptional()
   @IsInt({
-    message: 'El precio de Pro debe ser un número entero (sin centavos)',
+    message:
+      'El precio de STEAM Asincrónico debe ser un número entero (sin centavos)',
   })
   @Min(0)
   @Type(() => Number)
-  precioPro?: number;
+  precioSteamAsincronico?: number;
+
+  @ApiProperty({
+    description:
+      'Precio mensual del Tier STEAM Sincrónico (Todo + clases en vivo con docente)',
+    example: 95000,
+    required: false,
+  })
+  @IsOptional()
+  @IsInt({
+    message:
+      'El precio de STEAM Sincrónico debe ser un número entero (sin centavos)',
+  })
+  @Min(0)
+  @Type(() => Number)
+  precioSteamSincronico?: number;
 
   // =========================================================================
-  // DESCUENTOS FAMILIARES
+  // DESCUENTO FAMILIAR SIMPLIFICADO
   // =========================================================================
 
   @ApiProperty({
-    description: 'Porcentaje de descuento para el 2do hermano',
-    example: 12,
+    description:
+      'Porcentaje de descuento para segundo hermano en adelante (10% por defecto)',
+    example: 10,
     required: false,
   })
   @IsOptional()
@@ -95,19 +99,7 @@ export class ActualizarConfiguracionPreciosRequestDto {
   @Min(0)
   @Max(100)
   @Type(() => Number)
-  descuentoHermano2?: number;
-
-  @ApiProperty({
-    description: 'Porcentaje de descuento para el 3er hermano en adelante',
-    example: 20,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(100)
-  @Type(() => Number)
-  descuentoHermano3Mas?: number;
+  descuentoSegundoHermano?: number;
 
   // =========================================================================
   // CONFIGURACIÓN DE NOTIFICACIONES

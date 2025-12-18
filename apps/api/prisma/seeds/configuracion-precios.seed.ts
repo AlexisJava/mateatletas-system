@@ -1,45 +1,42 @@
 import { PrismaClient } from '@prisma/client';
 
 /**
- * Seed: Configuración de Precios - Sistema Tiers 2026
+ * Seed: Configuración de Precios - Sistema STEAM 2026
  * Crea/actualiza la configuración singleton de precios del sistema
  *
- * Tiers:
- * - Arcade: $30,000/mes - 1 mundo async, sin docente
- * - Arcade+: $60,000/mes - 3 mundos async, sin docente
- * - Pro: $75,000/mes - 1 mundo async + 1 mundo sync con docente
+ * Tiers STEAM:
+ * - STEAM_LIBROS: $40,000/mes - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM_ASINCRONICO: $65,000/mes - Todo + clases grabadas
+ * - STEAM_SINCRONICO: $95,000/mes - Todo + clases en vivo con docente
  *
- * Descuentos familiares:
- * - 2do hermano: 12% de descuento
- * - 3er hermano en adelante: 20% de descuento
+ * Descuento familiar simplificado:
+ * - 10% para segundo hermano en adelante
  */
 export async function seedConfiguracionPrecios(prisma: PrismaClient) {
   console.log(
-    '💰 Creando/actualizando configuración de precios (Tiers 2026)...',
+    '💰 Creando/actualizando configuración de precios (STEAM 2026)...',
   );
 
   const configuracion = await prisma.configuracionPrecios.upsert({
     where: { id: 'singleton' },
     update: {
-      // Actualizar precios de Tiers si cambian
-      precio_arcade: 30000.0,
-      precio_arcade_plus: 60000.0,
-      precio_pro: 75000.0,
-      // Descuentos familiares
-      descuento_hermano_2: 12.0,
-      descuento_hermano_3_mas: 20.0,
+      // Actualizar precios de Tiers STEAM
+      precio_steam_libros: 40000.0,
+      precio_steam_asincronico: 65000.0,
+      precio_steam_sincronico: 95000.0,
+      // Descuento familiar simplificado
+      descuento_segundo_hermano: 10.0,
     },
     create: {
       id: 'singleton',
 
-      // Precios por Tier (Sistema 2026)
-      precio_arcade: 30000.0,
-      precio_arcade_plus: 60000.0,
-      precio_pro: 75000.0,
+      // Precios por Tier STEAM (Sistema 2026)
+      precio_steam_libros: 40000.0,
+      precio_steam_asincronico: 65000.0,
+      precio_steam_sincronico: 95000.0,
 
-      // Descuentos familiares
-      descuento_hermano_2: 12.0, // 12% segundo hermano
-      descuento_hermano_3_mas: 20.0, // 20% tercer hermano en adelante
+      // Descuento familiar simplificado
+      descuento_segundo_hermano: 10.0, // 10% para 2do hermano en adelante
 
       // Configuración de notificaciones
       dia_vencimiento: 15,
@@ -48,21 +45,18 @@ export async function seedConfiguracionPrecios(prisma: PrismaClient) {
     },
   });
 
-  console.log('   ✅ Configuración de precios inicializada (Tiers 2026):');
+  console.log('   ✅ Configuración de precios inicializada (STEAM 2026):');
   console.log(
-    `      - Arcade: $${configuracion.precio_arcade.toNumber().toLocaleString('es-AR')}/mes`,
+    `      - STEAM Libros: $${configuracion.precio_steam_libros.toNumber().toLocaleString('es-AR')}/mes`,
   );
   console.log(
-    `      - Arcade+: $${configuracion.precio_arcade_plus.toNumber().toLocaleString('es-AR')}/mes`,
+    `      - STEAM Asincrónico: $${configuracion.precio_steam_asincronico.toNumber().toLocaleString('es-AR')}/mes`,
   );
   console.log(
-    `      - Pro: $${configuracion.precio_pro.toNumber().toLocaleString('es-AR')}/mes`,
+    `      - STEAM Sincrónico: $${configuracion.precio_steam_sincronico.toNumber().toLocaleString('es-AR')}/mes`,
   );
   console.log(
-    `      - Descuento 2do hermano: ${configuracion.descuento_hermano_2.toNumber()}%`,
-  );
-  console.log(
-    `      - Descuento 3er+ hermano: ${configuracion.descuento_hermano_3_mas.toNumber()}%`,
+    `      - Descuento 2do hermano: ${configuracion.descuento_segundo_hermano.toNumber()}%`,
   );
   console.log(
     `      - Día de vencimiento: ${configuracion.dia_vencimiento} de cada mes`,

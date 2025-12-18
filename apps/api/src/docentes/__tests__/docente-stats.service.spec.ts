@@ -209,7 +209,9 @@ describe('DocenteStatsService', () => {
       expect(result.topEstudiantesPorPuntos[1].puntos_totales).toBe(80);
     });
 
-    it('should identify estudiantes without tareas', async () => {
+    it('should return empty estudiantesSinTareas (tareas system not implemented)', async () => {
+      // Sistema de tareas (Planificaciones) no implementado
+      // calcularEstudiantesSinTareas retorna array vacío
       jest.spyOn(validator, 'validarDocenteExiste').mockResolvedValue();
       jest.spyOn(prisma.inscripcionClaseGrupo, 'findMany').mockResolvedValue([
         { estudiante_id: 'est-1', clase_grupo_id: 'grupo-1' },
@@ -237,8 +239,8 @@ describe('DocenteStatsService', () => {
 
       const result = await service.getEstadisticasCompletas('docente-123');
 
-      // Placeholder: retorna todos los estudiantes (máximo 20)
-      expect(result.estudiantesSinTareas).toHaveLength(2);
+      // Sistema de tareas no implementado - retorna array vacío
+      expect(result.estudiantesSinTareas).toEqual([]);
     });
 
     it('should throw NotFoundException if docente does not exist', async () => {

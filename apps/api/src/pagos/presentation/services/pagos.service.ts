@@ -83,7 +83,7 @@ export class PagosService {
   /**
    * Actualiza la configuración de precios
    * Convierte numbers a Decimals antes de llamar al Use Case
-   * Sistema de Tiers 2026
+   * Sistema STEAM 2026
    */
   async actualizarConfiguracionPrecios(
     requestDto: ActualizarConfiguracionPreciosRequestDto,
@@ -92,22 +92,19 @@ export class PagosService {
     // IMPORTANTE: Convertir numbers a Decimals
     const applicationDto: ActualizarConfiguracionPreciosInputDTO = {
       adminId: requestDto.adminId,
-      // Precios por Tier (Sistema 2026)
-      precioArcade: requestDto.precioArcade
-        ? new Decimal(requestDto.precioArcade)
+      // Precios por Tier STEAM (Sistema 2026)
+      precioSteamLibros: requestDto.precioSteamLibros
+        ? new Decimal(requestDto.precioSteamLibros)
         : undefined,
-      precioArcadePlus: requestDto.precioArcadePlus
-        ? new Decimal(requestDto.precioArcadePlus)
+      precioSteamAsincronico: requestDto.precioSteamAsincronico
+        ? new Decimal(requestDto.precioSteamAsincronico)
         : undefined,
-      precioPro: requestDto.precioPro
-        ? new Decimal(requestDto.precioPro)
+      precioSteamSincronico: requestDto.precioSteamSincronico
+        ? new Decimal(requestDto.precioSteamSincronico)
         : undefined,
-      // Descuentos familiares
-      descuentoHermano2: requestDto.descuentoHermano2
-        ? new Decimal(requestDto.descuentoHermano2)
-        : undefined,
-      descuentoHermano3Mas: requestDto.descuentoHermano3Mas
-        ? new Decimal(requestDto.descuentoHermano3Mas)
+      // Descuento familiar simplificado
+      descuentoSegundoHermano: requestDto.descuentoSegundoHermano
+        ? new Decimal(requestDto.descuentoSegundoHermano)
         : undefined,
       // Configuración de notificaciones
       diaVencimiento: requestDto.diaVencimiento,

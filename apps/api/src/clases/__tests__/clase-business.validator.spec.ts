@@ -18,7 +18,6 @@ describe('ClaseBusinessValidator', () => {
         {
           provide: PrismaService,
           useValue: {
-            rutaCurricular: { findUnique: jest.fn() },
             docente: { findUnique: jest.fn() },
             sector: { findUnique: jest.fn() },
             producto: { findUnique: jest.fn() },
@@ -34,36 +33,6 @@ describe('ClaseBusinessValidator', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('validarRutaCurricularExiste', () => {
-    it('debe pasar si la ruta curricular existe', async () => {
-      jest.spyOn(prisma.rutaCurricular, 'findUnique').mockResolvedValue({
-        id: 'ruta-1',
-        nombre: 'Álgebra',
-        color: '#3B82F6',
-        created_at: new Date(),
-        updated_at: new Date(),
-      });
-
-      await expect(
-        validator.validarRutaCurricularExiste('ruta-1'),
-      ).resolves.not.toThrow();
-    });
-
-    it('debe lanzar NotFoundException si la ruta no existe', async () => {
-      jest.spyOn(prisma.rutaCurricular, 'findUnique').mockResolvedValue(null);
-
-      await expect(
-        validator.validarRutaCurricularExiste('ruta-inexistente'),
-      ).rejects.toThrow(NotFoundException);
-
-      await expect(
-        validator.validarRutaCurricularExiste('ruta-inexistente'),
-      ).rejects.toThrow(
-        'Ruta curricular con ID ruta-inexistente no encontrada',
-      );
-    });
   });
 
   describe('validarDocenteExiste', () => {

@@ -3,7 +3,14 @@ import { Decimal } from 'decimal.js';
 /**
  * DTO de entrada para actualizar la configuración de precios
  * Input del use case ActualizarConfiguracionPreciosUseCase
- * Sistema de Tiers 2026
+ *
+ * Sistema STEAM 2026:
+ * - STEAM_LIBROS: $40.000/mes - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM_ASINCRONICO: $65.000/mes - Todo + clases grabadas
+ * - STEAM_SINCRONICO: $95.000/mes - Todo + clases en vivo con docente
+ *
+ * Descuento familiar simplificado:
+ * - 10% para segundo hermano en adelante
  */
 export interface ActualizarConfiguracionPreciosInputDTO {
   /**
@@ -13,18 +20,18 @@ export interface ActualizarConfiguracionPreciosInputDTO {
   readonly adminId: string;
 
   /**
-   * Precios por Tier (todos opcionales)
+   * Precios por Tier STEAM (todos opcionales)
    * Solo se actualizan los campos enviados
    */
-  readonly precioArcade?: Decimal;
-  readonly precioArcadePlus?: Decimal;
-  readonly precioPro?: Decimal;
+  readonly precioSteamLibros?: Decimal;
+  readonly precioSteamAsincronico?: Decimal;
+  readonly precioSteamSincronico?: Decimal;
 
   /**
-   * Descuentos familiares
+   * Descuento familiar simplificado
+   * 10% para segundo hermano en adelante
    */
-  readonly descuentoHermano2?: Decimal;
-  readonly descuentoHermano3Mas?: Decimal;
+  readonly descuentoSegundoHermano?: Decimal;
 
   /**
    * Configuración de notificaciones
@@ -63,16 +70,15 @@ export interface ActualizarConfiguracionPreciosOutputDTO {
 
 /**
  * Representa la configuración de precios completa
- * Sistema de Tiers 2026
+ * Sistema STEAM 2026
  */
 export interface ConfiguracionPreciosDTO {
-  // Precios por Tier
-  readonly precioArcade: Decimal;
-  readonly precioArcadePlus: Decimal;
-  readonly precioPro: Decimal;
-  // Descuentos familiares
-  readonly descuentoHermano2: Decimal;
-  readonly descuentoHermano3Mas: Decimal;
+  // Precios por Tier STEAM
+  readonly precioSteamLibros: Decimal;
+  readonly precioSteamAsincronico: Decimal;
+  readonly precioSteamSincronico: Decimal;
+  // Descuento familiar simplificado
+  readonly descuentoSegundoHermano: Decimal;
   // Configuración de notificaciones
   readonly diaVencimiento: number;
   readonly diasAntesRecordatorio: number;

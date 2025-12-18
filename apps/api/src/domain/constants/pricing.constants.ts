@@ -13,6 +13,33 @@
  */
 
 /**
+ * Precios de Tiers STEAM 2026
+ * Sistema de suscripción mensual por estudiante
+ */
+export const TIERS_STEAM = {
+  /**
+   * STEAM Libros - Plataforma completa (Mate + Progra + Ciencias)
+   */
+  STEAM_LIBROS: 40000,
+
+  /**
+   * STEAM Asincrónico - Todo + clases grabadas
+   */
+  STEAM_ASINCRONICO: 65000,
+
+  /**
+   * STEAM Sincrónico - Todo + clases en vivo con docente
+   */
+  STEAM_SINCRONICO: 95000,
+} as const;
+
+/**
+ * Descuento familiar simplificado STEAM 2026
+ * 10% para 2do hermano en adelante (aplicado al monto de hermanos adicionales)
+ */
+export const DESCUENTO_FAMILIAR_STEAM = 10;
+
+/**
  * Precios base de cursos y programas
  */
 export const PRECIOS = {
