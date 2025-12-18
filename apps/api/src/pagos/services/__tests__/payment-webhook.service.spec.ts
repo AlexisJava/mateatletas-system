@@ -9,6 +9,7 @@ import { EstadoPago } from '../../../domain/constants';
 import { MercadoPagoWebhookDto } from '../../dto/mercadopago-webhook.dto';
 import { WebhookIdempotencyService } from '../webhook-idempotency.service';
 import { PaymentAmountValidatorService } from '../payment-amount-validator.service';
+import { PaymentAlertService } from '../payment-alert.service';
 
 describe('PaymentWebhookService', () => {
   let service: PaymentWebhookService;
@@ -74,6 +75,16 @@ describe('PaymentWebhookService', () => {
               .fn()
               .mockResolvedValue({ isValid: true }),
             validateColoniaPago: jest.fn().mockResolvedValue({ isValid: true }),
+          },
+        },
+        {
+          provide: PaymentAlertService,
+          useValue: {
+            alertChargebackReceived: jest.fn().mockResolvedValue(undefined),
+            alertRefundProcessed: jest.fn().mockResolvedValue(undefined),
+            alertAmountMismatch: jest.fn().mockResolvedValue(undefined),
+            alertSuspiciousIP: jest.fn().mockResolvedValue(undefined),
+            alertWebhookError: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],

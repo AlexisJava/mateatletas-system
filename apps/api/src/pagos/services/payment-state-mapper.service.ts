@@ -60,6 +60,7 @@ export class PaymentStateMapperService {
    * - CANCELADO/RECHAZADO → Pendiente (permitir reintentar)
    * - EXPIRADO → Atrasada (membresía vencida)
    * - PENDIENTE → Pendiente (esperando confirmación)
+   * - REEMBOLSADO → Cancelada (refund/chargeback, pierde acceso inmediatamente)
    *
    * @param estadoPago - Estado interno de pago
    * @returns Estado de membresía según reglas de negocio (EstadoMembresia de Prisma)
@@ -74,9 +75,12 @@ export class PaymentStateMapperService {
       case EstadoPago.RECHAZADO:
         return EstadoMembresia.Pendiente; // Permitir reintentar
       case EstadoPago.EXPIRADO:
-        return EstadoMembresia.Atrasada; // Cambiado de 'Inactiva' a 'Atrasada' (Prisma enum)
-      case EstadoPago.PENDIENTE:
+        return EstadoMembresia.Atrasada;
       case EstadoPago.REEMBOLSADO:
+        // CRÍTICO: Refund o chargeback debe desactivar la membresía
+        // El usuario pierde acceso inmediatamente
+        return EstadoMembresia.Cancelada;
+      case EstadoPago.PENDIENTE:
       default:
         return EstadoMembresia.Pendiente;
     }
@@ -90,6 +94,7 @@ export class PaymentStateMapperService {
    * - CANCELADO/RECHAZADO → Pendiente (permitir reintentar)
    * - EXPIRADO → Vencido (pago vencido)
    * - PENDIENTE → Pendiente (esperando confirmación)
+   * - REEMBOLSADO → Vencido (refund/chargeback, inscripción invalidada)
    *
    * @param estadoPago - Estado interno de pago
    * @returns Estado de inscripción según reglas de negocio (EstadoPago de Prisma)
@@ -99,14 +104,15 @@ export class PaymentStateMapperService {
   ): EstadoInscripcionResult['estadoInscripcion'] {
     switch (estadoPago) {
       case EstadoPago.PAGADO:
-        return EstadoPagoPrisma.Pagado; // Para inscripciones mensuales
+        return EstadoPagoPrisma.Pagado;
       case EstadoPago.CANCELADO:
       case EstadoPago.RECHAZADO:
         return EstadoPagoPrisma.Pendiente; // Permitir reintentar
       case EstadoPago.EXPIRADO:
-        return EstadoPagoPrisma.Vencido; // Pago vencido
-      case EstadoPago.PENDIENTE:
       case EstadoPago.REEMBOLSADO:
+        // Refund/chargeback invalida la inscripción (usa Vencido ya que no hay Cancelado en enum)
+        return EstadoPagoPrisma.Vencido;
+      case EstadoPago.PENDIENTE:
       default:
         return EstadoPagoPrisma.Pendiente;
     }

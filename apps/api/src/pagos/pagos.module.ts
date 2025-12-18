@@ -12,6 +12,8 @@ import { PaymentQueryService } from './services/payment-query.service';
 import { PaymentCommandService } from './services/payment-command.service';
 import { PaymentWebhookService } from './services/payment-webhook.service';
 import { PaymentStateMapperService } from './services/payment-state-mapper.service';
+import { PaymentExpirationService } from './services/payment-expiration.service';
+import { PaymentAlertService } from './services/payment-alert.service';
 
 // Security Services (CRITICAL)
 import { WebhookIdempotencyService } from './services/webhook-idempotency.service';
@@ -87,6 +89,12 @@ import { MercadoPagoService } from './mercadopago.service';
 
     // State Mapper - Mapeo de estados centralizado
     PaymentStateMapperService,
+
+    // Expiration Service - Expirar inscripciones pendientes (cron job)
+    PaymentExpirationService,
+
+    // Alert Service - Alertas para eventos críticos (refunds, chargebacks, fraude)
+    PaymentAlertService,
 
     // === Legacy Presentation Layer (mantener temporalmente) ===
     PagosService,

@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../core/database/prisma.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PaymentStateMapperService } from './payment-state-mapper.service';
 import { PaymentCommandService } from './payment-command.service';
@@ -7,6 +6,8 @@ import { MercadoPagoService } from '../mercadopago.service';
 import { MercadoPagoWebhookDto } from '../dto/mercadopago-webhook.dto';
 import { WebhookIdempotencyService } from './webhook-idempotency.service';
 import { PaymentAmountValidatorService } from './payment-amount-validator.service';
+import { PaymentAlertService } from './payment-alert.service';
+import { EstadoPago } from '../../domain/constants';
 
 /**
  * Datos de pago de MercadoPago (simplificado)
@@ -42,12 +43,12 @@ export class PaymentWebhookService {
   private readonly logger = new Logger(PaymentWebhookService.name);
 
   constructor(
-    private readonly prisma: PrismaService,
     private readonly stateMapper: PaymentStateMapperService,
     private readonly commandService: PaymentCommandService,
     private readonly mercadoPagoService: MercadoPagoService,
     private readonly idempotency: WebhookIdempotencyService,
     private readonly amountValidator: PaymentAmountValidatorService,
+    private readonly alertService: PaymentAlertService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -239,6 +240,28 @@ export class PaymentWebhookService {
     // Mapear estado de MercadoPago a estado de pago
     const estadoPago = this.stateMapper.mapearEstadoPago(payment.status);
 
+    // ✅ ALERTAR si es refund o chargeback (eventos críticos)
+    if (estadoPago === EstadoPago.REEMBOLSADO) {
+      const isChargeback = payment.status === 'charged_back';
+
+      if (isChargeback) {
+        await this.alertService.alertChargebackReceived({
+          paymentId: payment.id,
+          amount: payment.transaction_amount || 0,
+          entityType: 'membresia',
+          entityId: membresiaId,
+        });
+      } else {
+        await this.alertService.alertRefundProcessed({
+          paymentId: payment.id,
+          originalAmount: payment.transaction_amount || 0,
+          refundedAmount: payment.transaction_amount || 0,
+          entityType: 'membresia',
+          entityId: membresiaId,
+        });
+      }
+    }
+
     // Actualizar membresía usando command service (persistiendo payment_id)
     await this.commandService.actualizarEstadoMembresia(
       membresiaId,
@@ -331,6 +354,28 @@ export class PaymentWebhookService {
 
     // Mapear estado de MercadoPago a estado de pago
     const estadoPago = this.stateMapper.mapearEstadoPago(payment.status);
+
+    // ✅ ALERTAR si es refund o chargeback (eventos críticos)
+    if (estadoPago === EstadoPago.REEMBOLSADO) {
+      const isChargeback = payment.status === 'charged_back';
+
+      if (isChargeback) {
+        await this.alertService.alertChargebackReceived({
+          paymentId: payment.id,
+          amount: payment.transaction_amount || 0,
+          entityType: 'inscripcion',
+          entityId: inscripcionId,
+        });
+      } else {
+        await this.alertService.alertRefundProcessed({
+          paymentId: payment.id,
+          originalAmount: payment.transaction_amount || 0,
+          refundedAmount: payment.transaction_amount || 0,
+          entityType: 'inscripcion',
+          entityId: inscripcionId,
+        });
+      }
+    }
 
     // Actualizar inscripción usando command service
     await this.commandService.actualizarEstadoInscripcion(

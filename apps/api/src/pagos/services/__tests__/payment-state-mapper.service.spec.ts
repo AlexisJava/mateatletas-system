@@ -78,9 +78,9 @@ describe('PaymentStateMapperService', () => {
       );
     });
 
-    it('debe mapear REEMBOLSADO a Pendiente', () => {
+    it('debe mapear REEMBOLSADO a Cancelada (usuario pierde acceso tras refund/chargeback)', () => {
       expect(service.mapearEstadoMembresia(EstadoPago.REEMBOLSADO)).toBe(
-        'Pendiente',
+        'Cancelada',
       );
     });
   });
@@ -107,6 +107,18 @@ describe('PaymentStateMapperService', () => {
         'Pendiente',
       );
     });
+
+    it('debe mapear REEMBOLSADO a Vencido (inscripción invalidada tras refund)', () => {
+      expect(service.mapearEstadoInscripcion(EstadoPago.REEMBOLSADO)).toBe(
+        'Vencido',
+      );
+    });
+
+    it('debe mapear EXPIRADO a Vencido', () => {
+      expect(service.mapearEstadoInscripcion(EstadoPago.EXPIRADO)).toBe(
+        'Vencido',
+      );
+    });
   });
 
   describe('procesarEstadoMembresia', () => {
@@ -126,6 +138,18 @@ describe('PaymentStateMapperService', () => {
       const result = service.procesarEstadoMembresia('pending');
       expect(result.estadoPago).toBe(EstadoPago.PENDIENTE);
       expect(result.estadoMembresia).toBe('Pendiente');
+    });
+
+    it('debe procesar refunded como Cancelada (usuario pierde acceso)', () => {
+      const result = service.procesarEstadoMembresia('refunded');
+      expect(result.estadoPago).toBe(EstadoPago.REEMBOLSADO);
+      expect(result.estadoMembresia).toBe('Cancelada');
+    });
+
+    it('debe procesar charged_back como Cancelada (chargeback = pierde acceso)', () => {
+      const result = service.procesarEstadoMembresia('charged_back');
+      expect(result.estadoPago).toBe(EstadoPago.REEMBOLSADO);
+      expect(result.estadoMembresia).toBe('Cancelada');
     });
   });
 

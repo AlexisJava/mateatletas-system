@@ -203,6 +203,14 @@ export class MercadoPagoService {
 
   /**
    * Construye los datos de una preferencia para membresía
+   *
+   * OPTIMIZADO PARA SCORE >90/100:
+   * - payer.email, payer.name, payer.surname (identificación completa)
+   * - items.category_id (clasificación para antifraude)
+   * - items.description (descripción completa)
+   * - statement_descriptor (identificador en resumen de tarjeta)
+   *
+   * Documentación: https://www.mercadopago.com.ar/developers/es/reference/preferences/_checkout_preferences/post
    */
   buildMembershipPreferenceData(
     producto: {
@@ -222,16 +230,20 @@ export class MercadoPagoService {
         {
           id: producto.id,
           title: producto.nombre,
-          description: producto.descripcion || undefined,
+          description:
+            producto.descripcion ||
+            `Membresía Mateatletas - ${producto.nombre}`,
           quantity: 1,
           unit_price: Number(producto.precio),
           currency_id: 'ARS',
+          // category_id mejora detección de fraude y approval rate
+          category_id: 'services', // Servicios educativos
         },
       ],
       payer: {
         email: tutor.email,
-        name: tutor.nombre,
-        surname: tutor.apellido,
+        name: tutor.nombre || undefined,
+        surname: tutor.apellido || undefined,
       },
       external_reference: EXTERNAL_REFERENCE_FORMATS.membresia(
         membresiaId,
@@ -244,13 +256,20 @@ export class MercadoPagoService {
         failure: `${frontendUrl}/suscripcion/error?membresiaId=${membresiaId}`,
         pending: `${frontendUrl}/suscripcion/pendiente?membresiaId=${membresiaId}`,
       },
-      auto_return: 'approved',
-      statement_descriptor: 'Mateatletas',
+      auto_return: 'approved' as const,
+      statement_descriptor: 'MATEATLETAS',
+      // expires: false - No expira automáticamente (controlamos nosotros)
+      // binary_mode: false - Permitir pagos pendientes (mejor approval rate)
     };
   }
 
   /**
    * Construye los datos de una preferencia para curso
+   *
+   * OPTIMIZADO PARA SCORE >90/100:
+   * - payer completo (email, name, surname)
+   * - items.category_id para clasificación antifraude
+   * - items.description con detalle del estudiante
    */
   buildCoursePreferenceData(
     producto: {
@@ -266,21 +285,29 @@ export class MercadoPagoService {
     backendUrl: string,
     frontendUrl: string,
   ) {
+    const estudianteNombreCompleto = estudiante.apellido
+      ? `${estudiante.nombre} ${estudiante.apellido}`
+      : estudiante.nombre;
+
     return {
       items: [
         {
           id: producto.id,
-          title: `${producto.nombre} - ${estudiante.nombre} ${estudiante.apellido}`,
-          description: producto.descripcion || undefined,
+          title: `${producto.nombre} - ${estudianteNombreCompleto}`,
+          description:
+            producto.descripcion ||
+            `Curso Mateatletas para ${estudianteNombreCompleto}`,
           quantity: 1,
           unit_price: Number(producto.precio),
           currency_id: 'ARS',
+          // category_id mejora detección de fraude y approval rate
+          category_id: 'learnings', // Cursos educativos
         },
       ],
       payer: {
         email: tutor.email,
-        name: tutor.nombre,
-        surname: tutor.apellido,
+        name: tutor.nombre || undefined,
+        surname: tutor.apellido || undefined,
       },
       external_reference: EXTERNAL_REFERENCE_FORMATS.inscripcionMensual(
         inscripcionId,
@@ -293,14 +320,19 @@ export class MercadoPagoService {
         failure: `${frontendUrl}/cursos/error?inscripcionId=${inscripcionId}`,
         pending: `${frontendUrl}/cursos/pendiente?inscripcionId=${inscripcionId}`,
       },
-      auto_return: 'approved',
-      statement_descriptor: 'Mateatletas',
+      auto_return: 'approved' as const,
+      statement_descriptor: 'MATEATLETAS',
     };
   }
 
   /**
    * Construye los datos de una preferencia para inscripción 2026
    * Soporta 3 tipos: Colonia, Ciclo 2026, Pack Completo
+   *
+   * OPTIMIZADO PARA SCORE >90/100:
+   * - payer completo (email, name, surname)
+   * - items.category_id para clasificación antifraude
+   * - items.description detallada
    */
   buildInscripcion2026PreferenceData(
     tipoInscripcion: string,
@@ -343,12 +375,14 @@ export class MercadoPagoService {
           quantity: 1,
           unit_price: Number(monto),
           currency_id: 'ARS',
+          // category_id mejora detección de fraude y approval rate
+          category_id: 'learnings', // Servicios educativos
         },
       ],
       payer: {
         email: tutor.email,
-        name: tutor.nombre,
-        surname: tutor.apellido,
+        name: tutor.nombre || undefined,
+        surname: tutor.apellido || undefined,
       },
       external_reference: EXTERNAL_REFERENCE_FORMATS.inscripcion2026(
         inscripcionId,
@@ -361,8 +395,8 @@ export class MercadoPagoService {
         failure: `${frontendUrl}/inscripcion-2026/error?inscripcionId=${inscripcionId}`,
         pending: `${frontendUrl}/inscripcion-2026/pendiente?inscripcionId=${inscripcionId}`,
       },
-      auto_return: 'approved',
-      statement_descriptor: 'Mateatletas 2026',
+      auto_return: 'approved' as const,
+      statement_descriptor: 'MATEATLETAS',
     };
   }
 }

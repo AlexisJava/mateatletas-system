@@ -182,11 +182,11 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
             'http://localhost:3000/suscripcion/pendiente?membresiaId=memb-456',
         },
         auto_return: 'approved',
-        statement_descriptor: 'Mateatletas',
+        statement_descriptor: 'MATEATLETAS',
       });
     });
 
-    it('should handle producto without descripcion (undefined)', () => {
+    it('should handle producto without descripcion (use default)', () => {
       const mockProducto = {
         id: 'prod-123',
         nombre: 'Membresía Básica',
@@ -209,7 +209,10 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         'http://localhost:3000',
       );
 
-      expect(result.items[0].description).toBeUndefined();
+      // Now uses default description for better approval rate
+      expect(result.items[0].description).toBe(
+        'Membresía Mateatletas - Membresía Básica',
+      );
     });
 
     it('should correctly convert string precio to number', () => {
@@ -370,7 +373,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
             'http://localhost:3000/cursos/pendiente?inscripcionId=insc-789',
         },
         auto_return: 'approved',
-        statement_descriptor: 'Mateatletas',
+        statement_descriptor: 'MATEATLETAS',
       });
     });
 
@@ -531,8 +534,8 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         'http://localhost:3000',
       );
 
-      // Empty string is falsy, should become undefined
-      expect(result.items[0].description).toBeUndefined();
+      // Empty string is falsy, should use default description for better approval rate
+      expect(result.items[0].description).toBe('Membresía Mateatletas - Test');
     });
   });
 
@@ -605,7 +608,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
       expect(result.auto_return).toBe('approved');
     });
 
-    it('should set statement_descriptor to Mateatletas', () => {
+    it('should set statement_descriptor to MATEATLETAS (uppercase for better visibility)', () => {
       const result = service.buildMembershipPreferenceData(
         { id: 'P1', nombre: 'Test', precio: 100 },
         { email: 't@t.com', nombre: 'T', apellido: 'T' },
@@ -615,7 +618,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         'http://localhost:3000',
       );
 
-      expect(result.statement_descriptor).toBe('Mateatletas');
+      expect(result.statement_descriptor).toBe('MATEATLETAS');
     });
   });
 
@@ -681,7 +684,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
               'http://localhost:3000/inscripcion-2026/pendiente?inscripcionId=insc-abc123',
           },
           auto_return: 'approved',
-          statement_descriptor: 'Mateatletas 2026',
+          statement_descriptor: 'MATEATLETAS',
         });
       });
 
@@ -867,7 +870,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         );
       });
 
-      it('should use statement_descriptor "Mateatletas 2026"', () => {
+      it('should use statement_descriptor "MATEATLETAS" (consistent branding)', () => {
         const result = service.buildInscripcion2026PreferenceData(
           'COLONIA',
           25000,
@@ -879,7 +882,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
           'http://localhost:3000',
         );
 
-        expect(result.statement_descriptor).toBe('Mateatletas 2026');
+        expect(result.statement_descriptor).toBe('MATEATLETAS');
       });
     });
 
