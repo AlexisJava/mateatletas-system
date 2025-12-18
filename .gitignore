@@ -73,3 +73,6 @@ logs/
 # pnpm-lock.yaml
 .yarn/cache
 .yarn/install-state.gz
+
+# Audit artifacts con datos sensibles
+docs/audit_artifacts/sys/
