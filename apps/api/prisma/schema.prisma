@@ -1515,11 +1515,11 @@ enum OnboardingEstado {
 }
 
 /// Enum para tipos de tier de suscripción (2026)
-/// Define los niveles de acceso a mundos y docentes
+/// Define los niveles de acceso a la plataforma STEAM
 enum TierNombre {
-  ARCADE // $30k - 1 mundo async, sin docente
-  ARCADE_PLUS // $60k - 3 mundos async, sin docente
-  PRO // $75k - 1 mundo async + 1 mundo sync con docente
+  STEAM_LIBROS // $40k - Plataforma completa (Mate + Progra + Ciencias)
+  STEAM_ASINCRONICO // $65k - Todo + clases grabadas
+  STEAM_SINCRONICO // $95k - Todo + clases en vivo con docente
 
   @@map("tier_nombre")
 }
