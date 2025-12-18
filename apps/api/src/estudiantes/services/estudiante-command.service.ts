@@ -16,6 +16,7 @@ import {
 import {
   generarUsername,
   generarPasswordTemporal,
+  generarPasswordEstudiante,
   hashPassword,
 } from '../utils/credenciales.utils';
 import { EstudianteBusinessValidator } from '../validators/estudiante-business.validator';
@@ -69,7 +70,7 @@ export class EstudianteCommandService {
    * Crea un nuevo estudiante asociado a un tutor
    * @param tutorId - ID del tutor que crea el estudiante
    * @param createDto - Datos del estudiante a crear
-   * @returns El estudiante creado con sus relaciones
+   * @returns El estudiante creado con credenciales temporales
    */
   async create(tutorId: string, createDto: CreateEstudianteDto) {
     // Validar que el tutor existe
@@ -83,14 +84,20 @@ export class EstudianteCommandService {
     // Validar edad
     this.validator.validateEdad(createDto.edad);
 
-    // Crear estudiante
+    // Generar credenciales
+    const username = await this.generarUsernameUnico(
+      createDto.nombre,
+      createDto.apellido,
+    );
+    const passwordTemporal = generarPasswordEstudiante();
+    const passwordHash = await hashPassword(passwordTemporal);
+
+    // Crear estudiante con credenciales
     const estudiante = await this.prisma.estudiante.create({
       data: {
         ...createDto,
-        username: await this.generarUsernameUnico(
-          createDto.nombre,
-          createDto.apellido,
-        ),
+        username,
+        password_hash: passwordHash,
         tutor_id: tutorId,
       },
       include: {
@@ -106,7 +113,14 @@ export class EstudianteCommandService {
 
     this.logger.log(`Estudiante creado: ${estudiante.id}`);
 
-    return estudiante;
+    // Retornar estudiante con credenciales temporales (solo en response, NO en BD)
+    return {
+      estudiante,
+      credenciales: {
+        username,
+        passwordTemporal,
+      },
+    };
   }
 
   /**

@@ -99,7 +99,7 @@ export interface UserForPasswordChange {
  * Estudiante con relaciones incluidas
  */
 export interface EstudianteWithRelations extends Estudiante {
-  tutor: Pick<Tutor, 'id' | 'nombre' | 'apellido' | 'email'> | null;
+  tutor: Pick<Tutor, 'id' | 'nombre' | 'apellido'> | null; // email: REMOVIDO - No exponer PII
   casa: Pick<Casa, 'id' | 'nombre' | 'colorPrimary' | 'colorSecondary'> | null;
 }
 
@@ -170,7 +170,7 @@ export class UserLookupService {
       where: { username },
       include: {
         tutor: {
-          select: { id: true, nombre: true, apellido: true, email: true },
+          select: { id: true, nombre: true, apellido: true }, // email: REMOVIDO - OWASP
         },
         casa: {
           select: {

@@ -18,12 +18,12 @@ export interface CasaData {
 
 /**
  * Datos de tutor incluidos en la respuesta
+ * NOTA: email REMOVIDO para no exponer PII del tutor al estudiante (OWASP)
  */
 export interface TutorData {
   id: string;
   nombre: string;
   apellido: string;
-  email: string | null;
 }
 
 /**
@@ -96,7 +96,7 @@ export class LoginEstudianteUseCase {
             id: true,
             nombre: true,
             apellido: true,
-            email: true,
+            // email: REMOVIDO - No exponer PII del tutor al estudiante (OWASP)
           },
         },
         casa: {

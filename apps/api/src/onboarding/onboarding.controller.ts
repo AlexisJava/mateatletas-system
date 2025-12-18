@@ -18,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { OnboardingService, AvatarConfig } from './onboarding.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OnboardingOwnershipGuard } from './guards/onboarding-ownership.guard';
 
 /**
  * DTO para selección de mundos
@@ -59,10 +60,17 @@ class GuardarAvatarDto {
  * - POST /onboarding/:estudianteId/confirmar-casa - Confirmar casa
  * - POST /onboarding/:estudianteId/avatar - Guardar avatar
  * - GET /onboarding/:estudianteId/progreso - Ver progreso
+ *
+ * SEGURIDAD:
+ * - Requiere autenticación (JwtAuthGuard)
+ * - Requiere ownership (OnboardingOwnershipGuard)
+ * - Solo el tutor del estudiante, el estudiante mismo, o admin/docente pueden acceder
+ *
+ * OWASP A01:2021 - Broken Access Control (IDOR Prevention)
  */
 @ApiTags('Onboarding')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, OnboardingOwnershipGuard)
 @Controller('onboarding')
 export class OnboardingController {
   constructor(private readonly onboardingService: OnboardingService) {}

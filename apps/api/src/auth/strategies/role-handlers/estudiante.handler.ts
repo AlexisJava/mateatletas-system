@@ -52,7 +52,7 @@ export class EstudianteHandler implements RoleHandler {
             id: true,
             nombre: true,
             apellido: true,
-            email: true,
+            // email: REMOVIDO - No exponer PII del tutor al estudiante (OWASP)
           },
         },
         casa: {

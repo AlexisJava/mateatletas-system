@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Inscripciones2026Service } from './inscripciones-2026.service';
 import {
@@ -20,6 +21,8 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
+import { GetUser } from '../auth/decorators/get-user.decorator';
+import { AuthUser } from '../auth/interfaces';
 import { InscripcionOwnershipGuard } from './guards/inscripcion-ownership.guard';
 import { WebhookRateLimitGuard } from './guards/webhook-rate-limit.guard';
 import { MercadoPagoWebhookGuard } from '../pagos/guards/mercadopago-webhook.guard';
@@ -84,11 +87,29 @@ export class Inscripciones2026Controller {
 
   /**
    * GET /inscripciones-2026/tutor/:tutorId
-   * Lista todas las inscripciones de un tutor (requiere autenticación)
+   * Lista todas las inscripciones de un tutor
+   *
+   * SEGURIDAD:
+   * - Requiere autenticación (JwtAuthGuard)
+   * - Requiere rol TUTOR o ADMIN (RolesGuard)
+   * - Ownership check: tutor solo puede ver sus propias inscripciones
+   * - Admin puede ver inscripciones de cualquier tutor
+   *
+   * OWASP A01:2021 - Broken Access Control (IDOR Prevention)
    */
   @Get('tutor/:tutorId')
-  @UseGuards(JwtAuthGuard)
-  async getByTutor(@Param('tutorId', ParseUUIDPipe) tutorId: string) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TUTOR)
+  async getByTutor(
+    @Param('tutorId', ParseUUIDPipe) tutorId: string,
+    @GetUser() user: AuthUser,
+  ) {
+    // Ownership check: tutor solo puede ver sus propias inscripciones
+    if (user.role === Role.TUTOR && user.id !== tutorId) {
+      throw new ForbiddenException(
+        'No tienes permiso para ver estas inscripciones',
+      );
+    }
     return this.inscripciones2026Service.getInscripcionesByTutor(tutorId);
   }
 

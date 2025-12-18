@@ -1,5 +1,6 @@
 import { PrismaService } from '../../core/database/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 
 /**
  * Genera un username único basado en nombre y apellido
@@ -58,4 +59,50 @@ export function generarPasswordTemporal(): string {
 export async function hashPassword(password: string): Promise<string> {
   const saltRounds = 12; // ✅ Updated from 10 to 12 (2025-11-21)
   return await bcrypt.hash(password, saltRounds);
+}
+
+/**
+ * Lista de palabras simples para passphrase de estudiantes
+ * Palabras cortas, fáciles de leer y escribir para niños
+ */
+const PALABRAS_PASSPHRASE = [
+  'Sol',
+  'Luna',
+  'Mar',
+  'Cielo',
+  'Rojo',
+  'Azul',
+  'Verde',
+  'Gato',
+  'Perro',
+  'Leon',
+  'Tigre',
+  'Puma',
+  'Oso',
+  'Lobo',
+  'Alfa',
+  'Beta',
+  'Gama',
+  'Nube',
+  'Flor',
+  'Arbol',
+  'Rio',
+];
+
+/**
+ * Genera una passphrase memorable para estudiantes
+ * Formato: Palabra+Número-Palabra+Número
+ * Ejemplo: "Sol7-Luna3", "Gato5-Rojo2"
+ *
+ * ✅ SECURITY: Usa crypto.randomBytes() (CSPRNG) para selección aleatoria
+ * Longitud: 10-12 caracteres (suficiente para cuenta sin datos sensibles)
+ */
+export function generarPasswordEstudiante(): string {
+  const bytes = randomBytes(4);
+  const palabra1 = PALABRAS_PASSPHRASE[bytes[0]! % PALABRAS_PASSPHRASE.length];
+  const numero1 = bytes[1]! % 10;
+  const palabra2 = PALABRAS_PASSPHRASE[bytes[2]! % PALABRAS_PASSPHRASE.length];
+  const numero2 = bytes[3]! % 10;
+
+  return `${palabra1}${numero1}-${palabra2}${numero2}`;
 }

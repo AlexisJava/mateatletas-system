@@ -84,7 +84,7 @@ describe('EstudianteCommandService', () => {
   });
 
   describe('create', () => {
-    it('debe crear un estudiante y emitir evento', async () => {
+    it('debe crear un estudiante con credenciales y emitir evento', async () => {
       const createDto = {
         nombre: 'Juan',
         apellido: 'Pérez',
@@ -110,7 +110,11 @@ describe('EstudianteCommandService', () => {
 
       const result = await service.create('tutor-1', createDto as any);
 
-      expect(result).toEqual(mockEstudiante);
+      // Verificar estructura de respuesta con credenciales
+      expect(result.estudiante).toEqual(mockEstudiante);
+      expect(result.credenciales).toBeDefined();
+      expect(result.credenciales.username).toBe('juan.perez');
+      expect(result.credenciales.passwordTemporal).toMatch(/^\w+-\w+$/); // Formato: Palabra#-Palabra#
       expect(validator.validateTutorExists).toHaveBeenCalledWith('tutor-1');
       expect(validator.validateEdad).toHaveBeenCalledWith(10);
       expect(eventEmitter.emit).toHaveBeenCalledWith('estudiante.created', {
@@ -164,7 +168,7 @@ describe('EstudianteCommandService', () => {
 
       const result = await service.create('tutor-1', createDto as any);
 
-      expect(result.username).toBe('juan.perez1');
+      expect(result.credenciales.username).toBe('juan.perez1');
     });
   });
 

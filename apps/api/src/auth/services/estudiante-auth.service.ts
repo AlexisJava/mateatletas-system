@@ -38,7 +38,7 @@ export interface EstudianteLoginResult {
       id: string;
       nombre: string;
       apellido: string;
-      email: string | null;
+      // email: REMOVIDO - No exponer PII del tutor al estudiante (OWASP)
     } | null;
     role: Role;
     roles: Role[];
@@ -94,7 +94,7 @@ export class EstudianteAuthService {
             id: true,
             nombre: true,
             apellido: true,
-            email: true,
+            // email: REMOVIDO - No exponer PII del tutor al estudiante (OWASP)
           },
         },
         casa: {
