@@ -19,6 +19,8 @@ import { LoginAttemptService } from './services/login-attempt.service';
 import { TokenService } from './services/token.service';
 import { PasswordService } from './services/password.service';
 import { UserLookupService } from './services/user-lookup.service';
+import { UserProfileService } from './services/user-profile.service';
+import { UserUpdateService } from './services/user-update.service';
 // FASE 2: Servicios de autenticación por tipo de usuario
 import { TutorAuthService } from './services/tutor-auth.service';
 import { DocenteAuthService } from './services/docente-auth.service';
@@ -101,7 +103,9 @@ import { AuthOrchestratorService } from './services/auth-orchestrator.service';
     TokenService,
     // Password Service (hashing, verification, strength validation)
     PasswordService,
-    // User Lookup Service (centralized user search across tables)
+    // User Services (centralized user operations)
+    UserProfileService,
+    UserUpdateService,
     UserLookupService,
     // FASE 2: Servicios de autenticación por tipo de usuario
     TutorAuthService,

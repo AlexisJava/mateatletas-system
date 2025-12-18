@@ -1,11 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { UserLookupService } from '../user-lookup.service';
+import { UserProfileService } from '../user-profile.service';
+import { UserUpdateService } from '../user-update.service';
 import { PrismaService } from '../../../core/database/prisma.service';
 
 describe('UserLookupService', () => {
   let service: UserLookupService;
   let prisma: PrismaService;
+  let profileService: typeof mockProfileService;
+  let updateService: typeof mockUpdateService;
 
   const mockTutor = {
     id: 'tutor-123',
@@ -71,6 +75,16 @@ describe('UserLookupService', () => {
     updatedAt: new Date(),
   };
 
+  const mockProfileService = {
+    getProfile: jest.fn(),
+  };
+
+  const mockUpdateService = {
+    updatePasswordHash: jest.fn(),
+    updatePasswordData: jest.fn(),
+    updateAdminMfaBackupCodes: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -96,11 +110,21 @@ describe('UserLookupService', () => {
             },
           },
         },
+        {
+          provide: UserProfileService,
+          useValue: mockProfileService,
+        },
+        {
+          provide: UserUpdateService,
+          useValue: mockUpdateService,
+        },
       ],
     }).compile();
 
     service = module.get<UserLookupService>(UserLookupService);
     prisma = module.get<PrismaService>(PrismaService);
+    profileService = mockProfileService;
+    updateService = mockUpdateService;
   });
 
   afterEach(() => {
@@ -365,87 +389,30 @@ describe('UserLookupService', () => {
     });
   });
 
-  describe('getProfile', () => {
-    it('should get tutor profile', async () => {
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue({
+  describe('getProfile (delegated to UserProfileService)', () => {
+    it('should delegate to profileService and return result', async () => {
+      const mockProfile = {
         id: 'tutor-123',
         email: 'tutor@test.com',
         nombre: 'Juan',
         apellido: 'Perez',
-        dni: '12345678',
-        telefono: '1234567890',
-        fecha_registro: new Date(),
-        ha_completado_onboarding: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as never);
+        role: 'tutor',
+      };
+      profileService.getProfile.mockResolvedValue(mockProfile);
 
       const result = await service.getProfile('tutor-123', 'tutor');
 
-      expect(result).toBeDefined();
-      expect(result.role).toBe('tutor');
+      expect(profileService.getProfile).toHaveBeenCalledWith(
+        'tutor-123',
+        'tutor',
+      );
+      expect(result).toEqual(mockProfile);
     });
 
-    it('should get docente profile', async () => {
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue({
-        id: 'docente-123',
-        email: 'docente@test.com',
-        nombre: 'Maria',
-        apellido: 'Garcia',
-        titulo: 'Profesora',
-        bio: 'Bio',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as never);
-
-      const result = await service.getProfile('docente-123', 'docente');
-
-      expect(result).toBeDefined();
-      expect(result.role).toBe('docente');
-    });
-
-    it('should get admin profile', async () => {
-      jest.spyOn(prisma.admin, 'findUnique').mockResolvedValue({
-        id: 'admin-123',
-        email: 'admin@test.com',
-        nombre: 'Carlos',
-        apellido: 'Lopez',
-        fecha_registro: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as never);
-
-      const result = await service.getProfile('admin-123', 'admin');
-
-      expect(result).toBeDefined();
-      expect(result.role).toBe('admin');
-    });
-
-    it('should get estudiante profile', async () => {
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
-        id: 'estudiante-123',
-        email: 'estudiante@test.com',
-        nombre: 'Pedro',
-        apellido: 'Martinez',
-        edad: 12,
-        nivelEscolar: 'Primaria',
-        fotoUrl: null,
-        puntos_totales: 100,
-        nivel_actual: 2,
-        equipoId: null,
-        tutor_id: 'tutor-123',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as never);
-
-      const result = await service.getProfile('estudiante-123', 'estudiante');
-
-      expect(result).toBeDefined();
-      expect(result.role).toBe('estudiante');
-    });
-
-    it('should throw NotFoundException if user not found', async () => {
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
+    it('should propagate NotFoundException from profileService', async () => {
+      profileService.getProfile.mockRejectedValue(
+        new NotFoundException('Usuario no encontrado'),
+      );
 
       await expect(service.getProfile('noexiste', 'tutor')).rejects.toThrow(
         NotFoundException,
@@ -453,118 +420,45 @@ describe('UserLookupService', () => {
     });
   });
 
-  describe('updatePasswordHash', () => {
-    it('should update estudiante password hash', async () => {
-      const updateSpy = jest
-        .spyOn(prisma.estudiante, 'update')
-        .mockResolvedValue({} as never);
+  describe('updatePasswordHash (delegated to UserUpdateService)', () => {
+    it('should delegate to updateService', async () => {
+      await service.updatePasswordHash('user-123', 'tutor', '$2b$12$newhash');
 
-      await service.updatePasswordHash(
-        'estudiante-123',
-        'estudiante',
+      expect(updateService.updatePasswordHash).toHaveBeenCalledWith(
+        'user-123',
+        'tutor',
         '$2b$12$newhash',
       );
-
-      expect(updateSpy).toHaveBeenCalledWith({
-        where: { id: 'estudiante-123' },
-        data: { password_hash: '$2b$12$newhash' },
-      });
-    });
-
-    it('should update tutor password hash', async () => {
-      const updateSpy = jest
-        .spyOn(prisma.tutor, 'update')
-        .mockResolvedValue({} as never);
-
-      await service.updatePasswordHash('tutor-123', 'tutor', '$2b$12$newhash');
-
-      expect(updateSpy).toHaveBeenCalledWith({
-        where: { id: 'tutor-123' },
-        data: { password_hash: '$2b$12$newhash' },
-      });
-    });
-
-    it('should update docente password hash', async () => {
-      const updateSpy = jest
-        .spyOn(prisma.docente, 'update')
-        .mockResolvedValue({} as never);
-
-      await service.updatePasswordHash(
-        'docente-123',
-        'docente',
-        '$2b$12$newhash',
-      );
-
-      expect(updateSpy).toHaveBeenCalledWith({
-        where: { id: 'docente-123' },
-        data: { password_hash: '$2b$12$newhash' },
-      });
-    });
-
-    it('should update admin password hash', async () => {
-      const updateSpy = jest
-        .spyOn(prisma.admin, 'update')
-        .mockResolvedValue({} as never);
-
-      await service.updatePasswordHash('admin-123', 'admin', '$2b$12$newhash');
-
-      expect(updateSpy).toHaveBeenCalledWith({
-        where: { id: 'admin-123' },
-        data: { password_hash: '$2b$12$newhash' },
-      });
     });
   });
 
-  describe('updatePasswordData', () => {
-    const updateData = {
-      password_hash: '$2b$12$newhash',
-      fecha_ultimo_cambio: new Date(),
-    };
+  describe('updatePasswordData (delegated to UserUpdateService)', () => {
+    it('should delegate to updateService', async () => {
+      const updateData = {
+        password_hash: '$2b$12$newhash',
+        fecha_ultimo_cambio: new Date(),
+      };
 
-    it('should update estudiante password data', async () => {
-      const updateSpy = jest
-        .spyOn(prisma.estudiante, 'update')
-        .mockResolvedValue({} as never);
+      await service.updatePasswordData('user-123', 'tutor', updateData);
 
-      await service.updatePasswordData(
-        'estudiante-123',
-        'estudiante',
+      expect(updateService.updatePasswordData).toHaveBeenCalledWith(
+        'user-123',
+        'tutor',
         updateData,
       );
-
-      expect(updateSpy).toHaveBeenCalledWith({
-        where: { id: 'estudiante-123' },
-        data: updateData,
-      });
-    });
-
-    it('should update tutor password data', async () => {
-      const updateSpy = jest
-        .spyOn(prisma.tutor, 'update')
-        .mockResolvedValue({} as never);
-
-      await service.updatePasswordData('tutor-123', 'tutor', updateData);
-
-      expect(updateSpy).toHaveBeenCalledWith({
-        where: { id: 'tutor-123' },
-        data: updateData,
-      });
     });
   });
 
-  describe('updateAdminMfaBackupCodes', () => {
-    it('should update admin MFA backup codes', async () => {
-      const updateSpy = jest
-        .spyOn(prisma.admin, 'update')
-        .mockResolvedValue({} as never);
+  describe('updateAdminMfaBackupCodes (delegated to UserUpdateService)', () => {
+    it('should delegate to updateService', async () => {
       const newCodes = ['code1', 'code2', 'code3'];
 
       await service.updateAdminMfaBackupCodes('admin-123', newCodes);
 
-      expect(updateSpy).toHaveBeenCalledWith({
-        where: { id: 'admin-123' },
-        data: { mfa_backup_codes: newCodes },
-      });
+      expect(updateService.updateAdminMfaBackupCodes).toHaveBeenCalledWith(
+        'admin-123',
+        newCodes,
+      );
     });
   });
 

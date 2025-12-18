@@ -34,10 +34,6 @@ import { UserLookupService } from './services/user-lookup.service';
 import { AuthUser } from './interfaces';
 import { RequireCsrf } from '../common/decorators';
 import { Public } from './decorators/public.decorator';
-import {
-  ACCESS_TOKEN_COOKIE_MAX_AGE,
-  REFRESH_TOKEN_COOKIE_MAX_AGE,
-} from '../common/constants/security.constants';
 import { parseUserRoles } from '../common/utils/role.utils';
 
 /**
@@ -174,30 +170,16 @@ export class AuthController {
       };
     };
 
-    // Generar refresh token
+    // Generar refresh token y establecer cookies
     const { token: refreshToken } = this.tokenService.generateRefreshToken(
       loginResult.user.id,
     );
+    this.tokenService.setTokenCookies(
+      res,
+      loginResult.access_token,
+      refreshToken,
+    );
 
-    // Establecer access token cookie
-    res.cookie('auth-token', loginResult.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
-      path: '/',
-    });
-
-    // Establecer refresh token cookie
-    res.cookie('refresh-token', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
-      path: '/',
-    });
-
-    // Devolver user y roles en la raíz para el frontend
     return {
       user: loginResult.user,
       roles: loginResult.user.roles ?? [],
@@ -244,28 +226,11 @@ export class AuthController {
       ip,
     );
 
-    // Generar refresh token
+    // Generar refresh token y establecer cookies
     const { token: refreshToken } = this.tokenService.generateRefreshToken(
       result.user.id,
     );
-
-    // Establecer access token cookie
-    res.cookie('auth-token', result.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
-      path: '/',
-    });
-
-    // Establecer refresh token cookie
-    res.cookie('refresh-token', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
-      path: '/',
-    });
+    this.tokenService.setTokenCookies(res, result.access_token, refreshToken);
 
     return { user: result.user };
   }
@@ -382,21 +347,8 @@ export class AuthController {
       }
     }
 
-    // 4. Limpiar cookie de access token
-    res.clearCookie('auth-token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      path: '/',
-    });
-
-    // 5. Limpiar cookie de refresh token
-    res.clearCookie('refresh-token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      path: '/',
-    });
+    // 4. Limpiar cookies de autenticación
+    this.tokenService.clearAllTokenCookies(res);
 
     return {
       message: 'Logout exitoso',
@@ -453,30 +405,12 @@ export class AuthController {
       dto.backup_code,
     );
 
-    // Generar refresh token
+    // Generar refresh token y establecer cookies
     const { token: refreshToken } = this.tokenService.generateRefreshToken(
       result.user.id,
     );
+    this.tokenService.setTokenCookies(res, result.access_token, refreshToken);
 
-    // Establecer access token cookie
-    res.cookie('auth-token', result.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
-      path: '/',
-    });
-
-    // Establecer refresh token cookie
-    res.cookie('refresh-token', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
-      path: '/',
-    });
-
-    // Retornar solo el user (el token va en la cookie)
     return { user: result.user };
   }
 
@@ -607,27 +541,11 @@ export class AuthController {
       'token_rotation',
     );
 
-    // 6. Generar nuevo par de tokens
+    // 6. Generar nuevo par de tokens y establecer cookies
     const roles = parseUserRoles(user.roles);
     const { accessToken, refreshToken: newRefreshToken } =
       this.tokenService.generateTokenPair(user.id, user.email, roles);
-
-    // 7. Establecer cookies
-    res.cookie('auth-token', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
-      path: '/',
-    });
-
-    res.cookie('refresh-token', newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
-      path: '/',
-    });
+    this.tokenService.setTokenCookies(res, accessToken, newRefreshToken);
 
     return {
       success: true,

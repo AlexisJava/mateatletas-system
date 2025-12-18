@@ -7,7 +7,6 @@ import { UserLookupService } from '../services/user-lookup.service';
 import { LoginDto } from '../dto/login.dto';
 import { Request, Response } from 'express';
 import { Role } from '../decorators/roles.decorator';
-import { ACCESS_TOKEN_COOKIE_MAX_AGE } from '../../common/constants/security.constants';
 
 /**
  * AuthController Tests (Post-Refactor)
@@ -76,6 +75,7 @@ describe('AuthController', () => {
       getRefreshTokenTtl: jest.fn(),
       setTokenCookie: jest.fn(),
       setRefreshTokenCookie: jest.fn(),
+      setTokenCookies: jest.fn(),
       clearTokenCookie: jest.fn(),
       clearRefreshTokenCookie: jest.fn(),
       clearAllTokenCookies: jest.fn(),
@@ -105,7 +105,7 @@ describe('AuthController', () => {
   });
 
   describe('login', () => {
-    it('should set httpOnly cookie with JWT and return user payload', async () => {
+    it('should set cookies via tokenService and return user payload', async () => {
       const dto: LoginDto = { email: 'demo@test.com', password: 'Secret123!' };
       const mockUser = {
         id: 'user-1',
@@ -125,28 +125,22 @@ describe('AuthController', () => {
       });
       authOrchestrator.requiresMfa.mockReturnValue(false);
 
-      const { response, cookie } = createMockResponse();
+      const { response } = createMockResponse();
       const mockIp = '127.0.0.1';
 
       const result = await controller.login(dto, response, mockIp);
 
-      expect(cookie).toHaveBeenCalledWith(
-        'auth-token',
-        'token-123',
-        expect.objectContaining({
-          httpOnly: true,
-          secure: false,
-          sameSite: 'lax',
-          maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
-          path: '/',
-        }),
-      );
       expect(tokenService.generateRefreshToken).toHaveBeenCalledWith('user-1');
+      expect(tokenService.setTokenCookies).toHaveBeenCalledWith(
+        response,
+        'token-123',
+        'refresh-token',
+      );
       expect(result).toEqual({ user: mockUser, roles: [Role.TUTOR] });
       expect(authOrchestrator.login).toHaveBeenCalledWith(dto, mockIp);
     });
 
-    it('should return MFA response when MFA is required', async () => {
+    it('should return MFA response when MFA is required without setting cookies', async () => {
       const dto: LoginDto = { email: 'admin@test.com', password: 'Secret123!' };
       const mfaResponse = {
         requires_mfa: true as const,
@@ -157,18 +151,18 @@ describe('AuthController', () => {
       authOrchestrator.login.mockResolvedValue(mfaResponse);
       authOrchestrator.requiresMfa.mockReturnValue(true);
 
-      const { response, cookie } = createMockResponse();
+      const { response } = createMockResponse();
       const mockIp = '127.0.0.1';
 
       const result = await controller.login(dto, response, mockIp);
 
-      expect(cookie).not.toHaveBeenCalled();
+      expect(tokenService.setTokenCookies).not.toHaveBeenCalled();
       expect(result).toEqual(mfaResponse);
     });
   });
 
   describe('loginEstudiante', () => {
-    it('should mirror tutor login behavior for estudiantes', async () => {
+    it('should set cookies via tokenService for estudiantes', async () => {
       const dto = {
         username: 'pedro.martinez',
         password: 'Secret123!',
@@ -199,24 +193,18 @@ describe('AuthController', () => {
         user: mockUser,
       });
 
-      const { response, cookie } = createMockResponse();
+      const { response } = createMockResponse();
       const mockIp = '127.0.0.1';
 
       const result = await controller.loginEstudiante(dto, response, mockIp);
 
-      expect(cookie).toHaveBeenCalledWith(
-        'auth-token',
-        'student-token',
-        expect.objectContaining({
-          httpOnly: true,
-          secure: false,
-          sameSite: 'lax',
-          maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
-          path: '/',
-        }),
-      );
       expect(tokenService.generateRefreshToken).toHaveBeenCalledWith(
         mockUser.id,
+      );
+      expect(tokenService.setTokenCookies).toHaveBeenCalledWith(
+        response,
+        'student-token',
+        'refresh-token',
       );
       expect(result).toEqual({ user: mockUser });
       expect(authOrchestrator.loginEstudiante).toHaveBeenCalledWith(
@@ -263,11 +251,12 @@ describe('AuthController', () => {
   });
 
   describe('logout', () => {
-    it('should blacklist the token and clear the cookie when Authorization header exists', async () => {
+    it('should blacklist the token and clear cookies via tokenService when Authorization header exists', async () => {
       const req = {
         headers: { authorization: 'Bearer jwt-token' },
+        cookies: {},
       } as unknown as Request;
-      const { response, clearCookie } = createMockResponse();
+      const { response } = createMockResponse();
 
       const result = await controller.logout(req, response);
 
@@ -275,28 +264,21 @@ describe('AuthController', () => {
         'jwt-token',
         'user_logout',
       );
-      expect(clearCookie).toHaveBeenCalledWith(
-        'auth-token',
-        expect.objectContaining({
-          httpOnly: true,
-          secure: false,
-          sameSite: 'lax',
-          path: '/',
-        }),
-      );
+      expect(tokenService.clearAllTokenCookies).toHaveBeenCalledWith(response);
       expect(result).toEqual({
         message: 'Logout exitoso',
         description: 'La sesión ha sido cerrada y los tokens invalidados',
       });
     });
 
-    it('should skip blacklist when Authorization header is missing', async () => {
-      const req = { headers: {} } as unknown as Request;
+    it('should skip blacklist when Authorization header is missing but still clear cookies', async () => {
+      const req = { headers: {}, cookies: {} } as unknown as Request;
       const { response } = createMockResponse();
 
       await controller.logout(req, response);
 
       expect(tokenBlacklistService.addToBlacklist).not.toHaveBeenCalled();
+      expect(tokenService.clearAllTokenCookies).toHaveBeenCalledWith(response);
     });
   });
 
