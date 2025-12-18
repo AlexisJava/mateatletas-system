@@ -1,8 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import { Role } from '../../domain/constants';
+import {
+  ACCESS_TOKEN_EXPIRATION,
+  ACCESS_TOKEN_COOKIE_MAX_AGE,
+  REFRESH_TOKEN_EXPIRATION,
+  REFRESH_TOKEN_COOKIE_MAX_AGE,
+} from '../../common/constants/security.constants';
 
 /**
  * Tipos de usuario soportados por el sistema de autenticación
@@ -10,7 +17,7 @@ import { Role } from '../../domain/constants';
 export type UserType = 'tutor' | 'docente' | 'admin' | 'estudiante';
 
 /**
- * Payload estándar para tokens JWT de autenticación
+ * Payload estándar para tokens JWT de autenticación (access token)
  */
 export interface TokenPayload {
   /** ID del usuario (subject) */
@@ -21,6 +28,24 @@ export interface TokenPayload {
   role: Role;
   /** Array de roles del usuario */
   roles: Role[];
+  /** Tipo de token */
+  type?: 'access';
+}
+
+/**
+ * Payload para refresh tokens
+ */
+export interface RefreshTokenPayload {
+  /** ID del usuario (subject) */
+  sub: string;
+  /** Tipo de token - siempre 'refresh' */
+  type: 'refresh';
+  /** JWT ID único para blacklisting */
+  jti: string;
+  /** Issued at (timestamp) */
+  iat?: number;
+  /** Expiration (timestamp) */
+  exp?: number;
 }
 
 /**
@@ -46,6 +71,18 @@ export interface TokenResult {
 }
 
 /**
+ * Resultado de la generación de par de tokens (access + refresh)
+ */
+export interface TokenPairResult {
+  /** Access token JWT */
+  accessToken: string;
+  /** Refresh token JWT */
+  refreshToken: string;
+  /** JTI del refresh token (para blacklisting) */
+  refreshTokenJti: string;
+}
+
+/**
  * Opciones de configuración para cookies de autenticación
  */
 interface CookieOptions {
@@ -60,15 +97,16 @@ interface CookieOptions {
  * TokenService - Servicio centralizado para gestión de tokens JWT
  *
  * Responsabilidades:
- * - Generación de tokens JWT de autenticación
+ * - Generación de access tokens (corta duración)
+ * - Generación de refresh tokens (larga duración, rotación)
  * - Generación de tokens MFA temporales
  * - Gestión de cookies httpOnly para tokens
  * - Verificación de tokens
  *
- * Este servicio fue extraído de AuthService para:
- * - Reducir el tamaño del servicio monolítico
- * - Centralizar la lógica de tokens en un solo lugar
- * - Facilitar testing y mantenimiento
+ * Arquitectura de tokens:
+ * - Access Token: 15min (prod) / 1h (dev) - para autenticar requests
+ * - Refresh Token: 7 días - para renovar access tokens
+ * - MFA Token: 5min - para completar login con MFA
  */
 @Injectable()
 export class TokenService {
@@ -83,8 +121,12 @@ export class TokenService {
       this.configService.get<string>('NODE_ENV') === 'production';
   }
 
+  // ============================================================================
+  // ACCESS TOKEN
+  // ============================================================================
+
   /**
-   * Genera un token JWT de autenticación
+   * Genera un access token JWT de autenticación
    *
    * @param userId - ID del usuario
    * @param email - Email o identificador del usuario
@@ -104,10 +146,151 @@ export class TokenService {
       email,
       role: normalizedRoles[0] ?? Role.TUTOR,
       roles: normalizedRoles,
+      type: 'access',
     };
 
-    return this.jwtService.sign(payload);
+    return this.jwtService.sign(payload, {
+      expiresIn: ACCESS_TOKEN_EXPIRATION,
+    });
   }
+
+  /**
+   * Verifica y decodifica un access token
+   *
+   * @param token - Token JWT a verificar
+   * @returns Payload del token si es válido, null si es inválido
+   */
+  verifyAccessToken(token: string): TokenPayload | null {
+    try {
+      const payload = this.jwtService.verify<TokenPayload>(token);
+
+      // Rechazar si es un refresh token
+      if ((payload as unknown as RefreshTokenPayload).type === 'refresh') {
+        return null;
+      }
+
+      return payload;
+    } catch {
+      return null;
+    }
+  }
+
+  // ============================================================================
+  // REFRESH TOKEN
+  // ============================================================================
+
+  /**
+   * Genera un refresh token JWT
+   *
+   * Características:
+   * - Larga duración (7 días)
+   * - Contiene JTI único para blacklisting individual
+   * - Solo contiene userId (sub), no roles/email
+   * - Tipo 'refresh' para distinguirlo de access tokens
+   *
+   * @param userId - ID del usuario
+   * @returns Objeto con token y JTI
+   */
+  generateRefreshToken(userId: string): { token: string; jti: string } {
+    const jti = uuidv4();
+
+    const payload: RefreshTokenPayload = {
+      sub: userId,
+      type: 'refresh',
+      jti,
+    };
+
+    const token = this.jwtService.sign(payload, {
+      expiresIn: REFRESH_TOKEN_EXPIRATION,
+    });
+
+    this.logger.debug(
+      `Refresh token generado para usuario ${userId}, JTI: ${jti}`,
+    );
+
+    return { token, jti };
+  }
+
+  /**
+   * Verifica y decodifica un refresh token
+   *
+   * @param token - Refresh token a verificar
+   * @returns Payload del token si es válido
+   * @throws UnauthorizedException si el token es inválido o no es refresh token
+   */
+  verifyRefreshToken(token: string): RefreshTokenPayload {
+    try {
+      const payload = this.jwtService.verify<RefreshTokenPayload>(token);
+
+      // Verificar que sea un refresh token
+      if (payload.type !== 'refresh') {
+        this.logger.warn('Token no es de tipo refresh');
+        throw new UnauthorizedException('Token inválido');
+      }
+
+      // Verificar que tenga JTI
+      if (!payload.jti) {
+        this.logger.warn('Refresh token sin JTI');
+        throw new UnauthorizedException('Token inválido');
+      }
+
+      return payload;
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      this.logger.warn('Error verificando refresh token', error);
+      throw new UnauthorizedException('Refresh token inválido o expirado');
+    }
+  }
+
+  /**
+   * Genera un par de tokens (access + refresh)
+   *
+   * Útil para login y refresh, donde necesitamos ambos tokens
+   *
+   * @param userId - ID del usuario
+   * @param email - Email del usuario
+   * @param roles - Roles del usuario
+   * @returns Par de tokens con JTI del refresh
+   */
+  generateTokenPair(
+    userId: string,
+    email: string,
+    roles: Role[] | Role = [Role.TUTOR],
+  ): TokenPairResult {
+    const accessToken = this.generateAccessToken(userId, email, roles);
+    const { token: refreshToken, jti: refreshTokenJti } =
+      this.generateRefreshToken(userId);
+
+    return {
+      accessToken,
+      refreshToken,
+      refreshTokenJti,
+    };
+  }
+
+  /**
+   * Calcula el tiempo restante hasta expiración de un refresh token
+   *
+   * @param payload - Payload del refresh token
+   * @returns Segundos hasta expiración, o 0 si ya expiró
+   */
+  getRefreshTokenTtl(payload: RefreshTokenPayload): number {
+    if (!payload.exp) {
+      return 0;
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const ttl = payload.exp - now;
+
+    return ttl > 0 ? ttl : 0;
+  }
+
+  // ============================================================================
+  // MFA TOKEN
+  // ============================================================================
 
   /**
    * Genera un token temporal para verificación MFA
@@ -153,56 +336,90 @@ export class TokenService {
     }
   }
 
-  /**
-   * Verifica y decodifica un token de autenticación
-   *
-   * @param token - Token JWT a verificar
-   * @returns Payload del token si es válido, null si es inválido
-   */
-  verifyAccessToken(token: string): TokenPayload | null {
-    try {
-      return this.jwtService.verify<TokenPayload>(token);
-    } catch {
-      return null;
-    }
-  }
+  // ============================================================================
+  // COOKIE MANAGEMENT
+  // ============================================================================
 
   /**
-   * Obtiene la configuración de cookie para tokens de autenticación
-   *
-   * @returns Opciones de cookie configuradas según el entorno
+   * Obtiene la configuración de cookie para access tokens
    */
-  private getCookieOptions(): CookieOptions {
+  private getAccessTokenCookieOptions(): CookieOptions {
     return {
       httpOnly: true,
       secure: this.isProduction,
       sameSite: 'lax',
-      maxAge: this.isProduction ? 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000, // 1h prod, 7d dev
+      maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
       path: '/',
     };
   }
 
   /**
-   * Establece el token de autenticación como cookie httpOnly
+   * Obtiene la configuración de cookie para refresh tokens
+   */
+  private getRefreshTokenCookieOptions(): CookieOptions {
+    return {
+      httpOnly: true,
+      secure: this.isProduction,
+      sameSite: 'lax',
+      maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
+      path: '/',
+    };
+  }
+
+  /**
+   * @deprecated Use getAccessTokenCookieOptions instead
+   */
+  private getCookieOptions(): CookieOptions {
+    return this.getAccessTokenCookieOptions();
+  }
+
+  /**
+   * Establece el access token como cookie httpOnly
    *
    * @param res - Response de Express
-   * @param token - Token JWT a establecer
+   * @param token - Access token JWT
    */
   setTokenCookie(res: Response, token: string): void {
-    const cookieOptions = this.getCookieOptions();
-
+    const cookieOptions = this.getAccessTokenCookieOptions();
     res.cookie('auth-token', token, cookieOptions);
-
     this.logger.debug('Cookie auth-token establecida');
   }
 
   /**
-   * Limpia la cookie de autenticación
+   * Establece el refresh token como cookie httpOnly
+   *
+   * @param res - Response de Express
+   * @param token - Refresh token JWT
+   */
+  setRefreshTokenCookie(res: Response, token: string): void {
+    const cookieOptions = this.getRefreshTokenCookieOptions();
+    res.cookie('refresh-token', token, cookieOptions);
+    this.logger.debug('Cookie refresh-token establecida');
+  }
+
+  /**
+   * Establece ambos tokens (access y refresh) como cookies
+   *
+   * @param res - Response de Express
+   * @param accessToken - Access token JWT
+   * @param refreshToken - Refresh token JWT
+   */
+  setTokenCookies(
+    res: Response,
+    accessToken: string,
+    refreshToken: string,
+  ): void {
+    this.setTokenCookie(res, accessToken);
+    this.setRefreshTokenCookie(res, refreshToken);
+  }
+
+  /**
+   * Limpia la cookie de access token
    *
    * @param res - Response de Express
    */
   clearTokenCookie(res: Response): void {
-    const cookieOptions = this.getCookieOptions();
+    const cookieOptions = this.getAccessTokenCookieOptions();
 
     res.clearCookie('auth-token', {
       httpOnly: cookieOptions.httpOnly,
@@ -213,6 +430,38 @@ export class TokenService {
 
     this.logger.debug('Cookie auth-token eliminada');
   }
+
+  /**
+   * Limpia la cookie de refresh token
+   *
+   * @param res - Response de Express
+   */
+  clearRefreshTokenCookie(res: Response): void {
+    const cookieOptions = this.getRefreshTokenCookieOptions();
+
+    res.clearCookie('refresh-token', {
+      httpOnly: cookieOptions.httpOnly,
+      secure: cookieOptions.secure,
+      sameSite: cookieOptions.sameSite,
+      path: cookieOptions.path,
+    });
+
+    this.logger.debug('Cookie refresh-token eliminada');
+  }
+
+  /**
+   * Limpia ambas cookies de autenticación
+   *
+   * @param res - Response de Express
+   */
+  clearAllTokenCookies(res: Response): void {
+    this.clearTokenCookie(res);
+    this.clearRefreshTokenCookie(res);
+  }
+
+  // ============================================================================
+  // UTILITIES
+  // ============================================================================
 
   /**
    * Parsea el tiempo de expiración de un string a segundos

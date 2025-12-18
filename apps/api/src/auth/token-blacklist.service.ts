@@ -258,6 +258,122 @@ export class TokenBlacklistService {
       );
     }
   }
+
+  // ============================================================================
+  // REFRESH TOKEN BLACKLIST (JTI-based)
+  // ============================================================================
+
+  /**
+   * Agrega un refresh token a la blacklist por su JTI
+   *
+   * El JTI (JWT ID) es un identificador único del refresh token.
+   * Usar JTI en lugar del token completo:
+   * - Ahorra espacio en Redis (JTI es UUID de 36 chars vs token de ~500 chars)
+   * - Más eficiente para búsquedas
+   * - Permite blacklist sin tener el token completo
+   *
+   * @param jti - JWT ID único del refresh token
+   * @param ttlSeconds - Tiempo de vida en segundos (debería ser tiempo restante del token)
+   * @param reason - Razón de invalidación (para logging/auditoría)
+   */
+  async blacklistRefreshToken(
+    jti: string,
+    ttlSeconds: number,
+    reason: string = 'token_rotation',
+  ): Promise<void> {
+    try {
+      if (ttlSeconds <= 0) {
+        this.logger.debug(
+          `Refresh token JTI ${jti} ya expirado, no se agrega a blacklist`,
+        );
+        return;
+      }
+
+      const blacklistKey = `blacklist:refresh:${jti}`;
+
+      await this.cacheManager.set(
+        blacklistKey,
+        {
+          reason,
+          blacklistedAt: new Date().toISOString(),
+          jti,
+        },
+        ttlSeconds * 1000, // TTL en milisegundos
+      );
+
+      this.logger.log(
+        `Refresh token blacklisted - JTI: ${jti}, Reason: ${reason}, TTL: ${ttlSeconds}s`,
+      );
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(
+        `Error al blacklist refresh token: ${err.message}`,
+        err.stack,
+      );
+      // No lanzar error - mejor continuar que romper el flujo
+    }
+  }
+
+  /**
+   * Verifica si un refresh token está en la blacklist por su JTI
+   *
+   * @param jti - JWT ID del refresh token a verificar
+   * @returns true si está blacklisted, false si es válido
+   */
+  async isRefreshTokenBlacklisted(jti: string): Promise<boolean> {
+    try {
+      const blacklistKey = `blacklist:refresh:${jti}`;
+      const blacklistedData = await this.cacheManager.get<
+        RefreshTokenBlacklistEntry | undefined
+      >(blacklistKey);
+
+      if (blacklistedData) {
+        this.logger.warn(
+          `Refresh token blacklisted detectado - JTI: ${jti}, Data: ${JSON.stringify(blacklistedData)}`,
+        );
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(
+        `Redis caído al verificar refresh token - bloqueando por seguridad: ${err.message}`,
+        err.stack,
+      );
+      // En caso de error de Redis, bloquear por seguridad
+      throw new UnauthorizedException('Servicio temporalmente no disponible');
+    }
+  }
+
+  /**
+   * Detecta posible robo de refresh token
+   *
+   * Si un JTI ya usado (blacklisted) se intenta usar de nuevo,
+   * significa que alguien tiene una copia del token que ya fue rotado.
+   * Esto indica un posible robo de token.
+   *
+   * Acción: Invalidar TODOS los tokens del usuario por seguridad.
+   *
+   * @param jti - JTI del refresh token sospechoso
+   * @param userId - ID del usuario afectado
+   */
+  async detectTokenReuse(jti: string, userId: string): Promise<void> {
+    const isBlacklisted = await this.isRefreshTokenBlacklisted(jti);
+
+    if (isBlacklisted) {
+      this.logger.error(
+        `🚨 POSIBLE ROBO DE TOKEN DETECTADO - Usuario: ${userId}, JTI reutilizado: ${jti}`,
+      );
+
+      // Invalidar TODOS los tokens del usuario
+      await this.blacklistAllUserTokens(userId, 'token_theft_detected');
+
+      throw new UnauthorizedException(
+        'Sesión comprometida. Por seguridad, todas las sesiones han sido cerradas. Por favor, inicie sesión nuevamente.',
+      );
+    }
+  }
 }
 
 interface DecodedToken {
@@ -271,6 +387,12 @@ interface TokenBlacklistEntry {
   blacklistedAt: string;
   userId?: string;
   expiresAt: string;
+}
+
+interface RefreshTokenBlacklistEntry {
+  reason: string;
+  blacklistedAt: string;
+  jti: string;
 }
 
 const isDecodedToken = (value: unknown): value is DecodedToken => {

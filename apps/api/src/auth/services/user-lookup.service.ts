@@ -429,6 +429,106 @@ export class UserLookupService {
   }
 
   /**
+   * Busca un usuario por ID en todas las tablas y retorna datos mínimos para tokens
+   * Usado por refresh token endpoint
+   *
+   * Orden de búsqueda: estudiante → tutor → docente → admin
+   *
+   * @param userId - ID del usuario
+   * @returns Datos mínimos del usuario para generación de tokens, o null
+   */
+  async findUserById(userId: string): Promise<{
+    id: string;
+    email: string;
+    roles: string[];
+    userType: UserType;
+  } | null> {
+    // 1. Buscar como estudiante
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, roles: true },
+    });
+
+    if (estudiante) {
+      return {
+        id: estudiante.id,
+        email: estudiante.email ?? '',
+        roles: this.parseRoles(estudiante.roles, 'estudiante'),
+        userType: 'estudiante',
+      };
+    }
+
+    // 2. Buscar como tutor
+    const tutor = await this.prisma.tutor.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, roles: true },
+    });
+
+    if (tutor) {
+      return {
+        id: tutor.id,
+        email: tutor.email ?? '',
+        roles: this.parseRoles(tutor.roles, 'tutor'),
+        userType: 'tutor',
+      };
+    }
+
+    // 3. Buscar como docente
+    const docente = await this.prisma.docente.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, roles: true },
+    });
+
+    if (docente) {
+      return {
+        id: docente.id,
+        email: docente.email ?? '',
+        roles: this.parseRoles(docente.roles, 'docente'),
+        userType: 'docente',
+      };
+    }
+
+    // 4. Buscar como admin
+    const admin = await this.prisma.admin.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, roles: true },
+    });
+
+    if (admin) {
+      return {
+        id: admin.id,
+        email: admin.email,
+        roles: this.parseRoles(admin.roles, 'admin'),
+        userType: 'admin',
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Parsea el campo roles de Prisma (Json) a string[]
+   * @param roles - Campo roles de Prisma (puede ser Json o null)
+   * @param defaultRole - Rol por defecto si no hay roles
+   * @returns Array de roles como strings
+   */
+  private parseRoles(roles: unknown, defaultRole: string): string[] {
+    if (!roles) {
+      return [defaultRole];
+    }
+
+    if (Array.isArray(roles)) {
+      return roles.map((r) => String(r));
+    }
+
+    if (typeof roles === 'string') {
+      return [roles];
+    }
+
+    return [defaultRole];
+  }
+
+  /**
    * Busca un tutor por ID
    * Usado por validateUser()
    *

@@ -29,9 +29,16 @@ import { CompleteMfaLoginDto } from './mfa/dto/complete-mfa-login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { TokenBlacklistService } from './token-blacklist.service';
+import { TokenService } from './services/token.service';
+import { UserLookupService } from './services/user-lookup.service';
 import { AuthUser } from './interfaces';
 import { RequireCsrf } from '../common/decorators';
 import { Public } from './decorators/public.decorator';
+import {
+  ACCESS_TOKEN_COOKIE_MAX_AGE,
+  REFRESH_TOKEN_COOKIE_MAX_AGE,
+} from '../common/constants/security.constants';
+import { parseUserRoles } from '../common/utils/role.utils';
 
 /**
  * Controlador de autenticación
@@ -52,6 +59,8 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly authOrchestrator: AuthOrchestratorService,
     private readonly tokenBlacklistService: TokenBlacklistService,
+    private readonly tokenService: TokenService,
+    private readonly userLookupService: UserLookupService,
   ) {}
 
   /**
@@ -154,16 +163,37 @@ export class AuthController {
       return result;
     }
 
-    // Login exitoso - configurar cookie httpOnly
+    // Login exitoso - configurar cookies httpOnly
     const loginResult = result as {
       access_token: string;
-      user: { roles?: string[]; [key: string]: unknown };
+      user: {
+        id: string;
+        email: string;
+        roles?: string[];
+        [key: string]: unknown;
+      };
     };
+
+    // Generar refresh token
+    const { token: refreshToken } = this.tokenService.generateRefreshToken(
+      loginResult.user.id,
+    );
+
+    // Establecer access token cookie
     res.cookie('auth-token', loginResult.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax' as const,
-      maxAge: 60 * 60 * 1000, // 1 hora
+      maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
+      path: '/',
+    });
+
+    // Establecer refresh token cookie
+    res.cookie('refresh-token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
       path: '/',
     });
 
@@ -214,12 +244,26 @@ export class AuthController {
       ip,
     );
 
-    // Configurar cookie httpOnly
+    // Generar refresh token
+    const { token: refreshToken } = this.tokenService.generateRefreshToken(
+      result.user.id,
+    );
+
+    // Establecer access token cookie
     res.cookie('auth-token', result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax' as const,
-      maxAge: 60 * 60 * 1000, // 1 hora
+      maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
+      path: '/',
+    });
+
+    // Establecer refresh token cookie
+    res.cookie('refresh-token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
       path: '/',
     });
 
@@ -307,28 +351,56 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    // 1. Extraer el token del header Authorization
+    // 1. Extraer el access token del header Authorization o cookie
     const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7); // Remover "Bearer "
+    const cookies = req.cookies as Record<string, string | undefined>;
+    const accessToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : cookies['auth-token'];
 
-      // 2. Agregar token a blacklist para invalidarlo
-      await this.tokenBlacklistService.addToBlacklist(token, 'user_logout');
+    if (accessToken) {
+      // 2. Agregar access token a blacklist para invalidarlo
+      await this.tokenBlacklistService.addToBlacklist(
+        accessToken,
+        'user_logout',
+      );
     }
 
-    // 3. Limpiar cookie de autenticación (comportamiento original)
+    // 3. Blacklist del refresh token si existe
+    const refreshToken = cookies['refresh-token'];
+    if (refreshToken) {
+      try {
+        const payload = this.tokenService.verifyRefreshToken(refreshToken);
+        const ttl = this.tokenService.getRefreshTokenTtl(payload);
+        await this.tokenBlacklistService.blacklistRefreshToken(
+          payload.jti,
+          ttl,
+          'user_logout',
+        );
+      } catch {
+        // Si el refresh token es inválido, ignorar (ya expiró o fue manipulado)
+      }
+    }
+
+    // 4. Limpiar cookie de access token
     res.clearCookie('auth-token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const, // lax funciona con proxy (mismo origen en desarrollo)
-      // NOTA: domain comentado - debe coincidir con la configuración de login
-      // domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
+      sameSite: 'lax' as const,
+      path: '/',
+    });
+
+    // 5. Limpiar cookie de refresh token
+    res.clearCookie('refresh-token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
       path: '/',
     });
 
     return {
       message: 'Logout exitoso',
-      description: 'La sesión ha sido cerrada y el token invalidado',
+      description: 'La sesión ha sido cerrada y los tokens invalidados',
     };
   }
 
@@ -381,12 +453,26 @@ export class AuthController {
       dto.backup_code,
     );
 
-    // Configurar cookie httpOnly con el token JWT final
+    // Generar refresh token
+    const { token: refreshToken } = this.tokenService.generateRefreshToken(
+      result.user.id,
+    );
+
+    // Establecer access token cookie
     res.cookie('auth-token', result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const, // lax funciona con proxy (mismo origen en desarrollo)
-      maxAge: 60 * 60 * 1000, // 1 hora, igual que JWT en producción
+      sameSite: 'lax' as const,
+      maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
+      path: '/',
+    });
+
+    // Establecer refresh token cookie
+    res.cookie('refresh-token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
       path: '/',
     });
 
@@ -443,5 +529,109 @@ export class AuthController {
     );
 
     return result;
+  }
+
+  /**
+   * POST /api/auth/refresh
+   * Renueva los tokens de autenticación usando el refresh token
+   *
+   * Flujo:
+   * 1. Lee el refresh token de la cookie
+   * 2. Verifica que no esté blacklisted (detecta robo de token)
+   * 3. Busca el usuario en la base de datos
+   * 4. Blacklist el JTI anterior (rotación)
+   * 5. Genera nuevo par de tokens (access + refresh)
+   * 6. Establece ambas cookies
+   *
+   * @param req - Request con cookie refresh-token
+   * @param res - Response para establecer nuevas cookies
+   * @returns 200 OK - { success: true }
+   * @throws 401 Unauthorized - Refresh token inválido/expirado/blacklisted
+   */
+  @ApiOperation({
+    summary: 'Renovar tokens de autenticación',
+    description:
+      'Usa el refresh token (en cookie) para obtener nuevos access y refresh tokens',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens renovados exitosamente',
+    schema: {
+      example: {
+        success: true,
+        message: 'Tokens renovados exitosamente',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Refresh token inválido, expirado o comprometido',
+  })
+  @Public()
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // 1. Obtener refresh token de la cookie
+    const cookies = req.cookies as Record<string, string | undefined>;
+    const refreshToken = cookies['refresh-token'];
+
+    if (!refreshToken) {
+      throw new (await import('@nestjs/common')).UnauthorizedException(
+        'Refresh token no proporcionado',
+      );
+    }
+
+    // 2. Verificar y decodificar el refresh token
+    const payload = this.tokenService.verifyRefreshToken(refreshToken);
+
+    // 3. Verificar si el JTI está blacklisted (detecta reuso/robo)
+    await this.tokenBlacklistService.detectTokenReuse(payload.jti, payload.sub);
+
+    // 4. Buscar usuario en la base de datos
+    const user = await this.userLookupService.findUserById(payload.sub);
+
+    if (!user) {
+      throw new (await import('@nestjs/common')).UnauthorizedException(
+        'Usuario no encontrado',
+      );
+    }
+
+    // 5. Blacklist el JTI anterior (rotación de tokens)
+    const ttl = this.tokenService.getRefreshTokenTtl(payload);
+    await this.tokenBlacklistService.blacklistRefreshToken(
+      payload.jti,
+      ttl,
+      'token_rotation',
+    );
+
+    // 6. Generar nuevo par de tokens
+    const roles = parseUserRoles(user.roles);
+    const { accessToken, refreshToken: newRefreshToken } =
+      this.tokenService.generateTokenPair(user.id, user.email, roles);
+
+    // 7. Establecer cookies
+    res.cookie('auth-token', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
+      path: '/',
+    });
+
+    res.cookie('refresh-token', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
+      path: '/',
+    });
+
+    return {
+      success: true,
+      message: 'Tokens renovados exitosamente',
+    };
   }
 }

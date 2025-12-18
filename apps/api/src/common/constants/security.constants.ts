@@ -14,11 +14,53 @@
  */
 export const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '12', 10);
 
+// ============================================================================
+// JWT TOKEN CONFIGURATION
+// ============================================================================
+
 /**
- * Tiempo de expiración del token JWT
- * Valor por defecto: 24 horas
+ * Access Token - Corta duración para minimizar ventana de ataque
+ * - Usado para autenticar requests a la API
+ * - Se renueva automáticamente con refresh token
+ *
+ * Duración: 15 minutos (producción) / 1 hora (desarrollo)
  */
-export const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
+export const ACCESS_TOKEN_EXPIRATION =
+  process.env.NODE_ENV === 'production' ? '15m' : '1h';
+
+/**
+ * Access Token cookie maxAge en milisegundos
+ */
+export const ACCESS_TOKEN_COOKIE_MAX_AGE =
+  process.env.NODE_ENV === 'production'
+    ? 15 * 60 * 1000 // 15 minutos
+    : 60 * 60 * 1000; // 1 hora
+
+/**
+ * Refresh Token - Larga duración para mantener sesión
+ * - Usado exclusivamente para obtener nuevos access tokens
+ * - Se rota en cada uso (seguridad contra robo)
+ * - Almacenado en httpOnly cookie separada
+ *
+ * Duración: 7 días
+ */
+export const REFRESH_TOKEN_EXPIRATION = '7d';
+
+/**
+ * Refresh Token cookie maxAge en milisegundos
+ */
+export const REFRESH_TOKEN_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 días
+
+/**
+ * @deprecated Use ACCESS_TOKEN_EXPIRATION instead
+ * Mantenido para backward compatibility
+ */
+export const JWT_EXPIRATION =
+  process.env.JWT_EXPIRATION || ACCESS_TOKEN_EXPIRATION;
+
+// ============================================================================
+// PASSWORD CONFIGURATION
+// ============================================================================
 
 /**
  * Longitud mínima de password

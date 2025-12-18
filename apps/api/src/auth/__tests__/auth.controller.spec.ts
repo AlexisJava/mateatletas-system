@@ -2,9 +2,12 @@ import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
 import { AuthOrchestratorService } from '../services/auth-orchestrator.service';
 import { TokenBlacklistService } from '../token-blacklist.service';
+import { TokenService } from '../services/token.service';
+import { UserLookupService } from '../services/user-lookup.service';
 import { LoginDto } from '../dto/login.dto';
 import { Request, Response } from 'express';
 import { Role } from '../decorators/roles.decorator';
+import { ACCESS_TOKEN_COOKIE_MAX_AGE } from '../../common/constants/security.constants';
 
 /**
  * AuthController Tests (Post-Refactor)
@@ -18,6 +21,8 @@ describe('AuthController', () => {
   let authService: jest.Mocked<AuthService>;
   let authOrchestrator: jest.Mocked<AuthOrchestratorService>;
   let tokenBlacklistService: jest.Mocked<TokenBlacklistService>;
+  let tokenService: jest.Mocked<TokenService>;
+  let userLookupService: jest.Mocked<UserLookupService>;
   let originalNodeEnv: string | undefined;
 
   const createMockResponse = () => {
@@ -56,12 +61,38 @@ describe('AuthController', () => {
       isBlacklisted: jest.fn(),
       blacklistAllUserTokens: jest.fn(),
       isUserBlacklisted: jest.fn(),
+      blacklistRefreshToken: jest.fn(),
+      isRefreshTokenBlacklisted: jest.fn(),
+      detectTokenReuse: jest.fn(),
     } as unknown as jest.Mocked<TokenBlacklistService>;
+
+    tokenService = {
+      generateAccessToken: jest.fn(),
+      generateRefreshToken: jest
+        .fn()
+        .mockReturnValue({ token: 'refresh-token', jti: 'jti-123' }),
+      verifyRefreshToken: jest.fn(),
+      generateTokenPair: jest.fn(),
+      getRefreshTokenTtl: jest.fn(),
+      setTokenCookie: jest.fn(),
+      setRefreshTokenCookie: jest.fn(),
+      clearTokenCookie: jest.fn(),
+      clearRefreshTokenCookie: jest.fn(),
+      clearAllTokenCookies: jest.fn(),
+    } as unknown as jest.Mocked<TokenService>;
+
+    userLookupService = {
+      findUserById: jest.fn(),
+      findByEmail: jest.fn(),
+      getProfile: jest.fn(),
+    } as unknown as jest.Mocked<UserLookupService>;
 
     controller = new AuthController(
       authService,
       authOrchestrator,
       tokenBlacklistService,
+      tokenService,
+      userLookupService,
     );
   });
 
@@ -106,10 +137,11 @@ describe('AuthController', () => {
           httpOnly: true,
           secure: false,
           sameSite: 'lax',
-          maxAge: 60 * 60 * 1000,
+          maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
           path: '/',
         }),
       );
+      expect(tokenService.generateRefreshToken).toHaveBeenCalledWith('user-1');
       expect(result).toEqual({ user: mockUser, roles: [Role.TUTOR] });
       expect(authOrchestrator.login).toHaveBeenCalledWith(dto, mockIp);
     });
@@ -179,9 +211,12 @@ describe('AuthController', () => {
           httpOnly: true,
           secure: false,
           sameSite: 'lax',
-          maxAge: 60 * 60 * 1000,
+          maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
           path: '/',
         }),
+      );
+      expect(tokenService.generateRefreshToken).toHaveBeenCalledWith(
+        mockUser.id,
       );
       expect(result).toEqual({ user: mockUser });
       expect(authOrchestrator.loginEstudiante).toHaveBeenCalledWith(
@@ -251,7 +286,7 @@ describe('AuthController', () => {
       );
       expect(result).toEqual({
         message: 'Logout exitoso',
-        description: 'La sesión ha sido cerrada y el token invalidado',
+        description: 'La sesión ha sido cerrada y los tokens invalidados',
       });
     });
 

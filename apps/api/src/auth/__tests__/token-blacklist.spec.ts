@@ -179,4 +179,105 @@ describe('TokenBlacklistService', () => {
       expect(result).toBe(false);
     });
   });
+
+  describe('blacklistRefreshToken', () => {
+    it('should blacklist a refresh token JTI', async () => {
+      const jti = 'unique-jti-123';
+      const ttlSeconds = 604800; // 7 days
+
+      await service.blacklistRefreshToken(jti, ttlSeconds, 'token_rotation');
+
+      expect(cacheManager.set).toHaveBeenCalledWith(
+        `blacklist:refresh:${jti}`,
+        expect.objectContaining({
+          reason: 'token_rotation',
+          jti,
+          blacklistedAt: expect.any(String),
+        }),
+        ttlSeconds * 1000, // converted to milliseconds
+      );
+    });
+
+    it('should handle cache errors gracefully', async () => {
+      cacheManager.set.mockRejectedValue(new Error('redis down'));
+      const loggerSpy = jest.spyOn(service['logger'], 'error');
+
+      await expect(
+        service.blacklistRefreshToken('jti-123', 3600, 'user_logout'),
+      ).resolves.toBeUndefined();
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Error al blacklist refresh token'),
+        expect.any(String),
+      );
+    });
+  });
+
+  describe('isRefreshTokenBlacklisted', () => {
+    it('should return true for blacklisted refresh token', async () => {
+      jest.spyOn(cacheManager, 'get').mockResolvedValue({
+        reason: 'token_rotation',
+        jti: 'jti-123',
+      });
+
+      const result = await service.isRefreshTokenBlacklisted('jti-123');
+
+      expect(result).toBe(true);
+      expect(cacheManager.get).toHaveBeenCalledWith(
+        'blacklist:refresh:jti-123',
+      );
+    });
+
+    it('should return false for non-blacklisted refresh token', async () => {
+      jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
+
+      const result = await service.isRefreshTokenBlacklisted('jti-456');
+
+      expect(result).toBe(false);
+    });
+
+    it('should throw UnauthorizedException on cache failure (fail-closed)', async () => {
+      cacheManager.get.mockRejectedValue(new Error('redis down'));
+
+      await expect(
+        service.isRefreshTokenBlacklisted('jti-123'),
+      ).rejects.toThrow('Servicio temporalmente no disponible');
+    });
+  });
+
+  describe('detectTokenReuse', () => {
+    it('should not throw if JTI is not blacklisted', async () => {
+      jest.spyOn(cacheManager, 'get').mockResolvedValue(null);
+
+      await expect(
+        service.detectTokenReuse('jti-123', 'user-123'),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should throw and blacklist all user tokens if JTI is blacklisted (theft detected)', async () => {
+      // JTI is blacklisted (was already used)
+      jest.spyOn(cacheManager, 'get').mockResolvedValue({
+        reason: 'token_rotation',
+        jti: 'jti-123',
+      });
+
+      const loggerSpy = jest.spyOn(service['logger'], 'warn');
+
+      await expect(
+        service.detectTokenReuse('jti-123', 'user-123'),
+      ).rejects.toThrow('Sesión comprometida');
+
+      // Verify security warning was logged
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('tokens del usuario'),
+      );
+
+      // Should have called blacklistAllUserTokens
+      expect(cacheManager.set).toHaveBeenCalledWith(
+        'blacklist:user:user-123',
+        expect.any(Object),
+        expect.any(Number),
+      );
+    });
+  });
 });
