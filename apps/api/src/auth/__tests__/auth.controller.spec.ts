@@ -4,6 +4,9 @@ import { AuthOrchestratorService } from '../services/auth-orchestrator.service';
 import { TokenBlacklistService } from '../token-blacklist.service';
 import { TokenService } from '../services/token.service';
 import { UserLookupService } from '../services/user-lookup.service';
+import { PasswordResetService } from '../services/password-reset.service';
+import { SessionService } from '../services/session.service';
+import { AuditLogService } from '../../audit/audit-log.service';
 import { LoginDto } from '../dto/login.dto';
 import { Request, Response } from 'express';
 import { Role } from '../decorators/roles.decorator';
@@ -22,6 +25,9 @@ describe('AuthController', () => {
   let tokenBlacklistService: jest.Mocked<TokenBlacklistService>;
   let tokenService: jest.Mocked<TokenService>;
   let userLookupService: jest.Mocked<UserLookupService>;
+  let passwordResetService: jest.Mocked<PasswordResetService>;
+  let sessionService: jest.Mocked<SessionService>;
+  let auditLogService: jest.Mocked<AuditLogService>;
   let originalNodeEnv: string | undefined;
 
   const createMockResponse = () => {
@@ -87,12 +93,37 @@ describe('AuthController', () => {
       getProfile: jest.fn(),
     } as unknown as jest.Mocked<UserLookupService>;
 
+    passwordResetService = {
+      requestPasswordReset: jest.fn(),
+      verifyResetToken: jest.fn(),
+      resetPassword: jest.fn(),
+    } as unknown as jest.Mocked<PasswordResetService>;
+
+    sessionService = {
+      createSession: jest.fn(),
+      getActiveSessions: jest.fn(),
+      revokeSession: jest.fn(),
+      revokeAllSessionsExceptCurrent: jest.fn(),
+      revokeAllSessions: jest.fn(),
+      updateLastUsed: jest.fn(),
+    } as unknown as jest.Mocked<SessionService>;
+
+    auditLogService = {
+      logLogin: jest.fn(),
+      logLogout: jest.fn(),
+      logLoginFailed: jest.fn(),
+      logPasswordChange: jest.fn(),
+    } as unknown as jest.Mocked<AuditLogService>;
+
     controller = new AuthController(
       authService,
       authOrchestrator,
       tokenBlacklistService,
       tokenService,
       userLookupService,
+      passwordResetService,
+      sessionService,
+      auditLogService,
     );
   });
 
@@ -251,6 +282,13 @@ describe('AuthController', () => {
   });
 
   describe('logout', () => {
+    const mockUser = {
+      id: 'user-123',
+      email: 'test@example.com',
+      role: Role.TUTOR,
+      roles: [Role.TUTOR],
+    };
+
     it('should blacklist the token and clear cookies via tokenService when Authorization header exists', async () => {
       const req = {
         headers: { authorization: 'Bearer jwt-token' },
@@ -258,13 +296,26 @@ describe('AuthController', () => {
       } as unknown as Request;
       const { response } = createMockResponse();
 
-      const result = await controller.logout(req, response);
+      const result = await controller.logout(
+        req,
+        response,
+        mockUser,
+        '127.0.0.1',
+        'Mozilla/5.0',
+      );
 
       expect(tokenBlacklistService.addToBlacklist).toHaveBeenCalledWith(
         'jwt-token',
         'user_logout',
       );
       expect(tokenService.clearAllTokenCookies).toHaveBeenCalledWith(response);
+      expect(auditLogService.logLogout).toHaveBeenCalledWith(
+        'user-123',
+        'test@example.com',
+        Role.TUTOR,
+        '127.0.0.1',
+        'Mozilla/5.0',
+      );
       expect(result).toEqual({
         message: 'Logout exitoso',
         description: 'La sesión ha sido cerrada y los tokens invalidados',
@@ -275,10 +326,11 @@ describe('AuthController', () => {
       const req = { headers: {}, cookies: {} } as unknown as Request;
       const { response } = createMockResponse();
 
-      await controller.logout(req, response);
+      await controller.logout(req, response, mockUser, '127.0.0.1');
 
       expect(tokenBlacklistService.addToBlacklist).not.toHaveBeenCalled();
       expect(tokenService.clearAllTokenCookies).toHaveBeenCalledWith(response);
+      expect(auditLogService.logLogout).toHaveBeenCalled();
     });
   });
 

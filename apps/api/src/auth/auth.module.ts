@@ -27,6 +27,8 @@ import { DocenteAuthService } from './services/docente-auth.service';
 import { AdminAuthService } from './services/admin-auth.service';
 import { EstudianteAuthService } from './services/estudiante-auth.service';
 import { AuthOrchestratorService } from './services/auth-orchestrator.service';
+import { PasswordResetService } from './services/password-reset.service';
+import { SessionService } from './services/session.service';
 
 /**
  * Módulo de autenticación
@@ -113,6 +115,9 @@ import { AuthOrchestratorService } from './services/auth-orchestrator.service';
     AdminAuthService,
     EstudianteAuthService,
     AuthOrchestratorService,
+    // P2 Nice-to-Have: Password Reset & Session Management
+    PasswordResetService,
+    SessionService,
   ],
   exports: [
     JwtStrategy,
@@ -122,6 +127,7 @@ import { AuthOrchestratorService } from './services/auth-orchestrator.service';
     TokenService,
     PasswordService,
     UserLookupService,
+    SessionService,
   ],
 })
 export class AuthModule {}

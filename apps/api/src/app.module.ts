@@ -35,6 +35,7 @@ import { TiersModule } from './tiers/tiers.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { AuditModule } from './audit/audit.module';
 import { StudioModule } from './studio/studio.module';
+import { EmailModule } from './email/email.module';
 
 /**
  * AppModule
@@ -65,6 +66,7 @@ import { StudioModule } from './studio/studio.module';
     PricingCalculatorModule, // Pricing & Discounts (Global)
     SharedModule, // Shared Services: PIN Generation, Tutor Creation (Global)
     AuditModule, // Audit Logs para seguridad y compliance (Global)
+    EmailModule, // Email transaccional (Password Reset, Notificaciones)
 
     // ============================================================================
     // FEATURE MODULES

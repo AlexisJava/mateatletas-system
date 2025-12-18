@@ -569,6 +569,59 @@ model LoginAttempt {
   @@map("login_attempts")
 }
 
+/// Token para recuperación de contraseña (olvidé mi contraseña)
+/// Los tokens son de un solo uso y expiran en 1 hora
+model PasswordResetToken {
+  /// Identificador único del token
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Email del usuario que solicita el reset
+  email     String   @db.VarChar(255)
+  /// Token hasheado (SHA256) - nunca almacenar en texto plano
+  token     String   @db.VarChar(64)
+  /// Tipo de usuario (tutor, docente, admin, estudiante)
+  user_type String   @db.VarChar(20)
+  /// Timestamp de expiración (1 hora desde creación)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  /// Si el token ya fue usado
+  used      Boolean  @default(false)
+  /// Timestamp de creación
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([email], name: "idx_password_reset_email")
+  @@index([token], name: "idx_password_reset_token")
+  @@index([expiresAt], name: "idx_password_reset_expires")
+  @@map("password_reset_tokens")
+}
+
+/// Sesiones activas de refresh tokens (para gestión de sesiones)
+/// Permite ver y revocar sesiones desde cualquier dispositivo
+model RefreshTokenSession {
+  /// Identificador único (JTI del refresh token)
+  id          String   @id @db.VarChar(36)
+  /// ID del usuario
+  user_id     String   @db.Uuid
+  /// Tipo de usuario (tutor, docente, admin, estudiante)
+  user_type   String   @db.VarChar(20)
+  /// Dirección IP desde donde se creó la sesión
+  ip_address  String?  @db.VarChar(45)
+  /// User agent del navegador/app
+  user_agent  String?  @db.VarChar(500)
+  /// Timestamp de creación de la sesión
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  /// Timestamp de última actividad (renovación de token)
+  lastUsedAt  DateTime @default(now()) @map("last_used_at") @db.Timestamptz
+  /// Timestamp de expiración
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz
+  /// Si la sesión fue revocada manualmente
+  revoked     Boolean  @default(false)
+  /// Razón de revocación (logout, password_change, security, admin_action)
+  revokedReason String? @map("revoked_reason") @db.VarChar(50)
+
+  @@index([user_id], name: "idx_refresh_session_user")
+  @@index([expiresAt], name: "idx_refresh_session_expires")
+  @@map("refresh_token_sessions")
+}
+
 /// Modelo para productos del catálogo
 /// Representa los productos que se pueden comprar: suscripciones, cursos, recursos
 model Producto {
