@@ -1,0 +1,208 @@
+/**
+ * Tipos para integración con MercadoPago PreApproval API
+ *
+ * Basado en documentación oficial:
+ * https://www.mercadopago.com.ar/developers/en/reference/subscriptions/_preapproval/post
+ *
+ * IMPORTANTE: No usar `any` ni `unknown`. Todos los tipos deben ser explícitos.
+ */
+
+/**
+ * Frecuencia de cobro para suscripciones
+ */
+export type FrequencyType = 'days' | 'months';
+
+/**
+ * Estados posibles de una suscripción en MercadoPago
+ */
+export type PreApprovalStatus =
+  | 'pending'
+  | 'authorized'
+  | 'paused'
+  | 'cancelled';
+
+/**
+ * Configuración de cobro automático recurrente
+ */
+export interface AutoRecurring {
+  /** Frecuencia de cobro (ej: 1 para mensual) */
+  readonly frequency: number;
+  /** Tipo de frecuencia */
+  readonly frequency_type: FrequencyType;
+  /** Monto a cobrar por período */
+  readonly transaction_amount: number;
+  /** Moneda (ARS para Argentina) */
+  readonly currency_id: 'ARS' | 'BRL' | 'MXN' | 'CLP' | 'COP' | 'PEN' | 'UYU';
+  /** Fecha de inicio (ISO 8601) */
+  readonly start_date?: string;
+  /** Fecha de fin (ISO 8601) */
+  readonly end_date?: string;
+  /** Configuración de período de prueba gratuito */
+  readonly free_trial?: {
+    readonly frequency: number;
+    readonly frequency_type: FrequencyType;
+  };
+}
+
+/**
+ * Request body para crear una suscripción en MercadoPago
+ * POST /preapproval
+ */
+export interface CreatePreApprovalRequest {
+  /** Email del pagador (requerido) */
+  readonly payer_email: string;
+  /** URL de retorno después del checkout */
+  readonly back_url: string;
+  /** Razón/descripción de la suscripción */
+  readonly reason: string;
+  /** Referencia externa para vincular con nuestro sistema */
+  readonly external_reference: string;
+  /** Configuración de cobro automático */
+  readonly auto_recurring: AutoRecurring;
+  /** ID del plan de suscripción (opcional si se usa auto_recurring) */
+  readonly preapproval_plan_id?: string;
+  /** Token de tarjeta para cobro inmediato */
+  readonly card_token_id?: string;
+  /** Estado inicial de la suscripción */
+  readonly status?: PreApprovalStatus;
+}
+
+/**
+ * Response de MercadoPago al crear una suscripción
+ */
+export interface PreApprovalResponse {
+  /** ID único de la suscripción en MercadoPago */
+  readonly id: string;
+  /** Versión del recurso */
+  readonly version: number;
+  /** ID de la aplicación */
+  readonly application_id: number;
+  /** ID del vendedor/collector */
+  readonly collector_id: number;
+  /** ID del plan de suscripción */
+  readonly preapproval_plan_id: string | null;
+  /** Razón/descripción */
+  readonly reason: string;
+  /** Referencia externa */
+  readonly external_reference: string;
+  /** URL de retorno */
+  readonly back_url: string;
+  /** URL de checkout para que el usuario complete el pago */
+  readonly init_point: string;
+  /** Configuración de cobro automático */
+  readonly auto_recurring: AutoRecurring;
+  /** ID del pagador */
+  readonly payer_id: number;
+  /** ID de la tarjeta */
+  readonly card_id: number | null;
+  /** Método de pago */
+  readonly payment_method_id: string | null;
+  /** Fecha del próximo cobro (ISO 8601) */
+  readonly next_payment_date: string | null;
+  /** Fecha de creación (ISO 8601) */
+  readonly date_created: string;
+  /** Fecha de última modificación (ISO 8601) */
+  readonly last_modified: string;
+  /** Estado actual de la suscripción */
+  readonly status: PreApprovalStatus;
+}
+
+/**
+ * Request body para actualizar una suscripción
+ * PUT /preapproval/{id}
+ */
+export interface UpdatePreApprovalRequest {
+  /** Nuevo estado */
+  readonly status?: PreApprovalStatus;
+  /** Nueva razón/descripción */
+  readonly reason?: string;
+  /** Nueva referencia externa */
+  readonly external_reference?: string;
+  /** Nueva URL de retorno */
+  readonly back_url?: string;
+  /** Nueva configuración de cobro automático */
+  readonly auto_recurring?: Partial<AutoRecurring>;
+}
+
+/**
+ * Datos para crear una suscripción en nuestro sistema
+ */
+export interface CrearSuscripcionInput {
+  /** ID del tutor que se suscribe */
+  readonly tutorId: string;
+  /** ID del plan de suscripción interno */
+  readonly planId: string;
+  /** Email del tutor para MercadoPago */
+  readonly tutorEmail: string;
+  /** Nombre del tutor (para descripción) */
+  readonly tutorNombre: string;
+  /** Número de hijo para calcular descuento familiar (1 = primer hijo) */
+  readonly numeroHijo: number;
+}
+
+/**
+ * Resultado de crear una suscripción
+ */
+export interface CrearSuscripcionResult {
+  /** ID de la suscripción en nuestra DB */
+  readonly suscripcionId: string;
+  /** ID de la suscripción en MercadoPago */
+  readonly mpPreapprovalId: string;
+  /** URL de checkout para redirigir al usuario */
+  readonly checkoutUrl: string;
+  /** Precio final con descuento aplicado */
+  readonly precioFinal: number;
+  /** Porcentaje de descuento aplicado */
+  readonly descuentoPorcentaje: number;
+}
+
+/**
+ * Datos para cancelar una suscripción
+ *
+ * REGLA DE NEGOCIO: No hay pausa. Si no paga, se cancela.
+ * Si quiere volver, crea una nueva suscripción.
+ */
+export interface CancelarSuscripcionInput {
+  /** ID de la suscripción en nuestra DB */
+  readonly suscripcionId: string;
+  /** ID del tutor (para validación de ownership) */
+  readonly tutorId: string;
+  /** Motivo de la cancelación */
+  readonly motivo: string;
+  /** Quién solicita la cancelación */
+  readonly canceladoPor: 'tutor' | 'admin' | 'system';
+}
+
+/**
+ * Error específico del servicio de PreApproval
+ */
+export class PreApprovalError extends Error {
+  constructor(
+    message: string,
+    public readonly code: PreApprovalErrorCode,
+    public readonly details?: Record<string, unknown>,
+  ) {
+    super(message);
+    this.name = 'PreApprovalError';
+  }
+}
+
+/**
+ * Códigos de error para PreApproval
+ */
+export enum PreApprovalErrorCode {
+  /** Suscripción no encontrada */
+  NOT_FOUND = 'SUBSCRIPTION_NOT_FOUND',
+  /** El tutor no es dueño de la suscripción */
+  UNAUTHORIZED = 'UNAUTHORIZED_ACCESS',
+  /** Estado inválido para la operación */
+  INVALID_STATE = 'INVALID_STATE',
+  /** Error de comunicación con MercadoPago */
+  MP_API_ERROR = 'MERCADOPAGO_API_ERROR',
+  /** Circuito abierto (MercadoPago no disponible) */
+  CIRCUIT_OPEN = 'CIRCUIT_BREAKER_OPEN',
+  /** Plan no encontrado */
+  PLAN_NOT_FOUND = 'PLAN_NOT_FOUND',
+  /** Tutor no encontrado */
+  TUTOR_NOT_FOUND = 'TUTOR_NOT_FOUND',
+}

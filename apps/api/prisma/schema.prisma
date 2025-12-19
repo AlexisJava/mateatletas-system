@@ -61,6 +61,9 @@ model Tutor {
   inscripciones_colonia ColoniaInscripcion[]
   Inscripcion2026       Inscripcion2026[]
 
+  /// SUSCRIPCIONES RECURRENTES (PreApproval MercadoPago)
+  suscripciones Suscripcion[]
+
   @@map("tutores")
 }
 
@@ -3478,4 +3481,259 @@ model ComponenteCatalogo {
   updatedAt DateTime @updatedAt
 
   @@map("componentes_catalogo")
+}
+
+// ============================================
+// SISTEMA DE SUSCRIPCIONES RECURRENTES
+// MercadoPago PreApproval - Diciembre 2025
+// ============================================
+
+/// Intervalo de cobro para suscripciones
+enum IntervaloSuscripcion {
+  DIARIO
+  SEMANAL
+  MENSUAL
+  ANUAL
+}
+
+/// Estados internos de una suscripción
+/// Mapeados desde MercadoPago PreApproval + estados de negocio
+enum EstadoSuscripcion {
+  PENDIENTE  /// Esperando primer pago
+  ACTIVA     /// Pagos al día, acceso completo
+  EN_GRACIA  /// Falló cobro, dentro de 3 días de gracia
+  MOROSA     /// Pasó grace period sin pago, acceso bloqueado
+  PAUSADA    /// Pausada voluntariamente (máx 30 días)
+  CANCELADA  /// Cancelada definitivamente
+}
+
+/// Plan de suscripción disponible
+/// Define precios y configuración de cobro
+model PlanSuscripcion {
+  /// Identificador único del plan
+  id                 String               @id @default(cuid())
+
+  /// Nombre del plan (STEAM_LIBROS, STEAM_ASINCRONICO, STEAM_SINCRONICO)
+  nombre             String
+
+  /// Descripción del plan para mostrar al usuario
+  descripcion        String?
+
+  /// Precio base mensual en pesos argentinos
+  precio_base        Decimal              @db.Decimal(10, 2)
+
+  /// Moneda del precio (por defecto ARS)
+  moneda             String               @default("ARS")
+
+  /// Intervalo de cobro (mensual por defecto)
+  intervalo          IntervaloSuscripcion @default(MENSUAL)
+
+  /// Cantidad de intervalos entre cobros (1 = cada mes)
+  intervalo_cantidad Int                  @default(1)
+
+  /// Si el plan está activo para nuevas suscripciones
+  activo             Boolean              @default(true)
+
+  /// Timestamp de creación
+  created_at         DateTime             @default(now())
+
+  /// Timestamp de última actualización
+  updated_at         DateTime             @updatedAt
+
+  /// Suscripciones asociadas a este plan
+  suscripciones      Suscripcion[]
+
+  @@map("planes_suscripcion")
+}
+
+/// Suscripción activa de un tutor
+/// Vincula un tutor con un plan y gestiona el ciclo de vida
+model Suscripcion {
+  /// Identificador único de la suscripción
+  id                   String            @id @default(cuid())
+
+  /// ID del tutor propietario
+  tutor_id             String
+
+  /// ID del plan de suscripción
+  plan_id              String
+
+  // === MercadoPago PreApproval ===
+
+  /// ID de la suscripción en MercadoPago (preapproval_id)
+  mp_preapproval_id    String?           @unique
+
+  /// Estado actual en MercadoPago (pending, authorized, paused, cancelled)
+  mp_status            String?
+
+  // === Estado interno ===
+
+  /// Estado actual de la suscripción
+  estado               EstadoSuscripcion @default(PENDIENTE)
+
+  // === Fechas ===
+
+  /// Fecha de inicio de la suscripción (primer pago confirmado)
+  fecha_inicio         DateTime?
+
+  /// Fecha del próximo cobro programado
+  fecha_proximo_cobro  DateTime?
+
+  /// Fecha de cancelación (si aplica)
+  fecha_cancelacion    DateTime?
+
+  /// Fecha en que se pausó la suscripción
+  fecha_pausa          DateTime?
+
+  /// Fecha en que termina la pausa (máx 30 días después de fecha_pausa)
+  fecha_fin_pausa      DateTime?
+
+  // === Grace Period ===
+
+  /// Días de gracia usados en el ciclo actual (máx 3)
+  dias_gracia_usados   Int               @default(0)
+
+  /// Fecha en que inició el período de gracia actual
+  fecha_inicio_gracia  DateTime?
+
+  // === Descuento familiar ===
+
+  /// Porcentaje de descuento aplicado (0, 10, 20, etc.)
+  descuento_porcentaje Int               @default(0)
+
+  /// Precio final después de aplicar descuento
+  precio_final         Decimal           @db.Decimal(10, 2)
+
+  // === Auditoría ===
+
+  /// Motivo de cancelación (si fue cancelada)
+  motivo_cancelacion   String?
+
+  /// Quién canceló: tutor_id, 'system', 'mercadopago'
+  cancelado_por        String?
+
+  /// Timestamp de creación
+  created_at           DateTime          @default(now())
+
+  /// Timestamp de última actualización
+  updated_at           DateTime          @updatedAt
+
+  // === Relaciones ===
+
+  /// Tutor propietario de la suscripción
+  tutor                Tutor             @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+
+  /// Plan de suscripción
+  plan                 PlanSuscripcion   @relation(fields: [plan_id], references: [id])
+
+  /// Pagos realizados en esta suscripción
+  pagos                PagoSuscripcion[]
+
+  /// Historial de cambios de estado
+  historial            HistorialEstadoSuscripcion[]
+
+  @@index([tutor_id])
+  @@index([estado])
+  @@index([mp_preapproval_id])
+  @@map("suscripciones")
+}
+
+/// Registro de cada pago de suscripción
+/// Guarda el historial de cobros mensuales
+model PagoSuscripcion {
+  /// Identificador único del pago
+  id              String      @id @default(cuid())
+
+  /// ID de la suscripción a la que pertenece
+  suscripcion_id  String
+
+  // === MercadoPago ===
+
+  /// ID del pago en MercadoPago
+  mp_payment_id   String      @unique
+
+  /// Estado del pago en MercadoPago (approved, rejected, pending, etc.)
+  mp_status       String
+
+  /// Detalle del estado (ej: "accredited", "cc_rejected_insufficient_amount")
+  mp_status_detail String?
+
+  // === Montos ===
+
+  /// Monto cobrado
+  monto           Decimal     @db.Decimal(10, 2)
+
+  /// Moneda del pago
+  moneda          String      @default("ARS")
+
+  // === Período cubierto ===
+
+  /// Fecha de inicio del período que cubre este pago
+  periodo_inicio  DateTime
+
+  /// Fecha de fin del período que cubre este pago
+  periodo_fin     DateTime
+
+  // === Intento ===
+
+  /// Número de intento (1 = primer intento, 2+ = reintentos)
+  intento_numero  Int         @default(1)
+
+  /// Código de error si falló (ej: "cc_rejected_insufficient_amount")
+  error_code      String?
+
+  /// Mensaje de error legible
+  error_message   String?
+
+  // === Fechas ===
+
+  /// Fecha en que se realizó el cobro exitoso
+  fecha_cobro     DateTime?
+
+  /// Timestamp de creación (fecha del intento)
+  created_at      DateTime    @default(now())
+
+  // === Relaciones ===
+
+  /// Suscripción a la que pertenece este pago
+  suscripcion     Suscripcion @relation(fields: [suscripcion_id], references: [id], onDelete: Cascade)
+
+  @@index([suscripcion_id])
+  @@map("pagos_suscripcion")
+}
+
+/// Historial de cambios de estado de suscripción
+/// Para auditoría y trazabilidad
+model HistorialEstadoSuscripcion {
+  /// Identificador único del registro
+  id              String             @id @default(cuid())
+
+  /// ID de la suscripción
+  suscripcion_id  String
+
+  /// Estado anterior (null si es el primer estado)
+  estado_anterior EstadoSuscripcion?
+
+  /// Estado nuevo
+  estado_nuevo    EstadoSuscripcion
+
+  /// Motivo del cambio
+  motivo          String?
+
+  /// Quién realizó el cambio: tutor_id, 'system', 'mercadopago'
+  realizado_por   String?
+
+  /// Metadata adicional (JSON)
+  metadata        Json?
+
+  /// Timestamp del cambio
+  created_at      DateTime           @default(now())
+
+  // === Relaciones ===
+
+  /// Suscripción a la que pertenece este historial
+  suscripcion     Suscripcion        @relation(fields: [suscripcion_id], references: [id], onDelete: Cascade)
+
+  @@index([suscripcion_id])
+  @@map("historial_estado_suscripcion")
 }
