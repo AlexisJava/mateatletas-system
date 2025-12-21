@@ -49,7 +49,6 @@ model Tutor {
   estudiantes               Estudiante[]
   inscripciones_clase       InscripcionClase[]
   inscripciones_clase_grupo InscripcionClaseGrupo[]
-  membresias                Membresia[]
   inscripciones_mensuales   InscripcionMensual[]
 
   /// COLONIA DE VERANO 2026
@@ -122,7 +121,6 @@ model Estudiante {
   inscripciones_clase       InscripcionClase[]
   inscripciones_clase_grupo InscripcionClaseGrupo[]
   asistencias_clase_grupo   AsistenciaClaseGrupo[]
-  inscripciones_curso       InscripcionCurso[]
   progresoLecciones         ProgresoLeccion[]
   puntosObtenidos           PuntoObtenido[]
   inscripciones_mensuales   InscripcionMensual[]
@@ -557,72 +555,13 @@ model Producto {
   /// Timestamp de última actualización del registro
   updatedAt               DateTime             @updatedAt
   clases                  Clase[]
-  inscripciones_curso     InscripcionCurso[]
-  membresias              Membresia[]
   modulos                 Modulo[]
   inscripciones_mensuales InscripcionMensual[]
 
   @@map("productos")
 }
 
-/// Modelo para membresías de suscripción
-/// Vincula un tutor con un producto de tipo Suscripcion
-model Membresia {
-  /// Identificador único de la membresía
-  id                     String          @id @default(cuid())
-  /// ID del tutor propietario de la membresía
-  tutor_id               String
-  /// ID del producto de suscripción
-  producto_id            String
-  /// Estado actual de la membresía
-  estado                 EstadoMembresia @default(Pendiente)
-  /// Fecha de inicio de la membresía (se llena cuando webhook confirma)
-  fecha_inicio           DateTime?
-  /// Fecha del próximo pago (se calcula cuando webhook confirma)
-  fecha_proximo_pago     DateTime?
-  /// ID de preferencia de MercadoPago (para tracking)
-  preferencia_id         String?
-  /// ID del pago confirmado de MercadoPago (para auditoría y soporte)
-  mercadopago_payment_id String?
-  /// Timestamp de creación del registro
-  createdAt              DateTime        @default(now())
-  /// Timestamp de última actualización del registro
-  updatedAt              DateTime        @updatedAt
-  producto               Producto        @relation(fields: [producto_id], references: [id])
-  tutor                  Tutor           @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
-
-  @@index([tutor_id, estado])
-  @@index([preferencia_id])
-  @@map("membresias")
-}
-
-/// Modelo para inscripciones a cursos
-/// Vincula un estudiante con un producto de tipo Curso
-model InscripcionCurso {
-  /// Identificador único de la inscripción
-  id                String                 @id @default(cuid())
-  /// ID del estudiante inscrito
-  estudiante_id     String
-  /// ID del producto curso
-  producto_id       String
-  /// Estado de la inscripción
-  estado            EstadoInscripcionCurso @default(PreInscrito)
-  /// Fecha de inscripción
-  fecha_inscripcion DateTime               @default(now())
-  /// ID de preferencia de MercadoPago (para tracking)
-  preferencia_id    String?
-  /// Timestamp de creación del registro
-  createdAt         DateTime               @default(now())
-  /// Timestamp de última actualización del registro
-  updatedAt         DateTime               @updatedAt
-  estudiante        Estudiante             @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  producto          Producto               @relation(fields: [producto_id], references: [id])
-
-  @@unique([estudiante_id, producto_id])
-  @@index([estudiante_id, estado])
-  @@index([preferencia_id])
-  @@map("inscripciones_curso")
-}
+// [ELIMINADO] Membresia e InscripcionCurso - sistema legacy reemplazado por Suscripciones PreApproval
 
 /// Modelo para clases programadas
 /// Representa una clase en vivo programada por un admin
@@ -1482,20 +1421,7 @@ enum TierNombre {
   @@map("tier_nombre")
 }
 
-/// Enum para estados de membresía
-enum EstadoMembresia {
-  Pendiente
-  Activa
-  Atrasada
-  Cancelada
-}
-
-/// Enum para estados de inscripción a cursos
-enum EstadoInscripcionCurso {
-  PreInscrito
-  Activo
-  Finalizado
-}
+// [ELIMINADO] EstadoMembresia y EstadoInscripcionCurso - enums de sistema legacy
 
 /// Enum para estados de clase
 enum EstadoClase {
