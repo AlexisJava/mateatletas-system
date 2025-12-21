@@ -52,10 +52,8 @@ model Tutor {
   membresias                Membresia[]
   inscripciones_mensuales   InscripcionMensual[]
 
-  /// NUEVAS RELACIONES - GAMIFICACIÓN V2 (PUNTOS PADRES)
-  puntos            PuntosPadre?
+  /// NUEVAS RELACIONES - GAMIFICACIÓN V2
   solicitudes_canje SolicitudCanje[]
-  canjes            CanjePadre[]
 
   /// COLONIA DE VERANO 2026
   inscripciones_colonia ColoniaInscripcion[]
@@ -71,43 +69,43 @@ model Tutor {
 /// Representa a los alumnos que utilizarán la plataforma
 model Estudiante {
   /// Identificador único del estudiante
-  id                        String                        @id @default(cuid())
+  id                        String                  @id @default(cuid())
   /// Username único del estudiante - usado para autenticación (OBLIGATORIO)
-  username                  String                        @unique
+  username                  String                  @unique
   /// Nombre del estudiante
   nombre                    String
   /// Apellido del estudiante
   apellido                  String
   /// Nivel escolar del estudiante: Primaria, Secundaria, Universidad
-  nivelEscolar              String                        @map("nivel_escolar")
+  nivelEscolar              String                  @map("nivel_escolar")
   /// URL del avatar 3D de Ready Player Me
   /// Ejemplo: https://models.readyplayer.me/abc123.glb
-  avatarUrl                 String?                       @map("avatar_url") @db.Text
+  avatarUrl                 String?                 @map("avatar_url") @db.Text
   /// URL de la animación idle seleccionada por el estudiante
   /// Ejemplo: https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb
-  animacion_idle_url        String?                       @db.Text
+  animacion_idle_url        String?                 @db.Text
   /// DEPRECADO: URL de la foto de perfil del estudiante (mantener por compatibilidad)
-  fotoUrl                   String?                       @map("foto_url")
+  fotoUrl                   String?                 @map("foto_url")
   /// ID del tutor que gestiona este estudiante
   tutor_id                  String
   /// ID de la casa a la que pertenece el estudiante (sistema 2026)
-  casaId                    String?                       @map("casa_id")
+  casaId                    String?                 @map("casa_id")
   /// Puntos totales acumulados por el estudiante (gamificación)
-  puntos_totales            Int                           @default(0)
+  puntos_totales            Int                     @default(0)
   /// Nivel actual del estudiante en el sistema de gamificación
-  nivel_actual              Int                           @default(1)
+  nivel_actual              Int                     @default(1)
   /// Timestamp de creación del registro
-  createdAt                 DateTime                      @default(now())
+  createdAt                 DateTime                @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt                 DateTime                      @updatedAt
+  updatedAt                 DateTime                @updatedAt
   /// ID del gradiente del avatar (0-9)
   /// Corresponde a uno de los 10 gradientes predefinidos del sistema
-  avatar_gradient           Int                           @default(0)
+  avatar_gradient           Int                     @default(0)
   /// Edad del estudiante en años
   edad                      Int
   /// Email único del estudiante - usado para autenticación propia
   /// IMPORTANTE: Debe estar indexado para búsquedas rápidas en login
-  email                     String?                       @unique
+  email                     String?                 @unique
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
   /// Permite que el estudiante acceda al portal con sus propias credenciales
   password_hash             String?
@@ -115,18 +113,15 @@ model Estudiante {
   fecha_ultimo_cambio       DateTime?
   /// Roles asignados al estudiante (normalmente solo ["estudiante"])
   /// Ejemplo: ["estudiante"]
-  roles                     Json                          @default("[\"estudiante\"]")
+  roles                     Json                    @default("[\"estudiante\"]")
   /// DEPRECADO: ID del sector al que pertenece el estudiante (usar sectores[] en su lugar)
   /// Mantener temporalmente para migración gradual
   sector_id                 String?
   alertas                   Alerta[]
   asistencias               Asistencia[]
-  casa                      Casa?                         @relation(fields: [casaId], references: [id])
-  /// DEPRECADO: Relación uno-a-uno con sector (usar sectores[] en su lugar)
-  sector                    Sector?                       @relation("EstudianteSectorLegacy", fields: [sector_id], references: [id])
-  /// NUEVO: Relación muchos-a-muchos con sectores a través de EstudianteSector
-  sectores                  EstudianteSector[]
-  tutor                     Tutor                         @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  casa                      Casa?                   @relation(fields: [casaId], references: [id])
+  sector                    Sector?                 @relation("EstudianteSectorLegacy", fields: [sector_id], references: [id])
+  tutor                     Tutor                   @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
   inscripciones_clase       InscripcionClase[]
   inscripciones_clase_grupo InscripcionClaseGrupo[]
   asistencias_clase_grupo   AsistenciaClaseGrupo[]
@@ -157,38 +152,6 @@ model Estudiante {
   @@index([casaId, puntos_totales(sort: Desc)], name: "idx_estudiantes_casa_ranking")
   @@index([tutor_id, apellido], name: "idx_estudiantes_tutor_listado")
   @@map("estudiantes")
-}
-
-/// Tabla intermedia para relación muchos-a-muchos entre Estudiante y Sector
-/// Un estudiante puede estar inscrito en múltiples sectores (ej: Matemática + Programación)
-/// Un sector puede tener múltiples estudiantes
-model EstudianteSector {
-  /// ID único de la relación
-  id            String    @id @default(cuid())
-  /// ID del estudiante
-  estudiante_id String
-  /// ID del sector
-  sector_id     String
-  /// Indica si es el sector principal del estudiante (para compatibilidad con lógica legacy)
-  es_principal  Boolean   @default(false)
-  /// Fecha de inscripción en el sector
-  fecha_inicio  DateTime  @default(now())
-  /// Fecha de baja del sector (null si está activo)
-  fecha_fin     DateTime?
-  /// Timestamp de creación del registro
-  createdAt     DateTime  @default(now())
-  /// Timestamp de última actualización del registro
-  updatedAt     DateTime  @updatedAt
-
-  /// Relaciones
-  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  sector     Sector     @relation(fields: [sector_id], references: [id], onDelete: Cascade)
-
-  /// Índice único para evitar duplicados (un estudiante no puede estar dos veces en el mismo sector activo)
-  @@unique([estudiante_id, sector_id])
-  @@index([estudiante_id])
-  @@index([sector_id])
-  @@map("estudiante_sectores")
 }
 
 /// Modelo para casas del sistema 2026
@@ -321,59 +284,7 @@ model Tier {
   /// Relación con estudiantes inscritos en este tier
   estudiantes_inscripcion EstudianteInscripcion2026[]
 
-  /// Relaciones con cambios de tier
-  cambios_como_actual CambioTierPendiente[] @relation("CambioTierActual")
-  cambios_como_nuevo  CambioTierPendiente[] @relation("CambioTierNuevo")
-
   @@map("tiers")
-}
-
-/// Modelo para cambios de tier pendientes o históricos
-/// Registra upgrades (aplicación diferida) y downgrades (aplicación inmediata)
-model CambioTierPendiente {
-  /// Identificador único del cambio
-  id String @id @default(cuid())
-
-  /// ID del estudiante-inscripción afectado
-  estudiante_inscripcion_id String
-
-  /// ID del tier actual al momento de solicitar el cambio
-  tier_actual_id String
-
-  /// ID del tier nuevo solicitado
-  tier_nuevo_id String
-
-  /// Tipo de cambio: upgrade o downgrade
-  tipo_cambio String // "upgrade" | "downgrade"
-
-  /// Fecha efectiva del cambio (1ro del próximo mes para upgrades)
-  fecha_efectiva DateTime
-
-  /// Estado del cambio: pendiente, aplicado, cancelado
-  estado String @default("pendiente") // "pendiente" | "aplicado" | "cancelado"
-
-  /// Si el cambio fue aplicado de forma inmediata
-  aplicacion_inmediata Boolean @default(false)
-
-  /// Fecha en que se aplicó el cambio (si estado = aplicado)
-  aplicado_en DateTime?
-
-  /// Fecha en que se canceló el cambio (si estado = cancelado)
-  cancelado_en DateTime?
-
-  /// Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  /// Relaciones
-  estudiante_inscripcion EstudianteInscripcion2026 @relation(fields: [estudiante_inscripcion_id], references: [id], onDelete: Cascade)
-  tier_actual            Tier                      @relation("CambioTierActual", fields: [tier_actual_id], references: [id])
-  tier_nuevo             Tier                      @relation("CambioTierNuevo", fields: [tier_nuevo_id], references: [id])
-
-  @@index([estudiante_inscripcion_id])
-  @@index([estado])
-  @@index([fecha_efectiva])
-  @@map("cambios_tier_pendientes")
 }
 
 /// Nivel del estudiante en cada mundo (2026)
@@ -466,49 +377,49 @@ model TestUbicacionResultado {
 /// Representa a los usuarios educadores que dictan clases
 model Docente {
   /// Identificador único del docente
-  id                          String              @id @default(cuid())
+  id                     String          @id @default(cuid())
   /// Email único del docente - usado para autenticación
-  email                       String              @unique
+  email                  String          @unique
   /// Hash bcrypt de la contraseña
-  password_hash               String
+  password_hash          String
   /// Nombre del docente
-  nombre                      String
+  nombre                 String
   /// Apellido del docente
-  apellido                    String
+  apellido               String
   /// Título profesional (ej: "Profesor de Matemática", "Licenciado en Física")
-  titulo                      String?
+  titulo                 String?
   /// Biografía o descripción del docente
-  bio                         String?
+  bio                    String?
   /// Timestamp de creación del registro
-  createdAt                   DateTime            @default(now())
+  createdAt              DateTime        @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt                   DateTime            @updatedAt
+  updatedAt              DateTime        @updatedAt
   /// Disponibilidad horaria del docente (ej: {"lunes": ["09:00-12:00", "14:00-18:00"], "martes": ["10:00-13:00"]})
   /// Se almacena como JSON object con días de la semana como keys
-  disponibilidad_horaria      Json?
+  disponibilidad_horaria Json?
   /// Especialidades del docente (ej: ["Álgebra", "Geometría", "Trigonometría"])
   /// Se almacena como JSON array de strings
-  especialidades              Json?
+  especialidades         Json?
   /// Estado del docente (activo, inactivo, vacaciones)
-  estado                      String              @default("activo")
+  estado                 String          @default("activo")
   /// Años de experiencia docente
-  experiencia_anos            Int?
+  experiencia_anos       Int?
   /// Nivel educativo que el docente puede impartir (ej: ["Primaria", "Secundaria", "Universidad"])
   /// Se almacena como JSON array de strings
-  nivel_educativo             Json?
+  nivel_educativo        Json?
   /// Roles asignados al docente (puede ser docente y admin simultáneamente)
   /// Ejemplo: ["docente", "admin"]
-  roles                       Json                @default("[\"docente\"]")
+  roles                  Json            @default("[\"docente\"]")
   /// Teléfono de contacto (opcional)
-  telefono                    String?
+  telefono               String?
   /// Fecha del último cambio de contraseña
-  fecha_ultimo_cambio         DateTime?
-  clases                      Clase[]
-  claseGrupos                 ClaseGrupo[]
-  rutasEspecialidad           DocenteRuta[]
-  eventos                     Evento[]
-  notificaciones              Notificacion[]
-  puntosOtorgados             PuntoObtenido[]     @relation("PuntosOtorgados")
+  fecha_ultimo_cambio    DateTime?
+  clases                 Clase[]
+  claseGrupos            ClaseGrupo[]
+  rutasEspecialidad      DocenteRuta[]
+  eventos                Evento[]
+  notificaciones         Notificacion[]
+  puntosOtorgados        PuntoObtenido[] @relation("PuntosOtorgados")
 
   @@map("docentes")
 }
@@ -600,25 +511,25 @@ model PasswordResetToken {
 /// Permite ver y revocar sesiones desde cualquier dispositivo
 model RefreshTokenSession {
   /// Identificador único (JTI del refresh token)
-  id          String   @id @db.VarChar(36)
+  id            String   @id @db.VarChar(36)
   /// ID del usuario
-  user_id     String   @db.Uuid
+  user_id       String   @db.Uuid
   /// Tipo de usuario (tutor, docente, admin, estudiante)
-  user_type   String   @db.VarChar(20)
+  user_type     String   @db.VarChar(20)
   /// Dirección IP desde donde se creó la sesión
-  ip_address  String?  @db.VarChar(45)
+  ip_address    String?  @db.VarChar(45)
   /// User agent del navegador/app
-  user_agent  String?  @db.VarChar(500)
+  user_agent    String?  @db.VarChar(500)
   /// Timestamp de creación de la sesión
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
   /// Timestamp de última actividad (renovación de token)
-  lastUsedAt  DateTime @default(now()) @map("last_used_at") @db.Timestamptz
+  lastUsedAt    DateTime @default(now()) @map("last_used_at") @db.Timestamptz
   /// Timestamp de expiración
-  expiresAt   DateTime @map("expires_at") @db.Timestamptz
+  expiresAt     DateTime @map("expires_at") @db.Timestamptz
   /// Si la sesión fue revocada manualmente
-  revoked     Boolean  @default(false)
+  revoked       Boolean  @default(false)
   /// Razón de revocación (logout, password_change, security, admin_action)
-  revokedReason String? @map("revoked_reason") @db.VarChar(50)
+  revokedReason String?  @map("revoked_reason") @db.VarChar(50)
 
   @@index([user_id], name: "idx_refresh_session_user")
   @@index([expiresAt], name: "idx_refresh_session_expires")
@@ -1442,30 +1353,28 @@ model NivelConfig {
 /// Permite organizar las especialidades en categorías principales
 model Sector {
   /// Identificador único del sector
-  id                 String             @id @default(cuid())
+  id          String             @id @default(cuid())
   /// Nombre del sector (ej: "Matemática", "Programación")
-  nombre             String             @unique
+  nombre      String             @unique
   /// Descripción del sector
-  descripcion        String?
+  descripcion String?
   /// Color hex para UI (ej: "#FF5733")
-  color              String             @default("#6366F1")
+  color       String             @default("#6366F1")
   /// Icono o emoji para UI (ej: "📐", "💻")
-  icono              String             @default("📚")
+  icono       String             @default("📚")
   /// Indica si el sector está activo
-  activo             Boolean            @default(true)
+  activo      Boolean            @default(true)
   /// Timestamp de creación del registro
-  createdAt          DateTime           @default(now())
+  createdAt   DateTime           @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt          DateTime           @updatedAt
-  clases             Clase[]
-  claseGrupos        ClaseGrupo[]
-  grupos             Grupo[]
-  docentes           DocenteRuta[]
-  /// DEPRECADO: Relación uno-a-muchos con estudiantes (usar estudianteSectores[] en su lugar)
-  estudiantes        Estudiante[]       @relation("EstudianteSectorLegacy")
-  /// NUEVO: Relación muchos-a-muchos con estudiantes a través de EstudianteSector
-  estudianteSectores EstudianteSector[]
-  rutas              RutaEspecialidad[]
+  updatedAt   DateTime           @updatedAt
+  clases      Clase[]
+  claseGrupos ClaseGrupo[]
+  grupos      Grupo[]
+  docentes    DocenteRuta[]
+  /// Relación uno-a-muchos con estudiantes
+  estudiantes Estudiante[]       @relation("EstudianteSectorLegacy")
+  rutas       RutaEspecialidad[]
 
   @@map("sectores")
 }
@@ -2384,112 +2293,7 @@ model CursoEstudiante {
   @@map("cursos_estudiantes")
 }
 
-// ==========================================
-// MODELO: PuntosPadre
-// ==========================================
-
-model PuntosPadre {
-  id       String @id @default(cuid())
-  tutor_id String @unique
-
-  // Recursos
-  puntos_total Int @default(0)
-  xp_total     Int @default(0)
-
-  // Stats
-  pagos_puntuales_consecutivos Int @default(0)
-  total_referidos_activos      Int @default(0)
-
-  updated_at DateTime @updatedAt
-
-  // Relaciones
-  tutor         Tutor                    @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
-  transacciones TransaccionPuntosPadre[]
-  canjes        CanjePadre[]
-
-  @@index([tutor_id])
-  @@map("puntos_padres")
-}
-
-// ==========================================
-// MODELO: TransaccionPuntosPadre
-// ==========================================
-
-model TransaccionPuntosPadre {
-  id              String @id @default(cuid())
-  puntos_padre_id String
-
-  tipo_recurso String // "PUNTOS", "XP"
-  cantidad     Int
-  razon        String // "pago_puntual", "referido", "engagement"
-
-  metadata Json?
-  fecha    DateTime @default(now())
-
-  puntos_padre PuntosPadre @relation(fields: [puntos_padre_id], references: [id], onDelete: Cascade)
-
-  @@index([puntos_padre_id])
-  @@index([tipo_recurso])
-  @@index([fecha])
-  @@map("transacciones_puntos_padres")
-}
-
-// ==========================================
-// MODELO: PremioPadre
-// ==========================================
-
-model PremioPadre {
-  id String @id @default(cuid())
-
-  // Información
-  codigo      String @unique
-  titulo      String
-  descripcion String @db.Text
-  categoria   String // "digital", "acceso", "premium", "epico"
-
-  // Costo
-  puntos_requeridos Int
-  costo_real_usd    Decimal? @db.Decimal(10, 2)
-
-  // Metadata
-  icono  String
-  activo Boolean @default(true)
-  orden  Int     @default(0)
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  canjes CanjePadre[]
-
-  @@index([categoria])
-  @@index([activo])
-  @@map("premios_padres")
-}
-
-// ==========================================
-// MODELO: CanjePadre
-// ==========================================
-
-model CanjePadre {
-  id String @id @default(cuid())
-
-  tutor_id        String
-  premio_id       String
-  puntos_padre_id String
-
-  puntos_usados Int
-  estado        String @default("completado")
-
-  fecha_canje DateTime @default(now())
-
-  tutor        Tutor       @relation(fields: [tutor_id], references: [id])
-  premio       PremioPadre @relation(fields: [premio_id], references: [id])
-  puntos_padre PuntosPadre @relation(fields: [puntos_padre_id], references: [id])
-
-  @@index([tutor_id])
-  @@index([fecha_canje])
-  @@map("canjes_padres")
-}
+// [ELIMINADO] Sistema PuntosPadre - modelos no utilizados removidos en cleanup
 
 // ========================================
 // SISTEMA DE CAMPAÑAS NARRATIVAS
@@ -2736,7 +2540,6 @@ model EstudianteInscripcion2026 {
   tier           Tier?                          @relation(fields: [tier_id], references: [id])
   cursos_colonia ColoniaCursoSeleccionado2026[]
   mundos_ciclo   CicloMundoSeleccionado2026[]
-  cambios_tier   CambioTierPendiente[]
 
   @@unique([inscripcion_id, estudiante_id])
   @@index([inscripcion_id])
@@ -3398,37 +3201,7 @@ model RecursoStudio {
   @@map("recursos_studio")
 }
 
-/// Badge personalizado creado en Studio
-/// Los badges predefinidos del sistema están en código, estos son custom
-model BadgeCustomStudio {
-  /// Identificador único del badge
-  id String @id @default(cuid())
-
-  /// ID del curso al que pertenece (null = disponible para todos)
-  curso_id String?
-
-  /// Nombre del badge
-  /// Ejemplo: "Maestro de Pociones"
-  nombre String
-
-  /// Descripción del badge
-  /// Ejemplo: "Completaste todas las actividades de pociones sin errores"
-  descripcion String @db.Text
-
-  /// Path al archivo de imagen/icono del badge
-  /// Ejemplo: "/uploads/badges/maestro_pociones.png"
-  icono String
-
-  /// Si está disponible en la biblioteca para reutilizar en otros cursos
-  en_biblioteca Boolean @default(false)
-
-  /// Fecha de creación
-  creado_en DateTime @default(now())
-
-  @@index([curso_id])
-  @@index([en_biblioteca])
-  @@map("badges_custom_studio")
-}
+// [ELIMINADO] BadgeCustomStudio - modelo no utilizado removido en cleanup
 
 /// Catálogo de componentes disponibles en Studio
 /// Almacena los 95+ tipos de componentes que pueden usarse en bloques de actividades
@@ -3499,49 +3272,49 @@ enum IntervaloSuscripcion {
 /// Estados internos de una suscripción
 /// Mapeados desde MercadoPago PreApproval + estados de negocio
 enum EstadoSuscripcion {
-  PENDIENTE  /// Esperando primer pago
-  ACTIVA     /// Pagos al día, acceso completo
-  EN_GRACIA  /// Falló cobro, dentro de 3 días de gracia
-  MOROSA     /// Pasó grace period sin pago, acceso bloqueado
-  PAUSADA    /// Pausada voluntariamente (máx 30 días)
-  CANCELADA  /// Cancelada definitivamente
+  PENDIENTE /// Esperando primer pago
+  ACTIVA /// Pagos al día, acceso completo
+  EN_GRACIA /// Falló cobro, dentro de 3 días de gracia
+  MOROSA /// Pasó grace period sin pago, acceso bloqueado
+  PAUSADA /// Pausada voluntariamente (máx 30 días)
+  CANCELADA /// Cancelada definitivamente
 }
 
 /// Plan de suscripción disponible
 /// Define precios y configuración de cobro
 model PlanSuscripcion {
   /// Identificador único del plan
-  id                 String               @id @default(cuid())
+  id String @id @default(cuid())
 
   /// Nombre del plan (STEAM_LIBROS, STEAM_ASINCRONICO, STEAM_SINCRONICO)
-  nombre             String
+  nombre String
 
   /// Descripción del plan para mostrar al usuario
-  descripcion        String?
+  descripcion String?
 
   /// Precio base mensual en pesos argentinos
-  precio_base        Decimal              @db.Decimal(10, 2)
+  precio_base Decimal @db.Decimal(10, 2)
 
   /// Moneda del precio (por defecto ARS)
-  moneda             String               @default("ARS")
+  moneda String @default("ARS")
 
   /// Intervalo de cobro (mensual por defecto)
-  intervalo          IntervaloSuscripcion @default(MENSUAL)
+  intervalo IntervaloSuscripcion @default(MENSUAL)
 
   /// Cantidad de intervalos entre cobros (1 = cada mes)
-  intervalo_cantidad Int                  @default(1)
+  intervalo_cantidad Int @default(1)
 
   /// Si el plan está activo para nuevas suscripciones
-  activo             Boolean              @default(true)
+  activo Boolean @default(true)
 
   /// Timestamp de creación
-  created_at         DateTime             @default(now())
+  created_at DateTime @default(now())
 
   /// Timestamp de última actualización
-  updated_at         DateTime             @updatedAt
+  updated_at DateTime @updatedAt
 
   /// Suscripciones asociadas a este plan
-  suscripciones      Suscripcion[]
+  suscripciones Suscripcion[]
 
   @@map("planes_suscripcion")
 }
@@ -3550,92 +3323,92 @@ model PlanSuscripcion {
 /// Vincula un tutor con un plan y gestiona el ciclo de vida
 model Suscripcion {
   /// Identificador único de la suscripción
-  id                   String            @id @default(cuid())
+  id String @id @default(cuid())
 
   /// ID del tutor propietario
-  tutor_id             String
+  tutor_id String
 
   /// ID del plan de suscripción
-  plan_id              String
+  plan_id String
 
   // === MercadoPago PreApproval ===
 
   /// ID de la suscripción en MercadoPago (preapproval_id)
-  mp_preapproval_id    String?           @unique
+  mp_preapproval_id String? @unique
 
   /// Estado actual en MercadoPago (pending, authorized, paused, cancelled)
-  mp_status            String?
+  mp_status String?
 
   // === Estado interno ===
 
   /// Estado actual de la suscripción
-  estado               EstadoSuscripcion @default(PENDIENTE)
+  estado EstadoSuscripcion @default(PENDIENTE)
 
   // === Fechas ===
 
   /// Fecha de inicio de la suscripción (primer pago confirmado)
-  fecha_inicio         DateTime?
+  fecha_inicio DateTime?
 
   /// Fecha del próximo cobro programado
-  fecha_proximo_cobro  DateTime?
+  fecha_proximo_cobro DateTime?
 
   /// Fecha de cancelación (si aplica)
-  fecha_cancelacion    DateTime?
+  fecha_cancelacion DateTime?
 
   /// Fecha en que se pausó la suscripción
-  fecha_pausa          DateTime?
+  fecha_pausa DateTime?
 
   /// Fecha en que termina la pausa (máx 30 días después de fecha_pausa)
-  fecha_fin_pausa      DateTime?
+  fecha_fin_pausa DateTime?
 
   // === Grace Period ===
 
   /// Días de gracia usados en el ciclo actual (máx 3)
-  dias_gracia_usados   Int               @default(0)
+  dias_gracia_usados Int @default(0)
 
   /// Fecha en que inició el período de gracia actual
-  fecha_inicio_gracia  DateTime?
+  fecha_inicio_gracia DateTime?
 
   // === Descuento familiar ===
 
   /// Porcentaje de descuento aplicado (0, 10, 20, etc.)
-  descuento_porcentaje Int               @default(0)
+  descuento_porcentaje Int @default(0)
 
   /// Precio final después de aplicar descuento
-  precio_final         Decimal           @db.Decimal(10, 2)
+  precio_final Decimal @db.Decimal(10, 2)
 
   // === Auditoría ===
 
   /// Motivo de cancelación (si fue cancelada)
-  motivo_cancelacion   String?
+  motivo_cancelacion String?
 
   /// Quién canceló: tutor_id, 'system', 'mercadopago'
-  cancelado_por        String?
+  cancelado_por String?
 
   /// Timestamp de creación
-  created_at           DateTime          @default(now())
+  created_at DateTime @default(now())
 
   /// Timestamp de última actualización
-  updated_at           DateTime          @updatedAt
+  updated_at DateTime @updatedAt
 
   // === Optimistic Locking ===
 
   /// Versión del registro para control de concurrencia
-  version              Int               @default(0)
+  version Int @default(0)
 
   // === Relaciones ===
 
   /// Tutor propietario de la suscripción
-  tutor                Tutor             @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  tutor Tutor @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
 
   /// Plan de suscripción
-  plan                 PlanSuscripcion   @relation(fields: [plan_id], references: [id])
+  plan PlanSuscripcion @relation(fields: [plan_id], references: [id])
 
   /// Pagos realizados en esta suscripción
-  pagos                PagoSuscripcion[]
+  pagos PagoSuscripcion[]
 
   /// Historial de cambios de estado
-  historial            HistorialEstadoSuscripcion[]
+  historial HistorialEstadoSuscripcion[]
 
   @@index([tutor_id])
   @@index([estado])
@@ -3647,18 +3420,18 @@ model Suscripcion {
 /// Guarda el historial de cobros mensuales
 model PagoSuscripcion {
   /// Identificador único del pago
-  id              String      @id @default(cuid())
+  id String @id @default(cuid())
 
   /// ID de la suscripción a la que pertenece
-  suscripcion_id  String
+  suscripcion_id String
 
   // === MercadoPago ===
 
   /// ID del pago en MercadoPago
-  mp_payment_id   String      @unique
+  mp_payment_id String @unique
 
   /// Estado del pago en MercadoPago (approved, rejected, pending, etc.)
-  mp_status       String
+  mp_status String
 
   /// Detalle del estado (ej: "accredited", "cc_rejected_insufficient_amount")
   mp_status_detail String?
@@ -3666,42 +3439,42 @@ model PagoSuscripcion {
   // === Montos ===
 
   /// Monto cobrado
-  monto           Decimal     @db.Decimal(10, 2)
+  monto Decimal @db.Decimal(10, 2)
 
   /// Moneda del pago
-  moneda          String      @default("ARS")
+  moneda String @default("ARS")
 
   // === Período cubierto ===
 
   /// Fecha de inicio del período que cubre este pago
-  periodo_inicio  DateTime
+  periodo_inicio DateTime
 
   /// Fecha de fin del período que cubre este pago
-  periodo_fin     DateTime
+  periodo_fin DateTime
 
   // === Intento ===
 
   /// Número de intento (1 = primer intento, 2+ = reintentos)
-  intento_numero  Int         @default(1)
+  intento_numero Int @default(1)
 
   /// Código de error si falló (ej: "cc_rejected_insufficient_amount")
-  error_code      String?
+  error_code String?
 
   /// Mensaje de error legible
-  error_message   String?
+  error_message String?
 
   // === Fechas ===
 
   /// Fecha en que se realizó el cobro exitoso
-  fecha_cobro     DateTime?
+  fecha_cobro DateTime?
 
   /// Timestamp de creación (fecha del intento)
-  created_at      DateTime    @default(now())
+  created_at DateTime @default(now())
 
   // === Relaciones ===
 
   /// Suscripción a la que pertenece este pago
-  suscripcion     Suscripcion @relation(fields: [suscripcion_id], references: [id], onDelete: Cascade)
+  suscripcion Suscripcion @relation(fields: [suscripcion_id], references: [id], onDelete: Cascade)
 
   @@index([suscripcion_id])
   @@map("pagos_suscripcion")
@@ -3711,33 +3484,33 @@ model PagoSuscripcion {
 /// Para auditoría y trazabilidad
 model HistorialEstadoSuscripcion {
   /// Identificador único del registro
-  id              String             @id @default(cuid())
+  id String @id @default(cuid())
 
   /// ID de la suscripción
-  suscripcion_id  String
+  suscripcion_id String
 
   /// Estado anterior (null si es el primer estado)
   estado_anterior EstadoSuscripcion?
 
   /// Estado nuevo
-  estado_nuevo    EstadoSuscripcion
+  estado_nuevo EstadoSuscripcion
 
   /// Motivo del cambio
-  motivo          String?
+  motivo String?
 
   /// Quién realizó el cambio: tutor_id, 'system', 'mercadopago'
-  realizado_por   String?
+  realizado_por String?
 
   /// Metadata adicional (JSON)
-  metadata        Json?
+  metadata Json?
 
   /// Timestamp del cambio
-  created_at      DateTime           @default(now())
+  created_at DateTime @default(now())
 
   // === Relaciones ===
 
   /// Suscripción a la que pertenece este historial
-  suscripcion     Suscripcion        @relation(fields: [suscripcion_id], references: [id], onDelete: Cascade)
+  suscripcion Suscripcion @relation(fields: [suscripcion_id], references: [id], onDelete: Cascade)
 
   @@index([suscripcion_id])
   @@map("historial_estado_suscripcion")
