@@ -29,7 +29,6 @@ import { GamificacionModule } from './gamificacion/gamificacion.module';
 import { CursosModule } from './cursos/cursos.module';
 import { EventosModule } from './eventos/eventos.module';
 import { HealthModule } from './health/health.module';
-import { TiendaModule } from './tienda/tienda.module';
 import { ColoniaModule } from './colonia/colonia.module';
 import { Inscripciones2026Module } from './inscripciones-2026/inscripciones-2026.module';
 import { TiersModule } from './tiers/tiers.module';
@@ -87,7 +86,6 @@ import { SuscripcionesModule } from './suscripciones/suscripciones.module';
     GamificacionModule,
     CursosModule,
     EventosModule,
-    TiendaModule,
     ColoniaModule,
     Inscripciones2026Module,
     TiersModule,
