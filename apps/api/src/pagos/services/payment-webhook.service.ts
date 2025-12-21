@@ -26,7 +26,7 @@ export interface MercadoPagoPaymentData {
  * Responsabilidades:
  * - Procesar notificaciones de pago de MercadoPago
  * - Parsear external_reference para identificar el tipo de pago
- * - Actualizar estados de membresías e inscripciones
+ * - Actualizar estados de inscripciones
  * - Emitir eventos de dominio
  *
  * SEGURIDAD (v2.0):
@@ -35,7 +35,6 @@ export interface MercadoPagoPaymentData {
  * ✅ Eventos de fraude: Emite alertas cuando se detecta monto inválido
  *
  * Formatos de external_reference soportados:
- * - "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
  * - "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
  */
 @Injectable()
@@ -160,10 +159,8 @@ export class PaymentWebhookService {
   }) {
     const externalRef = payment.external_reference;
 
-    // Determinar tipo de pago (membresía o inscripción)
-    if (externalRef.startsWith('membresia-')) {
-      return this.procesarPagoMembresia(payment);
-    } else if (externalRef.startsWith('inscripcion-')) {
+    // Determinar tipo de pago (inscripción)
+    if (externalRef.startsWith('inscripcion-')) {
       return this.procesarPagoInscripcion(payment);
     } else {
       this.logger.warn(
@@ -175,121 +172,6 @@ export class PaymentWebhookService {
         type: 'unknown',
       };
     }
-  }
-
-  /**
-   * Procesa pago de membresía CON VALIDACIÓN DE MONTO
-   *
-   * external_reference format: "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
-   *
-   * @param payment - Datos del pago
-   * @returns Resultado del procesamiento
-   */
-  private async procesarPagoMembresia(payment: {
-    external_reference: string;
-    id: string;
-    status: string;
-    transaction_amount?: number;
-  }) {
-    const externalRef = payment.external_reference;
-    const parts = externalRef.split('-');
-    const membresiaId = parts[1]; // "membresia-{ID}-tutor-..."
-
-    if (!membresiaId) {
-      throw new Error(
-        `external_reference inválido para membresía: "${externalRef}" - formato esperado: membresia-{ID}-...`,
-      );
-    }
-
-    this.logger.log(`🎫 Procesando pago de membresía ID: ${membresiaId}`);
-
-    // ✅ VALIDAR MONTO ANTES DE PROCESAR (solo para pagos aprobados)
-    if (payment.status === 'approved' && payment.transaction_amount) {
-      const validation = await this.amountValidator.validateMembresia(
-        membresiaId,
-        payment.transaction_amount,
-      );
-
-      if (!validation.isValid) {
-        this.logger.error(
-          `🚨 FRAUDE DETECTADO - Monto inválido en membresía ${membresiaId}: ${validation.reason}`,
-        );
-
-        // Emitir evento de fraude
-        this.eventEmitter.emit('webhook.fraud_detected', {
-          paymentId: payment.id,
-          membresiaId,
-          validation,
-          type: 'membresia',
-        });
-
-        // NO procesar el pago
-        return {
-          success: false,
-          error: 'Amount validation failed',
-          validation,
-          type: 'membresia',
-        };
-      }
-
-      this.logger.log(
-        `✅ Monto validado correctamente para membresía ${membresiaId}`,
-      );
-    }
-
-    // Mapear estado de MercadoPago a estado de pago
-    const estadoPago = this.stateMapper.mapearEstadoPago(payment.status);
-
-    // ✅ ALERTAR si es refund o chargeback (eventos críticos)
-    if (estadoPago === EstadoPago.REEMBOLSADO) {
-      const isChargeback = payment.status === 'charged_back';
-
-      if (isChargeback) {
-        await this.alertService.alertChargebackReceived({
-          paymentId: payment.id,
-          amount: payment.transaction_amount || 0,
-          entityType: 'membresia',
-          entityId: membresiaId,
-        });
-      } else {
-        await this.alertService.alertRefundProcessed({
-          paymentId: payment.id,
-          originalAmount: payment.transaction_amount || 0,
-          refundedAmount: payment.transaction_amount || 0,
-          entityType: 'membresia',
-          entityId: membresiaId,
-        });
-      }
-    }
-
-    // Actualizar membresía usando command service (persistiendo payment_id)
-    await this.commandService.actualizarEstadoMembresia(
-      membresiaId,
-      estadoPago,
-      payment.id, // ✅ Persistir payment_id para auditoría
-    );
-
-    // Emitir evento específico de webhook
-    this.eventEmitter.emit('webhook.membresia.procesado', {
-      membresiaId,
-      estadoPago,
-      paymentId: payment.id,
-      paymentStatus: payment.status,
-      amountValidated: !!payment.transaction_amount,
-    });
-
-    this.logger.log(
-      `✅ Membresía ${membresiaId} procesada - Estado: ${estadoPago}`,
-    );
-
-    return {
-      success: true,
-      message: 'Webhook processed successfully',
-      type: 'membresia',
-      membresiaId,
-      estadoPago,
-      paymentStatus: payment.status,
-    };
   }
 
   /**

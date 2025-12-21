@@ -3,7 +3,6 @@ import { DatabaseModule } from '../core/database/database.module';
 import { CatalogoModule } from '../catalogo/catalogo.module';
 import { PagosController } from './presentation/controllers/pagos.controller';
 import { PagosService } from './presentation/services/pagos.service';
-import { PagosTutorService } from './presentation/services/pagos-tutor.service';
 import { VerificacionMorosidadService } from './services/verificacion-morosidad.service';
 
 // CQRS Services (NEW)
@@ -98,7 +97,6 @@ import { MercadoPagoService } from './mercadopago.service';
 
     // === Legacy Presentation Layer (mantener temporalmente) ===
     PagosService,
-    PagosTutorService,
     MercadoPagoService,
     VerificacionMorosidadService,
 
@@ -170,7 +168,6 @@ import { MercadoPagoService } from './mercadopago.service';
 
     // Export legacy services for backwards compatibility
     PagosService,
-    PagosTutorService,
     MercadoPagoService,
     ConfiguracionPreciosRepository,
     InscripcionMensualRepository,

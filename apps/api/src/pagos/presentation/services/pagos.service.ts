@@ -200,15 +200,14 @@ export class PagosService {
    * Flujo:
    * 1. Valida que sea notificación de tipo "payment"
    * 2. Consulta detalles del pago a MercadoPago API
-   * 3. Parsea external_reference para identificar el tipo (membresía o inscripción)
+   * 3. Parsea external_reference para identificar el tipo
    * 4. Actualiza estado en DB según resultado del pago
    *
-   * External Reference Formats:
-   * - Membresía: "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
+   * External Reference Format:
    * - Inscripción: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
    *
    * Estados de pago MercadoPago → Estados del sistema:
-   * - approved → Activa/Pagado
+   * - approved → Pagado
    * - rejected, cancelled → Mantiene Pendiente (para reintentar)
    * - pending, in_process, in_mediation → Mantiene Pendiente
    */
@@ -242,18 +241,8 @@ export class PagosService {
         return { message: 'Payment without external_reference' };
       }
 
-      // Determinar tipo de pago (membresía o inscripción)
-      if (externalRef.startsWith('membresia-')) {
-        if (!payment.id || !payment.status) {
-          this.logger.warn('⚠️ Pago sin id o status - Ignorando');
-          return { message: 'Payment without id or status' };
-        }
-        return await this.procesarPagoMembresia({
-          external_reference: externalRef,
-          id: payment.id,
-          status: payment.status,
-        });
-      } else if (externalRef.startsWith('inscripcion-')) {
+      // Procesar solo inscripciones
+      if (externalRef.startsWith('inscripcion-')) {
         if (!payment.id || !payment.status) {
           this.logger.warn('⚠️ Pago sin id o status - Ignorando');
           return { message: 'Payment without id or status' };
@@ -279,67 +268,6 @@ export class PagosService {
       );
       throw error;
     }
-  }
-
-  /**
-   * Procesa pago de membresía
-   * external_reference format: "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
-   */
-  private async procesarPagoMembresia(payment: {
-    external_reference: string;
-    id: string;
-    status: string;
-  }) {
-    const externalRef = payment.external_reference;
-    const parts = externalRef.split('-');
-    const membresiaId = parts[1]; // "membresia-{ID}-tutor-..."
-
-    this.logger.log(`🎫 Procesando pago de membresía ID: ${membresiaId}`);
-
-    // Mapear estado de MercadoPago a estado de membresía
-    const estadoPago = mapearEstadoMercadoPago(payment.status);
-
-    // Convertir EstadoPago a estado de membresía
-    let nuevoEstado: 'Activa' | 'Pendiente' | 'Cancelada' = 'Pendiente';
-
-    switch (estadoPago) {
-      case EstadoPagoMP.PAGADO:
-        nuevoEstado = 'Activa';
-        break;
-      case EstadoPagoMP.CANCELADO:
-      case EstadoPagoMP.RECHAZADO:
-        nuevoEstado = 'Pendiente'; // Permitir reintentar
-        break;
-      default:
-        nuevoEstado = 'Pendiente';
-        break;
-    }
-
-    // Actualizar membresía en DB
-    const now = new Date();
-    const proximoPago = new Date(now);
-    proximoPago.setMonth(proximoPago.getMonth() + 1); // Mensual
-
-    await this.prisma.membresia.update({
-      where: { id: membresiaId },
-      data: {
-        estado: nuevoEstado,
-        fecha_inicio: nuevoEstado === 'Activa' ? now : undefined,
-        fecha_proximo_pago: nuevoEstado === 'Activa' ? proximoPago : undefined,
-      },
-    });
-
-    this.logger.log(
-      `✅ Membresía ${membresiaId} actualizada a estado: ${nuevoEstado}`,
-    );
-
-    return {
-      message: 'Webhook processed successfully',
-      type: 'membresia',
-      membresiaId,
-      nuevoEstado,
-      paymentStatus: payment.status,
-    };
   }
 
   /**

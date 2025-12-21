@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import { CompletarLeccionDto } from './dto/completar-leccion.dto';
 import { ModulosService } from './modulos.service';
@@ -50,19 +46,6 @@ export class ProgresoService {
   ) {
     // Get the lesson
     const leccion = await this.modulosService.findOneLeccion(leccionId);
-
-    // Verify that the student is enrolled in the course
-    const inscripcion = await this.prisma.inscripcionCurso.findFirst({
-      where: {
-        estudiante_id: estudianteId,
-        producto_id: leccion.modulo.producto_id,
-        estado: 'Activo',
-      },
-    });
-
-    if (!inscripcion) {
-      throw new ForbiddenException('No estás inscrito en este curso');
-    }
 
     // Verify prerequisite (Progressive Disclosure)
     if (leccion.leccion_prerequisito_id) {

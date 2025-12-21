@@ -31,11 +31,7 @@ export class ClasesReservasService {
     // 1. Verificar estudiante (puede estar fuera de transacción - datos estáticos)
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: dto.estudianteId },
-      include: {
-        inscripciones_curso: {
-          where: { estado: 'Activo' },
-        },
-      },
+      select: { id: true, tutor_id: true },
     });
 
     if (!estudiante) {
@@ -75,19 +71,6 @@ export class ClasesReservasService {
       // Esta lectura ve el estado MÁS RECIENTE incluso con requests concurrentes
       if (clase.cupos_ocupados >= clase.cupos_maximo) {
         throw new BadRequestException('La clase está llena');
-      }
-
-      // ✅ Validar inscripción en curso (si aplica)
-      if (clase.producto_id) {
-        const tieneInscripcion = estudiante.inscripciones_curso.some(
-          (insc) => insc.producto_id === clase.producto_id,
-        );
-
-        if (!tieneInscripcion) {
-          throw new BadRequestException(
-            `El estudiante no está inscrito en el curso: ${clase.producto?.nombre}`,
-          );
-        }
       }
 
       // ✅ Verificar duplicados (dentro de transacción)

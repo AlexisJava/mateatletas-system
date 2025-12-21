@@ -127,70 +127,6 @@ export class PaymentAmountValidatorService {
   }
 
   /**
-   * Valida el monto de una membresía (con Redis caching - PASO 3.1.B)
-   *
-   * @param membresiaId - ID de la membresía
-   * @param receivedAmount - Monto recibido en el pago
-   * @returns Resultado de la validación
-   * @throws BadRequestException si la membresía no existe
-   */
-  async validateMembresia(
-    membresiaId: string,
-    receivedAmount: number,
-  ): Promise<AmountValidationResult> {
-    const cacheKey = `${this.CACHE_PREFIX}Membresia:${membresiaId}`;
-    let expectedAmount: number;
-
-    // 1. Intentar recuperar desde cache
-    try {
-      const cached = await this.redis.get(cacheKey);
-      if (cached !== null) {
-        expectedAmount = Number(cached);
-        this.logger.debug(`✅ Cache HIT: ${cacheKey}`);
-        return this.compareAmounts(
-          expectedAmount,
-          receivedAmount,
-          'Membresia',
-          membresiaId,
-        );
-      }
-      this.logger.debug(`❌ Cache MISS: ${cacheKey}`);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      this.logger.warn(`⚠️ Redis error: ${errorMessage} - fallback a DB`);
-    }
-
-    // 2. Cache miss → consultar DB
-    const membresia = await this.prisma.membresia.findUnique({
-      where: { id: membresiaId },
-      include: {
-        producto: true,
-      },
-    });
-
-    if (!membresia) {
-      throw new BadRequestException(`Membresía ${membresiaId} no encontrada`);
-    }
-
-    expectedAmount = Number(membresia.producto.precio);
-
-    // 3. Guardar en cache
-    try {
-      await this.redis.set(cacheKey, String(expectedAmount), this.CACHE_TTL);
-    } catch {
-      // Fallback silencioso
-    }
-
-    return this.compareAmounts(
-      expectedAmount,
-      receivedAmount,
-      'Membresia',
-      membresiaId,
-    );
-  }
-
-  /**
    * Valida el monto de un pago de colonia (con Redis caching - PASO 3.1.B)
    *
    * @param pagoId - ID del pago de colonia
@@ -327,16 +263,6 @@ export class PaymentAmountValidatorService {
 
       if (inscripcionId) {
         return this.validateInscripcionMensual(inscripcionId, receivedAmount);
-      }
-    }
-
-    // Membresía: "membresia-{id}-tutor-{id}-producto-{id}"
-    if (externalRef.startsWith('membresia-')) {
-      const match = externalRef.match(/membresia-([^-]+)/);
-      const membresiaId = match ? match[1] : null;
-
-      if (membresiaId) {
-        return this.validateMembresia(membresiaId, receivedAmount);
       }
     }
 

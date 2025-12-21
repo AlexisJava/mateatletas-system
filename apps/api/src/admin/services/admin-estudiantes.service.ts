@@ -118,19 +118,6 @@ export class AdminEstudiantesService {
               icono: true,
             },
           },
-          sectores: {
-            select: {
-              sector: {
-                select: {
-                  id: true,
-                  nombre: true,
-                  color: true,
-                  icono: true,
-                },
-              },
-              es_principal: true,
-            },
-          },
           inscripciones_clase_grupo: {
             where: {
               fecha_baja: null, // Solo inscripciones activas
@@ -177,13 +164,7 @@ export class AdminEstudiantesService {
       puntos_totales: est.puntos_totales,
       tutor: est.tutor,
       casa: est.casa,
-      // LEGACY: sector único (para compatibilidad con código viejo)
       sector: est.sector,
-      // NUEVO: array de sectores (relación muchos-a-muchos)
-      sectores: est.sectores.map((es) => ({
-        ...es.sector,
-        es_principal: es.es_principal,
-      })),
       // GRUPOS: Inscripciones activas en grupos
       inscripciones_grupos: est.inscripciones_clase_grupo.map((insc) => ({
         id: insc.id,

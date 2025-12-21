@@ -3,10 +3,7 @@ import { PrismaService } from '../../core/database/prisma.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EstadoPago } from '../../domain/constants';
 import { PaymentStateMapperService } from './payment-state-mapper.service';
-import {
-  EstadoPago as EstadoPagoPrisma,
-  EstadoMembresia,
-} from '@prisma/client';
+import { EstadoPago as EstadoPagoPrisma } from '@prisma/client';
 
 /**
  * DTO para registrar pago manual
@@ -25,7 +22,6 @@ export interface RegistrarPagoManualDto {
  *
  * Responsabilidades:
  * - Registrar pagos manuales
- * - Actualizar estados de membresías
  * - Actualizar estados de inscripciones
  * - Emitir eventos de dominio
  *
@@ -152,55 +148,6 @@ export class PaymentCommandService {
   }
 
   /**
-   * Actualiza el estado de una membresía según el estado de pago
-   *
-   * Aplica reglas de negocio para determinar el nuevo estado de membresía
-   * y calcula la fecha del próximo pago si aplica.
-   *
-   * @param membresiaId - ID de la membresía
-   * @param estadoPago - Estado de pago a aplicar
-   * @param paymentId - ID del pago de MercadoPago (opcional, para auditoría)
-   * @returns Membresía actualizada
-   */
-  async actualizarEstadoMembresia(
-    membresiaId: string,
-    estadoPago: EstadoPago,
-    paymentId?: string,
-  ) {
-    const estadoMembresia = this.stateMapper.mapearEstadoMembresia(estadoPago);
-
-    const updated = await this.prisma.membresia.update({
-      where: { id: membresiaId },
-      data: {
-        estado: estadoMembresia,
-        fecha_inicio:
-          estadoMembresia === EstadoMembresia.Activa ? new Date() : undefined,
-        fecha_proximo_pago:
-          estadoMembresia === EstadoMembresia.Activa
-            ? this.calcularProximoPago()
-            : null,
-        // ✅ SEGURIDAD: Persistir payment_id para auditoría y soporte
-        mercadopago_payment_id: paymentId || undefined,
-      },
-    });
-
-    // Emitir evento de dominio
-    this.eventEmitter.emit('membresia.estado_actualizado', {
-      membresiaId,
-      estadoPago,
-      estadoMembresia,
-      paymentId,
-      fechaActualizacion: new Date(),
-    });
-
-    this.logger.log(
-      `✅ Membresía ${membresiaId} actualizada a estado: ${estadoMembresia}${paymentId ? ` | payment_id: ${paymentId}` : ''}`,
-    );
-
-    return updated;
-  }
-
-  /**
    * Actualiza el estado de una inscripción mensual según el estado de pago
    *
    * @param inscripcionId - ID de la inscripción
@@ -237,36 +184,5 @@ export class PaymentCommandService {
     );
 
     return updated;
-  }
-
-  /**
-   * Actualiza membresía con preferencia de pago creada
-   *
-   * @param membresiaId - ID de la membresía
-   * @param preferenciaId - ID de la preferencia de MercadoPago
-   * @returns Membresía actualizada
-   */
-  async actualizarMembresiaConPreferencia(
-    membresiaId: string,
-    preferenciaId: string,
-  ) {
-    return this.prisma.membresia.update({
-      where: { id: membresiaId },
-      data: {
-        preferencia_id: preferenciaId,
-      },
-    });
-  }
-
-  /**
-   * Calcular próximo pago (30 días adelante)
-   *
-   * @returns Fecha del próximo pago
-   */
-  private calcularProximoPago(): Date {
-    const now = new Date();
-    const proxPago = new Date(now);
-    proxPago.setDate(proxPago.getDate() + 30);
-    return proxPago;
   }
 }

@@ -115,47 +115,25 @@ export class ClaseQueryService {
    * Listar clases disponibles para tutores
    * - Solo clases programadas
    * - Solo clases futuras
-   * - Filtrar clases de cursos específicos si el tutor no tiene inscripción
    */
   async listarClasesParaTutor(tutorId: string) {
     const now = new Date();
 
-    // 1. Obtener estudiantes del tutor
+    // Verificar que el tutor existe
     const tutor = await this.prisma.tutor.findUnique({
       where: { id: tutorId },
-      include: {
-        estudiantes: {
-          include: {
-            inscripciones_curso: {
-              where: { estado: 'Activo' },
-              select: { producto_id: true },
-            },
-          },
-        },
-      },
+      select: { id: true },
     });
 
     if (!tutor) {
       throw new NotFoundException('Tutor no encontrado');
     }
 
-    // 2. Obtener IDs de productos de cursos activos
-    const cursosActivos = new Set<string>();
-    tutor.estudiantes.forEach((estudiante) => {
-      estudiante.inscripciones_curso.forEach((inscripcion) => {
-        cursosActivos.add(inscripcion.producto_id);
-      });
-    });
-
-    // 3. Buscar clases disponibles
+    // Buscar clases disponibles
     const clases = await this.prisma.clase.findMany({
       where: {
         estado: 'Programada',
         fecha_hora_inicio: { gte: now },
-        OR: [
-          { producto_id: null }, // Clases de suscripción general
-          { producto_id: { in: Array.from(cursosActivos) } }, // Clases de cursos activos
-        ],
       },
       include: {
         docente: { select: { nombre: true, apellido: true } },

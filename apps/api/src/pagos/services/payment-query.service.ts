@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { ConfiguracionPreciosRepository } from '../infrastructure/repositories/configuracion-precios.repository';
 import { InscripcionMensualRepository } from '../infrastructure/repositories/inscripcion-mensual.repository';
-import { EstadoPago, EstadoMembresia, Prisma } from '@prisma/client';
+import { EstadoPago, Prisma } from '@prisma/client';
 
 /**
  * Parámetros para búsqueda de inscripciones
@@ -22,7 +22,6 @@ export interface FindAllInscripcionesParams {
  *
  * Responsabilidades:
  * - Consultar inscripciones mensuales
- * - Consultar membresías
  * - Consultar configuración de precios
  * - Consultar historial de cambios
  * - Consultar estudiantes con descuentos
@@ -158,40 +157,6 @@ export class PaymentQueryService {
     });
 
     return !!inscripcion;
-  }
-
-  /**
-   * Obtener membresías de un tutor (todas)
-   *
-   * @param tutorId - ID del tutor
-   * @returns Lista de membresías con producto
-   */
-  async findMembresiasDelTutor(tutorId: string) {
-    return this.prisma.membresia.findMany({
-      where: { tutor_id: tutorId },
-      include: {
-        producto: true,
-      },
-      orderBy: { fecha_inicio: 'desc' },
-    });
-  }
-
-  /**
-   * Obtener membresía activa de un tutor
-   *
-   * @param tutorId - ID del tutor
-   * @returns Membresía activa o null si no tiene
-   */
-  async findMembresiaActiva(tutorId: string) {
-    return this.prisma.membresia.findFirst({
-      where: {
-        tutor_id: tutorId,
-        estado: EstadoMembresia.Activa,
-      },
-      include: {
-        producto: true,
-      },
-    });
   }
 
   /**

@@ -5,18 +5,7 @@ import {
   mapearEstadoMercadoPago,
 } from '../../domain/constants';
 
-import {
-  EstadoMembresia,
-  EstadoPago as EstadoPagoPrisma,
-} from '@prisma/client';
-
-/**
- * Resultado de mapeo para estados de membresía
- */
-export interface EstadoMembresiaResult {
-  estadoPago: EstadoPago;
-  estadoMembresia: EstadoMembresia; // Pendiente, Activa, Atrasada, Cancelada
-}
+import { EstadoPago as EstadoPagoPrisma } from '@prisma/client';
 
 /**
  * Resultado de mapeo para estados de inscripción (estado_pago enum Prisma)
@@ -31,7 +20,6 @@ export interface EstadoInscripcionResult {
  *
  * Responsabilidades:
  * - Mapear estados de MercadoPago a estados internos del sistema
- * - Mapear estados de pago a estados de membresía
  * - Mapear estados de pago a estados de inscripción
  * - Validar estados de pago
  *
@@ -50,40 +38,6 @@ export class PaymentStateMapperService {
    */
   mapearEstadoPago(estadoMP: string): EstadoPago {
     return mapearEstadoMercadoPago(estadoMP);
-  }
-
-  /**
-   * Mapea estado de pago a estado de membresía
-   *
-   * Reglas de negocio:
-   * - PAGADO → Activa (membresía habilitada)
-   * - CANCELADO/RECHAZADO → Pendiente (permitir reintentar)
-   * - EXPIRADO → Atrasada (membresía vencida)
-   * - PENDIENTE → Pendiente (esperando confirmación)
-   * - REEMBOLSADO → Cancelada (refund/chargeback, pierde acceso inmediatamente)
-   *
-   * @param estadoPago - Estado interno de pago
-   * @returns Estado de membresía según reglas de negocio (EstadoMembresia de Prisma)
-   */
-  mapearEstadoMembresia(
-    estadoPago: EstadoPago,
-  ): EstadoMembresiaResult['estadoMembresia'] {
-    switch (estadoPago) {
-      case EstadoPago.PAGADO:
-        return EstadoMembresia.Activa;
-      case EstadoPago.CANCELADO:
-      case EstadoPago.RECHAZADO:
-        return EstadoMembresia.Pendiente; // Permitir reintentar
-      case EstadoPago.EXPIRADO:
-        return EstadoMembresia.Atrasada;
-      case EstadoPago.REEMBOLSADO:
-        // CRÍTICO: Refund o chargeback debe desactivar la membresía
-        // El usuario pierde acceso inmediatamente
-        return EstadoMembresia.Cancelada;
-      case EstadoPago.PENDIENTE:
-      default:
-        return EstadoMembresia.Pendiente;
-    }
   }
 
   /**
@@ -116,21 +70,6 @@ export class PaymentStateMapperService {
       default:
         return EstadoPagoPrisma.Pendiente;
     }
-  }
-
-  /**
-   * Procesa estado completo de membresía desde MercadoPago
-   *
-   * Combina mapeo de estado MP → estado pago → estado membresía
-   *
-   * @param estadoMP - Estado de MercadoPago
-   * @returns Objeto con estado de pago y estado de membresía
-   */
-  procesarEstadoMembresia(estadoMP: string): EstadoMembresiaResult {
-    const estadoPago = this.mapearEstadoPago(estadoMP);
-    const estadoMembresia = this.mapearEstadoMembresia(estadoPago);
-
-    return { estadoPago, estadoMembresia };
   }
 
   /**

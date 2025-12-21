@@ -11,11 +11,10 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 /**
  * Controlador REST para gestionar Mundos STEAM
- * Sistema de mundos Mateatletas 2026
+ * Sistema de mundos Mateatletas
  *
  * Rutas disponibles:
  * - GET /api/mundos - Listar los 3 mundos
- * - GET /api/mundos/estadisticas - Estadisticas de todos los mundos
  * - GET /api/mundos/:id - Detalle de un mundo
  * - GET /api/mundos/tipo/:tipo - Obtener mundo por tipo
  */
@@ -33,17 +32,6 @@ export class MundosController {
   @Get()
   findAll(): ReturnType<MundosService['findAll']> {
     return this.mundosService.findAll();
-  }
-
-  /**
-   * Obtener estadisticas de todos los mundos
-   * GET /api/mundos/estadisticas
-   *
-   * IMPORTANTE: Esta ruta debe ir ANTES de /:id
-   */
-  @Get('estadisticas')
-  getEstadisticas(): ReturnType<MundosService['getEstadisticas']> {
-    return this.mundosService.getEstadisticas();
   }
 
   /**

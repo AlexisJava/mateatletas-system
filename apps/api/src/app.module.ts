@@ -31,7 +31,6 @@ import { EventosModule } from './eventos/eventos.module';
 import { HealthModule } from './health/health.module';
 import { ColoniaModule } from './colonia/colonia.module';
 import { TiersModule } from './tiers/tiers.module';
-import { OnboardingModule } from './onboarding/onboarding.module';
 import { AuditModule } from './audit/audit.module';
 import { StudioModule } from './studio/studio.module';
 import { EmailModule } from './email/email.module';
@@ -87,7 +86,6 @@ import { SuscripcionesModule } from './suscripciones/suscripciones.module';
     EventosModule,
     ColoniaModule,
     TiersModule,
-    OnboardingModule,
     HealthModule,
     StudioModule, // Planificador de Cursos
     SuscripcionesModule, // Suscripciones MercadoPago PreApproval

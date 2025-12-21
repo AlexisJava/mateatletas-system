@@ -58,26 +58,6 @@ export class PagosManagementFacadeService {
   }
 
   /**
-   * Obtener membresías de un tutor
-   *
-   * @param tutorId - ID del tutor
-   * @returns Lista de membresías
-   */
-  async findMembresiasDelTutor(tutorId: string) {
-    return this.queryService.findMembresiasDelTutor(tutorId);
-  }
-
-  /**
-   * Obtener membresía activa de un tutor
-   *
-   * @param tutorId - ID del tutor
-   * @returns Membresía activa o null
-   */
-  async findMembresiaActiva(tutorId: string) {
-    return this.queryService.findMembresiaActiva(tutorId);
-  }
-
-  /**
    * Verificar si estudiante tiene inscripción pendiente
    *
    * @param estudianteId - ID del estudiante
@@ -156,20 +136,6 @@ export class PagosManagementFacadeService {
    */
   async registrarPagoManual(dto: RegistrarPagoManualDto) {
     return this.commandService.registrarPagoManual(dto);
-  }
-
-  /**
-   * Actualizar estado de membresía
-   *
-   * @param membresiaId - ID de la membresía
-   * @param estadoPago - Estado de pago a aplicar
-   * @returns Membresía actualizada
-   */
-  async actualizarEstadoMembresia(membresiaId: string, estadoPago: EstadoPago) {
-    return this.commandService.actualizarEstadoMembresia(
-      membresiaId,
-      estadoPago,
-    );
   }
 
   /**

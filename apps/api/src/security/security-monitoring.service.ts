@@ -408,12 +408,13 @@ export class SecurityMonitoringService {
     const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const now = new Date();
 
-    // Total de pagos en últimas 24h
-    const totalPayments = await this.prisma.pagoInscripcion2026.count({
+    // Total de pagos en últimas 24h (inscripciones pagadas)
+    const totalPayments = await this.prisma.inscripcionMensual.count({
       where: {
-        createdAt: {
+        fecha_pago: {
           gte: last24Hours,
         },
+        estado_pago: 'Pagado',
       },
     });
 

@@ -16,9 +16,8 @@ import { Decimal } from '@prisma/client/runtime/library';
  */
 export enum TipoDescuento {
   NINGUNO = 'NINGUNO',
-  HERMANO_2 = 'HERMANO_2', // 10% descuento para 2do hermano en adelante
-  HERMANO_3_MAS = 'HERMANO_3_MAS', // Deprecated - ahora todo es 10%
-  BECA = 'BECA',
+  HERMANO_2 = 'HERMANO_2', // 12% descuento segundo hermano
+  HERMANO_3_MAS = 'HERMANO_3_MAS', // 20% descuento tercer hermano en adelante
 }
 
 /**

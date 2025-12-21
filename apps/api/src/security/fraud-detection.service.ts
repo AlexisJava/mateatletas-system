@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../core/database/prisma.service';
 import { AuditLogService, EntityType } from '../audit/audit-log.service';
 
 /**
@@ -80,76 +79,31 @@ export class FraudDetectionService {
 
   // Configuración de umbrales de detección
   private readonly MULTIPLE_PAYMENTS_THRESHOLD = 10; // Máximo 10 pagos en 5 minutos
-  private readonly MULTIPLE_PAYMENTS_WINDOW_MS = 5 * 60 * 1000; // 5 minutos
   private readonly HIGH_RISK_SCORE_THRESHOLD = 70; // Score > 70 = BLOCK
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly auditLog: AuditLogService,
-  ) {}
+  constructor(private readonly auditLog: AuditLogService) {}
 
   /**
    * Detecta múltiples pagos desde la misma IP en corto tiempo
    *
-   * ATAQUE: Botnet o script automatizado enviando múltiples pagos
-   * UMBRAL: 10 pagos en 5 minutos desde misma IP
+   * NOTA: Esta funcionalidad requiere tracking de IP en pagos.
+   * Actualmente retorna siempre no sospechoso hasta que se
+   * implemente tracking de IP en InscripcionMensual.
    *
    * @param ipAddress - IP a analizar
    * @returns Resultado del análisis
    */
-  async detectMultiplePaymentsFromSameIP(
-    ipAddress: string,
-  ): Promise<MultiplePaymentsResult> {
-    const windowStart = new Date(Date.now() - this.MULTIPLE_PAYMENTS_WINDOW_MS);
+  detectMultiplePaymentsFromSameIP(ipAddress: string): MultiplePaymentsResult {
+    // TODO: Implementar tracking de IP en InscripcionMensual
+    // Por ahora retornamos no sospechoso ya que no hay tracking de IP
 
-    // Contar pagos desde esta IP en la ventana de tiempo
-    const recentPayments = await this.prisma.pagoInscripcion2026.findMany({
-      where: {
-        ip_address: ipAddress,
-        createdAt: {
-          gte: windowStart,
-        },
-      },
-      select: {
-        id: true,
-        createdAt: true,
-      },
-    });
-
-    const count = recentPayments.length;
-    const isSuspicious = count > this.MULTIPLE_PAYMENTS_THRESHOLD;
-
-    const result: MultiplePaymentsResult = {
-      isSuspicious,
-      reason: isSuspicious
-        ? `${count} pagos en 5 minutos desde IP ${ipAddress}`
-        : 'Dentro del umbral normal',
+    return {
+      isSuspicious: false,
+      reason: 'IP tracking no implementado - se requiere campo ip_address',
       threshold: this.MULTIPLE_PAYMENTS_THRESHOLD,
-      actualCount: count,
+      actualCount: 0,
       ipAddress,
     };
-
-    // Si es sospechoso, loguear como fraude
-    if (isSuspicious) {
-      this.logger.warn(
-        `🚨 FRAUDE DETECTADO: ${count} pagos desde IP ${ipAddress} en 5 minutos (umbral: ${this.MULTIPLE_PAYMENTS_THRESHOLD})`,
-      );
-
-      await this.auditLog.logFraudDetected(
-        `Múltiples pagos desde misma IP: ${count} pagos en 5 minutos`,
-        EntityType.PAGO,
-        undefined,
-        {
-          ipAddress,
-          paymentCount: count,
-          threshold: this.MULTIPLE_PAYMENTS_THRESHOLD,
-          timeWindowMinutes: 5,
-        },
-        ipAddress,
-      );
-    }
-
-    return result;
   }
 
   /**
@@ -206,53 +160,27 @@ export class FraudDetectionService {
   /**
    * Verifica que un payment_id de MercadoPago sea único
    *
-   * ATAQUE: Reutilizar mismo payment_id aprobado para múltiples inscripciones
-   * EJEMPLO: Pagar 1 vez, usar ese payment_id para 10 inscripciones
+   * NOTA: Esta funcionalidad requiere tracking de payment_id en pagos.
+   * Actualmente retorna siempre único hasta que se implemente
+   * tracking de mercadopago_payment_id en InscripcionMensual.
    *
    * @param mercadopagoPaymentId - Payment ID de MercadoPago
    * @returns Resultado de verificación
    */
-  async checkPaymentIdUniqueness(
+  checkPaymentIdUniqueness(
     mercadopagoPaymentId: string,
-  ): Promise<PaymentIdUniquenessResult> {
-    const existingPayment = await this.prisma.pagoInscripcion2026.findUnique({
-      where: {
-        mercadopago_payment_id: mercadopagoPaymentId,
-      },
-      select: {
-        id: true,
-        inscripcion_id: true,
-      },
-    });
+  ): PaymentIdUniquenessResult {
+    // TODO: Implementar tracking de mercadopago_payment_id en InscripcionMensual
+    // Por ahora retornamos único ya que no hay tracking de payment_id
+    this.logger.debug(
+      `Verificando payment_id ${mercadopagoPaymentId} - tracking no implementado`,
+    );
 
-    const isUnique = !existingPayment;
-
-    const result: PaymentIdUniquenessResult = {
-      isUnique,
-      existingPaymentId: existingPayment?.id || null,
-      existingInscripcionId: existingPayment?.inscripcion_id || undefined,
+    return {
+      isUnique: true,
+      existingPaymentId: null,
+      existingInscripcionId: undefined,
     };
-
-    // Si ya existe, loguear como fraude
-    if (!isUnique) {
-      this.logger.error(
-        `🚨 FRAUDE DETECTADO: Reutilización de payment_id ${mercadopagoPaymentId}. Ya usado en pago ${existingPayment?.id}`,
-      );
-
-      await this.auditLog.logFraudDetected(
-        `Reutilización de payment_id: ${mercadopagoPaymentId} ya usado`,
-        EntityType.PAGO,
-        existingPayment?.id,
-        {
-          mercadopagoPaymentId,
-          existingPaymentId: existingPayment?.id,
-          existingInscripcionId: existingPayment?.inscripcion_id,
-        },
-        undefined,
-      );
-    }
-
-    return result;
   }
 
   /**
@@ -279,7 +207,7 @@ export class FraudDetectionService {
     const factors: string[] = [];
 
     // Factor 1: Múltiples pagos desde misma IP
-    const ipAnalysis = await this.detectMultiplePaymentsFromSameIP(
+    const ipAnalysis = this.detectMultiplePaymentsFromSameIP(
       paymentData.ipAddress,
     );
     if (ipAnalysis.isSuspicious) {
@@ -299,9 +227,7 @@ export class FraudDetectionService {
     }
 
     // Factor 3: Payment ID duplicado
-    const paymentIdCheck = await this.checkPaymentIdUniqueness(
-      paymentData.paymentId,
-    );
+    const paymentIdCheck = this.checkPaymentIdUniqueness(paymentData.paymentId);
     if (!paymentIdCheck.isUnique) {
       score += 60;
       factors.push('duplicate_payment_id');
