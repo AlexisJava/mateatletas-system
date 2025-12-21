@@ -123,9 +123,24 @@ export class PreapprovalService {
    * 4. DESPUÉS DEL COMMIT: Emitir evento
    *
    * Si MP falla, la transacción hace rollback automáticamente.
+   *
+   * FLUJOS SOPORTADOS:
+   * - Sin cardTokenId → Redirect a checkout de MercadoPago (estado: pending)
+   * - Con cardTokenId + payerEmail → Cobro inmediato con Bricks (estado: authorized)
    */
   async crear(input: CrearSuscripcionInput): Promise<CrearSuscripcionResult> {
-    const { tutorId, planId, tutorEmail, tutorNombre, numeroHijo } = input;
+    const {
+      tutorId,
+      planId,
+      tutorEmail,
+      tutorNombre,
+      numeroHijo,
+      cardTokenId,
+      payerEmail,
+    } = input;
+
+    // Determinar flujo: Bricks (cobro inmediato) o Redirect
+    const usarBricks = !!(cardTokenId && payerEmail);
 
     // 1. Validar tutor (read-only, fuera de transacción)
     const tutor = await this.prisma.tutor.findUnique({
@@ -161,14 +176,20 @@ export class PreapprovalService {
     // 4. TRANSACCIÓN: Crear en DB + MP API + Actualizar
     const result = await this.prisma.$transaction(
       async (tx: PrismaTransactionClient) => {
-        // 4.1 Crear registro en DB (estado PENDIENTE)
+        // 4.1 Crear registro en DB (estado según flujo)
+        const estadoInicial = usarBricks
+          ? EstadoSuscripcion.ACTIVA // Bricks: cobro inmediato → activa
+          : EstadoSuscripcion.PENDIENTE; // Redirect: espera pago
+
         const suscripcion = await tx.suscripcion.create({
           data: {
             tutor_id: tutorId,
             plan_id: planId,
-            estado: EstadoSuscripcion.PENDIENTE,
+            estado: estadoInicial,
             precio_final: precioFinal,
             descuento_porcentaje: descuentoPorcentaje,
+            // Si es Bricks, establecer fecha_inicio inmediatamente
+            ...(usarBricks && { fecha_inicio: new Date() }),
           },
         });
 
@@ -182,20 +203,37 @@ export class PreapprovalService {
             );
           }
 
-          return await this.mpPreApprovalClient.create({
-            body: {
-              payer_email: tutorEmail,
-              back_url: `${this.frontendUrl}/suscripcion/callback`,
-              reason: `Suscripción Mateatletas - ${plan.nombre} (${tutorNombre})`,
-              external_reference: `suscripcion:${suscripcion.id}`,
-              auto_recurring: {
-                frequency: plan.intervalo_cantidad,
-                frequency_type: frequencyType,
-                transaction_amount: precioFinal,
-                currency_id: 'ARS',
-              },
+          // Construir body base
+          const mpBody: Record<string, unknown> = {
+            payer_email: usarBricks ? payerEmail : tutorEmail,
+            back_url: `${this.frontendUrl}/suscripcion/callback`,
+            reason: `Suscripción Mateatletas - ${plan.nombre} (${tutorNombre})`,
+            external_reference: `suscripcion:${suscripcion.id}`,
+            auto_recurring: {
+              frequency: plan.intervalo_cantidad,
+              frequency_type: frequencyType,
+              transaction_amount: precioFinal,
+              currency_id: 'ARS',
             },
-          });
+          };
+
+          // Si usamos Bricks: agregar card_token_id y status authorized
+          if (usarBricks) {
+            mpBody.card_token_id = cardTokenId;
+            mpBody.status = 'authorized'; // Cobra inmediatamente
+
+            // SEGURIDAD: Solo loguear últimos 4 caracteres del token
+            this.logger.log(
+              `Creando suscripción con Bricks para ${payerEmail}, ` +
+                `token: ...${cardTokenId.slice(-4)}`,
+            );
+          } else {
+            this.logger.log(
+              `Creando suscripción con redirect para plan ${plan.nombre}`,
+            );
+          }
+
+          return await this.mpPreApprovalClient.create({ body: mpBody });
         });
 
         // 4.3 Actualizar suscripción con ID de MercadoPago
@@ -209,9 +247,11 @@ export class PreapprovalService {
         return {
           suscripcionId: suscripcion.id,
           mpPreapprovalId: mpResponse.id,
-          checkoutUrl: mpResponse.init_point,
+          // Si es Bricks, no hay checkout URL (ya se cobró)
+          checkoutUrl: usarBricks ? null : mpResponse.init_point,
           precioFinal,
           descuentoPorcentaje,
+          cobradoInmediatamente: usarBricks,
         };
       },
     );
@@ -230,8 +270,9 @@ export class PreapprovalService {
       }),
     );
 
+    const flujo = usarBricks ? 'Bricks (cobro inmediato)' : 'Redirect';
     this.logger.log(
-      `Suscripción creada: ${result.suscripcionId} - MP: ${result.mpPreapprovalId}`,
+      `Suscripción creada: ${result.suscripcionId} - MP: ${result.mpPreapprovalId} - Flujo: ${flujo}`,
     );
 
     return result;

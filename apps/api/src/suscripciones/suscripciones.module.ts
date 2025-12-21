@@ -17,9 +17,12 @@ import { BullModule } from '@nestjs/bullmq';
 
 // Controllers
 import { SuscripcionesWebhookController } from './presentation/suscripciones-webhook.controller';
+import { SuscripcionesController } from './presentation/suscripciones.controller';
 
 // Services
 import { PreapprovalService } from './services/preapproval.service';
+import { SuscripcionQueryService } from './services/suscripcion-query.service';
+import { SuscripcionAdminService } from './services/suscripcion-admin.service';
 import { PreapprovalWebhookService } from './services/preapproval-webhook.service';
 import { SuscripcionAccesoService } from './services/suscripcion-acceso.service';
 import { MercadoPagoPreApprovalClientService } from './services/mercadopago-preapproval-client.service';
@@ -57,10 +60,12 @@ import { MercadoPagoIpWhitelistService } from '../pagos/services/mercadopago-ip-
       name: WEBHOOK_PREAPPROVAL_QUEUE,
     }),
   ],
-  controllers: [SuscripcionesWebhookController],
+  controllers: [SuscripcionesWebhookController, SuscripcionesController],
   providers: [
     // Servicios propios del módulo
     PreapprovalService,
+    SuscripcionQueryService,
+    SuscripcionAdminService,
     PreapprovalWebhookService,
     SuscripcionAccesoService,
     MercadoPagoPreApprovalClientService,
@@ -81,6 +86,8 @@ import { MercadoPagoIpWhitelistService } from '../pagos/services/mercadopago-ip-
     PreapprovalService,
     PreapprovalWebhookService,
     SuscripcionAccesoService,
+    SuscripcionQueryService,
+    SuscripcionAdminService,
   ],
 })
 export class SuscripcionesModule {}

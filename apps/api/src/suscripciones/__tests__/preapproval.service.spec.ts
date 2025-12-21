@@ -246,6 +246,147 @@ describe('PreapprovalService', () => {
         }),
       });
     });
+
+    // =========================================================================
+    // TESTS PARA MERCADOPAGO BRICKS (COBRO INMEDIATO)
+    // =========================================================================
+
+    describe('MercadoPago Bricks flow', () => {
+      const crearInputConBricks: CrearSuscripcionInput = {
+        ...crearInput,
+        cardTokenId: 'abc123def456ghi789jkl012mno345pq', // 32 chars
+        payerEmail: 'payer@test.com',
+      };
+
+      it('should_create_with_immediate_charge_when_card_token_provided', async () => {
+        // Arrange
+        prisma.tutor.findUnique.mockResolvedValue(mockTutor);
+        prisma.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
+        prisma.suscripcion.create.mockResolvedValue({
+          id: 'suscripcion-bricks-123',
+          tutor_id: 'tutor-123',
+          plan_id: 'plan-123',
+          precio_final: { toNumber: () => 40000 },
+          descuento_porcentaje: 0,
+          estado: EstadoSuscripcion.ACTIVA, // ACTIVA inmediatamente
+        });
+
+        mockPreApprovalClient.create.mockResolvedValue({
+          id: 'mp-preapproval-bricks-123',
+          init_point: 'https://mercadopago.com/checkout/123', // no se usa
+          status: 'authorized',
+        });
+
+        // Act
+        const result = await service.crear(crearInputConBricks);
+
+        // Assert
+        expect(result.cobradoInmediatamente).toBe(true);
+        expect(result.checkoutUrl).toBeNull(); // No hay redirect
+        expect(result.suscripcionId).toBe('suscripcion-bricks-123');
+      });
+
+      it('should_send_card_token_and_authorized_status_to_mp_api', async () => {
+        // Arrange
+        prisma.tutor.findUnique.mockResolvedValue(mockTutor);
+        prisma.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
+        prisma.suscripcion.create.mockResolvedValue({
+          id: 'suscripcion-bricks-123',
+          tutor_id: 'tutor-123',
+          plan_id: 'plan-123',
+          precio_final: { toNumber: () => 40000 },
+          descuento_porcentaje: 0,
+          estado: EstadoSuscripcion.ACTIVA,
+        });
+
+        mockPreApprovalClient.create.mockResolvedValue({
+          id: 'mp-preapproval-bricks-123',
+          init_point: 'https://mercadopago.com/checkout/123',
+          status: 'authorized',
+        });
+
+        // Act
+        await service.crear(crearInputConBricks);
+
+        // Assert - Verificar que se envía card_token_id y status authorized
+        expect(mockPreApprovalClient.create).toHaveBeenCalledWith({
+          body: expect.objectContaining({
+            card_token_id: 'abc123def456ghi789jkl012mno345pq',
+            status: 'authorized',
+            payer_email: 'payer@test.com', // Usa payerEmail, no tutorEmail
+          }),
+        });
+      });
+
+      it('should_use_redirect_flow_when_no_card_token', async () => {
+        // Arrange
+        prisma.tutor.findUnique.mockResolvedValue(mockTutor);
+        prisma.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
+        prisma.suscripcion.create.mockResolvedValue({
+          id: 'suscripcion-redirect-123',
+          tutor_id: 'tutor-123',
+          plan_id: 'plan-123',
+          precio_final: { toNumber: () => 40000 },
+          descuento_porcentaje: 0,
+          estado: EstadoSuscripcion.PENDIENTE,
+        });
+
+        mockPreApprovalClient.create.mockResolvedValue({
+          id: 'mp-preapproval-redirect-123',
+          init_point: 'https://mercadopago.com/checkout/redirect',
+          status: 'pending',
+        });
+
+        // Act - Sin cardTokenId ni payerEmail
+        const result = await service.crear(crearInput);
+
+        // Assert
+        expect(result.cobradoInmediatamente).toBe(false);
+        expect(result.checkoutUrl).toBe(
+          'https://mercadopago.com/checkout/redirect',
+        );
+
+        // Verificar que NO se envía card_token_id
+        expect(mockPreApprovalClient.create).toHaveBeenCalledWith({
+          body: expect.not.objectContaining({
+            card_token_id: expect.anything(),
+            status: 'authorized',
+          }),
+        });
+      });
+
+      it('should_set_fecha_inicio_when_using_bricks', async () => {
+        // Arrange
+        prisma.tutor.findUnique.mockResolvedValue(mockTutor);
+        prisma.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
+        prisma.suscripcion.create.mockResolvedValue({
+          id: 'suscripcion-bricks-123',
+          tutor_id: 'tutor-123',
+          plan_id: 'plan-123',
+          precio_final: { toNumber: () => 40000 },
+          descuento_porcentaje: 0,
+          estado: EstadoSuscripcion.ACTIVA,
+          fecha_inicio: new Date(),
+        });
+
+        mockPreApprovalClient.create.mockResolvedValue({
+          id: 'mp-preapproval-bricks-123',
+          init_point: 'https://mercadopago.com/checkout/123',
+          status: 'authorized',
+        });
+
+        // Act
+        await service.crear(crearInputConBricks);
+
+        // Assert - Verificar que se crea con fecha_inicio
+        expect(prisma.suscripcion.create).toHaveBeenCalledWith({
+          data: expect.objectContaining({
+            estado: EstadoSuscripcion.ACTIVA,
+            fecha_inicio: expect.any(Date),
+          }),
+        });
+      });
+    });
   });
 
   describe('cancelar', () => {

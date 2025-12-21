@@ -126,6 +126,10 @@ export interface UpdatePreApprovalRequest {
 
 /**
  * Datos para crear una suscripción en nuestro sistema
+ *
+ * Soporta dos flujos:
+ * 1. Redirect: Sin card_token_id → Usuario redirigido a checkout de MP
+ * 2. Bricks: Con card_token_id + payerEmail → Cobro inmediato inline
  */
 export interface CrearSuscripcionInput {
   /** ID del tutor que se suscribe */
@@ -138,22 +142,46 @@ export interface CrearSuscripcionInput {
   readonly tutorNombre: string;
   /** Número de hijo para calcular descuento familiar (1 = primer hijo) */
   readonly numeroHijo: number;
+
+  // === Campos opcionales para MercadoPago Bricks ===
+
+  /**
+   * Token de tarjeta generado por MercadoPago Bricks
+   *
+   * SEGURIDAD:
+   * - Es de uso único, NO persistir en DB
+   * - Solo loguear últimos 4 caracteres
+   * - Si presente, payerEmail es REQUERIDO
+   */
+  readonly cardTokenId?: string;
+
+  /**
+   * Email del pagador para cobro con Bricks
+   * REQUERIDO si cardTokenId está presente
+   */
+  readonly payerEmail?: string;
 }
 
 /**
  * Resultado de crear una suscripción
+ *
+ * Incluye información sobre el flujo utilizado:
+ * - cobradoInmediatamente: true si se usó Bricks (card_token_id)
+ * - checkoutUrl: URL de redirect (solo si NO es cobro inmediato)
  */
 export interface CrearSuscripcionResult {
   /** ID de la suscripción en nuestra DB */
   readonly suscripcionId: string;
   /** ID de la suscripción en MercadoPago */
   readonly mpPreapprovalId: string;
-  /** URL de checkout para redirigir al usuario */
-  readonly checkoutUrl: string;
+  /** URL de checkout para redirigir al usuario (null si cobro inmediato) */
+  readonly checkoutUrl: string | null;
   /** Precio final con descuento aplicado */
   readonly precioFinal: number;
   /** Porcentaje de descuento aplicado */
   readonly descuentoPorcentaje: number;
+  /** Indica si se cobró inmediatamente con Bricks */
+  readonly cobradoInmediatamente: boolean;
 }
 
 /**
