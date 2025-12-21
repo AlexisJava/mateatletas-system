@@ -34,14 +34,6 @@ interface PaymentIdUniquenessResult {
 }
 
 /**
- * Resultado de verificación de inscripción duplicada
- */
-interface DuplicateInscriptionResult {
-  isDuplicate: boolean;
-  existingInscripcionId: string | null;
-}
-
-/**
  * Datos de pago para calcular score de riesgo
  */
 interface PaymentRiskData {
@@ -264,67 +256,6 @@ export class FraudDetectionService {
   }
 
   /**
-   * Detecta inscripciones duplicadas (mismo tutor + estudiante DNI)
-   *
-   * ATAQUE: Inscribir mismo estudiante múltiples veces para obtener múltiples cuentas
-   * REGLA: Un estudiante solo puede tener 1 inscripción activa por año
-   *
-   * @param tutorId - ID del tutor
-   * @param estudianteDNI - DNI del estudiante
-   * @returns Resultado de verificación
-   */
-  async checkDuplicateInscription(
-    tutorId: string,
-    estudianteDNI: string,
-  ): Promise<DuplicateInscriptionResult> {
-    const existingInscripciones = await this.prisma.inscripcion2026.findMany({
-      where: {
-        tutor_id: tutorId,
-        estudiantes: {
-          some: {
-            dni: estudianteDNI,
-          },
-        },
-        // Solo considerar inscripciones activas o pending
-        estado: {
-          in: ['active', 'pending'],
-        },
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    const isDuplicate = existingInscripciones.length > 0;
-
-    const result: DuplicateInscriptionResult = {
-      isDuplicate,
-      existingInscripcionId: existingInscripciones[0]?.id || null,
-    };
-
-    // Si es duplicado, loguear como fraude/intento duplicado
-    if (isDuplicate) {
-      this.logger.warn(
-        `🚨 FRAUDE/ERROR: Intento de inscripción duplicada. Tutor ${tutorId}, Estudiante DNI ${estudianteDNI}`,
-      );
-
-      await this.auditLog.logFraudDetected(
-        `Intento de inscripción duplicada: estudiante DNI ${estudianteDNI} ya inscripto`,
-        EntityType.INSCRIPCION,
-        existingInscripciones[0]?.id,
-        {
-          tutorId,
-          estudianteDNI,
-          existingInscripcionId: existingInscripciones[0]?.id,
-        },
-        undefined,
-      );
-    }
-
-    return result;
-  }
-
-  /**
    * Calcula score de riesgo de fraude basado en múltiples factores
    *
    * SCORE: 0-100
@@ -374,16 +305,6 @@ export class FraudDetectionService {
     if (!paymentIdCheck.isUnique) {
       score += 60;
       factors.push('duplicate_payment_id');
-    }
-
-    // Factor 4: Inscripción duplicada
-    const inscripcionCheck = await this.checkDuplicateInscription(
-      paymentData.tutorId,
-      paymentData.estudianteDNI,
-    );
-    if (inscripcionCheck.isDuplicate) {
-      score += 30;
-      factors.push('duplicate_inscription');
     }
 
     // Determinar recomendación basada en score

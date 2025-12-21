@@ -70,7 +70,6 @@ export enum TipoExternalReference {
   ESTUDIANTE_RECARGA = 'ESTUDIANTE_RECARGA',
   MEMBRESIA = 'MEMBRESIA', // Legacy: membresia-{id}-tutor-{id}-producto-{id}
   INSCRIPCION_MENSUAL = 'INSCRIPCION_MENSUAL', // Legacy: inscripcion-{id}-estudiante-{id}-producto-{id}
-  INSCRIPCION_2026 = 'INSCRIPCION_2026', // inscripcion2026-{id}-tutor-{id}-tipo-{tipo}
   PAGO_COLONIA = 'PAGO_COLONIA', // Colonia enero
 }
 
@@ -158,18 +157,6 @@ export const EXTERNAL_REFERENCE_FORMATS = {
   ): string {
     return `inscripcion-${inscripcionId}-estudiante-${estudianteId}-producto-${productoId}`;
   },
-
-  /**
-   * Crear external_reference para inscripción 2026
-   * Format: "inscripcion2026-{inscripcionId}-tutor-{tutorId}-tipo-{tipoInscripcion}"
-   */
-  inscripcion2026(
-    inscripcionId: string,
-    tutorId: string,
-    tipoInscripcion: string,
-  ): string {
-    return `inscripcion2026-${inscripcionId}-tutor-${tutorId}-tipo-${tipoInscripcion}`;
-  },
 };
 
 /**
@@ -239,7 +226,6 @@ export function parseExternalReference(
  * Formatos soportados:
  * - "membresia-{id}-tutor-{id}-producto-{id}"
  * - "inscripcion-{id}-estudiante-{id}-producto-{id}"
- * - "inscripcion2026-{id}-tutor-{id}-tipo-{tipo}"
  * - ID directo (colonia)
  */
 export function parseLegacyExternalReference(
@@ -281,25 +267,7 @@ export function parseLegacyExternalReference(
     };
   }
 
-  // Caso 3: Inscripción 2026
-  if (externalReference.startsWith('inscripcion2026-')) {
-    const match = externalReference.match(
-      /^inscripcion2026-(.+?)-tutor-(.+?)-tipo-(.+)$/,
-    );
-    if (!match) return null;
-    const [, inscripcionId, tutorId, tipoInscripcion] = match;
-    if (!inscripcionId || !tutorId || !tipoInscripcion) return null;
-    return {
-      tipo: TipoExternalReference.INSCRIPCION_2026,
-      ids: {
-        inscripcionId,
-        tutorId,
-        tipoInscripcion,
-      },
-    };
-  }
-
-  // Caso 4: ID directo (colonia, etc.)
+  // Caso 3: ID directo (colonia, etc.)
   // Si no matcheó ningún formato legacy, asumimos que es un ID directo de Colonia
   // Acepta cualquier formato: UUID, CUID, numérico, etc.
   return {

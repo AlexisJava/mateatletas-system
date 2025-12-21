@@ -1,11 +1,9 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WebhookQueueService } from './webhook-queue.service';
-import { WebhookProcessor } from './processors/webhook.processor';
 import { QueueMetricsController } from './queue-metrics.controller';
 import { QueueHealthIndicator } from './health/queue-health.indicator';
-import { Inscripciones2026Module } from '../inscripciones-2026/inscripciones-2026.module';
 
 /**
  * WebhookQueueModule - Sistema de Queue Asíncrono con Bull (PASO 3.2 + 3.4)
@@ -83,10 +81,9 @@ import { Inscripciones2026Module } from '../inscripciones-2026/inscripciones-202
         },
       },
     }),
-    forwardRef(() => Inscripciones2026Module), // Romper dependencia circular
   ],
   controllers: [QueueMetricsController],
-  providers: [WebhookQueueService, WebhookProcessor, QueueHealthIndicator],
+  providers: [WebhookQueueService, QueueHealthIndicator],
   exports: [WebhookQueueService, QueueHealthIndicator],
 })
 export class WebhookQueueModule {}

@@ -52,19 +52,10 @@ export class PaymentExpirationService {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - this.EXPIRATION_DAYS);
 
-      // 1. Expirar InscripcionMensual pendientes
+      // Expirar InscripcionMensual pendientes
       const inscripcionesMensualesExpired =
         await this.expireInscripcionesMensuales(cutoffDate);
       totalExpired += inscripcionesMensualesExpired;
-
-      // 2. Expirar Inscripcion2026 pendientes (si aplica)
-      const inscripciones2026Expired =
-        await this.expireInscripciones2026(cutoffDate);
-      totalExpired += inscripciones2026Expired;
-
-      // 3. Expirar PagoInscripcion2026 pendientes
-      const pagos2026Expired = await this.expirePagos2026(cutoffDate);
-      totalExpired += pagos2026Expired;
 
       const duration = Date.now() - startTime;
 
@@ -114,104 +105,12 @@ export class PaymentExpirationService {
   }
 
   /**
-   * Expira inscripciones 2026 pendientes
-   *
-   * Nota: Inscripcion2026 usa campo "estado" (string) no "estado_pago" (enum)
-   *
-   * @param cutoffDate - Fecha límite
-   * @returns Número de registros actualizados
-   */
-  private async expireInscripciones2026(cutoffDate: Date): Promise<number> {
-    const result = await this.prisma.inscripcion2026.updateMany({
-      where: {
-        estado: 'pending',
-        createdAt: {
-          lt: cutoffDate,
-        },
-      },
-      data: {
-        estado: 'cancelled', // Cancelada por timeout
-      },
-    });
-
-    if (result.count > 0) {
-      this.logger.log(`📋 Inscripciones2026 expiradas: ${result.count}`);
-
-      // Registrar en historial de cambios de estado
-      await this.registrarHistorialExpiracion(cutoffDate);
-    }
-
-    return result.count;
-  }
-
-  /**
-   * Expira pagos de inscripción 2026 pendientes
-   *
-   * @param cutoffDate - Fecha límite
-   * @returns Número de registros actualizados
-   */
-  private async expirePagos2026(cutoffDate: Date): Promise<number> {
-    const result = await this.prisma.pagoInscripcion2026.updateMany({
-      where: {
-        estado: 'pending',
-        createdAt: {
-          lt: cutoffDate,
-        },
-      },
-      data: {
-        estado: 'expired',
-      },
-    });
-
-    if (result.count > 0) {
-      this.logger.log(`📋 PagosInscripcion2026 expirados: ${result.count}`);
-    }
-
-    return result.count;
-  }
-
-  /**
-   * Registra en el historial los cambios de estado por expiración
-   *
-   * @param _cutoffDate - Fecha de corte usada para la expiración (para futura auditoría)
-   */
-  private async registrarHistorialExpiracion(_cutoffDate: Date): Promise<void> {
-    // Buscar inscripciones que acaban de ser expiradas
-    const inscripcionesExpiradas = await this.prisma.inscripcion2026.findMany({
-      where: {
-        estado: 'cancelled',
-        updatedAt: {
-          gte: new Date(Date.now() - 60000), // Actualizadas en el último minuto
-        },
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    // Crear registros de historial para cada una
-    if (inscripcionesExpiradas.length > 0) {
-      await this.prisma.historialEstadoInscripcion2026.createMany({
-        data: inscripcionesExpiradas.map((insc) => ({
-          inscripcion_id: insc.id,
-          estado_anterior: 'pending',
-          estado_nuevo: 'cancelled',
-          razon: `Expiración automática: más de ${this.EXPIRATION_DAYS} días sin pago`,
-          realizado_por: 'SYSTEM:PaymentExpirationService',
-        })),
-      });
-    }
-  }
-
-  /**
    * Método para ejecución manual (útil para testing o triggers manuales)
    *
    * @returns Estadísticas del proceso
    */
   async runManually(): Promise<{
     inscripcionesMensuales: number;
-    inscripciones2026: number;
-    pagos2026: number;
     total: number;
   }> {
     this.logger.log('🔧 Ejecutando expiración manual...');
@@ -221,14 +120,10 @@ export class PaymentExpirationService {
 
     const inscripcionesMensuales =
       await this.expireInscripcionesMensuales(cutoffDate);
-    const inscripciones2026 = await this.expireInscripciones2026(cutoffDate);
-    const pagos2026 = await this.expirePagos2026(cutoffDate);
 
     return {
       inscripcionesMensuales,
-      inscripciones2026,
-      pagos2026,
-      total: inscripcionesMensuales + inscripciones2026 + pagos2026,
+      total: inscripcionesMensuales,
     };
   }
 

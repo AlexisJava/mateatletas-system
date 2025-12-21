@@ -30,7 +30,6 @@ import { CursosModule } from './cursos/cursos.module';
 import { EventosModule } from './eventos/eventos.module';
 import { HealthModule } from './health/health.module';
 import { ColoniaModule } from './colonia/colonia.module';
-import { Inscripciones2026Module } from './inscripciones-2026/inscripciones-2026.module';
 import { TiersModule } from './tiers/tiers.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { AuditModule } from './audit/audit.module';
@@ -87,7 +86,6 @@ import { SuscripcionesModule } from './suscripciones/suscripciones.module';
     CursosModule,
     EventosModule,
     ColoniaModule,
-    Inscripciones2026Module,
     TiersModule,
     OnboardingModule,
     HealthModule,
