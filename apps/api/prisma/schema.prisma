@@ -52,9 +52,6 @@ model Tutor {
   membresias                Membresia[]
   inscripciones_mensuales   InscripcionMensual[]
 
-  /// NUEVAS RELACIONES - GAMIFICACIÓN V2
-  solicitudes_canje SolicitudCanje[]
-
   /// COLONIA DE VERANO 2026
   inscripciones_colonia ColoniaInscripcion[]
   Inscripcion2026       Inscripcion2026[]
@@ -132,11 +129,9 @@ model Estudiante {
   becas                     Beca[]
   recursos                  RecursosEstudiante?
 
-  /// NUEVAS RELACIONES - GAMIFICACIÓN V2
+  /// GAMIFICACIÓN V2
   logros_desbloqueados LogroEstudiante[]
   racha                RachaEstudiante?
-  solicitudes_canje    SolicitudCanje[]
-  cursos_canjeados     CursoEstudiante[]
 
   /// COLONIA DE VERANO 2026
   colonia_inscripciones     ColoniaEstudiante[]
@@ -1975,119 +1970,8 @@ model RachaEstudiante {
   @@map("rachas_estudiantes")
 }
 
-// ==========================================
-// MODELO: CursoCatalogo
-// ==========================================
-
-model CursoCatalogo {
-  id String @id @default(cuid())
-
-  // Información básica
-  codigo       String  @unique // "quimica_explosiva"
-  titulo       String
-  descripcion  String  @db.Text
-  categoria    String // "ciencia", "programacion", "robotica", "diseno"
-  subcategoria String?
-
-  // Detalles académicos
-  duracion_clases Int
-  nivel_requerido Int   @default(1) // Nivel mínimo estudiante
-  contenido       Json? // Syllabus, módulos, etc
-
-  // Pricing
-  precio_usd     Decimal @db.Decimal(10, 2)
-  precio_monedas Int // precio_usd * 20
-
-  // Media
-  imagen_url        String?
-  video_preview_url String?
-
-  // Metadata
-  destacado Boolean @default(false)
-  nuevo     Boolean @default(false)
-  activo    Boolean @default(true)
-  orden     Int     @default(0)
-
-  // Stats
-  total_canjes Int     @default(0)
-  rating       Decimal @default(0) @db.Decimal(3, 2)
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  // Relaciones
-  solicitudes_canje  SolicitudCanje[]
-  cursos_estudiantes CursoEstudiante[]
-
-  @@index([categoria])
-  @@index([destacado])
-  @@index([activo])
-  @@map("cursos_catalogo")
-}
-
-// ==========================================
-// MODELO: SolicitudCanje
-// ==========================================
-
-model SolicitudCanje {
-  id String @id @default(cuid())
-
-  // Partes involucradas
-  estudiante_id String
-  tutor_id      String
-  curso_id      String
-
-  // Detalles del canje
-  monedas_usadas Int
-  estado         String // "pendiente", "aprobada", "rechazada", "cancelada"
-
-  // Decisión del padre
-  fecha_decision DateTime?
-  opcion_pago    String? // "padre_paga_todo", "hijo_paga_mitad", "hijo_paga_todo"
-  monto_padre    Decimal?  @db.Decimal(10, 2) // Cuánto pagó el padre
-  mensaje_padre  String?   @db.Text
-
-  // Metadata
-  fecha_solicitud  DateTime  @default(now())
-  fecha_expiracion DateTime? // Opcional: expira en 7 días
-
-  // Relaciones
-  estudiante Estudiante    @relation(fields: [estudiante_id], references: [id])
-  tutor      Tutor         @relation(fields: [tutor_id], references: [id])
-  curso      CursoCatalogo @relation(fields: [curso_id], references: [id])
-
-  @@index([estudiante_id])
-  @@index([tutor_id])
-  @@index([estado])
-  @@index([fecha_solicitud])
-  @@map("solicitudes_canje")
-}
-
-// ==========================================
-// MODELO: CursoEstudiante (Habilitados)
-// ==========================================
-
-model CursoEstudiante {
-  id String @id @default(cuid())
-
-  estudiante_id String
-  curso_id      String
-
-  // Progreso
-  progreso         Int       @default(0) // 0-100%
-  completado       Boolean   @default(false)
-  fecha_inicio     DateTime  @default(now())
-  fecha_completado DateTime?
-
-  // Relaciones
-  estudiante Estudiante    @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  curso      CursoCatalogo @relation(fields: [curso_id], references: [id])
-
-  @@unique([estudiante_id, curso_id])
-  @@index([estudiante_id])
-  @@index([completado])
-  @@map("cursos_estudiantes")
-}
+// [ELIMINADO] Sistema Catálogo Cursos con Monedas - removido en cleanup
+// Modelos eliminados: CursoCatalogo, SolicitudCanje, CursoEstudiante
 
 // [ELIMINADO] Sistema PuntosPadre - modelos no utilizados removidos en cleanup
 
