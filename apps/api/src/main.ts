@@ -302,4 +302,4 @@ async function bootstrap() {
   logger.log(`🚀 API corriendo en http://localhost:${port}/api`);
   logger.log(`📚 Documentación Swagger en http://localhost:${port}/api/docs`);
 }
-bootstrap();
+void bootstrap();

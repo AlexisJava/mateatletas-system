@@ -1,6 +1,8 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { authenticator } from 'otplib';
 import * as QRCode from 'qrcode';
+import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { PrismaService } from '../../core/database/prisma.service';
 
 /**
@@ -169,7 +171,8 @@ export class MfaService {
     try {
       return authenticator.verify({ token, secret });
     } catch (error) {
-      this.logger.error(`Error verificando token TOTP: ${error}`);
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error verificando token TOTP: ${message}`);
       return false;
     }
   }
@@ -195,8 +198,6 @@ export class MfaService {
     }
 
     // Los backup codes se guardan hasheados (similar a passwords)
-    const bcrypt = require('bcrypt');
-
     for (const [index, hashedCode] of admin.mfa_backup_codes.entries()) {
       const isValid = await bcrypt.compare(backupCode, hashedCode);
 
@@ -250,15 +251,17 @@ export class MfaService {
    * @returns Código alfanumérico en mayúsculas
    */
   private generateRandomCode(length: number): string {
-    const crypto = require('crypto');
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
 
     // Generar bytes aleatorios criptográficamente seguros
-    const randomBytes = crypto.randomBytes(length);
+    const bytes = randomBytes(length);
 
     for (let i = 0; i < length; i++) {
-      code += chars[randomBytes[i] % chars.length];
+      const byte = bytes[i];
+      if (byte !== undefined) {
+        code += chars[byte % chars.length];
+      }
     }
 
     return code;

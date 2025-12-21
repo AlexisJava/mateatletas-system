@@ -9,6 +9,18 @@ import { map } from 'rxjs/operators';
 import { ApiResponse } from '../interfaces/api-response.interface';
 
 /**
+ * Tipo para respuestas parciales que pueden tener data y/o metadata
+ */
+interface PartialApiResponse<T> {
+  data?: T;
+  metadata?: {
+    timestamp?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+/**
  * TransformResponseInterceptor
  *
  * Interceptor global que estandariza el formato de todas las respuestas de la API.
@@ -67,11 +79,23 @@ export class TransformResponseInterceptor<T>
 
         // Si ya tiene la propiedad 'data', asumimos que ya está en formato correcto
         // Esto evita re-envolver respuestas que ya fueron formateadas manualmente
-        if ('data' in data && data.data !== undefined) {
-          // Asegurar que tenga metadata con timestamp
-          if (!data.metadata) {
+        if ('data' in data) {
+          const partialResponse = data as PartialApiResponse<T>;
+
+          if (partialResponse.data === undefined) {
+            // Tiene 'data' pero es undefined, envolver normalmente
             return {
-              ...data,
+              data: data as T,
+              metadata: {
+                timestamp: new Date().toISOString(),
+              },
+            };
+          }
+
+          // Asegurar que tenga metadata con timestamp
+          if (!partialResponse.metadata) {
+            return {
+              ...partialResponse,
               metadata: {
                 timestamp: new Date().toISOString(),
               },
@@ -79,18 +103,18 @@ export class TransformResponseInterceptor<T>
           }
 
           // Si tiene metadata pero no timestamp, agregarlo
-          if (!data.metadata.timestamp) {
+          if (!partialResponse.metadata.timestamp) {
             return {
-              ...data,
+              ...partialResponse,
               metadata: {
-                ...data.metadata,
+                ...partialResponse.metadata,
                 timestamp: new Date().toISOString(),
               },
             } as ApiResponse<T>;
           }
 
           // Ya tiene formato completo, retornar tal cual
-          return data as ApiResponse<T>;
+          return partialResponse as ApiResponse<T>;
         }
 
         // Respuesta que no tiene formato ApiResponse, envolverla

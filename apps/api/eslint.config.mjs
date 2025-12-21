@@ -23,6 +23,9 @@ export default tseslint.config(
       '**/__tests__/**',
       '**/*.spec.ts',
       '**/*.e2e-spec.ts',
+      // Archivos de test fuera del tsconfig
+      'test/**',
+      'prisma/seeds/**',
     ],
   },
 

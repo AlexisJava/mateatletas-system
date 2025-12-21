@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 
 // Core & Infrastructure Modules
 import { CoreModule } from './core/core.module';
@@ -36,6 +37,7 @@ import { OnboardingModule } from './onboarding/onboarding.module';
 import { AuditModule } from './audit/audit.module';
 import { StudioModule } from './studio/studio.module';
 import { EmailModule } from './email/email.module';
+import { SuscripcionesModule } from './suscripciones/suscripciones.module';
 
 /**
  * AppModule
@@ -92,6 +94,7 @@ import { EmailModule } from './email/email.module';
     OnboardingModule,
     HealthModule,
     StudioModule, // Planificador de Cursos
+    SuscripcionesModule, // Suscripciones MercadoPago PreApproval
   ],
   controllers: [AppController],
   providers: [
@@ -104,4 +107,9 @@ import { EmailModule } from './email/email.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Correlation ID middleware para trazabilidad de requests
+    consumer.apply(CorrelationIdMiddleware).forRoutes('*');
+  }
+}

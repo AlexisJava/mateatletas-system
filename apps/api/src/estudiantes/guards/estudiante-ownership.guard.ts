@@ -22,9 +22,12 @@ export class EstudianteOwnershipGuard implements CanActivate {
   constructor(private prisma: PrismaService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const user = request.user as AuthUser | undefined;
-    const estudianteId = request.params?.id as string | undefined;
+    const request = context.switchToHttp().getRequest<{
+      user?: AuthUser;
+      params?: { id?: string };
+    }>();
+    const user = request.user;
+    const estudianteId = request.params?.id;
 
     this.logger.debug(
       `Validating ownership - userId: ${user?.id}, role: ${user?.role}, estudianteId: ${estudianteId}`,

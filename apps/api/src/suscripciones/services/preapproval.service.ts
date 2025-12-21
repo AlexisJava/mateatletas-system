@@ -5,10 +5,15 @@
  * - Crear suscripciones (PreApproval) en MercadoPago
  * - Cancelar suscripciones
  * - Calcular descuentos familiares
- * - Emitir eventos de dominio
+ * - Emitir eventos de dominio (DESPUÉS del commit)
  *
  * REGLA DE NEGOCIO: Las suscripciones NO SE PAUSAN.
  * Si el tutor no paga, se cancela. Si quiere volver, crea una nueva.
+ *
+ * PATRÓN TRANSACCIONAL:
+ * - Todas las operaciones DB se envuelven en $transaction
+ * - Los eventos se emiten DESPUÉS del commit exitoso
+ * - Si falla, se hace rollback automático
  *
  * Patrón Circuit Breaker:
  * - Protege contra fallos repetidos de la API de MercadoPago
@@ -17,7 +22,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EstadoSuscripcion, IntervaloSuscripcion } from '@prisma/client';
+import {
+  EstadoSuscripcion,
+  IntervaloSuscripcion,
+  Prisma,
+} from '@prisma/client';
 import { PreApproval } from 'mercadopago';
 
 import { PrismaService } from '../../core/database/prisma.service';
@@ -34,6 +43,10 @@ import {
   calcularPrecioConDescuento,
   ResultadoDescuento,
 } from '../domain/constants/descuento-familiar.constants';
+import {
+  OptimisticLockError,
+  isOptimisticLockError,
+} from '../errors/optimistic-lock.error';
 
 /**
  * Interfaz para el cliente de PreApproval de MercadoPago
@@ -56,6 +69,11 @@ interface MpPreApprovalClient {
  * Tipo de frecuencia para MercadoPago
  */
 type MpFrequencyType = 'days' | 'months';
+
+/**
+ * Tipo para el cliente de transacción de Prisma
+ */
+type PrismaTransactionClient = Prisma.TransactionClient;
 
 @Injectable()
 export class PreapprovalService {
@@ -98,18 +116,18 @@ export class PreapprovalService {
   /**
    * Crea una nueva suscripción
    *
-   * Flujo:
-   * 1. Validar tutor y plan
+   * Flujo TRANSACCIONAL:
+   * 1. Validar tutor y plan (fuera de transacción - read-only)
    * 2. Calcular descuento familiar
-   * 3. Crear registro en DB (estado PENDIENTE)
-   * 4. Crear PreApproval en MercadoPago
-   * 5. Actualizar registro con ID de MP
-   * 6. Emitir evento
+   * 3. TRANSACCIÓN: Crear registro en DB + Llamar MP API + Actualizar con MP ID
+   * 4. DESPUÉS DEL COMMIT: Emitir evento
+   *
+   * Si MP falla, la transacción hace rollback automáticamente.
    */
   async crear(input: CrearSuscripcionInput): Promise<CrearSuscripcionResult> {
     const { tutorId, planId, tutorEmail, tutorNombre, numeroHijo } = input;
 
-    // 1. Validar tutor
+    // 1. Validar tutor (read-only, fuera de transacción)
     const tutor = await this.prisma.tutor.findUnique({
       where: { id: tutorId },
     });
@@ -121,7 +139,7 @@ export class PreapprovalService {
       );
     }
 
-    // 2. Validar plan
+    // 2. Validar plan (read-only, fuera de transacción)
     const plan = await this.prisma.planSuscripcion.findUnique({
       where: { id: planId },
     });
@@ -140,75 +158,83 @@ export class PreapprovalService {
       numeroHijo,
     );
 
-    // 4. Crear registro en DB (transacción)
-    const suscripcion = await this.prisma.suscripcion.create({
-      data: {
-        tutor_id: tutorId,
-        plan_id: planId,
-        estado: EstadoSuscripcion.PENDIENTE,
-        precio_final: precioFinal,
-        descuento_porcentaje: descuentoPorcentaje,
-      },
-    });
-
-    // 5. Crear PreApproval en MercadoPago con Circuit Breaker
-    const frequencyType = this.mapIntervaloToFrequencyType(plan.intervalo);
-    const mpResponse = await this.circuitBreaker.execute(async () => {
-      if (!this.mpPreApprovalClient) {
-        throw new PreApprovalError(
-          'Cliente MercadoPago no configurado',
-          PreApprovalErrorCode.MP_API_ERROR,
-        );
-      }
-
-      return await this.mpPreApprovalClient.create({
-        body: {
-          payer_email: tutorEmail,
-          back_url: `${this.frontendUrl}/suscripcion/callback`,
-          reason: `Suscripción Mateatletas - ${plan.nombre} (${tutorNombre})`,
-          external_reference: `suscripcion:${suscripcion.id}`,
-          auto_recurring: {
-            frequency: plan.intervalo_cantidad,
-            frequency_type: frequencyType,
-            transaction_amount: precioFinal,
-            currency_id: 'ARS',
+    // 4. TRANSACCIÓN: Crear en DB + MP API + Actualizar
+    const result = await this.prisma.$transaction(
+      async (tx: PrismaTransactionClient) => {
+        // 4.1 Crear registro en DB (estado PENDIENTE)
+        const suscripcion = await tx.suscripcion.create({
+          data: {
+            tutor_id: tutorId,
+            plan_id: planId,
+            estado: EstadoSuscripcion.PENDIENTE,
+            precio_final: precioFinal,
+            descuento_porcentaje: descuentoPorcentaje,
           },
-        },
-      });
-    });
+        });
 
-    // 6. Actualizar suscripción con ID de MercadoPago
-    await this.prisma.suscripcion.update({
-      where: { id: suscripcion.id },
-      data: {
-        mp_preapproval_id: mpResponse.id,
+        // 4.2 Crear PreApproval en MercadoPago con Circuit Breaker
+        const frequencyType = this.mapIntervaloToFrequencyType(plan.intervalo);
+        const mpResponse = await this.circuitBreaker.execute(async () => {
+          if (!this.mpPreApprovalClient) {
+            throw new PreApprovalError(
+              'Cliente MercadoPago no configurado',
+              PreApprovalErrorCode.MP_API_ERROR,
+            );
+          }
+
+          return await this.mpPreApprovalClient.create({
+            body: {
+              payer_email: tutorEmail,
+              back_url: `${this.frontendUrl}/suscripcion/callback`,
+              reason: `Suscripción Mateatletas - ${plan.nombre} (${tutorNombre})`,
+              external_reference: `suscripcion:${suscripcion.id}`,
+              auto_recurring: {
+                frequency: plan.intervalo_cantidad,
+                frequency_type: frequencyType,
+                transaction_amount: precioFinal,
+                currency_id: 'ARS',
+              },
+            },
+          });
+        });
+
+        // 4.3 Actualizar suscripción con ID de MercadoPago
+        await tx.suscripcion.update({
+          where: { id: suscripcion.id },
+          data: {
+            mp_preapproval_id: mpResponse.id,
+          },
+        });
+
+        return {
+          suscripcionId: suscripcion.id,
+          mpPreapprovalId: mpResponse.id,
+          checkoutUrl: mpResponse.init_point,
+          precioFinal,
+          descuentoPorcentaje,
+        };
       },
-    });
+    );
 
-    // 7. Emitir evento
+    // 5. DESPUÉS DEL COMMIT: Emitir evento
+    // CRÍTICO: Solo llegamos aquí si la transacción fue exitosa
     this.eventEmitter.emit(
       SuscripcionCreadaEvent.EVENT_NAME,
       new SuscripcionCreadaEvent({
-        suscripcionId: suscripcion.id,
+        suscripcionId: result.suscripcionId,
         tutorId,
         planId,
-        mpPreapprovalId: mpResponse.id,
-        precioFinal,
-        descuentoPorcentaje,
+        mpPreapprovalId: result.mpPreapprovalId,
+        precioFinal: result.precioFinal,
+        descuentoPorcentaje: result.descuentoPorcentaje,
       }),
     );
 
     this.logger.log(
-      `Suscripción creada: ${suscripcion.id} - MP: ${mpResponse.id}`,
+      `Suscripción creada: ${result.suscripcionId} - MP: ${result.mpPreapprovalId}`,
     );
 
-    return {
-      suscripcionId: suscripcion.id,
-      mpPreapprovalId: mpResponse.id,
-      checkoutUrl: mpResponse.init_point,
-      precioFinal,
-      descuentoPorcentaje,
-    };
+    return result;
   }
 
   /**
@@ -217,15 +243,15 @@ export class PreapprovalService {
    * REGLA DE NEGOCIO: No hay pausa. Si no paga, se cancela.
    * Si quiere volver, crea una nueva suscripción.
    *
-   * Validaciones:
-   * - Suscripción existe
-   * - Tutor es dueño
-   * - Estado permite cancelación (no ya cancelada)
+   * Flujo TRANSACCIONAL:
+   * 1. Validaciones (fuera de transacción - read-only)
+   * 2. TRANSACCIÓN: Cancelar en MP + Actualizar DB + Registrar historial
+   * 3. DESPUÉS DEL COMMIT: Emitir evento
    */
   async cancelar(input: CancelarSuscripcionInput): Promise<void> {
     const { suscripcionId, tutorId, motivo, canceladoPor } = input;
 
-    // 1. Buscar suscripción
+    // 1. Buscar suscripción (read-only, fuera de transacción)
     const suscripcion = await this.prisma.suscripcion.findUnique({
       where: { id: suscripcionId },
       include: { plan: true },
@@ -255,47 +281,66 @@ export class PreapprovalService {
     }
 
     const estadoAnterior = suscripcion.estado;
+    const currentVersion = suscripcion.version;
 
-    // 4. Cancelar en MercadoPago
-    if (suscripcion.mp_preapproval_id) {
-      await this.circuitBreaker.execute(async () => {
-        if (!this.mpPreApprovalClient) {
-          throw new PreApprovalError(
-            'Cliente MercadoPago no configurado',
-            PreApprovalErrorCode.MP_API_ERROR,
-          );
+    // Extraer mp_preapproval_id antes de la transacción para evitar narrowing issues
+    const mpPreapprovalId = suscripcion.mp_preapproval_id;
+
+    // 4. TRANSACCIÓN: MP API + DB updates con Optimistic Locking
+    try {
+      await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
+        // 4.1 Cancelar en MercadoPago
+        if (mpPreapprovalId) {
+          await this.circuitBreaker.execute(async () => {
+            if (!this.mpPreApprovalClient) {
+              throw new PreApprovalError(
+                'Cliente MercadoPago no configurado',
+                PreApprovalErrorCode.MP_API_ERROR,
+              );
+            }
+
+            return await this.mpPreApprovalClient.update({
+              id: mpPreapprovalId,
+              body: { status: 'cancelled' },
+            });
+          });
         }
 
-        return await this.mpPreApprovalClient.update({
-          id: suscripcion.mp_preapproval_id!,
-          body: { status: 'cancelled' },
+        // 4.2 Actualizar en DB con Optimistic Locking
+        await tx.suscripcion.update({
+          where: {
+            id: suscripcionId,
+            version: currentVersion, // Optimistic Lock check
+          },
+          data: {
+            estado: EstadoSuscripcion.CANCELADA,
+            motivo_cancelacion: motivo,
+            cancelado_por: canceladoPor,
+            fecha_cancelacion: new Date(),
+            version: { increment: 1 }, // Incrementar versión
+          },
+        });
+
+        // 4.3 Registrar en historial
+        await tx.historialEstadoSuscripcion.create({
+          data: {
+            suscripcion_id: suscripcionId,
+            estado_anterior: estadoAnterior,
+            estado_nuevo: EstadoSuscripcion.CANCELADA,
+            motivo,
+            realizado_por: canceladoPor,
+          },
         });
       });
+    } catch (error) {
+      // Convertir error de Prisma P2025 a OptimisticLockError
+      if (isOptimisticLockError(error)) {
+        throw new OptimisticLockError(suscripcionId, currentVersion);
+      }
+      throw error;
     }
 
-    // 5. Actualizar en DB
-    await this.prisma.suscripcion.update({
-      where: { id: suscripcionId },
-      data: {
-        estado: EstadoSuscripcion.CANCELADA,
-        motivo_cancelacion: motivo,
-        cancelado_por: canceladoPor,
-        fecha_cancelacion: new Date(),
-      },
-    });
-
-    // 6. Registrar en historial
-    await this.prisma.historialEstadoSuscripcion.create({
-      data: {
-        suscripcion_id: suscripcionId,
-        estado_anterior: estadoAnterior,
-        estado_nuevo: EstadoSuscripcion.CANCELADA,
-        motivo,
-        realizado_por: canceladoPor,
-      },
-    });
-
-    // 7. Emitir evento
+    // 5. DESPUÉS DEL COMMIT: Emitir evento
     this.eventEmitter.emit(
       SuscripcionCanceladaEvent.EVENT_NAME,
       new SuscripcionCanceladaEvent({

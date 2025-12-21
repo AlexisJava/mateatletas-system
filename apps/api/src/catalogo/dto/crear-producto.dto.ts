@@ -78,7 +78,7 @@ export class CrearProductoDto {
     type: String,
     format: 'date',
   })
-  @ValidateIf((o) => o.tipo === 'Curso')
+  @ValidateIf((o: CrearProductoDto) => o.tipo === 'Curso')
   @IsDateString({}, { message: 'La fecha de inicio debe ser una fecha válida' })
   @IsNotEmpty({ message: 'La fecha de inicio es requerida para cursos' })
   fecha_inicio?: string;
@@ -89,7 +89,7 @@ export class CrearProductoDto {
     type: String,
     format: 'date',
   })
-  @ValidateIf((o) => o.tipo === 'Curso')
+  @ValidateIf((o: CrearProductoDto) => o.tipo === 'Curso')
   @IsDateString({}, { message: 'La fecha de inicio debe ser una fecha válida' })
   @IsOptional()
   fechaInicio?: string; // Alias camelCase
@@ -100,7 +100,7 @@ export class CrearProductoDto {
     type: String,
     format: 'date',
   })
-  @ValidateIf((o) => o.tipo === 'Curso')
+  @ValidateIf((o: CrearProductoDto) => o.tipo === 'Curso')
   @IsDateString({}, { message: 'La fecha de fin debe ser una fecha válida' })
   @IsNotEmpty({ message: 'La fecha de fin es requerida para cursos' })
   fecha_fin?: string;
@@ -111,7 +111,7 @@ export class CrearProductoDto {
     type: String,
     format: 'date',
   })
-  @ValidateIf((o) => o.tipo === 'Curso')
+  @ValidateIf((o: CrearProductoDto) => o.tipo === 'Curso')
   @IsDateString({}, { message: 'La fecha de fin debe ser una fecha válida' })
   @IsOptional()
   fechaFin?: string; // Alias camelCase
@@ -122,7 +122,7 @@ export class CrearProductoDto {
     type: Number,
     minimum: 1,
   })
-  @ValidateIf((o) => o.tipo === 'Curso')
+  @ValidateIf((o: CrearProductoDto) => o.tipo === 'Curso')
   @IsInt({ message: 'El cupo máximo debe ser un número entero' })
   @Min(1, { message: 'El cupo máximo debe ser al menos 1' })
   @IsNotEmpty({ message: 'El cupo máximo es requerido para cursos' })
@@ -134,7 +134,7 @@ export class CrearProductoDto {
     type: Number,
     minimum: 1,
   })
-  @ValidateIf((o) => o.tipo === 'Curso')
+  @ValidateIf((o: CrearProductoDto) => o.tipo === 'Curso')
   @IsInt({ message: 'El cupo máximo debe ser un número entero' })
   @Min(1, { message: 'El cupo máximo debe ser al menos 1' })
   @IsOptional()
@@ -150,7 +150,9 @@ export class CrearProductoDto {
     type: Number,
     minimum: 1,
   })
-  @ValidateIf((o) => o.tipo === 'Suscripcion' || o.tipo === 'Curso')
+  @ValidateIf(
+    (o: CrearProductoDto) => o.tipo === 'Suscripcion' || o.tipo === 'Curso',
+  )
   @IsInt({ message: 'La duración debe ser un número entero de meses' })
   @Min(1, { message: 'La duración debe ser al menos 1 mes' })
   @IsOptional()
@@ -162,7 +164,9 @@ export class CrearProductoDto {
     type: Number,
     minimum: 1,
   })
-  @ValidateIf((o) => o.tipo === 'Suscripcion' || o.tipo === 'Curso')
+  @ValidateIf(
+    (o: CrearProductoDto) => o.tipo === 'Suscripcion' || o.tipo === 'Curso',
+  )
   @IsInt({ message: 'La duración debe ser un número entero de meses' })
   @Min(1, { message: 'La duración debe ser al menos 1 mes' })
   @IsOptional()

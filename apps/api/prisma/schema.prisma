@@ -3618,6 +3618,11 @@ model Suscripcion {
   /// Timestamp de última actualización
   updated_at           DateTime          @updatedAt
 
+  // === Optimistic Locking ===
+
+  /// Versión del registro para control de concurrencia
+  version              Int               @default(0)
+
   // === Relaciones ===
 
   /// Tutor propietario de la suscripción

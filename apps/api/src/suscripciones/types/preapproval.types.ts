@@ -205,4 +205,103 @@ export enum PreApprovalErrorCode {
   PLAN_NOT_FOUND = 'PLAN_NOT_FOUND',
   /** Tutor no encontrado */
   TUTOR_NOT_FOUND = 'TUTOR_NOT_FOUND',
+  /** Webhook duplicado (ya procesado) */
+  WEBHOOK_DUPLICATE = 'WEBHOOK_DUPLICATE',
+}
+
+// ============================================================================
+// TIPOS PARA WEBHOOKS DE SUBSCRIPTION_PREAPPROVAL
+// ============================================================================
+
+/**
+ * Payload del webhook subscription_preapproval de MercadoPago
+ *
+ * MercadoPago envía este webhook cuando cambia el estado de una suscripción:
+ * - authorized: Suscripción activa y cobros funcionando
+ * - cancelled: Cancelada por usuario o sistema
+ * - paused: Pausada (nosotros NO usamos, pero MP puede enviar)
+ * - pending: Esperando primer pago
+ */
+export interface PreApprovalWebhookPayload {
+  /** Tipo de webhook */
+  readonly type: 'subscription_preapproval';
+  /** Acción que disparó el webhook */
+  readonly action: 'created' | 'updated' | 'payment.created';
+  /** ID del webhook */
+  readonly id: string;
+  /** Versión de la API */
+  readonly api_version: string;
+  /** Fecha de creación del webhook */
+  readonly date_created: string;
+  /** Si es modo producción */
+  readonly live_mode: boolean;
+  /** ID del usuario/vendedor en MP */
+  readonly user_id: string;
+  /** Datos del recurso */
+  readonly data: {
+    /** ID del preapproval en MercadoPago */
+    readonly id: string;
+  };
+}
+
+/**
+ * Detalle del preapproval obtenido de la API de MercadoPago
+ * GET /preapproval/{id}
+ */
+export interface PreApprovalDetail {
+  /** ID del preapproval */
+  readonly id: string;
+  /** Estado actual */
+  readonly status: PreApprovalStatus;
+  /** Referencia externa (nuestro suscripcionId) */
+  readonly external_reference: string;
+  /** Email del pagador */
+  readonly payer_email: string;
+  /** ID del pagador en MP */
+  readonly payer_id: number;
+  /** Razón/descripción */
+  readonly reason: string;
+  /** Fecha del próximo pago */
+  readonly next_payment_date: string | null;
+  /** Fecha del último pago exitoso */
+  readonly last_payment_date?: string | null;
+  /** Configuración de cobro automático */
+  readonly auto_recurring: AutoRecurring;
+  /** Fecha de creación */
+  readonly date_created: string;
+  /** Fecha de última modificación */
+  readonly last_modified: string;
+  /** Información del pago más reciente */
+  readonly summarized?: {
+    /** Cantidad de pagos aprobados */
+    readonly quotas: number;
+    /** Total cobrado */
+    readonly charged_amount: number;
+    /** Último pago */
+    readonly last_charged_date?: string;
+    /** Último error de pago */
+    readonly last_charged_error_date?: string;
+  };
+}
+
+/**
+ * Resultado de procesar un webhook de preapproval
+ */
+export interface ProcessWebhookResult {
+  /** Si el webhook fue procesado exitosamente */
+  readonly success: boolean;
+  /** Acción tomada */
+  readonly action:
+    | 'activated'
+    | 'cancelled'
+    | 'grace_period'
+    | 'morosa'
+    | 'skipped'
+    | 'error';
+  /** ID de la suscripción afectada */
+  readonly suscripcionId?: string;
+  /** Mensaje descriptivo */
+  readonly message: string;
+  /** Si era un webhook duplicado */
+  readonly wasDuplicate?: boolean;
 }
