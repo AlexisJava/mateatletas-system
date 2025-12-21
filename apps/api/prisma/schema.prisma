@@ -1643,11 +1643,11 @@ enum DiaSemana {
 }
 
 // ============================================================================
-// SISTEMA DE TIENDA Y RECURSOS (XP, MONEDAS, GEMAS)
+// SISTEMA DE GAMIFICACIÓN (XP y Progresión)
 // ============================================================================
 
-/// Recursos del estudiante (XP, Monedas, Gemas)
-/// Tabla que centraliza todos los recursos obtenibles por el estudiante
+/// Recursos del estudiante (XP y progresión)
+/// Tabla que centraliza el XP y progresión del estudiante
 model RecursosEstudiante {
   /// Identificador único
   id String @id @default(cuid())
@@ -1658,12 +1658,6 @@ model RecursosEstudiante {
   /// XP total acumulado (Experience Points)
   /// Se usa para niveles, desafíos, progresión
   xp_total Int @default(0)
-
-  /// Monedas totales (moneda principal para compras en tienda)
-  /// Se obtienen completando actividades, desafíos, asistencias
-  monedas_total Int @default(0)
-
-  /// NOTA: gemas_total eliminado - sistema simplificado a 2 monedas (XP + Monedas)
 
   /// Última actualización de recursos
   ultima_actualizacion DateTime @updatedAt
@@ -1683,7 +1677,7 @@ model RecursosEstudiante {
 }
 
 /// Transacciones de recursos (historial de cambios)
-/// Tabla transaccional que registra cada cambio en XP/Monedas/Gemas
+/// Tabla transaccional que registra cada cambio en XP
 model TransaccionRecurso {
   /// Identificador único
   id String @id @default(cuid())
@@ -1731,7 +1725,6 @@ model TransaccionRecurso {
 /// Tipos de recursos del estudiante
 enum TipoRecurso {
   XP
-  MONEDAS
 
   @@map("tipo_recurso")
 }
@@ -1761,8 +1754,7 @@ model Logro {
   categoria   String // "consistencia", "maestria", "social", etc
 
   // Recompensas
-  monedas_recompensa Int
-  xp_recompensa      Int
+  xp_recompensa Int
 
   // Criterios de desbloqueo
   criterio_tipo  String // "racha_dias", "temas_completados", etc

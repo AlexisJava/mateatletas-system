@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -19,7 +19,6 @@ export class RecursosService {
       recursos = await this.prisma.recursosEstudiante.create({
         data: {
           estudiante_id: estudianteId,
-          monedas_total: 0,
           xp_total: 0,
         },
       });
@@ -42,39 +41,6 @@ export class RecursosService {
   xpParaNivel(nivel: number): number {
     // Fórmula: xp = (nivel - 1)² × 100
     return Math.pow(nivel - 1, 2) * 100;
-  }
-
-  /**
-   * Agregar monedas
-   */
-  async agregarMonedas(
-    estudianteId: string,
-    cantidad: number,
-    razon: string,
-    metadata?: Prisma.InputJsonValue,
-  ) {
-    const recursos = await this.obtenerRecursos(estudianteId);
-
-    const nuevoTotal = recursos.monedas_total + cantidad;
-
-    // Actualizar recursos
-    const recursosActualizados = await this.prisma.recursosEstudiante.update({
-      where: { id: recursos.id },
-      data: { monedas_total: nuevoTotal },
-    });
-
-    // Registrar transacción
-    await this.prisma.transaccionRecurso.create({
-      data: {
-        recursos_estudiante_id: recursos.id,
-        tipo_recurso: 'MONEDAS',
-        cantidad,
-        razon,
-        metadata: metadata || {},
-      },
-    });
-
-    return recursosActualizados;
   }
 
   /**
@@ -118,45 +84,6 @@ export class RecursosService {
       nivel_nuevo: nivelNuevo,
       subio_nivel: subioNivel,
     };
-  }
-
-  /**
-   * Gastar monedas (canjear cursos)
-   */
-  async gastarMonedas(
-    estudianteId: string,
-    cantidad: number,
-    razon: string,
-    metadata?: Prisma.InputJsonValue,
-  ) {
-    const recursos = await this.obtenerRecursos(estudianteId);
-
-    if (recursos.monedas_total < cantidad) {
-      throw new NotFoundException(
-        `No tienes suficientes monedas. Necesitas ${cantidad} pero tienes ${recursos.monedas_total}`,
-      );
-    }
-
-    const nuevoTotal = recursos.monedas_total - cantidad;
-
-    // Actualizar recursos
-    const recursosActualizados = await this.prisma.recursosEstudiante.update({
-      where: { id: recursos.id },
-      data: { monedas_total: nuevoTotal },
-    });
-
-    // Registrar transacción (negativa)
-    await this.prisma.transaccionRecurso.create({
-      data: {
-        recursos_estudiante_id: recursos.id,
-        tipo_recurso: 'MONEDAS',
-        cantidad: -cantidad,
-        razon,
-        metadata: metadata || {},
-      },
-    });
-
-    return recursosActualizados;
   }
 
   /**

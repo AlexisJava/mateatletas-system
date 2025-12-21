@@ -110,7 +110,7 @@ export class XpGainedEvent {
  * - Un estudiante acumula suficiente XP y sube de nivel
  *
  * Listeners:
- * - GamificacionModule: Otorgar recompensas de nivel (gemas, monedas)
+ * - GamificacionModule: Otorgar recompensas de nivel
  * - NotificacionesModule: Enviar notificación de felicitación
  */
 export class EstudianteNivelUpEvent {
@@ -119,8 +119,6 @@ export class EstudianteNivelUpEvent {
     public readonly nivelAnterior: number,
     public readonly nivelNuevo: number,
     public readonly recompensas: {
-      gemas?: number;
-      monedas?: number;
       xp?: number;
     },
   ) {}
@@ -134,7 +132,7 @@ export class EstudianteNivelUpEvent {
  *
  * Listeners:
  * - NotificacionesModule: Enviar notificación de nuevo logro
- * - GamificacionModule: Otorgar recompensas del logro (XP, monedas, gemas)
+ * - GamificacionModule: Otorgar recompensas del logro (XP)
  */
 export class LogroDesbloqueadoEvent {
   constructor(
@@ -143,8 +141,6 @@ export class LogroDesbloqueadoEvent {
     public readonly logroNombre: string,
     public readonly recompensas: {
       xp?: number;
-      monedas?: number;
-      gemas?: number;
     },
   ) {}
 }

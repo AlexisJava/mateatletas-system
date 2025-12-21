@@ -117,14 +117,7 @@ export class LogrosService {
       },
     });
 
-    // Otorgar recompensas
-    await this.recursosService.agregarMonedas(
-      estudianteId,
-      logro.monedas_recompensa,
-      `Logro desbloqueado: ${logro.nombre}`,
-      { logro_id: logro.id },
-    );
-
+    // Otorgar recompensas (solo XP)
     const resultadoXP = await this.recursosService.agregarXP(
       estudianteId,
       logro.xp_recompensa,
@@ -136,7 +129,6 @@ export class LogrosService {
       logro_desbloqueado: logroDesbloqueado,
       ya_desbloqueado: false,
       recompensas: {
-        monedas: logro.monedas_recompensa,
         xp: logro.xp_recompensa,
       },
       subio_nivel: resultadoXP.subio_nivel,
