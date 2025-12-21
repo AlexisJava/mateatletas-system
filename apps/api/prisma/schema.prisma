@@ -126,7 +126,6 @@ model Estudiante {
   progresoLecciones         ProgresoLeccion[]
   puntosObtenidos           PuntoObtenido[]
   inscripciones_mensuales   InscripcionMensual[]
-  becas                     Beca[]
   recursos                  RecursosEstudiante?
 
   /// GAMIFICACIÓN V2
@@ -1676,39 +1675,7 @@ model InscripcionMensual {
   @@map("inscripciones_mensuales")
 }
 
-/// Gestión de becas y descuentos especiales
-model Beca {
-  /// Identificador único
-  id String @id @default(cuid())
-
-  /// Estudiante beneficiado
-  estudiante_id String
-
-  /// Tipo y configuración de la beca
-  tipo_beca        String // "Mérito Académico", "Social", "Deportiva", etc
-  descuento_tipo   DescuentoBecaTipo
-  descuento_valor  Decimal           @db.Decimal(10, 2) // Porcentaje o monto fijo
-  productos_aplica Json // Array de IDs de productos donde aplica
-
-  /// Vigencia
-  fecha_inicio DateTime
-  fecha_fin    DateTime
-  activa       Boolean  @default(true)
-
-  /// Metadata
-  motivo_beca           String?
-  aprobada_por_admin_id String?
-  observaciones         String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  /// Relaciones
-  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-
-  @@index([estudiante_id])
-  @@index([activa])
-  @@map("becas")
-}
+// [ELIMINADO] modelo Beca - sistema no implementado
 
 // ============================================================================
 // ENUMS DEL SISTEMA DE PAGOS
@@ -1719,7 +1686,6 @@ enum TipoDescuento {
   NINGUNO
   HERMANO_2 // 12% descuento segundo hermano
   HERMANO_3_MAS // 20% descuento tercer hermano en adelante
-  BECA
 
   @@map("tipo_descuento")
 }
@@ -1730,17 +1696,8 @@ enum EstadoPago {
   Pagado
   Vencido
   Parcial
-  Becado
 
   @@map("estado_pago")
-}
-
-/// Tipo de descuento en becas
-enum DescuentoBecaTipo {
-  PORCENTAJE
-  MONTO_FIJO
-
-  @@map("descuento_beca_tipo")
 }
 
 /// Tipo de clase grupo

@@ -23,7 +23,7 @@ export interface EstadoMembresiaResult {
  */
 export interface EstadoInscripcionResult {
   estadoPago: EstadoPago;
-  estadoInscripcion: EstadoPagoPrisma; // Pendiente, Pagado, Vencido, Parcial, Becado
+  estadoInscripcion: EstadoPagoPrisma; // Pendiente, Pagado, Vencido, Parcial
 }
 
 /**

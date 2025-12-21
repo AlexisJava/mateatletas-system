@@ -30,16 +30,6 @@ export enum EstadoPago {
   Pagado = 'Pagado',
   Vencido = 'Vencido',
   Parcial = 'Parcial',
-  Becado = 'Becado',
-}
-
-/**
- * Tipo de descuento en becas
- * Debe coincidir exactamente con enum DescuentoBecaTipo en schema.prisma
- */
-export enum DescuentoBecaTipo {
-  PORCENTAJE = 'PORCENTAJE',
-  MONTO_FIJO = 'MONTO_FIJO',
 }
 
 /**
@@ -168,21 +158,6 @@ export interface CrearInscripcionMensualDto {
   readonly periodo: string; // "2025-01"
 }
 
-/**
- * DTO para crear una beca
- */
-export interface CrearBecaDto {
-  readonly estudianteId: string;
-  readonly tipoBeca: string;
-  readonly descuentoTipo: DescuentoBecaTipo;
-  readonly descuentoValor: number;
-  readonly productosAplica: ReadonlyArray<string>;
-  readonly fechaInicio: Date;
-  readonly fechaFin: Date;
-  readonly motivoBeca?: string;
-  readonly observaciones?: string;
-}
-
 // ============================================================================
 // INTERFACES - Responses (API)
 // ============================================================================
@@ -216,7 +191,6 @@ export interface DashboardPagosResponse {
     readonly morosidad: number;
     readonly ingresosAnio: number;
     readonly estudiantesActivos: number;
-    readonly estudiantesBecados: number;
     readonly ingresoEstimadoProximoMes: number;
   };
   readonly graficos: {
