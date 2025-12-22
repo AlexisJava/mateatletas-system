@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import { EstadoAsistencia } from '@prisma/client';
-import { PuntosService } from './puntos.service';
+import { PuntosService, TipoAccionPuntos } from './puntos.service';
 import { LogrosService } from './logros.service';
 import { RankingService } from './ranking.service';
+import { RecursosService } from './services/recursos.service';
 
 /**
  * Servicio de Gamificación (Coordinador)
@@ -17,6 +18,7 @@ export class GamificacionService {
     private puntosService: PuntosService,
     private logrosService: LogrosService,
     private rankingService: RankingService,
+    private recursosService: RecursosService,
   ) {}
 
   /**
@@ -37,7 +39,6 @@ export class GamificacionService {
         apellido: true,
         fotoUrl: true,
         avatar_gradient: true,
-        puntos_totales: true,
         casaId: true,
         casa: {
           select: {
@@ -94,14 +95,10 @@ export class GamificacionService {
       throw new NotFoundException('Estudiante no encontrado');
     }
 
-    // Obtener información del nivel actual
-    const nivelInfo = await this.getNivelInfo(estudiante.puntos_totales);
-
-    // Calcular puntos totales basados en asistencias
-    const _puntosAsistencia =
-      estudiante.asistencias.filter(
-        (a) => a.estado === EstadoAsistencia.Presente,
-      ).length * 10;
+    // Obtener información del nivel actual usando RecursosService
+    const recursosConNivel =
+      await this.recursosService.obtenerRecursosConNivel(estudianteId);
+    const nivelInfo = this.formatNivelInfo(recursosConNivel);
 
     // Calcular próximas clases (select optimizado)
     const proximasClases = await this.prisma.clase.findMany({
@@ -152,7 +149,7 @@ export class GamificacionService {
           : null,
       },
       stats: {
-        puntosToales: estudiante.puntos_totales, // typo intencional para match con schema
+        puntosToales: recursosConNivel.xp_total, // Ahora usa RecursosEstudiante.xp_total
         clasesAsistidas: estudiante.asistencias.filter(
           (a) => a.estado === EstadoAsistencia.Presente,
         ).length,
@@ -167,80 +164,131 @@ export class GamificacionService {
   }
 
   /**
-   * Obtener información del nivel basado en los puntos totales
+   * Formatear información del nivel desde RecursosService
+   * Reemplaza getNivelInfo que usaba NivelConfig (modelo eliminado)
    */
-  async getNivelInfo(puntosActuales: number) {
-    // Buscar el nivel actual del estudiante
-    const nivelActual = await this.prisma.nivelConfig.findFirst({
-      where: {
-        puntos_minimos: { lte: puntosActuales },
-        puntos_maximos: { gte: puntosActuales },
-      },
-    });
-
-    // Buscar el siguiente nivel
-    const siguienteNivel = await this.prisma.nivelConfig.findFirst({
-      where: {
-        nivel: { gt: nivelActual?.nivel || 1 },
-      },
-      orderBy: { nivel: 'asc' },
-    });
-
-    if (!nivelActual) {
-      // Si no hay nivel configurado, retornar nivel 1 por defecto
-      return {
-        nivelActual: 1,
-        nombre: 'Explorador Numérico',
-        descripcion: 'Empezando tu viaje',
-        puntosActuales,
-        puntosMinimos: 0,
-        puntosMaximos: 499,
-        puntosParaSiguienteNivel: 500 - puntosActuales,
-        porcentajeProgreso: (puntosActuales / 500) * 100,
-        color: '#10b981',
-        icono: '🌱',
-        siguienteNivel: {
-          nivel: 2,
-          nombre: 'Aprendiz Matemático',
-          puntosRequeridos: 500,
-        },
-      };
-    }
-
-    const puntosEnNivel = puntosActuales - nivelActual.puntos_minimos;
-    const puntosNecesariosEnNivel =
-      nivelActual.puntos_maximos - nivelActual.puntos_minimos;
-    const porcentajeProgreso = (puntosEnNivel / puntosNecesariosEnNivel) * 100;
+  private formatNivelInfo(recursos: {
+    xp_total: number;
+    nivel: number;
+    xp_progreso: number;
+    xp_necesario: number;
+    porcentaje_nivel: number;
+  }) {
+    const nivelActual = recursos.nivel;
+    const xpNivelActual = this.recursosService.xpParaNivel(nivelActual);
+    const xpSiguienteNivel = this.recursosService.xpParaNivel(nivelActual + 1);
 
     return {
-      nivelActual: nivelActual.nivel,
-      nombre: nivelActual.nombre,
-      descripcion: nivelActual.descripcion,
-      puntosActuales,
-      puntosMinimos: nivelActual.puntos_minimos,
-      puntosMaximos: nivelActual.puntos_maximos,
-      puntosParaSiguienteNivel: siguienteNivel
-        ? siguienteNivel.puntos_minimos - puntosActuales
-        : 0,
-      porcentajeProgreso: Math.min(Math.round(porcentajeProgreso), 100),
-      color: nivelActual.color,
-      icono: nivelActual.icono,
-      siguienteNivel: siguienteNivel
-        ? {
-            nivel: siguienteNivel.nivel,
-            nombre: siguienteNivel.nombre,
-            puntosRequeridos: siguienteNivel.puntos_minimos,
-          }
-        : null,
+      nivelActual,
+      nombre: this.getNombreNivel(nivelActual),
+      descripcion: this.getDescripcionNivel(nivelActual),
+      puntosActuales: recursos.xp_total,
+      puntosMinimos: xpNivelActual,
+      puntosMaximos: xpSiguienteNivel - 1,
+      puntosParaSiguienteNivel: recursos.xp_necesario - recursos.xp_progreso,
+      porcentajeProgreso: recursos.porcentaje_nivel,
+      color: this.getColorNivel(nivelActual),
+      icono: this.getIconoNivel(nivelActual),
+      siguienteNivel: {
+        nivel: nivelActual + 1,
+        nombre: this.getNombreNivel(nivelActual + 1),
+        puntosRequeridos: xpSiguienteNivel,
+      },
     };
   }
 
   /**
-   * Obtener todos los niveles configurados
+   * Obtener nombre del nivel basado en número
    */
-  async getAllNiveles() {
-    return this.prisma.nivelConfig.findMany({
-      orderBy: { nivel: 'asc' },
+  private getNombreNivel(nivel: number): string {
+    const nombres: Record<number, string> = {
+      1: 'Explorador Numérico',
+      2: 'Aprendiz Matemático',
+      3: 'Calculador Novato',
+      4: 'Estudiante Destacado',
+      5: 'Matemático Junior',
+      6: 'Experto en Números',
+      7: 'Maestro Matemático',
+      8: 'Genio Numérico',
+      9: 'Leyenda Matemática',
+      10: 'Campeón Supremo',
+    };
+    return nombres[nivel] || `Nivel ${nivel}`;
+  }
+
+  /**
+   * Obtener descripción del nivel
+   */
+  private getDescripcionNivel(nivel: number): string {
+    const descripciones: Record<number, string> = {
+      1: 'Empezando tu viaje',
+      2: 'Aprendiendo los fundamentos',
+      3: 'Dominando operaciones básicas',
+      4: 'Destacándote en clase',
+      5: 'Resolviendo problemas complejos',
+      6: 'Experto en múltiples áreas',
+      7: 'Maestría en matemáticas',
+      8: 'Genio en formación',
+      9: 'Una leyenda viviente',
+      10: 'El campeón supremo',
+    };
+    return descripciones[nivel] || 'Avanzando en tu camino';
+  }
+
+  /**
+   * Obtener color del nivel
+   */
+  private getColorNivel(nivel: number): string {
+    const colores: Record<number, string> = {
+      1: '#10b981', // Verde
+      2: '#3b82f6', // Azul
+      3: '#8b5cf6', // Púrpura
+      4: '#f59e0b', // Ámbar
+      5: '#ef4444', // Rojo
+      6: '#ec4899', // Rosa
+      7: '#14b8a6', // Teal
+      8: '#f97316', // Naranja
+      9: '#6366f1', // Indigo
+      10: '#fbbf24', // Dorado
+    };
+    return colores[nivel] || '#6b7280';
+  }
+
+  /**
+   * Obtener icono del nivel
+   */
+  private getIconoNivel(nivel: number): string {
+    const iconos: Record<number, string> = {
+      1: '🌱',
+      2: '📚',
+      3: '🔢',
+      4: '⭐',
+      5: '🎯',
+      6: '🏅',
+      7: '👑',
+      8: '💎',
+      9: '🔥',
+      10: '🏆',
+    };
+    return iconos[nivel] || '📊';
+  }
+
+  /**
+   * Obtener configuración de todos los niveles
+   * Reemplaza getAllNiveles que usaba NivelConfig (modelo eliminado)
+   */
+  getAllNiveles() {
+    return Array.from({ length: 10 }, (_, i) => {
+      const nivel = i + 1;
+      return {
+        nivel,
+        nombre: this.getNombreNivel(nivel),
+        descripcion: this.getDescripcionNivel(nivel),
+        puntos_minimos: this.recursosService.xpParaNivel(nivel),
+        puntos_maximos: this.recursosService.xpParaNivel(nivel + 1) - 1,
+        color: this.getColorNivel(nivel),
+        icono: this.getIconoNivel(nivel),
+      };
     });
   }
 
@@ -287,11 +335,11 @@ export class GamificacionService {
   }
 
   /**
-   * Obtener acciones puntuables
+   * Obtener tipos de acciones puntuables
    * @delegated PuntosService
    */
-  async getAccionesPuntuables() {
-    return this.puntosService.getAccionesPuntuables();
+  getTiposAccion() {
+    return this.puntosService.getTiposAccion();
   }
 
   /**
@@ -309,14 +357,14 @@ export class GamificacionService {
   async otorgarPuntos(
     docenteId: string,
     estudianteId: string,
-    accionId: string,
+    tipoAccion: TipoAccionPuntos,
     claseId?: string,
     contexto?: string,
   ) {
     return this.puntosService.otorgarPuntos(
       docenteId,
       estudianteId,
-      accionId,
+      tipoAccion,
       claseId,
       contexto,
     );

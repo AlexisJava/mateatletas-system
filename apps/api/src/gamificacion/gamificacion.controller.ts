@@ -9,12 +9,26 @@ import {
   Request,
   ForbiddenException,
 } from '@nestjs/common';
-import { IsString, IsOptional, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty, IsIn } from 'class-validator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { GamificacionService } from './gamificacion.service';
 import { RequestWithAuthUser } from '../auth/interfaces';
+import { TipoAccionPuntos } from './puntos.service';
+
+/**
+ * Tipos de acciones válidas para otorgar puntos
+ */
+const TIPOS_ACCION_VALIDOS: TipoAccionPuntos[] = [
+  'ASISTENCIA',
+  'PARTICIPACION',
+  'LOGRO',
+  'BONUS',
+  'TAREA_COMPLETADA',
+  'QUIZ_APROBADO',
+  'AYUDA_COMPANERO',
+];
 
 /**
  * DTOs para las peticiones
@@ -26,7 +40,8 @@ export class OtorgarPuntosDto {
 
   @IsString()
   @IsNotEmpty()
-  accionId!: string;
+  @IsIn(TIPOS_ACCION_VALIDOS)
+  tipoAccion!: TipoAccionPuntos;
 
   @IsString()
   @IsOptional()
@@ -110,12 +125,12 @@ export class GamificacionController {
 
   /**
    * GET /gamificacion/acciones
-   * Obtener lista de acciones puntuables disponibles (para docentes)
+   * Obtener lista de tipos de acciones puntuables disponibles (para docentes)
    */
   @Get('acciones')
   @Roles(Role.DOCENTE, Role.ADMIN)
-  async getAcciones() {
-    return this.gamificacionService.getAccionesPuntuables();
+  getTiposAccion() {
+    return this.gamificacionService.getTiposAccion();
   }
 
   /**
@@ -143,7 +158,7 @@ export class GamificacionController {
     return this.gamificacionService.otorgarPuntos(
       req.user.id,
       dto.estudianteId,
-      dto.accionId,
+      dto.tipoAccion,
       dto.claseId,
       dto.contexto,
     );
