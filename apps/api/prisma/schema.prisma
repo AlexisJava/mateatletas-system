@@ -132,10 +132,6 @@ model Estudiante {
   /// COLONIA DE VERANO
   colonia_inscripciones ColoniaEstudiante[]
 
-  /// ONBOARDING
-  niveles_por_mundo EstudianteMundoNivel[]
-  tests_ubicacion   TestUbicacionResultado[]
-
   // Índices de performance para rankings y listados
   @@index([puntos_totales(sort: Desc)], name: "idx_estudiantes_puntos_ranking")
   @@index([casaId, puntos_totales(sort: Desc)], name: "idx_estudiantes_casa_ranking")
@@ -185,10 +181,6 @@ model Casa {
   /// Estudiantes que pertenecen a esta casa
   estudiantes Estudiante[]
 
-  /// ONBOARDING 2026 - Tests de ubicación
-  tests_casa_original TestUbicacionResultado[] @relation("TestCasaOriginal")
-  tests_casa_asignada TestUbicacionResultado[] @relation("TestCasaAsignada")
-
   @@map("casas")
 }
 
@@ -224,10 +216,6 @@ model Mundo {
   createdAt DateTime @default(now())
   /// Timestamp de última actualización del registro
   updatedAt DateTime @updatedAt
-
-  /// ONBOARDING 2026 - Relaciones
-  estudiantes_nivel EstudianteMundoNivel[]
-  tests_ubicacion   TestUbicacionResultado[]
 
   // Índice de performance para filtros de mundos activos
   @@index([activo], name: "idx_mundos_activo")
@@ -271,92 +259,6 @@ model Tier {
   updatedAt DateTime @updatedAt
 
   @@map("tiers")
-}
-
-/// Nivel del estudiante en cada mundo (2026)
-/// Un estudiante puede tener diferentes niveles en cada mundo
-/// Ej: "Intermedio en Matemática" y "Básico en Programación"
-model EstudianteMundoNivel {
-  /// Identificador único del registro
-  id String @id @default(cuid())
-
-  /// ID del estudiante
-  estudiante_id String
-
-  /// ID del mundo
-  mundo_id String
-
-  /// Nivel interno asignado en este mundo
-  nivel_interno NivelInterno @default(BASICO)
-
-  /// Fecha de asignación del nivel
-  fecha_asignacion DateTime @default(now())
-
-  /// Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  /// Relaciones
-  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  mundo      Mundo      @relation(fields: [mundo_id], references: [id], onDelete: Cascade)
-
-  /// Un estudiante solo puede tener un nivel por mundo
-  @@unique([estudiante_id, mundo_id])
-  @@index([estudiante_id])
-  @@index([mundo_id])
-  @@map("estudiante_mundo_niveles")
-}
-
-/// Resultado del test de ubicación (2026)
-/// Registra el diagnóstico inicial del estudiante por mundo
-/// Determina casa y nivel interno
-model TestUbicacionResultado {
-  /// Identificador único del resultado
-  id String @id @default(cuid())
-
-  /// ID del estudiante que hizo el test
-  estudiante_id String
-
-  /// ID del mundo para el cual se hizo el test
-  mundo_id String
-
-  /// Total de preguntas en el test
-  preguntas_total Int
-
-  /// Cantidad de respuestas correctas
-  respuestas_correctas Int
-
-  /// Puntaje final (0-100)
-  puntaje Float
-
-  /// Nivel interno asignado basado en el puntaje
-  nivel_asignado NivelInterno
-
-  /// ID de la casa original (por edad)
-  casa_original_id String?
-
-  /// ID de la casa final asignada (puede ser menor si bajó)
-  casa_asignada_id String?
-
-  /// Indica si el estudiante bajó de casa por el test
-  bajo_de_casa Boolean @default(false)
-
-  /// Fecha de completado del test
-  fecha_completado DateTime @default(now())
-
-  /// Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  /// Relaciones
-  estudiante    Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  mundo         Mundo      @relation(fields: [mundo_id], references: [id], onDelete: Cascade)
-  casa_original Casa?      @relation("TestCasaOriginal", fields: [casa_original_id], references: [id])
-  casa_asignada Casa?      @relation("TestCasaAsignada", fields: [casa_asignada_id], references: [id])
-
-  @@index([estudiante_id])
-  @@index([mundo_id])
-  @@map("test_ubicacion_resultados")
 }
 
 /// Modelo para docentes (profesores) de la plataforma
@@ -524,6 +426,12 @@ model RefreshTokenSession {
 
 /// Modelo para productos del catálogo
 /// Representa los productos que se pueden comprar: suscripciones, cursos, recursos
+///
+/// TODO: V2 - Expandir Producto para tienda virtual
+/// - Agregar tipos: DIGITAL, FISICO, EVENTO
+/// - Campos: archivo_url, stock, cupo_maximo, fecha_evento, requiere_envio
+/// - Frontend admin para crear productos
+/// - Catálogo público para comprar
 model Producto {
   /// Identificador único del producto
   id                      String               @id @default(cuid())
@@ -903,39 +811,18 @@ model Alerta {
   @@map("alertas")
 }
 
-/// Modelo para acciones puntuables (configuración de gamificación)
-/// Define las acciones por las cuales un docente puede otorgar puntos
-model AccionPuntuable {
-  /// Identificador único de la acción
-  id              String          @id @default(cuid())
-  /// Nombre de la acción (ej: "Razonamiento destacado", "Participación activa")
-  nombre          String          @unique
-  /// Descripción de la acción
-  descripcion     String
-  /// Cantidad de puntos que otorga esta acción
-  puntos          Int
-  /// Indica si la acción está activa
-  activo          Boolean         @default(true)
-  /// Timestamp de creación del registro
-  createdAt       DateTime        @default(now())
-  /// Timestamp de última actualización del registro
-  updatedAt       DateTime        @updatedAt
-  puntosObtenidos PuntoObtenido[]
-
-  @@map("acciones_puntuables")
-}
-
 /// Modelo para registro de puntos obtenidos (tabla transaccional)
 /// Cada registro representa un evento donde un estudiante ganó puntos
 model PuntoObtenido {
   /// Identificador único del registro
-  id             String          @id @default(cuid())
+  id             String     @id @default(cuid())
   /// ID del estudiante que obtuvo los puntos
   estudiante_id  String
   /// ID del docente que otorgó los puntos
   docente_id     String
-  /// ID de la acción puntuable
-  accion_id      String
+  /// Tipo de acción que generó los puntos (reemplaza FK a AccionPuntuable)
+  /// Ejemplos: "ASISTENCIA", "PARTICIPACION", "LOGRO", "BONUS"
+  tipo_accion    String     @default("ASISTENCIA")
   /// ID de la clase donde se ganaron los puntos (opcional)
   clase_id       String?
   /// Cantidad de puntos otorgados (se guarda para preservar historial)
@@ -943,19 +830,18 @@ model PuntoObtenido {
   /// Contexto o razón adicional (opcional)
   contexto       String?
   /// Fecha y hora en que se otorgaron los puntos
-  fecha_otorgado DateTime        @default(now())
+  fecha_otorgado DateTime   @default(now())
   /// Timestamp de creación del registro
-  createdAt      DateTime        @default(now())
+  createdAt      DateTime   @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt      DateTime        @updatedAt
-  accion         AccionPuntuable @relation(fields: [accion_id], references: [id])
-  clase          Clase?          @relation(fields: [clase_id], references: [id])
-  docente        Docente         @relation("PuntosOtorgados", fields: [docente_id], references: [id])
-  estudiante     Estudiante      @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  updatedAt      DateTime   @updatedAt
+  clase          Clase?     @relation(fields: [clase_id], references: [id])
+  docente        Docente    @relation("PuntosOtorgados", fields: [docente_id], references: [id])
+  estudiante     Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
   @@index([estudiante_id])
   @@index([docente_id])
-  @@index([accion_id])
+  @@index([tipo_accion])
   @@index([fecha_otorgado])
   @@map("puntos_obtenidos")
 }
@@ -1250,32 +1136,6 @@ model Nota {
   @@map("notas")
 }
 
-/// Configuración de niveles del sistema de gamificación
-/// Define los nombres creativos y requisitos para cada nivel
-model NivelConfig {
-  /// Número del nivel (1, 2, 3, etc.)
-  nivel          Int      @id
-  /// Nombre creativo del nivel
-  /// Ejemplos: "Explorador Numérico", "Maestro del Cálculo", "Genio Matemático"
-  nombre         String
-  /// Descripción del nivel
-  descripcion    String
-  /// Puntos mínimos requeridos para alcanzar este nivel
-  puntos_minimos Int
-  /// Puntos máximos antes de pasar al siguiente nivel
-  puntos_maximos Int
-  /// Color hex asociado al nivel para UI
-  color          String   @default("#6366F1")
-  /// Icono o emoji asociado al nivel
-  icono          String   @default("🌟")
-  /// Timestamp de creación del registro
-  createdAt      DateTime @default(now())
-  /// Timestamp de última actualización del registro
-  updatedAt      DateTime @updatedAt
-
-  @@map("niveles_config")
-}
-
 /// Modelo para sectores de trabajo (Matemática, Programación, etc.)
 /// Permite organizar las especialidades en categorías principales
 model Sector {
@@ -1380,17 +1240,6 @@ enum MundoTipo {
   CIENCIAS // Mundo de ciencias - azul
 
   @@map("mundo_tipo")
-}
-
-/// Enum para niveles internos por mundo (2026)
-/// Define la progresión dentro de cada mundo según la casa
-enum NivelInterno {
-  BASICO // Nivel inicial
-  INTERMEDIO // Nivel medio
-  AVANZADO // Nivel avanzado
-  OLIMPICO // Nivel olímpico (solo Vertex y Pulsar en Mat/Prog)
-
-  @@map("nivel_interno")
 }
 
 /// Enum para estado del onboarding del estudiante (2026)
