@@ -4,6 +4,7 @@ import { PrismaService } from '../../core/database/prisma.service';
 import { PuntosService } from '../puntos.service';
 import { LogrosService } from '../logros.service';
 import { RankingService } from '../ranking.service';
+import { RecursosService } from '../services/recursos.service';
 import { NotFoundException } from '@nestjs/common';
 import { EstadoAsistencia } from '@prisma/client';
 
@@ -38,7 +39,7 @@ describe('GamificacionService', () => {
     apellido: 'González',
     fotoUrl: 'https://example.com/foto.jpg', // camelCase para coincidir con servicio
     avatar_gradient: 1,
-    puntos_totales: 350,
+    xp_total: 350,
     casaId: 'equipo-1', // camelCase para coincidir con servicio
     casa: {
       id: 'casa-1',
@@ -151,8 +152,8 @@ describe('GamificacionService', () => {
 
   const mockRacha = 5;
   const mockEquipoRanking = [
-    { id: 'estudiante-123', nombre: 'María', puntos_totales: 350, posicion: 1 },
-    { id: 'estudiante-456', nombre: 'Pedro', puntos_totales: 280, posicion: 2 },
+    { id: 'estudiante-123', nombre: 'María', xp_total: 350, posicion: 1 },
+    { id: 'estudiante-456', nombre: 'Pedro', xp_total: 280, posicion: 2 },
   ];
 
   beforeEach(async () => {
@@ -203,6 +204,18 @@ describe('GamificacionService', () => {
           useValue: {
             getRankingEstudiante: jest.fn(),
             getCasaRanking: jest.fn(),
+          },
+        },
+        {
+          provide: RecursosService,
+          useValue: {
+            getRecursosEstudiante: jest.fn(),
+            crearRecursosEstudiante: jest.fn(),
+            actualizarXP: jest.fn(),
+            xpParaNivel: jest.fn().mockImplementation((nivel: number) => {
+              // Simulación de XP por nivel: nivel 1 = 0, nivel 2 = 500, nivel 3 = 1000, etc.
+              return (nivel - 1) * 500;
+            }),
           },
         },
       ],

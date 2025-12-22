@@ -89,7 +89,7 @@ describe('AuthService - Post-Refactor Tests', () => {
     edad: 10,
     nivelEscolar: '5to Primaria',
     fotoUrl: 'https://example.com/foto.jpg',
-    puntos_totales: 150,
+    xp_total: 150,
     nivel_actual: 5,
     tutor_id: 'tutor-123',
     equipoId: 'equipo-123',

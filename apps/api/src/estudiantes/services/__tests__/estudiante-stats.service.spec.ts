@@ -38,21 +38,21 @@ describe('EstudianteStatsService', () => {
           id: 'est-1',
           nombre: 'Juan',
           nivelEscolar: 'Primaria',
-          puntos_totales: 100,
+          recursos: { xp_total: 100 },
           casa: { id: 'eq-1', nombre: 'Equipo Rojo' },
         },
         {
           id: 'est-2',
           nombre: 'María',
           nivelEscolar: 'Primaria',
-          puntos_totales: 150,
+          recursos: { xp_total: 150 },
           casa: { id: 'eq-1', nombre: 'Equipo Rojo' },
         },
         {
           id: 'est-3',
           nombre: 'Pedro',
           nivelEscolar: 'Secundaria',
-          puntos_totales: 200,
+          recursos: { xp_total: 200 },
           casa: { id: 'eq-2', nombre: 'Equipo Azul' },
         },
       ];
@@ -73,7 +73,7 @@ describe('EstudianteStatsService', () => {
           'Equipo Rojo': 2,
           'Equipo Azul': 1,
         },
-        puntos_totales: 450,
+        xp_total: 450,
       });
     });
 
@@ -83,21 +83,21 @@ describe('EstudianteStatsService', () => {
           id: 'est-1',
           nombre: 'Juan',
           nivelEscolar: 'Primaria',
-          puntos_totales: 100,
+          recursos: { xp_total: 100 },
           casa: { id: 'eq-1', nombre: 'Equipo Rojo' },
         },
         {
           id: 'est-2',
           nombre: 'María',
           nivelEscolar: 'Primaria',
-          puntos_totales: 50,
+          recursos: { xp_total: 50 },
           casa: null,
         },
         {
           id: 'est-3',
           nombre: 'Pedro',
           nivelEscolar: 'Secundaria',
-          puntos_totales: 75,
+          recursos: { xp_total: 75 },
           casa: null,
         },
       ];
@@ -123,31 +123,31 @@ describe('EstudianteStatsService', () => {
         total: 0,
         por_nivel: {},
         por_casa: {},
-        puntos_totales: 0,
+        xp_total: 0,
       });
     });
 
-    it('debe calcular correctamente la suma de puntos totales', async () => {
+    it('debe calcular correctamente la suma de XP totales', async () => {
       const mockEstudiantes = [
         {
           id: 'est-1',
           nombre: 'Juan',
           nivelEscolar: 'Primaria',
-          puntos_totales: 123,
+          recursos: { xp_total: 123 },
           casa: null,
         },
         {
           id: 'est-2',
           nombre: 'María',
           nivelEscolar: 'Primaria',
-          puntos_totales: 456,
+          recursos: { xp_total: 456 },
           casa: null,
         },
         {
           id: 'est-3',
           nombre: 'Pedro',
           nivelEscolar: 'Secundaria',
-          puntos_totales: 789,
+          recursos: { xp_total: 789 },
           casa: null,
         },
       ];
@@ -158,7 +158,7 @@ describe('EstudianteStatsService', () => {
 
       const result = await service.getEstadisticas('tutor-1');
 
-      expect(result.puntos_totales).toBe(1368);
+      expect(result.xp_total).toBe(1368);
     });
 
     it('debe agrupar correctamente múltiples niveles escolares', async () => {
@@ -166,43 +166,43 @@ describe('EstudianteStatsService', () => {
         {
           id: 'est-1',
           nivelEscolar: 'Preescolar',
-          puntos_totales: 10,
+          recursos: { xp_total: 10 },
           casa: null,
         },
         {
           id: 'est-2',
           nivelEscolar: 'Primaria',
-          puntos_totales: 20,
+          recursos: { xp_total: 20 },
           casa: null,
         },
         {
           id: 'est-3',
           nivelEscolar: 'Primaria',
-          puntos_totales: 30,
+          recursos: { xp_total: 30 },
           casa: null,
         },
         {
           id: 'est-4',
           nivelEscolar: 'Secundaria',
-          puntos_totales: 40,
+          recursos: { xp_total: 40 },
           casa: null,
         },
         {
           id: 'est-5',
           nivelEscolar: 'Secundaria',
-          puntos_totales: 50,
+          recursos: { xp_total: 50 },
           casa: null,
         },
         {
           id: 'est-6',
           nivelEscolar: 'Secundaria',
-          puntos_totales: 60,
+          recursos: { xp_total: 60 },
           casa: null,
         },
         {
           id: 'est-7',
           nivelEscolar: 'Universitario',
-          puntos_totales: 70,
+          recursos: { xp_total: 70 },
           casa: null,
         },
       ];
@@ -226,37 +226,37 @@ describe('EstudianteStatsService', () => {
         {
           id: 'est-1',
           nivelEscolar: 'Primaria',
-          puntos_totales: 10,
+          recursos: { xp_total: 10 },
           casa: { nombre: 'Equipo A' },
         },
         {
           id: 'est-2',
           nivelEscolar: 'Primaria',
-          puntos_totales: 20,
+          recursos: { xp_total: 20 },
           casa: { nombre: 'Equipo A' },
         },
         {
           id: 'est-3',
           nivelEscolar: 'Primaria',
-          puntos_totales: 30,
+          recursos: { xp_total: 30 },
           casa: { nombre: 'Equipo B' },
         },
         {
           id: 'est-4',
           nivelEscolar: 'Primaria',
-          puntos_totales: 40,
+          recursos: { xp_total: 40 },
           casa: { nombre: 'Equipo C' },
         },
         {
           id: 'est-5',
           nivelEscolar: 'Primaria',
-          puntos_totales: 50,
+          recursos: { xp_total: 50 },
           casa: { nombre: 'Equipo C' },
         },
         {
           id: 'est-6',
           nivelEscolar: 'Primaria',
-          puntos_totales: 60,
+          recursos: { xp_total: 60 },
           casa: { nombre: 'Equipo C' },
         },
       ];
@@ -281,28 +281,33 @@ describe('EstudianteStatsService', () => {
 
       expect(prisma.estudiante.findMany).toHaveBeenCalledWith({
         where: { tutor_id: 'tutor-123' },
-        include: { casa: true },
+        include: {
+          casa: true,
+          recursos: {
+            select: { xp_total: true },
+          },
+        },
       });
     });
 
-    it('debe manejar estudiantes con puntos_totales en cero', async () => {
+    it('debe manejar estudiantes con xp_total en cero', async () => {
       const mockEstudiantes = [
         {
           id: 'est-1',
           nivelEscolar: 'Primaria',
-          puntos_totales: 0,
+          recursos: { xp_total: 0 },
           casa: null,
         },
         {
           id: 'est-2',
           nivelEscolar: 'Primaria',
-          puntos_totales: 0,
+          recursos: { xp_total: 0 },
           casa: null,
         },
         {
           id: 'est-3',
           nivelEscolar: 'Primaria',
-          puntos_totales: 100,
+          recursos: { xp_total: 100 },
           casa: null,
         },
       ];
@@ -313,7 +318,7 @@ describe('EstudianteStatsService', () => {
 
       const result = await service.getEstadisticas('tutor-1');
 
-      expect(result.puntos_totales).toBe(100);
+      expect(result.xp_total).toBe(100);
       expect(result.total).toBe(3);
     });
 
@@ -322,31 +327,31 @@ describe('EstudianteStatsService', () => {
         {
           id: 'est-1',
           nivelEscolar: 'Primaria',
-          puntos_totales: 10,
+          recursos: { xp_total: 10 },
           casa: { nombre: 'Equipo Rojo' },
         },
         {
           id: 'est-2',
           nivelEscolar: 'Primaria',
-          puntos_totales: 20,
+          recursos: { xp_total: 20 },
           casa: null,
         },
         {
           id: 'est-3',
           nivelEscolar: 'Primaria',
-          puntos_totales: 30,
+          recursos: { xp_total: 30 },
           casa: { nombre: 'Equipo Azul' },
         },
         {
           id: 'est-4',
           nivelEscolar: 'Primaria',
-          puntos_totales: 40,
+          recursos: { xp_total: 40 },
           casa: null,
         },
         {
           id: 'est-5',
           nivelEscolar: 'Primaria',
-          puntos_totales: 50,
+          recursos: { xp_total: 50 },
           casa: { nombre: 'Equipo Rojo' },
         },
       ];
@@ -362,6 +367,32 @@ describe('EstudianteStatsService', () => {
         'Equipo Azul': 1,
         'Sin casa': 2,
       });
+    });
+
+    it('debe manejar estudiantes sin recursos (null)', async () => {
+      const mockEstudiantes = [
+        {
+          id: 'est-1',
+          nivelEscolar: 'Primaria',
+          recursos: null,
+          casa: null,
+        },
+        {
+          id: 'est-2',
+          nivelEscolar: 'Primaria',
+          recursos: { xp_total: 100 },
+          casa: null,
+        },
+      ];
+
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
+
+      const result = await service.getEstadisticas('tutor-1');
+
+      expect(result.xp_total).toBe(100);
+      expect(result.total).toBe(2);
     });
   });
 });

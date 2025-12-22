@@ -295,13 +295,13 @@ describe('CasasService', () => {
     it('should_return_estudiantes_ordenados_por_puntos', async () => {
       const casaQuantum = {
         ...mockCasas[0],
-        // Prisma devuelve ordenado por puntos_totales DESC
+        // Ordenado en memoria por xp_total DESC
         estudiantes: [
           {
             id: 'est-2',
             nombre: 'Luis',
             apellido: 'Perez',
-            puntos_totales: 750,
+            recursos: { xp_total: 750 },
             nivel_actual: 3,
             avatarUrl: null,
           },
@@ -309,7 +309,7 @@ describe('CasasService', () => {
             id: 'est-1',
             nombre: 'Ana',
             apellido: 'Garcia',
-            puntos_totales: 500,
+            recursos: { xp_total: 500 },
             nivel_actual: 2,
             avatarUrl: null,
           },
@@ -317,7 +317,7 @@ describe('CasasService', () => {
             id: 'est-3',
             nombre: 'Maria',
             apellido: 'Lopez',
-            puntos_totales: 300,
+            recursos: { xp_total: 300 },
             nivel_actual: 1,
             avatarUrl: null,
           },

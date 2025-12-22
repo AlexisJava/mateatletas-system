@@ -126,6 +126,7 @@ describe('GetProfileUseCase', () => {
 
     /**
      * TEST 4: should_get_estudiante_profile
+     * NOTA: xp_total ahora viene de recursos (RecursosEstudiante)
      */
     it('should_get_estudiante_profile', async () => {
       const mockEstudiante = {
@@ -136,7 +137,7 @@ describe('GetProfileUseCase', () => {
         edad: 12,
         nivelEscolar: 'PRIMARIA',
         fotoUrl: 'https://foto.url',
-        puntos_totales: 500,
+        recursos: { xp_total: 500 },
         nivel_actual: 5,
         casaId: 'casa-1',
         tutor_id: 'tutor-1',
@@ -152,8 +153,8 @@ describe('GetProfileUseCase', () => {
 
       expect(result.id).toBe('est-123');
       expect(result.nombre).toBe('Juan');
-      expect(result.puntos_totales).toBe(500);
-      expect(result.nivel_actual).toBe(5);
+      expect((result as any).xp_total).toBe(500);
+      expect((result as any).nivel_actual).toBe(5);
       expect(result.role).toBe(Role.ESTUDIANTE);
     });
   });

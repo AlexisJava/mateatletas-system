@@ -68,7 +68,7 @@ describe('UserLookupService', () => {
     nivelEscolar: 'Primaria',
     tutor_id: 'tutor-123',
     equipoId: null,
-    puntos_totales: 100,
+    xp_total: 100,
     nivel_actual: 2,
     roles: JSON.stringify(['estudiante']),
     createdAt: new Date(),

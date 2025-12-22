@@ -4,16 +4,20 @@ import { PaymentWebhookService } from '../payment-webhook.service';
 import { PaymentStateMapperService } from '../payment-state-mapper.service';
 import { PaymentCommandService } from '../payment-command.service';
 import { MercadoPagoService } from '../../mercadopago.service';
-import { PrismaService } from '../../../core/database/prisma.service';
 import { EstadoPago } from '../../../domain/constants';
 import { MercadoPagoWebhookDto } from '../../dto/mercadopago-webhook.dto';
 import { WebhookIdempotencyService } from '../webhook-idempotency.service';
 import { PaymentAmountValidatorService } from '../payment-amount-validator.service';
 import { PaymentAlertService } from '../payment-alert.service';
 
+/**
+ * PaymentWebhookService Tests
+ *
+ * NOTA: El servicio ahora solo soporta inscripciones.
+ * El sistema de membresías fue eliminado.
+ */
 describe('PaymentWebhookService', () => {
   let service: PaymentWebhookService;
-  let prismaService: jest.Mocked<PrismaService>;
   let stateMapper: jest.Mocked<PaymentStateMapperService>;
   let commandService: jest.Mocked<PaymentCommandService>;
   let mercadoPagoService: jest.Mocked<MercadoPagoService>;
@@ -26,10 +30,6 @@ describe('PaymentWebhookService', () => {
       providers: [
         PaymentWebhookService,
         {
-          provide: PrismaService,
-          useValue: {},
-        },
-        {
           provide: PaymentStateMapperService,
           useValue: {
             mapearEstadoPago: jest.fn(),
@@ -38,7 +38,6 @@ describe('PaymentWebhookService', () => {
         {
           provide: PaymentCommandService,
           useValue: {
-            actualizarEstadoMembresia: jest.fn(),
             actualizarEstadoInscripcion: jest.fn(),
           },
         },
@@ -64,17 +63,9 @@ describe('PaymentWebhookService', () => {
         {
           provide: PaymentAmountValidatorService,
           useValue: {
-            validateMembresia: jest.fn().mockResolvedValue({ isValid: true }),
             validateInscripcionMensual: jest
               .fn()
               .mockResolvedValue({ isValid: true }),
-            validateInscripcion2026: jest
-              .fn()
-              .mockResolvedValue({ isValid: true }),
-            validatePagoInscripcion2026: jest
-              .fn()
-              .mockResolvedValue({ isValid: true }),
-            validateColoniaPago: jest.fn().mockResolvedValue({ isValid: true }),
           },
         },
         {
@@ -91,7 +82,6 @@ describe('PaymentWebhookService', () => {
     }).compile();
 
     service = module.get<PaymentWebhookService>(PaymentWebhookService);
-    prismaService = module.get(PrismaService);
     stateMapper = module.get(PaymentStateMapperService);
     commandService = module.get(PaymentCommandService);
     mercadoPagoService = module.get(MercadoPagoService);
@@ -134,45 +124,6 @@ describe('PaymentWebhookService', () => {
       const result = await service.procesarWebhookMercadoPago(webhookData);
 
       expect(result.message).toBe('Payment without external_reference');
-    });
-
-    it('debe procesar webhook de membresía exitosamente', async () => {
-      const webhookData: MercadoPagoWebhookDto = {
-        type: 'payment',
-        action: 'updated',
-        data: { id: '123' },
-      };
-
-      mercadoPagoService.getPayment.mockResolvedValue({
-        id: 123,
-        status: 'approved',
-        external_reference: 'membresia-MEM001-tutor-TUT001-producto-PROD001',
-      } as any);
-
-      stateMapper.mapearEstadoPago.mockReturnValue(EstadoPago.PAGADO);
-      commandService.actualizarEstadoMembresia.mockResolvedValue({
-        id: 'MEM001',
-        estado: 'Activa',
-      } as any);
-
-      const result = await service.procesarWebhookMercadoPago(webhookData);
-
-      expect(result.type).toBe('membresia');
-      expect(result.membresiaId).toBe('MEM001');
-      expect(result.estadoPago).toBe(EstadoPago.PAGADO);
-      expect(commandService.actualizarEstadoMembresia).toHaveBeenCalledWith(
-        'MEM001',
-        EstadoPago.PAGADO,
-        123, // paymentId
-      );
-      expect(eventEmitter.emit).toHaveBeenCalledWith(
-        'webhook.membresia.procesado',
-        expect.objectContaining({
-          membresiaId: 'MEM001',
-          estadoPago: EstadoPago.PAGADO,
-          paymentId: 123,
-        }),
-      );
     });
 
     it('debe procesar webhook de inscripción exitosamente', async () => {
@@ -224,19 +175,20 @@ describe('PaymentWebhookService', () => {
       mercadoPagoService.getPayment.mockResolvedValue({
         id: 789,
         status: 'rejected',
-        external_reference: 'membresia-MEM002-tutor-TUT002-producto-PROD002',
+        external_reference:
+          'inscripcion-INS002-estudiante-EST002-producto-PROD002',
       } as any);
 
       stateMapper.mapearEstadoPago.mockReturnValue(EstadoPago.RECHAZADO);
-      commandService.actualizarEstadoMembresia.mockResolvedValue({
-        id: 'MEM002',
-        estado: 'Pendiente',
+      commandService.actualizarEstadoInscripcion.mockResolvedValue({
+        id: 'INS002',
+        estado_pago: 'Pendiente',
       } as any);
 
       const result = await service.procesarWebhookMercadoPago(webhookData);
 
-      expect(result.type).toBe('membresia');
-      expect(result.membresiaId).toBe('MEM002');
+      expect(result.type).toBe('inscripcion');
+      expect(result.inscripcionId).toBe('INS002');
       expect(result.estadoPago).toBe(EstadoPago.RECHAZADO);
       expect(result.paymentStatus).toBe('rejected');
     });
@@ -257,7 +209,6 @@ describe('PaymentWebhookService', () => {
       const result = await service.procesarWebhookMercadoPago(webhookData);
 
       expect(result.message).toBe('Unknown external_reference format');
-      expect(commandService.actualizarEstadoMembresia).not.toHaveBeenCalled();
       expect(commandService.actualizarEstadoInscripcion).not.toHaveBeenCalled();
     });
 
@@ -287,13 +238,29 @@ describe('PaymentWebhookService', () => {
       mercadoPagoService.getPayment.mockResolvedValue({
         id: null as any,
         status: null as any,
-        external_reference: 'membresia-MEM003-tutor-TUT003-producto-PROD003',
+        external_reference:
+          'inscripcion-INS003-estudiante-EST003-producto-PROD003',
       } as any);
 
       const result = await service.procesarWebhookMercadoPago(webhookData);
 
       expect(result.message).toBe('Payment without id or status');
-      expect(commandService.actualizarEstadoMembresia).not.toHaveBeenCalled();
+      expect(commandService.actualizarEstadoInscripcion).not.toHaveBeenCalled();
+    });
+
+    it('debe ignorar webhooks duplicados (idempotencia)', async () => {
+      idempotencyService.wasProcessed.mockResolvedValue(true);
+
+      const webhookData: MercadoPagoWebhookDto = {
+        type: 'payment',
+        action: 'updated',
+        data: { id: '123' },
+      };
+
+      const result = await service.procesarWebhookMercadoPago(webhookData);
+
+      expect(result.message).toBe('Webhook already processed (idempotent)');
+      expect(mercadoPagoService.getPayment).not.toHaveBeenCalled();
     });
   });
 });

@@ -58,7 +58,7 @@ describe('EstudianteCopyService', () => {
         tutor_id: 'tutor-1',
         sector_id: 'sector-1',
         nivel_actual: 5,
-        puntos_totales: 100,
+        xp_total: 100,
         avatar_gradient: 1,
         casaId: null,
         tutor: { id: 'tutor-1', nombre: 'Pedro', apellido: 'López' },
@@ -75,7 +75,7 @@ describe('EstudianteCopyService', () => {
         tutor_id: 'tutor-1',
         sector_id: 'sector-2',
         nivel_actual: 5,
-        puntos_totales: 100,
+        xp_total: 100,
         avatar_gradient: 1,
         casaId: null,
         sector: { id: 'sector-2', nombre: 'Matemática' },
@@ -161,7 +161,7 @@ describe('EstudianteCopyService', () => {
         tutor_id: 'tutor-1',
         sector_id: 'sector-1',
         nivel_actual: 1,
-        puntos_totales: 0,
+        xp_total: 0,
         avatar_gradient: 1,
         casaId: null,
         tutor: {},
@@ -190,7 +190,11 @@ describe('EstudianteCopyService', () => {
       );
     });
 
-    it('debe copiar datos de gamificación del estudiante original', async () => {
+    /**
+     * NOTA: xp_total ya NO se copia porque está en RecursosEstudiante (SUB-FASE 1.3)
+     * Solo se copian: nivel_actual, avatar_gradient, casaId
+     */
+    it('debe copiar datos de gamificación del estudiante original (sin xp_total)', async () => {
       const mockEstudiante = {
         id: 'est-1',
         nombre: 'Juan',
@@ -201,7 +205,6 @@ describe('EstudianteCopyService', () => {
         tutor_id: 'tutor-1',
         sector_id: 'sector-1',
         nivel_actual: 8,
-        puntos_totales: 500,
         avatar_gradient: 3,
         casaId: 'equipo-1',
         tutor: {},
@@ -225,7 +228,6 @@ describe('EstudianteCopyService', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             nivel_actual: 8,
-            puntos_totales: 500,
             avatar_gradient: 3,
             casaId: 'equipo-1',
           }),
@@ -244,7 +246,6 @@ describe('EstudianteCopyService', () => {
         tutor_id: 'tutor-1',
         sector_id: 'sector-1',
         nivel_actual: 5,
-        puntos_totales: 100,
         avatar_gradient: 1,
         casaId: null,
         edad: 10,
@@ -313,7 +314,7 @@ describe('EstudianteCopyService', () => {
         tutor_id: 'tutor-1',
         sector_id: 'sector-1',
         nivel_actual: 1,
-        puntos_totales: 0,
+        xp_total: 0,
         avatar_gradient: 1,
         casaId: null,
         tutor: {},

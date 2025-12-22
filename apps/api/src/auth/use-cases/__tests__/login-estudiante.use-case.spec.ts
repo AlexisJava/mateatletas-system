@@ -71,7 +71,7 @@ describe('LoginEstudianteUseCase', () => {
         fotoUrl: null,
         avatarUrl: 'https://avatar.url',
         animacion_idle_url: null,
-        puntos_totales: 100,
+        xp_total: 100,
         nivel_actual: 5,
         roles: '["estudiante"]',
         tutor: {
@@ -133,7 +133,7 @@ describe('LoginEstudianteUseCase', () => {
         fotoUrl: 'https://foto.url',
         avatarUrl: 'https://readyplayerme.avatar.url',
         animacion_idle_url: 'https://animation.idle.url',
-        puntos_totales: 500,
+        xp_total: 500,
         nivel_actual: 10,
         roles: '["estudiante"]',
         tutor: null,
@@ -339,7 +339,7 @@ describe('LoginEstudianteUseCase', () => {
         fotoUrl: null,
         avatarUrl: null,
         animacion_idle_url: null,
-        puntos_totales: 250,
+        xp_total: 250,
         nivel_actual: 7,
         roles: '["estudiante"]',
         tutor: {
@@ -377,7 +377,7 @@ describe('LoginEstudianteUseCase', () => {
       expect(result.user).toHaveProperty('fotoUrl');
       expect(result.user).toHaveProperty('avatarUrl');
       expect(result.user).toHaveProperty('animacion_idle_url');
-      expect(result.user).toHaveProperty('puntos_totales');
+      expect(result.user).toHaveProperty('xp_total');
       expect(result.user).toHaveProperty('nivel_actual');
       expect(result.user).toHaveProperty('casa');
       expect(result.user).toHaveProperty('tutor');

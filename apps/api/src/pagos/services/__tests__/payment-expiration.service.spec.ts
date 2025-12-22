@@ -3,6 +3,12 @@ import { PaymentExpirationService } from '../payment-expiration.service';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { EstadoPago } from '@prisma/client';
 
+/**
+ * PaymentExpirationService Tests
+ *
+ * NOTA: El servicio ahora solo maneja InscripcionMensual.
+ * Los sistemas de inscripciones2026 y pagos2026 fueron eliminados.
+ */
 describe('PaymentExpirationService', () => {
   let service: PaymentExpirationService;
   let prisma: jest.Mocked<PrismaService>;
@@ -11,16 +17,6 @@ describe('PaymentExpirationService', () => {
     inscripcionMensual: {
       updateMany: jest.fn(),
       count: jest.fn(),
-    },
-    inscripcion2026: {
-      updateMany: jest.fn(),
-      findMany: jest.fn(),
-    },
-    pagoInscripcion2026: {
-      updateMany: jest.fn(),
-    },
-    historialEstadoInscripcion2026: {
-      createMany: jest.fn(),
     },
   };
 
@@ -50,13 +46,6 @@ describe('PaymentExpirationService', () => {
       mockPrismaService.inscripcionMensual.updateMany.mockResolvedValue({
         count: 5,
       });
-      mockPrismaService.inscripcion2026.updateMany.mockResolvedValue({
-        count: 0,
-      });
-      mockPrismaService.inscripcion2026.findMany.mockResolvedValue([]);
-      mockPrismaService.pagoInscripcion2026.updateMany.mockResolvedValue({
-        count: 0,
-      });
 
       await service.expirePendingPayments();
 
@@ -75,85 +64,8 @@ describe('PaymentExpirationService', () => {
       });
     });
 
-    it('debe expirar inscripciones 2026 pendientes mayores a 30 días', async () => {
-      mockPrismaService.inscripcionMensual.updateMany.mockResolvedValue({
-        count: 0,
-      });
-      mockPrismaService.inscripcion2026.updateMany.mockResolvedValue({
-        count: 3,
-      });
-      mockPrismaService.inscripcion2026.findMany.mockResolvedValue([
-        { id: 'insc-1' },
-        { id: 'insc-2' },
-        { id: 'insc-3' },
-      ]);
-      mockPrismaService.pagoInscripcion2026.updateMany.mockResolvedValue({
-        count: 0,
-      });
-      mockPrismaService.historialEstadoInscripcion2026.createMany.mockResolvedValue(
-        {
-          count: 3,
-        },
-      );
-
-      await service.expirePendingPayments();
-
-      expect(mockPrismaService.inscripcion2026.updateMany).toHaveBeenCalledWith(
-        {
-          where: {
-            estado: 'pending',
-            createdAt: {
-              lt: expect.any(Date),
-            },
-          },
-          data: {
-            estado: 'cancelled',
-          },
-        },
-      );
-
-      // Debe registrar historial de cambios
-      expect(
-        mockPrismaService.historialEstadoInscripcion2026.createMany,
-      ).toHaveBeenCalled();
-    });
-
-    it('debe expirar pagos 2026 pendientes mayores a 30 días', async () => {
-      mockPrismaService.inscripcionMensual.updateMany.mockResolvedValue({
-        count: 0,
-      });
-      mockPrismaService.inscripcion2026.updateMany.mockResolvedValue({
-        count: 0,
-      });
-      mockPrismaService.pagoInscripcion2026.updateMany.mockResolvedValue({
-        count: 2,
-      });
-
-      await service.expirePendingPayments();
-
-      expect(
-        mockPrismaService.pagoInscripcion2026.updateMany,
-      ).toHaveBeenCalledWith({
-        where: {
-          estado: 'pending',
-          createdAt: {
-            lt: expect.any(Date),
-          },
-        },
-        data: {
-          estado: 'expired',
-        },
-      });
-    });
-
     it('no debe fallar si no hay inscripciones pendientes', async () => {
       mockPrismaService.inscripcionMensual.updateMany.mockResolvedValue({
-        count: 0,
-      });
-      mockPrismaService.inscripcion2026.updateMany.mockResolvedValue({
-        count: 0,
-      });
-      mockPrismaService.pagoInscripcion2026.updateMany.mockResolvedValue({
         count: 0,
       });
 
@@ -166,21 +78,12 @@ describe('PaymentExpirationService', () => {
       mockPrismaService.inscripcionMensual.updateMany.mockResolvedValue({
         count: 5,
       });
-      mockPrismaService.inscripcion2026.updateMany.mockResolvedValue({
-        count: 3,
-      });
-      mockPrismaService.inscripcion2026.findMany.mockResolvedValue([]);
-      mockPrismaService.pagoInscripcion2026.updateMany.mockResolvedValue({
-        count: 2,
-      });
 
       const result = await service.runManually();
 
       expect(result).toEqual({
         inscripcionesMensuales: 5,
-        inscripciones2026: 3,
-        pagos2026: 2,
-        total: 10,
+        total: 5,
       });
     });
   });
@@ -207,12 +110,6 @@ describe('PaymentExpirationService', () => {
   describe('fecha de corte', () => {
     it('debe usar 30 días como período de expiración', async () => {
       mockPrismaService.inscripcionMensual.updateMany.mockResolvedValue({
-        count: 0,
-      });
-      mockPrismaService.inscripcion2026.updateMany.mockResolvedValue({
-        count: 0,
-      });
-      mockPrismaService.pagoInscripcion2026.updateMany.mockResolvedValue({
         count: 0,
       });
 

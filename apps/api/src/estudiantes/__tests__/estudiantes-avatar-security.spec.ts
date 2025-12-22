@@ -29,7 +29,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
     nivel_escolar: 'Primaria',
     equipo_id: null,
     foto_url: null,
-    puntos_totales: 0,
+    xp_total: 0,
     nivel_actual: 1,
     fecha_nacimiento: null,
     createdAt: new Date(),

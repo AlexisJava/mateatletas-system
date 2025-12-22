@@ -160,62 +160,11 @@ describe('PaymentCommandService', () => {
     });
   });
 
-  describe('actualizarEstadoMembresia', () => {
-    it('debe actualizar estado de membresía a Activa', async () => {
-      const membresiaId = 'MEM001';
-      const estadoPago = EstadoPago.PAGADO;
-
-      stateMapper.mapearEstadoMembresia.mockReturnValue('Activa');
-
-      const mockMembresia = {
-        id: membresiaId,
-        estado: 'Activa',
-        fecha_inicio: new Date(),
-        fecha_proximo_pago: new Date(),
-      };
-
-      prismaService.membresia.update.mockResolvedValue(mockMembresia as any);
-
-      const result = await service.actualizarEstadoMembresia(
-        membresiaId,
-        estadoPago,
-      );
-
-      expect(result.estado).toBe('Activa');
-      expect(stateMapper.mapearEstadoMembresia).toHaveBeenCalledWith(
-        estadoPago,
-      );
-      expect(eventEmitter.emit).toHaveBeenCalledWith(
-        'membresia.estado_actualizado',
-        expect.objectContaining({
-          membresiaId,
-          estadoPago,
-          estadoMembresia: 'Activa',
-        }),
-      );
-    });
-
-    it('debe actualizar estado de membresía a Pendiente', async () => {
-      const membresiaId = 'MEM002';
-      const estadoPago = EstadoPago.RECHAZADO;
-
-      stateMapper.mapearEstadoMembresia.mockReturnValue('Pendiente');
-
-      const mockMembresia = {
-        id: membresiaId,
-        estado: 'Pendiente',
-      };
-
-      prismaService.membresia.update.mockResolvedValue(mockMembresia as any);
-
-      const result = await service.actualizarEstadoMembresia(
-        membresiaId,
-        estadoPago,
-      );
-
-      expect(result.estado).toBe('Pendiente');
-    });
-  });
+  /**
+   * NOTA: Tests de actualizarEstadoMembresia eliminados
+   * El sistema de membresía fue eliminado en FASE de cleanup
+   * Los métodos relacionados con membresía ya no existen
+   */
 
   describe('actualizarEstadoInscripcion', () => {
     it('debe actualizar estado de inscripción a Pagado', async () => {
@@ -281,28 +230,8 @@ describe('PaymentCommandService', () => {
     });
   });
 
-  describe('actualizarMembresiaConPreferencia', () => {
-    it('debe actualizar membresía con ID de preferencia', async () => {
-      const membresiaId = 'MEM001';
-      const preferenciaId = 'PREF123';
-
-      const mockMembresia = {
-        id: membresiaId,
-        preferencia_id: preferenciaId,
-      };
-
-      prismaService.membresia.update.mockResolvedValue(mockMembresia as any);
-
-      const result = await service.actualizarMembresiaConPreferencia(
-        membresiaId,
-        preferenciaId,
-      );
-
-      expect(result.preferencia_id).toBe(preferenciaId);
-      expect(prismaService.membresia.update).toHaveBeenCalledWith({
-        where: { id: membresiaId },
-        data: { preferencia_id: preferenciaId },
-      });
-    });
-  });
+  /**
+   * NOTA: Tests de actualizarMembresiaConPreferencia eliminados
+   * El sistema de membresía fue eliminado en FASE de cleanup
+   */
 });

@@ -4,6 +4,7 @@ import { PrismaService } from '../../core/database/prisma.service';
 import { PuntosService } from '../puntos.service';
 import { LogrosService } from '../logros.service';
 import { RankingService } from '../ranking.service';
+import { RecursosService } from '../services/recursos.service';
 
 /**
  * GamificacionService - getProgresoEstudiante Tests
@@ -36,6 +37,10 @@ describe('GamificacionService - getProgresoEstudiante', () => {
         },
         {
           provide: RankingService,
+          useValue: {},
+        },
+        {
+          provide: RecursosService,
           useValue: {},
         },
       ],

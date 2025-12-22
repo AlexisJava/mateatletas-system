@@ -206,7 +206,7 @@ describe('AuthController', () => {
         edad: 12,
         nivel_escolar: 'Secundaria',
         foto_url: null,
-        puntos_totales: 0,
+        xp_total: 0,
         nivel_actual: 1,
         equipo: null,
         tutor: {

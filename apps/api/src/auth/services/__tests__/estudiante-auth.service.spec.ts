@@ -40,7 +40,7 @@ describe('EstudianteAuthService', () => {
     fotoUrl: null,
     avatarUrl: 'https://example.com/avatar.png',
     animacion_idle_url: null,
-    puntos_totales: 100,
+    recursos: { xp_total: 100 },
     nivel_actual: 2,
     password_hash: 'hashed-password',
     roles: 'Estudiante',
@@ -121,7 +121,7 @@ describe('EstudianteAuthService', () => {
       expect(result.user.apellido).toBe('Martínez');
       expect(result.user.edad).toBe(12);
       expect(result.user.nivelEscolar).toBe('Secundaria');
-      expect(result.user.puntos_totales).toBe(100);
+      expect(result.user.xp_total).toBe(100);
       expect(result.user.nivel_actual).toBe(2);
       expect(result.user.casa).toEqual(mockCasa);
       expect(result.user.tutor).toEqual(mockTutor);

@@ -286,7 +286,7 @@ describe('EstudianteQueryService', () => {
         nombre: 'Juan',
         tutor_id: 'tutor-1',
         nivel_actual: 5,
-        puntos_totales: 100,
+        xp_total: 100,
         casa: null,
         logros_desbloqueados: [{ id: 'logro-1' }, { id: 'logro-2' }],
         inscripciones_clase: [],
@@ -334,7 +334,7 @@ describe('EstudianteQueryService', () => {
         nombre: 'Juan',
         tutor_id: 'tutor-1',
         nivel_actual: 1,
-        puntos_totales: 0,
+        xp_total: 0,
         casa: null,
         logros_desbloqueados: [],
         inscripciones_clase: [],
@@ -500,18 +500,19 @@ describe('EstudianteQueryService', () => {
         claseGrupo: { id: 'clase-grupo-1' },
       };
 
+      // NOTA: recursos.xp_total ahora viene de RecursosEstudiante (SUB-FASE 1.3)
       const mockCompaneros = [
         {
           id: 'est-2',
           nombre: 'María',
           apellido: 'López',
-          puntos_totales: 150,
+          recursos: { xp_total: 150 },
         },
         {
           id: 'est-3',
           nombre: 'Pedro',
           apellido: 'Gómez',
-          puntos_totales: 100,
+          recursos: { xp_total: 100 },
         },
       ];
 

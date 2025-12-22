@@ -74,7 +74,7 @@ describe('AuthOrchestratorService', () => {
       fotoUrl: null,
       avatarUrl: null,
       animacion_idle_url: null,
-      puntos_totales: 100,
+      xp_total: 100,
       nivel_actual: 2,
       equipo: null,
       tutor: null,

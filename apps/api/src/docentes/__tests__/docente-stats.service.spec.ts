@@ -203,10 +203,10 @@ describe('DocenteStatsService', () => {
       expect(result.topEstudiantesPorPuntos).toHaveLength(2);
       // est-1: 100 + 50 = 150 puntos (primero)
       expect(result.topEstudiantesPorPuntos[0].nombre).toBe('Juan');
-      expect(result.topEstudiantesPorPuntos[0].puntos_totales).toBe(150);
+      expect(result.topEstudiantesPorPuntos[0].xp_total).toBe(150);
       // est-2: 80 puntos (segundo)
       expect(result.topEstudiantesPorPuntos[1].nombre).toBe('Maria');
-      expect(result.topEstudiantesPorPuntos[1].puntos_totales).toBe(80);
+      expect(result.topEstudiantesPorPuntos[1].xp_total).toBe(80);
     });
 
     it('should return empty estudiantesSinTareas (tareas system not implemented)', async () => {

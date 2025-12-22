@@ -32,7 +32,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
     color_primario: '#10B981',
     color_secundario: '#34D399',
     icono_url: null,
-    puntos_totales: 0,
+    xp_total: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -59,7 +59,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
     username: 'juan.perez.xyz2',
     edad: 10,
     nivel_escolar: 'Primaria',
-    puntos_totales: 100,
+    xp_total: 100,
     nivel_actual: 2,
     tutor_id: 'tutor-id-123',
     password_hash: 'hashed-pin',
@@ -274,10 +274,11 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
       await service.crearEstudianteConCredenciales(dtoSinOpcionales);
 
       // Assert
+      // NOTA: xp_total ya NO está en Estudiante, está en RecursosEstudiante (SUB-FASE 1.3)
+      // Solo verificamos nivel_actual que sí sigue en Estudiante
       expect(mockEstudianteCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            puntos_totales: 0, // Default
             nivel_actual: 1, // Default
           }),
         }),
