@@ -26,14 +26,13 @@ import { ClasesModule } from './clases/clases.module';
 import { AsistenciaModule } from './asistencia/asistencia.module';
 import { AdminModule } from './admin/admin.module';
 import { GamificacionModule } from './gamificacion/gamificacion.module';
-import { CursosModule } from './cursos/cursos.module';
 import { EventosModule } from './eventos/eventos.module';
 import { HealthModule } from './health/health.module';
 import { ColoniaModule } from './colonia/colonia.module';
 import { TiersModule } from './tiers/tiers.module';
 import { AuditModule } from './audit/audit.module';
-import { StudioModule } from './studio/studio.module';
 import { EmailModule } from './email/email.module';
+// [ELIMINADO] CursosModule, StudioModule - sistema de contenido legacy
 import { SuscripcionesModule } from './suscripciones/suscripciones.module';
 
 /**
@@ -82,13 +81,12 @@ import { SuscripcionesModule } from './suscripciones/suscripciones.module';
     AsistenciaModule,
     AdminModule,
     GamificacionModule,
-    CursosModule,
     EventosModule,
     ColoniaModule,
     TiersModule,
     HealthModule,
-    StudioModule, // Planificador de Cursos
     SuscripcionesModule, // Suscripciones MercadoPago PreApproval
+    // [ELIMINADO] CursosModule, StudioModule - sistema legacy de contenido
   ],
   controllers: [AppController],
   providers: [
