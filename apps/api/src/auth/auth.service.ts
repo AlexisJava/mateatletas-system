@@ -187,8 +187,12 @@ export class AuthService {
           edad: true,
           nivelEscolar: true,
           fotoUrl: true,
-          puntos_totales: true,
           nivel_actual: true,
+          recursos: {
+            select: {
+              xp_total: true,
+            },
+          },
           casaId: true,
           tutor_id: true,
           createdAt: true,
@@ -200,8 +204,10 @@ export class AuthService {
         throw new NotFoundException('Estudiante no encontrado');
       }
 
+      const { recursos, ...rest } = estudiante;
       return {
-        ...estudiante,
+        ...rest,
+        xp_total: recursos?.xp_total ?? 0,
         role: Role.ESTUDIANTE,
       };
     }

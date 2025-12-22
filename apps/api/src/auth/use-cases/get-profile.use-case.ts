@@ -59,7 +59,7 @@ interface EstudianteProfile {
   edad?: number | null;
   nivelEscolar?: string | null;
   fotoUrl?: string | null;
-  puntos_totales?: number;
+  xp_total?: number;
   nivel_actual?: number;
   casaId?: string | null;
   tutor_id?: string | null;
@@ -239,8 +239,12 @@ export class GetProfileUseCase {
         edad: true,
         nivelEscolar: true,
         fotoUrl: true,
-        puntos_totales: true,
         nivel_actual: true,
+        recursos: {
+          select: {
+            xp_total: true,
+          },
+        },
         casaId: true,
         tutor_id: true,
         createdAt: true,
@@ -253,8 +257,10 @@ export class GetProfileUseCase {
       throw new NotFoundException('Estudiante no encontrado');
     }
 
+    const { recursos, ...rest } = estudiante;
     return {
-      ...estudiante,
+      ...rest,
+      xp_total: recursos?.xp_total ?? 0,
       role: Role.ESTUDIANTE,
     };
   }

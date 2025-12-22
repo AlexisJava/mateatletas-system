@@ -27,7 +27,7 @@ export interface EstudianteLoginResult {
     fotoUrl: string | null;
     avatarUrl: string | null;
     animacion_idle_url: string | null;
-    puntos_totales: number;
+    xp_total: number;
     nivel_actual: number;
     casa: {
       id: string;
@@ -104,6 +104,11 @@ export class EstudianteAuthService {
             colorPrimary: true,
           },
         },
+        recursos: {
+          select: {
+            xp_total: true,
+          },
+        },
       },
     });
 
@@ -161,7 +166,7 @@ export class EstudianteAuthService {
         fotoUrl: estudiante.fotoUrl,
         avatarUrl: estudiante.avatarUrl,
         animacion_idle_url: estudiante.animacion_idle_url,
-        puntos_totales: estudiante.puntos_totales,
+        xp_total: estudiante.recursos?.xp_total ?? 0,
         nivel_actual: estudiante.nivel_actual,
         casa: estudiante.casa,
         tutor: estudiante.tutor,

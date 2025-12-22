@@ -103,7 +103,6 @@ export class EstudianteCopyService {
         sector_id: nuevoSectorId,
         // Copiar datos de gamificación
         nivel_actual: estudiante.nivel_actual,
-        puntos_totales: estudiante.puntos_totales,
         avatar_gradient: estudiante.avatar_gradient,
         casaId: estudiante.casaId,
       },

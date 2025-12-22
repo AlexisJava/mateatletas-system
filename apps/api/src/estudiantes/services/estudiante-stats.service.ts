@@ -19,6 +19,9 @@ export class EstudianteStatsService {
       where: { tutor_id: tutorId },
       include: {
         casa: true,
+        recursos: {
+          select: { xp_total: true },
+        },
       },
     });
 
@@ -44,9 +47,9 @@ export class EstudianteStatsService {
       {} as Record<string, number>,
     );
 
-    // Suma de puntos totales
+    // Suma de XP totales
     const puntosTotales = estudiantes.reduce(
-      (sum: number, est) => sum + est.puntos_totales,
+      (sum: number, est) => sum + (est.recursos?.xp_total ?? 0),
       0,
     );
 
@@ -54,7 +57,7 @@ export class EstudianteStatsService {
       total: estudiantes.length,
       por_nivel: porNivel,
       por_casa: porCasa,
-      puntos_totales: puntosTotales,
+      xp_total: puntosTotales,
     };
   }
 }

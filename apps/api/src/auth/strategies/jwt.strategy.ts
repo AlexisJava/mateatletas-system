@@ -93,8 +93,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           edad: true,
           nivelEscolar: true,
           fotoUrl: true,
-          puntos_totales: true,
           nivel_actual: true,
+          recursos: {
+            select: {
+              xp_total: true,
+            },
+          },
           tutor: {
             select: {
               id: true,
@@ -162,6 +166,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // Si el usuario no existe, el token es inválido
     if (!user) {
       throw new UnauthorizedException('Token inválido o usuario no encontrado');
+    }
+
+    // Transformar recursos para estudiantes
+    if (normalizedRole === 'estudiante' && 'recursos' in user) {
+      const { recursos, ...rest } = user as typeof user & {
+        recursos?: { xp_total: number } | null;
+      };
+      return {
+        ...rest,
+        xp_total: recursos?.xp_total ?? 0,
+        role,
+        roles: normalizedRoles,
+      };
     }
 
     // El objeto user se inyectará en request.user

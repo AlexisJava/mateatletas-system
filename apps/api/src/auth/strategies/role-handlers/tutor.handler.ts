@@ -54,7 +54,11 @@ export class TutorHandler implements RoleHandler {
             apellido: true,
             edad: true,
             nivel_actual: true,
-            puntos_totales: true,
+            recursos: {
+              select: {
+                xp_total: true,
+              },
+            },
           },
         },
       },

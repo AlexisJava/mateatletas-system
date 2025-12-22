@@ -18,6 +18,8 @@ import { PrismaService } from '../core/database/prisma.service';
  * - La edad determina la casa BASE
  * - Un estudiante puede BAJAR de casa (nunca subir)
  * - PULSAR solo puede bajar a VERTEX (nunca a QUANTUM)
+ *
+ * Refactorizado para usar RecursosEstudiante.xp_total en lugar de puntos_totales
  */
 @Injectable()
 export class CasasService {
@@ -122,11 +124,12 @@ export class CasasService {
             id: true,
             nombre: true,
             apellido: true,
-            puntos_totales: true,
             nivel_actual: true,
             avatarUrl: true,
+            recursos: {
+              select: { xp_total: true },
+            },
           },
-          orderBy: { puntos_totales: 'desc' },
         },
         _count: {
           select: { estudiantes: true },
@@ -138,7 +141,22 @@ export class CasasService {
       throw new NotFoundException(`Casa con ID ${id} no encontrada`);
     }
 
-    return casa;
+    // Ordenar por XP en memoria y mapear
+    const estudiantesOrdenados = casa.estudiantes
+      .map((est) => ({
+        id: est.id,
+        nombre: est.nombre,
+        apellido: est.apellido,
+        xp_total: est.recursos?.xp_total ?? 0,
+        nivel_actual: est.nivel_actual,
+        avatarUrl: est.avatarUrl,
+      }))
+      .sort((a, b) => b.xp_total - a.xp_total);
+
+    return {
+      ...casa,
+      estudiantes: estudiantesOrdenados,
+    };
   }
 
   /**
@@ -160,10 +178,10 @@ export class CasasService {
   }
 
   /**
-   * Obtiene el ranking interno de una casa (estudiantes ordenados por puntos)
+   * Obtiene el ranking interno de una casa (estudiantes ordenados por XP)
    *
    * @param casaId - ID de la casa
-   * @returns Lista de estudiantes ordenados por puntos descendente
+   * @returns Lista de estudiantes ordenados por XP descendente
    */
   async getRankingInterno(casaId: string): Promise<EstudianteRanking[]> {
     const casa = await this.prisma.casa.findUnique({
@@ -174,11 +192,12 @@ export class CasasService {
             id: true,
             nombre: true,
             apellido: true,
-            puntos_totales: true,
             nivel_actual: true,
             avatarUrl: true,
+            recursos: {
+              select: { xp_total: true },
+            },
           },
-          orderBy: { puntos_totales: 'desc' },
         },
       },
     });
@@ -187,15 +206,17 @@ export class CasasService {
       throw new NotFoundException(`Casa con ID ${casaId} no encontrada`);
     }
 
-    // Mapear al formato esperado
-    return casa.estudiantes.map((est) => ({
-      id: est.id,
-      nombre: est.nombre,
-      apellido: est.apellido,
-      puntosTotales: est.puntos_totales,
-      nivelActual: est.nivel_actual,
-      avatarUrl: est.avatarUrl,
-    }));
+    // Mapear y ordenar por XP
+    return casa.estudiantes
+      .map((est) => ({
+        id: est.id,
+        nombre: est.nombre,
+        apellido: est.apellido,
+        puntosTotales: est.recursos?.xp_total ?? 0,
+        nivelActual: est.nivel_actual,
+        avatarUrl: est.avatarUrl,
+      }))
+      .sort((a, b) => b.puntosTotales - a.puntosTotales);
   }
 
   /**
@@ -237,17 +258,24 @@ export class CasasService {
   }
 
   /**
-   * Recalcula los puntos totales de una casa sumando los de sus estudiantes
+   * Recalcula los puntos totales de una casa sumando los XP de sus estudiantes
    *
    * @param casaId - ID de la casa
    */
   async recalcularPuntos(casaId: string): Promise<CasaBasica> {
-    const casa = await this.findOne(casaId);
+    // Obtener la suma de XP de todos los estudiantes de la casa
+    const resultado = await this.prisma.recursosEstudiante.aggregate({
+      where: {
+        estudiante: {
+          casaId: casaId,
+        },
+      },
+      _sum: {
+        xp_total: true,
+      },
+    });
 
-    const puntosTotales = (casa.estudiantes ?? []).reduce(
-      (sum, est) => sum + est.puntos_totales,
-      0,
-    );
+    const puntosTotales = resultado._sum.xp_total ?? 0;
 
     return this.prisma.casa.update({
       where: { id: casaId },
@@ -284,7 +312,7 @@ interface EstudianteBasico {
   id: string;
   nombre: string;
   apellido: string;
-  puntos_totales: number;
+  xp_total: number;
   nivel_actual: number;
   avatarUrl: string | null;
 }

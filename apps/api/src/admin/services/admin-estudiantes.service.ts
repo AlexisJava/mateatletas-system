@@ -146,6 +146,9 @@ export class AdminEstudiantesService {
               },
             },
           },
+          recursos: {
+            select: { xp_total: true },
+          },
         },
         orderBy: {
           apellido: 'asc',
@@ -161,7 +164,7 @@ export class AdminEstudiantesService {
       edad: est.edad,
       nivelEscolar: est.nivelEscolar, // Convertir a camelCase para el frontend
       nivel_actual: est.nivel_actual,
-      puntos_totales: est.puntos_totales,
+      xp_total: est.recursos?.xp_total ?? 0,
       tutor: est.tutor,
       casa: est.casa,
       sector: est.sector,
@@ -270,7 +273,6 @@ export class AdminEstudiantesService {
         nivelEscolar: data.nivelEscolar,
         tutor_id: tutor.id,
         nivel_actual: 1,
-        puntos_totales: 0,
       },
       include: {
         tutor: {
@@ -397,7 +399,9 @@ export class AdminEstudiantesService {
         apellido: true,
         edad: true,
         nivel_actual: true,
-        puntos_totales: true,
+        recursos: {
+          select: { xp_total: true },
+        },
         tutor: {
           select: {
             id: true,
@@ -443,7 +447,7 @@ export class AdminEstudiantesService {
         apellido: estudiante.apellido,
         edad: estudiante.edad,
         nivel_actual: estudiante.nivel_actual,
-        puntos_totales: estudiante.puntos_totales,
+        xp_total: estudiante.recursos?.xp_total ?? 0,
       },
       tutor: estudiante.tutor,
       casa: estudiante.casa,
@@ -582,7 +586,6 @@ export class AdminEstudiantesService {
           password_hash: estudiantePinHash,
           sector_id: dto.sectorId,
           casaId: dto.casaId || null,
-          puntos_totales: dto.puntosIniciales ?? 0,
           nivel_actual: dto.nivelInicial ?? 1,
           avatar_gradient: 0,
           fotoUrl: null,

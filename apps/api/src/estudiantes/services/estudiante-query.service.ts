@@ -204,6 +204,9 @@ export class EstudianteQueryService {
       },
       include: {
         casa: true,
+        recursos: {
+          select: { xp_total: true },
+        },
         logros_desbloqueados: {
           include: {
             logro: true,
@@ -269,7 +272,7 @@ export class EstudianteQueryService {
         clases_presente: clasesPresente,
         tasa_asistencia: tasaAsistencia,
         nivel: estudiante.nivel_actual,
-        puntos: estudiante.puntos_totales,
+        puntos: estudiante.recursos?.xp_total ?? 0,
         logros: estudiante.logros_desbloqueados?.length || 0,
       },
     };
@@ -484,19 +487,21 @@ export class EstudianteQueryService {
         id: true,
         nombre: true,
         apellido: true,
-        puntos_totales: true,
-      },
-      orderBy: {
-        puntos_totales: 'desc',
+        recursos: {
+          select: { xp_total: true },
+        },
       },
     });
 
-    return companeros.map((c) => ({
-      id: c.id,
-      nombre: c.nombre,
-      apellido: c.apellido,
-      puntos: c.puntos_totales,
-    }));
+    // Ordenar por XP en memoria y mapear
+    return companeros
+      .map((c) => ({
+        id: c.id,
+        nombre: c.nombre,
+        apellido: c.apellido,
+        puntos: c.recursos?.xp_total ?? 0,
+      }))
+      .sort((a, b) => b.puntos - a.puntos);
   }
 
   /**

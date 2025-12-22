@@ -4,6 +4,8 @@ import { PrismaService } from '../core/database/prisma.service';
 /**
  * Servicio de Ranking
  * Gestiona el sistema de ranking y leaderboards: global, por casa, por estudiante
+ *
+ * Refactorizado para usar RecursosEstudiante.xp_total en lugar de Estudiante.puntos_totales
  */
 @Injectable()
 export class RankingService {
@@ -15,12 +17,17 @@ export class RankingService {
   async getRankingEstudiante(estudianteId: string) {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: estudianteId },
-      include: { casa: true },
+      include: {
+        casa: true,
+        recursos: true,
+      },
     });
 
     if (!estudiante) {
       throw new NotFoundException('Estudiante no encontrado');
     }
+
+    const xpEstudiante = estudiante.recursos?.xp_total ?? 0;
 
     // Ranking de la casa (solo si tiene casa)
     const rankingCasa = estudiante.casaId
@@ -30,12 +37,12 @@ export class RankingService {
     // Ranking global (top 20)
     const rankingGlobal = await this.getRankingGlobal(1, 20);
 
-    // Calcular posición global del estudiante
+    // Calcular posición global del estudiante (cuántos tienen más XP)
     const posicionGlobal =
-      (await this.prisma.estudiante.count({
+      (await this.prisma.recursosEstudiante.count({
         where: {
-          puntos_totales: {
-            gt: estudiante.puntos_totales,
+          xp_total: {
+            gt: xpEstudiante,
           },
         },
       })) + 1;
@@ -48,13 +55,13 @@ export class RankingService {
       posicionCasa,
       posicionGlobal,
       rankingCasa: rankingCasa.slice(0, 10),
-      rankingGlobal: rankingGlobal.data, // Ya viene limitado a 20
+      rankingGlobal: rankingGlobal.data,
     };
   }
 
   /**
    * Obtener ranking de la casa
-   * Retorna todos los estudiantes de la casa ordenados por puntos
+   * Retorna todos los estudiantes de la casa ordenados por XP
    */
   async getCasaRanking(casaId: string) {
     const estudiantes = await this.prisma.estudiante.findMany({
@@ -64,20 +71,24 @@ export class RankingService {
         nombre: true,
         apellido: true,
         fotoUrl: true,
-        puntos_totales: true,
-      },
-      orderBy: {
-        puntos_totales: 'desc',
+        recursos: {
+          select: { xp_total: true },
+        },
       },
     });
 
-    return estudiantes.map((e) => ({
-      id: e.id,
-      nombre: e.nombre,
-      apellido: e.apellido,
-      avatar: e.fotoUrl,
-      puntos: e.puntos_totales,
-    }));
+    // Ordenar por XP en memoria (Prisma no soporta orderBy en relación opcional)
+    const sorted = estudiantes
+      .map((e) => ({
+        id: e.id,
+        nombre: e.nombre,
+        apellido: e.apellido,
+        avatar: e.fotoUrl,
+        puntos: e.recursos?.xp_total ?? 0,
+      }))
+      .sort((a, b) => b.puntos - a.puntos);
+
+    return sorted;
   }
 
   /**
@@ -88,39 +99,43 @@ export class RankingService {
    * - limit: Elementos por página (default: 20, max: 100)
    * - Retorna metadata con total, totalPages, currentPage
    *
-   * PERFORMANCE:
-   * - ANTES: Retornaba TODOS los estudiantes (potencialmente miles)
-   * - AHORA: Retorna solo 20-100 estudiantes por request
+   * ESTRATEGIA:
+   * Query RecursosEstudiante ordenado por xp_total, luego join con Estudiante
    */
   async getRankingGlobal(page: number = 1, limit: number = 20) {
-    // Validar y normalizar parámetros
     const normalizedPage = Math.max(1, page);
-    const normalizedLimit = Math.min(Math.max(1, limit), 100); // Max 100 por página
+    const normalizedLimit = Math.min(Math.max(1, limit), 100);
     const skip = (normalizedPage - 1) * normalizedLimit;
 
-    // Query con paginación
-    const [estudiantes, total] = await Promise.all([
-      this.prisma.estudiante.findMany({
+    // Query ordenado por xp_total desde RecursosEstudiante
+    const [recursos, total] = await Promise.all([
+      this.prisma.recursosEstudiante.findMany({
         skip,
         take: normalizedLimit,
+        orderBy: { xp_total: 'desc' },
         include: {
-          casa: true,
-        },
-        orderBy: {
-          puntos_totales: 'desc',
+          estudiante: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+              fotoUrl: true,
+              casa: true,
+            },
+          },
         },
       }),
-      this.prisma.estudiante.count(),
+      this.prisma.recursosEstudiante.count(),
     ]);
 
-    const mappedEstudiantes = estudiantes.map((e, index) => ({
-      id: e.id,
-      nombre: e.nombre,
-      apellido: e.apellido,
-      avatar: e.fotoUrl,
-      casa: e.casa,
-      puntos: e.puntos_totales,
-      posicion: skip + index + 1, // Posición absoluta en el ranking
+    const mappedEstudiantes = recursos.map((r, index) => ({
+      id: r.estudiante.id,
+      nombre: r.estudiante.nombre,
+      apellido: r.estudiante.apellido,
+      avatar: r.estudiante.fotoUrl,
+      casa: r.estudiante.casa,
+      puntos: r.xp_total,
+      posicion: skip + index + 1,
     }));
 
     return {

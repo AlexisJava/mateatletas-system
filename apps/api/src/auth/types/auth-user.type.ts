@@ -22,7 +22,7 @@ export interface AuthEstudiante extends DetailedAuthUserBase {
   edad: number;
   nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
   fotoUrl: string | null;
-  puntos_totales: number;
+  xp_total: number; // Antes: puntos_totales
   nivel_actual: number;
   tutor: {
     id: string;

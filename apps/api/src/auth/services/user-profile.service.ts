@@ -55,8 +55,12 @@ const ESTUDIANTE_PROFILE_SELECT = {
   edad: true,
   nivelEscolar: true,
   fotoUrl: true,
-  puntos_totales: true,
   nivel_actual: true,
+  recursos: {
+    select: {
+      xp_total: true,
+    },
+  },
   casaId: true,
   tutor_id: true,
   createdAt: true,

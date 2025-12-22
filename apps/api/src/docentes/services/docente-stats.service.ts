@@ -604,7 +604,7 @@ export class DocenteStatsService {
         nombre: top.estudiante.nombre,
         apellido: top.estudiante.apellido,
         fotoUrl: top.estudiante.fotoUrl,
-        puntos_totales: top.total,
+        xp_total: top.total,
         porcentaje_asistencia: asistenciaData?.porcentaje_asistencia || 0,
       };
     });
@@ -820,13 +820,13 @@ export class DocenteStatsService {
         codigo: grupo.codigo,
         estudiantes_activos: estudiantesIdsGrupo.length,
         cupo_maximo: grupo.cupo_maximo,
-        puntos_totales: puntosGrupoTotal,
+        xp_total: puntosGrupoTotal,
         asistencia_promedio: porcentajeAsistenciaGrupo,
       };
     });
 
-    // Ordenar grupos por puntos totales
-    rankingGrupos.sort((a, b) => b.puntos_totales - a.puntos_totales);
+    // Ordenar grupos por XP total
+    rankingGrupos.sort((a, b) => b.xp_total - a.xp_total);
 
     return rankingGrupos;
   }
