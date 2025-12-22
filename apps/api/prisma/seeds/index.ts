@@ -5,15 +5,12 @@ import { seedTutor } from './tutor.seed';
 import { seedCasas } from './casas.seed';
 import { seedMundos } from './mundos.seed';
 import { seedTiers } from './tiers.seed';
-import { seedRutasCurriculares } from './rutas-curriculares.seed';
 import { seedProductos } from './productos.seed';
 import { seedAccionesPuntuables } from './acciones-puntuables.seed';
 import { seedLogros } from './logros.seed';
-import { seedCursos } from './cursos.seed';
 import { seedSectores } from './sectores.seed';
 import { seedConfiguracionPrecios } from './configuracion-precios.seed';
 import { seedInscripcionesMensuales } from './inscripciones-mensuales.seed';
-import { seedClaseGrupos } from './clase-grupos.seed';
 
 /**
  * Orchestrator para todos los seeds modulares
@@ -31,12 +28,10 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedSectores(prisma); // Sectores base (Matemática y Programación)
     await seedCasas(prisma); // ESENCIAL: Casas 2026 (Quantum, Vertex, Pulsar)
     await seedMundos(prisma); // ESENCIAL: Mundos STEAM 2026 (Mat, Prog, Ciencias)
-    await seedTiers(prisma); // ESENCIAL: Tiers 2026 (ARCADE, ARCADE_PLUS, PRO)
-    await seedRutasCurriculares(prisma); // Las rutas son necesarias para el sistema
+    await seedTiers(prisma); // ESENCIAL: Tiers STEAM 2026
     await seedProductos(prisma); // Productos del catálogo (pueden ser reales)
     await seedAccionesPuntuables(prisma); // Configuración de gamificación
     await seedLogros(prisma); // Logros del sistema
-    await seedCursos(prisma); // Catálogo de cursos canjeables
   } else {
     // DEVELOPMENT/TEST: Datos completos de prueba
     console.log('🧪 Modo DESARROLLO: Creando datos de prueba completos\n');
@@ -47,14 +42,11 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedTutor(prisma);
     await seedCasas(prisma);
     await seedMundos(prisma); // Mundos STEAM 2026
-    await seedTiers(prisma); // Tiers 2026
-    await seedRutasCurriculares(prisma);
+    await seedTiers(prisma); // Tiers STEAM 2026
     await seedProductos(prisma);
     await seedAccionesPuntuables(prisma);
     await seedLogros(prisma);
-    await seedCursos(prisma); // Catálogo de cursos canjeables
     await seedInscripcionesMensuales(prisma); // Inscripciones de prueba para el tutor
-    await seedClaseGrupos(prisma); // Grupos de clases recurrentes
   }
 
   console.log(`\n🎉 Seed completado exitosamente (${env})!`);
@@ -70,11 +62,8 @@ export {
   seedCasas,
   seedMundos,
   seedTiers,
-  seedRutasCurriculares,
   seedProductos,
   seedAccionesPuntuables,
   seedLogros,
-  seedCursos,
   seedInscripcionesMensuales,
-  seedClaseGrupos,
 };

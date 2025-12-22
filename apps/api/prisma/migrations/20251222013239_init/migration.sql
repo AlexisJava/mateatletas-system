@@ -14,13 +14,7 @@ CREATE TYPE "nivel_interno" AS ENUM ('BASICO', 'INTERMEDIO', 'AVANZADO', 'OLIMPI
 CREATE TYPE "onboarding_estado" AS ENUM ('PENDIENTE', 'SELECCION_MUNDOS', 'TEST_UBICACION', 'CONFIRMACION_CASA', 'CREACION_AVATAR', 'COMPLETADO');
 
 -- CreateEnum
-CREATE TYPE "tier_nombre" AS ENUM ('ARCADE', 'ARCADE_PLUS', 'PRO');
-
--- CreateEnum
-CREATE TYPE "EstadoMembresia" AS ENUM ('Pendiente', 'Activa', 'Atrasada', 'Cancelada');
-
--- CreateEnum
-CREATE TYPE "EstadoInscripcionCurso" AS ENUM ('PreInscrito', 'Activo', 'Finalizado');
+CREATE TYPE "tier_nombre" AS ENUM ('STEAM_LIBROS', 'STEAM_ASINCRONICO', 'STEAM_SINCRONICO');
 
 -- CreateEnum
 CREATE TYPE "EstadoClase" AS ENUM ('Programada', 'Cancelada');
@@ -44,13 +38,10 @@ CREATE TYPE "estado_tarea" AS ENUM ('PENDIENTE', 'EN_PROGRESO', 'COMPLETADA', 'C
 CREATE TYPE "prioridad_tarea" AS ENUM ('BAJA', 'MEDIA', 'ALTA', 'URGENTE');
 
 -- CreateEnum
-CREATE TYPE "tipo_descuento" AS ENUM ('NINGUNO', 'MULTIPLE_ACTIVIDADES', 'HERMANOS_BASICO', 'HERMANOS_MULTIPLE', 'AACREA', 'BECA');
+CREATE TYPE "tipo_descuento" AS ENUM ('NINGUNO', 'HERMANO_2', 'HERMANO_3_MAS');
 
 -- CreateEnum
-CREATE TYPE "estado_pago" AS ENUM ('Pendiente', 'Pagado', 'Vencido', 'Parcial', 'Becado');
-
--- CreateEnum
-CREATE TYPE "descuento_beca_tipo" AS ENUM ('PORCENTAJE', 'MONTO_FIJO');
+CREATE TYPE "estado_pago" AS ENUM ('Pendiente', 'Pagado', 'Vencido', 'Parcial');
 
 -- CreateEnum
 CREATE TYPE "tipo_clase_grupo" AS ENUM ('GRUPO_REGULAR', 'CURSO_TEMPORAL');
@@ -59,22 +50,7 @@ CREATE TYPE "tipo_clase_grupo" AS ENUM ('GRUPO_REGULAR', 'CURSO_TEMPORAL');
 CREATE TYPE "dia_semana" AS ENUM ('LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO');
 
 -- CreateEnum
-CREATE TYPE "estado_planificacion" AS ENUM ('BORRADOR', 'PUBLICADA', 'ARCHIVADA');
-
--- CreateEnum
-CREATE TYPE "nivel_dificultad" AS ENUM ('BASICO', 'INTERMEDIO', 'AVANZADO', 'OLIMPICO');
-
--- CreateEnum
-CREATE TYPE "estado_asignacion" AS ENUM ('ACTIVA', 'PAUSADA', 'FINALIZADA', 'CANCELADA');
-
--- CreateEnum
-CREATE TYPE "tipo_recurso" AS ENUM ('XP', 'MONEDAS');
-
--- CreateEnum
-CREATE TYPE "tipo_item" AS ENUM ('AVATAR', 'SKIN', 'ACCESORIO', 'POWERUP', 'COSMETICO', 'TITULO', 'EMOJI', 'FONDO', 'MARCO');
-
--- CreateEnum
-CREATE TYPE "rareza_item" AS ENUM ('COMUN', 'RARO', 'EPICO', 'LEGENDARIO');
+CREATE TYPE "tipo_recurso" AS ENUM ('XP');
 
 -- CreateEnum
 CREATE TYPE "categoria_studio" AS ENUM ('EXPERIENCIA', 'CURRICULAR');
@@ -95,7 +71,13 @@ CREATE TYPE "estado_semana_studio" AS ENUM ('VACIA', 'COMPLETA');
 CREATE TYPE "tipo_recurso_studio" AS ENUM ('IMAGEN', 'AUDIO', 'VIDEO', 'DOCUMENTO');
 
 -- CreateEnum
-CREATE TYPE "categoria_componente" AS ENUM ('INTERACTIVO', 'CONTENIDO', 'EDITOR_CODIGO', 'MULTIMEDIA', 'GAMIFICACION', 'EVALUACION');
+CREATE TYPE "categoria_componente" AS ENUM ('INTERACTIVO', 'MOTRICIDAD_FINA', 'SIMULADOR', 'EDITOR_CODIGO', 'CREATIVO', 'MULTIMEDIA', 'EVALUACION', 'MULTIPLAYER');
+
+-- CreateEnum
+CREATE TYPE "IntervaloSuscripcion" AS ENUM ('DIARIO', 'SEMANAL', 'MENSUAL', 'ANUAL');
+
+-- CreateEnum
+CREATE TYPE "EstadoSuscripcion" AS ENUM ('PENDIENTE', 'ACTIVA', 'EN_GRACIA', 'MOROSA', 'PAUSADA', 'CANCELADA');
 
 -- CreateTable
 CREATE TABLE "tutores" (
@@ -103,8 +85,6 @@ CREATE TABLE "tutores" (
     "username" TEXT,
     "email" TEXT,
     "password_hash" TEXT NOT NULL,
-    "password_temporal" TEXT,
-    "debe_cambiar_password" BOOLEAN NOT NULL DEFAULT true,
     "debe_completar_perfil" BOOLEAN NOT NULL DEFAULT false,
     "fecha_ultimo_cambio" TIMESTAMP(3),
     "nombre" TEXT NOT NULL,
@@ -141,27 +121,11 @@ CREATE TABLE "estudiantes" (
     "edad" INTEGER NOT NULL,
     "email" TEXT,
     "password_hash" TEXT,
-    "password_temporal" TEXT,
-    "debe_cambiar_password" BOOLEAN NOT NULL DEFAULT true,
     "fecha_ultimo_cambio" TIMESTAMP(3),
     "roles" JSONB NOT NULL DEFAULT '["estudiante"]',
     "sector_id" TEXT,
 
     CONSTRAINT "estudiantes_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "estudiante_sectores" (
-    "id" TEXT NOT NULL,
-    "estudiante_id" TEXT NOT NULL,
-    "sector_id" TEXT NOT NULL,
-    "es_principal" BOOLEAN NOT NULL DEFAULT false,
-    "fecha_inicio" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "fecha_fin" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "estudiante_sectores_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -222,24 +186,6 @@ CREATE TABLE "tiers" (
 );
 
 -- CreateTable
-CREATE TABLE "cambios_tier_pendientes" (
-    "id" TEXT NOT NULL,
-    "estudiante_inscripcion_id" TEXT NOT NULL,
-    "tier_actual_id" TEXT NOT NULL,
-    "tier_nuevo_id" TEXT NOT NULL,
-    "tipo_cambio" TEXT NOT NULL,
-    "fecha_efectiva" TIMESTAMP(3) NOT NULL,
-    "estado" TEXT NOT NULL DEFAULT 'pendiente',
-    "aplicacion_inmediata" BOOLEAN NOT NULL DEFAULT false,
-    "aplicado_en" TIMESTAMP(3),
-    "cancelado_en" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "cambios_tier_pendientes_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "estudiante_mundo_niveles" (
     "id" TEXT NOT NULL,
     "estudiante_id" TEXT NOT NULL,
@@ -276,7 +222,6 @@ CREATE TABLE "docentes" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password_hash" TEXT NOT NULL,
-    "password_temporal" TEXT,
     "nombre" TEXT NOT NULL,
     "apellido" TEXT NOT NULL,
     "titulo" TEXT,
@@ -290,7 +235,6 @@ CREATE TABLE "docentes" (
     "nivel_educativo" JSONB,
     "roles" JSONB NOT NULL DEFAULT '["docente"]',
     "telefono" TEXT,
-    "debe_cambiar_password" BOOLEAN NOT NULL DEFAULT true,
     "fecha_ultimo_cambio" TIMESTAMP(3),
 
     CONSTRAINT "docentes_pkey" PRIMARY KEY ("id")
@@ -301,8 +245,6 @@ CREATE TABLE "admins" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password_hash" TEXT NOT NULL,
-    "password_temporal" TEXT,
-    "debe_cambiar_password" BOOLEAN NOT NULL DEFAULT true,
     "fecha_ultimo_cambio" TIMESTAMP(3),
     "nombre" TEXT NOT NULL,
     "apellido" TEXT NOT NULL,
@@ -317,6 +259,46 @@ CREATE TABLE "admins" (
     "mfa_backup_codes" TEXT[] DEFAULT ARRAY[]::TEXT[],
 
     CONSTRAINT "admins_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "login_attempts" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "email" VARCHAR(255) NOT NULL,
+    "ip" VARCHAR(45) NOT NULL,
+    "success" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "login_attempts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "password_reset_tokens" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "email" VARCHAR(255) NOT NULL,
+    "token" VARCHAR(64) NOT NULL,
+    "user_type" VARCHAR(20) NOT NULL,
+    "expires_at" TIMESTAMPTZ NOT NULL,
+    "used" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "password_reset_tokens_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "refresh_token_sessions" (
+    "id" VARCHAR(36) NOT NULL,
+    "user_id" UUID NOT NULL,
+    "user_type" VARCHAR(20) NOT NULL,
+    "ip_address" VARCHAR(45),
+    "user_agent" VARCHAR(500),
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "last_used_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "expires_at" TIMESTAMPTZ NOT NULL,
+    "revoked" BOOLEAN NOT NULL DEFAULT false,
+    "revoked_reason" VARCHAR(50),
+
+    CONSTRAINT "refresh_token_sessions_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -338,51 +320,8 @@ CREATE TABLE "productos" (
 );
 
 -- CreateTable
-CREATE TABLE "membresias" (
-    "id" TEXT NOT NULL,
-    "tutor_id" TEXT NOT NULL,
-    "producto_id" TEXT NOT NULL,
-    "estado" "EstadoMembresia" NOT NULL DEFAULT 'Pendiente',
-    "fecha_inicio" TIMESTAMP(3),
-    "fecha_proximo_pago" TIMESTAMP(3),
-    "preferencia_id" TEXT,
-    "mercadopago_payment_id" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "membresias_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "inscripciones_curso" (
-    "id" TEXT NOT NULL,
-    "estudiante_id" TEXT NOT NULL,
-    "producto_id" TEXT NOT NULL,
-    "estado" "EstadoInscripcionCurso" NOT NULL DEFAULT 'PreInscrito',
-    "fecha_inscripcion" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "preferencia_id" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "inscripciones_curso_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "rutas_curriculares" (
-    "id" TEXT NOT NULL,
-    "nombre" TEXT NOT NULL,
-    "color" TEXT,
-    "descripcion" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "rutas_curriculares_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "clases" (
     "id" TEXT NOT NULL,
-    "ruta_curricular_id" TEXT,
     "docente_id" TEXT NOT NULL,
     "fecha_hora_inicio" TIMESTAMP(3) NOT NULL,
     "duracion_minutos" INTEGER NOT NULL,
@@ -431,7 +370,6 @@ CREATE TABLE "clase_grupos" (
     "cupo_maximo" INTEGER NOT NULL DEFAULT 15,
     "grupo_id" TEXT NOT NULL,
     "docente_id" TEXT NOT NULL,
-    "ruta_curricular_id" TEXT,
     "sector_id" TEXT,
     "nivel" TEXT,
     "activo" BOOLEAN NOT NULL DEFAULT true,
@@ -729,13 +667,10 @@ CREATE TABLE "docentes_rutas" (
 -- CreateTable
 CREATE TABLE "configuracion_precios" (
     "id" TEXT NOT NULL DEFAULT 'singleton',
-    "precio_club_matematicas" DECIMAL(10,2) NOT NULL DEFAULT 50000,
-    "precio_cursos_especializados" DECIMAL(10,2) NOT NULL DEFAULT 55000,
-    "precio_multiple_actividades" DECIMAL(10,2) NOT NULL DEFAULT 44000,
-    "precio_hermanos_basico" DECIMAL(10,2) NOT NULL DEFAULT 44000,
-    "precio_hermanos_multiple" DECIMAL(10,2) NOT NULL DEFAULT 38000,
-    "descuento_aacrea_porcentaje" DECIMAL(5,2) NOT NULL DEFAULT 20,
-    "descuento_aacrea_activo" BOOLEAN NOT NULL DEFAULT true,
+    "precio_steam_libros" DECIMAL(10,2) NOT NULL DEFAULT 40000,
+    "precio_steam_asincronico" DECIMAL(10,2) NOT NULL DEFAULT 65000,
+    "precio_steam_sincronico" DECIMAL(10,2) NOT NULL DEFAULT 95000,
+    "descuento_segundo_hermano" DECIMAL(5,2) NOT NULL DEFAULT 10,
     "dia_vencimiento" INTEGER NOT NULL DEFAULT 15,
     "dias_antes_recordatorio" INTEGER NOT NULL DEFAULT 5,
     "notificaciones_activas" BOOLEAN NOT NULL DEFAULT true,
@@ -786,131 +721,10 @@ CREATE TABLE "inscripciones_mensuales" (
 );
 
 -- CreateTable
-CREATE TABLE "becas" (
-    "id" TEXT NOT NULL,
-    "estudiante_id" TEXT NOT NULL,
-    "tipo_beca" TEXT NOT NULL,
-    "descuento_tipo" "descuento_beca_tipo" NOT NULL,
-    "descuento_valor" DECIMAL(10,2) NOT NULL,
-    "productos_aplica" JSONB NOT NULL,
-    "fecha_inicio" TIMESTAMP(3) NOT NULL,
-    "fecha_fin" TIMESTAMP(3) NOT NULL,
-    "activa" BOOLEAN NOT NULL DEFAULT true,
-    "motivo_beca" TEXT,
-    "aprobada_por_admin_id" TEXT,
-    "observaciones" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "becas_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "planificaciones_mensuales" (
-    "id" TEXT NOT NULL,
-    "grupo_id" TEXT NOT NULL,
-    "mes" INTEGER NOT NULL,
-    "anio" INTEGER NOT NULL,
-    "titulo" TEXT NOT NULL,
-    "descripcion" TEXT NOT NULL,
-    "tematica_principal" TEXT NOT NULL,
-    "objetivos_aprendizaje" TEXT[],
-    "estado" "estado_planificacion" NOT NULL DEFAULT 'BORRADOR',
-    "fecha_publicacion" TIMESTAMP(3),
-    "notas_docentes" TEXT,
-    "created_by_admin_id" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "planificaciones_mensuales_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "actividades_semanales" (
-    "id" TEXT NOT NULL,
-    "planificacion_id" TEXT NOT NULL,
-    "semana_numero" INTEGER NOT NULL,
-    "titulo" TEXT NOT NULL,
-    "descripcion" TEXT NOT NULL,
-    "componente_nombre" TEXT NOT NULL,
-    "componente_props" JSONB NOT NULL,
-    "nivel_dificultad" "nivel_dificultad" NOT NULL,
-    "tiempo_estimado_minutos" INTEGER NOT NULL,
-    "puntos_gamificacion" INTEGER NOT NULL,
-    "instrucciones_docente" TEXT NOT NULL,
-    "instrucciones_estudiante" TEXT NOT NULL,
-    "recursos_url" JSONB,
-    "orden" INTEGER NOT NULL DEFAULT 1,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "actividades_semanales_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "asignaciones_docente" (
-    "id" TEXT NOT NULL,
-    "planificacion_id" TEXT NOT NULL,
-    "clase_grupo_id" TEXT NOT NULL,
-    "docente_id" TEXT NOT NULL,
-    "activo" BOOLEAN NOT NULL DEFAULT true,
-    "fecha_asignacion" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "mensaje_docente" TEXT,
-    "fecha_inicio_custom" TIMESTAMP(3),
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "asignaciones_docente_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "asignaciones_actividad_estudiante" (
-    "id" TEXT NOT NULL,
-    "asignacion_docente_id" TEXT NOT NULL,
-    "actividad_id" TEXT NOT NULL,
-    "clase_grupo_id" TEXT NOT NULL,
-    "fecha_inicio" TIMESTAMP(3) NOT NULL,
-    "fecha_fin" TIMESTAMP(3),
-    "estado" "estado_asignacion" NOT NULL DEFAULT 'ACTIVA',
-    "mensaje_semana" TEXT,
-    "notificado_estudiantes" BOOLEAN NOT NULL DEFAULT false,
-    "fecha_notificacion_estudiantes" TIMESTAMP(3),
-    "notificado_tutores" BOOLEAN NOT NULL DEFAULT false,
-    "fecha_notificacion_tutores" TIMESTAMP(3),
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "asignaciones_actividad_estudiante_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "progreso_estudiante_actividad" (
-    "id" TEXT NOT NULL,
-    "estudiante_id" TEXT NOT NULL,
-    "actividad_id" TEXT NOT NULL,
-    "asignacion_id" TEXT NOT NULL,
-    "iniciado" BOOLEAN NOT NULL DEFAULT false,
-    "fecha_inicio" TIMESTAMP(3),
-    "completado" BOOLEAN NOT NULL DEFAULT false,
-    "fecha_completado" TIMESTAMP(3),
-    "puntos_obtenidos" INTEGER NOT NULL DEFAULT 0,
-    "tiempo_total_minutos" INTEGER NOT NULL DEFAULT 0,
-    "intentos" INTEGER NOT NULL DEFAULT 0,
-    "mejor_puntaje" INTEGER NOT NULL DEFAULT 0,
-    "estado_juego" JSONB,
-    "respuestas_detalle" JSONB,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "progreso_estudiante_actividad_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "recursos_estudiante" (
     "id" TEXT NOT NULL,
     "estudiante_id" TEXT NOT NULL,
     "xp_total" INTEGER NOT NULL DEFAULT 0,
-    "monedas_total" INTEGER NOT NULL DEFAULT 0,
     "ultima_actualizacion" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -933,79 +747,12 @@ CREATE TABLE "transacciones_recurso" (
 );
 
 -- CreateTable
-CREATE TABLE "categorias_item" (
-    "id" TEXT NOT NULL,
-    "nombre" TEXT NOT NULL,
-    "descripcion" TEXT,
-    "icono" TEXT NOT NULL,
-    "orden" INTEGER NOT NULL DEFAULT 0,
-    "activa" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "categorias_item_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "items_tienda" (
-    "id" TEXT NOT NULL,
-    "nombre" TEXT NOT NULL,
-    "descripcion" TEXT,
-    "categoria_id" TEXT NOT NULL,
-    "tipo_item" "tipo_item" NOT NULL,
-    "precio_monedas" INTEGER NOT NULL DEFAULT 0,
-    "precio_gemas" INTEGER NOT NULL DEFAULT 0,
-    "imagen_url" TEXT,
-    "rareza" "rareza_item" NOT NULL DEFAULT 'COMUN',
-    "edicion_limitada" BOOLEAN NOT NULL DEFAULT false,
-    "fecha_inicio" TIMESTAMP(3),
-    "fecha_fin" TIMESTAMP(3),
-    "nivel_minimo_requerido" INTEGER NOT NULL DEFAULT 1,
-    "disponible" BOOLEAN NOT NULL DEFAULT true,
-    "veces_comprado" INTEGER NOT NULL DEFAULT 0,
-    "metadata" JSONB,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "items_tienda_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "items_obtenidos" (
-    "id" TEXT NOT NULL,
-    "estudiante_id" TEXT NOT NULL,
-    "item_id" TEXT NOT NULL,
-    "fecha_obtencion" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "equipado" BOOLEAN NOT NULL DEFAULT false,
-    "cantidad" INTEGER NOT NULL DEFAULT 1,
-    "metadata" JSONB,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "items_obtenidos_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "compras_item" (
-    "id" TEXT NOT NULL,
-    "recursos_estudiante_id" TEXT NOT NULL,
-    "item_id" TEXT NOT NULL,
-    "monedas_gastadas" INTEGER NOT NULL DEFAULT 0,
-    "gemas_gastadas" INTEGER NOT NULL DEFAULT 0,
-    "fecha_compra" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "compras_item_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "logros_gamificacion" (
     "id" TEXT NOT NULL,
     "codigo" TEXT NOT NULL,
     "nombre" TEXT NOT NULL,
     "descripcion" TEXT NOT NULL,
     "categoria" TEXT NOT NULL,
-    "monedas_recompensa" INTEGER NOT NULL,
     "xp_recompensa" INTEGER NOT NULL,
     "criterio_tipo" TEXT NOT NULL,
     "criterio_valor" TEXT NOT NULL,
@@ -1048,121 +795,6 @@ CREATE TABLE "rachas_estudiantes" (
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "rachas_estudiantes_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "cursos_catalogo" (
-    "id" TEXT NOT NULL,
-    "codigo" TEXT NOT NULL,
-    "titulo" TEXT NOT NULL,
-    "descripcion" TEXT NOT NULL,
-    "categoria" TEXT NOT NULL,
-    "subcategoria" TEXT,
-    "duracion_clases" INTEGER NOT NULL,
-    "nivel_requerido" INTEGER NOT NULL DEFAULT 1,
-    "contenido" JSONB,
-    "precio_usd" DECIMAL(10,2) NOT NULL,
-    "precio_monedas" INTEGER NOT NULL,
-    "imagen_url" TEXT,
-    "video_preview_url" TEXT,
-    "destacado" BOOLEAN NOT NULL DEFAULT false,
-    "nuevo" BOOLEAN NOT NULL DEFAULT false,
-    "activo" BOOLEAN NOT NULL DEFAULT true,
-    "orden" INTEGER NOT NULL DEFAULT 0,
-    "total_canjes" INTEGER NOT NULL DEFAULT 0,
-    "rating" DECIMAL(3,2) NOT NULL DEFAULT 0,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "cursos_catalogo_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "solicitudes_canje" (
-    "id" TEXT NOT NULL,
-    "estudiante_id" TEXT NOT NULL,
-    "tutor_id" TEXT NOT NULL,
-    "curso_id" TEXT NOT NULL,
-    "monedas_usadas" INTEGER NOT NULL,
-    "estado" TEXT NOT NULL,
-    "fecha_decision" TIMESTAMP(3),
-    "opcion_pago" TEXT,
-    "monto_padre" DECIMAL(10,2),
-    "mensaje_padre" TEXT,
-    "fecha_solicitud" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "fecha_expiracion" TIMESTAMP(3),
-
-    CONSTRAINT "solicitudes_canje_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "cursos_estudiantes" (
-    "id" TEXT NOT NULL,
-    "estudiante_id" TEXT NOT NULL,
-    "curso_id" TEXT NOT NULL,
-    "progreso" INTEGER NOT NULL DEFAULT 0,
-    "completado" BOOLEAN NOT NULL DEFAULT false,
-    "fecha_inicio" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "fecha_completado" TIMESTAMP(3),
-
-    CONSTRAINT "cursos_estudiantes_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "puntos_padres" (
-    "id" TEXT NOT NULL,
-    "tutor_id" TEXT NOT NULL,
-    "puntos_total" INTEGER NOT NULL DEFAULT 0,
-    "xp_total" INTEGER NOT NULL DEFAULT 0,
-    "pagos_puntuales_consecutivos" INTEGER NOT NULL DEFAULT 0,
-    "total_referidos_activos" INTEGER NOT NULL DEFAULT 0,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "puntos_padres_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "transacciones_puntos_padres" (
-    "id" TEXT NOT NULL,
-    "puntos_padre_id" TEXT NOT NULL,
-    "tipo_recurso" TEXT NOT NULL,
-    "cantidad" INTEGER NOT NULL,
-    "razon" TEXT NOT NULL,
-    "metadata" JSONB,
-    "fecha" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "transacciones_puntos_padres_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "premios_padres" (
-    "id" TEXT NOT NULL,
-    "codigo" TEXT NOT NULL,
-    "titulo" TEXT NOT NULL,
-    "descripcion" TEXT NOT NULL,
-    "categoria" TEXT NOT NULL,
-    "puntos_requeridos" INTEGER NOT NULL,
-    "costo_real_usd" DECIMAL(10,2),
-    "icono" TEXT NOT NULL,
-    "activo" BOOLEAN NOT NULL DEFAULT true,
-    "orden" INTEGER NOT NULL DEFAULT 0,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "premios_padres_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "canjes_padres" (
-    "id" TEXT NOT NULL,
-    "tutor_id" TEXT NOT NULL,
-    "premio_id" TEXT NOT NULL,
-    "puntos_padre_id" TEXT NOT NULL,
-    "puntos_usados" INTEGER NOT NULL,
-    "estado" TEXT NOT NULL DEFAULT 'completado',
-    "fecha_canje" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "canjes_padres_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -1229,111 +861,6 @@ CREATE TABLE "colonia_pagos" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "colonia_pagos_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "inscripciones_2026" (
-    "id" TEXT NOT NULL,
-    "tutor_id" TEXT NOT NULL,
-    "tipo_inscripcion" TEXT NOT NULL,
-    "estado" TEXT NOT NULL DEFAULT 'pending',
-    "inscripcion_pagada" INTEGER NOT NULL,
-    "descuento_aplicado" INTEGER NOT NULL DEFAULT 0,
-    "total_mensual_actual" INTEGER NOT NULL,
-    "origen_inscripcion" TEXT,
-    "ciudad" TEXT,
-    "fecha_inscripcion" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "fecha_inicio" TIMESTAMP(3),
-    "fecha_fin" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "inscripciones_2026_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "estudiantes_inscripciones_2026" (
-    "id" TEXT NOT NULL,
-    "inscripcion_id" TEXT NOT NULL,
-    "estudiante_id" TEXT NOT NULL,
-    "nombre" TEXT NOT NULL,
-    "edad" INTEGER NOT NULL,
-    "dni" TEXT,
-    "pin" TEXT NOT NULL,
-    "tier_id" TEXT,
-    "onboarding_estado" "onboarding_estado" NOT NULL DEFAULT 'PENDIENTE',
-    "onboarding_completado_at" TIMESTAMP(3),
-    "avatar_config" JSONB,
-    "mundos_seleccionados" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "estudiantes_inscripciones_2026_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "colonia_cursos_seleccionados_2026" (
-    "id" TEXT NOT NULL,
-    "estudiante_inscripcion_id" TEXT NOT NULL,
-    "course_id" TEXT NOT NULL,
-    "course_name" TEXT NOT NULL,
-    "course_area" TEXT NOT NULL,
-    "instructor" TEXT NOT NULL,
-    "day_of_week" TEXT NOT NULL,
-    "time_slot" TEXT NOT NULL,
-    "precio_base" INTEGER NOT NULL,
-    "precio_con_descuento" INTEGER NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "colonia_cursos_seleccionados_2026_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "ciclo_mundos_seleccionados_2026" (
-    "id" TEXT NOT NULL,
-    "estudiante_inscripcion_id" TEXT NOT NULL,
-    "mundo" "mundo_tipo" NOT NULL,
-    "dia_semana" TEXT,
-    "horario" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "ciclo_mundos_seleccionados_2026_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "pagos_inscripciones_2026" (
-    "id" TEXT NOT NULL,
-    "inscripcion_id" TEXT NOT NULL,
-    "tipo" TEXT NOT NULL,
-    "mes" TEXT,
-    "anio" INTEGER,
-    "monto" INTEGER NOT NULL,
-    "estado" TEXT NOT NULL DEFAULT 'pending',
-    "mercadopago_preference_id" TEXT,
-    "mercadopago_payment_id" TEXT,
-    "fecha_vencimiento" TIMESTAMP(3),
-    "fecha_pago" TIMESTAMP(3),
-    "processed_at" TIMESTAMP(3),
-    "ip_address" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "pagos_inscripciones_2026_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "historial_estado_inscripciones_2026" (
-    "id" TEXT NOT NULL,
-    "inscripcion_id" TEXT NOT NULL,
-    "estado_anterior" TEXT NOT NULL,
-    "estado_nuevo" TEXT NOT NULL,
-    "razon" TEXT NOT NULL,
-    "realizado_por" TEXT NOT NULL DEFAULT 'system',
-    "fecha_cambio" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "historial_estado_inscripciones_2026_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -1445,19 +972,6 @@ CREATE TABLE "recursos_studio" (
 );
 
 -- CreateTable
-CREATE TABLE "badges_custom_studio" (
-    "id" TEXT NOT NULL,
-    "curso_id" TEXT,
-    "nombre" TEXT NOT NULL,
-    "descripcion" TEXT NOT NULL,
-    "icono" TEXT NOT NULL,
-    "en_biblioteca" BOOLEAN NOT NULL DEFAULT false,
-    "creado_en" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "badges_custom_studio_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "componentes_catalogo" (
     "id" TEXT NOT NULL,
     "tipo" TEXT NOT NULL,
@@ -1477,6 +991,82 @@ CREATE TABLE "componentes_catalogo" (
     CONSTRAINT "componentes_catalogo_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "planes_suscripcion" (
+    "id" TEXT NOT NULL,
+    "nombre" TEXT NOT NULL,
+    "descripcion" TEXT,
+    "precio_base" DECIMAL(10,2) NOT NULL,
+    "moneda" TEXT NOT NULL DEFAULT 'ARS',
+    "intervalo" "IntervaloSuscripcion" NOT NULL DEFAULT 'MENSUAL',
+    "intervalo_cantidad" INTEGER NOT NULL DEFAULT 1,
+    "activo" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "planes_suscripcion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "suscripciones" (
+    "id" TEXT NOT NULL,
+    "tutor_id" TEXT NOT NULL,
+    "plan_id" TEXT NOT NULL,
+    "mp_preapproval_id" TEXT,
+    "mp_status" TEXT,
+    "estado" "EstadoSuscripcion" NOT NULL DEFAULT 'PENDIENTE',
+    "fecha_inicio" TIMESTAMP(3),
+    "fecha_proximo_cobro" TIMESTAMP(3),
+    "fecha_cancelacion" TIMESTAMP(3),
+    "fecha_pausa" TIMESTAMP(3),
+    "fecha_fin_pausa" TIMESTAMP(3),
+    "dias_gracia_usados" INTEGER NOT NULL DEFAULT 0,
+    "fecha_inicio_gracia" TIMESTAMP(3),
+    "descuento_porcentaje" INTEGER NOT NULL DEFAULT 0,
+    "precio_final" DECIMAL(10,2) NOT NULL,
+    "motivo_cancelacion" TEXT,
+    "cancelado_por" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "version" INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT "suscripciones_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "pagos_suscripcion" (
+    "id" TEXT NOT NULL,
+    "suscripcion_id" TEXT NOT NULL,
+    "mp_payment_id" TEXT NOT NULL,
+    "mp_status" TEXT NOT NULL,
+    "mp_status_detail" TEXT,
+    "monto" DECIMAL(10,2) NOT NULL,
+    "moneda" TEXT NOT NULL DEFAULT 'ARS',
+    "periodo_inicio" TIMESTAMP(3) NOT NULL,
+    "periodo_fin" TIMESTAMP(3) NOT NULL,
+    "intento_numero" INTEGER NOT NULL DEFAULT 1,
+    "error_code" TEXT,
+    "error_message" TEXT,
+    "fecha_cobro" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "pagos_suscripcion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "historial_estado_suscripcion" (
+    "id" TEXT NOT NULL,
+    "suscripcion_id" TEXT NOT NULL,
+    "estado_anterior" "EstadoSuscripcion",
+    "estado_nuevo" "EstadoSuscripcion" NOT NULL,
+    "motivo" TEXT,
+    "realizado_por" TEXT,
+    "metadata" JSONB,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "historial_estado_suscripcion_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "tutores_username_key" ON "tutores"("username");
 
@@ -1490,13 +1080,13 @@ CREATE UNIQUE INDEX "estudiantes_username_key" ON "estudiantes"("username");
 CREATE UNIQUE INDEX "estudiantes_email_key" ON "estudiantes"("email");
 
 -- CreateIndex
-CREATE INDEX "estudiante_sectores_estudiante_id_idx" ON "estudiante_sectores"("estudiante_id");
+CREATE INDEX "idx_estudiantes_puntos_ranking" ON "estudiantes"("puntos_totales" DESC);
 
 -- CreateIndex
-CREATE INDEX "estudiante_sectores_sector_id_idx" ON "estudiante_sectores"("sector_id");
+CREATE INDEX "idx_estudiantes_casa_ranking" ON "estudiantes"("casa_id", "puntos_totales" DESC);
 
 -- CreateIndex
-CREATE UNIQUE INDEX "estudiante_sectores_estudiante_id_sector_id_key" ON "estudiante_sectores"("estudiante_id", "sector_id");
+CREATE INDEX "idx_estudiantes_tutor_listado" ON "estudiantes"("tutor_id", "apellido");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "casas_tipo_key" ON "casas"("tipo");
@@ -1511,16 +1101,10 @@ CREATE UNIQUE INDEX "mundos_tipo_key" ON "mundos"("tipo");
 CREATE UNIQUE INDEX "mundos_nombre_key" ON "mundos"("nombre");
 
 -- CreateIndex
+CREATE INDEX "idx_mundos_activo" ON "mundos"("activo");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "tiers_nombre_key" ON "tiers"("nombre");
-
--- CreateIndex
-CREATE INDEX "cambios_tier_pendientes_estudiante_inscripcion_id_idx" ON "cambios_tier_pendientes"("estudiante_inscripcion_id");
-
--- CreateIndex
-CREATE INDEX "cambios_tier_pendientes_estado_idx" ON "cambios_tier_pendientes"("estado");
-
--- CreateIndex
-CREATE INDEX "cambios_tier_pendientes_fecha_efectiva_idx" ON "cambios_tier_pendientes"("fecha_efectiva");
 
 -- CreateIndex
 CREATE INDEX "estudiante_mundo_niveles_estudiante_id_idx" ON "estudiante_mundo_niveles"("estudiante_id");
@@ -1544,22 +1128,25 @@ CREATE UNIQUE INDEX "docentes_email_key" ON "docentes"("email");
 CREATE UNIQUE INDEX "admins_email_key" ON "admins"("email");
 
 -- CreateIndex
-CREATE INDEX "membresias_tutor_id_estado_idx" ON "membresias"("tutor_id", "estado");
+CREATE INDEX "idx_login_attempts_email" ON "login_attempts"("email");
 
 -- CreateIndex
-CREATE INDEX "membresias_preferencia_id_idx" ON "membresias"("preferencia_id");
+CREATE INDEX "idx_login_attempts_created_at" ON "login_attempts"("created_at");
 
 -- CreateIndex
-CREATE INDEX "inscripciones_curso_estudiante_id_estado_idx" ON "inscripciones_curso"("estudiante_id", "estado");
+CREATE INDEX "idx_password_reset_email" ON "password_reset_tokens"("email");
 
 -- CreateIndex
-CREATE INDEX "inscripciones_curso_preferencia_id_idx" ON "inscripciones_curso"("preferencia_id");
+CREATE INDEX "idx_password_reset_token" ON "password_reset_tokens"("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "inscripciones_curso_estudiante_id_producto_id_key" ON "inscripciones_curso"("estudiante_id", "producto_id");
+CREATE INDEX "idx_password_reset_expires" ON "password_reset_tokens"("expires_at");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "rutas_curriculares_nombre_key" ON "rutas_curriculares"("nombre");
+CREATE INDEX "idx_refresh_session_user" ON "refresh_token_sessions"("user_id");
+
+-- CreateIndex
+CREATE INDEX "idx_refresh_session_expires" ON "refresh_token_sessions"("expires_at");
 
 -- CreateIndex
 CREATE INDEX "clases_docente_id_idx" ON "clases"("docente_id");
@@ -1620,6 +1207,9 @@ CREATE INDEX "asistencias_clase_grupo_estudiante_id_idx" ON "asistencias_clase_g
 
 -- CreateIndex
 CREATE INDEX "asistencias_clase_grupo_fecha_idx" ON "asistencias_clase_grupo"("fecha");
+
+-- CreateIndex
+CREATE INDEX "idx_asistencias_estado" ON "asistencias_clase_grupo"("estado");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "asistencias_clase_grupo_clase_grupo_id_estudiante_id_fecha_key" ON "asistencias_clase_grupo"("clase_grupo_id", "estudiante_id", "fecha");
@@ -1775,48 +1365,6 @@ CREATE INDEX "inscripciones_mensuales_periodo_idx" ON "inscripciones_mensuales"(
 CREATE UNIQUE INDEX "inscripciones_mensuales_estudiante_id_producto_id_periodo_key" ON "inscripciones_mensuales"("estudiante_id", "producto_id", "periodo");
 
 -- CreateIndex
-CREATE INDEX "becas_estudiante_id_idx" ON "becas"("estudiante_id");
-
--- CreateIndex
-CREATE INDEX "becas_activa_idx" ON "becas"("activa");
-
--- CreateIndex
-CREATE INDEX "planificaciones_mensuales_grupo_id_mes_anio_idx" ON "planificaciones_mensuales"("grupo_id", "mes", "anio");
-
--- CreateIndex
-CREATE INDEX "planificaciones_mensuales_estado_idx" ON "planificaciones_mensuales"("estado");
-
--- CreateIndex
-CREATE UNIQUE INDEX "planificaciones_mensuales_grupo_id_mes_anio_key" ON "planificaciones_mensuales"("grupo_id", "mes", "anio");
-
--- CreateIndex
-CREATE INDEX "actividades_semanales_planificacion_id_semana_numero_idx" ON "actividades_semanales"("planificacion_id", "semana_numero");
-
--- CreateIndex
-CREATE INDEX "asignaciones_docente_clase_grupo_id_docente_id_idx" ON "asignaciones_docente"("clase_grupo_id", "docente_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "asignaciones_docente_planificacion_id_clase_grupo_id_key" ON "asignaciones_docente"("planificacion_id", "clase_grupo_id");
-
--- CreateIndex
-CREATE INDEX "asignaciones_actividad_estudiante_clase_grupo_id_fecha_inic_idx" ON "asignaciones_actividad_estudiante"("clase_grupo_id", "fecha_inicio");
-
--- CreateIndex
-CREATE INDEX "asignaciones_actividad_estudiante_asignacion_docente_id_idx" ON "asignaciones_actividad_estudiante"("asignacion_docente_id");
-
--- CreateIndex
-CREATE INDEX "progreso_estudiante_actividad_estudiante_id_idx" ON "progreso_estudiante_actividad"("estudiante_id");
-
--- CreateIndex
-CREATE INDEX "progreso_estudiante_actividad_actividad_id_idx" ON "progreso_estudiante_actividad"("actividad_id");
-
--- CreateIndex
-CREATE INDEX "progreso_estudiante_actividad_asignacion_id_idx" ON "progreso_estudiante_actividad"("asignacion_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "progreso_estudiante_actividad_estudiante_id_actividad_id_as_key" ON "progreso_estudiante_actividad"("estudiante_id", "actividad_id", "asignacion_id");
-
--- CreateIndex
 CREATE UNIQUE INDEX "recursos_estudiante_estudiante_id_key" ON "recursos_estudiante"("estudiante_id");
 
 -- CreateIndex
@@ -1832,43 +1380,16 @@ CREATE INDEX "transacciones_recurso_tipo_recurso_idx" ON "transacciones_recurso"
 CREATE INDEX "transacciones_recurso_fecha_idx" ON "transacciones_recurso"("fecha");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "categorias_item_nombre_key" ON "categorias_item"("nombre");
-
--- CreateIndex
-CREATE INDEX "items_tienda_categoria_id_idx" ON "items_tienda"("categoria_id");
-
--- CreateIndex
-CREATE INDEX "items_tienda_tipo_item_idx" ON "items_tienda"("tipo_item");
-
--- CreateIndex
-CREATE INDEX "items_tienda_rareza_idx" ON "items_tienda"("rareza");
-
--- CreateIndex
-CREATE INDEX "items_tienda_disponible_idx" ON "items_tienda"("disponible");
-
--- CreateIndex
-CREATE INDEX "items_obtenidos_estudiante_id_idx" ON "items_obtenidos"("estudiante_id");
-
--- CreateIndex
-CREATE INDEX "items_obtenidos_item_id_idx" ON "items_obtenidos"("item_id");
-
--- CreateIndex
-CREATE INDEX "items_obtenidos_equipado_idx" ON "items_obtenidos"("equipado");
-
--- CreateIndex
-CREATE UNIQUE INDEX "items_obtenidos_estudiante_id_item_id_key" ON "items_obtenidos"("estudiante_id", "item_id");
-
--- CreateIndex
-CREATE INDEX "compras_item_recursos_estudiante_id_idx" ON "compras_item"("recursos_estudiante_id");
-
--- CreateIndex
-CREATE INDEX "compras_item_item_id_idx" ON "compras_item"("item_id");
-
--- CreateIndex
-CREATE INDEX "compras_item_fecha_compra_idx" ON "compras_item"("fecha_compra");
-
--- CreateIndex
 CREATE UNIQUE INDEX "logros_gamificacion_codigo_key" ON "logros_gamificacion"("codigo");
+
+-- CreateIndex
+CREATE INDEX "idx_logros_categoria" ON "logros_gamificacion"("categoria");
+
+-- CreateIndex
+CREATE INDEX "idx_logros_rareza" ON "logros_gamificacion"("rareza");
+
+-- CreateIndex
+CREATE INDEX "idx_logros_activo" ON "logros_gamificacion"("activo");
 
 -- CreateIndex
 CREATE INDEX "logros_estudiantes_gamificacion_estudiante_id_idx" ON "logros_estudiantes_gamificacion"("estudiante_id");
@@ -1890,69 +1411,6 @@ CREATE INDEX "rachas_estudiantes_estudiante_id_idx" ON "rachas_estudiantes"("est
 
 -- CreateIndex
 CREATE INDEX "rachas_estudiantes_ultima_actividad_idx" ON "rachas_estudiantes"("ultima_actividad");
-
--- CreateIndex
-CREATE UNIQUE INDEX "cursos_catalogo_codigo_key" ON "cursos_catalogo"("codigo");
-
--- CreateIndex
-CREATE INDEX "cursos_catalogo_categoria_idx" ON "cursos_catalogo"("categoria");
-
--- CreateIndex
-CREATE INDEX "cursos_catalogo_destacado_idx" ON "cursos_catalogo"("destacado");
-
--- CreateIndex
-CREATE INDEX "cursos_catalogo_activo_idx" ON "cursos_catalogo"("activo");
-
--- CreateIndex
-CREATE INDEX "solicitudes_canje_estudiante_id_idx" ON "solicitudes_canje"("estudiante_id");
-
--- CreateIndex
-CREATE INDEX "solicitudes_canje_tutor_id_idx" ON "solicitudes_canje"("tutor_id");
-
--- CreateIndex
-CREATE INDEX "solicitudes_canje_estado_idx" ON "solicitudes_canje"("estado");
-
--- CreateIndex
-CREATE INDEX "solicitudes_canje_fecha_solicitud_idx" ON "solicitudes_canje"("fecha_solicitud");
-
--- CreateIndex
-CREATE INDEX "cursos_estudiantes_estudiante_id_idx" ON "cursos_estudiantes"("estudiante_id");
-
--- CreateIndex
-CREATE INDEX "cursos_estudiantes_completado_idx" ON "cursos_estudiantes"("completado");
-
--- CreateIndex
-CREATE UNIQUE INDEX "cursos_estudiantes_estudiante_id_curso_id_key" ON "cursos_estudiantes"("estudiante_id", "curso_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "puntos_padres_tutor_id_key" ON "puntos_padres"("tutor_id");
-
--- CreateIndex
-CREATE INDEX "puntos_padres_tutor_id_idx" ON "puntos_padres"("tutor_id");
-
--- CreateIndex
-CREATE INDEX "transacciones_puntos_padres_puntos_padre_id_idx" ON "transacciones_puntos_padres"("puntos_padre_id");
-
--- CreateIndex
-CREATE INDEX "transacciones_puntos_padres_tipo_recurso_idx" ON "transacciones_puntos_padres"("tipo_recurso");
-
--- CreateIndex
-CREATE INDEX "transacciones_puntos_padres_fecha_idx" ON "transacciones_puntos_padres"("fecha");
-
--- CreateIndex
-CREATE UNIQUE INDEX "premios_padres_codigo_key" ON "premios_padres"("codigo");
-
--- CreateIndex
-CREATE INDEX "premios_padres_categoria_idx" ON "premios_padres"("categoria");
-
--- CreateIndex
-CREATE INDEX "premios_padres_activo_idx" ON "premios_padres"("activo");
-
--- CreateIndex
-CREATE INDEX "canjes_padres_tutor_id_idx" ON "canjes_padres"("tutor_id");
-
--- CreateIndex
-CREATE INDEX "canjes_padres_fecha_canje_idx" ON "canjes_padres"("fecha_canje");
 
 -- CreateIndex
 CREATE INDEX "colonia_inscripciones_tutor_id_idx" ON "colonia_inscripciones"("tutor_id");
@@ -1992,75 +1450,6 @@ CREATE INDEX "colonia_pagos_mercadopago_preference_id_idx" ON "colonia_pagos"("m
 
 -- CreateIndex
 CREATE INDEX "colonia_pagos_processed_at_idx" ON "colonia_pagos"("processed_at");
-
--- CreateIndex
-CREATE INDEX "inscripciones_2026_tutor_id_idx" ON "inscripciones_2026"("tutor_id");
-
--- CreateIndex
-CREATE INDEX "inscripciones_2026_tipo_inscripcion_idx" ON "inscripciones_2026"("tipo_inscripcion");
-
--- CreateIndex
-CREATE INDEX "inscripciones_2026_estado_idx" ON "inscripciones_2026"("estado");
-
--- CreateIndex
-CREATE INDEX "inscripciones_2026_fecha_inscripcion_idx" ON "inscripciones_2026"("fecha_inscripcion");
-
--- CreateIndex
-CREATE INDEX "estudiantes_inscripciones_2026_inscripcion_id_idx" ON "estudiantes_inscripciones_2026"("inscripcion_id");
-
--- CreateIndex
-CREATE INDEX "estudiantes_inscripciones_2026_estudiante_id_idx" ON "estudiantes_inscripciones_2026"("estudiante_id");
-
--- CreateIndex
-CREATE INDEX "estudiantes_inscripciones_2026_pin_idx" ON "estudiantes_inscripciones_2026"("pin");
-
--- CreateIndex
-CREATE INDEX "estudiantes_inscripciones_2026_tier_id_idx" ON "estudiantes_inscripciones_2026"("tier_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "estudiantes_inscripciones_2026_inscripcion_id_estudiante_id_key" ON "estudiantes_inscripciones_2026"("inscripcion_id", "estudiante_id");
-
--- CreateIndex
-CREATE INDEX "colonia_cursos_seleccionados_2026_estudiante_inscripcion_id_idx" ON "colonia_cursos_seleccionados_2026"("estudiante_inscripcion_id");
-
--- CreateIndex
-CREATE INDEX "colonia_cursos_seleccionados_2026_course_id_idx" ON "colonia_cursos_seleccionados_2026"("course_id");
-
--- CreateIndex
-CREATE INDEX "ciclo_mundos_seleccionados_2026_estudiante_inscripcion_id_idx" ON "ciclo_mundos_seleccionados_2026"("estudiante_inscripcion_id");
-
--- CreateIndex
-CREATE INDEX "ciclo_mundos_seleccionados_2026_mundo_idx" ON "ciclo_mundos_seleccionados_2026"("mundo");
-
--- CreateIndex
-CREATE UNIQUE INDEX "pagos_inscripciones_2026_mercadopago_payment_id_key" ON "pagos_inscripciones_2026"("mercadopago_payment_id");
-
--- CreateIndex
-CREATE INDEX "pagos_inscripciones_2026_inscripcion_id_idx" ON "pagos_inscripciones_2026"("inscripcion_id");
-
--- CreateIndex
-CREATE INDEX "pagos_inscripciones_2026_tipo_idx" ON "pagos_inscripciones_2026"("tipo");
-
--- CreateIndex
-CREATE INDEX "pagos_inscripciones_2026_estado_idx" ON "pagos_inscripciones_2026"("estado");
-
--- CreateIndex
-CREATE INDEX "pagos_inscripciones_2026_fecha_vencimiento_idx" ON "pagos_inscripciones_2026"("fecha_vencimiento");
-
--- CreateIndex
-CREATE INDEX "pagos_inscripciones_2026_mercadopago_preference_id_idx" ON "pagos_inscripciones_2026"("mercadopago_preference_id");
-
--- CreateIndex
-CREATE INDEX "pagos_inscripciones_2026_mercadopago_payment_id_idx" ON "pagos_inscripciones_2026"("mercadopago_payment_id");
-
--- CreateIndex
-CREATE INDEX "pagos_inscripciones_2026_processed_at_idx" ON "pagos_inscripciones_2026"("processed_at");
-
--- CreateIndex
-CREATE INDEX "historial_estado_inscripciones_2026_inscripcion_id_idx" ON "historial_estado_inscripciones_2026"("inscripcion_id");
-
--- CreateIndex
-CREATE INDEX "historial_estado_inscripciones_2026_fecha_cambio_idx" ON "historial_estado_inscripciones_2026"("fecha_cambio");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "webhooks_processed_payment_id_key" ON "webhooks_processed"("payment_id");
@@ -2138,13 +1527,28 @@ CREATE INDEX "recursos_studio_curso_id_idx" ON "recursos_studio"("curso_id");
 CREATE INDEX "recursos_studio_tipo_idx" ON "recursos_studio"("tipo");
 
 -- CreateIndex
-CREATE INDEX "badges_custom_studio_curso_id_idx" ON "badges_custom_studio"("curso_id");
-
--- CreateIndex
-CREATE INDEX "badges_custom_studio_en_biblioteca_idx" ON "badges_custom_studio"("en_biblioteca");
-
--- CreateIndex
 CREATE UNIQUE INDEX "componentes_catalogo_tipo_key" ON "componentes_catalogo"("tipo");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "suscripciones_mp_preapproval_id_key" ON "suscripciones"("mp_preapproval_id");
+
+-- CreateIndex
+CREATE INDEX "suscripciones_tutor_id_idx" ON "suscripciones"("tutor_id");
+
+-- CreateIndex
+CREATE INDEX "suscripciones_estado_idx" ON "suscripciones"("estado");
+
+-- CreateIndex
+CREATE INDEX "suscripciones_mp_preapproval_id_idx" ON "suscripciones"("mp_preapproval_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "pagos_suscripcion_mp_payment_id_key" ON "pagos_suscripcion"("mp_payment_id");
+
+-- CreateIndex
+CREATE INDEX "pagos_suscripcion_suscripcion_id_idx" ON "pagos_suscripcion"("suscripcion_id");
+
+-- CreateIndex
+CREATE INDEX "historial_estado_suscripcion_suscripcion_id_idx" ON "historial_estado_suscripcion"("suscripcion_id");
 
 -- AddForeignKey
 ALTER TABLE "estudiantes" ADD CONSTRAINT "estudiantes_casa_id_fkey" FOREIGN KEY ("casa_id") REFERENCES "casas"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -2154,21 +1558,6 @@ ALTER TABLE "estudiantes" ADD CONSTRAINT "estudiantes_sector_id_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "estudiantes" ADD CONSTRAINT "estudiantes_tutor_id_fkey" FOREIGN KEY ("tutor_id") REFERENCES "tutores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "estudiante_sectores" ADD CONSTRAINT "estudiante_sectores_estudiante_id_fkey" FOREIGN KEY ("estudiante_id") REFERENCES "estudiantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "estudiante_sectores" ADD CONSTRAINT "estudiante_sectores_sector_id_fkey" FOREIGN KEY ("sector_id") REFERENCES "sectores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "cambios_tier_pendientes" ADD CONSTRAINT "cambios_tier_pendientes_estudiante_inscripcion_id_fkey" FOREIGN KEY ("estudiante_inscripcion_id") REFERENCES "estudiantes_inscripciones_2026"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "cambios_tier_pendientes" ADD CONSTRAINT "cambios_tier_pendientes_tier_actual_id_fkey" FOREIGN KEY ("tier_actual_id") REFERENCES "tiers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "cambios_tier_pendientes" ADD CONSTRAINT "cambios_tier_pendientes_tier_nuevo_id_fkey" FOREIGN KEY ("tier_nuevo_id") REFERENCES "tiers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "estudiante_mundo_niveles" ADD CONSTRAINT "estudiante_mundo_niveles_estudiante_id_fkey" FOREIGN KEY ("estudiante_id") REFERENCES "estudiantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -2189,25 +1578,10 @@ ALTER TABLE "test_ubicacion_resultados" ADD CONSTRAINT "test_ubicacion_resultado
 ALTER TABLE "test_ubicacion_resultados" ADD CONSTRAINT "test_ubicacion_resultados_casa_asignada_id_fkey" FOREIGN KEY ("casa_asignada_id") REFERENCES "casas"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "membresias" ADD CONSTRAINT "membresias_producto_id_fkey" FOREIGN KEY ("producto_id") REFERENCES "productos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "membresias" ADD CONSTRAINT "membresias_tutor_id_fkey" FOREIGN KEY ("tutor_id") REFERENCES "tutores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "inscripciones_curso" ADD CONSTRAINT "inscripciones_curso_estudiante_id_fkey" FOREIGN KEY ("estudiante_id") REFERENCES "estudiantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "inscripciones_curso" ADD CONSTRAINT "inscripciones_curso_producto_id_fkey" FOREIGN KEY ("producto_id") REFERENCES "productos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "clases" ADD CONSTRAINT "clases_docente_id_fkey" FOREIGN KEY ("docente_id") REFERENCES "docentes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "clases" ADD CONSTRAINT "clases_producto_id_fkey" FOREIGN KEY ("producto_id") REFERENCES "productos"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "clases" ADD CONSTRAINT "clases_ruta_curricular_id_fkey" FOREIGN KEY ("ruta_curricular_id") REFERENCES "rutas_curriculares"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "clases" ADD CONSTRAINT "clases_sector_id_fkey" FOREIGN KEY ("sector_id") REFERENCES "sectores"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -2220,9 +1594,6 @@ ALTER TABLE "clase_grupos" ADD CONSTRAINT "clase_grupos_grupo_id_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "clase_grupos" ADD CONSTRAINT "clase_grupos_docente_id_fkey" FOREIGN KEY ("docente_id") REFERENCES "docentes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "clase_grupos" ADD CONSTRAINT "clase_grupos_ruta_curricular_id_fkey" FOREIGN KEY ("ruta_curricular_id") REFERENCES "rutas_curriculares"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "clase_grupos" ADD CONSTRAINT "clase_grupos_sector_id_fkey" FOREIGN KEY ("sector_id") REFERENCES "sectores"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -2333,61 +1704,10 @@ ALTER TABLE "inscripciones_mensuales" ADD CONSTRAINT "inscripciones_mensuales_pr
 ALTER TABLE "inscripciones_mensuales" ADD CONSTRAINT "inscripciones_mensuales_tutor_id_fkey" FOREIGN KEY ("tutor_id") REFERENCES "tutores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "becas" ADD CONSTRAINT "becas_estudiante_id_fkey" FOREIGN KEY ("estudiante_id") REFERENCES "estudiantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "planificaciones_mensuales" ADD CONSTRAINT "planificaciones_mensuales_grupo_id_fkey" FOREIGN KEY ("grupo_id") REFERENCES "grupos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "actividades_semanales" ADD CONSTRAINT "actividades_semanales_planificacion_id_fkey" FOREIGN KEY ("planificacion_id") REFERENCES "planificaciones_mensuales"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "asignaciones_docente" ADD CONSTRAINT "asignaciones_docente_planificacion_id_fkey" FOREIGN KEY ("planificacion_id") REFERENCES "planificaciones_mensuales"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "asignaciones_docente" ADD CONSTRAINT "asignaciones_docente_clase_grupo_id_fkey" FOREIGN KEY ("clase_grupo_id") REFERENCES "clase_grupos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "asignaciones_docente" ADD CONSTRAINT "asignaciones_docente_docente_id_fkey" FOREIGN KEY ("docente_id") REFERENCES "docentes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "asignaciones_actividad_estudiante" ADD CONSTRAINT "asignaciones_actividad_estudiante_asignacion_docente_id_fkey" FOREIGN KEY ("asignacion_docente_id") REFERENCES "asignaciones_docente"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "asignaciones_actividad_estudiante" ADD CONSTRAINT "asignaciones_actividad_estudiante_actividad_id_fkey" FOREIGN KEY ("actividad_id") REFERENCES "actividades_semanales"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "asignaciones_actividad_estudiante" ADD CONSTRAINT "asignaciones_actividad_estudiante_clase_grupo_id_fkey" FOREIGN KEY ("clase_grupo_id") REFERENCES "clase_grupos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "progreso_estudiante_actividad" ADD CONSTRAINT "progreso_estudiante_actividad_estudiante_id_fkey" FOREIGN KEY ("estudiante_id") REFERENCES "estudiantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "progreso_estudiante_actividad" ADD CONSTRAINT "progreso_estudiante_actividad_actividad_id_fkey" FOREIGN KEY ("actividad_id") REFERENCES "actividades_semanales"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "progreso_estudiante_actividad" ADD CONSTRAINT "progreso_estudiante_actividad_asignacion_id_fkey" FOREIGN KEY ("asignacion_id") REFERENCES "asignaciones_actividad_estudiante"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "recursos_estudiante" ADD CONSTRAINT "recursos_estudiante_estudiante_id_fkey" FOREIGN KEY ("estudiante_id") REFERENCES "estudiantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "transacciones_recurso" ADD CONSTRAINT "transacciones_recurso_recursos_estudiante_id_fkey" FOREIGN KEY ("recursos_estudiante_id") REFERENCES "recursos_estudiante"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "items_tienda" ADD CONSTRAINT "items_tienda_categoria_id_fkey" FOREIGN KEY ("categoria_id") REFERENCES "categorias_item"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "items_obtenidos" ADD CONSTRAINT "items_obtenidos_estudiante_id_fkey" FOREIGN KEY ("estudiante_id") REFERENCES "estudiantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "items_obtenidos" ADD CONSTRAINT "items_obtenidos_item_id_fkey" FOREIGN KEY ("item_id") REFERENCES "items_tienda"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "compras_item" ADD CONSTRAINT "compras_item_recursos_estudiante_id_fkey" FOREIGN KEY ("recursos_estudiante_id") REFERENCES "recursos_estudiante"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "compras_item" ADD CONSTRAINT "compras_item_item_id_fkey" FOREIGN KEY ("item_id") REFERENCES "items_tienda"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "logros_estudiantes_gamificacion" ADD CONSTRAINT "logros_estudiantes_gamificacion_estudiante_id_fkey" FOREIGN KEY ("estudiante_id") REFERENCES "estudiantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -2397,36 +1717,6 @@ ALTER TABLE "logros_estudiantes_gamificacion" ADD CONSTRAINT "logros_estudiantes
 
 -- AddForeignKey
 ALTER TABLE "rachas_estudiantes" ADD CONSTRAINT "rachas_estudiantes_estudiante_id_fkey" FOREIGN KEY ("estudiante_id") REFERENCES "estudiantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "solicitudes_canje" ADD CONSTRAINT "solicitudes_canje_estudiante_id_fkey" FOREIGN KEY ("estudiante_id") REFERENCES "estudiantes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "solicitudes_canje" ADD CONSTRAINT "solicitudes_canje_tutor_id_fkey" FOREIGN KEY ("tutor_id") REFERENCES "tutores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "solicitudes_canje" ADD CONSTRAINT "solicitudes_canje_curso_id_fkey" FOREIGN KEY ("curso_id") REFERENCES "cursos_catalogo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "cursos_estudiantes" ADD CONSTRAINT "cursos_estudiantes_estudiante_id_fkey" FOREIGN KEY ("estudiante_id") REFERENCES "estudiantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "cursos_estudiantes" ADD CONSTRAINT "cursos_estudiantes_curso_id_fkey" FOREIGN KEY ("curso_id") REFERENCES "cursos_catalogo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "puntos_padres" ADD CONSTRAINT "puntos_padres_tutor_id_fkey" FOREIGN KEY ("tutor_id") REFERENCES "tutores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "transacciones_puntos_padres" ADD CONSTRAINT "transacciones_puntos_padres_puntos_padre_id_fkey" FOREIGN KEY ("puntos_padre_id") REFERENCES "puntos_padres"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "canjes_padres" ADD CONSTRAINT "canjes_padres_tutor_id_fkey" FOREIGN KEY ("tutor_id") REFERENCES "tutores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "canjes_padres" ADD CONSTRAINT "canjes_padres_premio_id_fkey" FOREIGN KEY ("premio_id") REFERENCES "premios_padres"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "canjes_padres" ADD CONSTRAINT "canjes_padres_puntos_padre_id_fkey" FOREIGN KEY ("puntos_padre_id") REFERENCES "puntos_padres"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "colonia_inscripciones" ADD CONSTRAINT "colonia_inscripciones_tutor_id_fkey" FOREIGN KEY ("tutor_id") REFERENCES "tutores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -2444,32 +1734,19 @@ ALTER TABLE "colonia_estudiante_cursos" ADD CONSTRAINT "colonia_estudiante_curso
 ALTER TABLE "colonia_pagos" ADD CONSTRAINT "colonia_pagos_inscripcion_id_fkey" FOREIGN KEY ("inscripcion_id") REFERENCES "colonia_inscripciones"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "inscripciones_2026" ADD CONSTRAINT "inscripciones_2026_tutor_id_fkey" FOREIGN KEY ("tutor_id") REFERENCES "tutores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "estudiantes_inscripciones_2026" ADD CONSTRAINT "estudiantes_inscripciones_2026_inscripcion_id_fkey" FOREIGN KEY ("inscripcion_id") REFERENCES "inscripciones_2026"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "estudiantes_inscripciones_2026" ADD CONSTRAINT "estudiantes_inscripciones_2026_estudiante_id_fkey" FOREIGN KEY ("estudiante_id") REFERENCES "estudiantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "estudiantes_inscripciones_2026" ADD CONSTRAINT "estudiantes_inscripciones_2026_tier_id_fkey" FOREIGN KEY ("tier_id") REFERENCES "tiers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "colonia_cursos_seleccionados_2026" ADD CONSTRAINT "colonia_cursos_seleccionados_2026_estudiante_inscripcion_i_fkey" FOREIGN KEY ("estudiante_inscripcion_id") REFERENCES "estudiantes_inscripciones_2026"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ciclo_mundos_seleccionados_2026" ADD CONSTRAINT "ciclo_mundos_seleccionados_2026_estudiante_inscripcion_id_fkey" FOREIGN KEY ("estudiante_inscripcion_id") REFERENCES "estudiantes_inscripciones_2026"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "pagos_inscripciones_2026" ADD CONSTRAINT "pagos_inscripciones_2026_inscripcion_id_fkey" FOREIGN KEY ("inscripcion_id") REFERENCES "inscripciones_2026"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "historial_estado_inscripciones_2026" ADD CONSTRAINT "historial_estado_inscripciones_2026_inscripcion_id_fkey" FOREIGN KEY ("inscripcion_id") REFERENCES "inscripciones_2026"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "semanas_studio" ADD CONSTRAINT "semanas_studio_curso_id_fkey" FOREIGN KEY ("curso_id") REFERENCES "cursos_studio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "recursos_studio" ADD CONSTRAINT "recursos_studio_curso_id_fkey" FOREIGN KEY ("curso_id") REFERENCES "cursos_studio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
+-- AddForeignKey
+ALTER TABLE "suscripciones" ADD CONSTRAINT "suscripciones_tutor_id_fkey" FOREIGN KEY ("tutor_id") REFERENCES "tutores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "suscripciones" ADD CONSTRAINT "suscripciones_plan_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "planes_suscripcion"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "pagos_suscripcion" ADD CONSTRAINT "pagos_suscripcion_suscripcion_id_fkey" FOREIGN KEY ("suscripcion_id") REFERENCES "suscripciones"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "historial_estado_suscripcion" ADD CONSTRAINT "historial_estado_suscripcion_suscripcion_id_fkey" FOREIGN KEY ("suscripcion_id") REFERENCES "suscripciones"("id") ON DELETE CASCADE ON UPDATE CASCADE;

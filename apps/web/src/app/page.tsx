@@ -1,161 +1,590 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { GraduationCap, Users, Shield, BookOpen, ArrowRight, Sparkles, Zap } from 'lucide-react';
+import { useState } from 'react';
+import {
+  GraduationCap,
+  Users,
+  Shield,
+  BookOpen,
+  Sparkles,
+  Zap,
+  LayoutDashboard,
+  CreditCard,
+  FileText,
+  Settings,
+  Calendar,
+  ClipboardList,
+  User,
+  Home,
+  ShoppingCart,
+  Palette,
+  Library,
+  PlusCircle,
+  Eye,
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  Lock,
+  Unlock,
+  Trophy,
+  UsersRound,
+  BookMarked,
+  FlaskConical,
+  Code,
+  Gamepad2,
+} from 'lucide-react';
 
-const portals = [
+interface RouteItem {
+  path: string;
+  label: string;
+  icon: React.ReactNode;
+  description?: string;
+  requiresAuth?: boolean;
+  isDynamic?: boolean;
+  examplePath?: string;
+}
+
+interface RouteSection {
+  id: string;
+  title: string;
+  icon: React.ReactNode;
+  gradient: string;
+  routes: RouteItem[];
+}
+
+const routeSections: RouteSection[] = [
   {
-    id: 'tutor',
-    title: 'Portal Tutor',
-    description: 'Seguí el progreso de tus hijos',
-    href: '/login',
-    icon: Users,
-    gradient: 'from-blue-500 to-cyan-500',
-    glowColor: 'rgba(59, 130, 246, 0.3)',
-    delay: 0,
+    id: 'auth',
+    title: 'Autenticación',
+    icon: <Lock className="w-5 h-5" />,
+    gradient: 'from-slate-500 to-zinc-600',
+    routes: [
+      {
+        path: '/login',
+        label: 'Login Tutor',
+        icon: <Users className="w-4 h-4" />,
+        description: 'Acceso para padres/tutores',
+      },
+      {
+        path: '/estudiante-login',
+        label: 'Login Estudiante',
+        icon: <GraduationCap className="w-4 h-4" />,
+        description: 'Acceso para estudiantes',
+      },
+      {
+        path: '/docente-login',
+        label: 'Login Docente',
+        icon: <BookOpen className="w-4 h-4" />,
+        description: 'Acceso para profesores',
+      },
+    ],
   },
   {
-    id: 'estudiante',
-    title: 'Portal Estudiante',
-    description: 'Accedé a tus cursos y misiones',
-    href: '/estudiante-login',
-    icon: GraduationCap,
-    gradient: 'from-emerald-500 to-teal-500',
-    glowColor: 'rgba(16, 185, 129, 0.3)',
-    delay: 0.1,
+    id: 'admin',
+    title: 'Portal Admin',
+    icon: <Shield className="w-5 h-5" />,
+    gradient: 'from-amber-500 to-orange-500',
+    routes: [
+      {
+        path: '/admin',
+        label: 'Home Admin',
+        icon: <Home className="w-4 h-4" />,
+        description: 'Página principal admin',
+      },
+      {
+        path: '/admin/dashboard',
+        label: 'Dashboard',
+        icon: <LayoutDashboard className="w-4 h-4" />,
+        description: 'Métricas y estadísticas',
+      },
+      {
+        path: '/admin/estudiantes',
+        label: 'Estudiantes',
+        icon: <GraduationCap className="w-4 h-4" />,
+        description: 'Gestión de estudiantes',
+      },
+      {
+        path: '/admin/usuarios',
+        label: 'Usuarios',
+        icon: <Users className="w-4 h-4" />,
+        description: 'Gestión de usuarios',
+      },
+      {
+        path: '/admin/pagos',
+        label: 'Pagos',
+        icon: <CreditCard className="w-4 h-4" />,
+        description: 'Historial y gestión de pagos',
+      },
+      {
+        path: '/admin/reportes',
+        label: 'Reportes',
+        icon: <FileText className="w-4 h-4" />,
+        description: 'Reportes y analytics',
+      },
+      {
+        path: '/admin/credenciales',
+        label: 'Credenciales',
+        icon: <Settings className="w-4 h-4" />,
+        description: 'Gestión de credenciales',
+      },
+      {
+        path: '/admin/inscripciones-2026',
+        label: 'Inscripciones 2026',
+        icon: <ClipboardList className="w-4 h-4" />,
+        description: 'Inscripciones Colonia/Ciclo',
+      },
+    ],
+  },
+  {
+    id: 'studio',
+    title: 'Studio (Admin)',
+    icon: <Palette className="w-5 h-5" />,
+    gradient: 'from-purple-500 to-pink-500',
+    routes: [
+      {
+        path: '/admin/studio',
+        label: 'Studio Home',
+        icon: <Palette className="w-4 h-4" />,
+        description: 'Editor de cursos',
+      },
+      {
+        path: '/admin/studio/biblioteca',
+        label: 'Biblioteca',
+        icon: <Library className="w-4 h-4" />,
+        description: 'Catálogo de 95 componentes',
+      },
+      {
+        path: '/admin/studio/nuevo',
+        label: 'Nuevo Curso',
+        icon: <PlusCircle className="w-4 h-4" />,
+        description: 'Wizard de creación',
+      },
+      {
+        path: '/admin/studio/[cursoId]',
+        label: 'Editor Curso',
+        icon: <Eye className="w-4 h-4" />,
+        description: 'Editar curso específico',
+        isDynamic: true,
+        examplePath: '/admin/studio/curso-ejemplo',
+      },
+      {
+        path: '/admin/studio/[cursoId]/semanas/[semanaNum]',
+        label: 'Editor Semana',
+        icon: <Calendar className="w-4 h-4" />,
+        description: 'Editar semana específica',
+        isDynamic: true,
+        examplePath: '/admin/studio/curso-ejemplo/semanas/1',
+      },
+    ],
   },
   {
     id: 'docente',
     title: 'Portal Docente',
-    description: 'Gestioná tus clases y estudiantes',
-    href: '/docente-login',
-    icon: BookOpen,
+    icon: <BookOpen className="w-5 h-5" />,
     gradient: 'from-violet-500 to-purple-500',
-    glowColor: 'rgba(139, 92, 246, 0.3)',
-    delay: 0.2,
+    routes: [
+      {
+        path: '/docente/dashboard',
+        label: 'Dashboard',
+        icon: <LayoutDashboard className="w-4 h-4" />,
+        description: 'Panel principal docente',
+      },
+      {
+        path: '/docente/calendario',
+        label: 'Calendario',
+        icon: <Calendar className="w-4 h-4" />,
+        description: 'Agenda de clases',
+      },
+      {
+        path: '/docente/observaciones',
+        label: 'Observaciones',
+        icon: <ClipboardList className="w-4 h-4" />,
+        description: 'Notas de estudiantes',
+      },
+      {
+        path: '/docente/perfil',
+        label: 'Perfil',
+        icon: <User className="w-4 h-4" />,
+        description: 'Configuración personal',
+      },
+      {
+        path: '/docente/clase/[id]/sala',
+        label: 'Sala de Clase',
+        icon: <Eye className="w-4 h-4" />,
+        description: 'Clase en vivo',
+        isDynamic: true,
+      },
+      {
+        path: '/docente/clases/[id]/asistencia',
+        label: 'Asistencia',
+        icon: <ClipboardList className="w-4 h-4" />,
+        description: 'Tomar asistencia',
+        isDynamic: true,
+      },
+      {
+        path: '/docente/grupos/[id]',
+        label: 'Grupo',
+        icon: <Users className="w-4 h-4" />,
+        description: 'Ver grupo',
+        isDynamic: true,
+      },
+    ],
   },
   {
-    id: 'admin',
-    title: 'Administración',
-    description: 'Panel de control del sistema',
-    href: '/admin',
-    icon: Shield,
-    gradient: 'from-amber-500 to-orange-500',
-    glowColor: 'rgba(245, 158, 11, 0.3)',
-    delay: 0.3,
+    id: 'tutor',
+    title: 'Portal Tutor (Protected)',
+    icon: <Users className="w-5 h-5" />,
+    gradient: 'from-blue-500 to-cyan-500',
+    routes: [
+      {
+        path: '/dashboard',
+        label: 'Dashboard',
+        icon: <LayoutDashboard className="w-4 h-4" />,
+        description: 'Panel principal tutor',
+        requiresAuth: true,
+      },
+      {
+        path: '/estudiantes',
+        label: 'Mis Hijos',
+        icon: <GraduationCap className="w-4 h-4" />,
+        description: 'Lista de estudiantes',
+        requiresAuth: true,
+      },
+      {
+        path: '/estudiantes/[id]',
+        label: 'Perfil Hijo',
+        icon: <User className="w-4 h-4" />,
+        description: 'Detalle de estudiante',
+        isDynamic: true,
+        requiresAuth: true,
+      },
+      {
+        path: '/clases',
+        label: 'Clases',
+        icon: <Calendar className="w-4 h-4" />,
+        description: 'Calendario de clases',
+        requiresAuth: true,
+      },
+      {
+        path: '/mis-clases',
+        label: 'Mis Clases',
+        icon: <BookMarked className="w-4 h-4" />,
+        description: 'Clases inscritas',
+        requiresAuth: true,
+      },
+      {
+        path: '/catalogo',
+        label: 'Catálogo',
+        icon: <ShoppingCart className="w-4 h-4" />,
+        description: 'Cursos disponibles',
+        requiresAuth: true,
+      },
+      {
+        path: '/casas',
+        label: 'Casas',
+        icon: <Trophy className="w-4 h-4" />,
+        description: 'Sistema de casas',
+        requiresAuth: true,
+      },
+      {
+        path: '/equipos',
+        label: 'Equipos',
+        icon: <UsersRound className="w-4 h-4" />,
+        description: 'Equipos de estudiantes',
+        requiresAuth: true,
+      },
+    ],
+  },
+  {
+    id: 'membresia',
+    title: 'Membresía (Protected)',
+    icon: <CreditCard className="w-5 h-5" />,
+    gradient: 'from-emerald-500 to-teal-500',
+    routes: [
+      {
+        path: '/membresia/planes',
+        label: 'Planes',
+        icon: <CreditCard className="w-4 h-4" />,
+        description: 'Ver planes de suscripción',
+        requiresAuth: true,
+      },
+      {
+        path: '/membresia/confirmacion',
+        label: 'Confirmación',
+        icon: <FileText className="w-4 h-4" />,
+        description: 'Resultado del pago',
+        requiresAuth: true,
+      },
+    ],
+  },
+  {
+    id: 'cursos',
+    title: 'Cursos (Protected)',
+    icon: <BookMarked className="w-5 h-5" />,
+    gradient: 'from-indigo-500 to-blue-500',
+    routes: [
+      {
+        path: '/cursos/matematicas',
+        label: 'Matemáticas',
+        icon: <BookMarked className="w-4 h-4" />,
+        description: 'Cursos de matemáticas',
+        requiresAuth: true,
+      },
+      {
+        path: '/cursos/ciencias/astronomia',
+        label: 'Astronomía',
+        icon: <FlaskConical className="w-4 h-4" />,
+        description: 'Cursos de astronomía',
+        requiresAuth: true,
+      },
+      {
+        path: '/cursos/ciencias/quimica',
+        label: 'Química',
+        icon: <FlaskConical className="w-4 h-4" />,
+        description: 'Cursos de química',
+        requiresAuth: true,
+      },
+      {
+        path: '/cursos/programacion',
+        label: 'Programación',
+        icon: <Code className="w-4 h-4" />,
+        description: 'Cursos de código',
+        requiresAuth: true,
+      },
+      {
+        path: '/cursos/juegos/matematicas',
+        label: 'Juegos Mate',
+        icon: <Gamepad2 className="w-4 h-4" />,
+        description: 'Juegos matemáticos',
+        requiresAuth: true,
+      },
+      {
+        path: '/cursos/juegos/ciencias',
+        label: 'Juegos Ciencias',
+        icon: <Gamepad2 className="w-4 h-4" />,
+        description: 'Juegos científicos',
+        requiresAuth: true,
+      },
+    ],
+  },
+  {
+    id: 'estudiante',
+    title: 'Portal Estudiante',
+    icon: <GraduationCap className="w-5 h-5" />,
+    gradient: 'from-emerald-500 to-teal-500',
+    routes: [
+      {
+        path: '/estudiante',
+        label: 'Home Estudiante',
+        icon: <Home className="w-4 h-4" />,
+        description: 'Portal del estudiante (placeholder)',
+        requiresAuth: true,
+      },
+    ],
+  },
+  {
+    id: 'clases',
+    title: 'Clases en Vivo',
+    icon: <Eye className="w-5 h-5" />,
+    gradient: 'from-rose-500 to-red-500',
+    routes: [
+      {
+        path: '/clase/[id]/sala',
+        label: 'Sala de Clase',
+        icon: <Eye className="w-4 h-4" />,
+        description: 'Clase en vivo (estudiante)',
+        isDynamic: true,
+      },
+    ],
+  },
+  {
+    id: 'dev',
+    title: 'Desarrollo',
+    icon: <Code className="w-5 h-5" />,
+    gradient: 'from-gray-500 to-slate-600',
+    routes: [
+      {
+        path: '/dev/preview-dragdrop',
+        label: 'Preview DragDrop',
+        icon: <Eye className="w-4 h-4" />,
+        description: 'Test de componente DragDrop',
+      },
+    ],
   },
 ];
 
-export default function HomePage() {
+function RouteCard({ route }: { route: RouteItem }) {
+  const href = route.isDynamic ? '#' : route.path;
+
   return (
-    <div className="min-h-screen bg-[#09090b] relative overflow-hidden">
-      {/* Subtle grid background */}
+    <Link
+      href={href}
+      className={`
+        group flex items-center gap-3 p-3 rounded-lg
+        bg-zinc-800/50 border border-zinc-700/50
+        hover:bg-zinc-700/50 hover:border-zinc-600
+        transition-all duration-200
+        ${route.isDynamic ? 'opacity-60 cursor-not-allowed' : ''}
+      `}
+      onClick={(e) => route.isDynamic && e.preventDefault()}
+    >
+      <div className="flex-shrink-0 w-8 h-8 rounded-md bg-zinc-700 flex items-center justify-center text-zinc-300 group-hover:text-white transition-colors">
+        {route.icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-zinc-200 group-hover:text-white transition-colors">
+            {route.label}
+          </span>
+          {route.requiresAuth && <Lock className="w-3 h-3 text-amber-500" />}
+          {route.isDynamic && <span className="text-xs text-zinc-500">[dinámico]</span>}
+        </div>
+        <p className="text-xs text-zinc-500 truncate">{route.path}</p>
+      </div>
+      {!route.isDynamic && (
+        <ExternalLink className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+      )}
+    </Link>
+  );
+}
+
+function SectionCard({ section }: { section: RouteSection }) {
+  const [isOpen, setIsOpen] = useState(true);
+
+  return (
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`
+          w-full flex items-center gap-3 p-4
+          bg-gradient-to-r ${section.gradient} bg-opacity-10
+          hover:bg-opacity-20 transition-all duration-200
+        `}
+      >
+        <div
+          className={`w-10 h-10 rounded-lg bg-gradient-to-br ${section.gradient} flex items-center justify-center text-white shadow-lg`}
+        >
+          {section.icon}
+        </div>
+        <div className="flex-1 text-left">
+          <h2 className="text-lg font-semibold text-white">{section.title}</h2>
+          <p className="text-xs text-zinc-400">{section.routes.length} rutas</p>
+        </div>
+        {isOpen ? (
+          <ChevronDown className="w-5 h-5 text-zinc-400" />
+        ) : (
+          <ChevronRight className="w-5 h-5 text-zinc-400" />
+        )}
+      </button>
+
+      {isOpen && (
+        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {section.routes.map((route) => (
+            <RouteCard key={route.path} route={route} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function HomePage() {
+  const totalRoutes = routeSections.reduce((acc, s) => acc + s.routes.length, 0);
+  const staticRoutes = routeSections.reduce(
+    (acc, s) => acc + s.routes.filter((r) => !r.isDynamic).length,
+    0,
+  );
+
+  return (
+    <div className="min-h-screen bg-[#09090b] relative">
+      {/* Background effects */}
       <div
         className="absolute inset-0 opacity-[0.02]"
         style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-          `,
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
           backgroundSize: '64px 64px',
         }}
       />
-
-      {/* Gradient orbs */}
       <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-emerald-500/10 blur-[120px]" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-violet-500/10 blur-[120px]" />
 
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-12">
-        {/* Logo & Brand */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          {/* Logo mark */}
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 mb-6 shadow-lg shadow-emerald-500/25">
-            <Sparkles className="w-10 h-10 text-white" />
+      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 mb-4 shadow-lg shadow-emerald-500/25">
+            <Sparkles className="w-8 h-8 text-white" />
           </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">Mateatletas</h1>
+          <p className="text-zinc-400 mb-4">Mapa de Navegación del Sitio</p>
+          <div className="flex items-center justify-center gap-4 text-sm">
+            <span className="px-3 py-1 rounded-full bg-zinc-800 text-zinc-300">
+              {totalRoutes} rutas totales
+            </span>
+            <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400">
+              {staticRoutes} navegables
+            </span>
+            <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 flex items-center gap-1">
+              <Lock className="w-3 h-3" /> Requiere auth
+            </span>
+          </div>
+        </div>
 
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-3 tracking-tight">
-            Mateatletas
-          </h1>
-          <p className="text-lg text-zinc-400 max-w-md mx-auto">
-            Club de Matemáticas, Ciencia y Tecnología
-          </p>
-        </motion.div>
-
-        {/* Portal Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl w-full">
-          {portals.map((portal) => {
-            const Icon = portal.icon;
-            return (
-              <motion.div
-                key={portal.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: portal.delay }}
+        {/* Quick Access - Portales principales */}
+        <div className="mb-12">
+          <h2 className="text-lg font-semibold text-zinc-300 mb-4 flex items-center gap-2">
+            <Zap className="w-5 h-5 text-emerald-400" />
+            Acceso Rápido
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              {
+                href: '/login',
+                label: 'Portal Tutor',
+                icon: <Users className="w-6 h-6" />,
+                gradient: 'from-blue-500 to-cyan-500',
+              },
+              {
+                href: '/estudiante-login',
+                label: 'Portal Estudiante',
+                icon: <GraduationCap className="w-6 h-6" />,
+                gradient: 'from-emerald-500 to-teal-500',
+              },
+              {
+                href: '/docente-login',
+                label: 'Portal Docente',
+                icon: <BookOpen className="w-6 h-6" />,
+                gradient: 'from-violet-500 to-purple-500',
+              },
+              {
+                href: '/admin',
+                label: 'Administración',
+                icon: <Shield className="w-6 h-6" />,
+                gradient: 'from-amber-500 to-orange-500',
+              },
+            ].map((portal) => (
+              <Link
+                key={portal.href}
+                href={portal.href}
+                className="group p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 hover:border-zinc-600 transition-all duration-300"
               >
-                <Link
-                  href={portal.href}
-                  className="group relative block p-6 rounded-xl bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-all duration-300 overflow-hidden"
-                  style={{
-                    boxShadow: `0 0 0 0 ${portal.glowColor}`,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = `0 0 40px 0 ${portal.glowColor}`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = `0 0 0 0 ${portal.glowColor}`;
-                  }}
+                <div
+                  className={`w-12 h-12 rounded-lg bg-gradient-to-br ${portal.gradient} flex items-center justify-center text-white mb-3 shadow-lg group-hover:scale-110 transition-transform`}
                 >
-                  {/* Gradient line on top */}
-                  <div
-                    className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${portal.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
-                  />
-
-                  <div className="flex items-start gap-4">
-                    {/* Icon */}
-                    <div
-                      className={`flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br ${portal.gradient} flex items-center justify-center shadow-lg`}
-                    >
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h2 className="text-lg font-semibold text-white group-hover:text-emerald-400 transition-colors">
-                          {portal.title}
-                        </h2>
-                        <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
-                      </div>
-                      <p className="text-sm text-zinc-500">{portal.description}</p>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
+                  {portal.icon}
+                </div>
+                <p className="font-medium text-zinc-200 group-hover:text-white transition-colors">
+                  {portal.label}
+                </p>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Colonia 2026 Banner */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-12 w-full max-w-2xl"
-        >
-          <Link
-            href="/colonia-2026"
-            className="group relative block p-6 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-300 overflow-hidden"
-          >
-            {/* Animated background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-teal-500/5 group-hover:from-emerald-500/10 group-hover:to-teal-500/10 transition-all duration-500" />
-
-            <div className="relative flex items-center justify-between">
+        <div className="mb-12">
+          <div className="p-6 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
                   <Zap className="w-6 h-6 text-emerald-400" />
@@ -167,28 +596,31 @@ export default function HomePage() {
                       INSCRIPCIONES ABIERTAS
                     </span>
                   </div>
-                  <p className="text-sm text-zinc-400 mt-0.5">
+                  <p className="text-sm text-zinc-400">
                     Enero y Febrero - Matemática, Robótica, Programación
                   </p>
                 </div>
               </div>
-
-              <ArrowRight className="w-5 h-5 text-emerald-500 group-hover:translate-x-1 transition-transform" />
+              <span className="text-xs text-red-400 bg-red-500/10 px-2 py-1 rounded">
+                Ruta pendiente: /colonia-2026
+              </span>
             </div>
-          </Link>
-        </motion.div>
+          </div>
+        </div>
+
+        {/* All Sections */}
+        <div className="space-y-6">
+          {routeSections.map((section) => (
+            <SectionCard key={section.id} section={section} />
+          ))}
+        </div>
 
         {/* Footer */}
-        <motion.footer
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
-          className="mt-16 text-center"
-        >
+        <footer className="mt-16 text-center">
           <p className="text-sm text-zinc-600">
-            &copy; {new Date().getFullYear()} Mateatletas Club. Todos los derechos reservados.
+            &copy; {new Date().getFullYear()} Mateatletas Club. Mapa de desarrollo.
           </p>
-        </motion.footer>
+        </footer>
       </div>
     </div>
   );

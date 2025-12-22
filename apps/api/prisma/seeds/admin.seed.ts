@@ -26,8 +26,6 @@ export async function seedAdmin(prisma: PrismaClient): Promise<void> {
     create: {
       email,
       password_hash: hashedPassword,
-      password_temporal: rawPassword,
-      debe_cambiar_password: false,
       nombre: 'Admin',
       apellido: 'Mateatletas',
     },
