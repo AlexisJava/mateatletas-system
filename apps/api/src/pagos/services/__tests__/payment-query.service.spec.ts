@@ -4,7 +4,7 @@ import { PaymentQueryService } from '../payment-query.service';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { ConfiguracionPreciosRepository } from '../../infrastructure/repositories/configuracion-precios.repository';
 import { InscripcionMensualRepository } from '../../infrastructure/repositories/inscripcion-mensual.repository';
-import { EstadoPago, EstadoMembresia } from '@prisma/client';
+import { EstadoPago } from '@prisma/client';
 
 /**
  * PaymentQueryService Tests
@@ -36,10 +36,6 @@ describe('PaymentQueryService', () => {
               findMany: jest.fn(),
               count: jest.fn(),
               findUnique: jest.fn(),
-              findFirst: jest.fn(),
-            },
-            membresia: {
-              findMany: jest.fn(),
               findFirst: jest.fn(),
             },
           },
@@ -265,66 +261,7 @@ describe('PaymentQueryService', () => {
     });
   });
 
-  describe('findMembresiaActiva', () => {
-    it('should return active membresia', async () => {
-      // Arrange
-      const mockMembresia = {
-        id: 'mem-1',
-        tutor_id: 'tutor-1',
-        estado: EstadoMembresia.Activa,
-        producto: { id: 'prod-1', nombre: 'Membresía Premium' },
-      };
-
-      prismaService.membresia.findFirst.mockResolvedValue(mockMembresia as any);
-
-      // Act
-      const result = await service.findMembresiaActiva('tutor-1');
-
-      // Assert
-      expect(result).toEqual(mockMembresia);
-      expect(prismaService.membresia.findFirst).toHaveBeenCalledWith({
-        where: {
-          tutor_id: 'tutor-1',
-          estado: EstadoMembresia.Activa,
-        },
-        include: { producto: true },
-      });
-    });
-
-    it('should return null when no active membresia exists', async () => {
-      // Arrange
-      prismaService.membresia.findFirst.mockResolvedValue(null);
-
-      // Act
-      const result = await service.findMembresiaActiva('tutor-1');
-
-      // Assert
-      expect(result).toBeNull();
-    });
-  });
-
-  describe('findMembresiasDelTutor', () => {
-    it('should return all membresias ordered by fecha_inicio desc', async () => {
-      // Arrange
-      const mockMembresias = [
-        { id: 'mem-2', fecha_inicio: new Date('2025-02-01') },
-        { id: 'mem-1', fecha_inicio: new Date('2025-01-01') },
-      ];
-
-      prismaService.membresia.findMany.mockResolvedValue(mockMembresias as any);
-
-      // Act
-      const result = await service.findMembresiasDelTutor('tutor-1');
-
-      // Assert
-      expect(result).toEqual(mockMembresias);
-      expect(prismaService.membresia.findMany).toHaveBeenCalledWith({
-        where: { tutor_id: 'tutor-1' },
-        include: { producto: true },
-        orderBy: { fecha_inicio: 'desc' },
-      });
-    });
-  });
+  // Tests de findMembresiaActiva y findMembresiasDelTutor eliminados (sistema membresía removido)
 
   describe('findInscripcionPorPeriodo', () => {
     it('should return inscripcion for specific period', async () => {

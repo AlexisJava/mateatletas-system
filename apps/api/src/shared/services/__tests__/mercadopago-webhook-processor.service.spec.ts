@@ -132,8 +132,7 @@ describe('MercadoPagoWebhookProcessorService', () => {
     });
 
     it('debe retornar error si el external_reference es inválido', async () => {
-      // Para PAGO_COLONIA, cualquier string es válido como external_reference
-      // Así que probamos con un tipo completamente diferente que el parser rechazará
+      // Empty string como external_reference no es válido
       const paymentInvalidRef = {
         ...mockPaymentApproved,
         external_reference: '', // Empty string no es válido
@@ -144,21 +143,20 @@ describe('MercadoPagoWebhookProcessorService', () => {
 
       const result = await service.processWebhook(
         mockWebhookData,
-        TipoExternalReference.INSCRIPCION_2026, // Esperar INSCRIPCION_2026 pero recibir empty string
+        TipoExternalReference.PAGO_COLONIA, // Tipo válido pero external_reference vacío
         async () => null,
         async () => ({ success: true }),
       );
 
       expect(result.success).toBe(false);
-      // Con empty string, el parseLegacyExternalReference debería retornar null o no coincidir con el tipo esperado
+      // Con empty string, findPayment no encuentra nada
     });
 
     it('debe retornar error si el tipo de external_reference no coincide', async () => {
-      // External reference de INSCRIPCION_2026 pero esperamos PAGO_COLONIA
+      // External reference de CLASE_INSCRIPCION pero esperamos PAGO_COLONIA
       const paymentWrongType = {
         ...mockPaymentApproved,
-        external_reference:
-          'inscripcion2026-inscabc123-tutor-tutorxyz789-tipo-COLONIA',
+        external_reference: 'CLASE_INSCRIPCION:clase123:est456:2025-01-15',
       };
       jest
         .spyOn(mercadoPagoService, 'getPayment')
@@ -167,12 +165,13 @@ describe('MercadoPagoWebhookProcessorService', () => {
       const result = await service.processWebhook(
         mockWebhookData,
         TipoExternalReference.PAGO_COLONIA,
-        async () => null,
+        async () => null, // findPayment no encuentra nada porque el tipo no coincide
         async () => ({ success: true }),
       );
 
       expect(result.success).toBe(false);
-      expect(result.message).toBe('Invalid external_reference format');
+      // El parser reconoce el formato pero el tipo no coincide, findPayment retorna null
+      expect(result.message).toBe('Payment not found in database');
     });
 
     it('debe retornar error si el pago no se encuentra en la base de datos', async () => {

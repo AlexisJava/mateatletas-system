@@ -12,15 +12,6 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
     inscripcionMensual: {
       findUnique: jest.fn(),
     },
-    membresia: {
-      findUnique: jest.fn(),
-    },
-    inscripcion2026: {
-      findUnique: jest.fn(),
-    },
-    pagoInscripcion2026: {
-      findUnique: jest.fn(),
-    },
     coloniaPago: {
       findUnique: jest.fn(),
     },
@@ -147,106 +138,8 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
     });
   });
 
-  describe('validateMembresia', () => {
-    it('should validate membresia amount correctly', async () => {
-      mockPrismaService.membresia.findUnique.mockResolvedValue({
-        id: 'membresia-1',
-        producto: {
-          precio: 15000.0,
-        },
-      });
-
-      const result = await service.validateMembresia('membresia-1', 15000.0);
-
-      expect(result.isValid).toBe(true);
-      expect(result.expectedAmount).toBe(15000.0);
-    });
-
-    it('should REJECT membresia with wrong amount', async () => {
-      mockPrismaService.membresia.findUnique.mockResolvedValue({
-        id: 'membresia-1',
-        producto: {
-          precio: 15000.0,
-        },
-      });
-
-      const result = await service.validateMembresia('membresia-1', 100.0);
-
-      expect(result.isValid).toBe(false);
-    });
-
-    it('should throw BadRequestException if membresia does not exist', async () => {
-      mockPrismaService.membresia.findUnique.mockResolvedValue(null);
-
-      await expect(
-        service.validateMembresia('membresia-999', 15000.0),
-      ).rejects.toThrow(BadRequestException);
-    });
-  });
-
-  describe('validateInscripcion2026', () => {
-    it('should validate inscripcion 2026 amount', async () => {
-      mockPrismaService.inscripcion2026.findUnique.mockResolvedValue({
-        id: 'insc2026-1',
-        total_mensual_actual: 8000.0,
-      });
-
-      const result = await service.validateInscripcion2026(
-        'insc2026-1',
-        8000.0,
-      );
-
-      expect(result.isValid).toBe(true);
-    });
-
-    it('should throw if inscripcion 2026 not found', async () => {
-      mockPrismaService.inscripcion2026.findUnique.mockResolvedValue(null);
-
-      await expect(
-        service.validateInscripcion2026('insc2026-999', 8000.0),
-      ).rejects.toThrow(BadRequestException);
-    });
-  });
-
-  describe('validatePagoInscripcion2026', () => {
-    it('should validate pago inscripcion 2026 (mensualidad)', async () => {
-      mockPrismaService.pagoInscripcion2026.findUnique.mockResolvedValue({
-        id: 'pago-1',
-        monto: 3000.0,
-        tipo: 'mensualidad',
-      });
-
-      const result = await service.validatePagoInscripcion2026(
-        'pago-1',
-        3000.0,
-      );
-
-      expect(result.isValid).toBe(true);
-    });
-
-    it('should validate pago inscripcion 2026 (inscripcion)', async () => {
-      mockPrismaService.pagoInscripcion2026.findUnique.mockResolvedValue({
-        id: 'pago-2',
-        monto: 5000.0,
-        tipo: 'inscripcion',
-      });
-
-      const result = await service.validatePagoInscripcion2026(
-        'pago-2',
-        5000.0,
-      );
-
-      expect(result.isValid).toBe(true);
-    });
-
-    it('should throw if pago not found', async () => {
-      mockPrismaService.pagoInscripcion2026.findUnique.mockResolvedValue(null);
-
-      await expect(
-        service.validatePagoInscripcion2026('pago-999', 3000.0),
-      ).rejects.toThrow(BadRequestException);
-    });
-  });
+  // NOTA: Tests de validateMembresia, validateInscripcion2026 y validatePagoInscripcion2026
+  // fueron eliminados porque esos métodos fueron removidos del servicio (sistema legacy eliminado)
 
   describe('validateColoniaPago', () => {
     it('should validate colonia pago amount', async () => {
@@ -294,39 +187,7 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
       });
     });
 
-    it('should validate membresia by external reference', async () => {
-      const externalRef = 'membresia-abc-tutor-def-producto-ghi';
-
-      mockPrismaService.membresia.findUnique.mockResolvedValue({
-        producto: { precio: 10000.0 },
-      });
-
-      const result = await service.validateByExternalReference(
-        externalRef,
-        10000.0,
-      );
-
-      expect(result.isValid).toBe(true);
-      expect(mockPrismaService.membresia.findUnique).toHaveBeenCalledWith({
-        where: { id: 'abc' },
-        include: { producto: true },
-      });
-    });
-
-    it('should validate inscripcion2026 by external reference', async () => {
-      const externalRef = 'inscripcion2026-xyz-tutor-123-tipo-COLONIA';
-
-      mockPrismaService.inscripcion2026.findUnique.mockResolvedValue({
-        total_mensual_actual: 8000.0,
-      });
-
-      const result = await service.validateByExternalReference(
-        externalRef,
-        8000.0,
-      );
-
-      expect(result.isValid).toBe(true);
-    });
+    // Tests de membresia e inscripcion2026 eliminados (sistema legacy removido)
 
     it('should throw error for unknown external reference format', async () => {
       const externalRef = 'unknown-format-123';

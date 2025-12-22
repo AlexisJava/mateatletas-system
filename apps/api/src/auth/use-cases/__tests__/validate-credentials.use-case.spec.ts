@@ -16,13 +16,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ValidateCredentialsUseCase } from '../validate-credentials.use-case';
 import { PrismaService } from '../../../core/database/prisma.service';
+import { BCRYPT_ROUNDS } from '../../../common/constants/security.constants';
 import * as bcrypt from 'bcrypt';
 
 describe('ValidateCredentialsUseCase', () => {
   let useCase: ValidateCredentialsUseCase;
   let prismaService: PrismaService;
-
-  const BCRYPT_ROUNDS = 12;
 
   const mockPrismaService = {
     tutor: {
@@ -123,8 +122,9 @@ describe('ValidateCredentialsUseCase', () => {
      */
     it('should_rehash_password_when_old_rounds_detected', async () => {
       const password = 'old-password';
-      // Hash con rounds antiguos (10)
-      const oldHash = await bcrypt.hash(password, 10);
+      // Hash con rounds antiguos (siempre menor que BCRYPT_ROUNDS configurado)
+      const oldRounds = Math.max(4, BCRYPT_ROUNDS - 2); // Usar rounds menores al configurado
+      const oldHash = await bcrypt.hash(password, oldRounds);
       const mockTutor = {
         id: 'tutor-old-hash',
         email: 'old@email.com',
@@ -183,7 +183,8 @@ describe('ValidateCredentialsUseCase', () => {
      */
     it('should_handle_rehash_error_gracefully', async () => {
       const password = 'old-password';
-      const oldHash = await bcrypt.hash(password, 10);
+      const oldRounds = Math.max(4, BCRYPT_ROUNDS - 2);
+      const oldHash = await bcrypt.hash(password, oldRounds);
       const mockTutor = {
         id: 'tutor-rehash-error',
         email: 'error@email.com',

@@ -49,41 +49,7 @@ describe('PaymentStateMapperService', () => {
     });
   });
 
-  describe('mapearEstadoMembresia', () => {
-    it('debe mapear PAGADO a Activa', () => {
-      expect(service.mapearEstadoMembresia(EstadoPago.PAGADO)).toBe('Activa');
-    });
-
-    it('debe mapear RECHAZADO a Pendiente', () => {
-      expect(service.mapearEstadoMembresia(EstadoPago.RECHAZADO)).toBe(
-        'Pendiente',
-      );
-    });
-
-    it('debe mapear CANCELADO a Pendiente', () => {
-      expect(service.mapearEstadoMembresia(EstadoPago.CANCELADO)).toBe(
-        'Pendiente',
-      );
-    });
-
-    it('debe mapear EXPIRADO a Atrasada', () => {
-      expect(service.mapearEstadoMembresia(EstadoPago.EXPIRADO)).toBe(
-        'Atrasada',
-      );
-    });
-
-    it('debe mapear PENDIENTE a Pendiente', () => {
-      expect(service.mapearEstadoMembresia(EstadoPago.PENDIENTE)).toBe(
-        'Pendiente',
-      );
-    });
-
-    it('debe mapear REEMBOLSADO a Cancelada (usuario pierde acceso tras refund/chargeback)', () => {
-      expect(service.mapearEstadoMembresia(EstadoPago.REEMBOLSADO)).toBe(
-        'Cancelada',
-      );
-    });
-  });
+  // Tests de mapearEstadoMembresia eliminados (sistema membresía removido)
 
   describe('mapearEstadoInscripcion', () => {
     it('debe mapear PAGADO a Pagado', () => {
@@ -121,37 +87,7 @@ describe('PaymentStateMapperService', () => {
     });
   });
 
-  describe('procesarEstadoMembresia', () => {
-    it('debe procesar estado completo de membresía para approved', () => {
-      const result = service.procesarEstadoMembresia('approved');
-      expect(result.estadoPago).toBe(EstadoPago.PAGADO);
-      expect(result.estadoMembresia).toBe('Activa'); // EstadoMembresia.Activa
-    });
-
-    it('debe procesar estado completo de membresía para rejected', () => {
-      const result = service.procesarEstadoMembresia('rejected');
-      expect(result.estadoPago).toBe(EstadoPago.RECHAZADO);
-      expect(result.estadoMembresia).toBe('Pendiente');
-    });
-
-    it('debe procesar estado completo de membresía para pending', () => {
-      const result = service.procesarEstadoMembresia('pending');
-      expect(result.estadoPago).toBe(EstadoPago.PENDIENTE);
-      expect(result.estadoMembresia).toBe('Pendiente');
-    });
-
-    it('debe procesar refunded como Cancelada (usuario pierde acceso)', () => {
-      const result = service.procesarEstadoMembresia('refunded');
-      expect(result.estadoPago).toBe(EstadoPago.REEMBOLSADO);
-      expect(result.estadoMembresia).toBe('Cancelada');
-    });
-
-    it('debe procesar charged_back como Cancelada (chargeback = pierde acceso)', () => {
-      const result = service.procesarEstadoMembresia('charged_back');
-      expect(result.estadoPago).toBe(EstadoPago.REEMBOLSADO);
-      expect(result.estadoMembresia).toBe('Cancelada');
-    });
-  });
+  // Tests de procesarEstadoMembresia eliminados (sistema membresía removido)
 
   describe('procesarEstadoInscripcion', () => {
     it('debe procesar estado completo de inscripción para approved', () => {

@@ -85,9 +85,8 @@ model Estudiante {
   tutor_id                  String
   /// ID de la casa a la que pertenece el estudiante (sistema 2026)
   casaId                    String?                 @map("casa_id")
-  /// Puntos totales acumulados por el estudiante (gamificación)
-  puntos_totales            Int                     @default(0)
   /// Nivel actual del estudiante en el sistema de gamificación
+  /// NOTA: puntos_totales fue migrado a RecursosEstudiante.xp_total (SUB-FASE 1.3)
   nivel_actual              Int                     @default(1)
   /// Timestamp de creación del registro
   createdAt                 DateTime                @default(now())
@@ -132,8 +131,7 @@ model Estudiante {
   colonia_inscripciones ColoniaEstudiante[]
 
   // Índices de performance para rankings y listados
-  @@index([puntos_totales(sort: Desc)], name: "idx_estudiantes_puntos_ranking")
-  @@index([casaId, puntos_totales(sort: Desc)], name: "idx_estudiantes_casa_ranking")
+  // NOTA: Índices de puntos_totales eliminados - usar RecursosEstudiante para rankings (SUB-FASE 1.3)
   @@index([tutor_id, apellido], name: "idx_estudiantes_tutor_listado")
   @@map("estudiantes")
 }

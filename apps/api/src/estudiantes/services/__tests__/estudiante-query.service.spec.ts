@@ -286,7 +286,7 @@ describe('EstudianteQueryService', () => {
         nombre: 'Juan',
         tutor_id: 'tutor-1',
         nivel_actual: 5,
-        xp_total: 100,
+        recursos: { xp_total: 100 }, // SUB-FASE 1.3: xp_total viene de RecursosEstudiante
         casa: null,
         logros_desbloqueados: [{ id: 'logro-1' }, { id: 'logro-2' }],
         inscripciones_clase: [],
@@ -334,7 +334,7 @@ describe('EstudianteQueryService', () => {
         nombre: 'Juan',
         tutor_id: 'tutor-1',
         nivel_actual: 1,
-        xp_total: 0,
+        recursos: { xp_total: 0 }, // SUB-FASE 1.3: xp_total viene de RecursosEstudiante
         casa: null,
         logros_desbloqueados: [],
         inscripciones_clase: [],
