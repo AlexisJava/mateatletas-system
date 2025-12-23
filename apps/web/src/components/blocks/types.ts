@@ -74,3 +74,14 @@ export interface SemanaMetadata {
   descripcion?: string;
   objetivos?: string[];
 }
+
+/** Definición de un bloque para el registry del Studio */
+export interface BlockDefinition {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  component: ComponentType<StudioBlockProps<any>>;
+  category: BloqueCategoria;
+  displayName: string;
+  icon: string;
+  defaultSize: { width: number; height: number };
+  defaultProps: Record<string, unknown>;
+}
