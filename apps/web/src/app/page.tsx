@@ -7,7 +7,6 @@ import {
   Users,
   Shield,
   BookOpen,
-  Sparkles,
   Zap,
   LayoutDashboard,
   CreditCard,
@@ -18,21 +17,17 @@ import {
   User,
   Home,
   ShoppingCart,
-  Palette,
-  Library,
-  PlusCircle,
-  Eye,
   ChevronDown,
   ChevronRight,
   ExternalLink,
   Lock,
-  Unlock,
   Trophy,
   UsersRound,
   BookMarked,
   FlaskConical,
   Code,
   Gamepad2,
+  Eye,
 } from 'lucide-react';
 
 interface RouteItem {
@@ -133,48 +128,6 @@ const routeSections: RouteSection[] = [
         label: 'Inscripciones 2026',
         icon: <ClipboardList className="w-4 h-4" />,
         description: 'Inscripciones Colonia/Ciclo',
-      },
-    ],
-  },
-  {
-    id: 'studio',
-    title: 'Studio (Admin)',
-    icon: <Palette className="w-5 h-5" />,
-    gradient: 'from-purple-500 to-pink-500',
-    routes: [
-      {
-        path: '/admin/studio',
-        label: 'Studio Home',
-        icon: <Palette className="w-4 h-4" />,
-        description: 'Editor de cursos',
-      },
-      {
-        path: '/admin/studio/biblioteca',
-        label: 'Biblioteca',
-        icon: <Library className="w-4 h-4" />,
-        description: 'Catálogo de 95 componentes',
-      },
-      {
-        path: '/admin/studio/nuevo',
-        label: 'Nuevo Curso',
-        icon: <PlusCircle className="w-4 h-4" />,
-        description: 'Wizard de creación',
-      },
-      {
-        path: '/admin/studio/[cursoId]',
-        label: 'Editor Curso',
-        icon: <Eye className="w-4 h-4" />,
-        description: 'Editar curso específico',
-        isDynamic: true,
-        examplePath: '/admin/studio/curso-ejemplo',
-      },
-      {
-        path: '/admin/studio/[cursoId]/semanas/[semanaNum]',
-        label: 'Editor Semana',
-        icon: <Calendar className="w-4 h-4" />,
-        description: 'Editar semana específica',
-        isDynamic: true,
-        examplePath: '/admin/studio/curso-ejemplo/semanas/1',
       },
     ],
   },
@@ -513,7 +466,7 @@ export default function HomePage() {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 mb-4 shadow-lg shadow-emerald-500/25">
-            <Sparkles className="w-8 h-8 text-white" />
+            <Zap className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">Mateatletas</h1>
           <p className="text-zinc-400 mb-4">Mapa de Navegación del Sitio</p>

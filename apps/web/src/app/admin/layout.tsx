@@ -17,13 +17,13 @@ import {
   Menu,
   X,
   Key,
-  Sparkles,
   ChevronRight,
   Settings,
   Search,
   ClipboardList,
   PanelLeftClose,
   PanelLeft,
+  Zap,
 } from 'lucide-react';
 
 /**
@@ -70,10 +70,6 @@ const navSections: NavSection[] = [
       { href: '/admin/pagos', label: 'Pagos', icon: CreditCard },
       { href: '/admin/reportes', label: 'Reportes', icon: BarChart3 },
     ],
-  },
-  {
-    title: 'Contenido',
-    items: [{ href: '/admin/studio', label: 'Studio', icon: Sparkles }],
   },
 ];
 
@@ -141,7 +137,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center' : 'px-5'}`}
           >
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-white" />
+              <Zap className="w-5 h-5 text-white" />
             </div>
             {!sidebarCollapsed && (
               <div>
@@ -329,7 +325,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="h-16 flex items-center justify-between px-5 border-b border-[var(--admin-border)]">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
+                  <Zap className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-[15px] font-bold text-[var(--admin-text)]">Mateatletas</span>
               </div>

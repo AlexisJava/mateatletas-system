@@ -35,7 +35,7 @@ export default function LoginPage() {
       case 'docente':
         return '/docente/dashboard';
       case 'estudiante':
-        return '/estudiante/dashboard';
+        return '/estudiante';
       case 'tutor':
       default:
         return '/dashboard';

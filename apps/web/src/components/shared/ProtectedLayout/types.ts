@@ -34,7 +34,7 @@ export const DEFAULT_ROLE_REDIRECTS: Record<UserRole, string> = {
   admin: '/admin/dashboard',
   docente: '/docente/dashboard',
   tutor: '/dashboard',
-  estudiante: '/estudiante/gimnasio',
+  estudiante: '/estudiante',
 } as const;
 
 /**
