@@ -1594,11 +1594,23 @@ interface LuauEditorProps {
 
 export default function LuauEditor({ theme, exercises }: LuauEditorProps) {
   // Usar ejercicios pasados como prop o los hardcodeados como fallback
-  const ACTIVE_EXERCISES = exercises || EXERCISES;
+  const ACTIVE_EXERCISES = exercises ?? EXERCISES;
+
+  // Guard: si no hay ejercicios, mostrar mensaje
+  if (ACTIVE_EXERCISES.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-900 text-white">
+        <p>No hay ejercicios disponibles</p>
+      </div>
+    );
+  }
+
+  // Safe first exercise - guaranteed to exist after length check
+  const firstExercise = ACTIVE_EXERCISES[0] as Exercise;
 
   const { width, height } = useWindowSize();
-  const [currentExercise, setCurrentExercise] = useState(0);
-  const [code, setCode] = useState(ACTIVE_EXERCISES[0].starter_code);
+  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+  const [code, setCode] = useState(firstExercise.starter_code);
   const [output, setOutput] = useState<string[]>([]);
   const [showHints, setShowHints] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
@@ -1607,9 +1619,12 @@ export default function LuauEditor({ theme, exercises }: LuauEditorProps) {
   const [showConfetti, setShowConfetti] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [fengariLoaded, setFengariLoaded] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [luaEngine, setLuaEngine] = useState<any>(null);
 
-  const exercise = ACTIVE_EXERCISES[currentExercise];
+  // Safe exercise access - clamp index to valid range
+  const safeIndex = Math.min(currentExerciseIndex, ACTIVE_EXERCISES.length - 1);
+  const exercise = ACTIVE_EXERCISES[safeIndex] as Exercise;
 
   // Cargar Fengari cuando el componente se monta
   useEffect(() => {
@@ -1639,7 +1654,7 @@ export default function LuauEditor({ theme, exercises }: LuauEditorProps) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
     }
-  }, [currentExercise, exercise.starter_code, isSpeaking]);
+  }, [currentExerciseIndex, exercise.starter_code, isSpeaking]);
 
   const handleSpeak = () => {
     console.log('handleSpeak llamado, isSpeaking:', isSpeaking);
@@ -1730,7 +1745,7 @@ export default function LuauEditor({ theme, exercises }: LuauEditorProps) {
         for (let line of lines) {
           // Capturar print con múltiples argumentos
           const printMatch = line.match(/print\s*\((.*)\)/);
-          if (printMatch) {
+          if (printMatch && printMatch[1] !== undefined) {
             const args = printMatch[1];
             // Evaluar strings simples y números
             let output = args.replace(/["']/g, '').replace(/\.\./g, ' ').trim();
@@ -1810,14 +1825,14 @@ export default function LuauEditor({ theme, exercises }: LuauEditorProps) {
   };
 
   const handleNextExercise = () => {
-    if (currentExercise < ACTIVE_EXERCISES.length - 1) {
-      setCurrentExercise(currentExercise + 1);
+    if (currentExerciseIndex < ACTIVE_EXERCISES.length - 1) {
+      setCurrentExerciseIndex(currentExerciseIndex + 1);
     }
   };
 
   const handlePrevExercise = () => {
-    if (currentExercise > 0) {
-      setCurrentExercise(currentExercise - 1);
+    if (currentExerciseIndex > 0) {
+      setCurrentExerciseIndex(currentExerciseIndex - 1);
     }
   };
 
@@ -2125,7 +2140,7 @@ export default function LuauEditor({ theme, exercises }: LuauEditorProps) {
         <div className="flex justify-between items-center gap-2 md:gap-4 mt-4 flex-shrink-0">
           <button
             onClick={handlePrevExercise}
-            disabled={currentExercise === 0}
+            disabled={currentExerciseIndex === 0}
             className="px-3 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl font-bold text-xs md:text-base transition-all duration-300 hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 bg-slate-800 hover:bg-slate-700 text-white border-2 border-slate-700"
           >
             ← Anterior
@@ -2134,17 +2149,17 @@ export default function LuauEditor({ theme, exercises }: LuauEditorProps) {
           <div className="text-center">
             <p className="text-slate-400 text-xs md:text-sm mb-1">Ejercicio</p>
             <p className="text-white text-lg md:text-2xl font-black">
-              {currentExercise + 1} / {ACTIVE_EXERCISES.length}
+              {currentExerciseIndex + 1} / {ACTIVE_EXERCISES.length}
             </p>
           </div>
 
           <button
             onClick={handleNextExercise}
-            disabled={currentExercise === ACTIVE_EXERCISES.length - 1}
+            disabled={currentExerciseIndex === ACTIVE_EXERCISES.length - 1}
             className="px-3 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl font-bold text-xs md:text-base transition-all duration-300 hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 text-white"
             style={{
               background:
-                currentExercise === ACTIVE_EXERCISES.length - 1
+                currentExerciseIndex === ACTIVE_EXERCISES.length - 1
                   ? '#475569'
                   : `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
             }}

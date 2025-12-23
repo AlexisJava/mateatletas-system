@@ -1,33 +1,20 @@
 /**
- * UI Components - Estilo Crash Bandicoot
- *
- * Componentes base reutilizables con diseño chunky, vibrante y divertido.
- * Todos los componentes siguen la paleta de colores de Crash Bandicoot.
+ * UI Components - Barrel Export
  */
 
+export { Avatar } from './Avatar';
+export { Badge } from './Badge';
+export { Breadcrumbs } from './Breadcrumbs';
 export { Button } from './Button';
 export type { ButtonProps } from './Button';
-
-export { Input } from './Input';
-export type { InputProps } from './Input';
-
 export { Card } from './Card';
 export type { CardProps } from './Card';
-
-export { Modal } from './Modal';
-
-export { Avatar } from './Avatar';
-
-export { Badge } from './Badge';
-
-export { Select } from './Select';
-
-export { Breadcrumbs } from './Breadcrumbs';
-
-export { ToastProvider, toast } from './Toast';
-
-// Landing Page Components
-export { AnimatedCounter } from './AnimatedCounter';
-export { TypingCode } from './TypingCode';
-export { MagneticButton } from './MagneticButton';
 export { FloatingCard } from './FloatingCard';
+export { Input } from './Input';
+export { Modal } from './Modal';
+export { Select } from './Select';
+export { ToastProvider } from './Toast';
+export { StudentAvatar } from './StudentAvatar';
+export { MagneticButton } from './MagneticButton';
+export { TypingCode } from './TypingCode';
+export { AnimatedCounter } from './AnimatedCounter';

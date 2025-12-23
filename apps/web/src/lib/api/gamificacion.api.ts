@@ -27,8 +27,7 @@ import type {
   RecursosEstudiante,
   TransaccionRecurso,
 } from '@/types/gamificacion';
-import { normalizarLogros } from '@/types/gamificacion';
-import { mapLogrosToEstudiante } from '@/lib/utils/gamificacion.utils';
+import { normalizarLogros, mapLogrosToEstudiante } from '@/types/gamificacion';
 
 export type DashboardData = DashboardGamificacion;
 export type ProximaClase = DashboardData['proximasClases'][number];

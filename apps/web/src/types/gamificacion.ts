@@ -64,7 +64,25 @@ export function normalizarLogros<T extends ContractsLogro>(logros: T[]): T[] {
     ...logro,
     // Asegurar que los campos opcionales tengan valores por defecto
     icono: logro.icono || '🏆',
-    puntos_recompensa: logro.puntos_recompensa || 0,
+    xp_recompensa: logro.xp_recompensa || 0,
     monedas_recompensa: logro.monedas_recompensa || 0,
+  }));
+}
+
+/**
+ * Mapea logros normalizados al formato LogroEstudiante
+ */
+export function mapLogrosToEstudiante(
+  _estudianteId: string,
+  logros: ContractsLogro[],
+): LogroEstudiante[] {
+  return logros.map((logro) => ({
+    id: logro.id,
+    logro,
+    desbloqueado: logro.desbloqueado ?? false,
+    fecha_desbloqueo:
+      typeof logro.fecha_desbloqueo === 'string'
+        ? logro.fecha_desbloqueo
+        : logro.fecha_desbloqueo?.toISOString(),
   }));
 }

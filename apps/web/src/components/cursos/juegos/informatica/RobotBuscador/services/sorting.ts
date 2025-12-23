@@ -1,4 +1,13 @@
-import { Video, SortStep } from '../types';
+import { Video, SortStep, safeGet, safeSwap } from '../types';
+
+// Default video for safe access fallback
+const DEFAULT_VIDEO: Video = {
+  id: '',
+  titulo: 'Desconocido',
+  emoji: '❓',
+  relevancia: 0,
+  ordenado: false,
+};
 
 export function mezclarVideos(videos: Omit<Video, 'id' | 'ordenado'>[]): Video[] {
   const initializedVideos: Video[] = videos.map((v, i) => ({
@@ -12,13 +21,15 @@ export function mezclarVideos(videos: Omit<Video, 'id' | 'ordenado'>[]): Video[]
   // Fisher-Yates shuffle
   for (let i = mezclados.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [mezclados[i], mezclados[j]] = [mezclados[j], mezclados[i]];
+    safeSwap(mezclados, i, j);
   }
 
   // Ensure not accidentally sorted (rare but possible)
   let isSorted = true;
   for (let i = 0; i < mezclados.length - 1; i++) {
-    if (mezclados[i].relevancia < mezclados[i + 1].relevancia) {
+    const current = safeGet(mezclados, i, DEFAULT_VIDEO);
+    const next = safeGet(mezclados, i + 1, DEFAULT_VIDEO);
+    if (current.relevancia < next.relevancia) {
       isSorted = false;
       break;
     }
@@ -26,7 +37,7 @@ export function mezclarVideos(videos: Omit<Video, 'id' | 'ordenado'>[]): Video[]
 
   // If accidentally sorted, force a swap
   if (isSorted && mezclados.length > 1) {
-    [mezclados[0], mezclados[1]] = [mezclados[1], mezclados[0]];
+    safeSwap(mezclados, 0, 1);
   }
 
   return mezclados;
@@ -38,8 +49,8 @@ export function* bubbleSortDescendente(videosIniciales: Video[]): Generator<Sort
 
   for (let i = 0; i < n - 1; i++) {
     for (let j = 0; j < n - i - 1; j++) {
-      const vidA = arr[j];
-      const vidB = arr[j + 1];
+      const vidA = safeGet(arr, j, DEFAULT_VIDEO);
+      const vidB = safeGet(arr, j + 1, DEFAULT_VIDEO);
 
       // Yield Comparison Step
       yield {
@@ -52,7 +63,7 @@ export function* bubbleSortDescendente(videosIniciales: Video[]): Generator<Sort
       // Descending sort: if Left < Right, swap them
       if (vidA.relevancia < vidB.relevancia) {
         // Swap
-        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+        safeSwap(arr, j, j + 1);
 
         yield {
           tipo: 'intercambiando',
@@ -71,18 +82,25 @@ export function* bubbleSortDescendente(videosIniciales: Video[]): Generator<Sort
     }
 
     // Mark last processed as sorted
-    arr[n - 1 - i].ordenado = true;
+    const sortedIndex = n - 1 - i;
+    const sortedVideo = arr[sortedIndex];
+    if (sortedVideo) {
+      sortedVideo.ordenado = true;
+    }
 
     yield {
       tipo: 'posicionado',
-      indices: [n - 1 - i],
+      indices: [sortedIndex],
       videos: [...arr],
-      mensaje: `🎯 "${arr[n - 1 - i].titulo}" ya está en su lugar.`,
+      mensaje: `🎯 "${safeGet(arr, sortedIndex, DEFAULT_VIDEO).titulo}" ya está en su lugar.`,
     };
   }
 
   // Mark the first one as sorted too at the end
-  arr[0].ordenado = true;
+  const firstVideo = arr[0];
+  if (firstVideo) {
+    firstVideo.ordenado = true;
+  }
 
   yield {
     tipo: 'completado',

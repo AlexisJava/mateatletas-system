@@ -115,5 +115,8 @@
   "packageManager": "yarn@4.10.3",
   "resolutions": {
     "camera-controls": "2.9.0"
+  },
+  "dependencies": {
+    "react-use": "^17.6.0"
   }
 }
