@@ -35,12 +35,13 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   disconnect: vi.fn(),
 }));
 
-// Mock de ResizeObserver
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-}));
+// Mock de ResizeObserver (dnd-kit requiere un constructor real)
+class MockResizeObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+global.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
 
 // Suprimir warnings de console en tests (opcional)
 const originalError = console.error;
