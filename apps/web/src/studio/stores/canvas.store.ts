@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import type { CanvasElement, CanvasStore } from '../types/canvas.types';
 import { snapPosition } from '../utils/snap.utils';
+import { getBlockDefinition } from '@/components/blocks/registry';
 
 const MAX_HISTORY = 50;
 const DEFAULT_ELEMENT_SIZE = { width: 200, height: 150 };
@@ -56,12 +57,17 @@ export const useCanvasStore = create<CanvasStore>()(
         const basePosition = position ?? DEFAULT_POSITION;
         const finalPosition = snap ? snapPosition(basePosition, gridSize) : basePosition;
 
+        // Get default props and size from block registry
+        const blockDef = getBlockDefinition(type);
+        const defaultProps = blockDef?.defaultProps ?? {};
+        const defaultSize = blockDef?.defaultSize ?? DEFAULT_ELEMENT_SIZE;
+
         const newElement: CanvasElement = {
           id: crypto.randomUUID(),
           componentType: type,
           position: finalPosition,
-          size: { ...DEFAULT_ELEMENT_SIZE },
-          props: {},
+          size: { ...defaultSize },
+          props: { ...defaultProps },
           zIndex: getMaxZIndex(elements) + 1,
           locked: false,
         };

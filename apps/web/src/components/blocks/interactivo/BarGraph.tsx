@@ -41,13 +41,14 @@ export function BarGraph({
 
   const isInteractive = modo === 'estudiante' && !disabled && !verificado;
 
-  // Prepare data with colors
+  // Prepare data with colors (defensive: handle empty/undefined datos)
+  const datos = config.datos ?? [];
   const chartData = useMemo(() => {
-    return config.datos.map((d, index) => ({
+    return datos.map((d, index) => ({
       ...d,
       color: d.color || DEFAULT_COLORS[index % DEFAULT_COLORS.length],
     }));
-  }, [config.datos]);
+  }, [datos]);
 
   const handleBarClick = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,7 +92,7 @@ export function BarGraph({
         <h3 className="text-white font-medium">{config.instruccion}</h3>
         {config.titulo && <p className="text-slate-400 text-sm mt-1">{config.titulo}</p>}
         <div className="mt-2 text-slate-400 text-sm">
-          Barras: {config.datos.length}
+          Barras: {datos.length}
           {hasCorrectBar && ` | Respuesta: ${config.barraCorrectaId}`}
           {config.orientacion && ` | ${config.orientacion}`}
         </div>
