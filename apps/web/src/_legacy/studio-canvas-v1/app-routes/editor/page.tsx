@@ -1,6 +1,6 @@
 'use client';
 
-import { StudioEditor } from '@/studio/components/StudioEditor';
+import { StudioEditor } from '../../components/StudioEditor';
 
 export default function StudioEditorPage() {
   return <StudioEditor />;
