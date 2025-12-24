@@ -140,16 +140,20 @@ export type MetricasDashboardResponse = z.infer<typeof metricasDashboardResponse
 
 /**
  * Configuración de precios editable por administradores.
- * Sistema de Tiers 2026: Arcade ($30k), Arcade+ ($60k), Pro ($75k)
+ * Sistema de Tiers STEAM 2026:
+ * - STEAM_LIBROS: $40.000/mes - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM_ASINCRONICO: $65.000/mes - Todo + clases grabadas
+ * - STEAM_SINCRONICO: $95.000/mes - Todo + clases en vivo con docente
+ *
+ * Descuento familiar simplificado: 10% para 2do hermano en adelante
  */
 export const configuracionPreciosSchema = z.object({
-  // Precios por Tier (Sistema 2026)
-  precioArcade: z.string(),
-  precioArcadePlus: z.string(),
-  precioPro: z.string(),
-  // Descuentos familiares
-  descuentoHermano2: z.string(), // 12% segundo hermano
-  descuentoHermano3Mas: z.string(), // 20% tercer hermano en adelante
+  // Precios por Tier STEAM (Sistema 2026)
+  precioSteamLibros: z.string(), // $40.000 - Plataforma completa
+  precioSteamAsincronico: z.string(), // $65.000 - Todo + clases grabadas
+  precioSteamSincronico: z.string(), // $95.000 - Todo + clases en vivo
+  // Descuento familiar simplificado (10% para 2do hermano en adelante)
+  descuentoSegundoHermano: z.string(),
   // Configuración de notificaciones
   diaVencimiento: z.number().int().min(1).max(31),
   diasAntesRecordatorio: z.number().int().nonnegative(),
@@ -215,17 +219,16 @@ export type EstudianteConDescuento = z.infer<typeof estudianteConDescuentoSchema
 
 /**
  * Request para actualizar configuración de precios.
- * Sistema de Tiers 2026
+ * Sistema de Tiers STEAM 2026
  */
 export const actualizarConfiguracionPreciosSchema = z.object({
   adminId: z.string(),
-  // Precios por Tier
-  precioArcade: z.number().optional(),
-  precioArcadePlus: z.number().optional(),
-  precioPro: z.number().optional(),
-  // Descuentos familiares
-  descuentoHermano2: z.number().optional(),
-  descuentoHermano3Mas: z.number().optional(),
+  // Precios por Tier STEAM
+  precioSteamLibros: z.number().optional(),
+  precioSteamAsincronico: z.number().optional(),
+  precioSteamSincronico: z.number().optional(),
+  // Descuento familiar simplificado (10% para 2do hermano en adelante)
+  descuentoSegundoHermano: z.number().optional(),
   // Configuración de notificaciones
   diaVencimiento: z.number().int().min(1).max(31).optional(),
   diasAntesRecordatorio: z.number().int().nonnegative().optional(),

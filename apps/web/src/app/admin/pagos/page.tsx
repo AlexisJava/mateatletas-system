@@ -74,14 +74,13 @@ ChartJS.register(
  * 💰 MATEATLETAS OS - Dashboard de Pagos
  *
  * Sistema de Gestión Financiera del Club
- * Sistema de Tiers 2026:
- * - Arcade: $30.000/mes - 1 mundo async
- * - Arcade+: $60.000/mes - 3 mundos async
- * - Pro: $75.000/mes - 1 mundo async + 1 mundo sync con docente
+ * Sistema de Tiers STEAM 2026:
+ * - STEAM Libros: $40.000/mes - Plataforma completa (Mate + Progra + Ciencias)
+ * - STEAM Asincrónico: $65.000/mes - Todo + clases grabadas
+ * - STEAM Sincrónico: $95.000/mes - Todo + clases en vivo con docente
  *
- * Descuentos familiares:
- * - 2do hermano: 12%
- * - 3er hermano en adelante: 20%
+ * Descuento familiar simplificado:
+ * - 10% para 2do hermano en adelante
  */
 export default function PagosDashboard() {
   const { user } = useAuthStore();
@@ -99,11 +98,10 @@ export default function PagosDashboard() {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
-    precioArcade: '',
-    precioArcadePlus: '',
-    precioPro: '',
-    descuentoHermano2: '',
-    descuentoHermano3Mas: '',
+    precioSteamLibros: '',
+    precioSteamAsincronico: '',
+    precioSteamSincronico: '',
+    descuentoSegundoHermano: '',
     diaVencimiento: '',
     diasAntesRecordatorio: '',
     notificacionesActivas: true,
@@ -157,11 +155,10 @@ export default function PagosDashboard() {
   useEffect(() => {
     if (showConfigModal && configuracion) {
       setFormData({
-        precioArcade: String(configuracion.precioArcade || ''),
-        precioArcadePlus: String(configuracion.precioArcadePlus || ''),
-        precioPro: String(configuracion.precioPro || ''),
-        descuentoHermano2: String(configuracion.descuentoHermano2 || ''),
-        descuentoHermano3Mas: String(configuracion.descuentoHermano3Mas || ''),
+        precioSteamLibros: String(configuracion.precioSteamLibros || ''),
+        precioSteamAsincronico: String(configuracion.precioSteamAsincronico || ''),
+        precioSteamSincronico: String(configuracion.precioSteamSincronico || ''),
+        descuentoSegundoHermano: String(configuracion.descuentoSegundoHermano || ''),
         diaVencimiento: String(configuracion.diaVencimiento || '15'),
         diasAntesRecordatorio: String(configuracion.diasAntesRecordatorio || '5'),
         notificacionesActivas: configuracion.notificacionesActivas,
@@ -189,11 +186,10 @@ export default function PagosDashboard() {
 
       const updateData = {
         adminId: user?.id || '',
-        precioArcade: parsePrice(formData.precioArcade),
-        precioArcadePlus: parsePrice(formData.precioArcadePlus),
-        precioPro: parsePrice(formData.precioPro),
-        descuentoHermano2: parsePercentage(formData.descuentoHermano2),
-        descuentoHermano3Mas: parsePercentage(formData.descuentoHermano3Mas),
+        precioSteamLibros: parsePrice(formData.precioSteamLibros),
+        precioSteamAsincronico: parsePrice(formData.precioSteamAsincronico),
+        precioSteamSincronico: parsePrice(formData.precioSteamSincronico),
+        descuentoSegundoHermano: parsePercentage(formData.descuentoSegundoHermano),
         diaVencimiento: parseInt(formData.diaVencimiento || '15'),
         diasAntesRecordatorio: parseInt(formData.diasAntesRecordatorio || '5'),
         notificacionesActivas: formData.notificacionesActivas,
@@ -508,7 +504,7 @@ export default function PagosDashboard() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold text-white flex items-center gap-2">
               <Settings className="w-5 h-5 text-blue-400" />
-              Tiers 2026
+              Tiers STEAM 2026
             </h3>
             <button
               onClick={() => setShowConfigModal(true)}
@@ -519,82 +515,76 @@ export default function PagosDashboard() {
           </div>
           {configuracion && (
             <div className="space-y-4">
-              {/* Tier Arcade */}
+              {/* Tier STEAM Libros */}
               <div className="p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl border border-cyan-500/20">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center">
                     <Gamepad2 className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <span className="text-white font-bold text-lg">Arcade</span>
-                    <p className="text-gray-400 text-xs">1 mundo async</p>
+                    <span className="text-white font-bold text-lg">STEAM Libros</span>
+                    <p className="text-gray-400 text-xs">
+                      Plataforma completa (Mate + Progra + Ciencias)
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="text-2xl font-bold text-cyan-400">
-                    {formatCurrency(configuracion.precioArcade)}
+                    {formatCurrency(configuracion.precioSteamLibros)}
                   </span>
                   <span className="text-gray-400 text-sm">/mes</span>
                 </div>
               </div>
 
-              {/* Tier Arcade+ */}
+              {/* Tier STEAM Asincrónico */}
               <div className="p-4 bg-gradient-to-r from-violet-500/10 to-purple-500/10 rounded-xl border border-violet-500/20">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg flex items-center justify-center">
                     <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <span className="text-white font-bold text-lg">Arcade+</span>
-                    <p className="text-gray-400 text-xs">3 mundos async</p>
+                    <span className="text-white font-bold text-lg">STEAM Asincrónico</span>
+                    <p className="text-gray-400 text-xs">Todo + clases grabadas</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="text-2xl font-bold text-violet-400">
-                    {formatCurrency(configuracion.precioArcadePlus)}
+                    {formatCurrency(configuracion.precioSteamAsincronico)}
                   </span>
                   <span className="text-gray-400 text-sm">/mes</span>
                 </div>
               </div>
 
-              {/* Tier Pro */}
+              {/* Tier STEAM Sincrónico */}
               <div className="p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-xl border border-amber-500/20">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">
                     <Crown className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <span className="text-white font-bold text-lg">Pro</span>
-                    <p className="text-gray-400 text-xs">1 async + 1 sync con docente</p>
+                    <span className="text-white font-bold text-lg">STEAM Sincrónico</span>
+                    <p className="text-gray-400 text-xs">Todo + clases en vivo con docente</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="text-2xl font-bold text-amber-400">
-                    {formatCurrency(configuracion.precioPro)}
+                    {formatCurrency(configuracion.precioSteamSincronico)}
                   </span>
                   <span className="text-gray-400 text-sm">/mes</span>
                 </div>
               </div>
 
-              {/* Descuentos Familiares */}
+              {/* Descuento Familiar Simplificado */}
               <div className="pt-4 border-t border-white/10">
                 <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
                   <UserMinus className="w-4 h-4" />
-                  Descuentos Familiares
+                  Descuento Familiar
                 </h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-white/5 rounded-lg">
-                    <span className="text-gray-400 text-sm">2do hermano</span>
-                    <p className="text-emerald-400 font-bold text-lg">
-                      {parseFloat(String(configuracion.descuentoHermano2)).toFixed(0)}% OFF
-                    </p>
-                  </div>
-                  <div className="p-3 bg-white/5 rounded-lg">
-                    <span className="text-gray-400 text-sm">3er+ hermano</span>
-                    <p className="text-emerald-400 font-bold text-lg">
-                      {parseFloat(String(configuracion.descuentoHermano3Mas)).toFixed(0)}% OFF
-                    </p>
-                  </div>
+                <div className="p-3 bg-white/5 rounded-lg">
+                  <span className="text-gray-400 text-sm">2do hermano en adelante</span>
+                  <p className="text-emerald-400 font-bold text-lg">
+                    {parseFloat(String(configuracion.descuentoSegundoHermano)).toFixed(0)}% OFF
+                  </p>
                 </div>
               </div>
             </div>
@@ -781,7 +771,7 @@ export default function PagosDashboard() {
             <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-cyan-600 p-6 flex items-center justify-between border-b border-white/20">
               <div className="flex items-center gap-3">
                 <Settings className="w-6 h-6 text-white" />
-                <h2 className="text-2xl font-bold text-white">Configuración Tiers 2026</h2>
+                <h2 className="text-2xl font-bold text-white">Configuración Tiers STEAM 2026</h2>
               </div>
               <button
                 onClick={() => setShowConfigModal(false)}
@@ -798,23 +788,24 @@ export default function PagosDashboard() {
                   <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-semibold text-blue-300 mb-1">
-                      Sistema de Tiers 2026
+                      Sistema de Tiers STEAM 2026
                     </p>
                     <p className="text-xs text-gray-300">
-                      Cada Tier tiene un precio independiente. Los descuentos familiares se aplican
-                      sobre cualquier Tier seleccionado.
+                      STEAM Libros: Plataforma completa (Mate + Progra + Ciencias). STEAM
+                      Asincrónico: Todo + clases grabadas. STEAM Sincrónico: Todo + clases en vivo.
+                      Descuento familiar: 10% para 2do hermano en adelante.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Precios por Tier */}
+              {/* Precios por Tier STEAM */}
               <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-300">Precios por Tier</h4>
+                <h4 className="text-sm font-semibold text-gray-300">Precios por Tier STEAM</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs text-gray-400 mb-1 flex items-center gap-1">
-                      <Gamepad2 className="w-3 h-3" /> Arcade
+                      <Gamepad2 className="w-3 h-3" /> STEAM Libros
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -822,16 +813,18 @@ export default function PagosDashboard() {
                       </span>
                       <input
                         type="number"
-                        value={formData.precioArcade}
-                        onChange={(e) => setFormData({ ...formData, precioArcade: e.target.value })}
+                        value={formData.precioSteamLibros}
+                        onChange={(e) =>
+                          setFormData({ ...formData, precioSteamLibros: e.target.value })
+                        }
                         className="w-full pl-8 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-cyan-500"
-                        placeholder="30000"
+                        placeholder="40000"
                       />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs text-gray-400 mb-1 flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" /> Arcade+
+                      <Sparkles className="w-3 h-3" /> STEAM Asincrónico
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -839,18 +832,18 @@ export default function PagosDashboard() {
                       </span>
                       <input
                         type="number"
-                        value={formData.precioArcadePlus}
+                        value={formData.precioSteamAsincronico}
                         onChange={(e) =>
-                          setFormData({ ...formData, precioArcadePlus: e.target.value })
+                          setFormData({ ...formData, precioSteamAsincronico: e.target.value })
                         }
                         className="w-full pl-8 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-violet-500"
-                        placeholder="60000"
+                        placeholder="65000"
                       />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs text-gray-400 mb-1 flex items-center gap-1">
-                      <Crown className="w-3 h-3" /> Pro
+                      <Crown className="w-3 h-3" /> STEAM Sincrónico
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -858,48 +851,36 @@ export default function PagosDashboard() {
                       </span>
                       <input
                         type="number"
-                        value={formData.precioPro}
-                        onChange={(e) => setFormData({ ...formData, precioPro: e.target.value })}
+                        value={formData.precioSteamSincronico}
+                        onChange={(e) =>
+                          setFormData({ ...formData, precioSteamSincronico: e.target.value })
+                        }
                         className="w-full pl-8 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-amber-500"
-                        placeholder="75000"
+                        placeholder="95000"
                       />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Descuentos Familiares */}
+              {/* Descuento Familiar Simplificado */}
               <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-300">Descuentos Familiares</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-gray-400 mb-1">2do hermano (%)</label>
-                    <input
-                      type="number"
-                      value={formData.descuentoHermano2}
-                      onChange={(e) =>
-                        setFormData({ ...formData, descuentoHermano2: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-emerald-500"
-                      placeholder="12"
-                      min="0"
-                      max="100"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-400 mb-1">3er+ hermano (%)</label>
-                    <input
-                      type="number"
-                      value={formData.descuentoHermano3Mas}
-                      onChange={(e) =>
-                        setFormData({ ...formData, descuentoHermano3Mas: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-emerald-500"
-                      placeholder="20"
-                      min="0"
-                      max="100"
-                    />
-                  </div>
+                <h4 className="text-sm font-semibold text-gray-300">Descuento Familiar</h4>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    2do hermano en adelante (%)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.descuentoSegundoHermano}
+                    onChange={(e) =>
+                      setFormData({ ...formData, descuentoSegundoHermano: e.target.value })
+                    }
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                    placeholder="10"
+                    min="0"
+                    max="100"
+                  />
                 </div>
               </div>
 
