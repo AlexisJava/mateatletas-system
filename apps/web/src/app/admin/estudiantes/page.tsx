@@ -292,11 +292,13 @@ export default function AdminEstudiantesPage() {
                         )}
                       </td>
                       <td>
-                        <span className="admin-badge-info">Nivel {estudiante.nivel_actual}</span>
+                        <span className="admin-badge-info">
+                          Nivel {estudiante.nivel_actual ?? 1}
+                        </span>
                       </td>
                       <td>
                         <span className="font-semibold text-[var(--status-warning)]">
-                          {estudiante.puntos_totales.toLocaleString()} pts
+                          {(estudiante.puntos_totales ?? 0).toLocaleString()} pts
                         </span>
                       </td>
                       <td>

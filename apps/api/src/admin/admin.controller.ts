@@ -40,7 +40,7 @@ import {
 } from './dto/asistencias.dto';
 import { FiltrosClaseGruposDto } from './dto/filtros-clase-grupos.dto';
 import {
-  ResetPasswordDto,
+  AdminResetPasswordDto,
   ResetPasswordMasivoDto,
 } from './dto/reset-password.dto';
 
@@ -162,7 +162,7 @@ export class AdminController {
   @HttpCode(HttpStatus.OK)
   async resetearPassword(
     @Param('usuarioId', ParseUUIDPipe) usuarioId: string,
-    @Body() dto: ResetPasswordDto,
+    @Body() dto: AdminResetPasswordDto,
   ) {
     return this.adminService.resetearPasswordUsuario(
       usuarioId,

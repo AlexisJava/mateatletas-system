@@ -18,9 +18,9 @@ export enum TipoUsuarioReset {
 }
 
 /**
- * DTO para resetear contraseña de un usuario individual
+ * DTO para resetear contraseña de un usuario individual (uso administrativo)
  */
-export class ResetPasswordDto {
+export class AdminResetPasswordDto {
   @ApiProperty({
     description: 'Tipo de usuario',
     enum: TipoUsuarioReset,
