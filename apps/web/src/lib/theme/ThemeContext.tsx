@@ -14,11 +14,9 @@ export const ThemeContext = createContext<ThemeContextType | undefined>(undefine
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('light');
-  const [mounted, setMounted] = useState(false);
 
   // Cargar tema del localStorage al montar
   useEffect(() => {
-    setMounted(true);
     const savedTheme = localStorage.getItem('theme') as Theme | null;
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
@@ -38,11 +36,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(newTheme);
   };
 
-  // Evitar flash de tema incorrecto durante SSR
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Siempre proveer el contexto, incluso antes de montar
+  // Esto evita el error "useTheme must be used within a ThemeProvider"
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
