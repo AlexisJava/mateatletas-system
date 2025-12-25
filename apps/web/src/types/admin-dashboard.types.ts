@@ -45,6 +45,7 @@ export const AdminView = {
   ANALYTICS: 'analytics',
   PERSONAS: 'personas',
   PRODUCTOS: 'productos',
+  SANDBOX: 'sandbox',
 } as const;
 
 export type AdminView = (typeof AdminView)[keyof typeof AdminView];
@@ -180,6 +181,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { view: AdminView.ANALYTICS, label: 'Analytics', href: '/admin/analytics', icon: 'BarChart3' },
   { view: AdminView.PERSONAS, label: 'Personas', href: '/admin/personas', icon: 'Users' },
   { view: AdminView.PRODUCTOS, label: 'Productos', href: '/admin/productos', icon: 'Package' },
+  { view: AdminView.SANDBOX, label: 'Sandbox', href: '/admin/sandbox', icon: 'Code2' },
 ];
 
 // =============================================================================

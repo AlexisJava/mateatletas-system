@@ -8,6 +8,7 @@ import {
   BarChart3,
   Users,
   Package,
+  Code2,
   type LucideIcon,
 } from 'lucide-react';
 import { ADMIN_NAV_ITEMS, type AdminNavItem } from '@/types/admin-dashboard.types';
@@ -29,6 +30,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   BarChart3,
   Users,
   Package,
+  Code2,
 };
 
 function getIcon(iconName: string): LucideIcon {
