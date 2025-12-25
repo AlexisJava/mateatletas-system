@@ -130,6 +130,9 @@ model Estudiante {
   /// COLONIA DE VERANO
   colonia_inscripciones ColoniaEstudiante[]
 
+  /// SANDBOX: Progreso en contenidos educativos
+  progresosContenido ProgresoContenido[]
+
   // Índices de performance para rankings y listados
   // NOTA: Índices de puntos_totales eliminados - usar RecursosEstudiante para rankings (SUB-FASE 1.3)
   @@index([tutor_id, apellido], name: "idx_estudiantes_tutor_listado")
@@ -217,6 +220,137 @@ model Mundo {
   // Índice de performance para filtros de mundos activos
   @@index([activo], name: "idx_mundos_activo")
   @@map("mundos")
+}
+
+// ============================================================================
+// SISTEMA DE CONTENIDO EDUCATIVO (SANDBOX)
+// ============================================================================
+
+/// Contenido educativo (lección) creada en el Sandbox
+/// Una lección completa con múltiples slides para estudiantes
+model Contenido {
+  /// Identificador único del contenido
+  id String @id @default(cuid())
+
+  /// Título de la lección
+  titulo String
+
+  /// Casa objetivo (QUANTUM, VERTEX, PULSAR)
+  /// Define qué estudiantes pueden ver este contenido
+  casaTipo CasaTipo @map("casa_tipo")
+
+  /// Mundo/materia (MATEMATICA, PROGRAMACION, CIENCIAS)
+  mundoTipo MundoTipo @map("mundo_tipo")
+
+  /// Estado actual del contenido
+  estado EstadoContenido @default(BORRADOR)
+
+  /// ID del admin que creó el contenido
+  creadorId String @map("creador_id")
+
+  /// Descripción o resumen (opcional)
+  descripcion String?
+
+  /// URL de imagen de portada (opcional)
+  imagenPortada String? @map("imagen_portada")
+
+  /// Orden de visualización dentro de la casa/mundo
+  orden Int @default(0)
+
+  /// Duración estimada en minutos
+  duracionMinutos Int? @map("duracion_minutos")
+
+  /// Fecha de publicación (null si es borrador)
+  fechaPublicacion DateTime? @map("fecha_publicacion")
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  creador   Admin               @relation(fields: [creadorId], references: [id])
+  slides    Slide[]
+  progresos ProgresoContenido[]
+
+  @@index([casaTipo, mundoTipo, estado], name: "idx_contenidos_casa_mundo_estado")
+  @@index([creadorId], name: "idx_contenidos_creador")
+  @@index([estado], name: "idx_contenidos_estado")
+  @@map("contenidos")
+}
+
+/// Slide individual dentro de un Contenido
+/// Cada slide contiene JSON que el frontend renderiza como componentes
+model Slide {
+  /// Identificador único del slide
+  id String @id @default(cuid())
+
+  /// ID del contenido padre
+  contenidoId String @map("contenido_id")
+
+  /// Título del slide
+  titulo String
+
+  /// Contenido JSON (estructura ContentBlock serializada)
+  /// Se almacena como JSON string que el frontend parsea
+  contenidoJson String @map("contenido_json") @db.Text
+
+  /// Orden del slide dentro de la lección
+  orden Int @default(0)
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  contenido Contenido @relation(fields: [contenidoId], references: [id], onDelete: Cascade)
+
+  @@index([contenidoId], name: "idx_slides_contenido")
+  @@index([orden], name: "idx_slides_orden")
+  @@map("slides")
+}
+
+/// Progreso del estudiante en un contenido
+/// Registra el avance y tiempo dedicado a cada lección
+model ProgresoContenido {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID del estudiante
+  estudianteId String @map("estudiante_id")
+
+  /// ID del contenido
+  contenidoId String @map("contenido_id")
+
+  /// Índice del último slide visto (0-based)
+  slideActual Int @default(0) @map("slide_actual")
+
+  /// Si completó todo el contenido
+  completado Boolean @default(false)
+
+  /// Tiempo total dedicado en segundos
+  tiempoTotalSegundos Int @default(0) @map("tiempo_total_segundos")
+
+  /// Fecha de inicio
+  fechaInicio DateTime @default(now()) @map("fecha_inicio")
+
+  /// Fecha de última actividad
+  ultimaActividad DateTime @updatedAt @map("ultima_actividad")
+
+  /// Fecha de completitud (null si no completado)
+  fechaCompletitud DateTime? @map("fecha_completitud")
+
+  /// Relaciones
+  estudiante Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  contenido  Contenido  @relation(fields: [contenidoId], references: [id], onDelete: Cascade)
+
+  @@unique([estudianteId, contenidoId])
+  @@index([estudianteId], name: "idx_progreso_estudiante")
+  @@index([contenidoId], name: "idx_progreso_contenido")
+  @@map("progreso_contenidos")
 }
 
 /// Modelo para Tiers de suscripción - Sistema Mateatletas 2026
@@ -345,6 +479,9 @@ model Admin {
   /// Códigos de backup para MFA (hasheados con bcrypt)
   /// Array de strings - cada código es de un solo uso
   mfa_backup_codes    String[]  @default([])
+
+  /// SANDBOX: Contenidos educativos creados por este admin
+  contenidosCreados Contenido[]
 
   @@map("admins")
 }
@@ -1095,6 +1232,16 @@ enum MundoTipo {
   CIENCIAS // Mundo de ciencias - azul
 
   @@map("mundo_tipo")
+}
+
+/// Estado del contenido educativo en el flujo de publicación
+/// BORRADOR -> PUBLICADO -> ARCHIVADO
+enum EstadoContenido {
+  BORRADOR // Creado, editable, no visible para estudiantes
+  PUBLICADO // Visible para estudiantes de la casa correspondiente
+  ARCHIVADO // Oculto, pero preservado para historial
+
+  @@map("estado_contenido")
 }
 
 /// Enum para estado del onboarding del estudiante (2026)
