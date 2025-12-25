@@ -11,8 +11,12 @@ import type { ContentBlock } from '../types';
 /**
  * Maps string type names to actual React components.
  * Supports Design System components and basic HTML elements.
+ *
+ * Usamos `React.ComponentType<any>` para permitir que los componentes
+ * del Design System reciban sus props tipadas sin conflictos.
  */
-const ComponentMap: Record<string, React.ComponentType<Record<string, unknown>> | string> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ComponentMap: Record<string, React.ComponentType<any> | string> = {
   // Layout Components
   Stage: DesignSystem.Stage,
   ContentZone: DesignSystem.ContentZone,

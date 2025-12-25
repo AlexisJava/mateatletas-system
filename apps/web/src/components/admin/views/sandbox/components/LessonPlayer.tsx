@@ -20,7 +20,8 @@ interface LessonPlayerProps {
  */
 export function LessonPlayer({ lesson, houseStyles, onClose }: LessonPlayerProps) {
   const [currentIdx, setCurrentIdx] = useState(0);
-  const currentSlide = lesson.slides[currentIdx];
+  // slides siempre tiene al menos 1 elemento (enforced por el parent)
+  const currentSlide = lesson.slides[currentIdx]!;
 
   // Dynamic CSS variables for house theming
   const playerStyle = {

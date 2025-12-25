@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { HOUSES, SUBJECTS } from '../constants';
 import { SandboxIcons } from './SandboxIcons';
-import type { House, Subject } from '../types';
+import { House, type Subject } from '../types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WELCOME SCREEN
@@ -20,7 +20,7 @@ const SUBJECT_ICONS: Record<Subject, React.FC> = {
 };
 
 export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
-  const [selectedHouse, setSelectedHouse] = useState<House>('QUANTUM');
+  const [selectedHouse, setSelectedHouse] = useState<House>(House.QUANTUM);
   const [selectedSubject, setSelectedSubject] = useState<Subject>('MATH');
 
   return (

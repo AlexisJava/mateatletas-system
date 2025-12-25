@@ -14,7 +14,7 @@ import { ViewportContext } from './components/DesignSystem';
 import { SandboxIcons } from './components/SandboxIcons';
 
 // Types & Constants
-import type { House, Subject, Lesson, SandboxViewMode, PreviewMode } from './types';
+import { House, type Subject, type Lesson, type SandboxViewMode, type PreviewMode } from './types';
 import { INITIAL_JSON, HOUSES } from './constants';
 
 // Hooks
@@ -32,7 +32,7 @@ export function SandboxView() {
   const [lesson, setLesson] = useState<Lesson>({
     id: 'l1',
     title: 'Nueva Lección',
-    house: 'QUANTUM',
+    house: House.QUANTUM,
     subject: 'MATH',
     slides: [{ id: 's1', title: 'Main Sequence', content: initialJsonString }],
   });
@@ -60,10 +60,11 @@ export function SandboxView() {
   const previewContainerRef = useRef<HTMLDivElement>(null);
 
   // ─── Derived State ───
-  const activeSlide = useMemo(
-    () => lesson.slides.find((s) => s.id === activeSlideId) || lesson.slides[0],
-    [lesson.slides, activeSlideId],
-  );
+  const activeSlide = useMemo(() => {
+    const found = lesson.slides.find((s) => s.id === activeSlideId);
+    // slides siempre tiene al menos un elemento (inicializado en useState)
+    return found ?? lesson.slides[0]!;
+  }, [lesson.slides, activeSlideId]);
 
   const houseStyles = useMemo(() => HOUSES[lesson.house], [lesson.house]);
 
@@ -188,7 +189,8 @@ export function SandboxView() {
     if (lesson.slides.length === 1) return;
     const newSlides = lesson.slides.filter((s) => s.id !== id);
     setLesson((prev) => ({ ...prev, slides: newSlides }));
-    if (activeSlideId === id) setActiveSlideId(newSlides[0].id);
+    // newSlides siempre tiene al menos 1 elemento (ya verificamos length > 1)
+    if (activeSlideId === id) setActiveSlideId(newSlides[0]!.id);
   };
 
   // ─── Tab Renaming ───
@@ -212,12 +214,15 @@ export function SandboxView() {
     const tempObj = JSON.parse(initialJsonString);
     tempObj.props.pattern = pattern;
     const newCode = JSON.stringify(tempObj, null, 2);
-    setLesson((prev) => ({
-      ...prev,
-      house,
-      subject,
-      slides: [{ ...prev.slides[0], content: newCode }],
-    }));
+    setLesson((prev) => {
+      const firstSlide = prev.slides[0]!;
+      return {
+        ...prev,
+        house,
+        subject,
+        slides: [{ id: firstSlide.id, title: firstSlide.title, content: newCode }],
+      };
+    });
     setHasStarted(true);
   };
 

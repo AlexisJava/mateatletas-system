@@ -30,7 +30,7 @@ export class PreviewErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('[PreviewErrorBoundary] Render error:', error, errorInfo);
   }
 
@@ -39,7 +39,7 @@ export class PreviewErrorBoundary extends Component<Props, State> {
     this.props.onReset?.();
   };
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <div className="h-full w-full flex items-center justify-center bg-[#030014] p-8">
