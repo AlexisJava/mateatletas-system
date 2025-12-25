@@ -2935,13 +2935,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kurkle/color@npm:^0.3.0":
-  version: 0.3.4
-  resolution: "@kurkle/color@npm:0.3.4"
-  checksum: 10c0/0e9fd55c614b005c5f0c4c755bca19ec0293bc7513b4ea3ec1725234f9c2fa81afbc78156baf555c8b9cb0d305619253c3f5bca016067daeebb3d00ebb4ea683
-  languageName: node
-  linkType: hard
-
 "@lottiefiles/dotlottie-react@npm:^0.17.5":
   version: 0.17.6
   resolution: "@lottiefiles/dotlottie-react@npm:0.17.6"
@@ -8390,15 +8383,6 @@ __metadata:
   version: 2.1.1
   resolution: "chardet@npm:2.1.1"
   checksum: 10c0/d8391dd412338442b3de0d3a488aa9327f8bcf74b62b8723d6bd0b85c4084d50b731320e0a7c710edb1d44de75969995d2784b80e4c13b004a6c7a0db4c6e793
-  languageName: node
-  linkType: hard
-
-"chart.js@npm:^4.5.1":
-  version: 4.5.1
-  resolution: "chart.js@npm:4.5.1"
-  dependencies:
-    "@kurkle/color": "npm:^0.3.0"
-  checksum: 10c0/3f2a11dcaae9079e8e6b8ad077e2ae311f04996f9da14815730891e66215ee8b5f2c0eb70b5a156e5bde0f89a41bae13506dc6153e50fd22dcb282b21eec706f
   languageName: node
   linkType: hard
 
@@ -16088,16 +16072,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-chartjs-2@npm:^5.3.0":
-  version: 5.3.1
-  resolution: "react-chartjs-2@npm:5.3.1"
-  peerDependencies:
-    chart.js: ^4.1.1
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/40fac3fe23a163232d952bf5cd2a14d7baceadea326b57909d5e556ed2481b7cfb177582ac8f39b8dc51ac11f3d19a6127784746f35f5771181ab700110e7326
-  languageName: node
-  linkType: hard
-
 "react-colorful@npm:^5.5.1":
   version: 5.6.1
   resolution: "react-colorful@npm:5.6.1"
@@ -19526,7 +19500,6 @@ __metadata:
     axe-core: "npm:^4.11.0"
     axios: "npm:^1.12.2"
     canvas-confetti: "npm:^1.9.3"
-    chart.js: "npm:^4.5.1"
     clsx: "npm:^2.1.1"
     date-fns: "npm:^4.1.0"
     eslint: "npm:^8.57.0"
@@ -19549,7 +19522,6 @@ __metadata:
     next: "npm:^15.5.9"
     papaparse: "npm:^5.5.3"
     react: "npm:19.1.0"
-    react-chartjs-2: "npm:^5.3.0"
     react-confetti: "npm:^6.4.0"
     react-confetti-explosion: "npm:^3.0.3"
     react-countup: "npm:^6.5.3"

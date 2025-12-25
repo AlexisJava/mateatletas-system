@@ -56,7 +56,7 @@ const nextConfig = {
 
   // Experimental: mejorar tree-shaking
   experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion', 'react-chartjs-2', 'recharts'],
+    optimizePackageImports: ['lucide-react', 'framer-motion', 'recharts'],
   },
 
   // Compiler optimizations
@@ -95,7 +95,7 @@ const nextConfig = {
             },
             // Charts en su propio chunk
             charts: {
-              test: /[\\/]node_modules[\\/](chart\.js|recharts|react-chartjs-2)[\\/]/,
+              test: /[\\/]node_modules[\\/]recharts[\\/]/,
               name: 'charts',
               priority: 20,
               reuseExistingChunk: true,

@@ -72,6 +72,7 @@ main {
   --admin-accent-hover: #059669;
   --admin-accent-muted: rgba(16, 185, 129, 0.12);
   --admin-accent-glow: rgba(16, 185, 129, 0.25);
+  --admin-accent-secondary: #6366f1; /* Indigo - Secondary accent for gradients */
 
   /* Status Colors - Semantic meaning */
   --status-success: #22c55e;
