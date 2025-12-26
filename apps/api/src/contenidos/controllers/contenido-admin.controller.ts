@@ -19,15 +19,12 @@ import { AuthUser } from '../../auth/interfaces';
 import {
   ContenidoAdminService,
   ContenidoPublicacionService,
-  SlideService,
+  NodoService,
 } from '../services';
 import {
   CreateContenidoDto,
   UpdateContenidoDto,
   QueryContenidosDto,
-  CreateSlideDto,
-  UpdateSlideDto,
-  ReordenarSlidesDto,
 } from '../dto';
 
 /**
@@ -43,7 +40,7 @@ export class ContenidoAdminController {
   constructor(
     private readonly contenidoAdminService: ContenidoAdminService,
     private readonly publicacionService: ContenidoPublicacionService,
-    private readonly slideService: SlideService,
+    private readonly nodoService: NodoService,
   ) {}
 
   // ==================== CRUD DE CONTENIDOS ====================
@@ -61,9 +58,15 @@ export class ContenidoAdminController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obtener contenido completo con slides' })
+  @ApiOperation({ summary: 'Obtener contenido completo con nodos' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.contenidoAdminService.findOne(id);
+  }
+
+  @Get(':id/arbol')
+  @ApiOperation({ summary: 'Obtener árbol jerárquico de nodos del contenido' })
+  getArbol(@Param('id', ParseUUIDPipe) contenidoId: string) {
+    return this.nodoService.getArbol(contenidoId);
   }
 
   @Patch(':id')
@@ -95,43 +98,53 @@ export class ContenidoAdminController {
     return this.publicacionService.archivar(id);
   }
 
-  // ==================== GESTIÓN DE SLIDES ====================
+  // ==================== GESTIÓN DE NODOS ====================
 
-  @Post(':id/slides')
-  @ApiOperation({ summary: 'Agregar slide a un contenido' })
-  addSlide(
+  @Post(':id/nodos')
+  @ApiOperation({ summary: 'Agregar nodo a un contenido' })
+  addNodo(
     @Param('id', ParseUUIDPipe) contenidoId: string,
-    @Body() dto: CreateSlideDto,
+    @Body()
+    dto: {
+      titulo: string;
+      parentId?: string;
+      contenidoJson?: string;
+      orden?: number;
+    },
   ) {
-    return this.slideService.addSlide(contenidoId, dto);
+    return this.nodoService.addNodo(contenidoId, dto);
   }
 
-  @Patch(':id/slides/:slideId')
-  @ApiOperation({ summary: 'Actualizar un slide' })
-  updateSlide(
-    @Param('id', ParseUUIDPipe) _contenidoId: string,
-    @Param('slideId', ParseUUIDPipe) slideId: string,
-    @Body() dto: UpdateSlideDto,
+  @Patch('nodos/:nodoId')
+  @ApiOperation({ summary: 'Actualizar un nodo' })
+  updateNodo(
+    @Param('nodoId', ParseUUIDPipe) nodoId: string,
+    @Body() dto: { titulo?: string; contenidoJson?: string; orden?: number },
   ) {
-    // contenidoId validado en servicio (slide pertenece al contenido)
-    return this.slideService.updateSlide(slideId, dto);
+    return this.nodoService.updateNodo(nodoId, dto);
   }
 
-  @Delete(':id/slides/:slideId')
-  @ApiOperation({ summary: 'Eliminar un slide' })
-  removeSlide(
-    @Param('id', ParseUUIDPipe) _contenidoId: string,
-    @Param('slideId', ParseUUIDPipe) slideId: string,
-  ) {
-    return this.slideService.removeSlide(slideId);
+  @Delete('nodos/:nodoId')
+  @ApiOperation({ summary: 'Eliminar un nodo (no aplica a nodos bloqueados)' })
+  removeNodo(@Param('nodoId', ParseUUIDPipe) nodoId: string) {
+    return this.nodoService.removeNodo(nodoId);
   }
 
-  @Patch(':id/slides/reordenar')
-  @ApiOperation({ summary: 'Reordenar slides de un contenido' })
-  reordenarSlides(
+  @Patch(':id/nodos/reordenar')
+  @ApiOperation({ summary: 'Reordenar nodos de un contenido' })
+  reordenarNodos(
     @Param('id', ParseUUIDPipe) contenidoId: string,
-    @Body() dto: ReordenarSlidesDto,
+    @Body() dto: { orden: Array<{ nodoId: string; orden: number }> },
   ) {
-    return this.slideService.reordenar(contenidoId, dto);
+    return this.nodoService.reordenar(contenidoId, dto);
+  }
+
+  @Patch('nodos/:nodoId/mover')
+  @ApiOperation({ summary: 'Mover nodo a otro padre' })
+  moverNodo(
+    @Param('nodoId', ParseUUIDPipe) nodoId: string,
+    @Body() dto: { nuevoParentId: string | null },
+  ) {
+    return this.nodoService.moverNodo(nodoId, dto.nuevoParentId);
   }
 }

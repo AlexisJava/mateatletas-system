@@ -12,7 +12,7 @@ import {
   ContenidoAdminService,
   ContenidoPublicacionService,
   ContenidoEstudianteService,
-  SlideService,
+  NodoService,
   ProgresoService,
 } from './services';
 
@@ -23,7 +23,7 @@ import {
     // Admin services
     ContenidoAdminService,
     ContenidoPublicacionService,
-    SlideService,
+    NodoService,
     // Estudiante services
     ContenidoEstudianteService,
     ProgresoService,

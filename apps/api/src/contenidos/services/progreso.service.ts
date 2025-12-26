@@ -25,9 +25,10 @@ export class ProgresoService {
           select: {
             id: true,
             titulo: true,
-            _count: { select: { slides: true } },
+            _count: { select: { nodos: true } },
           },
         },
+        nodoActual: { select: { id: true, titulo: true, orden: true } },
       },
     });
 
@@ -35,11 +36,18 @@ export class ProgresoService {
       throw new NotFoundException('Progreso no encontrado');
     }
 
+    // TODO: Calcular porcentaje basado en nodos visitados vs totales
+    // Por ahora, si hay nodo actual calculamos un estimado
+    const totalNodos = progreso.contenido._count.nodos;
+    const porcentaje = progreso.completado
+      ? 100
+      : progreso.nodoActual
+        ? Math.round(((progreso.nodoActual.orden + 1) / totalNodos) * 100)
+        : 0;
+
     return {
       ...progreso,
-      porcentaje: Math.round(
-        (progreso.slideActual / progreso.contenido._count.slides) * 100,
-      ),
+      porcentaje,
     };
   }
 
@@ -71,7 +79,7 @@ export class ProgresoService {
     const updateData: Parameters<
       typeof this.prisma.progresoContenido.update
     >[0]['data'] = {
-      slideActual: dto.slideActual,
+      nodoActualId: dto.nodoActualId,
     };
 
     // Sumar tiempo adicional
@@ -108,16 +116,22 @@ export class ProgresoService {
             titulo: true,
             mundoTipo: true,
             imagenPortada: true,
-            _count: { select: { slides: true } },
+            _count: { select: { nodos: true } },
           },
         },
+        nodoActual: { select: { id: true, titulo: true, orden: true } },
       },
       orderBy: { ultimaActividad: 'desc' },
     });
 
-    return progresos.map((p) => ({
-      ...p,
-      porcentaje: Math.round((p.slideActual / p.contenido._count.slides) * 100),
-    }));
+    return progresos.map((p) => {
+      const totalNodos = p.contenido._count.nodos;
+      const porcentaje = p.completado
+        ? 100
+        : p.nodoActual
+          ? Math.round(((p.nodoActual.orden + 1) / totalNodos) * 100)
+          : 0;
+      return { ...p, porcentaje };
+    });
   }
 }

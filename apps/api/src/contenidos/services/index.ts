@@ -5,7 +5,7 @@
 // Admin services
 export { ContenidoAdminService } from './contenido-admin.service';
 export { ContenidoPublicacionService } from './contenido-publicacion.service';
-export { SlideService } from './slide.service';
+export { NodoService } from './nodo.service';
 
 // Estudiante services
 export { ContenidoEstudianteService } from './contenido-estudiante.service';

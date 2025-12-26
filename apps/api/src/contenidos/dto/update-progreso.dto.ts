@@ -1,25 +1,23 @@
-import { IsInt, Min, IsOptional, IsBoolean } from 'class-validator';
+import { IsInt, Min, IsOptional, IsBoolean, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
  * DTO para actualizar el progreso de un estudiante en un contenido
- * Se usa cuando el estudiante navega por los slides o completa la lección
+ * Se usa cuando el estudiante navega por los nodos o completa la lección
  */
 export class UpdateProgresoDto {
   /**
-   * Índice del slide actual (0-based)
+   * ID del nodo actual donde está el estudiante
    */
-  @ApiProperty({
-    description: 'Índice del slide actual (0-based)',
-    example: 2,
-    minimum: 0,
-    type: Number,
+  @ApiPropertyOptional({
+    description: 'ID del nodo actual donde está el estudiante',
+    example: 'clxx123...',
+    type: String,
   })
-  @IsInt({ message: 'El slide actual debe ser un número entero' })
-  @Min(0, { message: 'El slide mínimo es 0' })
-  @Type(() => Number)
-  slideActual!: number;
+  @IsOptional()
+  @IsString({ message: 'El nodo actual debe ser un string (CUID)' })
+  nodoActualId?: string;
 
   /**
    * Tiempo adicional a sumar en segundos

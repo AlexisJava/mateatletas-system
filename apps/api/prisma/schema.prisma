@@ -271,7 +271,7 @@ model Contenido {
 
   /// Relaciones
   creador   Admin               @relation(fields: [creadorId], references: [id])
-  slides    Slide[]
+  nodos     NodoContenido[]
   progresos ProgresoContenido[]
 
   @@index([casaTipo, mundoTipo, estado], name: "idx_contenidos_casa_mundo_estado")
@@ -280,24 +280,33 @@ model Contenido {
   @@map("contenidos")
 }
 
-/// Slide individual dentro de un Contenido
-/// Cada slide contiene JSON que el frontend renderiza como componentes
-model Slide {
-  /// Identificador único del slide
+/// Nodo de contenido jerárquico dentro de un Contenido
+/// Permite estructura de árbol: Teoría/Práctica/Evaluación con sub-nodos infinitos
+/// Si tiene hijos → es contenedor (carpeta)
+/// Si no tiene hijos → es hoja editable (slide con contenidoJson)
+model NodoContenido {
+  /// Identificador único del nodo
   id String @id @default(cuid())
 
-  /// ID del contenido padre
+  /// ID del contenido raíz al que pertenece
   contenidoId String @map("contenido_id")
 
-  /// Título del slide
+  /// ID del nodo padre (NULL = nodo raíz: Teoría, Práctica, Evaluación)
+  parentId String? @map("parent_id")
+
+  /// Título del nodo
   titulo String
 
-  /// Contenido JSON (estructura ContentBlock serializada)
-  /// Se almacena como JSON string que el frontend parsea
-  contenidoJson String @map("contenido_json") @db.Text
+  /// Si es un nodo bloqueado (Teoría, Práctica, Evaluación no se pueden eliminar)
+  bloqueado Boolean @default(false)
 
-  /// Orden del slide dentro de la lección
+  /// Orden del nodo dentro de su nivel (hermanos)
   orden Int @default(0)
+
+  /// Contenido JSON (solo si es hoja, es decir, si no tiene hijos)
+  /// Se almacena como JSON string que el frontend parsea
+  /// NULL si el nodo es contenedor (tiene hijos)
+  contenidoJson String? @map("contenido_json") @db.Text
 
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
@@ -308,9 +317,19 @@ model Slide {
   /// Relaciones
   contenido Contenido @relation(fields: [contenidoId], references: [id], onDelete: Cascade)
 
-  @@index([contenidoId], name: "idx_slides_contenido")
-  @@index([orden], name: "idx_slides_orden")
-  @@map("slides")
+  /// Relación recursiva: nodo padre
+  parent NodoContenido? @relation("NodoHijos", fields: [parentId], references: [id], onDelete: Cascade)
+
+  /// Relación recursiva: nodos hijos
+  hijos NodoContenido[] @relation("NodoHijos")
+
+  /// Progresos que apuntan a este nodo como nodo actual
+  progresosEnNodo ProgresoContenido[]
+
+  @@index([contenidoId], name: "idx_nodos_contenido")
+  @@index([parentId], name: "idx_nodos_parent")
+  @@index([orden], name: "idx_nodos_orden")
+  @@map("nodos_contenido")
 }
 
 /// Progreso del estudiante en un contenido
@@ -325,8 +344,9 @@ model ProgresoContenido {
   /// ID del contenido
   contenidoId String @map("contenido_id")
 
-  /// Índice del último slide visto (0-based)
-  slideActual Int @default(0) @map("slide_actual")
+  /// ID del último nodo visitado (hoja del árbol)
+  /// Reemplaza slideActual (índice) por referencia directa al nodo
+  nodoActualId String? @map("nodo_actual_id")
 
   /// Si completó todo el contenido
   completado Boolean @default(false)
@@ -344,12 +364,14 @@ model ProgresoContenido {
   fechaCompletitud DateTime? @map("fecha_completitud")
 
   /// Relaciones
-  estudiante Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
-  contenido  Contenido  @relation(fields: [contenidoId], references: [id], onDelete: Cascade)
+  estudiante  Estudiante     @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  contenido   Contenido      @relation(fields: [contenidoId], references: [id], onDelete: Cascade)
+  nodoActual  NodoContenido? @relation(fields: [nodoActualId], references: [id], onDelete: SetNull)
 
   @@unique([estudianteId, contenidoId])
   @@index([estudianteId], name: "idx_progreso_estudiante")
   @@index([contenidoId], name: "idx_progreso_contenido")
+  @@index([nodoActualId], name: "idx_progreso_nodo_actual")
   @@map("progreso_contenidos")
 }
 

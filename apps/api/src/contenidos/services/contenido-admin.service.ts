@@ -21,29 +21,49 @@ export class ContenidoAdminService {
 
   /**
    * Crea un nuevo contenido como BORRADOR
+   * Incluye automáticamente 3 nodos estructurales: Teoría, Práctica, Evaluación
    * @param adminId - ID del admin que crea
    * @param dto - Datos del contenido
    */
   async create(adminId: string, dto: CreateContenidoDto) {
     const { slides, ...contenidoData } = dto;
 
+    // Crear nodos iniciales: slides del DTO + nodos estructurales si no hay slides
+    const nodosIniciales = slides?.length
+      ? slides.map((slide, index) => ({
+          titulo: slide.titulo,
+          contenidoJson: slide.contenidoJson,
+          orden: slide.orden ?? index,
+          bloqueado: false,
+        }))
+      : [
+          // Si no hay slides, crear estructura por defecto
+          { titulo: 'Teoría', orden: 0, bloqueado: true, contenidoJson: null },
+          {
+            titulo: 'Práctica',
+            orden: 1,
+            bloqueado: true,
+            contenidoJson: null,
+          },
+          {
+            titulo: 'Evaluación',
+            orden: 2,
+            bloqueado: true,
+            contenidoJson: null,
+          },
+        ];
+
     return this.prisma.contenido.create({
       data: {
         ...contenidoData,
         creadorId: adminId,
         estado: EstadoContenido.BORRADOR,
-        slides: slides?.length
-          ? {
-              create: slides.map((slide, index) => ({
-                titulo: slide.titulo,
-                contenidoJson: slide.contenidoJson,
-                orden: slide.orden ?? index,
-              })),
-            }
-          : undefined,
+        nodos: {
+          create: nodosIniciales,
+        },
       },
       include: {
-        slides: { orderBy: { orden: 'asc' } },
+        nodos: { orderBy: { orden: 'asc' } },
         creador: { select: { id: true, nombre: true, apellido: true } },
       },
     });
@@ -64,7 +84,7 @@ export class ContenidoAdminService {
       this.prisma.contenido.findMany({
         where,
         include: {
-          _count: { select: { slides: true } },
+          _count: { select: { nodos: true } },
           creador: { select: { id: true, nombre: true, apellido: true } },
         },
         orderBy: [{ estado: 'asc' }, { updatedAt: 'desc' }],
@@ -93,7 +113,7 @@ export class ContenidoAdminService {
     const contenido = await this.prisma.contenido.findUnique({
       where: { id },
       include: {
-        slides: { orderBy: { orden: 'asc' } },
+        nodos: { orderBy: { orden: 'asc' } },
         creador: { select: { id: true, nombre: true, apellido: true } },
       },
     });
@@ -124,7 +144,7 @@ export class ContenidoAdminService {
       where: { id },
       data: dto,
       include: {
-        slides: { orderBy: { orden: 'asc' } },
+        nodos: { orderBy: { orden: 'asc' } },
         creador: { select: { id: true, nombre: true, apellido: true } },
       },
     });

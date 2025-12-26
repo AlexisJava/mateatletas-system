@@ -16,13 +16,13 @@ export class ContenidoPublicacionService {
 
   /**
    * Publica un contenido (BORRADOR -> PUBLICADO)
-   * Valida que tenga al menos un slide antes de publicar
+   * Valida que tenga al menos un nodo antes de publicar
    * @param id - ID del contenido
    */
   async publicar(id: string) {
     const contenido = await this.prisma.contenido.findUnique({
       where: { id },
-      include: { _count: { select: { slides: true } } },
+      include: { _count: { select: { nodos: true } } },
     });
 
     if (!contenido) {
@@ -35,9 +35,9 @@ export class ContenidoPublicacionService {
       );
     }
 
-    if (contenido._count.slides === 0) {
+    if (contenido._count.nodos === 0) {
       throw new BadRequestException(
-        'No se puede publicar un contenido sin slides',
+        'No se puede publicar un contenido sin nodos',
       );
     }
 
@@ -48,7 +48,7 @@ export class ContenidoPublicacionService {
         fechaPublicacion: new Date(),
       },
       include: {
-        slides: { orderBy: { orden: 'asc' } },
+        nodos: { orderBy: { orden: 'asc' } },
         creador: { select: { id: true, nombre: true, apellido: true } },
       },
     });
@@ -80,7 +80,7 @@ export class ContenidoPublicacionService {
         estado: EstadoContenido.ARCHIVADO,
       },
       include: {
-        slides: { orderBy: { orden: 'asc' } },
+        nodos: { orderBy: { orden: 'asc' } },
         creador: { select: { id: true, nombre: true, apellido: true } },
       },
     });

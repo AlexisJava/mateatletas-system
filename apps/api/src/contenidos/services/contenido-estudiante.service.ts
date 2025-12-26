@@ -54,7 +54,7 @@ export class ContenidoEstudianteService {
         imagenPortada: true,
         duracionMinutos: true,
         orden: true,
-        _count: { select: { slides: true } },
+        _count: { select: { nodos: true } },
       },
       orderBy: [{ orden: 'asc' }, { fechaPublicacion: 'desc' }],
     });
@@ -67,7 +67,7 @@ export class ContenidoEstudianteService {
       },
       select: {
         contenidoId: true,
-        slideActual: true,
+        nodoActualId: true,
         completado: true,
       },
     });
@@ -92,7 +92,7 @@ export class ContenidoEstudianteService {
     const contenido = await this.prisma.contenido.findUnique({
       where: { id: contenidoId },
       include: {
-        slides: { orderBy: { orden: 'asc' } },
+        nodos: { orderBy: { orden: 'asc' } },
       },
     });
 
@@ -118,7 +118,7 @@ export class ContenidoEstudianteService {
       create: {
         estudianteId,
         contenidoId,
-        slideActual: 0,
+        nodoActualId: null,
       },
       update: {},
     });
