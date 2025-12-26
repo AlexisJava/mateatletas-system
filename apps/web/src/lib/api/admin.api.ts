@@ -9,8 +9,12 @@ import {
   ChangeRoleDto,
   UpdateRolesDto,
   SystemStats,
+  DashboardStats,
 } from '@/types/admin.types';
 import type { Producto } from '@/types/catalogo.types';
+
+// Re-export para uso en componentes
+export type { Producto };
 import type { CrearProductoDto } from './catalogo.api';
 import type { RegisterResponse } from './auth.api';
 
@@ -370,4 +374,235 @@ export const createAdmin = async (data: CreateAdminData): Promise<AdminUser> => 
     console.error('Error al crear un administrador:', error);
     throw error;
   }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DASHBOARD STATS COMBINADAS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Response del endpoint GET /admin/dashboard */
+interface AdminDashboardResponse {
+  activeMemberships: number;
+  upcomingClasses: number;
+  openAlerts: number;
+  totalEstudiantes: number;
+  totalDocentes: number;
+  totalTutores: number;
+  fecha: string;
+}
+
+/** Response del endpoint GET /casas/estadisticas (camelCase) */
+interface CasaRankingItem {
+  posicion: number;
+  id: string;
+  tipo: 'QUANTUM' | 'VERTEX' | 'PULSAR';
+  nombre: string;
+  emoji: string;
+  puntosTotales: number;
+  cantidadEstudiantes: number;
+}
+
+interface CasasEstadisticasResponse {
+  totalCasas: number;
+  totalEstudiantes: number;
+  promedioEstudiantesPorCasa: number;
+  ranking: CasaRankingItem[];
+}
+
+/**
+ * Obtener estadísticas de casas
+ * GET /casas/estadisticas
+ */
+export const getCasasEstadisticas = async (): Promise<CasasEstadisticasResponse> => {
+  try {
+    return await axios.get<CasasEstadisticasResponse>('/casas/estadisticas');
+  } catch (error) {
+    console.error('Error al obtener estadísticas de casas:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener todas las stats del dashboard en una sola llamada
+ * Combina: /admin/dashboard + /admin/estadisticas + /casas/estadisticas
+ * Transforma al formato esperado por el frontend (DashboardStats)
+ */
+// ─────────────────────────────────────────────────────────────────────────────
+// FINANCE / PAGOS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Response del endpoint GET /pagos/configuracion (Decimals se serializan como strings) */
+export interface TierConfigResponse {
+  precioSteamLibros: string;
+  precioSteamAsincronico: string;
+  precioSteamSincronico: string;
+  descuentoSegundoHermano: string;
+  diaVencimiento: number;
+  diasAntesRecordatorio: number;
+  notificacionesActivas: boolean;
+}
+
+/** TierConfig con números (para el frontend) */
+export interface TierConfig {
+  precioSteamLibros: number;
+  precioSteamAsincronico: number;
+  precioSteamSincronico: number;
+  descuentoSegundoHermano: number;
+  diaVencimiento: number;
+  diasAntesRecordatorio: number;
+  notificacionesActivas: boolean;
+}
+
+/** Métricas del dashboard de pagos */
+export interface FinanceMetricsResponse {
+  periodo: string;
+  metricas: {
+    ingresosMesActual: string;
+    pagosPendientes: string;
+    inscripcionesActivas: number;
+    tasaCobroActual: string;
+    comparacionMesAnterior: {
+      ingresosCambio: string;
+      pendientesCambio: string;
+      inscripcionesCambio: number;
+      tasaCobroCambio: string;
+    };
+  };
+  evolucionMensual: Array<{
+    periodo: string;
+    ingresos: string;
+    pendientes: string;
+    totalEsperado: string;
+  }>;
+  distribucionEstados: Array<{
+    estado: string;
+    cantidad: number;
+    monto: string;
+    porcentaje: string;
+  }>;
+}
+
+/** Métricas transformadas para el frontend */
+export interface FinanceStats {
+  ingresosMes: number;
+  pagosPendientes: number;
+  inscripcionesActivas: number;
+  tasaCobro: number;
+  cambios: {
+    ingresos: number;
+    pendientes: number;
+    inscripciones: number;
+    tasaCobro: number;
+  };
+}
+
+/**
+ * Obtener configuración de precios
+ * GET /pagos/configuracion
+ */
+export const getFinanceConfig = async (): Promise<TierConfig> => {
+  try {
+    const response = await axios.get<TierConfigResponse>('/pagos/configuracion');
+    // Convertir strings (Decimal serializado) a números
+    return {
+      precioSteamLibros: parseFloat(response.precioSteamLibros),
+      precioSteamAsincronico: parseFloat(response.precioSteamAsincronico),
+      precioSteamSincronico: parseFloat(response.precioSteamSincronico),
+      descuentoSegundoHermano: parseFloat(response.descuentoSegundoHermano),
+      diaVencimiento: response.diaVencimiento,
+      diasAntesRecordatorio: response.diasAntesRecordatorio,
+      notificacionesActivas: response.notificacionesActivas,
+    };
+  } catch (error) {
+    console.error('Error al obtener configuración de precios:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener métricas del dashboard de finanzas
+ * GET /pagos/dashboard/metricas
+ */
+export const getFinanceMetrics = async (): Promise<FinanceStats> => {
+  try {
+    const response = await axios.get<FinanceMetricsResponse>('/pagos/dashboard/metricas');
+    // Transformar de Decimal strings a números
+    return {
+      ingresosMes: parseFloat(response.metricas.ingresosMesActual),
+      pagosPendientes: parseFloat(response.metricas.pagosPendientes),
+      inscripcionesActivas: response.metricas.inscripcionesActivas,
+      tasaCobro: parseFloat(response.metricas.tasaCobroActual),
+      cambios: {
+        ingresos: parseFloat(response.metricas.comparacionMesAnterior.ingresosCambio),
+        pendientes: parseFloat(response.metricas.comparacionMesAnterior.pendientesCambio),
+        inscripciones: response.metricas.comparacionMesAnterior.inscripcionesCambio,
+        tasaCobro: parseFloat(response.metricas.comparacionMesAnterior.tasaCobroCambio),
+      },
+    };
+  } catch (error) {
+    console.error('Error al obtener métricas de finanzas:', error);
+    throw error;
+  }
+};
+
+/**
+ * Actualizar configuración de precios
+ * POST /pagos/configuracion/actualizar
+ */
+export const updateFinanceConfig = async (config: Partial<TierConfig>): Promise<TierConfig> => {
+  try {
+    const response = await axios.post<TierConfigResponse>(
+      '/pagos/configuracion/actualizar',
+      config,
+    );
+    return {
+      precioSteamLibros: parseFloat(response.precioSteamLibros),
+      precioSteamAsincronico: parseFloat(response.precioSteamAsincronico),
+      precioSteamSincronico: parseFloat(response.precioSteamSincronico),
+      descuentoSegundoHermano: parseFloat(response.descuentoSegundoHermano),
+      diaVencimiento: response.diaVencimiento,
+      diasAntesRecordatorio: response.diasAntesRecordatorio,
+      notificacionesActivas: response.notificacionesActivas,
+    };
+  } catch (error) {
+    console.error('Error al actualizar configuración de precios:', error);
+    throw error;
+  }
+};
+
+export const getCombinedDashboardStats = async (): Promise<DashboardStats> => {
+  const [dashboard, estadisticas, casas] = await Promise.all([
+    axios.get<AdminDashboardResponse>('/admin/dashboard'),
+    getSystemStats(),
+    getCasasEstadisticas(),
+  ]);
+
+  // Calcular tasa de cobro
+  const totalFacturado = estadisticas.ingresosTotal + estadisticas.pagosPendientes;
+  const tasaCobro =
+    totalFacturado > 0 ? Math.round((estadisticas.ingresosTotal / totalFacturado) * 1000) / 10 : 0;
+
+  // Transformar distribución de casas desde ranking
+  const distribucionCasas = {
+    Quantum: 0,
+    Vertex: 0,
+    Pulsar: 0,
+  };
+
+  casas.ranking.forEach((casa) => {
+    if (casa.tipo === 'QUANTUM') distribucionCasas.Quantum = casa.cantidadEstudiantes;
+    if (casa.tipo === 'VERTEX') distribucionCasas.Vertex = casa.cantidadEstudiantes;
+    if (casa.tipo === 'PULSAR') distribucionCasas.Pulsar = casa.cantidadEstudiantes;
+  });
+
+  return {
+    totalEstudiantes: estadisticas.totalEstudiantes,
+    estudiantesActivos: dashboard.activeMemberships, // Inscripciones activas como proxy
+    inscripcionesActivas: estadisticas.inscripcionesActivas,
+    ingresosMes: estadisticas.ingresosTotal,
+    ingresosPendientes: estadisticas.pagosPendientes,
+    tasaCobro,
+    crecimientoMensual: 0, // TODO: Implementar cuando exista endpoint de histórico
+    distribucionCasas,
+  };
 };

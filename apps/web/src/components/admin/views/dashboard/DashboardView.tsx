@@ -1,13 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Users, GraduationCap, DollarSign, Clock } from 'lucide-react';
-import {
-  MOCK_TASKS,
-  MOCK_DASHBOARD_STATS,
-  formatCompactCurrency,
-  type MockTask,
-} from '@/lib/constants/admin-mock-data';
+import { MOCK_TASKS, formatCompactCurrency, type MockTask } from '@/lib/constants/admin-mock-data';
 import type { TaskStatus } from '@/types/admin-dashboard.types';
 import {
   StatCard,
@@ -21,32 +16,20 @@ import {
   NotesButton,
   NotesModal,
 } from './components';
+import { useDashboardStats } from './hooks';
 
 /**
  * DashboardView - Vista principal del admin
  *
- * Orquesta los componentes del dashboard con datos y estado.
+ * Orquesta los componentes del dashboard con datos reales del backend.
+ * Fallback a mock data si el backend no está disponible.
  */
 
 export function DashboardView() {
+  const { stats, isLoading, error } = useDashboardStats();
   const [tasks, setTasks] = useState<MockTask[]>(MOCK_TASKS);
   const [notes, setNotes] = useState('');
   const [showNotesModal, setShowNotesModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadData = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      if (isMounted) setIsLoading(false);
-    };
-
-    loadData();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const handleToggleTask = useCallback((id: string) => {
     setTasks((prev) =>
@@ -57,8 +40,6 @@ export function DashboardView() {
       }),
     );
   }, []);
-
-  const stats = MOCK_DASHBOARD_STATS;
 
   if (isLoading) {
     return (
@@ -73,6 +54,13 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Error banner (datos mock en uso) */}
+      {error && (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-2 text-sm text-yellow-400">
+          Usando datos de ejemplo (backend no disponible)
+        </div>
+      )}
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard

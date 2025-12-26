@@ -16,12 +16,25 @@ import { SectionHeader } from './SectionHeader';
 import { RetentionStatCard } from './RetentionStatCard';
 import { RetentionRateCard } from './RetentionRateCard';
 import { RecommendedActionsCard } from './RecommendedActionsCard';
+import type { RetentionDataPoint } from '../hooks';
 
 /**
  * RetencionTab - Tab de métricas de retención
  */
 
-export function RetencionTab() {
+interface RetencionTabProps {
+  retentionData?: RetentionDataPoint[];
+}
+
+export function RetencionTab({ retentionData }: RetencionTabProps) {
+  const data = retentionData ?? MOCK_RETENTION_DATA;
+
+  // Calcular stats del último mes
+  const lastMonth = data[data.length - 1];
+  const nuevos = lastMonth?.nuevos ?? 0;
+  const activos = lastMonth?.activos ?? 0;
+  const bajas = lastMonth?.bajas ?? 0;
+
   return (
     <div className="space-y-6">
       <SectionHeader icon={Activity} title="Metricas de Retencion" iconColor="#22c55e" />
@@ -31,21 +44,21 @@ export function RetencionTab() {
         <RetentionStatCard
           icon={UserPlus}
           label="Nuevos este mes"
-          value="+55"
+          value={`+${nuevos}`}
           colorClass="text-[var(--status-success)]"
           bgClass="bg-[var(--status-success-muted)]"
         />
         <RetentionStatCard
           icon={Users}
           label="Activos totales"
-          value="381"
+          value={activos.toString()}
           colorClass="text-[var(--status-info)]"
           bgClass="bg-[var(--status-info-muted)]"
         />
         <RetentionStatCard
           icon={UserMinus}
           label="Bajas este mes"
-          value="-9"
+          value={`-${bajas}`}
           colorClass="text-[var(--status-danger)]"
           bgClass="bg-[var(--status-danger-muted)]"
         />
@@ -58,7 +71,7 @@ export function RetencionTab() {
         </h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={MOCK_RETENTION_DATA}>
+            <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--admin-border)" />
               <XAxis dataKey="month" stroke="var(--admin-text-muted)" fontSize={12} />
               <YAxis stroke="var(--admin-text-muted)" fontSize={12} />

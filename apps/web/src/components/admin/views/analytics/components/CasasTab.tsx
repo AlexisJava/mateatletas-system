@@ -4,13 +4,19 @@ import { Home } from 'lucide-react';
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 import { MOCK_CASA_DISTRIBUTION } from '@/lib/constants/admin-mock-data';
 import { SectionHeader } from './SectionHeader';
+import type { CasaDistribution } from '../hooks';
 
 /**
  * CasasTab - Tab de distribución por casa
  */
 
-export function CasasTab() {
-  const total = MOCK_CASA_DISTRIBUTION.reduce((acc, c) => acc + c.value, 0);
+interface CasasTabProps {
+  casaDistribution?: CasaDistribution[];
+}
+
+export function CasasTab({ casaDistribution }: CasasTabProps) {
+  const data = casaDistribution ?? MOCK_CASA_DISTRIBUTION;
+  const total = data.reduce((acc, c) => acc + c.value, 0);
 
   return (
     <div className="space-y-6">
@@ -26,7 +32,7 @@ export function CasasTab() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={MOCK_CASA_DISTRIBUTION}
+                  data={data}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -34,7 +40,7 @@ export function CasasTab() {
                   dataKey="value"
                   strokeWidth={0}
                 >
-                  {MOCK_CASA_DISTRIBUTION.map((entry, index) => (
+                  {data.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -57,7 +63,7 @@ export function CasasTab() {
 
         {/* Casa Cards */}
         <div className="space-y-4">
-          {MOCK_CASA_DISTRIBUTION.map((casa) => {
+          {data.map((casa) => {
             const percentage = ((casa.value / total) * 100).toFixed(1);
 
             return (

@@ -1,11 +1,10 @@
 'use client';
 
-import { Package, CheckCircle, Users, DollarSign } from 'lucide-react';
-import { formatCurrency } from '@/lib/constants/admin-mock-data';
+import { Package, CheckCircle, GraduationCap, FileText } from 'lucide-react';
 import type { ProductosStats } from '../types/productos.types';
 
 /**
- * ProductsStatsGrid - Grid de estadísticas de productos
+ * ProductsStatsGrid - Grid de estadísticas de productos de pago único
  */
 
 interface ProductsStatsGridProps {
@@ -22,7 +21,7 @@ export function ProductsStatsGrid({ stats }: ProductsStatsGridProps) {
           </div>
           <div>
             <p className="text-2xl font-bold text-[var(--admin-text)]">{stats.total}</p>
-            <p className="text-sm text-[var(--admin-text-muted)]">Productos</p>
+            <p className="text-sm text-[var(--admin-text-muted)]">Total Productos</p>
           </div>
         </div>
       </div>
@@ -39,25 +38,23 @@ export function ProductsStatsGrid({ stats }: ProductsStatsGridProps) {
       </div>
       <div className="p-4 rounded-xl bg-[var(--admin-surface-1)] border border-[var(--admin-border)]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[var(--status-info-muted)] flex items-center justify-center">
-            <Users className="w-5 h-5 text-[var(--status-info)]" />
+          <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+            <GraduationCap className="w-5 h-5 text-emerald-500" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-[var(--admin-text)]">{stats.totalInscritos}</p>
-            <p className="text-sm text-[var(--admin-text-muted)]">Inscritos</p>
+            <p className="text-2xl font-bold text-[var(--admin-text)]">{stats.cursos}</p>
+            <p className="text-sm text-[var(--admin-text-muted)]">Cursos</p>
           </div>
         </div>
       </div>
       <div className="p-4 rounded-xl bg-[var(--admin-surface-1)] border border-[var(--admin-border)]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[var(--status-success-muted)] flex items-center justify-center">
-            <DollarSign className="w-5 h-5 text-[var(--status-success)]" />
+          <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
+            <FileText className="w-5 h-5 text-violet-500" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-[var(--admin-text)]">
-              {formatCurrency(stats.totalIngresos)}
-            </p>
-            <p className="text-sm text-[var(--admin-text-muted)]">Ingresos/mes</p>
+            <p className="text-2xl font-bold text-[var(--admin-text)]">{stats.recursos}</p>
+            <p className="text-sm text-[var(--admin-text-muted)]">Recursos Digitales</p>
           </div>
         </div>
       </div>

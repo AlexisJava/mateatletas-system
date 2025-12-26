@@ -4,15 +4,16 @@ import { useProductos } from './hooks';
 import { ProductsStatsGrid, ProductsFilters, ProductsGrid, ProductDetailModal } from './components';
 
 /**
- * ProductosView - Vista de gestión de productos
+ * ProductosView - Vista de gestión de productos de pago único
  *
- * Gestiona productos: Colonia, Cursos, Talleres.
- * Muestra tier, precio, inscripciones.
+ * Gestiona productos: Cursos (talleres, colonias, eventos) y RecursoDigital.
+ * Las Suscripciones STEAM se gestionan en FinanceView.
  */
 
 export function ProductosView() {
   const {
     isLoading,
+    error,
     searchQuery,
     setSearchQuery,
     tierFilter,
@@ -41,6 +42,13 @@ export function ProductosView() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Error banner (datos mock en uso) */}
+      {error && (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-2 text-sm text-yellow-400">
+          Usando datos de ejemplo (backend no disponible)
+        </div>
+      )}
+
       {/* Stats */}
       <ProductsStatsGrid stats={stats} />
 

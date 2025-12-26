@@ -1,9 +1,10 @@
 import type { LucideIcon } from 'lucide-react';
-import type { UserRole } from '@/types/admin-dashboard.types';
-import type { MockPerson } from '@/lib/constants/admin-mock-data';
+import type { UserRole, AdminPerson } from '@/types/admin-dashboard.types';
 
 /**
  * Personas Types - Tipos para la vista de personas
+ *
+ * Usa AdminPerson del sistema de tipos unificado
  */
 
 export interface RoleConfigItem {
@@ -26,14 +27,14 @@ export interface PersonaStatCardProps {
 }
 
 export interface PersonRowProps {
-  person: MockPerson;
-  onView: (person: MockPerson) => void;
-  onEdit: (person: MockPerson) => void;
-  onDelete: (person: MockPerson) => void;
+  person: AdminPerson;
+  onView: (person: AdminPerson) => void;
+  onEdit: (person: AdminPerson) => void;
+  onDelete: (person: AdminPerson) => void;
 }
 
 export interface PersonDetailModalProps {
-  person: MockPerson | null;
+  person: AdminPerson | null;
   onClose: () => void;
 }
 

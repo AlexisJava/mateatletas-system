@@ -1,7 +1,7 @@
 'use client';
 
 import { Users } from 'lucide-react';
-import type { MockPerson } from '@/lib/constants/admin-mock-data';
+import type { AdminPerson } from '@/types/admin-dashboard.types';
 import { PersonRow } from './PersonRow';
 
 /**
@@ -9,10 +9,10 @@ import { PersonRow } from './PersonRow';
  */
 
 interface PersonasTableProps {
-  people: MockPerson[];
-  onView: (person: MockPerson) => void;
-  onEdit: (person: MockPerson) => void;
-  onDelete: (person: MockPerson) => void;
+  people: AdminPerson[];
+  onView: (person: AdminPerson) => void;
+  onEdit: (person: AdminPerson) => void;
+  onDelete: (person: AdminPerson) => void;
 }
 
 export function PersonasTable({ people, onView, onEdit, onDelete }: PersonasTableProps) {

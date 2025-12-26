@@ -1,18 +1,18 @@
 'use client';
 
 import { Package } from 'lucide-react';
-import type { MockProduct } from '@/lib/constants/admin-mock-data';
+import type { AdminProducto } from '../types/productos.types';
 import { ProductCard } from './ProductCard';
 
 /**
- * ProductsGrid - Grid de productos
+ * ProductsGrid - Grid de productos de pago único
  */
 
 interface ProductsGridProps {
-  products: MockProduct[];
-  onView: (product: MockProduct) => void;
-  onEdit: (product: MockProduct) => void;
-  onDelete: (product: MockProduct) => void;
+  products: AdminProducto[];
+  onView: (product: AdminProducto) => void;
+  onEdit: (product: AdminProducto) => void;
+  onDelete: (product: AdminProducto) => void;
 }
 
 export function ProductsGrid({ products, onView, onEdit, onDelete }: ProductsGridProps) {

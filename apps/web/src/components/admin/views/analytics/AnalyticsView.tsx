@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Users, Target, BookOpen, TrendingUp, Download } from 'lucide-react';
-import { MOCK_DASHBOARD_STATS } from '@/lib/constants/admin-mock-data';
 import type { AnalyticsTabId } from './types/analytics.types';
 import {
   AnalyticsStatCard,
@@ -11,30 +10,18 @@ import {
   BibliotecaTab,
   RetencionTab,
 } from './components';
+import { useAnalytics } from './hooks';
 
 /**
  * AnalyticsView - Vista de analytics del admin
  *
  * Orquesta los tabs de Casas, Biblioteca y Retención.
+ * Conecta con endpoints reales del backend.
  */
 
 export function AnalyticsView() {
-  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<AnalyticsTabId>('casas');
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadData = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      if (isMounted) setIsLoading(false);
-    };
-
-    loadData();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const { isLoading, error, data } = useAnalytics();
 
   if (isLoading) {
     return (
@@ -47,10 +34,17 @@ export function AnalyticsView() {
     );
   }
 
-  const stats = MOCK_DASHBOARD_STATS;
+  const { stats, casaDistribution, retentionData } = data;
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Error banner (datos mock en uso) */}
+      {error && (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-2 text-sm text-yellow-400">
+          Usando datos de ejemplo (backend no disponible)
+        </div>
+      )}
+
       {/* Header Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <AnalyticsStatCard
@@ -62,15 +56,15 @@ export function AnalyticsView() {
         />
         <AnalyticsStatCard
           label="Tasa de Retencion"
-          value="94.2%"
+          value={`${stats.tasaRetencion}%`}
           change={2.1}
           icon={Target}
           color="#22c55e"
         />
         <AnalyticsStatCard
           label="Libros Leidos"
-          value="2,100"
-          change={15.3}
+          value={stats.librosLeidos > 0 ? stats.librosLeidos.toLocaleString() : '—'}
+          change={stats.librosLeidos > 0 ? 15.3 : undefined}
           icon={BookOpen}
           color="#f59e0b"
         />
@@ -87,9 +81,9 @@ export function AnalyticsView() {
       <AnalyticsTabNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Tab Content */}
-      {activeTab === 'casas' && <CasasTab />}
+      {activeTab === 'casas' && <CasasTab casaDistribution={casaDistribution} />}
       {activeTab === 'biblioteca' && <BibliotecaTab />}
-      {activeTab === 'retencion' && <RetencionTab />}
+      {activeTab === 'retencion' && <RetencionTab retentionData={retentionData} />}
 
       {/* Export Button */}
       <div className="flex justify-end">

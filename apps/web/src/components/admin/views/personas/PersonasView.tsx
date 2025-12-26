@@ -4,15 +4,16 @@ import { usePersonas } from './hooks';
 import { PersonasStatsGrid, PersonasFilters, PersonasTable, PersonDetailModal } from './components';
 
 /**
- * PersonasView - Vista de gestión de personas
+ * PersonasView - Vista de gestión unificada de personas
  *
- * Unifica estudiantes, docentes, tutores y admins.
+ * Unifica estudiantes, docentes, tutores y admins desde el backend.
  * Tabla con filtros, búsqueda y acciones.
  */
 
 export function PersonasView() {
   const {
     isLoading,
+    error,
     searchQuery,
     setSearchQuery,
     roleFilter,
@@ -41,6 +42,13 @@ export function PersonasView() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Error banner (datos mock en uso) */}
+      {error && (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-2 text-sm text-yellow-400">
+          Usando datos de ejemplo (backend no disponible)
+        </div>
+      )}
+
       {/* Stats */}
       <PersonasStatsGrid stats={stats} roleFilter={roleFilter} onRoleFilterChange={setRoleFilter} />
 

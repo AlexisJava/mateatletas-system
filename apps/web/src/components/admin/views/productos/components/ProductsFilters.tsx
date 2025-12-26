@@ -1,17 +1,17 @@
 'use client';
 
 import { Search, Plus } from 'lucide-react';
-import type { TierFilter, StatusFilter } from '../types/productos.types';
+import type { TipoFilter, StatusFilter } from '../types/productos.types';
 
 /**
- * ProductsFilters - Filtros y búsqueda de productos
+ * ProductsFilters - Filtros y búsqueda de productos de pago único
  */
 
 interface ProductsFiltersProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  tierFilter: TierFilter;
-  onTierChange: (tier: TierFilter) => void;
+  tierFilter: TipoFilter;
+  onTierChange: (tier: TipoFilter) => void;
   statusFilter: StatusFilter;
   onStatusChange: (status: StatusFilter) => void;
 }
@@ -39,13 +39,12 @@ export function ProductsFilters({
       <div className="flex gap-2">
         <select
           value={tierFilter}
-          onChange={(e) => onTierChange(e.target.value)}
+          onChange={(e) => onTierChange(e.target.value as TipoFilter)}
           className="px-4 py-2.5 bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-xl text-[var(--admin-text)] focus:outline-none focus:border-[var(--admin-accent)]"
         >
-          <option value="all">Todos los tiers</option>
-          <option value="STEAM Libros">STEAM Libros</option>
-          <option value="STEAM Asincronico">STEAM Asincronico</option>
-          <option value="STEAM Sincronico">STEAM Sincronico</option>
+          <option value="all">Todos los tipos</option>
+          <option value="Curso">Cursos</option>
+          <option value="RecursoDigital">Recursos Digitales</option>
         </select>
         <select
           value={statusFilter}

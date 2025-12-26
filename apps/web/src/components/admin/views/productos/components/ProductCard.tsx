@@ -6,24 +6,32 @@ import {
   Edit,
   Trash2,
   Eye,
-  Users,
+  ShoppingCart,
   DollarSign,
   Tag,
   CheckCircle,
   XCircle,
 } from 'lucide-react';
-import { formatCurrency, getTierColor } from '@/lib/constants/admin-mock-data';
+import { formatCurrency } from '@/lib/constants/admin-mock-data';
 import type { ProductCardProps } from '../types/productos.types';
-import { TIER_ICON_MAP, DEFAULT_TIER_ICON } from '../constants/tier-icons';
+import {
+  TIPO_ICON_MAP,
+  DEFAULT_TIPO_ICON,
+  TIPO_COLORS,
+  DEFAULT_TIPO_COLOR,
+} from '../constants/tier-icons';
 
 /**
- * ProductCard - Card de producto individual
+ * ProductCard - Card de producto de pago único
  */
 
 export function ProductCard({ product, onView, onEdit, onDelete }: ProductCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const tierColor = getTierColor(product.tier);
-  const TierIcon = TIER_ICON_MAP[product.tier] || DEFAULT_TIER_ICON;
+  const tipoColor = TIPO_COLORS[product.tipo] || DEFAULT_TIPO_COLOR;
+  const TipoIcon = TIPO_ICON_MAP[product.tipo] || DEFAULT_TIPO_ICON;
+
+  // Label amigable para el tipo
+  const tipoLabel = product.tipo === 'RecursoDigital' ? 'Recurso Digital' : product.tipo;
 
   return (
     <div className="p-5 rounded-2xl bg-[var(--admin-surface-1)] border border-[var(--admin-border)] hover:border-[var(--admin-border-accent)] transition-all group">
@@ -31,9 +39,9 @@ export function ProductCard({ product, onView, onEdit, onDelete }: ProductCardPr
       <div className="flex items-start justify-between mb-4">
         <div
           className="w-12 h-12 rounded-xl flex items-center justify-center"
-          style={{ backgroundColor: `${tierColor}20` }}
+          style={{ backgroundColor: `${tipoColor}20` }}
         >
-          <TierIcon className="w-6 h-6" style={{ color: tierColor }} />
+          <TipoIcon className="w-6 h-6" style={{ color: tipoColor }} />
         </div>
         <div className="flex items-center gap-2">
           <span
@@ -105,14 +113,14 @@ export function ProductCard({ product, onView, onEdit, onDelete }: ProductCardPr
           </p>
         </div>
 
-        {/* Tier Badge */}
+        {/* Tipo Badge */}
         <div className="flex items-center gap-2">
           <Tag className="w-4 h-4 text-[var(--admin-text-muted)]" />
           <span
             className="text-sm font-medium px-2 py-0.5 rounded-md"
-            style={{ backgroundColor: `${tierColor}20`, color: tierColor }}
+            style={{ backgroundColor: `${tipoColor}20`, color: tipoColor }}
           >
-            {product.tier}
+            {tipoLabel}
           </span>
         </div>
 
@@ -128,10 +136,12 @@ export function ProductCard({ product, onView, onEdit, onDelete }: ProductCardPr
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-[var(--status-info)]" />
+            <ShoppingCart className="w-4 h-4 text-[var(--status-info)]" />
             <div>
-              <p className="text-xs text-[var(--admin-text-muted)]">Inscritos</p>
-              <p className="text-sm font-semibold text-[var(--admin-text)]">{product.inscritos}</p>
+              <p className="text-xs text-[var(--admin-text-muted)]">Ventas</p>
+              <p className="text-sm font-semibold text-[var(--admin-text)]">
+                {product.ventas ?? 0}
+              </p>
             </div>
           </div>
         </div>

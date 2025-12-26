@@ -1,30 +1,45 @@
 import type { LucideIcon } from 'lucide-react';
-import type { MockProduct } from '@/lib/constants/admin-mock-data';
+import type { Producto } from '@/types/catalogo.types';
 
 /**
- * Productos Types - Tipos para la vista de productos
+ * Productos Types - Tipos para la vista de productos (admin)
+ *
+ * ProductosView muestra productos de pago único:
+ * - Cursos (talleres, colonias, eventos)
+ * - RecursoDigital (material descargable)
+ *
+ * Las Suscripciones STEAM se gestionan en FinanceView.
  */
 
+/** Producto adaptado para la vista admin */
+export interface AdminProducto extends Producto {
+  /** Número de ventas/inscripciones (calculado del backend o mock) */
+  ventas?: number;
+}
+
 export interface ProductCardProps {
-  product: MockProduct;
-  onView: (product: MockProduct) => void;
-  onEdit: (product: MockProduct) => void;
-  onDelete: (product: MockProduct) => void;
+  product: AdminProducto;
+  onView: (product: AdminProducto) => void;
+  onEdit: (product: AdminProducto) => void;
+  onDelete: (product: AdminProducto) => void;
 }
 
 export interface ProductDetailModalProps {
-  product: MockProduct | null;
+  product: AdminProducto | null;
   onClose: () => void;
 }
 
 export interface ProductosStats {
   total: number;
   activos: number;
-  totalInscritos: number;
-  totalIngresos: number;
+  cursos: number;
+  recursos: number;
 }
 
-export type TierFilter = string;
+export type TipoFilter = 'all' | 'Curso' | 'RecursoDigital';
 export type StatusFilter = 'all' | 'active' | 'inactive';
 
-export type TierIconMap = Record<string, LucideIcon>;
+export type TipoIconMap = Record<string, LucideIcon>;
+
+// Re-export para compatibilidad
+export type TierFilter = TipoFilter;

@@ -1,16 +1,27 @@
-import { Package, Gamepad2, Sparkles, Crown } from 'lucide-react';
-import type { TierIconMap } from '../types/productos.types';
+import { Package, GraduationCap, FileText } from 'lucide-react';
+import type { TipoIconMap } from '../types/productos.types';
 
 /**
- * TIER_ICON_MAP - Mapeo de iconos por tier
+ * TIPO_ICON_MAP - Mapeo de iconos por tipo de producto
+ *
+ * Para productos de pago único:
+ * - Curso: talleres, colonias, eventos
+ * - RecursoDigital: material descargable
  */
 
-export const TIER_ICON_MAP: TierIconMap = {
-  'STEAM Libros': Gamepad2,
-  'STEAM Asincronico': Sparkles,
-  'STEAM Asincrónico': Sparkles,
-  'STEAM Sincronico': Crown,
-  'STEAM Sincrónico': Crown,
+export const TIPO_ICON_MAP: TipoIconMap = {
+  Curso: GraduationCap,
+  RecursoDigital: FileText,
 };
 
-export const DEFAULT_TIER_ICON = Package;
+export const DEFAULT_TIPO_ICON = Package;
+
+/**
+ * Colores por tipo de producto
+ */
+export const TIPO_COLORS: Record<string, string> = {
+  Curso: '#10b981', // emerald-500
+  RecursoDigital: '#8b5cf6', // violet-500
+};
+
+export const DEFAULT_TIPO_COLOR = '#6b7280'; // gray-500

@@ -11,6 +11,24 @@ export interface SystemStats {
   clasesActivas: number;
   totalProductos: number;
   ingresosTotal: number;
+  pagosPendientes: number;
+  inscripcionesActivas: number;
+}
+
+/** Stats combinadas para el Dashboard principal */
+export interface DashboardStats {
+  totalEstudiantes: number;
+  estudiantesActivos: number;
+  inscripcionesActivas: number;
+  ingresosMes: number;
+  ingresosPendientes: number;
+  tasaCobro: number;
+  crecimientoMensual: number;
+  distribucionCasas: {
+    Quantum: number;
+    Vertex: number;
+    Pulsar: number;
+  };
 }
 
 export interface DashboardData {

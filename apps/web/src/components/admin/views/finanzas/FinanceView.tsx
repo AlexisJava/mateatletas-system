@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { DollarSign, Clock, Users, TrendingUp } from 'lucide-react';
 import { formatCompactCurrency } from '@/lib/constants/admin-mock-data';
-import type { TierConfig, FinanceStatCardProps } from './types/finance.types';
+import type { FinanceStatCardProps } from './types/finance.types';
 import {
   FinanceStatCard,
   ConfigModal,
@@ -14,41 +14,27 @@ import {
   ReportsPanel,
   NotificationsPanel,
 } from './components';
+import { useFinanceStats } from './hooks';
 
 /**
  * FinanceView - Vista de finanzas del admin
  *
- * Orquesta los componentes de finanzas con datos y estado.
+ * Orquesta los componentes de finanzas con datos reales del backend.
+ * Fallback a mock data si el backend no está disponible.
  */
 
-const DEFAULT_CONFIG: TierConfig = {
-  precioSteamLibros: 40000,
-  precioSteamAsincronico: 65000,
-  precioSteamSincronico: 95000,
-  descuentoSegundoHermano: 10,
-  diaVencimiento: 15,
-  diasAntesRecordatorio: 5,
-  notificacionesActivas: true,
-};
-
 export function FinanceView() {
-  const [isLoading, setIsLoading] = useState(true);
+  const { stats, config, isLoading, error, saveConfig } = useFinanceStats();
   const [showConfigModal, setShowConfigModal] = useState(false);
-  const [config, setConfig] = useState<TierConfig>(DEFAULT_CONFIG);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadData = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      if (isMounted) setIsLoading(false);
-    };
-
-    loadData();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const handleSaveConfig = async (newConfig: typeof config) => {
+    try {
+      await saveConfig(newConfig);
+      setShowConfigModal(false);
+    } catch {
+      // Error ya logueado en el hook
+    }
+  };
 
   if (isLoading) {
     return (
@@ -61,39 +47,45 @@ export function FinanceView() {
     );
   }
 
+  // Formatear cambios como string con signo
+  const formatChange = (value: number): string => {
+    const sign = value >= 0 ? '+' : '';
+    return `${sign}${value.toFixed(1)}%`;
+  };
+
   const mainStats: FinanceStatCardProps[] = [
     {
       label: 'Ingresos del Mes',
-      value: formatCompactCurrency(4200000),
-      change: '+15.3%',
-      trend: 'up',
+      value: formatCompactCurrency(stats.ingresosMes),
+      change: formatChange(stats.cambios.ingresos),
+      trend: stats.cambios.ingresos >= 0 ? 'up' : 'down',
       icon: DollarSign,
       gradient: 'from-emerald-500 to-green-500',
       bgGradient: 'from-emerald-500/10 to-green-500/10',
     },
     {
       label: 'Pagos Pendientes',
-      value: formatCompactCurrency(320000),
-      change: '-5.2%',
-      trend: 'down',
+      value: formatCompactCurrency(stats.pagosPendientes),
+      change: formatChange(stats.cambios.pendientes),
+      trend: stats.cambios.pendientes <= 0 ? 'down' : 'up',
       icon: Clock,
       gradient: 'from-amber-500 to-orange-500',
       bgGradient: 'from-amber-500/10 to-orange-500/10',
     },
     {
       label: 'Inscripciones Activas',
-      value: '298',
-      change: '+12',
-      trend: 'up',
+      value: stats.inscripcionesActivas.toLocaleString('es-AR'),
+      change: `${stats.cambios.inscripciones >= 0 ? '+' : ''}${stats.cambios.inscripciones}`,
+      trend: stats.cambios.inscripciones >= 0 ? 'up' : 'down',
       icon: Users,
       gradient: 'from-violet-500 to-purple-500',
       bgGradient: 'from-violet-500/10 to-purple-500/10',
     },
     {
       label: 'Tasa de Cobro',
-      value: '92.9%',
-      change: '+2.1%',
-      trend: 'up',
+      value: `${stats.tasaCobro.toFixed(1)}%`,
+      change: formatChange(stats.cambios.tasaCobro),
+      trend: stats.cambios.tasaCobro >= 0 ? 'up' : 'down',
       icon: TrendingUp,
       gradient: 'from-blue-500 to-cyan-500',
       bgGradient: 'from-blue-500/10 to-cyan-500/10',
@@ -102,6 +94,13 @@ export function FinanceView() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Error banner (datos mock en uso) */}
+      {error && (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-2 text-sm text-yellow-400">
+          Usando datos de ejemplo (backend no disponible)
+        </div>
+      )}
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {mainStats.map((stat, index) => (
@@ -131,7 +130,7 @@ export function FinanceView() {
         isOpen={showConfigModal}
         onClose={() => setShowConfigModal(false)}
         config={config}
-        onSave={setConfig}
+        onSave={handleSaveConfig}
       />
     </div>
   );
