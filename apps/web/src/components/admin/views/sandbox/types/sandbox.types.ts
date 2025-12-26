@@ -85,6 +85,19 @@ export type SandboxViewMode = 'split' | 'editor' | 'preview';
 export type PreviewMode = 'desktop' | 'mobile';
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SAVE STATE
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Estado del auto-guardado
+ * - draft: Sin cambios pendientes
+ * - saving: Guardando en el servidor
+ * - saved: Guardado exitosamente
+ * - error: Error al guardar
+ */
+export type SaveStatus = 'draft' | 'saving' | 'saved' | 'error';
+
+// ─────────────────────────────────────────────────────────────────────────────
 // BACKGROUND PATTERNS
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -12,21 +12,55 @@ import { PublishModal, SuccessToast } from './components/PublishModal';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { ViewportContext } from './components/DesignSystem';
 import { SandboxIcons } from './components/SandboxIcons';
+import { SaveStatusIndicator } from './components/SaveStatusIndicator';
 
 // Types & Constants
 import { House, type Subject, type Lesson, type SandboxViewMode, type PreviewMode } from './types';
 import { INITIAL_JSON, HOUSES } from './constants';
 
 // Hooks
-import { useDebouncedCallback } from './hooks';
+import { useDebouncedCallback, useAutoSave } from './hooks';
+
+// API
+import {
+  createContenido,
+  publicarContenido,
+  addSlide as apiAddSlide,
+  deleteSlide as apiDeleteSlide,
+  subjectToMundoTipo,
+  mundoTipoToSubject,
+  type ContenidoBackend,
+  type CasaTipo,
+} from '@/lib/api/contenidos.api';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SANDBOX VIEW
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Convierte respuesta del backend a Lesson del frontend */
+function backendToLesson(contenido: ContenidoBackend): Lesson {
+  return {
+    id: contenido.id,
+    title: contenido.titulo,
+    house: contenido.casaTipo as House,
+    subject: mundoTipoToSubject(contenido.mundoTipo),
+    slides: contenido.slides.map((s) => ({
+      id: s.id,
+      title: s.titulo,
+      content: s.contenidoJson,
+    })),
+  };
+}
+
 export function SandboxView() {
   // ─── Initial State ───
   const [hasStarted, setHasStarted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [backendId, setBackendId] = useState<string | null>(null);
   const initialJsonString = JSON.stringify(INITIAL_JSON, null, 2);
 
   const [lesson, setLesson] = useState<Lesson>({
@@ -36,6 +70,15 @@ export function SandboxView() {
     subject: 'MATH',
     slides: [{ id: 's1', title: 'Main Sequence', content: initialJsonString }],
   });
+
+  // ─── Auto-Save Hook ───
+  const {
+    status: saveStatus,
+    errorMessage: saveError,
+    saveSlideContent,
+    saveSlideTitle,
+    saveContenidoMeta,
+  } = useAutoSave(backendId);
 
   // ─── Editor State ───
   const [activeSlideId, setActiveSlideId] = useState('s1');
@@ -132,8 +175,12 @@ export function SandboxView() {
         ...prev,
         slides: prev.slides.map((s) => (s.id === activeSlideId ? { ...s, content: value } : s)),
       }));
+      // Trigger auto-save to backend
+      if (backendId) {
+        saveSlideContent(activeSlideId, value);
+      }
     },
-    [activeSlideId],
+    [activeSlideId, backendId, saveSlideContent],
   );
 
   const debouncedUpdateContent = useDebouncedCallback(updateSlideContent, 150);
@@ -173,24 +220,65 @@ export function SandboxView() {
   };
 
   // ─── Slide Management ───
-  const addSlide = () => {
-    const newId = `s${Date.now()}`;
+  const addSlide = async () => {
+    const tempId = `s${Date.now()}`;
+    const newTitle = `Sequence ${lesson.slides.length + 1}`;
+
+    // Optimistic update
     setLesson((prev) => ({
       ...prev,
-      slides: [
-        ...prev.slides,
-        { id: newId, title: `Sequence ${prev.slides.length + 1}`, content: initialJsonString },
-      ],
+      slides: [...prev.slides, { id: tempId, title: newTitle, content: initialJsonString }],
     }));
-    setActiveSlideId(newId);
+    setActiveSlideId(tempId);
+
+    // Sync with backend
+    if (backendId) {
+      try {
+        const newSlide = await apiAddSlide(backendId, {
+          titulo: newTitle,
+          contenidoJson: initialJsonString,
+        });
+        // Replace temp ID with real ID
+        setLesson((prev) => ({
+          ...prev,
+          slides: prev.slides.map((s) =>
+            s.id === tempId
+              ? { id: newSlide.id, title: newSlide.titulo, content: newSlide.contenidoJson }
+              : s,
+          ),
+        }));
+        setActiveSlideId(newSlide.id);
+      } catch (error) {
+        console.error('Error al agregar slide:', error);
+      }
+    }
   };
 
-  const removeSlide = (id: string) => {
+  const removeSlide = async (id: string) => {
     if (lesson.slides.length === 1) return;
+
     const newSlides = lesson.slides.filter((s) => s.id !== id);
+
+    // Optimistic update
     setLesson((prev) => ({ ...prev, slides: newSlides }));
-    // newSlides siempre tiene al menos 1 elemento (ya verificamos length > 1)
     if (activeSlideId === id) setActiveSlideId(newSlides[0]!.id);
+
+    // Sync with backend
+    if (backendId) {
+      try {
+        await apiDeleteSlide(backendId, id);
+      } catch (error) {
+        console.error('Error al eliminar slide:', error);
+        // Revert on error
+        setLesson((prev) => {
+          const slide = lesson.slides.find((s) => s.id === id);
+          if (slide) {
+            return { ...prev, slides: [...prev.slides, slide] };
+          }
+          return prev;
+        });
+      }
+    }
   };
 
   // ─── Tab Renaming ───
@@ -205,37 +293,72 @@ export function SandboxView() {
         ...prev,
         slides: prev.slides.map((s) => (s.id === editingTabId ? { ...s, title: tempTitle } : s)),
       }));
+      // Auto-save title to backend
+      if (backendId) {
+        saveSlideTitle(editingTabId, tempTitle);
+      }
     }
     setEditingTabId(null);
   };
 
   // ─── Start Handler ───
-  const handleStart = (house: House, subject: Subject, pattern: string) => {
+  const handleStart = async (house: House, subject: Subject, pattern: string) => {
     const tempObj = JSON.parse(initialJsonString);
     tempObj.props.pattern = pattern;
     const newCode = JSON.stringify(tempObj, null, 2);
-    setLesson((prev) => {
-      const firstSlide = prev.slides[0]!;
-      return {
-        ...prev,
-        house,
-        subject,
-        slides: [{ id: firstSlide.id, title: firstSlide.title, content: newCode }],
-      };
-    });
-    setHasStarted(true);
+
+    setIsLoading(true);
+    try {
+      // Crear borrador en backend
+      const contenido = await createContenido({
+        titulo: 'Nueva Lección',
+        casaTipo: house as CasaTipo,
+        mundoTipo: subjectToMundoTipo(subject),
+        slides: [{ titulo: 'Main Sequence', contenidoJson: newCode }],
+      });
+
+      // Actualizar estado local con datos del backend
+      setBackendId(contenido.id);
+      setLesson(backendToLesson(contenido));
+      setActiveSlideId(contenido.slides[0]?.id ?? 's1');
+      setHasStarted(true);
+    } catch (error) {
+      console.error('Error al crear contenido:', error);
+      // Fallback: continuar sin backend
+      setLesson((prev) => {
+        const firstSlide = prev.slides[0]!;
+        return {
+          ...prev,
+          house,
+          subject,
+          slides: [{ id: firstSlide.id, title: firstSlide.title, content: newCode }],
+        };
+      });
+      setHasStarted(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // ─── Publish Handler ───
-  const handlePublish = () => {
+  const handlePublish = async () => {
+    if (!backendId) {
+      console.error('No hay contenido guardado para publicar');
+      return;
+    }
+
     setIsPublishing(true);
-    // Mock publish - will connect to backend later
-    setTimeout(() => {
-      setIsPublishing(false);
+    try {
+      await publicarContenido(backendId);
       setShowPublishModal(false);
       setShowSuccessToast(true);
       setTimeout(() => setShowSuccessToast(false), 3000);
-    }, 2000);
+    } catch (error) {
+      console.error('Error al publicar:', error);
+      // TODO: Mostrar error al usuario
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   // ─── Render Welcome Screen ───
@@ -272,16 +395,25 @@ export function SandboxView() {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-[#030014]">
         {/* Navbar */}
         <div className="h-14 flex items-center justify-between px-4 bg-[#030014] shrink-0 z-20 border-b border-[#8b5cf6]/10">
-          <div className="flex items-center gap-4 bg-[#0f0720] p-1.5 pr-4 rounded-full border border-white/5">
-            <div className="w-8 h-8 rounded-full bg-[#a855f7]/10 border border-[#a855f7]/20 flex items-center justify-center text-sm text-[#a855f7]">
-              <SandboxIcons.Document />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 bg-[#0f0720] p-1.5 pr-4 rounded-full border border-white/5">
+              <div className="w-8 h-8 rounded-full bg-[#a855f7]/10 border border-[#a855f7]/20 flex items-center justify-center text-sm text-[#a855f7]">
+                <SandboxIcons.Document />
+              </div>
+              <input
+                value={lesson.title}
+                onChange={(e) => {
+                  const newTitle = e.target.value;
+                  setLesson((prev) => ({ ...prev, title: newTitle }));
+                  if (backendId) {
+                    saveContenidoMeta({ titulo: newTitle });
+                  }
+                }}
+                className="bg-transparent text-sm font-bold text-white focus:outline-none w-48 placeholder-[#64748b]"
+                placeholder="Nombre del Proyecto"
+              />
             </div>
-            <input
-              value={lesson.title}
-              onChange={(e) => setLesson((prev) => ({ ...prev, title: e.target.value }))}
-              className="bg-transparent text-sm font-bold text-white focus:outline-none w-48 placeholder-[#64748b]"
-              placeholder="Nombre del Proyecto"
-            />
+            <SaveStatusIndicator status={saveStatus} errorMessage={saveError} />
           </div>
 
           <div className="flex items-center gap-4">
