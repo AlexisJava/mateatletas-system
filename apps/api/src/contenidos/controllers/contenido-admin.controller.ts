@@ -25,6 +25,10 @@ import {
   CreateContenidoDto,
   UpdateContenidoDto,
   QueryContenidosDto,
+  CreateNodoDto,
+  UpdateNodoDto,
+  MoverNodoDto,
+  ReordenarNodosDto,
 } from '../dto';
 
 /**
@@ -104,13 +108,7 @@ export class ContenidoAdminController {
   @ApiOperation({ summary: 'Agregar nodo a un contenido' })
   addNodo(
     @Param('id', ParseUUIDPipe) contenidoId: string,
-    @Body()
-    dto: {
-      titulo: string;
-      parentId?: string;
-      contenidoJson?: string;
-      orden?: number;
-    },
+    @Body() dto: CreateNodoDto,
   ) {
     return this.nodoService.addNodo(contenidoId, dto);
   }
@@ -119,7 +117,7 @@ export class ContenidoAdminController {
   @ApiOperation({ summary: 'Actualizar un nodo' })
   updateNodo(
     @Param('nodoId', ParseUUIDPipe) nodoId: string,
-    @Body() dto: { titulo?: string; contenidoJson?: string; orden?: number },
+    @Body() dto: UpdateNodoDto,
   ) {
     return this.nodoService.updateNodo(nodoId, dto);
   }
@@ -134,7 +132,7 @@ export class ContenidoAdminController {
   @ApiOperation({ summary: 'Reordenar nodos de un contenido' })
   reordenarNodos(
     @Param('id', ParseUUIDPipe) contenidoId: string,
-    @Body() dto: { orden: Array<{ nodoId: string; orden: number }> },
+    @Body() dto: ReordenarNodosDto,
   ) {
     return this.nodoService.reordenar(contenidoId, dto);
   }
@@ -143,8 +141,8 @@ export class ContenidoAdminController {
   @ApiOperation({ summary: 'Mover nodo a otro padre' })
   moverNodo(
     @Param('nodoId', ParseUUIDPipe) nodoId: string,
-    @Body() dto: { nuevoParentId: string | null },
+    @Body() dto: MoverNodoDto,
   ) {
-    return this.nodoService.moverNodo(nodoId, dto.nuevoParentId);
+    return this.nodoService.moverNodo(nodoId, dto.nuevoParentId ?? null);
   }
 }

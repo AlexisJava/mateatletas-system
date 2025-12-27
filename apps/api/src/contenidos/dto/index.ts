@@ -2,17 +2,16 @@
 // CONTENIDOS DTOs - Sistema de Contenido Educativo (Sandbox)
 // ============================================================================
 
-// Creación
+// Contenido
 export { CreateContenidoDto } from './create-contenido.dto';
-export { CreateSlideDto } from './create-slide.dto';
-
-// Actualización
 export { UpdateContenidoDto } from './update-contenido.dto';
-export { UpdateSlideDto } from './update-slide.dto';
-
-// Operaciones
-export { ReordenarSlidesDto, SlideOrdenItemDto } from './reordenar-slides.dto';
-export { UpdateProgresoDto } from './update-progreso.dto';
-
-// Query
 export { QueryContenidosDto } from './query-contenidos.dto';
+
+// Nodos jerárquicos
+export { CreateNodoDto } from './create-nodo.dto';
+export { UpdateNodoDto } from './update-nodo.dto';
+export { MoverNodoDto } from './mover-nodo.dto';
+export { ReordenarNodosDto, NodoOrdenItemDto } from './reordenar-nodos.dto';
+
+// Progreso
+export { UpdateProgresoDto } from './update-progreso.dto';

@@ -1,4 +1,4 @@
-import { OmitType, PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/mapped-types';
 import { CreateContenidoDto } from './create-contenido.dto';
 import { IsOptional, IsString, IsInt, Min, IsUrl } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -6,18 +6,11 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Trim } from '../../common/decorators/trim.decorator';
 
 /**
- * DTO base sin slides (los slides se gestionan con endpoints separados)
- */
-class ContenidoSinSlidesDto extends OmitType(CreateContenidoDto, [
-  'slides',
-] as const) {}
-
-/**
  * DTO para actualizar un contenido educativo existente
  * Todos los campos son opcionales
- * NO incluye slides (se gestionan con endpoints separados)
+ * Los nodos se gestionan con endpoints separados
  */
-export class UpdateContenidoDto extends PartialType(ContenidoSinSlidesDto) {
+export class UpdateContenidoDto extends PartialType(CreateContenidoDto) {
   /**
    * URL de imagen de portada (opcional)
    * Debe ser HTTPS para seguridad

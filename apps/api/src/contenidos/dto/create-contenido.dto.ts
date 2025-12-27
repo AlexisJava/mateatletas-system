@@ -3,15 +3,11 @@ import {
   IsNotEmpty,
   IsEnum,
   IsOptional,
-  IsArray,
-  ValidateNested,
   MaxLength,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CasaTipo, MundoTipo } from '@prisma/client';
 import { Trim } from '../../common/decorators/trim.decorator';
-import { CreateSlideDto } from './create-slide.dto';
 
 /**
  * DTO para crear un nuevo contenido educativo (lección)
@@ -79,19 +75,4 @@ export class CreateContenidoDto {
   })
   @Trim()
   descripcion?: string;
-
-  /**
-   * Slides iniciales (opcional)
-   * Permite crear el contenido con slides ya definidos
-   */
-  @ApiPropertyOptional({
-    description: 'Slides iniciales de la lección',
-    type: [CreateSlideDto],
-    isArray: true,
-  })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateSlideDto)
-  slides?: CreateSlideDto[];
 }

@@ -26,40 +26,20 @@ export class ContenidoAdminService {
    * @param dto - Datos del contenido
    */
   async create(adminId: string, dto: CreateContenidoDto) {
-    const { slides, ...contenidoData } = dto;
-
-    // Crear nodos iniciales: slides del DTO + nodos estructurales si no hay slides
-    const nodosIniciales = slides?.length
-      ? slides.map((slide, index) => ({
-          titulo: slide.titulo,
-          contenidoJson: slide.contenidoJson,
-          orden: slide.orden ?? index,
-          bloqueado: false,
-        }))
-      : [
-          // Si no hay slides, crear estructura por defecto
-          { titulo: 'Teoría', orden: 0, bloqueado: true, contenidoJson: null },
-          {
-            titulo: 'Práctica',
-            orden: 1,
-            bloqueado: true,
-            contenidoJson: null,
-          },
-          {
-            titulo: 'Evaluación',
-            orden: 2,
-            bloqueado: true,
-            contenidoJson: null,
-          },
-        ];
+    // Nodos estructurales por defecto (bloqueados, no eliminables)
+    const nodosEstructurales = [
+      { titulo: 'Teoría', orden: 0, bloqueado: true, contenidoJson: null },
+      { titulo: 'Práctica', orden: 1, bloqueado: true, contenidoJson: null },
+      { titulo: 'Evaluación', orden: 2, bloqueado: true, contenidoJson: null },
+    ];
 
     return this.prisma.contenido.create({
       data: {
-        ...contenidoData,
+        ...dto,
         creadorId: adminId,
         estado: EstadoContenido.BORRADOR,
         nodos: {
-          create: nodosIniciales,
+          create: nodosEstructurales,
         },
       },
       include: {

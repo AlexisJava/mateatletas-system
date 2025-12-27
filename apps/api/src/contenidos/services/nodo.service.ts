@@ -5,26 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { EstadoContenido } from '@prisma/client';
-
-/**
- * DTOs internos para nodos - se crearán formalmente después
- */
-interface CreateNodoDto {
-  titulo: string;
-  parentId?: string;
-  contenidoJson?: string;
-  orden?: number;
-}
-
-interface UpdateNodoDto {
-  titulo?: string;
-  contenidoJson?: string;
-  orden?: number;
-}
-
-interface ReordenarNodosDto {
-  orden: Array<{ nodoId: string; orden: number }>;
-}
+import { CreateNodoDto, UpdateNodoDto, ReordenarNodosDto } from '../dto';
 
 /**
  * Tipo para el árbol de nodos (estructura jerárquica)
