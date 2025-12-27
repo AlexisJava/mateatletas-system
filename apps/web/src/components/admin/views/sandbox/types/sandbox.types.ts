@@ -47,9 +47,33 @@ export interface ContentBlock {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// LESSON STRUCTURE
+// NODO STRUCTURE (Hierarchical Content)
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * NodoContenido - Estructura jerárquica recursiva para contenido educativo
+ *
+ * Reglas del árbol:
+ * - Nodos raíz: Teoría, Práctica, Evaluación (bloqueado=true, no eliminables)
+ * - Si hijos.length > 0: Es contenedor (no editable directamente)
+ * - Si hijos.length === 0: Es hoja (editable, tiene contenidoJson)
+ * - Profundidad infinita permitida
+ */
+export interface NodoContenido {
+  id: string;
+  titulo: string;
+  bloqueado: boolean;
+  parentId: string | null;
+  orden: number;
+  /** JSON string que Monaco edita - NULL si es contenedor con hijos */
+  contenidoJson: string | null;
+  /** Nodos hijos (estructura recursiva) */
+  hijos: NodoContenido[];
+}
+
+/**
+ * @deprecated Use NodoContenido instead - slides replaced by hierarchical nodos
+ */
 export interface Slide {
   id: string;
   title: string;
@@ -57,12 +81,23 @@ export interface Slide {
   content: string;
 }
 
+export type EstadoContenido = 'BORRADOR' | 'PUBLICADO' | 'ARCHIVADO';
+
 export interface Lesson {
   id: string;
   title: string;
   house: House;
   subject: Subject;
-  slides: Slide[];
+  estado: EstadoContenido;
+  /**
+   * Árbol jerárquico de nodos - Siempre 3 raíces: Teoría, Práctica, Evaluación
+   * Cada raíz puede tener hijos anidados infinitamente
+   */
+  nodos: NodoContenido[];
+  /**
+   * @deprecated Use nodos instead
+   */
+  slides?: Slide[];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

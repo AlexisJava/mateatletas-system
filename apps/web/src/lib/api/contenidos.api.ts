@@ -2,7 +2,7 @@
  * Contenidos API Client
  *
  * Cliente para el sistema de contenido educativo (Sandbox).
- * Endpoints para CRUD de contenidos, slides y publicación.
+ * Endpoints para CRUD de contenidos, nodos jerárquicos y publicación.
  */
 
 import axios from '@/lib/axios';
@@ -15,14 +15,25 @@ export type CasaTipo = 'QUANTUM' | 'VERTEX' | 'PULSAR';
 export type MundoTipo = 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
 export type EstadoContenido = 'BORRADOR' | 'PUBLICADO' | 'ARCHIVADO';
 
-export interface SlideBackend {
+/**
+ * NodoContenido - Estructura jerárquica del contenido educativo
+ *
+ * Estructura de árbol con profundidad infinita:
+ * - Nodos raíz: Teoría, Práctica, Evaluación (bloqueado=true)
+ * - Nodos con hijos: Contenedores (contenidoJson=null)
+ * - Nodos sin hijos: Hojas editables (contenidoJson=string)
+ */
+export interface NodoBackend {
   id: string;
   titulo: string;
-  contenidoJson: string;
+  bloqueado: boolean;
+  parentId: string | null;
   orden: number;
+  contenidoJson: string | null;
   contenidoId: string;
   createdAt: string;
   updatedAt: string;
+  hijos: NodoBackend[];
 }
 
 export interface ContenidoBackend {
@@ -39,7 +50,8 @@ export interface ContenidoBackend {
   creadorId: string;
   createdAt: string;
   updatedAt: string;
-  slides: SlideBackend[];
+  /** Árbol jerárquico de nodos (3 raíces: Teoría, Práctica, Evaluación) */
+  nodos: NodoBackend[];
   creador?: {
     id: string;
     nombre: string;
@@ -52,7 +64,6 @@ export interface CreateContenidoDto {
   casaTipo: CasaTipo;
   mundoTipo: MundoTipo;
   descripcion?: string;
-  slides?: CreateSlideDto[];
 }
 
 export interface UpdateContenidoDto {
@@ -65,16 +76,29 @@ export interface UpdateContenidoDto {
   orden?: number;
 }
 
-export interface CreateSlideDto {
+// ─────────────────────────────────────────────────────────────────────────────
+// NODOS DTOs
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface CreateNodoDto {
   titulo: string;
-  contenidoJson: string;
+  parentId?: string;
+  contenidoJson?: string;
   orden?: number;
 }
 
-export interface UpdateSlideDto {
+export interface UpdateNodoDto {
   titulo?: string;
   contenidoJson?: string;
   orden?: number;
+}
+
+export interface MoverNodoDto {
+  nuevoParentId: string | null;
+}
+
+export interface ReordenarNodosDto {
+  orden: Array<{ nodoId: string; orden: number }>;
 }
 
 export interface QueryContenidosParams {
@@ -124,7 +148,7 @@ export const getContenidos = async (
 };
 
 /**
- * Obtener contenido por ID con slides
+ * Obtener contenido por ID con árbol de nodos
  */
 export const getContenidoById = async (id: string): Promise<ContenidoBackend> => {
   return axios.get<ContenidoBackend>(`/contenidos/${id}`);
@@ -168,45 +192,54 @@ export const archivarContenido = async (id: string): Promise<ContenidoBackend> =
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SLIDES
+// NODOS JERÁRQUICOS
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Agregar slide a un contenido
+ * Obtener árbol completo de nodos de un contenido
  */
-export const addSlide = async (contenidoId: string, dto: CreateSlideDto): Promise<SlideBackend> => {
-  return axios.post<SlideBackend>(`/contenidos/${contenidoId}/slides`, dto);
+export const getArbol = async (contenidoId: string): Promise<NodoBackend[]> => {
+  return axios.get<NodoBackend[]>(`/contenidos/${contenidoId}/arbol`);
 };
 
 /**
- * Actualizar un slide existente
+ * Crear nuevo nodo dentro de un contenido
  */
-export const updateSlide = async (
-  contenidoId: string,
-  slideId: string,
-  dto: UpdateSlideDto,
-): Promise<SlideBackend> => {
-  return axios.patch<SlideBackend>(`/contenidos/${contenidoId}/slides/${slideId}`, dto);
+export const createNodo = async (contenidoId: string, dto: CreateNodoDto): Promise<NodoBackend> => {
+  return axios.post<NodoBackend>(`/contenidos/${contenidoId}/nodos`, dto);
 };
 
 /**
- * Eliminar un slide
+ * Actualizar un nodo existente
  */
-export const deleteSlide = async (
-  contenidoId: string,
-  slideId: string,
+export const updateNodo = async (nodoId: string, dto: UpdateNodoDto): Promise<NodoBackend> => {
+  return axios.patch<NodoBackend>(`/contenidos/nodos/${nodoId}`, dto);
+};
+
+/**
+ * Eliminar un nodo (no aplica a nodos bloqueados)
+ */
+export const deleteNodo = async (
+  nodoId: string,
 ): Promise<{ success: boolean; mensaje: string }> => {
-  return axios.delete(`/contenidos/${contenidoId}/slides/${slideId}`);
+  return axios.delete(`/contenidos/nodos/${nodoId}`);
 };
 
 /**
- * Reordenar slides
+ * Mover nodo a otro padre
  */
-export const reordenarSlides = async (
+export const moverNodo = async (nodoId: string, dto: MoverNodoDto): Promise<NodoBackend> => {
+  return axios.patch<NodoBackend>(`/contenidos/nodos/${nodoId}/mover`, dto);
+};
+
+/**
+ * Reordenar nodos de un contenido
+ */
+export const reordenarNodos = async (
   contenidoId: string,
-  orden: { slideId: string; orden: number }[],
-): Promise<SlideBackend[]> => {
-  return axios.patch<SlideBackend[]>(`/contenidos/${contenidoId}/slides/reordenar`, { orden });
+  dto: ReordenarNodosDto,
+): Promise<NodoBackend[]> => {
+  return axios.patch<NodoBackend[]>(`/contenidos/${contenidoId}/nodos/reordenar`, dto);
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
