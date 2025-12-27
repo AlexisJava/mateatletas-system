@@ -5,6 +5,7 @@ import Editor, { type OnMount } from '@monaco-editor/react';
 
 // Components
 import { StudioSidebar } from './components/StudioSidebar';
+import { TreeSidebar } from './components/TreeSidebar';
 import { CodePreview } from './components/CodePreview';
 import { LessonPlayer } from './components/LessonPlayer';
 import { PreviewErrorBoundary } from './components/PreviewErrorBoundary';
@@ -15,7 +16,14 @@ import { SandboxIcons } from './components/SandboxIcons';
 import { SaveStatusIndicator } from './components/SaveStatusIndicator';
 
 // Types & Constants
-import { House, type Subject, type Lesson, type SandboxViewMode, type PreviewMode } from './types';
+import {
+  House,
+  type Subject,
+  type Lesson,
+  type NodoContenido,
+  type SandboxViewMode,
+  type PreviewMode,
+} from './types';
 import { INITIAL_JSON, HOUSES } from './constants';
 
 // Hooks
@@ -25,21 +33,86 @@ import { useDebouncedCallback, useAutoSave } from './hooks';
 import {
   createContenido,
   publicarContenido,
-  addSlide as apiAddSlide,
-  deleteSlide as apiDeleteSlide,
+  createNodo,
+  updateNodo as apiUpdateNodo,
+  deleteNodo as apiDeleteNodo,
   subjectToMundoTipo,
   mundoTipoToSubject,
   type ContenidoBackend,
+  type NodoBackend,
   type CasaTipo,
 } from '@/lib/api/contenidos.api';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SANDBOX VIEW
+// TREE HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ─────────────────────────────────────────────────────────────────────────────
-// HELPERS
-// ─────────────────────────────────────────────────────────────────────────────
+/** Convierte NodoBackend del API a NodoContenido del frontend */
+function mapNodoBackendToFrontend(nodo: NodoBackend): NodoContenido {
+  return {
+    id: nodo.id,
+    titulo: nodo.titulo,
+    bloqueado: nodo.bloqueado,
+    parentId: nodo.parentId,
+    orden: nodo.orden,
+    contenidoJson: nodo.contenidoJson,
+    hijos: nodo.hijos.map(mapNodoBackendToFrontend),
+  };
+}
+
+/** Buscar nodo por ID en árbol recursivo */
+function findNodoById(nodos: NodoContenido[], id: string): NodoContenido | null {
+  for (const nodo of nodos) {
+    if (nodo.id === id) return nodo;
+    const found = findNodoById(nodo.hijos, id);
+    if (found) return found;
+  }
+  return null;
+}
+
+/** Actualizar nodo en árbol (immutable) */
+function updateNodoInTree(
+  nodos: NodoContenido[],
+  id: string,
+  updates: Partial<NodoContenido>,
+): NodoContenido[] {
+  return nodos.map((nodo) => {
+    if (nodo.id === id) {
+      return { ...nodo, ...updates };
+    }
+    if (nodo.hijos.length > 0) {
+      return { ...nodo, hijos: updateNodoInTree(nodo.hijos, id, updates) };
+    }
+    return nodo;
+  });
+}
+
+/** Agregar hijo a un nodo */
+function addNodoToParent(
+  nodos: NodoContenido[],
+  parentId: string,
+  nuevoNodo: NodoContenido,
+): NodoContenido[] {
+  return nodos.map((nodo) => {
+    if (nodo.id === parentId) {
+      return { ...nodo, hijos: [...nodo.hijos, nuevoNodo] };
+    }
+    if (nodo.hijos.length > 0) {
+      return { ...nodo, hijos: addNodoToParent(nodo.hijos, parentId, nuevoNodo) };
+    }
+    return nodo;
+  });
+}
+
+/** Eliminar nodo del árbol */
+function removeNodoFromTree(nodos: NodoContenido[], id: string): NodoContenido[] {
+  return nodos
+    .filter((nodo) => nodo.id !== id)
+    .map((nodo) => ({
+      ...nodo,
+      hijos: removeNodoFromTree(nodo.hijos, id),
+    }));
+}
 
 /** Convierte respuesta del backend a Lesson del frontend */
 function backendToLesson(contenido: ContenidoBackend): Lesson {
@@ -48,13 +121,14 @@ function backendToLesson(contenido: ContenidoBackend): Lesson {
     title: contenido.titulo,
     house: contenido.casaTipo as House,
     subject: mundoTipoToSubject(contenido.mundoTipo),
-    slides: contenido.slides.map((s) => ({
-      id: s.id,
-      title: s.titulo,
-      content: s.contenidoJson,
-    })),
+    estado: contenido.estado,
+    nodos: contenido.nodos.map(mapNodoBackendToFrontend),
   };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SANDBOX VIEW
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function SandboxView() {
   // ─── Initial State ───
@@ -64,28 +138,32 @@ export function SandboxView() {
   const initialJsonString = JSON.stringify(INITIAL_JSON, null, 2);
 
   const [lesson, setLesson] = useState<Lesson>({
-    id: 'l1',
+    id: 'new',
     title: 'Nueva Lección',
     house: House.QUANTUM,
     subject: 'MATH',
-    slides: [{ id: 's1', title: 'Main Sequence', content: initialJsonString }],
+    estado: 'BORRADOR',
+    nodos: [],
   });
 
   // ─── Auto-Save Hook ───
   const {
     status: saveStatus,
     errorMessage: saveError,
-    saveSlideContent,
-    saveSlideTitle,
+    saveNodoContent,
+    saveNodoTitle,
     saveContenidoMeta,
   } = useAutoSave(backendId);
 
   // ─── Editor State ───
-  const [activeSlideId, setActiveSlideId] = useState('s1');
+  const [activeNodoId, setActiveNodoId] = useState<string | null>(null);
+  const [activeNodo, setActiveNodo] = useState<NodoContenido | null>(null);
+  const [editorContent, setEditorContent] = useState<string>(initialJsonString);
   const [view, setView] = useState<SandboxViewMode>('split');
   const [previewMode, setPreviewMode] = useState<PreviewMode>('desktop');
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isTreeSidebarOpen, setIsTreeSidebarOpen] = useState(true);
   const [mobileScale, setMobileScale] = useState(1);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -94,22 +172,15 @@ export function SandboxView() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
-  // ─── Tab Editing State ───
-  const [editingTabId, setEditingTabId] = useState<string | null>(null);
-  const [tempTitle, setTempTitle] = useState('');
-
   // ─── Refs ───
   const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
 
   // ─── Derived State ───
-  const activeSlide = useMemo(() => {
-    const found = lesson.slides.find((s) => s.id === activeSlideId);
-    // slides siempre tiene al menos un elemento (inicializado en useState)
-    return found ?? lesson.slides[0]!;
-  }, [lesson.slides, activeSlideId]);
-
   const houseStyles = useMemo(() => HOUSES[lesson.house], [lesson.house]);
+
+  // Check if active nodo is a leaf (editable)
+  const isActiveNodoEditable = activeNodo !== null && activeNodo.hijos.length === 0;
 
   // ─── Auto-Scaling for Mobile Simulator ───
   useLayoutEffect(() => {
@@ -169,21 +240,30 @@ export function SandboxView() {
     }
   };
 
-  const updateSlideContent = useCallback(
+  const updateEditorContent = useCallback(
     (value: string) => {
-      setLesson((prev) => ({
-        ...prev,
-        slides: prev.slides.map((s) => (s.id === activeSlideId ? { ...s, content: value } : s)),
-      }));
-      // Trigger auto-save to backend
-      if (backendId) {
-        saveSlideContent(activeSlideId, value);
+      setEditorContent(value);
+
+      // Update local tree state
+      if (activeNodoId) {
+        setLesson((prev) => ({
+          ...prev,
+          nodos: updateNodoInTree(prev.nodos, activeNodoId, { contenidoJson: value }),
+        }));
+
+        // Also update activeNodo reference
+        setActiveNodo((prev) => (prev ? { ...prev, contenidoJson: value } : null));
+
+        // Trigger auto-save to backend
+        if (backendId) {
+          saveNodoContent(activeNodoId, value);
+        }
       }
     },
-    [activeSlideId, backendId, saveSlideContent],
+    [activeNodoId, backendId, saveNodoContent],
   );
 
-  const debouncedUpdateContent = useDebouncedCallback(updateSlideContent, 150);
+  const debouncedUpdateContent = useDebouncedCallback(updateEditorContent, 150);
 
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
@@ -202,104 +282,114 @@ export function SandboxView() {
         setTimeout(() => editor.getAction('editor.action.formatDocument')?.run(), 100);
       }
     } else {
-      updateSlideContent(activeSlide.content + '\n' + snippet);
+      updateEditorContent(editorContent + '\n' + snippet);
     }
   };
 
   const handleUpdateBackground = (bg: string) => {
     try {
-      const jsonContent = JSON.parse(activeSlide.content);
+      const jsonContent = JSON.parse(editorContent);
       if (jsonContent.type === 'Stage') {
         jsonContent.props = { ...jsonContent.props, background: bg };
         const newCode = JSON.stringify(jsonContent, null, 2);
-        updateSlideContent(newCode);
+        updateEditorContent(newCode);
       }
     } catch {
       console.error('No se pudo actualizar el fondo: JSON inválido');
     }
   };
 
-  // ─── Slide Management ───
-  const addSlide = async () => {
-    const tempId = `s${Date.now()}`;
-    const newTitle = `Sequence ${lesson.slides.length + 1}`;
+  // ─── Nodo Management ───
+  const handleSelectNodo = useCallback(
+    (nodo: NodoContenido) => {
+      setActiveNodoId(nodo.id);
+      setActiveNodo(nodo);
 
-    // Optimistic update
-    setLesson((prev) => ({
-      ...prev,
-      slides: [...prev.slides, { id: tempId, title: newTitle, content: initialJsonString }],
-    }));
-    setActiveSlideId(tempId);
+      // Only load editor content if it's a leaf node (editable)
+      if (nodo.hijos.length === 0) {
+        setEditorContent(nodo.contenidoJson || initialJsonString);
+      }
+    },
+    [initialJsonString],
+  );
 
-    // Sync with backend
-    if (backendId) {
+  const handleAddNodo = useCallback(
+    async (parentId: string) => {
+      if (!backendId) return;
+
       try {
-        const newSlide = await apiAddSlide(backendId, {
-          titulo: newTitle,
+        const newNodo = await createNodo(backendId, {
+          titulo: 'Nuevo nodo',
+          parentId,
           contenidoJson: initialJsonString,
         });
-        // Replace temp ID with real ID
+
+        const frontendNodo = mapNodoBackendToFrontend(newNodo);
+
         setLesson((prev) => ({
           ...prev,
-          slides: prev.slides.map((s) =>
-            s.id === tempId
-              ? { id: newSlide.id, title: newSlide.titulo, content: newSlide.contenidoJson }
-              : s,
-          ),
+          nodos: addNodoToParent(prev.nodos, parentId, frontendNodo),
         }));
-        setActiveSlideId(newSlide.id);
+
+        // Select the new node
+        handleSelectNodo(frontendNodo);
       } catch (error) {
-        console.error('Error al agregar slide:', error);
+        console.error('Error al agregar nodo:', error);
       }
-    }
-  };
+    },
+    [backendId, initialJsonString, handleSelectNodo],
+  );
 
-  const removeSlide = async (id: string) => {
-    if (lesson.slides.length === 1) return;
+  const handleDeleteNodo = useCallback(
+    async (nodoId: string) => {
+      if (!backendId) return;
 
-    const newSlides = lesson.slides.filter((s) => s.id !== id);
-
-    // Optimistic update
-    setLesson((prev) => ({ ...prev, slides: newSlides }));
-    if (activeSlideId === id) setActiveSlideId(newSlides[0]!.id);
-
-    // Sync with backend
-    if (backendId) {
       try {
-        await apiDeleteSlide(backendId, id);
+        await apiDeleteNodo(nodoId);
+
+        setLesson((prev) => ({
+          ...prev,
+          nodos: removeNodoFromTree(prev.nodos, nodoId),
+        }));
+
+        // If deleted node was active, clear selection
+        if (activeNodoId === nodoId) {
+          setActiveNodoId(null);
+          setActiveNodo(null);
+          setEditorContent(initialJsonString);
+        }
       } catch (error) {
-        console.error('Error al eliminar slide:', error);
-        // Revert on error
-        setLesson((prev) => {
-          const slide = lesson.slides.find((s) => s.id === id);
-          if (slide) {
-            return { ...prev, slides: [...prev.slides, slide] };
-          }
-          return prev;
-        });
+        console.error('Error al eliminar nodo:', error);
       }
-    }
-  };
+    },
+    [backendId, activeNodoId, initialJsonString],
+  );
 
-  // ─── Tab Renaming ───
-  const startEditingTab = (slideId: string, currentTitle: string) => {
-    setEditingTabId(slideId);
-    setTempTitle(currentTitle);
-  };
+  const handleRenameNodo = useCallback(
+    async (nodoId: string, nuevoTitulo: string) => {
+      if (!backendId) return;
 
-  const saveTabTitle = () => {
-    if (editingTabId && tempTitle.trim() !== '') {
-      setLesson((prev) => ({
-        ...prev,
-        slides: prev.slides.map((s) => (s.id === editingTabId ? { ...s, title: tempTitle } : s)),
-      }));
-      // Auto-save title to backend
-      if (backendId) {
-        saveSlideTitle(editingTabId, tempTitle);
+      try {
+        await apiUpdateNodo(nodoId, { titulo: nuevoTitulo });
+
+        setLesson((prev) => ({
+          ...prev,
+          nodos: updateNodoInTree(prev.nodos, nodoId, { titulo: nuevoTitulo }),
+        }));
+
+        // Update active nodo if it's the one being renamed
+        if (activeNodoId === nodoId) {
+          setActiveNodo((prev) => (prev ? { ...prev, titulo: nuevoTitulo } : null));
+        }
+
+        // Also trigger auto-save for title
+        saveNodoTitle(nodoId, nuevoTitulo);
+      } catch (error) {
+        console.error('Error al renombrar nodo:', error);
       }
-    }
-    setEditingTabId(null);
-  };
+    },
+    [backendId, activeNodoId, saveNodoTitle],
+  );
 
   // ─── Start Handler ───
   const handleStart = async (house: House, subject: Subject, pattern: string) => {
@@ -309,36 +399,94 @@ export function SandboxView() {
 
     setIsLoading(true);
     try {
-      // Crear borrador en backend
+      // Crear borrador en backend (el backend crea los 3 nodos raíz automáticamente)
       const contenido = await createContenido({
         titulo: 'Nueva Lección',
         casaTipo: house as CasaTipo,
         mundoTipo: subjectToMundoTipo(subject),
-        slides: [{ titulo: 'Main Sequence', contenidoJson: newCode }],
       });
 
       // Actualizar estado local con datos del backend
       setBackendId(contenido.id);
-      setLesson(backendToLesson(contenido));
-      setActiveSlideId(contenido.slides[0]?.id ?? 's1');
+      const newLesson = backendToLesson(contenido);
+      setLesson(newLesson);
+
+      // Select first leaf node if available
+      const firstLeaf = findFirstLeafNode(newLesson.nodos);
+      if (firstLeaf) {
+        handleSelectNodo(firstLeaf);
+      }
+
       setHasStarted(true);
     } catch (error) {
       console.error('Error al crear contenido:', error);
-      // Fallback: continuar sin backend
-      setLesson((prev) => {
-        const firstSlide = prev.slides[0]!;
-        return {
-          ...prev,
-          house,
-          subject,
-          slides: [{ id: firstSlide.id, title: firstSlide.title, content: newCode }],
-        };
+      // Fallback: continuar sin backend con nodos vacíos
+      setLesson({
+        id: 'local',
+        title: 'Nueva Lección',
+        house,
+        subject,
+        estado: 'BORRADOR',
+        nodos: createDefaultNodos(),
       });
       setHasStarted(true);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Helper to find first leaf node
+  function findFirstLeafNode(nodos: NodoContenido[]): NodoContenido | null {
+    for (const nodo of nodos) {
+      if (nodo.hijos.length === 0) return nodo;
+      const found = findFirstLeafNode(nodo.hijos);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  // Create default nodos for offline mode
+  function createDefaultNodos(): NodoContenido[] {
+    return [
+      {
+        id: 'teoria-1',
+        titulo: 'Teoría',
+        bloqueado: true,
+        parentId: null,
+        orden: 0,
+        contenidoJson: null,
+        hijos: [
+          {
+            id: 'teoria-intro',
+            titulo: 'Introducción',
+            bloqueado: false,
+            parentId: 'teoria-1',
+            orden: 0,
+            contenidoJson: initialJsonString,
+            hijos: [],
+          },
+        ],
+      },
+      {
+        id: 'practica-1',
+        titulo: 'Práctica',
+        bloqueado: true,
+        parentId: null,
+        orden: 1,
+        contenidoJson: null,
+        hijos: [],
+      },
+      {
+        id: 'evaluacion-1',
+        titulo: 'Evaluación',
+        bloqueado: true,
+        parentId: null,
+        orden: 2,
+        contenidoJson: null,
+        hijos: [],
+      },
+    ];
+  }
 
   // ─── Publish Handler ───
   const handlePublish = async () => {
@@ -355,10 +503,17 @@ export function SandboxView() {
       setTimeout(() => setShowSuccessToast(false), 3000);
     } catch (error) {
       console.error('Error al publicar:', error);
-      // TODO: Mostrar error al usuario
     } finally {
       setIsPublishing(false);
     }
+  };
+
+  // Count total leaf nodes for publish modal
+  const countLeafNodes = (nodos: NodoContenido[]): number => {
+    return nodos.reduce((count, nodo) => {
+      if (nodo.hijos.length === 0) return count + 1;
+      return count + countLeafNodes(nodo.hijos);
+    }, 0);
   };
 
   // ─── Render Welcome Screen ───
@@ -376,12 +531,12 @@ export function SandboxView() {
           onClose={() => setShowPublishModal(false)}
           onConfirm={handlePublish}
           lessonTitle={lesson.title}
-          slideCount={lesson.slides.length}
+          slideCount={countLeafNodes(lesson.nodos)}
         />
       )}
       {showSuccessToast && <SuccessToast />}
 
-      {/* Sidebar */}
+      {/* Studio Sidebar (Components & Backgrounds) */}
       <StudioSidebar
         currentHouse={lesson.house}
         setHouse={(h) => setLesson((prev) => ({ ...prev, house: h }))}
@@ -391,11 +546,34 @@ export function SandboxView() {
         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       />
 
+      {/* Tree Sidebar (Content Structure) */}
+      {isTreeSidebarOpen && (
+        <div className="w-64 h-full bg-[#02040a] border-r border-[rgba(255,255,255,0.05)] flex flex-col shrink-0">
+          <TreeSidebar
+            nodos={lesson.nodos}
+            activeNodoId={activeNodoId}
+            onSelectNodo={handleSelectNodo}
+            onAddNodo={handleAddNodo}
+            onDeleteNodo={handleDeleteNodo}
+            onRenameNodo={handleRenameNodo}
+          />
+        </div>
+      )}
+
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-[#030014]">
         {/* Navbar */}
         <div className="h-14 flex items-center justify-between px-4 bg-[#030014] shrink-0 z-20 border-b border-[#8b5cf6]/10">
           <div className="flex items-center gap-4">
+            {/* Toggle Tree Sidebar */}
+            <button
+              onClick={() => setIsTreeSidebarOpen(!isTreeSidebarOpen)}
+              className={`p-2 rounded-lg transition-all ${isTreeSidebarOpen ? 'bg-[#a855f7]/20 text-[#a855f7]' : 'text-[#64748b] hover:text-white hover:bg-[#131b2e]'}`}
+              aria-label={isTreeSidebarOpen ? 'Ocultar árbol' : 'Mostrar árbol'}
+            >
+              <SandboxIcons.Tree />
+            </button>
+
             <div className="flex items-center gap-4 bg-[#0f0720] p-1.5 pr-4 rounded-full border border-white/5">
               <div className="w-8 h-8 rounded-full bg-[#a855f7]/10 border border-[#a855f7]/20 flex items-center justify-center text-sm text-[#a855f7]">
                 <SandboxIcons.Document />
@@ -453,115 +631,90 @@ export function SandboxView() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="h-10 px-4 flex items-end gap-0.5 overflow-x-auto hide-scrollbar shrink-0 bg-[#030014] pt-2 select-none z-10">
-          {lesson.slides.map((s) => (
-            <div
-              key={s.id}
-              onClick={() => setActiveSlideId(s.id)}
-              className={`group relative px-5 py-2 rounded-t-[1rem] text-[11px] font-bold transition-all flex items-center gap-3 border-t border-x min-w-[140px] max-w-[200px] cursor-pointer ${
-                activeSlideId === s.id
-                  ? 'bg-[#0f0720] border-[#8b5cf6]/20 text-white z-10'
-                  : 'bg-transparent border-transparent text-[#64748b] hover:bg-[#0f0720]/50 hover:text-white z-0'
-              }`}
-              title="Doble click para renombrar"
-            >
+        {/* Active Node Indicator */}
+        <div className="h-10 px-4 flex items-center gap-3 bg-[#030014] border-b border-[#8b5cf6]/5 shrink-0">
+          {activeNodo ? (
+            <>
               <span
-                className={`w-1.5 h-1.5 rounded-full ${activeSlideId === s.id ? 'bg-[#a855f7] shadow-[0_0_5px_#a855f7]' : 'bg-[#1e1b4b]'}`}
+                className={`w-2 h-2 rounded-full ${isActiveNodoEditable ? 'bg-[#4ade80] shadow-[0_0_5px_#4ade80]' : 'bg-[#fbbf24] shadow-[0_0_5px_#fbbf24]'}`}
               />
-
-              <div
-                className="flex-1 truncate relative"
-                onDoubleClick={(e) => {
-                  e.stopPropagation();
-                  startEditingTab(s.id, s.title);
-                }}
-              >
-                {editingTabId === s.id ? (
-                  <input
-                    autoFocus
-                    value={tempTitle}
-                    onChange={(e) => setTempTitle(e.target.value)}
-                    onBlur={saveTabTitle}
-                    onKeyDown={(e) => e.key === 'Enter' && saveTabTitle()}
-                    className="bg-transparent border-b border-[#a855f7] text-white w-full outline-none p-0 m-0 font-mono"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                ) : (
-                  <span className="font-mono cursor-text hover:text-[#a855f7] transition-colors">
-                    {s.title}
+              <span className="text-xs font-medium text-[#94a3b8]">
+                {activeNodo.titulo}
+                {!isActiveNodoEditable && (
+                  <span className="ml-2 text-[10px] text-[#64748b]">
+                    (contenedor - seleccioná un nodo hoja)
                   </span>
                 )}
-              </div>
-
-              {lesson.slides.length > 1 && (
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeSlide(s.id);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:text-red-400 w-4 h-4 rounded-full flex items-center justify-center transition-all text-sm leading-none pb-0.5"
-                >
-                  ×
-                </span>
-              )}
-
-              {activeSlideId === s.id && (
-                <div className="absolute -bottom-[1px] left-0 right-0 h-1 bg-[#0f0720] z-20" />
-              )}
-            </div>
-          ))}
-          <button
-            onClick={addSlide}
-            className="w-8 h-8 rounded-full hover:bg-[#0f0720] text-[#64748b] hover:text-[#a855f7] flex items-center justify-center transition-all ml-1 mb-0.5"
-            aria-label="Agregar slide"
-          >
-            <SandboxIcons.Plus />
-          </button>
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 rounded-full bg-[#475569]" />
+              <span className="text-xs text-[#64748b]">Seleccioná un nodo para editar</span>
+            </>
+          )}
         </div>
 
         {/* Workspace */}
-        <div className="flex-1 flex overflow-hidden gap-4 bg-[#030014] relative z-0 px-4 pb-4">
+        <div className="flex-1 flex overflow-hidden gap-4 bg-[#030014] relative z-0 px-4 pb-4 pt-2">
           {/* EDITOR */}
           {(view === 'split' || view === 'editor') && (
             <div
-              className={`flex-1 relative flex flex-col ${view === 'editor' ? 'w-full' : 'w-1/2'} bg-[#0f0720] rounded-b-2xl rounded-tr-2xl rounded-tl-none overflow-hidden border border-[#8b5cf6]/20 shadow-2xl group transition-all duration-300`}
+              className={`flex-1 relative flex flex-col ${view === 'editor' ? 'w-full' : 'w-1/2'} bg-[#0f0720] rounded-2xl overflow-hidden border border-[#8b5cf6]/20 shadow-2xl group transition-all duration-300`}
             >
-              <div className="absolute top-3 right-4 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={handleFormatCode}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-[#1e1b4b]/90 backdrop-blur-sm border border-white/10 rounded-lg text-[10px] font-bold text-[#94a3b8] hover:text-white hover:bg-[#2e1065] transition-colors shadow-lg"
-                  aria-label="Formatear JSON (Cmd+S)"
-                >
-                  <SandboxIcons.Format />
-                  <span>PRETTIFY</span>
-                </button>
-              </div>
+              {isActiveNodoEditable ? (
+                <>
+                  <div className="absolute top-3 right-4 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={handleFormatCode}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-[#1e1b4b]/90 backdrop-blur-sm border border-white/10 rounded-lg text-[10px] font-bold text-[#94a3b8] hover:text-white hover:bg-[#2e1065] transition-colors shadow-lg"
+                      aria-label="Formatear JSON (Cmd+S)"
+                    >
+                      <SandboxIcons.Format />
+                      <span>PRETTIFY</span>
+                    </button>
+                  </div>
 
-              <Editor
-                height="100%"
-                defaultLanguage="json"
-                theme="vs-dark"
-                value={activeSlide.content}
-                onMount={handleEditorDidMount}
-                onChange={handleEditorChange}
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 13,
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontLigatures: true,
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
-                  padding: { top: 24, bottom: 24 },
-                  lineNumbers: 'on',
-                  renderLineHighlight: 'line',
-                  overviewRulerBorder: false,
-                  hideCursorInOverviewRuler: true,
-                  bracketPairColorization: { enabled: true },
-                  formatOnPaste: true,
-                  formatOnType: true,
-                }}
-              />
+                  <Editor
+                    height="100%"
+                    defaultLanguage="json"
+                    theme="vs-dark"
+                    value={editorContent}
+                    onMount={handleEditorDidMount}
+                    onChange={handleEditorChange}
+                    options={{
+                      minimap: { enabled: false },
+                      fontSize: 13,
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontLigatures: true,
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                      padding: { top: 24, bottom: 24 },
+                      lineNumbers: 'on',
+                      renderLineHighlight: 'line',
+                      overviewRulerBorder: false,
+                      hideCursorInOverviewRuler: true,
+                      bracketPairColorization: { enabled: true },
+                      formatOnPaste: true,
+                      formatOnType: true,
+                    }}
+                  />
+                </>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+                  <div className="w-16 h-16 rounded-2xl bg-[#131b2e] flex items-center justify-center mb-4 text-[#475569]">
+                    <SandboxIcons.Folder />
+                  </div>
+                  <h3 className="text-sm font-bold text-white mb-2">
+                    {activeNodo ? 'Nodo Contenedor' : 'Sin Selección'}
+                  </h3>
+                  <p className="text-xs text-[#64748b] max-w-xs">
+                    {activeNodo
+                      ? 'Este nodo contiene sub-nodos. Seleccioná un nodo hoja (sin hijos) para editar su contenido.'
+                      : 'Seleccioná un nodo del árbol de contenido para comenzar a editar.'}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -609,8 +762,8 @@ export function SandboxView() {
                         <ViewportContext.Provider value={{ isMobile: true }}>
                           <PreviewErrorBoundary onReset={() => setRefreshKey((k) => k + 1)}>
                             <CodePreview
-                              code={activeSlide.content}
-                              key={`${activeSlide.id}-${refreshKey}`}
+                              code={editorContent}
+                              key={`preview-${activeNodoId}-${refreshKey}`}
                               showGuidelines={false}
                             />
                           </PreviewErrorBoundary>
@@ -645,8 +798,8 @@ export function SandboxView() {
                     >
                       <PreviewErrorBoundary onReset={() => setRefreshKey((k) => k + 1)}>
                         <CodePreview
-                          code={activeSlide.content}
-                          key={`${activeSlide.id}-${refreshKey}`}
+                          code={editorContent}
+                          key={`preview-${activeNodoId}-${refreshKey}`}
                           showGuidelines={true}
                         />
                       </PreviewErrorBoundary>

@@ -1,8 +1,33 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { CodePreview } from './CodePreview';
-import type { Lesson, HouseConfig } from '../types';
+import type { Lesson, HouseConfig, NodoContenido } from '../types';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Flatten tree to get all leaf nodes (nodes without children) in order */
+function getLeafNodes(nodos: NodoContenido[]): NodoContenido[] {
+  const leaves: NodoContenido[] = [];
+
+  function traverse(node: NodoContenido) {
+    if (node.hijos.length === 0) {
+      leaves.push(node);
+    } else {
+      // Sort children by order before traversing
+      const sortedHijos = [...node.hijos].sort((a, b) => a.orden - b.orden);
+      sortedHijos.forEach(traverse);
+    }
+  }
+
+  // Sort root nodes by order
+  const sortedRoots = [...nodos].sort((a, b) => a.orden - b.orden);
+  sortedRoots.forEach(traverse);
+
+  return leaves;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LESSON PLAYER
@@ -17,11 +42,48 @@ interface LessonPlayerProps {
 /**
  * Fullscreen lesson player - how students will see the content.
  * Includes navigation, progress bar, and house-themed styling.
+ * Navigates through leaf nodes (nodes without children) in hierarchical order.
  */
 export function LessonPlayer({ lesson, houseStyles, onClose }: LessonPlayerProps) {
+  // Get all navigable content (leaf nodes only)
+  const leafNodes = useMemo(() => getLeafNodes(lesson.nodos), [lesson.nodos]);
+
   const [currentIdx, setCurrentIdx] = useState(0);
-  // slides siempre tiene al menos 1 elemento (enforced por el parent)
-  const currentSlide = lesson.slides[currentIdx]!;
+
+  // Handle empty content
+  if (leafNodes.length === 0) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-[#030014] flex flex-col items-center justify-center font-sans text-slate-200">
+        <div className="text-center p-8">
+          <div className="w-20 h-20 rounded-2xl bg-[#131b2e] flex items-center justify-center mb-6 mx-auto">
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-[#64748b]"
+            >
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Sin contenido</h2>
+          <p className="text-sm text-[#64748b] mb-6">
+            Esta lección no tiene nodos de contenido para mostrar.
+          </p>
+          <button
+            onClick={onClose}
+            className="px-6 py-3 rounded-xl bg-[#a855f7] text-white font-bold text-sm hover:bg-[#9333ea] transition-colors"
+          >
+            Volver al Editor
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const currentNode = leafNodes[currentIdx]!;
 
   // Dynamic CSS variables for house theming
   const playerStyle = {
@@ -30,8 +92,8 @@ export function LessonPlayer({ lesson, houseStyles, onClose }: LessonPlayerProps
     '--house-accent': houseStyles.accentColor,
   } as React.CSSProperties;
 
-  const progressPercent = ((currentIdx + 1) / lesson.slides.length) * 100;
-  const isLastSlide = currentIdx === lesson.slides.length - 1;
+  const progressPercent = ((currentIdx + 1) / leafNodes.length) * 100;
+  const isLastNode = currentIdx === leafNodes.length - 1;
 
   return (
     <div
@@ -40,8 +102,8 @@ export function LessonPlayer({ lesson, houseStyles, onClose }: LessonPlayerProps
     >
       {/* LAYER 0: CONTENT (Full Screen) */}
       <div className="absolute inset-0 z-0">
-        {/* Key forces remount on slide change for animations */}
-        <CodePreview code={currentSlide.content} key={currentSlide.id} />
+        {/* Key forces remount on node change for animations */}
+        <CodePreview code={currentNode.contenidoJson || '{}'} key={currentNode.id} />
       </div>
 
       {/* LAYER 1: HUD (Floating Controls) */}
@@ -91,6 +153,7 @@ export function LessonPlayer({ lesson, houseStyles, onClose }: LessonPlayerProps
             <h1 className="text-sm font-bold text-white drop-shadow-md opacity-90">
               {lesson.title}
             </h1>
+            <p className="text-[10px] text-[#64748b] mt-0.5">{currentNode.titulo}</p>
           </div>
         </header>
 
@@ -103,7 +166,7 @@ export function LessonPlayer({ lesson, houseStyles, onClose }: LessonPlayerProps
             onClick={() => setCurrentIdx((prev) => Math.max(0, prev - 1))}
             disabled={currentIdx === 0}
             className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#94a3b8] hover:text-white transition-all px-4 py-3 rounded-xl hover:bg-white/5 ${currentIdx === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-            aria-label="Slide anterior"
+            aria-label="Nodo anterior"
           >
             <svg
               width="16"
@@ -122,29 +185,29 @@ export function LessonPlayer({ lesson, houseStyles, onClose }: LessonPlayerProps
           <div className="flex flex-col items-center pb-2">
             <span className="text-2xl font-black text-white/20 tracking-tighter font-mono select-none">
               {String(currentIdx + 1).padStart(2, '0')} /{' '}
-              {String(lesson.slides.length).padStart(2, '0')}
+              {String(leafNodes.length).padStart(2, '0')}
             </span>
           </div>
 
           <button
             onClick={() => {
-              if (isLastSlide) {
+              if (isLastNode) {
                 onClose();
               } else {
-                setCurrentIdx((prev) => Math.min(lesson.slides.length - 1, prev + 1));
+                setCurrentIdx((prev) => Math.min(leafNodes.length - 1, prev + 1));
               }
             }}
             className="group relative px-8 py-3.5 rounded-xl font-black text-sm text-black transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(0,0,0,0.3)] overflow-hidden"
             style={{
-              background: isLastSlide
+              background: isLastNode
                 ? 'linear-gradient(135deg, #00ffa3, #06b6d4)'
                 : 'linear-gradient(135deg, var(--house-primary), var(--house-accent))',
             }}
-            aria-label={isLastSlide ? 'Finalizar lección' : 'Siguiente slide'}
+            aria-label={isLastNode ? 'Finalizar lección' : 'Siguiente nodo'}
           >
             <div className="absolute inset-0 bg-white/20 group-hover:opacity-100 opacity-0 transition-opacity" />
             <span className="relative flex items-center gap-2">
-              {isLastSlide ? 'FINALIZAR MISIÓN' : 'SIGUIENTE'}
+              {isLastNode ? 'FINALIZAR MISIÓN' : 'SIGUIENTE'}
               <svg
                 width="16"
                 height="16"
