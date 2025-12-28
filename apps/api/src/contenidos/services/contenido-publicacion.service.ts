@@ -41,6 +41,20 @@ export class ContenidoPublicacionService {
       );
     }
 
+    // Validar que exista al menos un nodo hoja con contenido real
+    const nodosConContenido = await this.prisma.nodoContenido.count({
+      where: {
+        contenidoId: id,
+        contenidoJson: { not: null },
+      },
+    });
+
+    if (nodosConContenido === 0) {
+      throw new BadRequestException(
+        'No se puede publicar un contenido sin slides con contenido',
+      );
+    }
+
     return this.prisma.contenido.update({
       where: { id },
       data: {

@@ -170,16 +170,25 @@ export function StudioSidebar({
   const layouts = DESIGN_SYSTEM_COMPONENTS.filter((c) => c.category === 'layout');
   const content = DESIGN_SYSTEM_COMPONENTS.filter((c) => c.category === 'content');
 
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        onUpdateBackground(base64String);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      alert('El archivo es demasiado grande. Máximo 2MB.');
+      // Limpiar input para permitir re-selección del mismo archivo
+      e.target.value = '';
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      onUpdateBackground(base64String);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (

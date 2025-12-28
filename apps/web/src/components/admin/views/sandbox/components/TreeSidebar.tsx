@@ -198,9 +198,10 @@ function getRootIcon(titulo: string): React.ReactNode {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TREE NODE COMPONENT (Recursivo)
+// Memoizado para evitar re-renders innecesarios en árboles grandes
 // ─────────────────────────────────────────────────────────────────────────────
 
-function TreeNode({
+const TreeNode = React.memo(function TreeNode({
   nodo,
   level,
   activeNodoId,
@@ -403,7 +404,7 @@ function TreeNode({
       )}
     </div>
   );
-}
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TREE SIDEBAR COMPONENT

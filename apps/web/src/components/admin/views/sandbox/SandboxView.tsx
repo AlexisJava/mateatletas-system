@@ -14,6 +14,7 @@ import { WelcomeScreen } from './components/WelcomeScreen';
 import { ViewportContext } from './components/DesignSystem';
 import { SandboxIcons } from './components/SandboxIcons';
 import { SaveStatusIndicator } from './components/SaveStatusIndicator';
+import { Modal } from '@/components/ui/Modal';
 
 // Types & Constants
 import {
@@ -114,6 +115,15 @@ function removeNodoFromTree(nodos: NodoContenido[], id: string): NodoContenido[]
     }));
 }
 
+/** Contar todos los descendientes de un nodo (hijos, nietos, etc.) */
+function countDescendants(nodo: NodoContenido): number {
+  let count = nodo.hijos.length;
+  for (const hijo of nodo.hijos) {
+    count += countDescendants(hijo);
+  }
+  return count;
+}
+
 /** Convierte respuesta del backend a Lesson del frontend */
 function backendToLesson(contenido: ContenidoBackend): Lesson {
   return {
@@ -151,8 +161,8 @@ export function SandboxView() {
     status: saveStatus,
     errorMessage: saveError,
     saveNodoContent,
-    saveNodoTitle,
     saveContenidoMeta,
+    flushPendingChanges,
   } = useAutoSave(backendId);
 
   // ─── Editor State ───
@@ -171,6 +181,22 @@ export function SandboxView() {
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+
+  // ─── Delete Confirmation State ───
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    nodoId: string;
+    titulo: string;
+    descendantCount: number;
+  } | null>(null);
+
+  // ─── Error Toast State ───
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Helper para mostrar errores al usuario
+  const showError = useCallback((message: string) => {
+    setErrorMessage(message);
+    setTimeout(() => setErrorMessage(null), 5000); // Auto-dismiss después de 5s
+  }, []);
 
   // ─── Refs ───
   const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
@@ -295,13 +321,18 @@ export function SandboxView() {
         updateEditorContent(newCode);
       }
     } catch {
-      console.error('No se pudo actualizar el fondo: JSON inválido');
+      showError('No se pudo actualizar el fondo: JSON inválido');
     }
   };
 
   // ─── Nodo Management ───
   const handleSelectNodo = useCallback(
-    (nodo: NodoContenido) => {
+    async (nodo: NodoContenido) => {
+      // Guardar cambios pendientes antes de cambiar de nodo
+      // Esto previene pérdida de datos si el usuario cambia de nodo
+      // antes de que expire el debounce del auto-save
+      await flushPendingChanges();
+
       setActiveNodoId(nodo.id);
       setActiveNodo(nodo);
 
@@ -310,7 +341,7 @@ export function SandboxView() {
         setEditorContent(nodo.contenidoJson || initialJsonString);
       }
     },
-    [initialJsonString],
+    [initialJsonString, flushPendingChanges],
   );
 
   const handleAddNodo = useCallback(
@@ -335,14 +366,30 @@ export function SandboxView() {
         handleSelectNodo(frontendNodo);
       } catch (error) {
         console.error('Error al agregar nodo:', error);
+        showError('Error al agregar nodo. Intenta de nuevo.');
       }
     },
-    [backendId, initialJsonString, handleSelectNodo],
+    [backendId, initialJsonString, handleSelectNodo, showError],
   );
 
   const handleDeleteNodo = useCallback(
-    async (nodoId: string) => {
+    async (nodoId: string, skipConfirmation = false) => {
       if (!backendId) return;
+
+      // Buscar el nodo para verificar si tiene hijos
+      const nodo = findNodoById(lesson.nodos, nodoId);
+      if (!nodo) return;
+
+      // Si tiene descendientes y no se ha confirmado, pedir confirmación
+      const descendantCount = countDescendants(nodo);
+      if (descendantCount > 0 && !skipConfirmation) {
+        setDeleteConfirmation({
+          nodoId,
+          titulo: nodo.titulo,
+          descendantCount,
+        });
+        return;
+      }
 
       try {
         await apiDeleteNodo(nodoId);
@@ -358,11 +405,15 @@ export function SandboxView() {
           setActiveNodo(null);
           setEditorContent(initialJsonString);
         }
+
+        // Limpiar estado de confirmación si estaba abierto
+        setDeleteConfirmation(null);
       } catch (error) {
         console.error('Error al eliminar nodo:', error);
+        showError('Error al eliminar nodo. Intenta de nuevo.');
       }
     },
-    [backendId, activeNodoId, initialJsonString],
+    [backendId, activeNodoId, initialJsonString, lesson.nodos, showError],
   );
 
   const handleRenameNodo = useCallback(
@@ -381,14 +432,14 @@ export function SandboxView() {
         if (activeNodoId === nodoId) {
           setActiveNodo((prev) => (prev ? { ...prev, titulo: nuevoTitulo } : null));
         }
-
-        // Also trigger auto-save for title
-        saveNodoTitle(nodoId, nuevoTitulo);
+        // Nota: NO llamamos saveNodoTitle aquí porque apiUpdateNodo ya guardó el título.
+        // Llamar a saveNodoTitle causaría un doble request redundante.
       } catch (error) {
         console.error('Error al renombrar nodo:', error);
+        showError('Error al renombrar nodo. Intenta de nuevo.');
       }
     },
-    [backendId, activeNodoId, saveNodoTitle],
+    [backendId, activeNodoId, showError],
   );
 
   // ─── Start Handler ───
@@ -420,6 +471,7 @@ export function SandboxView() {
       setHasStarted(true);
     } catch (error) {
       console.error('Error al crear contenido:', error);
+      showError('Error al crear contenido. Continuando en modo local.');
       // Fallback: continuar sin backend con nodos vacíos
       setLesson({
         id: 'local',
@@ -491,7 +543,7 @@ export function SandboxView() {
   // ─── Publish Handler ───
   const handlePublish = async () => {
     if (!backendId) {
-      console.error('No hay contenido guardado para publicar');
+      showError('No hay contenido guardado para publicar');
       return;
     }
 
@@ -503,6 +555,7 @@ export function SandboxView() {
       setTimeout(() => setShowSuccessToast(false), 3000);
     } catch (error) {
       console.error('Error al publicar:', error);
+      showError('Error al publicar. Verifica que el contenido tenga slides con contenido.');
     } finally {
       setIsPublishing(false);
     }
@@ -535,6 +588,70 @@ export function SandboxView() {
         />
       )}
       {showSuccessToast && <SuccessToast />}
+
+      {/* Error Toast */}
+      {errorMessage && (
+        <div className="fixed bottom-4 right-4 z-50 bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>{errorMessage}</span>
+          <button
+            onClick={() => setErrorMessage(null)}
+            className="ml-2 hover:text-red-200 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <Modal
+          isOpen={true}
+          onClose={() => setDeleteConfirmation(null)}
+          title="Confirmar eliminación"
+          size="sm"
+        >
+          <div className="space-y-4">
+            <p className="text-gray-700">
+              ¿Estás seguro de que deseas eliminar{' '}
+              <strong>&quot;{deleteConfirmation.titulo}&quot;</strong>?
+            </p>
+            <p className="text-red-600 font-medium">
+              ⚠️ Esta acción eliminará también {deleteConfirmation.descendantCount}{' '}
+              {deleteConfirmation.descendantCount === 1 ? 'subnodo' : 'subnodos'} que dependen de
+              este nodo.
+            </p>
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                onClick={() => setDeleteConfirmation(null)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => handleDeleteNodo(deleteConfirmation.nodoId, true)}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors"
+              >
+                Eliminar todo
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* Studio Sidebar (Components & Backgrounds) */}
       <StudioSidebar

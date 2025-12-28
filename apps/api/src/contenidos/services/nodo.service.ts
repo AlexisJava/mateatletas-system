@@ -60,8 +60,21 @@ export class NodoService {
   /**
    * Obtiene el árbol completo de nodos de un contenido
    * @param contenidoId - ID del contenido
+   * @throws NotFoundException si el contenido no existe
    */
   async getArbol(contenidoId: string) {
+    // Primero validar que el contenido existe
+    const contenido = await this.prisma.contenido.findUnique({
+      where: { id: contenidoId },
+      select: { id: true },
+    });
+
+    if (!contenido) {
+      throw new NotFoundException(
+        `Contenido con ID ${contenidoId} no encontrado`,
+      );
+    }
+
     const nodos = await this.prisma.nodoContenido.findMany({
       where: { contenidoId },
       orderBy: { orden: 'asc' },
@@ -228,9 +241,36 @@ export class NodoService {
    * Reordena múltiples nodos
    * @param contenidoId - ID del contenido
    * @param dto - Nuevas posiciones de nodos
+   * @throws BadRequestException si algún nodo no pertenece al contenido
    */
   async reordenar(contenidoId: string, dto: ReordenarNodosDto) {
     await this.validateContenidoEditable(contenidoId);
+
+    // Validar que TODOS los nodos pertenezcan al contenido especificado
+    const nodoIds = dto.orden.map((item) => item.nodoId);
+    const nodosExistentes = await this.prisma.nodoContenido.findMany({
+      where: { id: { in: nodoIds } },
+      select: { id: true, contenidoId: true },
+    });
+
+    // Verificar que encontramos todos los nodos
+    if (nodosExistentes.length !== nodoIds.length) {
+      const encontrados = new Set(nodosExistentes.map((n) => n.id));
+      const noEncontrados = nodoIds.filter((id) => !encontrados.has(id));
+      throw new BadRequestException(
+        `Nodos no encontrados: ${noEncontrados.join(', ')}`,
+      );
+    }
+
+    // Verificar que todos pertenecen al contenido correcto
+    const nodosDeOtroContenido = nodosExistentes.filter(
+      (n) => n.contenidoId !== contenidoId,
+    );
+    if (nodosDeOtroContenido.length > 0) {
+      throw new BadRequestException(
+        `Los siguientes nodos no pertenecen al contenido especificado: ${nodosDeOtroContenido.map((n) => n.id).join(', ')}`,
+      );
+    }
 
     // Actualizar orden de cada nodo en transacción
     await this.prisma.$transaction(
@@ -315,24 +355,39 @@ export class NodoService {
 
   /**
    * Verifica si un nodo es descendiente de otro
+   * Optimizado: carga todos los nodos del contenido en 1 query y verifica en memoria
    */
   private async esDescendiente(
     posibleDescendienteId: string,
     ancestroId: string,
   ): Promise<boolean> {
-    let actual = await this.prisma.nodoContenido.findUnique({
+    // Primero obtener el contenidoId del nodo
+    const nodo = await this.prisma.nodoContenido.findUnique({
       where: { id: posibleDescendienteId },
-      select: { parentId: true },
+      select: { contenidoId: true, parentId: true },
     });
 
-    while (actual?.parentId) {
-      if (actual.parentId === ancestroId) {
+    if (!nodo) {
+      return false;
+    }
+
+    // Cargar todos los nodos del contenido en una sola query
+    const todosLosNodos = await this.prisma.nodoContenido.findMany({
+      where: { contenidoId: nodo.contenidoId },
+      select: { id: true, parentId: true },
+    });
+
+    // Construir mapa para búsqueda O(1)
+    const nodosMap = new Map<string, string | null>();
+    todosLosNodos.forEach((n) => nodosMap.set(n.id, n.parentId));
+
+    // Subir por la cadena de ancestros en memoria
+    let actualParentId = nodo.parentId;
+    while (actualParentId) {
+      if (actualParentId === ancestroId) {
         return true;
       }
-      actual = await this.prisma.nodoContenido.findUnique({
-        where: { id: actual.parentId },
-        select: { parentId: true },
-      });
+      actualParentId = nodosMap.get(actualParentId) ?? null;
     }
 
     return false;
