@@ -3,12 +3,12 @@ import {
   Get,
   Post,
   Param,
-  ParseUUIDPipe,
   Body,
   UseGuards,
   Request,
   ForbiddenException,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes';
 import { IsString, IsOptional, IsNotEmpty, IsIn } from 'class-validator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -68,7 +68,7 @@ export class GamificacionController {
   @Get('dashboard/:estudianteId')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async getDashboard(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
     @Request() req: RequestWithAuthUser,
   ) {
     // Validar que el estudiante solo pueda ver su propio dashboard
@@ -89,7 +89,7 @@ export class GamificacionController {
    */
   @Get('logros/:estudianteId')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
-  async getLogros(@Param('estudianteId', ParseUUIDPipe) estudianteId: string) {
+  async getLogros(@Param('estudianteId', ParseIdPipe) estudianteId: string) {
     return this.gamificacionService.getLogrosEstudiante(estudianteId);
   }
 
@@ -99,7 +99,7 @@ export class GamificacionController {
    */
   @Get('puntos/:estudianteId')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
-  async getPuntos(@Param('estudianteId', ParseUUIDPipe) estudianteId: string) {
+  async getPuntos(@Param('estudianteId', ParseIdPipe) estudianteId: string) {
     return this.gamificacionService.getPuntosEstudiante(estudianteId);
   }
 
@@ -109,7 +109,7 @@ export class GamificacionController {
    */
   @Get('ranking/:estudianteId')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
-  async getRanking(@Param('estudianteId', ParseUUIDPipe) estudianteId: string) {
+  async getRanking(@Param('estudianteId', ParseIdPipe) estudianteId: string) {
     return this.gamificacionService.getRankingEstudiante(estudianteId);
   }
 
@@ -119,7 +119,7 @@ export class GamificacionController {
    */
   @Get('progreso/:estudianteId')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
-  getProgreso(@Param('estudianteId', ParseUUIDPipe) estudianteId: string) {
+  getProgreso(@Param('estudianteId', ParseIdPipe) estudianteId: string) {
     return this.gamificacionService.getProgresoEstudiante(estudianteId);
   }
 
@@ -139,9 +139,7 @@ export class GamificacionController {
    */
   @Get('historial/:estudianteId')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
-  async getHistorial(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
-  ) {
+  async getHistorial(@Param('estudianteId', ParseIdPipe) estudianteId: string) {
     return this.gamificacionService.getHistorialPuntos(estudianteId);
   }
 
@@ -171,7 +169,7 @@ export class GamificacionController {
   @Post('logros/:logroId/desbloquear')
   @Roles(Role.ADMIN)
   desbloquearLogro(
-    @Param('logroId', ParseUUIDPipe) logroId: string,
+    @Param('logroId', ParseIdPipe) logroId: string,
     @Request() req: RequestWithAuthUser,
   ) {
     return this.gamificacionService.desbloquearLogro(req.user.id, logroId);

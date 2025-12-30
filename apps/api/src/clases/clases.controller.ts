@@ -5,13 +5,13 @@ import {
   Patch,
   Delete,
   Param,
-  ParseUUIDPipe,
   Body,
   UseGuards,
   Query,
   Req,
   ForbiddenException,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes';
 import { ClasesService } from './clases.service';
 import { CrearClaseDto } from './dto/crear-clase.dto';
 import { ReservarClaseDto } from './dto/reservar-clase.dto';
@@ -66,7 +66,7 @@ export class ClasesController {
   @Patch(':id/cancelar')
   @Roles(Role.ADMIN, Role.DOCENTE)
   async cancelarClase(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @Req() req: RequestWithAuthUser,
   ) {
     // 📌 Decisión 2025-01: mantenemos PATCH /clases/:id/cancelar como endpoint oficial
@@ -87,7 +87,7 @@ export class ClasesController {
    */
   @Delete(':id')
   @Roles(Role.ADMIN)
-  async eliminarClase(@Param('id', ParseUUIDPipe) id: string) {
+  async eliminarClase(@Param('id', ParseIdPipe) id: string) {
     return this.clasesService.eliminarClase(id);
   }
 
@@ -98,7 +98,7 @@ export class ClasesController {
   @Post(':id/asignar-estudiantes')
   @Roles(Role.ADMIN)
   async asignarEstudiantes(
-    @Param('id', ParseUUIDPipe) claseId: string,
+    @Param('id', ParseIdPipe) claseId: string,
     @Body() dto: AsignarEstudiantesDto,
   ) {
     return this.clasesService.asignarEstudiantesAClase(
@@ -160,7 +160,7 @@ export class ClasesController {
   @Post(':id/reservar')
   @Roles(Role.TUTOR)
   async reservarClase(
-    @Param('id', ParseUUIDPipe) claseId: string,
+    @Param('id', ParseIdPipe) claseId: string,
     @Body() dto: ReservarClaseDto,
     @Req() req: RequestWithAuthUser,
   ) {
@@ -175,7 +175,7 @@ export class ClasesController {
   @Delete('reservas/:id')
   @Roles(Role.TUTOR)
   async cancelarReserva(
-    @Param('id', ParseUUIDPipe) inscripcionId: string,
+    @Param('id', ParseIdPipe) inscripcionId: string,
     @Req() req: RequestWithAuthUser,
   ) {
     const tutorId = req.user.id;
@@ -208,7 +208,7 @@ export class ClasesController {
   @Post(':id/asistencia')
   @Roles(Role.DOCENTE)
   async registrarAsistencia(
-    @Param('id', ParseUUIDPipe) claseId: string,
+    @Param('id', ParseIdPipe) claseId: string,
     @Body() dto: RegistrarAsistenciaDto,
     @Req() req: RequestWithAuthUser,
   ) {
@@ -225,7 +225,7 @@ export class ClasesController {
    */
   @Get(':id/estudiantes')
   @Roles(Role.ADMIN)
-  async obtenerEstudiantes(@Param('id', ParseUUIDPipe) claseId: string) {
+  async obtenerEstudiantes(@Param('id', ParseIdPipe) claseId: string) {
     return this.clasesService.obtenerEstudiantesDeClase(claseId);
   }
 
@@ -235,7 +235,7 @@ export class ClasesController {
    */
   @Get(':id')
   @Roles(Role.ADMIN, Role.DOCENTE, Role.TUTOR)
-  async obtenerClase(@Param('id', ParseUUIDPipe) id: string) {
+  async obtenerClase(@Param('id', ParseIdPipe) id: string) {
     return this.clasesService.obtenerClase(id);
   }
 }

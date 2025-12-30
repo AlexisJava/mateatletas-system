@@ -5,9 +5,9 @@ import {
   Body,
   Param,
   Query,
-  ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../../common/pipes';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { MundoTipo } from '@prisma/client';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -52,7 +52,7 @@ export class ContenidoEstudianteController {
   @ApiOperation({ summary: 'Obtener contenido completo para reproducir' })
   findOne(
     @GetUser() user: AuthUser,
-    @Param('id', ParseUUIDPipe) contenidoId: string,
+    @Param('id', ParseIdPipe) contenidoId: string,
   ) {
     return this.contenidoService.findOnePublicado(user.id, contenidoId);
   }
@@ -61,7 +61,7 @@ export class ContenidoEstudianteController {
   @ApiOperation({ summary: 'Actualizar mi progreso en un contenido' })
   updateProgreso(
     @GetUser() user: AuthUser,
-    @Param('id', ParseUUIDPipe) contenidoId: string,
+    @Param('id', ParseIdPipe) contenidoId: string,
     @Body() dto: UpdateProgresoDto,
   ) {
     return this.progresoService.updateProgreso(user.id, contenidoId, dto);

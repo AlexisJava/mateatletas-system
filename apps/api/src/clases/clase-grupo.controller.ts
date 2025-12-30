@@ -2,11 +2,11 @@ import {
   Controller,
   Get,
   Param,
-  ParseUUIDPipe,
   UseGuards,
   Request,
   NotFoundException,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -118,7 +118,7 @@ export class ClaseGrupoController {
     description: 'No tienes permiso para acceder a este grupo',
   })
   async getDetalleCompleto(
-    @Param('id', ParseUUIDPipe) claseGrupoId: string,
+    @Param('id', ParseIdPipe) claseGrupoId: string,
     @Request() req: RequestWithAuthUser,
   ) {
     // El servicio valida que el docente sea el titular

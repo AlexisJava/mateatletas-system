@@ -4,10 +4,10 @@ import {
   Get,
   Body,
   Param,
-  ParseUUIDPipe,
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes';
 import { EstadoAsistencia } from '@prisma/client';
 import { AsistenciaService } from './asistencia.service';
 import { AsistenciaReportesService } from './asistencia-reportes.service';
@@ -35,8 +35,8 @@ export class AsistenciaController {
   @Post('clases/:claseId/estudiantes/:estudianteId')
   @Roles(Role.DOCENTE)
   async marcarAsistencia(
-    @Param('claseId', ParseUUIDPipe) claseId: string,
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('claseId', ParseIdPipe) claseId: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
     @Body() dto: MarcarAsistenciaDto,
     @GetUser() user: AuthUser,
   ) {
@@ -56,7 +56,7 @@ export class AsistenciaController {
   @Get('clases/:claseId')
   @Roles(Role.DOCENTE, Role.ADMIN)
   async obtenerAsistenciaClase(
-    @Param('claseId', ParseUUIDPipe) claseId: string,
+    @Param('claseId', ParseIdPipe) claseId: string,
     @GetUser() user: AuthUser,
   ) {
     // Si es docente, verificar que es el titular
@@ -72,7 +72,7 @@ export class AsistenciaController {
   @Get('clases/:claseId/estadisticas')
   @Roles(Role.DOCENTE, Role.ADMIN)
   async obtenerEstadisticasClase(
-    @Param('claseId', ParseUUIDPipe) claseId: string,
+    @Param('claseId', ParseIdPipe) claseId: string,
   ) {
     return this.reportesService.obtenerEstadisticasClase(claseId);
   }
@@ -85,7 +85,7 @@ export class AsistenciaController {
   @Get('estudiantes/:estudianteId')
   @Roles(Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerHistorialEstudiante(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
     @Query() filtros: FiltrarAsistenciaDto,
   ) {
     return this.reportesService.obtenerHistorialEstudiante(

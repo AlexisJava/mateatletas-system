@@ -5,11 +5,11 @@ import {
   Body,
   Patch,
   Param,
-  ParseUUIDPipe,
   Delete,
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes';
 import { ProductosService } from './productos.service';
 import { CrearProductoDto } from './dto/crear-producto.dto';
 import { ActualizarProductoDto } from './dto/actualizar-producto.dto';
@@ -75,7 +75,7 @@ export class ProductosController {
    */
   @Public()
   @Get(':id')
-  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+  async findOne(@Param('id', ParseIdPipe) id: string) {
     return this.productosService.findById(id);
   }
 
@@ -100,7 +100,7 @@ export class ProductosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @Body() updateDto: ActualizarProductoDto,
   ) {
     return this.productosService.update(id, updateDto);
@@ -119,7 +119,7 @@ export class ProductosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async remove(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @Query('hardDelete') hardDelete?: string,
   ) {
     const permanent = hardDelete === 'true';

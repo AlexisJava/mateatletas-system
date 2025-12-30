@@ -1,10 +1,5 @@
-import {
-  Controller,
-  Get,
-  Param,
-  ParseEnumPipe,
-  ParseUUIDPipe,
-} from '@nestjs/common';
+import { Controller, Get, Param, ParseEnumPipe } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes';
 import { TierNombre } from '@prisma/client';
 import { TiersService } from './tiers.service';
 import { Public } from '../auth/decorators/public.decorator';
@@ -45,7 +40,7 @@ export class TiersController {
    * Obtiene un tier por su ID
    */
   @Get(':id')
-  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+  async findOne(@Param('id', ParseIdPipe) id: string) {
     return this.tiersService.findOne(id);
   }
 }

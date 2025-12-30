@@ -6,9 +6,9 @@ import {
   Body,
   Query,
   UseGuards,
-  ParseUUIDPipe,
   BadRequestException,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../../common/pipes';
 import { EstadoSuscripcion } from '@prisma/client';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
@@ -199,7 +199,7 @@ export class SuscripcionesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TUTOR)
   async getSuscripcionDetalle(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser() user: AuthUser,
   ): Promise<SuscripcionDetalleDto> {
     return this.queryService.getSuscripcionDetalle(id, user.id);
@@ -213,7 +213,7 @@ export class SuscripcionesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TUTOR)
   async cancelarSuscripcion(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser() user: AuthUser,
   ): Promise<CancelarSuscripcionResponseDto> {
     // Validar estado antes de cancelar
@@ -266,7 +266,7 @@ export class SuscripcionesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TUTOR)
   async getHistorialPagos(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser() user: AuthUser,
   ): Promise<HistorialPagosResponseDto> {
     return this.queryService.getHistorialPagos(id, user.id);

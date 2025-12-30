@@ -4,10 +4,10 @@ import {
   Patch,
   Delete,
   Param,
-  ParseUUIDPipe,
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes';
 import { NotificacionesService } from './notificaciones.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -50,7 +50,7 @@ export class NotificacionesController {
    */
   @Patch(':id/leer')
   async marcarComoLeida(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser('id') docenteId: string,
   ) {
     return this.notificacionesService.marcarComoLeida(id, docenteId);
@@ -76,7 +76,7 @@ export class NotificacionesController {
    */
   @Delete(':id')
   async remove(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser('id') docenteId: string,
   ) {
     await this.notificacionesService.remove(id, docenteId);

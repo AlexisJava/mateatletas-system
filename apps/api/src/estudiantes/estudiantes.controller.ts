@@ -6,11 +6,11 @@ import {
   Delete,
   Body,
   Param,
-  ParseUUIDPipe,
   Query,
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes';
 import { EstudiantesFacadeService } from './estudiantes-facade.service';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
@@ -154,7 +154,7 @@ export class EstudiantesController {
   @Get(':id/detalle-completo')
   @UseGuards(EstudianteOwnershipGuard)
   async getDetalleCompleto(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser() user: AuthUser,
   ) {
     return this.estudiantesService.getDetalleCompleto(id, user.id);
@@ -170,7 +170,7 @@ export class EstudiantesController {
   @Get(':id')
   @UseGuards(EstudianteOwnershipGuard)
   async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser() user: AuthUser,
   ) {
     return this.estudiantesService.findOne(id, user.id);
@@ -187,7 +187,7 @@ export class EstudiantesController {
   @Patch(':id')
   @UseGuards(EstudianteOwnershipGuard)
   async update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @Body() updateDto: UpdateEstudianteDto,
     @GetUser() user: AuthUser,
   ) {
@@ -212,7 +212,7 @@ export class EstudiantesController {
   @Patch(':id/avatar')
   @UseGuards(EstudianteOwnershipGuard)
   async updateAvatar(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @Body() body: { avatar_gradient: number },
     @GetUser() _user: AuthUser,
   ) {
@@ -234,7 +234,7 @@ export class EstudiantesController {
   @Delete(':id')
   @UseGuards(EstudianteOwnershipGuard)
   async remove(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser() user: AuthUser,
   ) {
     await this.estudiantesService.remove(id, user.id);
@@ -265,7 +265,7 @@ export class EstudiantesController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   async copiarASector(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @Body() dto: CopiarEstudianteDto,
   ) {
     return this.estudiantesService.copiarEstudianteASector(id, dto.sectorId);
@@ -298,7 +298,7 @@ export class EstudiantesController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   async asignarClases(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @Body() dto: AsignarClasesDto,
   ) {
     const primeraClaseId = dto.clasesIds[0];
@@ -321,7 +321,7 @@ export class EstudiantesController {
   @Get(':id/clases-disponibles')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
-  async obtenerClasesDisponibles(@Param('id', ParseUUIDPipe) id: string) {
+  async obtenerClasesDisponibles(@Param('id', ParseIdPipe) id: string) {
     return this.estudiantesService.obtenerClasesDisponiblesParaEstudiante(id);
   }
 }

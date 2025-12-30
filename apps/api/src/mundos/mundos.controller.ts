@@ -1,10 +1,5 @@
-import {
-  Controller,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes';
 import { MundoTipo } from '@prisma/client';
 import { MundosService } from './mundos.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -53,7 +48,7 @@ export class MundosController {
    */
   @Get(':id')
   findOne(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
   ): ReturnType<MundosService['findOne']> {
     return this.mundosService.findOne(id);
   }

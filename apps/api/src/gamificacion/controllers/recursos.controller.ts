@@ -1,11 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  ParseUUIDPipe,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, UseGuards } from '@nestjs/common';
+import { ParseIdPipe } from '../../common/pipes';
 import { RecursosService } from '../services/recursos.service';
 import { RachaService } from '../services/racha.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -27,7 +21,7 @@ export class RecursosController {
    */
   @Get(':estudianteId')
   async obtenerRecursos(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
   ) {
     const recursos =
       await this.recursosService.obtenerRecursosConNivel(estudianteId);
@@ -45,7 +39,7 @@ export class RecursosController {
    */
   @Get(':estudianteId/historial')
   async obtenerHistorial(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
   ) {
     return this.recursosService.obtenerHistorial(estudianteId);
   }
@@ -56,7 +50,7 @@ export class RecursosController {
    */
   @Post(':estudianteId/racha')
   async registrarActividad(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
   ) {
     return this.rachaService.registrarActividad(estudianteId);
   }
@@ -66,9 +60,7 @@ export class RecursosController {
    * Obtener estadísticas de racha
    */
   @Get(':estudianteId/racha')
-  async obtenerRacha(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
-  ) {
+  async obtenerRacha(@Param('estudianteId', ParseIdPipe) estudianteId: string) {
     return this.rachaService.obtenerEstadisticas(estudianteId);
   }
 }

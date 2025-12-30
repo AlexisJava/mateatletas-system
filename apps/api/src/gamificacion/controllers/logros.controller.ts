@@ -3,12 +3,12 @@ import {
   Get,
   Post,
   Param,
-  ParseUUIDPipe,
   Query,
   UseGuards,
   Body,
   Patch,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../../common/pipes';
 import { LogrosService } from '../services/logros.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
@@ -42,7 +42,7 @@ export class LogrosController {
    */
   @Get('estudiante/:estudianteId')
   async obtenerLogrosEstudiante(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
   ) {
     return this.logrosService.obtenerLogrosEstudiante(estudianteId);
   }
@@ -53,7 +53,7 @@ export class LogrosController {
    */
   @Get('estudiante/:estudianteId/progreso')
   async obtenerProgreso(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
   ) {
     const [progreso, porCategoria, porRareza] = await Promise.all([
       this.logrosService.obtenerProgresoLogros(estudianteId),
@@ -74,7 +74,7 @@ export class LogrosController {
    */
   @Get('estudiante/:estudianteId/no-vistos')
   async obtenerLogrosNoVistos(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
   ) {
     return this.logrosService.obtenerLogrosNoVistos(estudianteId);
   }
@@ -85,8 +85,8 @@ export class LogrosController {
    */
   @Patch('estudiante/:estudianteId/:logroId/visto')
   async marcarLogroVisto(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
-    @Param('logroId', ParseUUIDPipe) logroId: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
+    @Param('logroId', ParseIdPipe) logroId: string,
   ) {
     await this.logrosService.marcarLogroVisto(estudianteId, logroId);
     return { success: true };

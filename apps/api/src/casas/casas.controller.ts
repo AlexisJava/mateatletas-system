@@ -4,11 +4,11 @@ import {
   Post,
   Body,
   Param,
-  ParseUUIDPipe,
   UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes';
 import { CasaTipo } from '@prisma/client';
 import { CasasService } from './casas.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -72,7 +72,7 @@ export class CasasController {
    */
   @Get(':id')
   findOne(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
   ): ReturnType<CasasService['findOne']> {
     return this.casasService.findOne(id);
   }
@@ -83,7 +83,7 @@ export class CasasController {
    */
   @Get(':id/ranking')
   getRankingInterno(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
   ): ReturnType<CasasService['getRankingInterno']> {
     return this.casasService.getRankingInterno(id);
   }
@@ -95,7 +95,7 @@ export class CasasController {
   @Post(':id/recalcular-puntos')
   @HttpCode(HttpStatus.OK)
   recalcularPuntos(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
   ): ReturnType<CasasService['recalcularPuntos']> {
     return this.casasService.recalcularPuntos(id);
   }

@@ -5,11 +5,11 @@ import {
   Body,
   Patch,
   Param,
-  ParseUUIDPipe,
   Delete,
   UseGuards,
   Query,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes';
 import { TipoEvento } from '@prisma/client';
 import { EventosService } from './eventos.service';
 import {
@@ -197,7 +197,7 @@ export class EventosController {
    */
   @Get(':id')
   async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser('id') docenteId: string,
   ) {
     return this.eventosService.findOne(id, docenteId);
@@ -213,7 +213,7 @@ export class EventosController {
    */
   @Patch('tareas/:id')
   async updateTarea(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser('id') docenteId: string,
     @Body() updateTareaDto: UpdateTareaDto,
   ) {
@@ -228,7 +228,7 @@ export class EventosController {
    */
   @Patch('recordatorios/:id')
   async updateRecordatorio(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser('id') docenteId: string,
     @Body() updateRecordatorioDto: UpdateRecordatorioDto,
   ) {
@@ -247,7 +247,7 @@ export class EventosController {
    */
   @Patch('notas/:id')
   async updateNota(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser('id') docenteId: string,
     @Body() updateNotaDto: UpdateNotaDto,
   ) {
@@ -262,7 +262,7 @@ export class EventosController {
    */
   @Patch(':id/fechas')
   async updateFechas(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser('id') docenteId: string,
     @Body() body: { fecha_inicio: string; fecha_fin: string },
   ) {
@@ -283,7 +283,7 @@ export class EventosController {
    */
   @Delete(':id')
   async remove(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @GetUser('id') docenteId: string,
   ) {
     await this.eventosService.remove(id, docenteId);

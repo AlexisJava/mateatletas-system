@@ -7,11 +7,11 @@ import {
   HttpStatus,
   Query,
   Param,
-  ParseUUIDPipe,
   UseGuards,
   NotFoundException,
   Headers,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../../../common/pipes';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PagosService } from '../services/pagos.service';
 import { VerificacionMorosidadService } from '../../services/verificacion-morosidad.service';
@@ -346,7 +346,7 @@ export class PagosController {
   @ApiOperation({ summary: 'Verificar morosidad de un tutor' })
   @ApiResponse({ status: 200, description: 'Estado de morosidad obtenido' })
   async verificarMorosidadTutor(
-    @Param('tutorId', ParseUUIDPipe) tutorId: string,
+    @Param('tutorId', ParseIdPipe) tutorId: string,
     @GetUser() user: AuthUser,
   ) {
     // Si es tutor, solo puede ver su propia información
@@ -386,7 +386,7 @@ export class PagosController {
   })
   @ApiResponse({ status: 200, description: 'Estado de acceso del estudiante' })
   async verificarAccesoEstudiante(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
   ) {
     return await this.verificacionMorosidadService.verificarAccesoEstudiante(
       estudianteId,
@@ -425,7 +425,7 @@ export class PagosController {
     description: 'Estudiante no encontrado o sin inscripciones pendientes',
   })
   async registrarPagoManual(
-    @Param('estudianteId', ParseUUIDPipe) estudianteId: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
     @GetUser() user: AuthUser,
   ) {
     return await this.pagosFacade.registrarPagoManual({
