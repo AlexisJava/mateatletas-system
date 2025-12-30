@@ -1,6 +1,10 @@
 /**
  * Genera credenciales únicas y seguras para usuarios del sistema
+ *
+ * SEGURIDAD: Usa crypto.randomBytes() para generación criptográficamente segura
+ * Math.random() NO es seguro para credenciales - es predecible
  */
+import * as crypto from 'crypto';
 
 /**
  * Genera un username único para tutores
@@ -58,11 +62,16 @@ export function generateTutorPassword(): string {
 
 /**
  * Genera un PIN numérico de 4 dígitos para estudiantes
- * Formato: 4 dígitos
- * Ejemplo: 1234
+ * Formato: 4 dígitos (1000-9999)
+ * Usa crypto para seguridad
  */
 export function generateEstudiantePin(): string {
-  return Math.floor(1000 + Math.random() * 9000).toString();
+  // Genera número entre 1000 y 9999 usando crypto
+  const randomBytes = crypto.randomBytes(2);
+  const randomNumber = randomBytes.readUInt16BE(0);
+  // Mapear 0-65535 a 1000-9999
+  const pin = 1000 + (randomNumber % 9000);
+  return pin.toString();
 }
 
 /**
@@ -79,19 +88,22 @@ export function generateDocentePassword(): string {
 
 /**
  * Genera un sufijo aleatorio de longitud especificada
- * Usa letras minúsculas y números
+ * Usa letras minúsculas y números con crypto seguro
  */
 function generateRandomSuffix(length: number): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const bytes = crypto.randomBytes(length);
   let result = '';
   for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
+    const byte = bytes.readUInt8(i);
+    result += chars.charAt(byte % chars.length);
   }
   return result;
 }
 
 /**
  * Genera una cadena aleatoria segura para contraseñas
+ * Usa crypto.randomBytes() - criptográficamente seguro
  * Incluye mayúsculas, minúsculas, números y símbolos
  */
 function generateSecureRandomString(length: number): string {
@@ -101,22 +113,29 @@ function generateSecureRandomString(length: number): string {
   const symbols = '!@#$%^&*';
   const allChars = uppercase + lowercase + numbers + symbols;
 
+  const bytes = crypto.randomBytes(length + 4); // Extra bytes para garantizar tipos
   let result = '';
 
-  // Asegurar al menos uno de cada tipo
-  result += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
-  result += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
-  result += numbers.charAt(Math.floor(Math.random() * numbers.length));
-  result += symbols.charAt(Math.floor(Math.random() * symbols.length));
+  // Asegurar al menos uno de cada tipo usando bytes aleatorios
+  result += uppercase.charAt(bytes.readUInt8(0) % uppercase.length);
+  result += lowercase.charAt(bytes.readUInt8(1) % lowercase.length);
+  result += numbers.charAt(bytes.readUInt8(2) % numbers.length);
+  result += symbols.charAt(bytes.readUInt8(3) % symbols.length);
 
-  // Rellenar el resto
+  // Rellenar el resto con bytes aleatorios
   for (let i = result.length; i < length; i++) {
-    result += allChars.charAt(Math.floor(Math.random() * allChars.length));
+    result += allChars.charAt(bytes.readUInt8(i) % allChars.length);
   }
 
-  // Mezclar para que los caracteres garantizados no estén siempre al inicio
-  return result
-    .split('')
-    .sort(() => Math.random() - 0.5)
-    .join('');
+  // Mezclar usando Fisher-Yates con crypto
+  const chars = result.split('');
+  const shuffleBytes = crypto.randomBytes(chars.length);
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = shuffleBytes.readUInt8(i) % (i + 1);
+    const temp = chars[i];
+    chars[i] = chars[j] as string;
+    chars[j] = temp as string;
+  }
+
+  return chars.join('');
 }

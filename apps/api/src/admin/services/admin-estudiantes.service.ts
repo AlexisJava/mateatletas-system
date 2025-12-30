@@ -198,13 +198,15 @@ export class AdminEstudiantesService {
   /**
    * Crear estudiante de forma rápida con o sin tutor existente
    * Si no existe el tutor, lo crea automáticamente
+   *
+   * @param tutorExistenteId - ID del tutor existente (opcional)
    */
   async crearEstudianteRapido(data: {
     nombre: string;
     apellido: string;
     edad: number;
     nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
-    sectorId?: string;
+    tutorExistenteId?: string;
     tutorNombre?: string;
     tutorApellido?: string;
     tutorEmail?: string;
@@ -224,15 +226,15 @@ export class AdminEstudiantesService {
     // 1. Determinar o crear el tutor
     let tutor;
 
-    if (data.sectorId) {
+    if (data.tutorExistenteId) {
       // Usar tutor existente
       tutor = await this.prisma.tutor.findUnique({
-        where: { id: data.sectorId },
+        where: { id: data.tutorExistenteId },
       });
 
       if (!tutor) {
         throw new NotFoundException(
-          `Tutor con ID ${data.sectorId} no encontrado`,
+          `Tutor con ID ${data.tutorExistenteId} no encontrado`,
         );
       }
     } else {
@@ -243,8 +245,8 @@ export class AdminEstudiantesService {
       const tutorNombre = data.tutorNombre || 'Tutor';
       const tutorApellido = data.tutorApellido || 'Genérico';
 
-      // Generar password temporal
-      const tempPassword = Math.random().toString(36).slice(-8);
+      // Generar password temporal SEGURO (crypto)
+      const tempPassword = generateTutorPassword();
       const passwordHash = await bcrypt.hash(tempPassword, BCRYPT_ROUNDS);
 
       tutor = await this.prisma.tutor.create({
@@ -258,9 +260,8 @@ export class AdminEstudiantesService {
         },
       });
 
-      this.logger.log(
-        `Tutor creado automáticamente: ${tutorEmail} | Password temporal: ${tempPassword}`,
-      );
+      // SECURITY: NO loguear password - solo confirmar creación
+      this.logger.log(`Tutor creado automáticamente: ${tutorEmail}`);
     }
 
     // 2. Crear el estudiante
@@ -290,7 +291,7 @@ export class AdminEstudiantesService {
       success: true,
       message: 'Estudiante creado exitosamente',
       estudiante,
-      tutor_creado: !data.sectorId, // Indica si se creó un tutor nuevo
+      tutor_creado: !data.tutorExistenteId, // Indica si se creó un tutor nuevo
     };
   }
 

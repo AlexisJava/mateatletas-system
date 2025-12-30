@@ -6,10 +6,17 @@ import {
   IsInt,
   Min,
   Max,
-  IsUUID,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IsCuid } from '../../common/validators/is-cuid.validator';
 
+/**
+ * DTO para crear estudiante de forma rápida
+ *
+ * Permite:
+ * - Usar un tutor existente (tutorExistenteId)
+ * - O crear un tutor nuevo automáticamente (tutorNombre, tutorApellido, etc.)
+ */
 export class CrearEstudianteRapidoDto {
   @IsString()
   @IsNotEmpty({ message: 'El nombre es obligatorio' })
@@ -30,10 +37,13 @@ export class CrearEstudianteRapidoDto {
   @IsNotEmpty({ message: 'El nivel escolar es obligatorio' })
   nivelEscolar!: 'Primaria' | 'Secundaria' | 'Universidad';
 
-  @IsString()
+  /**
+   * ID del tutor existente (si se quiere asignar a un tutor ya registrado)
+   * Si no se provee, se creará un tutor nuevo con los datos de tutorNombre, etc.
+   */
   @IsOptional()
-  @IsUUID('4', { message: 'El ID del sector debe ser un UUID válido' })
-  sectorId?: string;
+  @IsCuid()
+  tutorExistenteId?: string;
 
   @IsString()
   @IsOptional()
