@@ -15,6 +15,7 @@ interface PieDataItem {
   name: string;
   value: number;
   color?: string;
+  [key: string]: string | number | undefined;
 }
 
 interface AdminPieChartProps {
