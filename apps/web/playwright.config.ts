@@ -1,61 +1,97 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
 
 /**
- * Configuración de Playwright para tests E2E - Nivel Producción
- * Documentación: https://playwright.dev/docs/test-configuration
+ * Playwright E2E Configuration - Mateatletas Web
+ *
+ * Configuración multi-environment para testing end-to-end.
+ *
+ * Environments:
+ * - Local (default): yarn test:e2e
+ * - Staging: E2E_ENV=staging yarn test:e2e
+ * - Production: E2E_ENV=production yarn test:e2e --grep @smoke
  *
  * Features:
- * - ✅ Multi-browser testing (Chrome, Firefox, Safari)
- * - ✅ Mobile device testing (Android, iOS)
- * - ✅ Video recording on failures
- * - ✅ HAR recording para debugging de red
- * - ✅ Multiple reporters (HTML, JSON, JUnit, GitHub)
- * - ✅ Variables de entorno configurables
- * - ✅ Global setup/teardown
+ * - Multi-browser testing (Chrome, Firefox, Safari)
+ * - Mobile device testing (Android, iOS)
+ * - Video/Screenshot on failures
+ * - Multiple reporters (HTML, JSON, JUnit, GitHub)
+ * - Auth setup para tests protegidos
  */
 
-// Variables de entorno con fallbacks
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000';
+// Determinar environment
+const environment = process.env.E2E_ENV || 'local';
 const CI = !!process.env.CI;
+
+// Configuración por environment
+const envConfig = {
+  local: {
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
+    apiURL: 'http://localhost:3001/api',
+    workers: undefined,
+    retries: 0,
+  },
+  staging: {
+    baseURL: process.env.STAGING_WEB_URL || 'https://staging.mateatletasclub.com.ar',
+    apiURL: process.env.STAGING_API_URL || 'https://mateatletas-system-staging.up.railway.app/api',
+    workers: 2,
+    retries: 2,
+  },
+  production: {
+    baseURL: process.env.PRODUCTION_WEB_URL || 'https://www.mateatletasclub.com.ar',
+    apiURL:
+      process.env.PRODUCTION_API_URL || 'https://mateatletas-system-production.up.railway.app/api',
+    workers: 1,
+    retries: 3,
+  },
+};
+
+const config = envConfig[environment as keyof typeof envConfig] || envConfig.local;
+
+// Exponer la API URL al runtime de Playwright
+if (!process.env.PLAYWRIGHT_API_URL) {
+  process.env.PLAYWRIGHT_API_URL = config.apiURL;
+}
+
+// Workers: configurable via env var o environment
 const WORKERS = process.env.PLAYWRIGHT_WORKERS
   ? parseInt(process.env.PLAYWRIGHT_WORKERS, 10)
   : CI
     ? 1
-    : undefined;
+    : config.workers;
+
+// Path para storage de autenticación
+const STORAGE_STATE = path.join(__dirname, 'playwright/.auth/admin.json');
 
 export default defineConfig({
   testDir: './tests/e2e',
 
-  /* Global setup/teardown - útil para seed de BD, login, etc. */
+  // Solo archivos .spec.ts en tests/e2e
+  testMatch: '**/*.spec.ts',
+
+  // Global setup/teardown
   globalSetup: require.resolve('./tests/e2e/global-setup'),
   globalTeardown: require.resolve('./tests/e2e/global-teardown'),
 
-  /* Timeout para cada test */
+  // Timeouts
   timeout: 60 * 1000,
   expect: {
     timeout: 10000,
   },
 
-  /* Run tests in files in parallel */
+  // Ejecución en paralelo
   fullyParallel: true,
 
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
+  // Forbid .only en CI
   forbidOnly: CI,
 
-  /* Retry on CI only */
-  retries: CI ? 2 : 0,
+  // Retries según environment
+  retries: CI ? 2 : config.retries,
 
-  /* Workers: configurable via env var */
+  // Workers
   workers: WORKERS,
 
-  /*
-   * Multiple reporters para diferentes propósitos:
-   * - html: Reporte visual interactivo
-   * - json: Para análisis programático
-   * - junit: Para integración con CI/CD (Jenkins, GitLab, etc.)
-   * - github: Para GitHub Actions annotations
-   * - list: Output en consola (solo en desarrollo)
-   */
+  // Reporters
   reporter: CI
     ? [
         ['html', { outputFolder: 'test-results/html-report', open: 'never' }],
@@ -65,114 +101,114 @@ export default defineConfig({
       ]
     : [['html', { open: 'on-failure' }], ['list']],
 
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: BASE_URL,
+    // Base URL según environment
+    baseURL: config.baseURL,
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    // Tracing
     trace: 'on-first-retry',
 
-    /* Screenshot only on failure */
+    // Screenshots
     screenshot: 'only-on-failure',
 
-    /* Video recording - solo en fallos para ahorrar espacio */
+    // Video
     video: 'retain-on-failure',
 
-    /* HAR recording - captura requests/responses para debugging */
-    ...(CI
-      ? {}
-      : {
-          recordHar: {
-            mode: 'minimal' as const,
-            path: 'test-results/hars/',
-          },
-        }),
+    // Timeouts
+    actionTimeout: 10000,
+    navigationTimeout: 30000,
 
-    /* Configuraciones adicionales */
-    actionTimeout: 10000, // Timeout para acciones individuales
-    navigationTimeout: 30000, // Timeout para navegación
+    // Context options
+    viewport: { width: 1920, height: 1080 },
+    ignoreHTTPSErrors: environment === 'staging',
 
-    /* User agent personalizado (opcional) */
-    // userAgent: 'PlaywrightTests/1.0',
+    // Extra HTTP headers
+    extraHTTPHeaders: {
+      'Accept-Language': 'es-AR',
+    },
   },
 
-  /* Configure projects for major browsers */
+  // Projects con setup de autenticación
   projects: [
-    /* === DESKTOP BROWSERS === */
+    // === SETUP: Autenticación ===
     {
-      name: 'chromium',
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+    },
+
+    // === TESTS PÚBLICOS (sin auth) ===
+    {
+      name: 'public',
+      testMatch: /0[1-3]-.*\.spec\.ts/, // smoke, colonia-landing, colonia-catalog
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
       },
     },
 
+    // === TESTS AUTENTICADOS ===
+    {
+      name: 'chromium',
+      testIgnore: /0[1-3]-.*\.spec\.ts|auth\.setup\.ts/, // Ignorar tests públicos y setup
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
+        storageState: STORAGE_STATE,
+      },
+    },
     {
       name: 'firefox',
+      testIgnore: /0[1-3]-.*\.spec\.ts|auth\.setup\.ts/,
+      dependencies: ['setup'],
       use: {
         ...devices['Desktop Firefox'],
         viewport: { width: 1920, height: 1080 },
+        storageState: STORAGE_STATE,
       },
     },
-
     {
       name: 'webkit',
+      testIgnore: /0[1-3]-.*\.spec\.ts|auth\.setup\.ts/,
+      dependencies: ['setup'],
       use: {
         ...devices['Desktop Safari'],
         viewport: { width: 1920, height: 1080 },
+        storageState: STORAGE_STATE,
       },
     },
 
-    /* === MOBILE BROWSERS === */
+    // === MOBILE (autenticado) ===
     {
       name: 'Mobile Chrome',
+      testIgnore: /0[1-3]-.*\.spec\.ts|auth\.setup\.ts/,
+      dependencies: ['setup'],
       use: {
         ...devices['Pixel 5'],
+        storageState: STORAGE_STATE,
       },
     },
-
     {
       name: 'Mobile Safari',
+      testIgnore: /0[1-3]-.*\.spec\.ts|auth\.setup\.ts/,
+      dependencies: ['setup'],
       use: {
         ...devices['iPhone 13'],
+        storageState: STORAGE_STATE,
       },
     },
-
-    /* === TABLET === */
-    {
-      name: 'iPad',
-      use: {
-        ...devices['iPad Pro'],
-      },
-    },
-
-    /* === BRANDED TESTS - Solo ejecutar en CI o con flag === */
-    // Descomentá estos si querés probar navegadores específicos
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: {
-    //     ...devices['Desktop Edge'],
-    //     channel: 'msedge',
-    //   },
-    // },
-
-    // {
-    //   name: 'Google Chrome',
-    //   use: {
-    //     ...devices['Desktop Chrome'],
-    //     channel: 'chrome',
-    //   },
-    // },
   ],
 
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'yarn dev',
-    url: BASE_URL,
-    reuseExistingServer: !CI, // En CI siempre levantar servidor fresco
-    timeout: 120 * 1000,
-    stdout: 'pipe', // No mostrar logs del servidor
-    stderr: 'pipe',
-  },
+  // Web Server (solo para local)
+  webServer:
+    environment === 'local'
+      ? {
+          command: 'yarn dev',
+          url: config.baseURL,
+          reuseExistingServer: !CI,
+          timeout: 120 * 1000,
+          stdout: 'pipe',
+          stderr: 'pipe',
+        }
+      : undefined,
 });

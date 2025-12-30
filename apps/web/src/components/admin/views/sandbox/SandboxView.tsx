@@ -37,6 +37,7 @@ import {
   createNodo,
   updateNodo as apiUpdateNodo,
   deleteNodo as apiDeleteNodo,
+  getArbol,
   subjectToMundoTipo,
   mundoTipoToSubject,
   type ContenidoBackend,
@@ -57,7 +58,7 @@ function mapNodoBackendToFrontend(nodo: NodoBackend): NodoContenido {
     parentId: nodo.parentId,
     orden: nodo.orden,
     contenidoJson: nodo.contenidoJson,
-    hijos: nodo.hijos.map(mapNodoBackendToFrontend),
+    hijos: (nodo.hijos ?? []).map(mapNodoBackendToFrontend),
   };
 }
 
@@ -122,18 +123,6 @@ function countDescendants(nodo: NodoContenido): number {
     count += countDescendants(hijo);
   }
   return count;
-}
-
-/** Convierte respuesta del backend a Lesson del frontend */
-function backendToLesson(contenido: ContenidoBackend): Lesson {
-  return {
-    id: contenido.id,
-    title: contenido.titulo,
-    house: contenido.casaTipo as House,
-    subject: mundoTipoToSubject(contenido.mundoTipo),
-    estado: contenido.estado,
-    nodos: contenido.nodos.map(mapNodoBackendToFrontend),
-  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -443,11 +432,7 @@ export function SandboxView() {
   );
 
   // ─── Start Handler ───
-  const handleStart = async (house: House, subject: Subject, pattern: string) => {
-    const tempObj = JSON.parse(initialJsonString);
-    tempObj.props.pattern = pattern;
-    const newCode = JSON.stringify(tempObj, null, 2);
-
+  const handleStart = async (house: House, subject: Subject, _pattern: string) => {
     setIsLoading(true);
     try {
       // Crear borrador en backend (el backend crea los 3 nodos raíz automáticamente)
@@ -457,9 +442,19 @@ export function SandboxView() {
         mundoTipo: subjectToMundoTipo(subject),
       });
 
+      // Obtener árbol jerárquico con hijos (createContenido devuelve nodos planos)
+      const arbol = await getArbol(contenido.id);
+
       // Actualizar estado local con datos del backend
       setBackendId(contenido.id);
-      const newLesson = backendToLesson(contenido);
+      const newLesson: Lesson = {
+        id: contenido.id,
+        title: contenido.titulo,
+        house: contenido.casaTipo as House,
+        subject: mundoTipoToSubject(contenido.mundoTipo),
+        estado: contenido.estado,
+        nodos: arbol.map(mapNodoBackendToFrontend),
+      };
       setLesson(newLesson);
 
       // Select first leaf node if available
@@ -549,9 +544,13 @@ export function SandboxView() {
 
     setIsPublishing(true);
     try {
+      // Guardar cambios pendientes antes de publicar
+      await flushPendingChanges();
+
       await publicarContenido(backendId);
       setShowPublishModal(false);
       setShowSuccessToast(true);
+      setLesson((prev) => ({ ...prev, estado: 'PUBLICADO' }));
       setTimeout(() => setShowSuccessToast(false), 3000);
     } catch (error) {
       console.error('Error al publicar:', error);
