@@ -14162,7 +14162,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "mateatletas@workspace:."
   dependencies:
-    "@playwright/test": "npm:^1.56.0"
     "@types/bcrypt": "npm:^6.0.0"
     "@types/node": "npm:^22.10.7"
     "@types/passport-jwt": "npm:^4.0.1"
