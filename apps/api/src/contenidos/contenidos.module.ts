@@ -18,7 +18,9 @@ import {
 
 @Module({
   imports: [DatabaseModule],
-  controllers: [ContenidoAdminController, ContenidoEstudianteController],
+  // IMPORTANTE: ContenidoEstudianteController primero para que /contenidos/estudiante
+  // matchee antes que /contenidos/:id del admin controller
+  controllers: [ContenidoEstudianteController, ContenidoAdminController],
   providers: [
     // Admin services
     ContenidoAdminService,

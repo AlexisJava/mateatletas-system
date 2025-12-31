@@ -181,6 +181,7 @@ export class LoginEstudianteUseCase {
     const payload = {
       sub: userId,
       email: identifier, // Compatible con estructura existente
+      role: Role.ESTUDIANTE, // Rol principal para jwt.strategy
       roles,
     };
 

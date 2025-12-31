@@ -505,6 +505,135 @@ export class EstudianteQueryService {
   }
 
   /**
+   * Obtener TODAS las clases (ClaseGrupo) en las que está inscrito el estudiante
+   * Incluye docente, grupo, sector y link de videollamada
+   * @param estudianteId - ID del estudiante autenticado
+   * @returns Array de clases con información completa para el portal
+   */
+  async obtenerMisClases(estudianteId: string) {
+    const ahora = new Date();
+
+    // Mapeo de enum DiaSemana de Prisma a índices de JavaScript (0=Domingo, 6=Sábado)
+    const diasSemanaMap: Record<string, number> = {
+      DOMINGO: 0,
+      LUNES: 1,
+      MARTES: 2,
+      MIERCOLES: 3,
+      JUEVES: 4,
+      VIERNES: 5,
+      SABADO: 6,
+    };
+
+    // Nombres de días para mostrar en UI
+    const nombresDia: Record<string, string> = {
+      LUNES: 'Lunes',
+      MARTES: 'Martes',
+      MIERCOLES: 'Miércoles',
+      JUEVES: 'Jueves',
+      VIERNES: 'Viernes',
+      SABADO: 'Sábado',
+      DOMINGO: 'Domingo',
+    };
+
+    // Buscar todas las inscripciones activas del estudiante
+    const inscripciones = await this.prisma.inscripcionClaseGrupo.findMany({
+      where: {
+        estudiante_id: estudianteId,
+        fecha_baja: null, // Solo inscripciones activas
+      },
+      include: {
+        claseGrupo: {
+          include: {
+            docente: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+              },
+            },
+            grupo: {
+              select: {
+                id: true,
+                codigo: true,
+                nombre: true,
+                link_meet: true,
+              },
+            },
+            sector: {
+              select: {
+                id: true,
+                nombre: true,
+                color: true,
+                icono: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Mapear a formato para el frontend y calcular próxima fecha
+    const clases = inscripciones
+      .filter((i) => i.claseGrupo.activo)
+      .map((inscripcion) => {
+        const cg = inscripcion.claseGrupo;
+
+        // Calcular próxima fecha de la clase
+        const diaActual = ahora.getDay();
+        const diaClase = diasSemanaMap[cg.dia_semana] ?? -1;
+
+        const { horas, minutos } = parseHorario(cg.hora_inicio);
+
+        let diasHasta = diaClase - diaActual;
+
+        // Si es hoy mismo, verificar si la hora ya pasó
+        if (diasHasta === 0) {
+          const horaClase = horas * 60 + minutos;
+          const horaActual = ahora.getHours() * 60 + ahora.getMinutes();
+          if (horaActual >= horaClase) {
+            // La clase de hoy ya pasó, próxima semana
+            diasHasta = 7;
+          }
+        } else if (diasHasta < 0) {
+          // El día ya pasó esta semana, próxima semana
+          diasHasta += 7;
+        }
+
+        const fechaProxima = new Date(ahora);
+        fechaProxima.setDate(ahora.getDate() + diasHasta);
+        fechaProxima.setHours(horas, minutos, 0, 0);
+
+        const duracionMinutos = calcularDuracionMinutos(
+          cg.hora_inicio,
+          cg.hora_fin,
+        );
+
+        return {
+          id: cg.id,
+          nombre: cg.nombre,
+          codigo: cg.codigo,
+          nivel: cg.nivel,
+          dia_semana: cg.dia_semana,
+          dia_nombre: nombresDia[cg.dia_semana] || cg.dia_semana,
+          hora_inicio: cg.hora_inicio,
+          hora_fin: cg.hora_fin,
+          duracion_minutos: duracionMinutos,
+          fecha_proxima: fechaProxima,
+          docente: cg.docente,
+          grupo: cg.grupo,
+          sector: cg.sector,
+          link_meet: cg.grupo?.link_meet || null,
+          fecha_inscripcion: inscripcion.fecha_inscripcion,
+        };
+      });
+
+    // Ordenar por próxima fecha (más cercana primero)
+    return clases.sort(
+      (a, b) => a.fecha_proxima.getTime() - b.fecha_proxima.getTime(),
+    );
+  }
+
+  /**
    * Obtener los sectores (Matemática, Programación, Ciencias) en los que está inscrito el estudiante
    * Agrupa los grupos por sector para mostrar en el portal del estudiante
    * @param estudianteId - ID del estudiante autenticado

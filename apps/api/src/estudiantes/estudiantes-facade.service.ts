@@ -100,6 +100,13 @@ export class EstudiantesFacadeService {
     return this.queryService.obtenerMisSectores(estudianteId);
   }
 
+  /**
+   * Obtener TODAS las clases del estudiante con información para el portal
+   */
+  async obtenerMisClases(estudianteId: string) {
+    return this.queryService.obtenerMisClases(estudianteId);
+  }
+
   // ==================== COMMANDS (Delegadas a CommandService) ====================
 
   /**

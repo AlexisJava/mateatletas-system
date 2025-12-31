@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { EstadoContenido, CasaTipo, MundoTipo } from '@prisma/client';
+import { NodoService, NodoArbol } from './nodo.service';
 
 /**
  * Service para acceso de estudiantes a contenidos publicados
@@ -12,7 +13,10 @@ import { EstadoContenido, CasaTipo, MundoTipo } from '@prisma/client';
  */
 @Injectable()
 export class ContenidoEstudianteService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private nodoService: NodoService,
+  ) {}
 
   /**
    * Obtiene la casa del estudiante
@@ -85,15 +89,13 @@ export class ContenidoEstudianteService {
    * Valida que el estudiante tiene acceso (mismo casa)
    * @param estudianteId - ID del estudiante
    * @param contenidoId - ID del contenido
+   * @returns Contenido con árbol jerárquico de nodos
    */
   async findOnePublicado(estudianteId: string, contenidoId: string) {
     const casaTipo = await this.getEstudianteCasa(estudianteId);
 
     const contenido = await this.prisma.contenido.findUnique({
       where: { id: contenidoId },
-      include: {
-        nodos: { orderBy: { orden: 'asc' } },
-      },
     });
 
     if (!contenido) {
@@ -110,6 +112,9 @@ export class ContenidoEstudianteService {
       throw new ForbiddenException('No tienes acceso a este contenido');
     }
 
+    // Obtener árbol jerárquico de nodos
+    const nodos: NodoArbol[] = await this.nodoService.getArbol(contenidoId);
+
     // Obtener o crear progreso
     const progreso = await this.prisma.progresoContenido.upsert({
       where: {
@@ -123,6 +128,6 @@ export class ContenidoEstudianteService {
       update: {},
     });
 
-    return { ...contenido, progreso };
+    return { ...contenido, nodos, progreso };
   }
 }

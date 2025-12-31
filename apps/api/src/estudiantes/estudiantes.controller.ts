@@ -144,6 +144,21 @@ export class EstudiantesController {
   }
 
   /**
+   * GET /estudiantes/mis-clases - Obtener TODAS las clases del estudiante logueado
+   * Para el portal de estudiantes - sección "Clases"
+   * Incluye: docente, horario, link de videollamada (Google Meet/Zoom)
+   * @param req - Request con usuario autenticado
+   * @returns Array de clases ordenadas por próxima fecha
+   */
+  @Get('mis-clases')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async obtenerMisClases(@Request() req: RequestWithAuthUser) {
+    const estudianteId = req.user.id;
+    return this.estudiantesService.obtenerMisClases(estudianteId);
+  }
+
+  /**
    * GET /estudiantes/:id/detalle-completo - Obtener detalle COMPLETO del estudiante
    * Para el portal de tutores - pestaña "Mis Hijos"
    * Incluye: gamificación, asistencias, inscripciones, estadísticas

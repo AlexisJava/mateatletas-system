@@ -79,7 +79,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     let user;
 
     // Normalizar el rol a lowercase para comparación case-insensitive
-    const normalizedRole = role?.toLowerCase();
+    // Usar role si existe, sino el primer elemento de roles array
+    const effectiveRole =
+      role ?? (Array.isArray(roles) && roles.length > 0 ? roles[0] : undefined);
+    const normalizedRole = effectiveRole?.toLowerCase();
 
     // Buscar según el rol especificado en el token
     if (normalizedRole === 'estudiante') {
