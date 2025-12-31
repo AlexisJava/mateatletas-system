@@ -99,12 +99,54 @@ const sectorSchema = z.object({
 
 const sectoresList = z.array(sectorSchema);
 
+/**
+ * Schema para clases del estudiante
+ */
+const claseEstudianteSchema = z.object({
+  id: z.string(),
+  nombre: z.string(),
+  codigo: z.string(),
+  nivel: z.string().nullable(),
+  dia_semana: z.string(),
+  dia_nombre: z.string(),
+  hora_inicio: z.string(),
+  hora_fin: z.string(),
+  duracion_minutos: z.number(),
+  fecha_proxima: z.string(),
+  docente: z.object({
+    id: z.string(),
+    nombre: z.string(),
+    apellido: z.string(),
+  }),
+  grupo: z
+    .object({
+      id: z.string(),
+      codigo: z.string(),
+      nombre: z.string(),
+      link_meet: z.string().nullable(),
+    })
+    .nullable(),
+  sector: z
+    .object({
+      id: z.string(),
+      nombre: z.string(),
+      color: z.string(),
+      icono: z.string(),
+    })
+    .nullable(),
+  link_meet: z.string().nullable(),
+  fecha_inscripcion: z.string(),
+});
+
+const clasesEstudianteList = z.array(claseEstudianteSchema);
+
 // Tipos inferidos de los schemas
 type DeleteResponse = z.infer<typeof deleteResponseSchema>;
 type CountResponse = z.infer<typeof countResponseSchema>;
 type ProximaClase = z.infer<typeof proximaClaseSchema>;
 type Companero = z.infer<typeof companeroSchema>;
 type Sector = z.infer<typeof sectorSchema>;
+export type ClaseEstudiante = z.infer<typeof claseEstudianteSchema>;
 
 /**
  * API Client para operaciones de estudiantes
@@ -296,6 +338,20 @@ export const estudiantesApi = {
       return sectoresList.parse(response);
     } catch (error) {
       console.error('Error al obtener sectores:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener TODAS las clases del estudiante autenticado
+   * @returns Array de clases ordenadas por próxima fecha
+   */
+  getMisClases: async (): Promise<ClaseEstudiante[]> => {
+    try {
+      const response = await apiClient.get<ClaseEstudiante[]>('/estudiantes/mis-clases');
+      return clasesEstudianteList.parse(response);
+    } catch (error) {
+      console.error('Error al obtener clases:', error);
       throw error;
     }
   },

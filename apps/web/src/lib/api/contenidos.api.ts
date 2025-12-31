@@ -269,3 +269,76 @@ export const mundoTipoToSubject = (mundo: MundoTipo): 'MATH' | 'CODE' | 'SCIENCE
   };
   return map[mundo];
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ESTUDIANTE API - Endpoints para el portal de estudiantes
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Progreso del estudiante en un contenido
+ */
+export interface ProgresoContenido {
+  contenidoId: string;
+  nodoActualId: string | null;
+  completado: boolean;
+}
+
+/**
+ * Contenido publicado para estudiantes (lista)
+ */
+export interface ContenidoEstudiante {
+  id: string;
+  titulo: string;
+  descripcion: string | null;
+  mundoTipo: MundoTipo;
+  imagenPortada: string | null;
+  duracionMinutos: number | null;
+  orden: number;
+  _count: { nodos: number };
+  progreso: ProgresoContenido | null;
+}
+
+/**
+ * Contenido completo con árbol de nodos para reproducir
+ */
+export interface ContenidoCompletoEstudiante extends ContenidoBackend {
+  progreso: ProgresoContenido;
+}
+
+/**
+ * DTO para actualizar progreso
+ */
+export interface UpdateProgresoDto {
+  nodoActualId?: string;
+  tiempoAdicionalSegundos?: number;
+  completado?: boolean;
+}
+
+/**
+ * Listar contenidos publicados para el estudiante logueado
+ * Filtrados por la casa del estudiante
+ */
+export const getContenidosEstudiante = async (
+  mundoTipo?: MundoTipo,
+): Promise<ContenidoEstudiante[]> => {
+  const query = mundoTipo ? `?mundo=${mundoTipo}` : '';
+  return axios.get<ContenidoEstudiante[]>(`/contenidos/estudiante${query}`);
+};
+
+/**
+ * Obtener contenido completo para reproducir
+ * Incluye árbol de nodos y progreso del estudiante
+ */
+export const getContenidoEstudiante = async (id: string): Promise<ContenidoCompletoEstudiante> => {
+  return axios.get<ContenidoCompletoEstudiante>(`/contenidos/estudiante/${id}`);
+};
+
+/**
+ * Actualizar progreso del estudiante en un contenido
+ */
+export const updateProgresoEstudiante = async (
+  contenidoId: string,
+  dto: UpdateProgresoDto,
+): Promise<ProgresoContenido> => {
+  return axios.post<ProgresoContenido>(`/contenidos/estudiante/${contenidoId}/progreso`, dto);
+};

@@ -81,91 +81,159 @@ export default function EstudianteDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a1a] text-white p-4 md:p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <header className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-black">
-                ¡Hola, {user?.nombre}! <span className="inline-block animate-bounce">👋</span>
-              </h1>
-              <p className="text-slate-400 mt-1">Exploremos el universo juntos</p>
+    <div className="min-h-[calc(100vh-3.5rem)] bg-[#0a0a1a] text-white flex flex-col relative overflow-hidden">
+      {/* Fondo de estrellas animado */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="stars-layer stars-small" />
+        <div className="stars-layer stars-medium" />
+        <div className="stars-layer stars-large" />
+        {/* Gradiente sutil */}
+        <div className="absolute inset-0 bg-gradient-to-b from-violet-950/20 via-transparent to-indigo-950/20" />
+      </div>
+
+      <style jsx>{`
+        .stars-layer {
+          position: absolute;
+          inset: 0;
+          background-repeat: repeat;
+          animation: twinkle 8s ease-in-out infinite;
+        }
+        .stars-small {
+          background-image:
+            radial-gradient(1px 1px at 20px 30px, white, transparent),
+            radial-gradient(1px 1px at 40px 70px, rgba(255, 255, 255, 0.8), transparent),
+            radial-gradient(1px 1px at 50px 160px, rgba(255, 255, 255, 0.6), transparent),
+            radial-gradient(1px 1px at 90px 40px, white, transparent),
+            radial-gradient(1px 1px at 130px 80px, rgba(255, 255, 255, 0.7), transparent),
+            radial-gradient(1px 1px at 160px 120px, white, transparent),
+            radial-gradient(1px 1px at 200px 50px, rgba(255, 255, 255, 0.5), transparent),
+            radial-gradient(1px 1px at 220px 140px, rgba(255, 255, 255, 0.8), transparent),
+            radial-gradient(1px 1px at 260px 90px, white, transparent),
+            radial-gradient(1px 1px at 300px 170px, rgba(255, 255, 255, 0.6), transparent);
+          background-size: 320px 200px;
+          opacity: 0.4;
+        }
+        .stars-medium {
+          background-image:
+            radial-gradient(1.5px 1.5px at 100px 50px, white, transparent),
+            radial-gradient(1.5px 1.5px at 200px 150px, rgba(255, 255, 255, 0.9), transparent),
+            radial-gradient(1.5px 1.5px at 300px 100px, white, transparent),
+            radial-gradient(1.5px 1.5px at 50px 180px, rgba(255, 255, 255, 0.7), transparent),
+            radial-gradient(1.5px 1.5px at 350px 30px, white, transparent);
+          background-size: 400px 220px;
+          opacity: 0.3;
+          animation-delay: 2s;
+          animation-duration: 10s;
+        }
+        .stars-large {
+          background-image:
+            radial-gradient(2px 2px at 150px 80px, rgba(167, 139, 250, 0.8), transparent),
+            radial-gradient(2px 2px at 350px 200px, rgba(139, 92, 246, 0.7), transparent),
+            radial-gradient(2px 2px at 250px 50px, rgba(196, 181, 253, 0.6), transparent);
+          background-size: 500px 280px;
+          opacity: 0.5;
+          animation-delay: 4s;
+          animation-duration: 12s;
+        }
+        @keyframes twinkle {
+          0%,
+          100% {
+            opacity: 0.3;
+          }
+          50% {
+            opacity: 0.6;
+          }
+        }
+      `}</style>
+
+      {/* Header fijo arriba */}
+      <header className="max-w-5xl w-full mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3 relative z-10 shrink-0">
+        <div>
+          <h1 className="text-2xl font-black">
+            ¡Hola, {user?.nombre}! <span className="inline-block animate-bounce">👋</span>
+          </h1>
+          <p className="text-slate-400 text-sm mt-1">Exploremos el universo juntos</p>
+        </div>
+
+        {/* Stats Pills */}
+        <div className="flex gap-2">
+          <StatPill
+            icon={<Star className="w-4 h-4" />}
+            label="Nivel"
+            value={data?.nivel ?? 1}
+            gradient="from-amber-500 to-orange-600"
+          />
+          <StatPill
+            icon={<Zap className="w-4 h-4" />}
+            label="XP"
+            value={data?.xp ?? 0}
+            gradient="from-violet-500 to-purple-600"
+          />
+          <StatPill
+            icon={<Flame className="w-4 h-4" />}
+            label="Racha"
+            value={`${data?.racha ?? 0}d`}
+            gradient="from-rose-500 to-red-600"
+          />
+        </div>
+      </header>
+
+      {/* Contenido centrado verticalmente */}
+      <div className="flex-1 flex items-center justify-center px-4 pb-6">
+        <div className="max-w-5xl w-full space-y-6 relative z-10">
+          {/* Event Banner */}
+          <EventBanner />
+
+          {/* Bento Grid - Layout fijo */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Columna izquierda: Explorar (card grande) */}
+            <BentoCard
+              href="/estudiante/explorar"
+              title="Explorar"
+              subtitle="Mapa del Conocimiento"
+              icon={<Compass className="w-10 h-10" />}
+              gradient="from-violet-600 via-purple-600 to-indigo-700"
+              className="h-[400px]"
+              featured
+            />
+
+            {/* Columna derecha: 3 cards apiladas */}
+            <div className="flex flex-col gap-4">
+              {/* Fila superior: Jugar y Mi Viaje */}
+              <div className="grid grid-cols-2 gap-4">
+                <BentoCard
+                  href="/estudiante/jugar"
+                  title="Jugar"
+                  subtitle="Arcade Zone"
+                  icon={<Gamepad2 className="w-7 h-7" />}
+                  gradient="from-cyan-500 via-blue-500 to-blue-600"
+                  className="h-[190px]"
+                />
+                <BentoCard
+                  href="/estudiante/progreso"
+                  title="Mi Viaje"
+                  subtitle="Tu progreso"
+                  icon={<Rocket className="w-7 h-7" />}
+                  gradient="from-emerald-500 via-green-500 to-teal-600"
+                  className="h-[190px]"
+                />
+              </div>
+
+              {/* Fila inferior: Clases (ancho completo) */}
+              <BentoCard
+                href="/estudiante/clases"
+                title="Clases"
+                subtitle={
+                  data?.proximaClase
+                    ? `Próxima con ${data.proximaClase.docente.nombre}`
+                    : 'Tu aula virtual'
+                }
+                icon={<GraduationCap className="w-7 h-7" />}
+                gradient="from-amber-500 via-orange-500 to-red-500"
+                className="h-[190px]"
+              />
             </div>
           </div>
-
-          {/* Stats Pills */}
-          <div className="flex flex-wrap gap-2 sm:gap-3">
-            <StatPill
-              icon={<Star className="w-4 h-4" />}
-              label="Nivel"
-              value={data?.nivel ?? 1}
-              gradient="from-amber-500 to-orange-600"
-            />
-            <StatPill
-              icon={<Zap className="w-4 h-4" />}
-              label="XP"
-              value={data?.xp ?? 0}
-              gradient="from-violet-500 to-purple-600"
-            />
-            <StatPill
-              icon={<Flame className="w-4 h-4" />}
-              label="Racha"
-              value={`${data?.racha ?? 0} días`}
-              gradient="from-rose-500 to-red-600"
-            />
-          </div>
-        </header>
-
-        {/* Event Banner */}
-        <EventBanner />
-
-        {/* Bento Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {/* Explorar - Grande */}
-          <BentoCard
-            href="/estudiante/explorar"
-            title="Explorar"
-            subtitle="Mapa del Conocimiento"
-            icon={<Compass className="w-8 h-8 sm:w-10 sm:h-10" />}
-            gradient="from-violet-600 via-purple-600 to-indigo-700"
-            className="col-span-2 row-span-2 min-h-[280px] sm:min-h-[320px]"
-            featured
-          />
-
-          {/* Jugar */}
-          <BentoCard
-            href="/estudiante/jugar"
-            title="Jugar"
-            subtitle="Arcade Zone"
-            icon={<Gamepad2 className="w-6 h-6 sm:w-8 sm:h-8" />}
-            gradient="from-cyan-500 via-blue-500 to-blue-600"
-            className="min-h-[140px] sm:min-h-[152px]"
-          />
-
-          {/* Mi Viaje */}
-          <BentoCard
-            href="/estudiante/progreso"
-            title="Mi Viaje"
-            subtitle="Tu progreso"
-            icon={<Rocket className="w-6 h-6 sm:w-8 sm:h-8" />}
-            gradient="from-emerald-500 via-green-500 to-teal-600"
-            className="min-h-[140px] sm:min-h-[152px]"
-          />
-
-          {/* Clases - Más ancha */}
-          <BentoCard
-            href="/estudiante/clases"
-            title="Clases"
-            subtitle={
-              data?.proximaClase
-                ? `Próxima con ${data.proximaClase.docente.nombre}`
-                : 'Tu aula virtual'
-            }
-            icon={<GraduationCap className="w-6 h-6 sm:w-8 sm:h-8" />}
-            gradient="from-amber-500 via-orange-500 to-red-500"
-            className="col-span-2 min-h-[140px] sm:min-h-[152px]"
-          />
         </div>
       </div>
     </div>
@@ -185,7 +253,7 @@ function StatPill({
 }) {
   return (
     <div
-      className={`inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r ${gradient} text-white text-sm font-semibold shadow-lg`}
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r ${gradient} text-white text-sm font-semibold shadow-lg`}
     >
       {icon}
       <span className="hidden sm:inline text-white/80">{label}:</span>
@@ -196,30 +264,27 @@ function StatPill({
 
 function EventBanner() {
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-900/80 via-purple-800/80 to-indigo-900/80 border border-violet-500/30 p-4 sm:p-6">
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-900/80 via-purple-800/80 to-indigo-900/80 border border-violet-500/30 p-4">
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500/20 rounded-full blur-2xl" />
 
-      <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="flex items-center gap-3 flex-1">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
-            <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-          </div>
-          <div>
-            <span className="inline-block px-2 py-0.5 text-xs font-bold bg-violet-500/30 text-violet-200 rounded-full mb-1">
-              NUEVA EXHIBICIÓN
-            </span>
-            <h3 className="text-lg sm:text-xl font-bold text-white">Aventura Matemática</h3>
-            <p className="text-sm text-violet-200/80 hidden sm:block">
-              Descubre los secretos de los números
-            </p>
-          </div>
+      <div className="relative flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shrink-0">
+          <Sparkles className="w-6 h-6 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <span className="inline-block px-2 py-0.5 text-xs font-bold bg-violet-500/30 text-violet-200 rounded-full mb-1">
+            NUEVA EXHIBICIÓN
+          </span>
+          <h3 className="text-lg font-bold text-white">Aventura Matemática</h3>
+          <p className="text-sm text-violet-200/80 hidden sm:block">
+            Descubre los secretos de los números
+          </p>
         </div>
 
         <Link
           href="/estudiante/explorar"
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-violet-900 font-bold rounded-xl hover:bg-violet-100 transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white text-violet-900 font-bold rounded-xl hover:bg-violet-100 transition-all shadow-lg hover:scale-105 active:scale-95 shrink-0"
         >
           Ver ahora
           <ChevronRight className="w-4 h-4" />
@@ -250,9 +315,9 @@ function BentoCard({
     <Link
       href={href}
       className={`
-        group relative overflow-hidden rounded-2xl sm:rounded-3xl
+        group relative overflow-hidden rounded-2xl
         bg-gradient-to-br ${gradient}
-        p-4 sm:p-6
+        p-5
         transition-all duration-300
         hover:scale-[1.02] hover:shadow-2xl hover:shadow-violet-500/20
         active:scale-[0.98]
@@ -268,8 +333,8 @@ function BentoCard({
       <div className="relative h-full flex flex-col justify-between">
         <div
           className={`
-          ${featured ? 'w-16 h-16 sm:w-20 sm:h-20' : 'w-10 h-10 sm:w-12 sm:h-12'}
-          rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm
+          ${featured ? 'w-16 h-16' : 'w-12 h-12'}
+          rounded-xl bg-white/20 backdrop-blur-sm
           flex items-center justify-center
           group-hover:scale-110 transition-transform duration-300
           shadow-lg
@@ -278,15 +343,13 @@ function BentoCard({
           {icon}
         </div>
 
-        <div className={featured ? 'mt-auto pt-6' : 'mt-auto pt-3'}>
-          <h2 className={`font-black ${featured ? 'text-2xl sm:text-3xl' : 'text-lg sm:text-xl'}`}>
-            {title}
-          </h2>
+        <div className="mt-auto">
+          <h2 className={`font-black ${featured ? 'text-2xl' : 'text-xl'}`}>{title}</h2>
           <p className={`text-white/70 ${featured ? 'text-base' : 'text-sm'} mt-1`}>{subtitle}</p>
         </div>
 
         {/* Arrow indicator */}
-        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
           <ChevronRight className="w-4 h-4" />
         </div>
       </div>
