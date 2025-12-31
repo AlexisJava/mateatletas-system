@@ -45,6 +45,7 @@ export const AdminView = {
   ANALYTICS: 'analytics',
   PERSONAS: 'personas',
   PRODUCTOS: 'productos',
+  CONTENIDOS: 'contenidos',
   SANDBOX: 'sandbox',
 } as const;
 
@@ -181,6 +182,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { view: AdminView.ANALYTICS, label: 'Analytics', href: '/admin/analytics', icon: 'BarChart3' },
   { view: AdminView.PERSONAS, label: 'Personas', href: '/admin/personas', icon: 'Users' },
   { view: AdminView.PRODUCTOS, label: 'Productos', href: '/admin/productos', icon: 'Package' },
+  { view: AdminView.CONTENIDOS, label: 'Contenidos', href: '/admin/contenidos', icon: 'BookOpen' },
   { view: AdminView.SANDBOX, label: 'Sandbox', href: '/admin/sandbox', icon: 'Code2' },
 ];
 
