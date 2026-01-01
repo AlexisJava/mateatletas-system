@@ -106,8 +106,8 @@
     "**/*.{json,md,yml,yaml}": "prettier --write"
   },
   "overrides": {
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "19.1.4",
+    "react-dom": "19.1.4",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2"
   },
