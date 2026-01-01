@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
 import {
   Plus,
   Users,
@@ -50,21 +51,41 @@ export function ComisionesSection({ productoId, productoNombre }: ComisionesSect
   const [expandedComision, setExpandedComision] = useState<ComisionConInscripciones | null>(null);
   const [loadingExpanded, setLoadingExpanded] = useState(false);
 
-  const fetchComisiones = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getComisionesByProducto(productoId);
-      // Asegurar que siempre sea un array
-      setComisiones(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error('Error al cargar comisiones:', err);
-      setError('Error al cargar las comisiones');
-      setComisiones([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Ref para controlar el request actual y evitar race conditions
+  const currentRequestRef = useRef<string | null>(null);
+
+  const fetchComisiones = useCallback(
+    async (requestId: string) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getComisionesByProducto(productoId);
+
+        // Verificar que este request siga siendo el actual (evita race condition)
+        if (currentRequestRef.current !== requestId) {
+          return; // Request obsoleto, ignorar resultado
+        }
+
+        // Asegurar que siempre sea un array
+        setComisiones(Array.isArray(data) ? data : []);
+      } catch (err) {
+        // Solo actualizar estado si el request sigue siendo actual
+        if (currentRequestRef.current !== requestId) {
+          return;
+        }
+        console.error('Error al cargar comisiones:', err);
+        toast.error('Error al cargar las comisiones');
+        setError('Error al cargar las comisiones');
+        setComisiones([]);
+      } finally {
+        // Solo actualizar loading si el request sigue siendo actual
+        if (currentRequestRef.current === requestId) {
+          setLoading(false);
+        }
+      }
+    },
+    [productoId],
+  );
 
   // Cargar comisión expandida con inscripciones
   const fetchExpandedComision = async (comisionId: string) => {
@@ -74,6 +95,7 @@ export function ComisionesSection({ productoId, productoNombre }: ComisionesSect
       setExpandedComision(data);
     } catch (err) {
       console.error('Error al cargar detalle de comisión:', err);
+      toast.error('Error al cargar detalle de comisión');
     } finally {
       setLoadingExpanded(false);
     }
@@ -91,17 +113,33 @@ export function ComisionesSection({ productoId, productoNombre }: ComisionesSect
     }
   };
 
+  // Función para refrescar la lista (genera nuevo requestId internamente)
+  const refreshComisiones = useCallback(() => {
+    const requestId = `${productoId}-${Date.now()}`;
+    currentRequestRef.current = requestId;
+    fetchComisiones(requestId);
+  }, [productoId, fetchComisiones]);
+
   const handleRefreshExpanded = async () => {
     if (expandedComisionId) {
       await fetchExpandedComision(expandedComisionId);
       // También refrescar lista para actualizar contadores
-      fetchComisiones();
+      refreshComisiones();
     }
   };
 
   useEffect(() => {
-    fetchComisiones();
-  }, [productoId]);
+    // Generar ID único para este request
+    const requestId = `${productoId}-${Date.now()}`;
+    currentRequestRef.current = requestId;
+
+    fetchComisiones(requestId);
+
+    // Cleanup: invalidar el request anterior cuando cambie productoId o se desmonte
+    return () => {
+      currentRequestRef.current = null;
+    };
+  }, [productoId, fetchComisiones]);
 
   const handleCreate = () => {
     setEditingComision(null);
@@ -117,9 +155,10 @@ export function ComisionesSection({ productoId, productoNombre }: ComisionesSect
     if (!confirm(`¿Desactivar la comisión "${comision.nombre}"?`)) return;
     try {
       await deleteComision(comision.id);
-      fetchComisiones();
+      refreshComisiones();
     } catch (err) {
       console.error('Error al eliminar comisión:', err);
+      toast.error('Error al eliminar comisión');
     }
   };
 
@@ -131,9 +170,10 @@ export function ComisionesSection({ productoId, productoNombre }: ComisionesSect
         await createComision({ ...data, producto_id: productoId });
       }
       setIsFormOpen(false);
-      fetchComisiones();
+      refreshComisiones();
     } catch (err) {
       console.error('Error al guardar comisión:', err);
+      toast.error('Error al guardar comisión');
     }
   };
 

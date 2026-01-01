@@ -17,6 +17,7 @@ import {
   Trash2,
   Plus,
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 interface Docente {
   id: string;
@@ -82,8 +83,10 @@ export default function ViewEditDocenteModal({
     try {
       await onUpdate(docente.id, form);
       setIsEditMode(false);
+      toast.success('Docente actualizado correctamente');
     } catch (error) {
       console.error('Error updating docente:', error);
+      toast.error('Error al actualizar docente');
     }
   };
 

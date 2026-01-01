@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Search, Loader2, UserCheck } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { getAllEstudiantes, type EstudianteAdmin } from '@/lib/api/admin.api';
 
 interface BuscarEstudianteModalProps {
@@ -25,30 +26,56 @@ export function BuscarEstudianteModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isSelecting, setIsSelecting] = useState<string | null>(null);
 
-  // Cargar estudiantes cuando se abre el modal o cambia la búsqueda
-  const buscarEstudiantes = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await getAllEstudiantes({
-        search: searchQuery || undefined,
-        limit: 20,
-      });
-      // Filtrar los ya inscriptos
-      const filtrados = response.data.filter((e) => !excludeIds.includes(e.id));
-      setEstudiantes(filtrados);
-    } catch (error) {
-      console.error('Error buscando estudiantes:', error);
-      setEstudiantes([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [searchQuery, excludeIds]);
+  // Ref para controlar el request actual y evitar race conditions
+  const currentRequestRef = useRef<string | null>(null);
 
+  // Efecto para buscar estudiantes cuando cambia la búsqueda o se abre el modal
   useEffect(() => {
-    if (isOpen) {
-      buscarEstudiantes();
-    }
-  }, [isOpen, buscarEstudiantes]);
+    if (!isOpen) return;
+
+    // Generar ID único para este request
+    const requestId = `search-${Date.now()}-${Math.random()}`;
+    currentRequestRef.current = requestId;
+
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await getAllEstudiantes({
+          search: searchQuery || undefined,
+          limit: 20,
+        });
+
+        // Verificar que este request siga siendo el actual (evita race condition)
+        if (currentRequestRef.current !== requestId) {
+          return; // Request obsoleto, ignorar resultado
+        }
+
+        // Filtrar los ya inscriptos
+        const filtrados = response.data.filter((e) => !excludeIds.includes(e.id));
+        setEstudiantes(filtrados);
+      } catch (error) {
+        // Solo actualizar estado si el request sigue siendo actual
+        if (currentRequestRef.current !== requestId) {
+          return;
+        }
+        console.error('Error buscando estudiantes:', error);
+        toast.error('Error al buscar estudiantes');
+        setEstudiantes([]);
+      } finally {
+        // Solo actualizar loading si el request sigue siendo actual
+        if (currentRequestRef.current === requestId) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+
+    // Cleanup: invalidar el request anterior
+    return () => {
+      currentRequestRef.current = null;
+    };
+  }, [isOpen, searchQuery, excludeIds]);
 
   // Reset al cerrar
   useEffect(() => {

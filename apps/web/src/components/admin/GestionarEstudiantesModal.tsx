@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { X, UserPlus, Users, Search } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import axios from '@/lib/axios';
 
 interface Estudiante {
@@ -76,34 +77,60 @@ export default function GestionarEstudiantesModal({
     tutor_telefono: '',
   });
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [claseResponse, estudiantesResponse] = await Promise.all([
-        axios.get<ClaseEstudiantes>(`/clases/${claseId}/estudiantes`),
-        axios.get('/admin/estudiantes'),
-      ]);
+  // Ref para controlar el request actual y evitar race conditions
+  const currentRequestRef = useRef<string | null>(null);
 
-      const clase = (claseResponse as ClaseEstudiantes) ?? null;
-      setClaseData(clase);
-      // El backend devuelve { data: [], metadata: {} }
-      const estudiantes =
-        (Array.isArray(estudiantesResponse)
-          ? estudiantesResponse
-          : (estudiantesResponse as { data?: Estudiante[] })?.data) ?? [];
-      setTodosEstudiantes(estudiantes as Estudiante[]);
-    } catch {
-      setError('Error al cargar datos');
-      setTodosEstudiantes([]); // Ensure we always have an array even on error
-    } finally {
-      setLoading(false);
-    }
-  }, [claseId]);
+  const fetchData = useCallback(
+    async (requestId: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const [claseResponse, estudiantesResponse] = await Promise.all([
+          axios.get<ClaseEstudiantes>(`/clases/${claseId}/estudiantes`),
+          axios.get('/admin/estudiantes'),
+        ]);
+
+        // Verificar que este request siga siendo el actual (evita race condition)
+        if (currentRequestRef.current !== requestId) return;
+
+        const clase = (claseResponse as ClaseEstudiantes) ?? null;
+        setClaseData(clase);
+        // El backend devuelve { data: [], metadata: {} }
+        const estudiantes =
+          (Array.isArray(estudiantesResponse)
+            ? estudiantesResponse
+            : (estudiantesResponse as { data?: Estudiante[] })?.data) ?? [];
+        setTodosEstudiantes(estudiantes as Estudiante[]);
+      } catch (error) {
+        // Solo actualizar estado si el request sigue siendo actual
+        if (currentRequestRef.current !== requestId) return;
+
+        console.error('Error al cargar datos:', error);
+        setError('Error al cargar datos');
+        toast.error('Error al cargar datos de la clase');
+        setTodosEstudiantes([]); // Ensure we always have an array even on error
+      } finally {
+        // Solo actualizar loading si el request sigue siendo actual
+        if (currentRequestRef.current === requestId) {
+          setLoading(false);
+        }
+      }
+    },
+    [claseId],
+  );
 
   useEffect(() => {
-    void fetchData();
-  }, [fetchData]);
+    // Generar ID único para este request
+    const requestId = `clase-${claseId}-${Date.now()}`;
+    currentRequestRef.current = requestId;
+
+    void fetchData(requestId);
+
+    // Cleanup: invalidar el request anterior
+    return () => {
+      currentRequestRef.current = null;
+    };
+  }, [claseId, fetchData]);
 
   const handleAsignarEstudiantes = async () => {
     if (selectedEstudiantes.length === 0) return;
@@ -116,11 +143,16 @@ export default function GestionarEstudiantesModal({
         estudianteIds: selectedEstudiantes,
       });
 
-      await fetchData();
+      // Generar nuevo request ID para el refresh
+      const requestId = `clase-${claseId}-${Date.now()}`;
+      currentRequestRef.current = requestId;
+      await fetchData(requestId);
       setSelectedEstudiantes([]);
       onSuccess();
-    } catch {
+    } catch (error) {
+      console.error('Error al asignar estudiantes:', error);
       setError('Error al asignar estudiantes');
+      toast.error('Error al asignar estudiantes');
     } finally {
       setSubmitting(false);
     }
@@ -176,6 +208,7 @@ export default function GestionarEstudiantesModal({
     } catch (error) {
       console.error('Error al crear estudiante:', error);
       setError('Error al crear el estudiante');
+      toast.error('Error al crear el estudiante');
     } finally {
       setSubmitting(false);
     }

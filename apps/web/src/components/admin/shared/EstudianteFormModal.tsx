@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, UserPlus, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import {
@@ -89,23 +89,45 @@ export function EstudianteFormModal({
   const [casas, setCasas] = useState<Casa[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
+  // Ref para controlar si el request sigue siendo válido
+  const currentRequestRef = useRef<string | null>(null);
+
   // Cargar sectores y casas
   useEffect(() => {
-    if (isOpen) {
-      setIsLoadingData(true);
-      Promise.all([getSectores(), getCasas()])
-        .then(([sectoresData, casasData]) => {
-          setSectores(sectoresData.filter((s) => s.activo));
-          setCasas(casasData.filter((c) => c.activo));
-        })
-        .catch((error) => {
-          console.error('Error cargando datos:', error);
-          toast.error('Error al cargar sectores y casas');
-        })
-        .finally(() => {
+    if (!isOpen) return;
+
+    // Generar ID único para este request
+    const requestId = `catalogos-${Date.now()}`;
+    currentRequestRef.current = requestId;
+
+    setIsLoadingData(true);
+
+    Promise.all([getSectores(), getCasas()])
+      .then(([sectoresData, casasData]) => {
+        // Verificar que este request siga siendo el actual
+        if (currentRequestRef.current !== requestId) return;
+
+        setSectores(sectoresData.filter((s) => s.activo));
+        setCasas(casasData.filter((c) => c.activo));
+      })
+      .catch((error) => {
+        // Solo mostrar error si el request sigue siendo actual
+        if (currentRequestRef.current !== requestId) return;
+
+        console.error('Error cargando datos:', error);
+        toast.error('Error al cargar sectores y casas');
+      })
+      .finally(() => {
+        // Solo actualizar loading si el request sigue siendo actual
+        if (currentRequestRef.current === requestId) {
           setIsLoadingData(false);
-        });
-    }
+        }
+      });
+
+    // Cleanup: invalidar el request anterior
+    return () => {
+      currentRequestRef.current = null;
+    };
   }, [isOpen]);
 
   // Reset form when modal opens

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -44,10 +44,70 @@ export default function ProductoDetailPage() {
     cupo_maximo: undefined as number | undefined,
   });
 
-  const fetchProducto = useCallback(async () => {
+  // Ref para controlar el request actual y evitar race conditions
+  const currentRequestRef = useRef<string | null>(null);
+
+  // Cargar producto cuando cambia el productoId
+  useEffect(() => {
+    if (!productoId) return;
+
+    // Generar ID único para este request
+    const requestId = `producto-${productoId}-${Date.now()}`;
+    currentRequestRef.current = requestId;
+
+    setLoading(true);
+
+    getProductById(productoId)
+      .then((data) => {
+        // Verificar que este request siga siendo el actual (evita race condition)
+        if (currentRequestRef.current !== requestId) return;
+
+        setProducto(data);
+        setFormData({
+          nombre: data.nombre,
+          descripcion: data.descripcion || '',
+          precio: Number(data.precio),
+          tipo: data.tipo,
+          activo: data.activo,
+          fecha_inicio: data.fecha_inicio?.split('T')[0] || '',
+          fecha_fin: data.fecha_fin?.split('T')[0] || '',
+          cupo_maximo: data.cupo_maximo ?? undefined,
+        });
+        setError(null);
+      })
+      .catch((err) => {
+        // Solo actualizar estado si el request sigue siendo actual
+        if (currentRequestRef.current !== requestId) return;
+
+        console.error('Error al cargar producto:', err);
+        setError('Error al cargar el producto');
+      })
+      .finally(() => {
+        // Solo actualizar loading si el request sigue siendo actual
+        if (currentRequestRef.current === requestId) {
+          setLoading(false);
+        }
+      });
+
+    // Cleanup: invalidar el request anterior
+    return () => {
+      currentRequestRef.current = null;
+    };
+  }, [productoId]);
+
+  // Función para recargar el producto (usada después de guardar)
+  const fetchProducto = async () => {
+    if (!productoId) return;
+
+    const requestId = `producto-${productoId}-${Date.now()}`;
+    currentRequestRef.current = requestId;
+
+    setLoading(true);
+
     try {
-      setLoading(true);
       const data = await getProductById(productoId);
+      if (currentRequestRef.current !== requestId) return;
+
       setProducto(data);
       setFormData({
         nombre: data.nombre,
@@ -61,18 +121,15 @@ export default function ProductoDetailPage() {
       });
       setError(null);
     } catch (err) {
+      if (currentRequestRef.current !== requestId) return;
       console.error('Error al cargar producto:', err);
       setError('Error al cargar el producto');
     } finally {
-      setLoading(false);
+      if (currentRequestRef.current === requestId) {
+        setLoading(false);
+      }
     }
-  }, [productoId]);
-
-  useEffect(() => {
-    if (productoId) {
-      fetchProducto();
-    }
-  }, [productoId, fetchProducto]);
+  };
 
   const handleSave = async () => {
     try {

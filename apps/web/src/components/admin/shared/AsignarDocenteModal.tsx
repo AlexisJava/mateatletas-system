@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Search, Loader2, UserCheck, GraduationCap, UserMinus } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { getDocentes } from '@/lib/api/admin.api';
 import type { DocenteFromSchema } from '@/lib/schemas/docente.schema';
 
@@ -29,25 +30,44 @@ export function AsignarDocenteModal({
   const [isSelecting, setIsSelecting] = useState<string | null>(null);
   const [isRemoving, setIsRemoving] = useState(false);
 
-  // Cargar docentes cuando se abre el modal
-  const cargarDocentes = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await getDocentes();
-      setDocentes(response);
-    } catch (error) {
-      console.error('Error cargando docentes:', error);
-      setDocentes([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // Ref para controlar el request actual y evitar race conditions
+  const currentRequestRef = useRef<string | null>(null);
 
+  // Cargar docentes cuando se abre el modal
   useEffect(() => {
-    if (isOpen) {
-      cargarDocentes();
-    }
-  }, [isOpen, cargarDocentes]);
+    if (!isOpen) return;
+
+    // Generar ID único para este request
+    const requestId = `docentes-${Date.now()}`;
+    currentRequestRef.current = requestId;
+
+    setIsLoading(true);
+
+    getDocentes()
+      .then((response) => {
+        // Verificar que este request siga siendo el actual (evita race condition)
+        if (currentRequestRef.current !== requestId) return;
+        setDocentes(response);
+      })
+      .catch((error) => {
+        // Solo actualizar estado si el request sigue siendo actual
+        if (currentRequestRef.current !== requestId) return;
+        console.error('Error cargando docentes:', error);
+        toast.error('Error al cargar docentes');
+        setDocentes([]);
+      })
+      .finally(() => {
+        // Solo actualizar loading si el request sigue siendo actual
+        if (currentRequestRef.current === requestId) {
+          setIsLoading(false);
+        }
+      });
+
+    // Cleanup: invalidar el request anterior
+    return () => {
+      currentRequestRef.current = null;
+    };
+  }, [isOpen]);
 
   // Reset al cerrar
   useEffect(() => {

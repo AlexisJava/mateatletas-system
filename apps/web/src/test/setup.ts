@@ -43,6 +43,16 @@ class MockResizeObserver {
 }
 global.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
 
+// Mock de navigator.clipboard (para componentes que copian al portapapeles)
+Object.defineProperty(navigator, 'clipboard', {
+  value: {
+    writeText: vi.fn().mockResolvedValue(undefined),
+    readText: vi.fn().mockResolvedValue(''),
+  },
+  writable: true,
+  configurable: true,
+});
+
 // Suprimir warnings de console en tests (opcional)
 const originalError = console.error;
 const originalWarn = console.warn;
