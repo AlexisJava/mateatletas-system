@@ -96,7 +96,11 @@ const categoriaDefault: Categoria = {
   bgSidebar: 'bg-slate-600',
   textColor: 'text-slate-400',
   mundoTipo: 'MATEMATICA',
-  houseColors: HOUSE_COLORS.QUANTUM,
+  houseColors: HOUSE_COLORS.QUANTUM ?? {
+    primary: '#F472B6',
+    secondary: '#EC4899',
+    accent: '#FBCFE8',
+  },
 };
 
 // ============================================================================

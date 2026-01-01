@@ -29,8 +29,8 @@ export default function PlanesPage() {
     fetchProductos();
   }, [fetchProductos]);
 
-  // Filtrar solo suscripciones
-  const suscripciones = productos.filter((p) => p.tipo === TipoProducto.Suscripcion);
+  // Filtrar productos de tipo Servicio (mentorías, membresías)
+  const suscripciones = productos.filter((p) => p.tipo === 'Servicio');
 
   // Ordenar por precio (asumiendo que hay básico, estándar, premium)
   const suscripcionesOrdenadas = [...suscripciones].sort((a, b) => a.precio - b.precio);

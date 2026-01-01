@@ -35,22 +35,22 @@ export function ProductFilter({ filtroActivo, onFiltroChange, productCount }: Pr
       color: 'hover:bg-primary/10 active:bg-primary',
     },
     {
-      value: TipoProducto.Suscripcion,
-      label: 'Suscripciones',
-      emoji: '💎',
-      color: 'hover:bg-[#00d9ff]/10 active:bg-[#00d9ff]',
+      value: 'Evento',
+      label: 'Eventos',
+      emoji: '🎪',
+      color: 'hover:bg-amber-500/10 active:bg-amber-500',
     },
     {
-      value: TipoProducto.Curso,
+      value: 'Curso',
       label: 'Cursos',
       emoji: '📚',
-      color: 'hover:bg-[#ff6b35]/10 active:bg-[#ff6b35]',
+      color: 'hover:bg-emerald-500/10 active:bg-emerald-500',
     },
     {
-      value: TipoProducto.RecursoDigital,
-      label: 'Recursos',
-      emoji: '🎁',
-      color: 'hover:bg-[#f7b801]/10 active:bg-[#f7b801]',
+      value: 'Digital',
+      label: 'Digitales',
+      emoji: '📱',
+      color: 'hover:bg-violet-500/10 active:bg-violet-500',
     },
   ];
 

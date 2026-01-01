@@ -30,11 +30,23 @@ export function ProductCard({ product, onView, onEdit, onDelete }: ProductCardPr
   const tipoColor = TIPO_COLORS[product.tipo] || DEFAULT_TIPO_COLOR;
   const TipoIcon = TIPO_ICON_MAP[product.tipo] || DEFAULT_TIPO_ICON;
 
-  // Label amigable para el tipo
-  const tipoLabel = product.tipo === 'RecursoDigital' ? 'Recurso Digital' : product.tipo;
+  // Labels amigables para los tipos
+  const TIPO_LABELS: Record<string, string> = {
+    Evento: 'Evento',
+    Digital: 'Digital',
+    Fisico: 'Físico',
+    Curso: 'Curso',
+    Servicio: 'Servicio',
+    Bundle: 'Bundle',
+    Certificacion: 'Certificación',
+  };
+  const tipoLabel = TIPO_LABELS[product.tipo] || product.tipo;
 
   return (
-    <div className="p-5 rounded-2xl bg-[var(--admin-surface-1)] border border-[var(--admin-border)] hover:border-[var(--admin-border-accent)] transition-all group">
+    <div
+      onClick={() => onView(product)}
+      className="p-5 rounded-2xl bg-[var(--admin-surface-1)] border border-[var(--admin-border)] hover:border-[var(--admin-border-accent)] transition-all group cursor-pointer"
+    >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div
@@ -56,7 +68,10 @@ export function ProductCard({ product, onView, onEdit, onDelete }: ProductCardPr
           </span>
           <div className="relative">
             <button
-              onClick={() => setMenuOpen(!menuOpen)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setMenuOpen(!menuOpen);
+              }}
               className="p-2 rounded-lg hover:bg-[var(--admin-surface-2)] transition-colors"
             >
               <MoreVertical className="w-4 h-4 text-[var(--admin-text-muted)]" />
@@ -64,7 +79,10 @@ export function ProductCard({ product, onView, onEdit, onDelete }: ProductCardPr
             {menuOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 w-40 py-1 bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-lg shadow-xl z-50">
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute right-0 top-full mt-1 w-40 py-1 bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-lg shadow-xl z-50"
+                >
                   <button
                     onClick={() => {
                       onView(product);

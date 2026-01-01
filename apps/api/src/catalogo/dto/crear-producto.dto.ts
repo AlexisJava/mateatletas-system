@@ -51,10 +51,11 @@ export class CrearProductoDto {
   @ApiProperty({
     description: 'Tipo de producto',
     enum: TipoProducto,
-    example: TipoProducto.Suscripcion,
+    example: TipoProducto.Curso,
   })
   @IsEnum(TipoProducto, {
-    message: 'El tipo debe ser: Suscripcion, Curso o RecursoDigital',
+    message:
+      'El tipo debe ser: Evento, Digital, Fisico, Curso, Servicio, Bundle o Certificacion',
   })
   @IsNotEmpty({ message: 'El tipo es requerido' })
   tipo!: TipoProducto;
@@ -140,18 +141,18 @@ export class CrearProductoDto {
   @IsOptional()
   cupoMaximo?: number; // Alias camelCase
 
-  // --- Campos específicos para tipo Suscripcion Y Curso ---
+  // --- Campos específicos para tipo Servicio Y Curso ---
   // Los cursos PUEDEN tener duración en meses (ej: "Exploradores Matemáticos de 9 meses")
   // O pueden tener fechas específicas (fecha_inicio + fecha_fin)
 
   @ApiPropertyOptional({
-    description: '[Suscripciones y Cursos] Duración en meses',
+    description: '[Servicios y Cursos] Duración en meses',
     example: 1,
     type: Number,
     minimum: 1,
   })
   @ValidateIf(
-    (o: CrearProductoDto) => o.tipo === 'Suscripcion' || o.tipo === 'Curso',
+    (o: CrearProductoDto) => o.tipo === 'Servicio' || o.tipo === 'Curso',
   )
   @IsInt({ message: 'La duración debe ser un número entero de meses' })
   @Min(1, { message: 'La duración debe ser al menos 1 mes' })
@@ -159,13 +160,13 @@ export class CrearProductoDto {
   duracion_meses?: number;
 
   @ApiPropertyOptional({
-    description: '[Suscripciones y Cursos] Alias camelCase de duracion_meses',
+    description: '[Servicios y Cursos] Alias camelCase de duracion_meses',
     example: 1,
     type: Number,
     minimum: 1,
   })
   @ValidateIf(
-    (o: CrearProductoDto) => o.tipo === 'Suscripcion' || o.tipo === 'Curso',
+    (o: CrearProductoDto) => o.tipo === 'Servicio' || o.tipo === 'Curso',
   )
   @IsInt({ message: 'La duración debe ser un número entero de meses' })
   @Min(1, { message: 'La duración debe ser al menos 1 mes' })

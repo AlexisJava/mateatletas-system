@@ -58,14 +58,14 @@ export class ProductosController {
   }
 
   /**
-   * GET /productos/suscripciones
-   * Obtiene solo planes de suscripción disponibles
+   * GET /productos/servicios
+   * Obtiene solo servicios disponibles (membresías, mentorías)
    * Endpoint público
    */
   @Public()
-  @Get('suscripciones')
-  async findSuscripciones() {
-    return this.productosService.findSuscripciones();
+  @Get('servicios')
+  async findServicios() {
+    return this.productosService.findServicios();
   }
 
   /**

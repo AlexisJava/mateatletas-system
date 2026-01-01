@@ -606,3 +606,442 @@ export const getCombinedDashboardStats = async (): Promise<DashboardStats> => {
     distribucionCasas,
   };
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMISIONES (Instancias de Productos tipo Curso)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Estado de inscripción en comisión */
+export type EstadoInscripcionComision = 'Pendiente' | 'Confirmada' | 'Cancelada' | 'ListaEspera';
+
+/** Comisión de producto */
+export interface Comision {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  producto_id: string;
+  casa_id: string | null;
+  docente_id: string | null;
+  cupo_maximo: number | null;
+  horario: string | null;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  activo: boolean;
+  createdAt: string;
+  updatedAt: string;
+  producto?: {
+    id: string;
+    nombre: string;
+    tipo: string;
+    precio?: number;
+  };
+  casa?: {
+    id: string;
+    nombre: string;
+    emoji: string;
+  } | null;
+  docente?: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email?: string;
+  } | null;
+  total_inscriptos?: number;
+  cupos_disponibles?: number | null;
+}
+
+/** Inscripción en comisión */
+export interface InscripcionComision {
+  id: string;
+  comision_id: string;
+  estudiante_id: string;
+  estado: EstadoInscripcionComision;
+  fecha_inscripcion: string;
+  notas: string | null;
+  estudiante?: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    edad?: number;
+    casa?: {
+      id: string;
+      nombre: string;
+      emoji: string;
+    } | null;
+  };
+}
+
+/** DTO para crear comisión */
+export interface CreateComisionDto {
+  nombre: string;
+  descripcion?: string;
+  producto_id: string;
+  casa_id?: string | null;
+  docente_id?: string | null;
+  cupo_maximo?: number | null;
+  horario?: string | null;
+  fecha_inicio?: string | null;
+  fecha_fin?: string | null;
+  activo?: boolean;
+}
+
+/** DTO para inscribir estudiantes */
+export interface InscribirEstudiantesDto {
+  estudiantes_ids: string[];
+  estado?: EstadoInscripcionComision;
+}
+
+/** Response de lista de comisiones */
+export interface ComisionesListResponse {
+  success: boolean;
+  data: Comision[];
+  total: number;
+}
+
+/** Response de comisión individual */
+export interface ComisionResponse {
+  success: boolean;
+  data: Comision & { inscripciones?: InscripcionComision[] };
+  message?: string;
+}
+
+/**
+ * Obtener todas las comisiones
+ * GET /admin/comisiones
+ */
+export const getComisiones = async (params?: {
+  producto_id?: string;
+  casa_id?: string;
+  docente_id?: string;
+  activo?: boolean;
+}): Promise<Comision[]> => {
+  try {
+    const queryParams = new URLSearchParams();
+    if (params?.producto_id) queryParams.append('producto_id', params.producto_id);
+    if (params?.casa_id) queryParams.append('casa_id', params.casa_id);
+    if (params?.docente_id) queryParams.append('docente_id', params.docente_id);
+    if (params?.activo !== undefined) queryParams.append('activo', String(params.activo));
+
+    const url = queryParams.toString()
+      ? `/admin/comisiones?${queryParams.toString()}`
+      : '/admin/comisiones';
+
+    // El interceptor ya extrae .data del response del backend
+    // Entonces response aquí es directamente el array de comisiones
+    const comisiones = await axios.get<Comision[]>(url);
+    return comisiones ?? [];
+  } catch (error) {
+    console.error('Error al obtener comisiones:', error);
+    return []; // Retornar array vacío en caso de error para evitar undefined
+  }
+};
+
+/**
+ * Obtener comisiones por producto
+ * GET /admin/comisiones?producto_id=xxx
+ */
+export const getComisionesByProducto = async (productoId: string): Promise<Comision[]> => {
+  return getComisiones({ producto_id: productoId });
+};
+
+/**
+ * Obtener una comisión por ID
+ * GET /admin/comisiones/:id
+ */
+export const getComisionById = async (
+  id: string,
+): Promise<Comision & { inscripciones?: InscripcionComision[] }> => {
+  try {
+    // El interceptor ya extrae .data del response del backend
+    const comision = await axios.get<Comision & { inscripciones?: InscripcionComision[] }>(
+      `/admin/comisiones/${id}`,
+    );
+    return comision;
+  } catch (error) {
+    console.error('Error al obtener comisión:', error);
+    throw error;
+  }
+};
+
+/**
+ * Crear una comisión
+ * POST /admin/comisiones
+ */
+export const createComision = async (data: CreateComisionDto): Promise<Comision> => {
+  try {
+    // El interceptor ya extrae .data del response del backend
+    const comision = await axios.post<Comision>('/admin/comisiones', data);
+    return comision;
+  } catch (error) {
+    console.error('Error al crear comisión:', error);
+    throw error;
+  }
+};
+
+/**
+ * Actualizar una comisión
+ * PUT /admin/comisiones/:id
+ */
+export const updateComision = async (
+  id: string,
+  data: Partial<CreateComisionDto>,
+): Promise<Comision> => {
+  try {
+    // El interceptor ya extrae .data del response del backend
+    const comision = await axios.put<Comision>(`/admin/comisiones/${id}`, data);
+    return comision;
+  } catch (error) {
+    console.error('Error al actualizar comisión:', error);
+    throw error;
+  }
+};
+
+/**
+ * Eliminar una comisión (soft delete)
+ * DELETE /admin/comisiones/:id
+ */
+export const deleteComision = async (id: string): Promise<void> => {
+  try {
+    await axios.delete(`/admin/comisiones/${id}`);
+  } catch (error) {
+    console.error('Error al eliminar comisión:', error);
+    throw error;
+  }
+};
+
+/**
+ * Inscribir estudiantes a una comisión
+ * POST /admin/comisiones/:id/estudiantes
+ */
+export const inscribirEstudiantesComision = async (
+  comisionId: string,
+  data: InscribirEstudiantesDto,
+): Promise<InscripcionComision[]> => {
+  try {
+    // El interceptor ya extrae .data del response del backend
+    const inscripciones = await axios.post<InscripcionComision[]>(
+      `/admin/comisiones/${comisionId}/estudiantes`,
+      data,
+    );
+    return inscripciones ?? [];
+  } catch (error) {
+    console.error('Error al inscribir estudiantes:', error);
+    throw error;
+  }
+};
+
+/**
+ * Actualizar estado de inscripción
+ * PATCH /admin/comisiones/:comisionId/estudiantes/:estudianteId
+ */
+export const actualizarInscripcionComision = async (
+  comisionId: string,
+  estudianteId: string,
+  data: { estado: EstadoInscripcionComision; notas?: string },
+): Promise<InscripcionComision> => {
+  try {
+    // El interceptor ya extrae .data del response del backend
+    const inscripcion = await axios.patch<InscripcionComision>(
+      `/admin/comisiones/${comisionId}/estudiantes/${estudianteId}`,
+      data,
+    );
+    return inscripcion;
+  } catch (error) {
+    console.error('Error al actualizar inscripción:', error);
+    throw error;
+  }
+};
+
+/**
+ * Remover estudiante de comisión
+ * DELETE /admin/comisiones/:comisionId/estudiantes/:estudianteId
+ */
+export const removerEstudianteComision = async (
+  comisionId: string,
+  estudianteId: string,
+): Promise<void> => {
+  try {
+    await axios.delete(`/admin/comisiones/${comisionId}/estudiantes/${estudianteId}`);
+  } catch (error) {
+    console.error('Error al remover estudiante:', error);
+    throw error;
+  }
+};
+
+/**
+ * Respuesta al crear estudiante e inscribirlo en comisión
+ */
+export interface CrearEstudianteEInscribirResponse {
+  estudiante: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    username: string;
+    edad: number;
+    nivelEscolar: string;
+  };
+  tutor: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email?: string;
+  };
+  tutorCreado: boolean;
+  credencialesTutor: {
+    username: string;
+    passwordTemporal: string;
+  } | null;
+  credencialesEstudiante: {
+    username: string;
+    pin: string;
+  };
+  inscripcion: {
+    id: string;
+    comision: {
+      id: string;
+      nombre: string;
+    };
+    estado: EstadoInscripcionComision;
+    fecha_inscripcion: string;
+  };
+}
+
+/**
+ * Crear estudiante nuevo e inscribirlo a una comisión
+ * POST /admin/comisiones/:id/estudiantes/nuevo
+ *
+ * Crea estudiante con credenciales y lo inscribe automáticamente
+ */
+export const crearEstudianteEInscribir = async (
+  comisionId: string,
+  dto: CrearEstudianteConCredencialesDto,
+): Promise<CrearEstudianteEInscribirResponse> => {
+  try {
+    return await axios.post(`/admin/comisiones/${comisionId}/estudiantes/nuevo`, dto);
+  } catch (error) {
+    console.error('Error al crear estudiante e inscribir:', error);
+    throw error;
+  }
+};
+
+// ============================================================================
+// SECTORES Y CASAS
+// ============================================================================
+
+/**
+ * Sector del sistema (Matemática, Programación, etc.)
+ */
+export interface Sector {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  activo: boolean;
+}
+
+/**
+ * Casa/Equipo del sistema (Quantum, Vertex, Pulsar)
+ */
+export interface Casa {
+  id: string;
+  nombre: string;
+  color?: string;
+  activo: boolean;
+}
+
+/**
+ * Obtener todos los sectores
+ * GET /admin/sectores
+ */
+export const getSectores = async (): Promise<Sector[]> => {
+  try {
+    return await axios.get('/admin/sectores');
+  } catch (error) {
+    console.error('Error al obtener sectores:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener todas las casas/equipos
+ * GET /equipos
+ */
+export const getCasas = async (): Promise<Casa[]> => {
+  try {
+    return await axios.get('/equipos');
+  } catch (error) {
+    console.error('Error al obtener casas:', error);
+    throw error;
+  }
+};
+
+// ============================================================================
+// CREAR ESTUDIANTE CON CREDENCIALES
+// ============================================================================
+
+/**
+ * DTO para crear estudiante con credenciales
+ */
+export interface CrearEstudianteConCredencialesDto {
+  // Datos del estudiante
+  nombreEstudiante: string;
+  apellidoEstudiante: string;
+  edadEstudiante: number;
+  nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
+  sectorId: string;
+  casaId?: string;
+  puntosIniciales?: number;
+  nivelInicial?: number;
+  // Datos del tutor
+  nombreTutor: string;
+  apellidoTutor: string;
+  emailTutor?: string;
+  telefonoTutor?: string;
+  dniTutor?: string;
+}
+
+/**
+ * Respuesta al crear estudiante con credenciales
+ */
+export interface CrearEstudianteConCredencialesResponse {
+  estudiante: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    username: string;
+    edad: number;
+    nivelEscolar: string;
+  };
+  tutor: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email?: string;
+  };
+  tutorCreado: boolean;
+  credencialesTutor: {
+    username: string;
+    passwordTemporal: string;
+  } | null;
+  credencialesEstudiante: {
+    username: string;
+    pin: string;
+  };
+}
+
+/**
+ * Crear estudiante con generación automática de credenciales
+ * POST /admin/estudiantes/con-credenciales
+ *
+ * Genera credenciales para estudiante (username + PIN)
+ * y para tutor si es nuevo (username + password temporal)
+ */
+export const crearEstudianteConCredenciales = async (
+  dto: CrearEstudianteConCredencialesDto,
+): Promise<CrearEstudianteConCredencialesResponse> => {
+  try {
+    return await axios.post('/admin/estudiantes/con-credenciales', dto);
+  } catch (error) {
+    console.error('Error al crear estudiante con credenciales:', error);
+    throw error;
+  }
+};

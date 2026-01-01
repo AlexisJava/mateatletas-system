@@ -13,6 +13,10 @@ type CrearEstudianteRapidoData = Parameters<
   AdminEstudiantesService['crearEstudianteRapido']
 >[0];
 
+type CrearEstudianteConCredencialesData = Parameters<
+  AdminEstudiantesService['crearEstudianteConCredenciales']
+>[0];
+
 /**
  * Servicio principal de administración
  * REFACTORIZADO (ETAPA 2): Delega operaciones específicas a servicios especializados
@@ -240,6 +244,21 @@ export class AdminService {
   async crearEstudianteRapido(data: CrearEstudianteRapidoData) {
     return this.crearEstudianteCircuit.execute(() =>
       this.estudiantesService.crearEstudianteRapido(data),
+    );
+  }
+
+  /**
+   * Crear estudiante con generación de credenciales
+   * DELEGACIÓN: AdminEstudiantesService
+   * PROTECCIÓN: Circuit Breaker (sin fallback - debe fallar si servicio cae)
+   *
+   * Retorna credenciales en texto plano para que admin las copie y envíe por WhatsApp
+   */
+  async crearEstudianteConCredenciales(
+    data: CrearEstudianteConCredencialesData,
+  ) {
+    return this.crearEstudianteCircuit.execute(() =>
+      this.estudiantesService.crearEstudianteConCredenciales(data),
     );
   }
 

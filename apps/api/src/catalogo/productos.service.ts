@@ -45,7 +45,7 @@ export class ProductosService {
     };
 
     // Agregar campos específicos según el tipo
-    if (createDto.tipo === 'Curso') {
+    if (createDto.tipo === 'Curso' || createDto.tipo === 'Evento') {
       // Soportar tanto snake_case como camelCase
       const fechaInicio = createDto.fecha_inicio || createDto.fechaInicio;
       const fechaFin = createDto.fecha_fin || createDto.fechaFin;
@@ -54,7 +54,7 @@ export class ProductosService {
       data.fecha_inicio = fechaInicio ? new Date(fechaInicio) : undefined;
       data.fecha_fin = fechaFin ? new Date(fechaFin) : undefined;
       data.cupo_maximo = cupoMaximo;
-    } else if (createDto.tipo === 'Suscripcion') {
+    } else if (createDto.tipo === 'Servicio') {
       data.duracion_meses = createDto.duracion_meses ?? 1;
     }
 
@@ -147,13 +147,13 @@ export class ProductosService {
   }
 
   /**
-   * Obtiene solo las suscripciones disponibles
-   * @returns Lista de suscripciones activas
+   * Obtiene solo los servicios disponibles (membresías, mentorías)
+   * @returns Lista de servicios activos
    */
-  async findSuscripciones() {
+  async findServicios() {
     return await this.prisma.producto.findMany({
       where: {
-        tipo: 'Suscripcion',
+        tipo: 'Servicio',
         activo: true,
       },
       orderBy: {

@@ -31,6 +31,7 @@ import {
   AsignarRutasDocenteDto,
 } from './dto/ruta-especialidad.dto';
 import { CrearEstudianteRapidoDto } from './dto/crear-estudiante-rapido.dto';
+import { CrearEstudianteDto } from './dto/crear-estudiante.dto';
 import { CrearClaseGrupoDto } from './dto/crear-clase-grupo.dto';
 import { ActualizarClaseGrupoDto } from './dto/actualizar-clase-grupo.dto';
 import {
@@ -43,6 +44,14 @@ import {
   AdminResetPasswordDto,
   ResetPasswordMasivoDto,
 } from './dto/reset-password.dto';
+import {
+  CreateComisionDto,
+  UpdateComisionDto,
+  FiltrosComisionDto,
+  InscribirEstudiantesDto,
+  ActualizarInscripcionDto,
+} from './dto/comision.dto';
+import { ComisionesService } from './comisiones.service';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -53,6 +62,7 @@ export class AdminController {
     private readonly sectoresRutasService: SectoresRutasService,
     private readonly claseGruposService: ClaseGruposService,
     private readonly asistenciasService: AsistenciasService,
+    private readonly comisionesService: ComisionesService,
   ) {}
 
   /**
@@ -197,6 +207,35 @@ export class AdminController {
   @Post('estudiantes')
   async crearEstudianteRapido(@Body() dto: CrearEstudianteRapidoDto) {
     return this.adminService.crearEstudianteRapido(dto);
+  }
+
+  /**
+   * Crear estudiante con generación de credenciales
+   * POST /api/admin/estudiantes/con-credenciales
+   * Rol: Admin
+   *
+   * Genera credenciales automáticas para estudiante (username + PIN)
+   * y opcionalmente para tutor si no existe (username + password)
+   *
+   * Retorna credenciales en texto plano para que admin las copie
+   * y las envíe al tutor por WhatsApp
+   */
+  @Post('estudiantes/con-credenciales')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Crear estudiante con credenciales',
+    description: `
+      Crea un estudiante nuevo con generación automática de credenciales.
+
+      - Estudiante: username (nombre.apellido) + PIN de 4 dígitos
+      - Tutor (si es nuevo): username + password temporal
+
+      Las credenciales se retornan en texto plano para que el admin
+      las copie y envíe al tutor por WhatsApp.
+    `,
+  })
+  async crearEstudianteConCredenciales(@Body() dto: CrearEstudianteDto) {
+    return this.adminService.crearEstudianteConCredenciales(dto);
   }
 
   /**
@@ -642,5 +681,180 @@ export class AdminController {
       id,
       estudianteId,
     );
+  }
+
+  // ============================================================================
+  // COMISIONES DE PRODUCTOS
+  // ============================================================================
+
+  /**
+   * Listar todas las comisiones
+   * GET /api/admin/comisiones
+   * Rol: Admin
+   *
+   * Query params opcionales:
+   * - producto_id: Filtrar por producto
+   * - casa_id: Filtrar por casa
+   * - docente_id: Filtrar por docente
+   * - activo: Filtrar por estado activo/inactivo
+   */
+  @Get('comisiones')
+  @ApiOperation({
+    summary: 'Listar comisiones',
+    description:
+      'Lista todas las comisiones de productos con filtros opcionales',
+  })
+  async listarComisiones(@Query() filtros: FiltrosComisionDto) {
+    return this.comisionesService.findAll(filtros);
+  }
+
+  /**
+   * Obtener una comisión por ID
+   * GET /api/admin/comisiones/:id
+   * Rol: Admin
+   */
+  @Get('comisiones/:id')
+  @ApiOperation({
+    summary: 'Obtener detalle de comisión',
+    description: 'Obtiene una comisión con todos sus detalles e inscripciones',
+  })
+  async obtenerComision(@Param('id', ParseIdPipe) id: string) {
+    return this.comisionesService.findOne(id);
+  }
+
+  /**
+   * Crear una nueva comisión
+   * POST /api/admin/comisiones
+   * Rol: Admin
+   */
+  @Post('comisiones')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Crear comisión',
+    description: `
+      Crea una nueva comisión para un producto de tipo Curso.
+
+      Ejemplo: Para "Colonia de Verano 2026" crear comisiones:
+      - "QUANTUM Mañana" (casa QUANTUM, turno mañana)
+      - "VERTEX Tarde" (casa VERTEX, turno tarde)
+    `,
+  })
+  async crearComision(@Body() dto: CreateComisionDto) {
+    return this.comisionesService.create(dto);
+  }
+
+  /**
+   * Actualizar una comisión
+   * PUT /api/admin/comisiones/:id
+   * Rol: Admin
+   */
+  @Put('comisiones/:id')
+  @ApiOperation({
+    summary: 'Actualizar comisión',
+    description: 'Actualiza los datos de una comisión existente',
+  })
+  async actualizarComision(
+    @Param('id', ParseIdPipe) id: string,
+    @Body() dto: UpdateComisionDto,
+  ) {
+    return this.comisionesService.update(id, dto);
+  }
+
+  /**
+   * Eliminar una comisión (soft delete)
+   * DELETE /api/admin/comisiones/:id
+   * Rol: Admin
+   */
+  @Delete('comisiones/:id')
+  @ApiOperation({
+    summary: 'Eliminar comisión',
+    description: 'Desactiva una comisión (soft delete)',
+  })
+  async eliminarComision(@Param('id', ParseIdPipe) id: string) {
+    return this.comisionesService.remove(id);
+  }
+
+  /**
+   * Inscribir estudiantes a una comisión
+   * POST /api/admin/comisiones/:id/estudiantes
+   * Rol: Admin
+   */
+  @Post('comisiones/:id/estudiantes')
+  @ApiOperation({
+    summary: 'Inscribir estudiantes',
+    description: 'Inscribe uno o más estudiantes en una comisión',
+  })
+  async inscribirEstudiantesComision(
+    @Param('id', ParseIdPipe) id: string,
+    @Body() dto: InscribirEstudiantesDto,
+  ) {
+    return this.comisionesService.inscribirEstudiantes(id, dto);
+  }
+
+  /**
+   * Crear estudiante nuevo e inscribirlo a una comisión
+   * POST /api/admin/comisiones/:id/estudiantes/nuevo
+   * Rol: Admin
+   *
+   * Crea un estudiante nuevo con credenciales y lo inscribe
+   * automáticamente a la comisión especificada.
+   * Retorna el estudiante, tutor, credenciales e inscripción.
+   */
+  @Post('comisiones/:id/estudiantes/nuevo')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Crear estudiante e inscribir',
+    description: `
+      Crea un estudiante nuevo con credenciales y lo inscribe a la comisión.
+
+      - Valida cupo disponible antes de crear
+      - Genera credenciales (username + PIN para estudiante)
+      - Crea tutor si no existe (con username + password temporal)
+      - Inscribe automáticamente a la comisión con estado Confirmada
+
+      Retorna las credenciales en texto plano para enviar por WhatsApp.
+    `,
+  })
+  async crearEstudianteEInscribir(
+    @Param('id', ParseIdPipe) id: string,
+    @Body() dto: CrearEstudianteDto,
+  ) {
+    return this.comisionesService.crearEstudianteEInscribir(id, dto);
+  }
+
+  /**
+   * Actualizar estado de inscripción de un estudiante
+   * PATCH /api/admin/comisiones/:id/estudiantes/:estudianteId
+   * Rol: Admin
+   */
+  @Patch('comisiones/:id/estudiantes/:estudianteId')
+  @ApiOperation({
+    summary: 'Actualizar inscripción',
+    description:
+      'Actualiza el estado de inscripción de un estudiante en una comisión',
+  })
+  async actualizarInscripcionComision(
+    @Param('id', ParseIdPipe) id: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
+    @Body() dto: ActualizarInscripcionDto,
+  ) {
+    return this.comisionesService.actualizarInscripcion(id, estudianteId, dto);
+  }
+
+  /**
+   * Remover un estudiante de una comisión
+   * DELETE /api/admin/comisiones/:id/estudiantes/:estudianteId
+   * Rol: Admin
+   */
+  @Delete('comisiones/:id/estudiantes/:estudianteId')
+  @ApiOperation({
+    summary: 'Remover estudiante',
+    description: 'Elimina la inscripción de un estudiante en una comisión',
+  })
+  async removerEstudianteComision(
+    @Param('id', ParseIdPipe) id: string,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
+  ) {
+    return this.comisionesService.removerEstudiante(id, estudianteId);
   }
 }

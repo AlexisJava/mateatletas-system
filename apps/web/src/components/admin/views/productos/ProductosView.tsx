@@ -1,7 +1,9 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { Plus } from 'lucide-react';
 import { useProductos } from './hooks';
-import { ProductsStatsGrid, ProductsFilters, ProductsGrid, ProductDetailModal } from './components';
+import { ProductsStatsGrid, ProductsFilters, ProductsGrid, ProductoFormModal } from './components';
 
 /**
  * ProductosView - Vista de gestión de productos de pago único
@@ -11,6 +13,7 @@ import { ProductsStatsGrid, ProductsFilters, ProductsGrid, ProductDetailModal } 
  */
 
 export function ProductosView() {
+  const router = useRouter();
   const {
     isLoading,
     error,
@@ -20,14 +23,22 @@ export function ProductosView() {
     setTierFilter,
     statusFilter,
     setStatusFilter,
-    selectedProduct,
-    setSelectedProduct,
     filteredProducts,
     stats,
     totalCount,
-    handleEdit,
     handleDelete,
+    refetch,
+    isFormModalOpen,
+    editingProduct,
+    openCreateModal,
+    openEditModal,
+    closeFormModal,
   } = useProductos();
+
+  // Navegar a la página de detalle del producto
+  const handleViewProduct = (product: { id: string }) => {
+    router.push(`/admin/productos/${product.id}`);
+  };
 
   if (isLoading) {
     return (
@@ -49,6 +60,23 @@ export function ProductosView() {
         </div>
       )}
 
+      {/* Header con botón crear */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--admin-text)]">Productos</h1>
+          <p className="text-sm text-[var(--admin-text-muted)]">
+            Gestiona cursos, talleres, colonias y recursos digitales
+          </p>
+        </div>
+        <button
+          onClick={openCreateModal}
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--admin-accent)] hover:bg-[var(--admin-accent-hover)] text-white rounded-lg font-medium transition-colors"
+        >
+          <Plus className="w-5 h-5" />
+          Crear Producto
+        </button>
+      </div>
+
       {/* Stats */}
       <ProductsStatsGrid stats={stats} />
 
@@ -65,8 +93,8 @@ export function ProductosView() {
       {/* Products Grid */}
       <ProductsGrid
         products={filteredProducts}
-        onView={setSelectedProduct}
-        onEdit={handleEdit}
+        onView={handleViewProduct}
+        onEdit={openEditModal}
         onDelete={handleDelete}
       />
 
@@ -75,8 +103,13 @@ export function ProductosView() {
         Mostrando {filteredProducts.length} de {totalCount} productos
       </div>
 
-      {/* Detail Modal */}
-      <ProductDetailModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
+      {/* Form Modal (Crear/Editar) */}
+      <ProductoFormModal
+        isOpen={isFormModalOpen}
+        onClose={closeFormModal}
+        onSuccess={refetch}
+        producto={editingProduct}
+      />
     </div>
   );
 }

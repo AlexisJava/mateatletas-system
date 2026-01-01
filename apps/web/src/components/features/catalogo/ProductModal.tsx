@@ -29,22 +29,49 @@ export function ProductModal({ producto, isOpen, onClose, onComprar }: ProductMo
   if (!producto) return null;
 
   // Configuración visual por tipo
-  const tipoConfig = {
-    [TipoProducto.Suscripcion]: {
-      bg: 'bg-gradient-to-br from-[#00d9ff]/20 to-[#00d9ff]/5',
-      badgeBg: 'bg-[#00d9ff]',
-      badgeText: 'text-[#2a1a5e]',
-      emoji: '💎',
+  const tipoConfig: Record<
+    string,
+    { bg: string; badgeBg: string; badgeText: string; emoji: string; beneficios: string[] }
+  > = {
+    Evento: {
+      bg: 'bg-gradient-to-br from-amber-500/20 to-amber-500/5',
+      badgeBg: 'bg-amber-500',
+      badgeText: 'text-white',
+      emoji: '🎪',
       beneficios: [
-        'Acceso ilimitado a clases',
-        'Contenido exclusivo',
-        'Prioridad en reservas',
-        'Soporte premium',
+        'Evento presencial',
+        'Material incluido',
+        'Certificado de participación',
+        'Refrigerio incluido',
       ],
     },
-    [TipoProducto.Curso]: {
-      bg: 'bg-gradient-to-br from-[#ff6b35]/20 to-[#ff6b35]/5',
-      badgeBg: 'bg-[#ff6b35]',
+    Digital: {
+      bg: 'bg-gradient-to-br from-violet-500/20 to-violet-500/5',
+      badgeBg: 'bg-violet-500',
+      badgeText: 'text-white',
+      emoji: '📱',
+      beneficios: [
+        'Descarga inmediata',
+        'Uso ilimitado',
+        'Actualizaciones gratuitas',
+        'Soporte básico',
+      ],
+    },
+    Fisico: {
+      bg: 'bg-gradient-to-br from-pink-500/20 to-pink-500/5',
+      badgeBg: 'bg-pink-500',
+      badgeText: 'text-white',
+      emoji: '🎁',
+      beneficios: [
+        'Envío a domicilio',
+        'Producto de calidad',
+        'Garantía incluida',
+        'Soporte postventa',
+      ],
+    },
+    Curso: {
+      bg: 'bg-gradient-to-br from-emerald-500/20 to-emerald-500/5',
+      badgeBg: 'bg-emerald-500',
       badgeText: 'text-white',
       emoji: '📚',
       beneficios: [
@@ -54,21 +81,51 @@ export function ProductModal({ producto, isOpen, onClose, onComprar }: ProductMo
         'Soporte del instructor',
       ],
     },
-    [TipoProducto.RecursoDigital]: {
-      bg: 'bg-gradient-to-br from-[#f7b801]/20 to-[#f7b801]/5',
-      badgeBg: 'bg-[#f7b801]',
-      badgeText: 'text-[#2a1a5e]',
-      emoji: '🎁',
+    Servicio: {
+      bg: 'bg-gradient-to-br from-blue-500/20 to-blue-500/5',
+      badgeBg: 'bg-blue-500',
+      badgeText: 'text-white',
+      emoji: '👤',
       beneficios: [
-        'Descarga inmediata',
-        'Uso ilimitado',
-        'Actualizaciones gratuitas',
-        'Soporte básico',
+        'Atención personalizada',
+        'Horarios flexibles',
+        'Seguimiento continuo',
+        'Material personalizado',
+      ],
+    },
+    Bundle: {
+      bg: 'bg-gradient-to-br from-indigo-500/20 to-indigo-500/5',
+      badgeBg: 'bg-indigo-500',
+      badgeText: 'text-white',
+      emoji: '📦',
+      beneficios: [
+        'Múltiples productos',
+        'Precio especial',
+        'Acceso combinado',
+        'Soporte unificado',
+      ],
+    },
+    Certificacion: {
+      bg: 'bg-gradient-to-br from-yellow-500/20 to-yellow-500/5',
+      badgeBg: 'bg-yellow-500',
+      badgeText: 'text-black',
+      emoji: '🏆',
+      beneficios: [
+        'Examen oficial',
+        'Certificado reconocido',
+        'Material de estudio',
+        'Reintentos incluidos',
       ],
     },
   };
 
-  const config = tipoConfig[producto.tipo];
+  const config = tipoConfig[producto.tipo] || {
+    bg: 'bg-gradient-to-br from-gray-500/20 to-gray-500/5',
+    badgeBg: 'bg-gray-500',
+    badgeText: 'text-white',
+    emoji: '📦',
+    beneficios: ['Producto disponible'],
+  };
 
   return (
     <Modal

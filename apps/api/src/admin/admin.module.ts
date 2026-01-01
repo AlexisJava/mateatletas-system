@@ -10,6 +10,7 @@ import { AdminCredencialesService } from './services/admin-credenciales.service'
 import { SectoresRutasService } from './services/sectores-rutas.service';
 import { ClaseGruposService } from './clase-grupos.service';
 import { AsistenciasService } from './asistencias.service';
+import { ComisionesService } from './comisiones.service';
 import { DatabaseModule } from '../core/database/database.module';
 
 /**
@@ -36,6 +37,7 @@ import { DatabaseModule } from '../core/database/database.module';
     SectoresRutasService,
     ClaseGruposService, // ✅ NUEVO: Gestión de grupos de clases recurrentes
     AsistenciasService, // ✅ NUEVO: Gestión de asistencias
+    ComisionesService, // ✅ NUEVO: Gestión de comisiones de productos
   ],
   exports: [
     AdminService,

@@ -1,6 +1,7 @@
 'use client';
 
-import { X, ShoppingCart, DollarSign, Calendar } from 'lucide-react';
+import { useState } from 'react';
+import { X, ShoppingCart, DollarSign, Calendar, Trash2, Loader2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/constants/admin-mock-data';
 import type { ProductDetailModalProps } from '../types/productos.types';
 import {
@@ -9,22 +10,39 @@ import {
   TIPO_COLORS,
   DEFAULT_TIPO_COLOR,
 } from '../constants/tier-icons';
+import { ComisionesSection } from './ComisionesSection';
 
 /**
  * ProductDetailModal - Modal de detalle de producto de pago único
  */
 
-export function ProductDetailModal({ product, onClose }: ProductDetailModalProps) {
+export function ProductDetailModal({
+  product,
+  onClose,
+  onEdit,
+  onDelete,
+}: ProductDetailModalProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   if (!product) return null;
 
   const tipoColor = TIPO_COLORS[product.tipo] || DEFAULT_TIPO_COLOR;
   const TipoIcon = TIPO_ICON_MAP[product.tipo] || DEFAULT_TIPO_ICON;
-  const tipoLabel = product.tipo === 'RecursoDigital' ? 'Recurso Digital' : product.tipo;
+  const TIPO_LABELS: Record<string, string> = {
+    Evento: 'Evento',
+    Digital: 'Digital',
+    Fisico: 'Físico',
+    Curso: 'Curso',
+    Servicio: 'Servicio',
+    Bundle: 'Bundle',
+    Certificacion: 'Certificación',
+  };
+  const tipoLabel = TIPO_LABELS[product.tipo] || product.tipo;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-2xl max-w-lg w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-5 border-b border-[var(--admin-border)]">
+      <div className="bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between p-5 border-b border-[var(--admin-border)] shrink-0">
           <h3 className="text-lg font-semibold text-[var(--admin-text)]">Detalle del Producto</h3>
           <button
             onClick={onClose}
@@ -34,7 +52,7 @@ export function ProductDetailModal({ product, onClose }: ProductDetailModalProps
           </button>
         </div>
 
-        <div className="p-5 space-y-5">
+        <div className="p-5 space-y-5 overflow-y-auto flex-1">
           {/* Header */}
           <div className="flex items-start gap-4">
             <div
@@ -111,6 +129,13 @@ export function ProductDetailModal({ product, onClose }: ProductDetailModalProps
             </div>
           )}
 
+          {/* Comisiones Section for Cursos y Eventos */}
+          {(product.tipo === 'Curso' || product.tipo === 'Evento') && (
+            <div className="p-4 bg-[var(--admin-surface-2)] rounded-xl">
+              <ComisionesSection productoId={product.id} productoNombre={product.nombre} />
+            </div>
+          )}
+
           {/* Created Date */}
           <div className="flex items-center justify-between p-3 bg-[var(--admin-surface-2)] rounded-lg">
             <div className="flex items-center gap-2 text-[var(--admin-text-muted)]">
@@ -133,16 +158,66 @@ export function ProductDetailModal({ product, onClose }: ProductDetailModalProps
           </div>
         </div>
 
-        <div className="flex gap-3 p-5 border-t border-[var(--admin-border)]">
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2.5 bg-[var(--admin-surface-2)] text-[var(--admin-text)] rounded-xl font-medium hover:bg-[var(--admin-surface-1)] border border-[var(--admin-border)] transition-colors"
-          >
-            Cerrar
-          </button>
-          <button className="flex-1 px-4 py-2.5 bg-[var(--admin-accent)] text-black rounded-xl font-medium hover:opacity-90 transition-opacity">
-            Editar
-          </button>
+        <div className="flex gap-3 p-5 border-t border-[var(--admin-border)] shrink-0">
+          {showDeleteConfirm ? (
+            <>
+              <p className="flex-1 text-sm text-[var(--status-error)] flex items-center">
+                Confirmar eliminacion?
+              </p>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="px-4 py-2.5 bg-[var(--admin-surface-2)] text-[var(--admin-text)] rounded-xl font-medium hover:bg-[var(--admin-surface-1)] border border-[var(--admin-border)] transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  if (onDelete && product) {
+                    setIsDeleting(true);
+                    try {
+                      await onDelete(product);
+                      onClose();
+                    } finally {
+                      setIsDeleting(false);
+                    }
+                  }
+                }}
+                disabled={isDeleting}
+                className="px-4 py-2.5 bg-[var(--status-error)] text-white rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                Eliminar
+              </button>
+            </>
+          ) : (
+            <>
+              {onDelete && (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="px-4 py-2.5 text-[var(--status-error)] hover:bg-[var(--status-error-muted)] rounded-xl font-medium transition-colors flex items-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="flex-1 px-4 py-2.5 bg-[var(--admin-surface-2)] text-[var(--admin-text)] rounded-xl font-medium hover:bg-[var(--admin-surface-1)] border border-[var(--admin-border)] transition-colors"
+              >
+                Cerrar
+              </button>
+              <button
+                onClick={() => onEdit?.(product)}
+                className="flex-1 px-4 py-2.5 bg-[var(--admin-accent)] text-black rounded-xl font-medium hover:opacity-90 transition-opacity"
+              >
+                Editar
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

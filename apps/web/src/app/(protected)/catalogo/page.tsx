@@ -38,9 +38,13 @@ export default function CatalogoPage() {
   // Contador de productos por tipo
   const productCount = {
     todos: productos.length,
-    Suscripcion: productos.filter((p) => p.tipo === TipoProducto.Suscripcion).length,
-    Curso: productos.filter((p) => p.tipo === TipoProducto.Curso).length,
-    RecursoDigital: productos.filter((p) => p.tipo === TipoProducto.RecursoDigital).length,
+    Evento: productos.filter((p) => p.tipo === 'Evento').length,
+    Digital: productos.filter((p) => p.tipo === 'Digital').length,
+    Fisico: productos.filter((p) => p.tipo === 'Fisico').length,
+    Curso: productos.filter((p) => p.tipo === 'Curso').length,
+    Servicio: productos.filter((p) => p.tipo === 'Servicio').length,
+    Bundle: productos.filter((p) => p.tipo === 'Bundle').length,
+    Certificacion: productos.filter((p) => p.tipo === 'Certificacion').length,
   };
 
   // Handler para abrir modal

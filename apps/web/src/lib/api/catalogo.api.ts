@@ -77,7 +77,7 @@ export const getSuscripciones = async (): Promise<Producto[]> => {
  * Filtrar productos por tipo
  */
 export const getProductosPorTipo = async (tipo: TipoProducto): Promise<Producto[]> => {
-  if (tipo === TipoProducto.Curso) return getCursos();
-  if (tipo === TipoProducto.Suscripcion) return getSuscripciones();
+  if (tipo === 'Curso') return getCursos();
+  // Suscripciones ya no existen como tipo, retornar todos
   return getProductos();
 };

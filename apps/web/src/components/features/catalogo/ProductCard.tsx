@@ -23,25 +23,49 @@ interface ProductCardProps {
 
 export function ProductCard({ producto, onClick }: ProductCardProps) {
   // Colores según tipo de producto
-  const tipoBadgeConfig = {
-    [TipoProducto.Suscripcion]: {
-      bg: 'bg-[#00d9ff]', // cyan
-      text: 'text-[#2a1a5e]',
-      emoji: '💎',
+  const tipoBadgeConfig: Record<string, { bg: string; text: string; emoji: string }> = {
+    Evento: {
+      bg: 'bg-amber-500',
+      text: 'text-white',
+      emoji: '🎪',
     },
-    [TipoProducto.Curso]: {
-      bg: 'bg-[#ff6b35]', // naranja
+    Digital: {
+      bg: 'bg-violet-500',
+      text: 'text-white',
+      emoji: '📱',
+    },
+    Fisico: {
+      bg: 'bg-pink-500',
+      text: 'text-white',
+      emoji: '🎁',
+    },
+    Curso: {
+      bg: 'bg-emerald-500',
       text: 'text-white',
       emoji: '📚',
     },
-    [TipoProducto.RecursoDigital]: {
-      bg: 'bg-[#f7b801]', // amarillo
-      text: 'text-[#2a1a5e]',
-      emoji: '🎁',
+    Servicio: {
+      bg: 'bg-blue-500',
+      text: 'text-white',
+      emoji: '👤',
+    },
+    Bundle: {
+      bg: 'bg-indigo-500',
+      text: 'text-white',
+      emoji: '📦',
+    },
+    Certificacion: {
+      bg: 'bg-yellow-500',
+      text: 'text-black',
+      emoji: '🏆',
     },
   };
 
-  const config = tipoBadgeConfig[producto.tipo];
+  const config = tipoBadgeConfig[producto.tipo] || {
+    bg: 'bg-gray-500',
+    text: 'text-white',
+    emoji: '📦',
+  };
 
   return (
     <Card

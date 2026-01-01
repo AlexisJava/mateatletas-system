@@ -14,7 +14,7 @@ const MOCK_PRODUCTOS: AdminProducto[] = [
     nombre: 'Colonia de Verano 2026 - Enero',
     descripcion: 'Programa STEAM completo para vacaciones de verano',
     precio: 180000,
-    tipo: 'Curso',
+    tipo: 'Evento',
     activo: true,
     ventas: 45,
     createdAt: new Date().toISOString(),
@@ -28,7 +28,7 @@ const MOCK_PRODUCTOS: AdminProducto[] = [
     nombre: 'Taller de Robótica - Marzo',
     descripcion: 'Introducción a la robótica con Arduino',
     precio: 95000,
-    tipo: 'Curso',
+    tipo: 'Evento',
     activo: true,
     ventas: 28,
     createdAt: new Date().toISOString(),
@@ -42,7 +42,7 @@ const MOCK_PRODUCTOS: AdminProducto[] = [
     nombre: 'Pack Material Didáctico Digital',
     descripcion: 'Guías, ejercicios y recursos descargables',
     precio: 25000,
-    tipo: 'RecursoDigital',
+    tipo: 'Digital',
     activo: true,
     ventas: 156,
     createdAt: new Date().toISOString(),
@@ -50,8 +50,8 @@ const MOCK_PRODUCTOS: AdminProducto[] = [
   },
   {
     id: 'prod-4',
-    nombre: 'Curso de Verano 2025 (Archivado)',
-    descripcion: 'Programa del año anterior',
+    nombre: 'Curso Online de Matemáticas',
+    descripcion: 'Curso completo con videos y ejercicios',
     precio: 150000,
     tipo: 'Curso',
     activo: false,
@@ -78,13 +78,18 @@ interface UseProductosReturn {
   handleEdit: (product: AdminProducto) => void;
   handleDelete: (product: AdminProducto) => Promise<void>;
   refetch: () => Promise<void>;
+  // Modal de formulario
+  isFormModalOpen: boolean;
+  editingProduct: AdminProducto | null;
+  openCreateModal: () => void;
+  openEditModal: (product: AdminProducto) => void;
+  closeFormModal: () => void;
 }
 
 /**
- * useProductos - Hook para gestión de productos de pago único
+ * useProductos - Hook para gestión de productos
  *
- * Llama al backend GET /productos para obtener productos.
- * Filtra solo Cursos y RecursoDigital (excluye Suscripciones).
+ * Llama al backend GET /productos para obtener todos los productos.
  *
  * Fallback a mock data si hay error (desarrollo sin backend)
  */
@@ -96,6 +101,9 @@ export function useProductos(): UseProductosReturn {
   const [tierFilter, setTierFilter] = useState<TipoFilter>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedProduct, setSelectedProduct] = useState<AdminProducto | null>(null);
+  // Estados para modal crear/editar
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<AdminProducto | null>(null);
 
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
@@ -105,14 +113,11 @@ export function useProductos(): UseProductosReturn {
       // Obtener todos los productos (incluye inactivos para admin)
       const data = await getAllProducts(true);
 
-      // Filtrar solo productos de pago único (excluir Suscripciones)
-      // y adaptar al tipo AdminProducto
-      const productosUnicos: AdminProducto[] = data
-        .filter((p: Producto) => p.tipo !== 'Suscripcion')
-        .map((p: Producto) => ({
-          ...p,
-          ventas: 0, // TODO: Obtener ventas desde endpoint específico
-        }));
+      // Adaptar al tipo AdminProducto
+      const productosUnicos: AdminProducto[] = data.map((p: Producto) => ({
+        ...p,
+        ventas: 0, // TODO: Obtener ventas desde endpoint específico
+      }));
 
       setProducts(productosUnicos);
     } catch (err) {
@@ -149,20 +154,41 @@ export function useProductos(): UseProductosReturn {
 
   const stats: ProductosStats = useMemo(() => {
     const activeProducts = products.filter((p) => p.activo);
+    const eventos = products.filter((p) => p.tipo === 'Evento').length;
     const cursos = products.filter((p) => p.tipo === 'Curso').length;
-    const recursos = products.filter((p) => p.tipo === 'RecursoDigital').length;
+    const digitales = products.filter((p) => p.tipo === 'Digital').length;
+    const fisicos = products.filter((p) => p.tipo === 'Fisico').length;
+    const servicios = products.filter((p) => p.tipo === 'Servicio').length;
 
     return {
       total: products.length,
       activos: activeProducts.length,
+      eventos,
       cursos,
-      recursos,
+      digitales,
+      fisicos,
+      servicios,
     };
   }, [products]);
 
-  const handleEdit = useCallback((_product: AdminProducto) => {
-    // TODO: Implementar edición con modal
-    console.log('Edit product:', _product.id);
+  const handleEdit = useCallback((product: AdminProducto) => {
+    setEditingProduct(product);
+    setIsFormModalOpen(true);
+  }, []);
+
+  const openCreateModal = useCallback(() => {
+    setEditingProduct(null);
+    setIsFormModalOpen(true);
+  }, []);
+
+  const openEditModal = useCallback((product: AdminProducto) => {
+    setEditingProduct(product);
+    setIsFormModalOpen(true);
+  }, []);
+
+  const closeFormModal = useCallback(() => {
+    setIsFormModalOpen(false);
+    setEditingProduct(null);
   }, []);
 
   const handleDelete = useCallback(
@@ -195,5 +221,11 @@ export function useProductos(): UseProductosReturn {
     handleEdit,
     handleDelete,
     refetch: fetchProducts,
+    // Modal de formulario
+    isFormModalOpen,
+    editingProduct,
+    openCreateModal,
+    openEditModal,
+    closeFormModal,
   };
 }
