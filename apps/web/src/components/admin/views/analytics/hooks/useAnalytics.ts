@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getCombinedDashboardStats, getCasasEstadisticas } from '@/lib/api/admin.api';
+import {
+  getCombinedDashboardStats,
+  getCasasEstadisticas,
+  getRetentionStats,
+  type RetentionDataPoint as ApiRetentionDataPoint,
+} from '@/lib/api/admin.api';
 import {
   MOCK_DASHBOARD_STATS,
   MOCK_CASA_DISTRIBUTION,
@@ -85,10 +90,11 @@ export function useAnalytics(): UseAnalyticsReturn {
     setError(null);
 
     try {
-      // Fetch en paralelo
-      const [dashboardStats, casasStats] = await Promise.all([
+      // Fetch en paralelo: dashboard, casas y retención
+      const [dashboardStats, casasStats, retentionData] = await Promise.all([
         getCombinedDashboardStats(),
         getCasasEstadisticas(),
+        getRetentionStats(6),
       ]);
 
       // Mapear distribución de casas desde el ranking
@@ -106,6 +112,16 @@ export function useAnalytics(): UseAnalyticsReturn {
             ) / 10
           : 0;
 
+      // Mapear retentionData para agregar index signature para Recharts
+      const mappedRetentionData: RetentionDataPoint[] = retentionData.map(
+        (item: ApiRetentionDataPoint) => ({
+          month: item.month,
+          nuevos: item.nuevos,
+          activos: item.activos,
+          bajas: item.bajas,
+        }),
+      );
+
       setData({
         stats: {
           estudiantesActivos: dashboardStats.estudiantesActivos,
@@ -114,8 +130,7 @@ export function useAnalytics(): UseAnalyticsReturn {
           librosLeidos: 0, // TODO: Endpoint de biblioteca cuando exista
         },
         casaDistribution,
-        // Retención mensual requiere endpoint de histórico - usar mock por ahora
-        retentionData: MOCK_RETENTION_DATA,
+        retentionData: mappedRetentionData,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cargar analytics';

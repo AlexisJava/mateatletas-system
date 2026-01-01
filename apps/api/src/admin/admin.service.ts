@@ -343,6 +343,14 @@ export class AdminService {
   }
 
   /**
+   * Obtener datos históricos de retención de estudiantes
+   * DELEGACIÓN: AdminStatsService
+   */
+  async getRetentionStats(meses?: number) {
+    return this.statsService.getRetentionStats(meses);
+  }
+
+  /**
    * Obtener métricas de los circuit breakers (para monitoring)
    * Útil para dashboards de observabilidad
    */

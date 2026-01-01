@@ -86,6 +86,19 @@ export class AdminController {
   }
 
   /**
+   * Obtener datos históricos de retención de estudiantes
+   * GET /api/admin/analytics/retencion
+   * Rol: Admin
+   * Query params: meses (opcional, default 6)
+   */
+  @Get('analytics/retencion')
+  @ApiOperation({ summary: 'Obtener histórico de retención de estudiantes' })
+  async getRetentionStats(@Query('meses') meses?: string) {
+    const numMeses = meses ? parseInt(meses, 10) : 6;
+    return this.adminService.getRetentionStats(numMeses);
+  }
+
+  /**
    * Listar alertas pendientes
    * GET /api/admin/alertas
    * Rol: Admin

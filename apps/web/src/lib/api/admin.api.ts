@@ -422,6 +422,31 @@ export const getCasasEstadisticas = async (): Promise<CasasEstadisticasResponse>
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ANALYTICS / RETENCIÓN
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Punto de datos de retención mensual */
+export interface RetentionDataPoint {
+  month: string;
+  nuevos: number;
+  activos: number;
+  bajas: number;
+}
+
+/**
+ * Obtener histórico de retención de estudiantes
+ * GET /admin/analytics/retencion
+ */
+export const getRetentionStats = async (meses = 6): Promise<RetentionDataPoint[]> => {
+  try {
+    return await axios.get<RetentionDataPoint[]>(`/admin/analytics/retencion?meses=${meses}`);
+  } catch (error) {
+    console.error('Error al obtener estadísticas de retención:', error);
+    throw error;
+  }
+};
+
 /**
  * Obtener todas las stats del dashboard en una sola llamada
  * Combina: /admin/dashboard + /admin/estadisticas + /casas/estadisticas

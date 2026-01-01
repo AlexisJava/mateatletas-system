@@ -131,4 +131,81 @@ export class AdminStatsService {
       inscripcionesActivas,
     };
   }
+
+  /**
+   * Obtener datos históricos de retención de estudiantes
+   * Devuelve nuevos, activos y bajas por mes (últimos 6 meses)
+   */
+  async getRetentionStats(meses = 6) {
+    const now = new Date();
+    const result: Array<{
+      month: string;
+      nuevos: number;
+      activos: number;
+      bajas: number;
+    }> = [];
+
+    // Nombres de meses en español abreviados
+    const nombresMeses = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
+
+    for (let i = meses - 1; i >= 0; i--) {
+      const fecha = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const inicioMes = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
+      const finMes = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
+      finMes.setHours(23, 59, 59, 999);
+
+      // Estudiantes nuevos (creados en este mes)
+      const nuevos = await this.prisma.estudiante.count({
+        where: {
+          createdAt: {
+            gte: inicioMes,
+            lte: finMes,
+          },
+        },
+      });
+
+      // Estudiantes activos (tienen inscripción activa en este mes)
+      // Usamos InscripcionMensual para determinar actividad
+      const periodo = `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}`;
+      const inscripcionesActivasMes =
+        await this.prisma.inscripcionMensual.count({
+          where: {
+            periodo,
+            estado_pago: { in: ['Pagado', 'Pendiente'] },
+          },
+        });
+
+      // Bajas: inscripciones que fueron dadas de baja en este mes
+      const bajas = await this.prisma.inscripcionClaseGrupo.count({
+        where: {
+          fecha_baja: {
+            gte: inicioMes,
+            lte: finMes,
+          },
+        },
+      });
+
+      result.push({
+        month: nombresMeses[fecha.getMonth()] ?? 'N/A',
+        nuevos,
+        activos: inscripcionesActivasMes,
+        bajas,
+      });
+    }
+
+    return result;
+  }
 }
