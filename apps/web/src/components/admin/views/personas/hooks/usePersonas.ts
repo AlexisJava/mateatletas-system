@@ -207,14 +207,37 @@ export function usePersonas(): UsePersonasReturn {
           toast.success('Estudiante creado exitosamente');
         }
       } else if (data.role === 'docente') {
-        await createDocente({
+        const result = await createDocente({
           nombre: data.nombre,
           apellido: data.apellido,
           email: data.email ?? '',
           titulo: data.titulo,
           telefono: data.telefono,
         });
-        toast.success('Docente creado exitosamente');
+
+        // El backend genera una contraseña automática si no se proporciona
+        const generatedPassword = (result as { generatedPassword?: string }).generatedPassword;
+        if (generatedPassword) {
+          const mensaje = [
+            `✅ Docente creado: ${data.nombre} ${data.apellido}`,
+            '',
+            '📋 CREDENCIALES DEL DOCENTE:',
+            `   Email: ${data.email}`,
+            `   Contraseña: ${generatedPassword}`,
+            '',
+            '⚠️ Comparta estas credenciales con el docente de forma segura.',
+          ];
+
+          // Copiar al clipboard
+          const textoCredenciales = mensaje.join('\n');
+          navigator.clipboard.writeText(textoCredenciales).then(() => {
+            toast.success('Credenciales copiadas al portapapeles', { duration: 5000 });
+          });
+
+          alert(textoCredenciales);
+        } else {
+          toast.success('Docente creado exitosamente');
+        }
       }
       // Refetch para actualizar la lista
       await fetchPeople();
