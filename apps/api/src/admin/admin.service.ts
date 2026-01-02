@@ -359,6 +359,14 @@ export class AdminService {
   }
 
   /**
+   * Obtener histórico mensual de ingresos y pendientes
+   * DELEGACIÓN: AdminStatsService
+   */
+  async getHistoricoMensual(meses?: number) {
+    return this.statsService.getHistoricoMensual(meses);
+  }
+
+  /**
    * Obtener métricas de los circuit breakers (para monitoring)
    * Útil para dashboards de observabilidad
    */

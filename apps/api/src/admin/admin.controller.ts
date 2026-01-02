@@ -116,6 +116,19 @@ export class AdminController {
   }
 
   /**
+   * Obtener histórico mensual de ingresos y pendientes
+   * GET /api/admin/pagos/historico-mensual
+   * Rol: Admin
+   * Query params: meses (opcional, default 6)
+   */
+  @Get('pagos/historico-mensual')
+  @ApiOperation({ summary: 'Obtener histórico mensual de ingresos' })
+  async getHistoricoMensual(@Query('meses') meses?: string) {
+    const numMeses = meses ? parseInt(meses, 10) : 6;
+    return this.adminService.getHistoricoMensual(numMeses);
+  }
+
+  /**
    * Listar alertas pendientes
    * GET /api/admin/alertas
    * Rol: Admin

@@ -495,6 +495,26 @@ export const getPagosRecientes = async (
   }
 };
 
+/** Punto de datos de ingresos mensual */
+export interface RevenueDataPoint {
+  month: string;
+  ingresos: number;
+  pendientes: number;
+}
+
+/**
+ * Obtener histórico mensual de ingresos y pendientes
+ * GET /admin/pagos/historico-mensual
+ */
+export const getHistoricoMensual = async (meses = 6): Promise<RevenueDataPoint[]> => {
+  try {
+    return await axios.get<RevenueDataPoint[]>(`/admin/pagos/historico-mensual?meses=${meses}`);
+  } catch (error) {
+    console.error('Error al obtener histórico mensual:', error);
+    throw error;
+  }
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // FINANCE / CONFIGURACIÓN
 // ─────────────────────────────────────────────────────────────────────────────

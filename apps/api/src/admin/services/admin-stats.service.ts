@@ -236,6 +236,67 @@ export class AdminStatsService {
   }
 
   /**
+   * Obtener histórico mensual de ingresos y pagos pendientes
+   * Usado por RevenueChart y RevenueEvolutionChart
+   */
+  async getHistoricoMensual(meses = 6) {
+    const now = new Date();
+    const result: Array<{
+      month: string;
+      ingresos: number;
+      pendientes: number;
+    }> = [];
+
+    const nombresMeses = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
+
+    for (let i = meses - 1; i >= 0; i--) {
+      const fecha = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const periodo = `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}`;
+
+      const inscripcionesMes = await this.prisma.inscripcionMensual.findMany({
+        where: { periodo },
+        select: { precio_final: true, estado_pago: true },
+      });
+
+      let ingresos = 0;
+      let pendientes = 0;
+
+      inscripcionesMes.forEach((ins) => {
+        const monto = ins.precio_final.toNumber();
+        if (ins.estado_pago === 'Pagado') {
+          ingresos += monto;
+        } else if (
+          ins.estado_pago === 'Pendiente' ||
+          ins.estado_pago === 'Vencido'
+        ) {
+          pendientes += monto;
+        }
+      });
+
+      result.push({
+        month: nombresMeses[fecha.getMonth()] ?? 'N/A',
+        ingresos,
+        pendientes,
+      });
+    }
+
+    return result;
+  }
+
+  /**
    * Obtener pagos/transacciones recientes con paginación
    * Combina InscripcionMensual (membresías) para el dashboard de finanzas
    */
