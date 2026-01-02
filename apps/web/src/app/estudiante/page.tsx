@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Zap,
 } from 'lucide-react';
+import FloatingLines from '@/components/ui/FloatingLines';
 
 interface DashboardData {
   nivel: number;
@@ -81,70 +82,20 @@ export default function EstudianteDashboard() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] bg-[#0a0a1a] text-white flex flex-col relative overflow-hidden">
-      {/* Fondo de estrellas animado */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="stars-layer stars-small" />
-        <div className="stars-layer stars-medium" />
-        <div className="stars-layer stars-large" />
-        {/* Gradiente sutil */}
-        <div className="absolute inset-0 bg-gradient-to-b from-violet-950/20 via-transparent to-indigo-950/20" />
+    <div className="min-h-[calc(100vh-3.5rem)] bg-[#030014] text-white flex flex-col relative overflow-hidden">
+      {/* Fondo FloatingLines */}
+      <div className="absolute inset-0">
+        <FloatingLines
+          linesGradient={['#E945F5', '#2F4BC0', '#E945F5']}
+          animationSpeed={0.4}
+          interactive
+          bendRadius={3}
+          bendStrength={-1.4}
+          mouseDamping={0.12}
+          parallax={false}
+          parallaxStrength={0.85}
+        />
       </div>
-
-      <style jsx>{`
-        .stars-layer {
-          position: absolute;
-          inset: 0;
-          background-repeat: repeat;
-          animation: twinkle 8s ease-in-out infinite;
-        }
-        .stars-small {
-          background-image:
-            radial-gradient(1px 1px at 20px 30px, white, transparent),
-            radial-gradient(1px 1px at 40px 70px, rgba(255, 255, 255, 0.8), transparent),
-            radial-gradient(1px 1px at 50px 160px, rgba(255, 255, 255, 0.6), transparent),
-            radial-gradient(1px 1px at 90px 40px, white, transparent),
-            radial-gradient(1px 1px at 130px 80px, rgba(255, 255, 255, 0.7), transparent),
-            radial-gradient(1px 1px at 160px 120px, white, transparent),
-            radial-gradient(1px 1px at 200px 50px, rgba(255, 255, 255, 0.5), transparent),
-            radial-gradient(1px 1px at 220px 140px, rgba(255, 255, 255, 0.8), transparent),
-            radial-gradient(1px 1px at 260px 90px, white, transparent),
-            radial-gradient(1px 1px at 300px 170px, rgba(255, 255, 255, 0.6), transparent);
-          background-size: 320px 200px;
-          opacity: 0.4;
-        }
-        .stars-medium {
-          background-image:
-            radial-gradient(1.5px 1.5px at 100px 50px, white, transparent),
-            radial-gradient(1.5px 1.5px at 200px 150px, rgba(255, 255, 255, 0.9), transparent),
-            radial-gradient(1.5px 1.5px at 300px 100px, white, transparent),
-            radial-gradient(1.5px 1.5px at 50px 180px, rgba(255, 255, 255, 0.7), transparent),
-            radial-gradient(1.5px 1.5px at 350px 30px, white, transparent);
-          background-size: 400px 220px;
-          opacity: 0.3;
-          animation-delay: 2s;
-          animation-duration: 10s;
-        }
-        .stars-large {
-          background-image:
-            radial-gradient(2px 2px at 150px 80px, rgba(167, 139, 250, 0.8), transparent),
-            radial-gradient(2px 2px at 350px 200px, rgba(139, 92, 246, 0.7), transparent),
-            radial-gradient(2px 2px at 250px 50px, rgba(196, 181, 253, 0.6), transparent);
-          background-size: 500px 280px;
-          opacity: 0.5;
-          animation-delay: 4s;
-          animation-duration: 12s;
-        }
-        @keyframes twinkle {
-          0%,
-          100% {
-            opacity: 0.3;
-          }
-          50% {
-            opacity: 0.6;
-          }
-        }
-      `}</style>
 
       {/* Header fijo arriba */}
       <header className="max-w-5xl w-full mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3 relative z-10 shrink-0">
