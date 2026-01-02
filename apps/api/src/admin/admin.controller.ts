@@ -99,6 +99,23 @@ export class AdminController {
   }
 
   /**
+   * Obtener pagos/transacciones recientes con paginación
+   * GET /api/admin/pagos/recientes
+   * Rol: Admin
+   * Query params: page (default 1), limit (default 20, max 100)
+   */
+  @Get('pagos/recientes')
+  @ApiOperation({ summary: 'Obtener transacciones recientes paginadas' })
+  async getPagosRecientes(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const numPage = page ? parseInt(page, 10) : 1;
+    const numLimit = limit ? parseInt(limit, 10) : 20;
+    return this.adminService.getPagosRecientes(numPage, numLimit);
+  }
+
+  /**
    * Listar alertas pendientes
    * GET /api/admin/alertas
    * Rol: Admin

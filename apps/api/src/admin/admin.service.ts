@@ -351,6 +351,14 @@ export class AdminService {
   }
 
   /**
+   * Obtener pagos/transacciones recientes con paginación
+   * DELEGACIÓN: AdminStatsService
+   */
+  async getPagosRecientes(page?: number, limit?: number) {
+    return this.statsService.getPagosRecientes(page, limit);
+  }
+
+  /**
    * Obtener métricas de los circuit breakers (para monitoring)
    * Útil para dashboards de observabilidad
    */

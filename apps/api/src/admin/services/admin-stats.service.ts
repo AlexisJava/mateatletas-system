@@ -1,6 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 
+/** Tipo para transacciones recientes del admin */
+export interface TransaccionReciente {
+  id: string;
+  fecha: Date;
+  monto: number;
+  estado: string;
+  concepto: string;
+  tutor: { id: string; nombre: string; apellido: string; email: string | null };
+  estudiante: { id: string; nombre: string; apellido: string } | null;
+  metodoPago: string | null;
+}
+
+/** Metadata de paginación */
+export interface PaginationMeta {
+  total: number;
+  lastPage: number;
+  currentPage: number;
+  perPage: number;
+}
+
+/** Response paginada genérica */
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
 /**
  * Servicio especializado para estadísticas del dashboard administrativo
  * Extraído de AdminService para separar responsabilidades
@@ -207,5 +233,58 @@ export class AdminStatsService {
     }
 
     return result;
+  }
+
+  /**
+   * Obtener pagos/transacciones recientes con paginación
+   * Combina InscripcionMensual (membresías) para el dashboard de finanzas
+   */
+  async getPagosRecientes(
+    page = 1,
+    limit = 20,
+  ): Promise<PaginatedResponse<TransaccionReciente>> {
+    const skip = (page - 1) * limit;
+    const take = Math.min(limit, 100); // Max 100 por request
+
+    const [inscripciones, total] = await Promise.all([
+      this.prisma.inscripcionMensual.findMany({
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          tutor: {
+            select: { id: true, nombre: true, apellido: true, email: true },
+          },
+          estudiante: {
+            select: { id: true, nombre: true, apellido: true },
+          },
+          producto: {
+            select: { nombre: true },
+          },
+        },
+      }),
+      this.prisma.inscripcionMensual.count(),
+    ]);
+
+    const data: TransaccionReciente[] = inscripciones.map((ins) => ({
+      id: ins.id,
+      fecha: ins.createdAt,
+      monto: ins.precio_final.toNumber(),
+      estado: ins.estado_pago,
+      concepto: ins.producto?.nombre ?? `Membresía ${ins.periodo}`,
+      tutor: ins.tutor,
+      estudiante: ins.estudiante,
+      metodoPago: ins.metodo_pago,
+    }));
+
+    return {
+      data,
+      meta: {
+        total,
+        lastPage: Math.ceil(total / take),
+        currentPage: page,
+        perPage: take,
+      },
+    };
   }
 }

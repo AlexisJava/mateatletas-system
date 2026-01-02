@@ -447,13 +447,56 @@ export const getRetentionStats = async (meses = 6): Promise<RetentionDataPoint[]
   }
 };
 
-/**
- * Obtener todas las stats del dashboard en una sola llamada
- * Combina: /admin/dashboard + /admin/estadisticas + /casas/estadisticas
- * Transforma al formato esperado por el frontend (DashboardStats)
- */
 // ─────────────────────────────────────────────────────────────────────────────
-// FINANCE / PAGOS
+// PAGOS / TRANSACCIONES
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Transacción para el admin dashboard */
+export interface TransaccionAdmin {
+  id: string;
+  fecha: string;
+  monto: number;
+  estado: string;
+  concepto: string;
+  tutor: { id: string; nombre: string; apellido: string; email: string | null };
+  estudiante: { id: string; nombre: string; apellido: string } | null;
+  metodoPago: string | null;
+}
+
+/** Metadata de paginación */
+export interface PaginationMeta {
+  total: number;
+  lastPage: number;
+  currentPage: number;
+  perPage: number;
+}
+
+/** Response paginada */
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
+/**
+ * Obtener transacciones/pagos recientes con paginación
+ * GET /admin/pagos/recientes
+ */
+export const getPagosRecientes = async (
+  page = 1,
+  limit = 20,
+): Promise<PaginatedResponse<TransaccionAdmin>> => {
+  try {
+    return await axios.get<PaginatedResponse<TransaccionAdmin>>(
+      `/admin/pagos/recientes?page=${page}&limit=${limit}`,
+    );
+  } catch (error) {
+    console.error('Error al obtener pagos recientes:', error);
+    throw error;
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FINANCE / CONFIGURACIÓN
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Response del endpoint GET /pagos/configuracion (Decimals se serializan como strings) */
