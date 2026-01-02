@@ -6,9 +6,12 @@ import {
   deleteUser,
   deleteEstudiante,
   deleteDocente,
+  createEstudiante,
+  createDocente,
 } from '@/lib/api/admin.api';
 import type { AdminPerson, UserRole } from '@/types/admin-dashboard.types';
 import type { RoleFilter, StatusFilter, PersonasStats } from '../types/personas.types';
+import type { PersonaFormData } from '../components/PersonaFormModal';
 
 // Mock data para fallback cuando el backend no está disponible
 const MOCK_PERSONAS: AdminPerson[] = [
@@ -69,6 +72,7 @@ interface UsePersonasReturn {
   filteredPeople: AdminPerson[];
   stats: PersonasStats;
   totalCount: number;
+  handleCreate: (data: PersonaFormData) => Promise<void>;
   handleEdit: (person: AdminPerson) => void;
   handleDelete: (person: AdminPerson) => Promise<void>;
   refetch: () => Promise<void>;
@@ -192,6 +196,34 @@ export function usePersonas(): UsePersonasReturn {
     [people],
   );
 
+  const handleCreate = useCallback(
+    async (data: PersonaFormData) => {
+      if (data.role === 'estudiante') {
+        await createEstudiante({
+          nombre: data.nombre,
+          apellido: data.apellido,
+          edad: data.edad ?? 10,
+          nivelEscolar: data.nivelEscolar ?? 'Primaria',
+          tutorNombre: data.tutorNombre,
+          tutorApellido: data.tutorApellido,
+          tutorEmail: data.tutorEmail,
+          tutorTelefono: data.tutorTelefono,
+        });
+      } else if (data.role === 'docente') {
+        await createDocente({
+          nombre: data.nombre,
+          apellido: data.apellido,
+          email: data.email ?? '',
+          titulo: data.titulo,
+          telefono: data.telefono,
+        });
+      }
+      // Refetch para actualizar la lista
+      await fetchPeople();
+    },
+    [fetchPeople],
+  );
+
   const handleEdit = useCallback((person: AdminPerson) => {
     // Abrir modal de edición mostrando el detalle de la persona
     setSelectedPerson(person);
@@ -245,6 +277,7 @@ export function usePersonas(): UsePersonasReturn {
     filteredPeople,
     stats,
     totalCount: people.length,
+    handleCreate,
     handleEdit,
     handleDelete,
     refetch: fetchPeople,

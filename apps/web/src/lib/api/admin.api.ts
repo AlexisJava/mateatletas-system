@@ -177,6 +177,58 @@ export const deleteDocente = async (docenteId: string): Promise<void> => {
   }
 };
 
+// =============================================================================
+// CREAR PERSONAS
+// =============================================================================
+
+export interface CrearEstudianteDto {
+  nombre: string;
+  apellido: string;
+  edad: number;
+  nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
+  tutorExistenteId?: string;
+  tutorNombre?: string;
+  tutorApellido?: string;
+  tutorEmail?: string;
+  tutorTelefono?: string;
+}
+
+export interface CrearDocenteDto {
+  nombre: string;
+  apellido: string;
+  email: string;
+  password?: string;
+  titulo?: string;
+  telefono?: string;
+  especialidades?: string[];
+}
+
+/**
+ * Crear un estudiante con tutor
+ * POST /api/admin/estudiantes
+ */
+export const createEstudiante = async (dto: CrearEstudianteDto): Promise<EstudianteAdmin> => {
+  try {
+    return await axios.post('/admin/estudiantes', dto);
+  } catch (error) {
+    console.error('Error al crear estudiante:', error);
+    throw error;
+  }
+};
+
+/**
+ * Crear un docente
+ * POST /api/docentes
+ */
+export const createDocente = async (dto: CrearDocenteDto): Promise<DocenteAdmin> => {
+  try {
+    return await axios.post('/docentes', dto);
+  } catch (error) {
+    console.error('Error al crear docente:', error);
+    throw error;
+  }
+};
+
 export const getAllClasses = async (): Promise<ClasesResponse> => {
   try {
     // El interceptor ya retorna response.data directamente

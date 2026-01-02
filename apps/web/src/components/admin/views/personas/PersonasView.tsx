@@ -1,13 +1,21 @@
 'use client';
 
+import { useState } from 'react';
+import { UserPlus } from 'lucide-react';
 import { usePersonas } from './hooks';
-import { PersonasStatsGrid, PersonasFilters, PersonasTable, PersonDetailModal } from './components';
+import {
+  PersonasStatsGrid,
+  PersonasFilters,
+  PersonasTable,
+  PersonDetailModal,
+  PersonaFormModal,
+} from './components';
 
 /**
  * PersonasView - Vista de gestión unificada de personas
  *
  * Unifica estudiantes, docentes, tutores y admins desde el backend.
- * Tabla con filtros, búsqueda y acciones.
+ * Tabla con filtros, búsqueda y acciones CRUD completas.
  */
 
 export function PersonasView() {
@@ -25,9 +33,12 @@ export function PersonasView() {
     filteredPeople,
     stats,
     totalCount,
+    handleCreate,
     handleEdit,
     handleDelete,
   } = usePersonas();
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   if (isLoading) {
     return (
@@ -48,6 +59,18 @@ export function PersonasView() {
           Usando datos de ejemplo (backend no disponible)
         </div>
       )}
+
+      {/* Header with Add button */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-[var(--admin-text)]">Gestión de Personas</h1>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--admin-accent)] text-black font-medium hover:opacity-90 transition-opacity"
+        >
+          <UserPlus className="w-4 h-4" />
+          Agregar Persona
+        </button>
+      </div>
 
       {/* Stats */}
       <PersonasStatsGrid stats={stats} roleFilter={roleFilter} onRoleFilterChange={setRoleFilter} />
@@ -75,6 +98,13 @@ export function PersonasView() {
 
       {/* Detail Modal */}
       <PersonDetailModal person={selectedPerson} onClose={() => setSelectedPerson(null)} />
+
+      {/* Create Modal */}
+      <PersonaFormModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleCreate}
+      />
     </div>
   );
 }
