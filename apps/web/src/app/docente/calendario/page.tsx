@@ -29,6 +29,7 @@ import {
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { LoadingSpinner } from '@/components/effects';
 import { docentesApi, ClaseCalendario, ClasesDelMesResponse } from '@/lib/api/docentes.api';
+import { useAuthStore } from '@/store/auth.store';
 
 /**
  * CALENDARIO DOCENTE - BRUTAL & INTELIGENTE
@@ -50,14 +51,18 @@ interface EventoDia {
 }
 
 export default function DocenteCalendarioPage() {
+  const { user, isAuthenticated } = useAuthStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
   const [clasesDelMes, setClasesDelMes] = useState<ClaseCalendario[]>([]);
   const [stats, setStats] = useState<ClasesDelMesResponse['stats'] | null>(null);
 
   useEffect(() => {
-    fetchClasesDelMes();
-  }, [currentDate]);
+    // Solo cargar datos si el usuario está autenticado
+    if (isAuthenticated && user) {
+      fetchClasesDelMes();
+    }
+  }, [currentDate, isAuthenticated, user]);
 
   const fetchClasesDelMes = async () => {
     try {
