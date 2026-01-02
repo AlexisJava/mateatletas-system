@@ -775,6 +775,33 @@ export const getFinanceMetrics = async (): Promise<FinanceStats> => {
   }
 };
 
+/** Distribución de estados de pago */
+export interface PaymentStatusDistribution {
+  estado: string;
+  cantidad: number;
+  monto: number;
+  porcentaje: number;
+}
+
+/**
+ * Obtener distribución de estados de pago
+ * GET /pagos/dashboard/metricas (extrae distribucionEstados)
+ */
+export const getPaymentStatusDistribution = async (): Promise<PaymentStatusDistribution[]> => {
+  try {
+    const response = await axios.get<FinanceMetricsResponse>('/pagos/dashboard/metricas');
+    return response.distribucionEstados.map((item) => ({
+      estado: item.estado,
+      cantidad: item.cantidad,
+      monto: parseFloat(item.monto),
+      porcentaje: parseFloat(item.porcentaje),
+    }));
+  } catch (error) {
+    console.error('Error al obtener distribución de estados de pago:', error);
+    throw error;
+  }
+};
+
 /**
  * Actualizar configuración de precios
  * POST /pagos/configuracion/actualizar
