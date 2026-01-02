@@ -8,10 +8,13 @@ import {
   deleteDocente,
   createEstudiante,
   createDocente,
+  updateEstudiante,
+  updateDocente,
 } from '@/lib/api/admin.api';
 import type { AdminPerson, UserRole } from '@/types/admin-dashboard.types';
 import type { RoleFilter, StatusFilter, PersonasStats } from '../types/personas.types';
 import type { PersonaFormData } from '../components/PersonaFormModal';
+import type { PersonaEditData } from '../components/PersonaEditModal';
 
 // Mock data para fallback cuando el backend no está disponible
 const MOCK_PERSONAS: AdminPerson[] = [
@@ -69,11 +72,14 @@ interface UsePersonasReturn {
   setStatusFilter: (filter: StatusFilter) => void;
   selectedPerson: AdminPerson | null;
   setSelectedPerson: (person: AdminPerson | null) => void;
+  editingPerson: AdminPerson | null;
+  setEditingPerson: (person: AdminPerson | null) => void;
   filteredPeople: AdminPerson[];
   stats: PersonasStats;
   totalCount: number;
   handleCreate: (data: PersonaFormData) => Promise<void>;
   handleEdit: (person: AdminPerson) => void;
+  handleUpdate: (personId: string, data: PersonaEditData) => Promise<void>;
   handleDelete: (person: AdminPerson) => Promise<void>;
   refetch: () => Promise<void>;
 }
@@ -96,6 +102,7 @@ export function usePersonas(): UsePersonasReturn {
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedPerson, setSelectedPerson] = useState<AdminPerson | null>(null);
+  const [editingPerson, setEditingPerson] = useState<AdminPerson | null>(null);
 
   const fetchPeople = useCallback(async () => {
     setIsLoading(true);
@@ -123,6 +130,8 @@ export function usePersonas(): UsePersonasReturn {
           createdAt: est.createdAt,
           casa: est.equipo?.nombre,
           puntos: est.puntos_totales,
+          edad: est.edad,
+          nivelEscolar: est.nivel_escolar,
         });
       });
 
@@ -152,6 +161,8 @@ export function usePersonas(): UsePersonasReturn {
           status: 'active',
           createdAt: doc.createdAt ?? new Date().toISOString(),
           clasesAsignadas: 0, // TODO: Obtener desde endpoint específico
+          titulo: doc.titulo ?? doc.titulo_profesional ?? undefined,
+          telefono: doc.telefono ?? undefined,
         });
       });
 
@@ -225,9 +236,56 @@ export function usePersonas(): UsePersonasReturn {
   );
 
   const handleEdit = useCallback((person: AdminPerson) => {
-    // Abrir modal de edición mostrando el detalle de la persona
-    setSelectedPerson(person);
+    // Abrir modal de edición
+    setEditingPerson(person);
   }, []);
+
+  const handleUpdate = useCallback(
+    async (personId: string, data: PersonaEditData) => {
+      const person = people.find((p) => p.id === personId);
+      if (!person) return;
+
+      try {
+        if (person.role === 'estudiante') {
+          await updateEstudiante(personId, {
+            nombre: data.nombre,
+            apellido: data.apellido,
+            edad: data.edad,
+            nivelEscolar: data.nivelEscolar,
+          });
+        } else if (person.role === 'docente') {
+          await updateDocente(personId, {
+            nombre: data.nombre,
+            apellido: data.apellido,
+            email: data.email,
+            titulo: data.titulo,
+            telefono: data.telefono,
+          });
+        }
+
+        // Actualizar lista local
+        setPeople((prev) =>
+          prev.map((p) =>
+            p.id === personId
+              ? {
+                  ...p,
+                  nombre: data.nombre ?? p.nombre,
+                  apellido: data.apellido ?? p.apellido,
+                  email: data.email ?? p.email,
+                }
+              : p,
+          ),
+        );
+
+        setEditingPerson(null);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Error al actualizar persona';
+        console.error('Error al actualizar persona:', message);
+        throw err; // Re-throw para que el modal pueda mostrar el error
+      }
+    },
+    [people],
+  );
 
   const handleDelete = useCallback(
     async (person: AdminPerson) => {
@@ -274,11 +332,14 @@ export function usePersonas(): UsePersonasReturn {
     setStatusFilter,
     selectedPerson,
     setSelectedPerson,
+    editingPerson,
+    setEditingPerson,
     filteredPeople,
     stats,
     totalCount: people.length,
     handleCreate,
     handleEdit,
+    handleUpdate,
     handleDelete,
     refetch: fetchPeople,
   };

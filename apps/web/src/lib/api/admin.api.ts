@@ -94,6 +94,18 @@ export interface EstudiantesResponse {
   };
 }
 
+export interface DocenteAdmin {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono?: string | null;
+  titulo?: string | null;
+  titulo_profesional?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export const getAllEstudiantes = async (options?: {
   page?: number;
   limit?: number;
@@ -225,6 +237,58 @@ export const createDocente = async (dto: CrearDocenteDto): Promise<DocenteAdmin>
     return await axios.post('/docentes', dto);
   } catch (error) {
     console.error('Error al crear docente:', error);
+    throw error;
+  }
+};
+
+// =============================================================================
+// ACTUALIZAR PERSONAS
+// =============================================================================
+
+export interface UpdateEstudianteDto {
+  nombre?: string;
+  apellido?: string;
+  edad?: number;
+  nivelEscolar?: 'Primaria' | 'Secundaria' | 'Universidad';
+}
+
+export interface UpdateDocenteDto {
+  nombre?: string;
+  apellido?: string;
+  email?: string;
+  titulo?: string;
+  telefono?: string;
+  especialidades?: string[];
+}
+
+/**
+ * Actualizar un estudiante
+ * PATCH /api/estudiantes/:id
+ */
+export const updateEstudiante = async (
+  estudianteId: string,
+  dto: UpdateEstudianteDto,
+): Promise<EstudianteAdmin> => {
+  try {
+    return await axios.patch(`/estudiantes/${estudianteId}`, dto);
+  } catch (error) {
+    console.error('Error al actualizar estudiante:', error);
+    throw error;
+  }
+};
+
+/**
+ * Actualizar un docente
+ * PATCH /api/docentes/:id
+ */
+export const updateDocente = async (
+  docenteId: string,
+  dto: UpdateDocenteDto,
+): Promise<DocenteAdmin> => {
+  try {
+    return await axios.patch(`/docentes/${docenteId}`, dto);
+  } catch (error) {
+    console.error('Error al actualizar docente:', error);
     throw error;
   }
 };

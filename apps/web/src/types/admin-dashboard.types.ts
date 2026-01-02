@@ -88,8 +88,16 @@ export interface AdminPerson {
   tier?: TierSTEAM;
   /** Solo estudiantes: Puntos acumulados */
   puntos?: number;
+  /** Solo estudiantes: Edad */
+  edad?: number;
+  /** Solo estudiantes: Nivel escolar */
+  nivelEscolar?: string;
   /** Solo docentes: Cantidad de clases asignadas */
   clasesAsignadas?: number;
+  /** Solo docentes: Título profesional */
+  titulo?: string;
+  /** Solo docentes: Teléfono */
+  telefono?: string;
   /** Solo tutores: Cantidad de estudiantes a cargo */
   estudiantesACargo?: number;
 }

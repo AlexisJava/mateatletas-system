@@ -9,6 +9,7 @@ import {
   PersonasTable,
   PersonDetailModal,
   PersonaFormModal,
+  PersonaEditModal,
 } from './components';
 
 /**
@@ -30,11 +31,14 @@ export function PersonasView() {
     setStatusFilter,
     selectedPerson,
     setSelectedPerson,
+    editingPerson,
+    setEditingPerson,
     filteredPeople,
     stats,
     totalCount,
     handleCreate,
     handleEdit,
+    handleUpdate,
     handleDelete,
   } = usePersonas();
 
@@ -104,6 +108,13 @@ export function PersonasView() {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSubmit={handleCreate}
+      />
+
+      {/* Edit Modal */}
+      <PersonaEditModal
+        person={editingPerson}
+        onClose={() => setEditingPerson(null)}
+        onSubmit={handleUpdate}
       />
     </div>
   );
