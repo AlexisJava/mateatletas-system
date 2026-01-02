@@ -58,9 +58,14 @@ export class ProductosService {
       data.duracion_meses = createDto.duracion_meses ?? 1;
     }
 
-    return await this.prisma.producto.create({
+    const producto = await this.prisma.producto.create({
       data,
     });
+
+    // Invalidar caché
+    await this.invalidateProductosCache();
+
+    return producto;
   }
 
   /**
@@ -204,10 +209,15 @@ export class ProductosService {
       data.duracion_meses = updateDto.duracion_meses;
     }
 
-    return await this.prisma.producto.update({
+    const producto = await this.prisma.producto.update({
       where: { id },
       data,
     });
+
+    // Invalidar caché
+    await this.invalidateProductosCache();
+
+    return producto;
   }
 
   /**
@@ -218,6 +228,8 @@ export class ProductosService {
    * @returns Mensaje de confirmación
    */
   async remove(id: string, hardDelete: boolean = false) {
+    this.logger.log(`remove() called - id: ${id}, hardDelete: ${hardDelete}`);
+
     // Verificar que el producto existe
     await this.findById(id);
 
@@ -225,14 +237,43 @@ export class ProductosService {
       await this.prisma.producto.delete({
         where: { id },
       });
-      return { message: 'Producto eliminado permanentemente' };
     } else {
       await this.prisma.producto.update({
         where: { id },
         data: { activo: false },
       });
-      return { message: 'Producto marcado como inactivo' };
     }
+
+    // Invalidar caché de productos
+    await this.invalidateProductosCache();
+
+    return {
+      message: hardDelete
+        ? 'Producto eliminado permanentemente'
+        : 'Producto marcado como inactivo',
+    };
+  }
+
+  /**
+   * Invalida todas las claves de caché de productos
+   */
+  private async invalidateProductosCache() {
+    const cacheKeys = [
+      'productos_all_activos',
+      'productos_all_todos',
+      'productos_Curso_activos',
+      'productos_Curso_todos',
+      'productos_Evento_activos',
+      'productos_Evento_todos',
+      'productos_Digital_activos',
+      'productos_Digital_todos',
+      'productos_Fisico_activos',
+      'productos_Fisico_todos',
+      'productos_Servicio_activos',
+      'productos_Servicio_todos',
+    ];
+    await Promise.all(cacheKeys.map((key) => this.cacheManager.del(key)));
+    this.logger.debug('Cache de productos invalidado');
   }
 
   /**

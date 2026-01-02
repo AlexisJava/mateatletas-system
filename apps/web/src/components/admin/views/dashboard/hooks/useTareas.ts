@@ -9,7 +9,6 @@ import {
   type TareaPrioridad,
   type TareaEstado,
 } from '@/lib/api/admin.api';
-import { MOCK_TASKS } from '@/lib/constants/admin-mock-data';
 
 /** Tarea adaptada para el componente TaskItem (compatibilidad con mock) */
 export interface TaskItemData {
@@ -79,7 +78,6 @@ interface UseTareasReturn {
  * useTareas - Hook para gestionar tareas del dashboard
  *
  * Llama al backend GET /admin/tareas
- * Fallback a mock data si hay error
  */
 export function useTareas(): UseTareasReturn {
   const [tasks, setTasks] = useState<TaskItemData[]>([]);
@@ -96,20 +94,7 @@ export function useTareas(): UseTareasReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cargar tareas';
       setError(message);
-      console.warn('useTareas: Usando datos mock por error:', message);
-      // Fallback a mock data
-      setTasks(
-        MOCK_TASKS.map((t) => ({
-          id: t.id,
-          title: t.title,
-          description: t.description ?? null,
-          priority: t.priority,
-          status: t.status,
-          dueDate: t.dueDate ?? null,
-          assignee: t.assignee ?? null,
-          createdAt: t.createdAt,
-        })),
-      );
+      console.error('useTareas: Error al cargar:', message);
     } finally {
       setIsLoading(false);
     }

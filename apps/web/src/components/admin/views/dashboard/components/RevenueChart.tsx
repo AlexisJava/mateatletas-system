@@ -17,7 +17,6 @@ import { useRevenueData } from '../../finanzas/hooks/useRevenueData';
  * RevenueChart - Gráfico de evolución de ingresos
  *
  * Conectado al backend: GET /admin/pagos/historico-mensual
- * Fallback a mock data si hay error.
  */
 
 export function RevenueChart() {
@@ -27,24 +26,22 @@ export function RevenueChart() {
     <div className="p-5 rounded-2xl bg-[var(--admin-surface-1)] border border-[var(--admin-border)]">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-[var(--admin-text)]">Evolución de Ingresos</h2>
-        <div className="flex items-center gap-2">
-          {error && (
-            <span className="text-xs text-[var(--status-warning)]" title={error}>
-              (mock)
-            </span>
-          )}
-          <Link
-            href="/admin/finanzas"
-            className="text-xs text-[var(--admin-accent)] hover:underline"
-          >
-            Ver detalle
-          </Link>
-        </div>
+        <Link href="/admin/finanzas" className="text-xs text-[var(--admin-accent)] hover:underline">
+          Ver detalle
+        </Link>
       </div>
       <div className="h-64">
         {isLoading ? (
-          <div className="h-full flex items-center justify-center text-[var(--admin-text-muted)]">
-            Cargando...
+          <div className="h-full flex items-center justify-center">
+            <div className="w-6 h-6 border-2 border-[var(--admin-accent)] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="h-full flex items-center justify-center text-[var(--status-danger)] text-sm">
+            Error al cargar datos
+          </div>
+        ) : data.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-[var(--admin-text-muted)] text-sm">
+            Sin datos de ingresos
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">

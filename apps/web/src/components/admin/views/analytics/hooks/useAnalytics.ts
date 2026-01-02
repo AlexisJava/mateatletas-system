@@ -5,11 +5,6 @@ import {
   getRetentionStats,
   type RetentionDataPoint as ApiRetentionDataPoint,
 } from '@/lib/api/admin.api';
-import {
-  MOCK_DASHBOARD_STATS,
-  MOCK_CASA_DISTRIBUTION,
-  MOCK_RETENTION_DATA,
-} from '@/lib/constants/admin-mock-data';
 
 /**
  * Tipos para analytics
@@ -46,7 +41,7 @@ export interface AnalyticsData {
 interface UseAnalyticsReturn {
   isLoading: boolean;
   error: string | null;
-  data: AnalyticsData;
+  data: AnalyticsData | null;
   refetch: () => Promise<void>;
 }
 
@@ -60,28 +55,14 @@ const CASA_COLORS: Record<string, string> = {
   Pulsar: '#ec4899',
 };
 
-// Mock data para fallback
-const MOCK_ANALYTICS: AnalyticsData = {
-  stats: {
-    estudiantesActivos: MOCK_DASHBOARD_STATS.estudiantesActivos,
-    crecimientoMensual: MOCK_DASHBOARD_STATS.crecimientoMensual,
-    tasaRetencion: 94.2,
-    librosLeidos: 2100,
-  },
-  casaDistribution: MOCK_CASA_DISTRIBUTION,
-  retentionData: MOCK_RETENTION_DATA,
-};
-
 /**
  * useAnalytics - Hook para datos de analytics
  *
  * Combina llamadas al backend:
  * - GET /admin/dashboard + /admin/estadisticas + /casas/estadisticas
- *
- * Fallback a mock data si hay error (desarrollo sin backend)
  */
 export function useAnalytics(): UseAnalyticsReturn {
-  const [data, setData] = useState<AnalyticsData>(MOCK_ANALYTICS);
+  const [data, setData] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -135,8 +116,7 @@ export function useAnalytics(): UseAnalyticsReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cargar analytics';
       setError(message);
-      console.warn('useAnalytics: Usando datos mock por error:', message);
-      setData(MOCK_ANALYTICS);
+      console.error('useAnalytics: Error al cargar:', message);
     } finally {
       setIsLoading(false);
     }

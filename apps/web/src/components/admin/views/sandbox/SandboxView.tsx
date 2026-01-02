@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Editor, { type OnMount } from '@monaco-editor/react';
 
 // Components
@@ -38,9 +39,9 @@ import {
   updateNodo as apiUpdateNodo,
   deleteNodo as apiDeleteNodo,
   getArbol,
+  getContenidoById,
   subjectToMundoTipo,
   mundoTipoToSubject,
-  type ContenidoBackend,
   type NodoBackend,
   type CasaTipo,
 } from '@/lib/api/contenidos.api';
@@ -130,6 +131,10 @@ function countDescendants(nodo: NodoContenido): number {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function SandboxView() {
+  // ─── URL Params ───
+  const searchParams = useSearchParams();
+  const contenidoIdFromUrl = searchParams.get('id');
+
   // ─── Initial State ───
   const [hasStarted, setHasStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -243,6 +248,52 @@ export function SandboxView() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isPlayerOpen]);
+
+  // ─── Load Existing Content from URL ───
+  useEffect(() => {
+    if (!contenidoIdFromUrl || hasStarted) return;
+
+    const loadExistingContent = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch contenido metadata and tree in parallel
+        const [contenido, arbol] = await Promise.all([
+          getContenidoById(contenidoIdFromUrl),
+          getArbol(contenidoIdFromUrl),
+        ]);
+
+        // Update state with existing content
+        setBackendId(contenido.id);
+        const loadedLesson: Lesson = {
+          id: contenido.id,
+          title: contenido.titulo,
+          house: contenido.casaTipo as House,
+          subject: mundoTipoToSubject(contenido.mundoTipo),
+          estado: contenido.estado,
+          nodos: arbol.map(mapNodoBackendToFrontend),
+        };
+        setLesson(loadedLesson);
+
+        // Select first leaf node if available
+        const firstLeaf = findFirstLeafNode(loadedLesson.nodos);
+        if (firstLeaf) {
+          setActiveNodoId(firstLeaf.id);
+          setActiveNodo(firstLeaf);
+          setEditorContent(firstLeaf.contenidoJson || initialJsonString);
+        }
+
+        setHasStarted(true);
+      } catch (error) {
+        console.error('Error al cargar contenido existente:', error);
+        showError('Error al cargar el contenido. Verifica que el ID sea válido.');
+        // Don't set hasStarted, let user start fresh via WelcomeScreen
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadExistingContent();
+  }, [contenidoIdFromUrl, hasStarted, initialJsonString, showError]);
 
   // ─── Editor Handlers ───
   const handleEditorDidMount: OnMount = (editor) => {
@@ -567,6 +618,18 @@ export function SandboxView() {
       return count + countLeafNodes(nodo.hijos);
     }, 0);
   };
+
+  // ─── Render Loading State ───
+  if (isLoading) {
+    return (
+      <div className="flex h-[calc(100vh-10rem)] bg-[#030014] text-slate-200 items-center justify-center rounded-2xl border border-white/5">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#a855f7]/30 border-t-[#a855f7] rounded-full animate-spin" />
+          <p className="text-[#94a3b8] text-sm">Cargando contenido...</p>
+        </div>
+      </div>
+    );
+  }
 
   // ─── Render Welcome Screen ───
   if (!hasStarted) {

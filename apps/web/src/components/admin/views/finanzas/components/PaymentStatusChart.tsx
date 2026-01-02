@@ -28,13 +28,6 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELADO: 'Cancelados',
 };
 
-// Mock data para fallback
-const MOCK_DATA = [
-  { name: 'Pagados', value: 65, color: 'var(--status-success)' },
-  { name: 'Pendientes', value: 25, color: 'var(--status-warning)' },
-  { name: 'Vencidos', value: 10, color: 'var(--status-danger)' },
-];
-
 interface ChartData {
   name: string;
   value: number;
@@ -42,29 +35,31 @@ interface ChartData {
 }
 
 export function PaymentStatusChart() {
-  const [data, setData] = useState<ChartData[]>(MOCK_DATA);
+  const [data, setData] = useState<ChartData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const distribution = await getPaymentStatusDistribution();
-        const chartData = distribution.map((item) => ({
-          name: STATUS_LABELS[item.estado] ?? item.estado,
-          value: item.porcentaje,
-          color: STATUS_COLORS[item.estado] ?? 'var(--admin-text-muted)',
-        }));
-        setData(chartData.length > 0 ? chartData : MOCK_DATA);
-        setError(null);
-      } catch (err) {
-        console.warn('PaymentStatusChart: Usando datos mock por error:', err);
-        setError('Usando datos de ejemplo');
-        setData(MOCK_DATA);
-      } finally {
-        setIsLoading(false);
-      }
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const distribution = await getPaymentStatusDistribution();
+      const chartData = distribution.map((item) => ({
+        name: STATUS_LABELS[item.estado] ?? item.estado,
+        value: item.porcentaje,
+        color: STATUS_COLORS[item.estado] ?? 'var(--admin-text-muted)',
+      }));
+      setData(chartData);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al cargar estados de pago';
+      setError(message);
+      console.error('PaymentStatusChart: Error al cargar:', message);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -75,11 +70,23 @@ export function PaymentStatusChart() {
         Estados de Pago
       </h3>
 
-      {error && <div className="mb-2 text-xs text-yellow-400">{error}</div>}
-
       {isLoading ? (
         <div className="h-72 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-[var(--admin-accent)] border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="h-72 flex flex-col items-center justify-center">
+          <p className="text-[var(--status-danger)] text-sm mb-3">Error al cargar datos</p>
+          <button
+            onClick={fetchData}
+            className="px-3 py-1.5 text-sm bg-[var(--admin-surface-2)] rounded-lg hover:bg-[var(--admin-surface-1)] border border-[var(--admin-border)] transition-colors"
+          >
+            Reintentar
+          </button>
+        </div>
+      ) : data.length === 0 ? (
+        <div className="h-72 flex items-center justify-center">
+          <p className="text-[var(--admin-text-muted)] text-sm">Sin datos de pagos</p>
         </div>
       ) : (
         <div className="h-72">

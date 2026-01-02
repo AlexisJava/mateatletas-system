@@ -7,33 +7,9 @@ import {
   type TierConfig,
 } from '@/lib/api/admin.api';
 
-// Valores por defecto cuando el backend no está disponible
-const MOCK_STATS: FinanceStats = {
-  ingresosMes: 4200000,
-  pagosPendientes: 320000,
-  inscripcionesActivas: 298,
-  tasaCobro: 92.9,
-  cambios: {
-    ingresos: 15.3,
-    pendientes: -5.2,
-    inscripciones: 12,
-    tasaCobro: 2.1,
-  },
-};
-
-const MOCK_CONFIG: TierConfig = {
-  precioSteamLibros: 40000,
-  precioSteamAsincronico: 65000,
-  precioSteamSincronico: 95000,
-  descuentoSegundoHermano: 10,
-  diaVencimiento: 15,
-  diasAntesRecordatorio: 5,
-  notificacionesActivas: true,
-};
-
 interface UseFinanceStatsReturn {
-  stats: FinanceStats;
-  config: TierConfig;
+  stats: FinanceStats | null;
+  config: TierConfig | null;
   isLoading: boolean;
   error: string | null;
   isSaving: boolean;
@@ -47,12 +23,10 @@ interface UseFinanceStatsReturn {
  * Llama al backend:
  * - GET /pagos/dashboard/metricas
  * - GET /pagos/configuracion
- *
- * Fallback a mock data si hay error (desarrollo sin backend)
  */
 export function useFinanceStats(): UseFinanceStatsReturn {
-  const [stats, setStats] = useState<FinanceStats>(MOCK_STATS);
-  const [config, setConfig] = useState<TierConfig>(MOCK_CONFIG);
+  const [stats, setStats] = useState<FinanceStats | null>(null);
+  const [config, setConfig] = useState<TierConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,10 +45,7 @@ export function useFinanceStats(): UseFinanceStatsReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cargar datos de finanzas';
       setError(message);
-      console.warn('useFinanceStats: Usando datos mock por error:', message);
-      // Mantener mock data como fallback
-      setStats(MOCK_STATS);
-      setConfig(MOCK_CONFIG);
+      console.error('useFinanceStats: Error al cargar datos:', message);
     } finally {
       setIsLoading(false);
     }

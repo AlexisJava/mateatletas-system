@@ -7,17 +7,13 @@ import {
   type TransaccionAdmin,
   type PaginatedResponse,
 } from '@/lib/api/admin.api';
-import {
-  MOCK_TRANSACTIONS,
-  formatCurrency,
-  formatRelativeTime,
-} from '@/lib/constants/admin-mock-data';
+import { formatCurrency, formatRelativeTime } from '@/lib/constants/admin-mock-data';
 
 /**
  * TransactionsList - Lista de transacciones recientes
  *
  * Conectado al backend via GET /admin/pagos/recientes
- * Con paginación y fallback a mock data si hay error.
+ * Con paginación.
  */
 
 // Mapeo de estados del backend a colores
@@ -46,11 +42,17 @@ export function TransactionsList() {
     setError(null);
     try {
       const response = await getPagosRecientes(page, limit);
+      // Validar estructura de respuesta
+      if (!response || !Array.isArray(response.data)) {
+        console.error('TransactionsList: Respuesta inválida del backend:', response);
+        setError('Respuesta inválida del servidor');
+        return;
+      }
       setData(response);
     } catch (err) {
-      console.warn('TransactionsList: Usando mock data por error:', err);
-      setError('Error al cargar transacciones');
-      // No hacemos setData aquí, usamos mock en el render
+      const message = err instanceof Error ? err.message : 'Error al cargar transacciones';
+      console.error('TransactionsList: Error al cargar:', message);
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -75,25 +77,23 @@ export function TransactionsList() {
     );
   }
 
-  // Error state - show mock data
-  if (error || !data) {
+  // Error state - incluye validación de estructura de datos
+  if (error || !data || !data.data) {
     return (
       <div className="p-5 rounded-2xl bg-[var(--admin-surface-1)] border border-[var(--admin-border)]">
         <h3 className="text-lg font-semibold text-[var(--admin-text)] mb-4 flex items-center gap-2">
           <Clock className="w-5 h-5 text-[var(--status-warning)]" />
           Transacciones Recientes
-          <span className="text-xs font-normal text-[var(--admin-text-muted)]">(demo)</span>
         </h3>
-        {error && (
-          <div className="flex items-center gap-2 text-xs text-[var(--status-warning)] mb-3">
-            <AlertCircle className="w-4 h-4" />
-            {error}
-          </div>
-        )}
-        <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-1">
-          {MOCK_TRANSACTIONS.map((tx) => (
-            <MockTransactionItem key={tx.id} transaction={tx} />
-          ))}
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <AlertCircle className="w-8 h-8 text-[var(--status-danger)] mb-2" />
+          <p className="text-sm text-[var(--status-danger)]">Error al cargar transacciones</p>
+          <button
+            onClick={fetchData}
+            className="mt-3 px-4 py-2 text-sm bg-[var(--admin-surface-2)] rounded-lg hover:bg-[var(--admin-surface-1)] border border-[var(--admin-border)] transition-colors"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
@@ -186,47 +186,6 @@ function TransactionItem({ transaction: tx }: TransactionItemProps) {
       </div>
       <p className="text-xs text-[var(--admin-text-disabled)] mt-2">
         {formatRelativeTime(tx.fecha)}
-      </p>
-    </div>
-  );
-}
-
-// Mock transaction item (para fallback)
-interface MockTransactionItemProps {
-  transaction: (typeof MOCK_TRANSACTIONS)[0];
-}
-
-function MockTransactionItem({ transaction: tx }: MockTransactionItemProps) {
-  const statusLabels = {
-    completed: 'Pagado',
-    pending: 'Pendiente',
-    failed: 'Fallido',
-  };
-
-  const statusColors = {
-    completed: 'bg-[var(--status-success-muted)] text-[var(--status-success)]',
-    pending: 'bg-[var(--status-warning-muted)] text-[var(--status-warning)]',
-    failed: 'bg-[var(--status-error-muted)] text-[var(--status-error)]',
-  };
-
-  return (
-    <div className="p-3 bg-[var(--admin-surface-2)] rounded-lg hover:bg-[var(--admin-surface-1)] border border-transparent hover:border-[var(--admin-border)] transition-colors">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="font-semibold text-[var(--admin-text)]">{tx.studentName}</p>
-          <p className="text-xs text-[var(--admin-text-muted)]">{tx.tier}</p>
-        </div>
-        <div className="text-right">
-          <p className="font-semibold text-[var(--admin-text)]">{formatCurrency(tx.amount)}</p>
-          <span
-            className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${statusColors[tx.status]}`}
-          >
-            {statusLabels[tx.status]}
-          </span>
-        </div>
-      </div>
-      <p className="text-xs text-[var(--admin-text-disabled)] mt-2">
-        {formatRelativeTime(tx.date)}
       </p>
     </div>
   );

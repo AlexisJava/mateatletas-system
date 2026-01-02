@@ -21,11 +21,10 @@ import { useDashboardStats, useTareas } from './hooks';
  * DashboardView - Vista principal del admin
  *
  * Orquesta los componentes del dashboard con datos reales del backend.
- * Fallback a mock data si el backend no está disponible.
  */
 
 export function DashboardView() {
-  const { stats, isLoading, error } = useDashboardStats();
+  const { stats, isLoading, error, refetch } = useDashboardStats();
   const { tasks, isLoading: tasksLoading, error: tasksError, toggleTask } = useTareas();
   const [notes, setNotes] = useState('');
   const [showNotesModal, setShowNotesModal] = useState(false);
@@ -54,15 +53,25 @@ export function DashboardView() {
     );
   }
 
+  // Error state - no hay datos
+  if (error || !stats) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center">
+          <p className="text-[var(--status-danger)] mb-4">Error al cargar datos del dashboard</p>
+          <button
+            onClick={refetch}
+            className="px-4 py-2 bg-[var(--admin-surface-2)] rounded-lg hover:bg-[var(--admin-surface-1)] border border-[var(--admin-border)] transition-colors"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Error banner (datos mock en uso) */}
-      {error && (
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-2 text-sm text-yellow-400">
-          Usando datos de ejemplo (backend no disponible)
-        </div>
-      )}
-
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard

@@ -241,6 +241,34 @@ export const createDocente = async (dto: CrearDocenteDto): Promise<DocenteAdmin>
   }
 };
 
+/**
+ * Resetear credenciales de un usuario
+ * POST /api/admin/credenciales/:usuarioId/reset
+ */
+export interface ResetCredencialesResponse {
+  usuario: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email?: string;
+    username?: string;
+  };
+  nuevaPassword: string;
+  tipoUsuario: 'tutor' | 'estudiante' | 'docente';
+}
+
+export const resetCredenciales = async (
+  usuarioId: string,
+  tipoUsuario: 'tutor' | 'estudiante' | 'docente',
+): Promise<ResetCredencialesResponse> => {
+  try {
+    return await axios.post(`/admin/credenciales/${usuarioId}/reset`, { tipoUsuario });
+  } catch (error) {
+    console.error('Error al resetear credenciales:', error);
+    throw error;
+  }
+};
+
 // =============================================================================
 // ACTUALIZAR PERSONAS
 // =============================================================================

@@ -43,7 +43,7 @@ export function PersonasTable({ people, onView, onEdit, onDelete }: PersonasTabl
           <tbody>
             {people.map((person) => (
               <PersonRow
-                key={person.id}
+                key={`${person.id}-${person.role}`}
                 person={person}
                 onView={onView}
                 onEdit={onEdit}

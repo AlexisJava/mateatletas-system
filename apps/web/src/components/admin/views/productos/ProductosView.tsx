@@ -51,15 +51,25 @@ export function ProductosView() {
     );
   }
 
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center">
+          <p className="text-[var(--status-danger)] mb-4">Error al cargar productos</p>
+          <button
+            onClick={refetch}
+            className="px-4 py-2 bg-[var(--admin-surface-2)] rounded-lg hover:bg-[var(--admin-surface-1)] border border-[var(--admin-border)] transition-colors"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Error banner (datos mock en uso) */}
-      {error && (
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-2 text-sm text-yellow-400">
-          Usando datos de ejemplo (backend no disponible)
-        </div>
-      )}
-
       {/* Header con botón crear */}
       <div className="flex items-center justify-between">
         <div>

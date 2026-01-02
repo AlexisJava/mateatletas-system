@@ -3,12 +3,11 @@ import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 /**
  * ParseIdPipe - Validador de IDs para Prisma
  *
- * Acepta tanto UUIDs como CUIDs ya que Prisma genera CUIDs por defecto.
- *
- * Formatos soportados:
+ * Acepta múltiples formatos de ID:
  * - UUID v4: 550e8400-e29b-41d4-a716-446655440000
  * - CUID: cmjpy6pcj000i8js3y8rz9lx4 (25 chars, empieza con 'c')
  * - CUID2: variable length, empieza con letra minúscula
+ * - Slug: seed-producto-nombre (para datos de seed)
  *
  * Uso:
  * @Get(':id')
@@ -31,14 +30,18 @@ export class ParseIdPipe implements PipeTransform<string> {
     // CUID2 pattern (starts with any letter, variable length)
     const cuid2Regex = /^[a-z][a-z0-9]{19,31}$/;
 
+    // Slug pattern (lowercase letters, numbers, hyphens - for seed data)
+    const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
     if (
       uuidRegex.test(value) ||
       cuidRegex.test(value) ||
-      cuid2Regex.test(value)
+      cuid2Regex.test(value) ||
+      slugRegex.test(value)
     ) {
       return value;
     }
 
-    throw new BadRequestException('Validation failed (uuid or cuid expected)');
+    throw new BadRequestException('Validation failed (invalid id format)');
   }
 }

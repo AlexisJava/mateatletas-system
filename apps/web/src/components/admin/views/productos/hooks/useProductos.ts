@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
 import { getAllProducts, deleteProduct, type Producto } from '@/lib/api/admin.api';
 import type {
   TipoFilter,
@@ -6,60 +7,6 @@ import type {
   ProductosStats,
   AdminProducto,
 } from '../types/productos.types';
-
-// Mock data para fallback cuando el backend no está disponible
-const MOCK_PRODUCTOS: AdminProducto[] = [
-  {
-    id: 'prod-1',
-    nombre: 'Colonia de Verano 2026 - Enero',
-    descripcion: 'Programa STEAM completo para vacaciones de verano',
-    precio: 180000,
-    tipo: 'Evento',
-    activo: true,
-    ventas: 45,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    fecha_inicio: '2026-01-06T00:00:00.000Z',
-    fecha_fin: '2026-01-31T00:00:00.000Z',
-    cupo_maximo: 50,
-  },
-  {
-    id: 'prod-2',
-    nombre: 'Taller de Robótica - Marzo',
-    descripcion: 'Introducción a la robótica con Arduino',
-    precio: 95000,
-    tipo: 'Evento',
-    activo: true,
-    ventas: 28,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    fecha_inicio: '2026-03-01T00:00:00.000Z',
-    fecha_fin: '2026-03-15T00:00:00.000Z',
-    cupo_maximo: 30,
-  },
-  {
-    id: 'prod-3',
-    nombre: 'Pack Material Didáctico Digital',
-    descripcion: 'Guías, ejercicios y recursos descargables',
-    precio: 25000,
-    tipo: 'Digital',
-    activo: true,
-    ventas: 156,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 'prod-4',
-    nombre: 'Curso Online de Matemáticas',
-    descripcion: 'Curso completo con videos y ejercicios',
-    precio: 150000,
-    tipo: 'Curso',
-    activo: false,
-    ventas: 89,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
 
 interface UseProductosReturn {
   isLoading: boolean;
@@ -90,16 +37,14 @@ interface UseProductosReturn {
  * useProductos - Hook para gestión de productos
  *
  * Llama al backend GET /productos para obtener todos los productos.
- *
- * Fallback a mock data si hay error (desarrollo sin backend)
  */
 export function useProductos(): UseProductosReturn {
-  const [products, setProducts] = useState<AdminProducto[]>(MOCK_PRODUCTOS);
+  const [products, setProducts] = useState<AdminProducto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [tierFilter, setTierFilter] = useState<TipoFilter>('all');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('active');
   const [selectedProduct, setSelectedProduct] = useState<AdminProducto | null>(null);
   // Estados para modal crear/editar
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -123,9 +68,7 @@ export function useProductos(): UseProductosReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cargar productos';
       setError(message);
-      console.warn('useProductos: Usando datos mock por error:', message);
-      // Mantener mock data como fallback
-      setProducts(MOCK_PRODUCTOS);
+      console.error('useProductos: Error al cargar:', message);
     } finally {
       setIsLoading(false);
     }
@@ -193,12 +136,19 @@ export function useProductos(): UseProductosReturn {
 
   const handleDelete = useCallback(
     async (product: AdminProducto) => {
+      const confirmMessage = `¿Desactivar "${product.nombre}"? Podrás reactivarlo desde el filtro "Inactivos".`;
+      if (!window.confirm(confirmMessage)) {
+        return;
+      }
+
       try {
         await deleteProduct(product.id, false); // Soft delete
+        toast.success(`"${product.nombre}" desactivado`);
         await fetchProducts(); // Refetch
       } catch (err) {
-        console.error('Error al eliminar producto:', err);
-        throw err;
+        const message = err instanceof Error ? err.message : 'Error al eliminar producto';
+        console.error('Error al eliminar producto:', message);
+        toast.error(message);
       }
     },
     [fetchProducts],

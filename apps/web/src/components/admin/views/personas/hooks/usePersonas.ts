@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
 import {
   getAllEstudiantes,
   getAllUsers,
@@ -10,56 +11,12 @@ import {
   createDocente,
   updateEstudiante,
   updateDocente,
+  resetCredenciales,
 } from '@/lib/api/admin.api';
 import type { AdminPerson, UserRole } from '@/types/admin-dashboard.types';
 import type { RoleFilter, StatusFilter, PersonasStats } from '../types/personas.types';
 import type { PersonaFormData } from '../components/PersonaFormModal';
 import type { PersonaEditData } from '../components/PersonaEditModal';
-
-// Mock data para fallback cuando el backend no está disponible
-const MOCK_PERSONAS: AdminPerson[] = [
-  {
-    id: '1',
-    nombre: 'María',
-    apellido: 'González',
-    email: 'maria.gonzalez@ejemplo.com',
-    role: 'estudiante',
-    status: 'active',
-    createdAt: '2024-01-15T10:00:00Z',
-    casa: 'Quantum',
-    tier: 'STEAM Sincrónico',
-    puntos: 2450,
-  },
-  {
-    id: '2',
-    nombre: 'Carlos',
-    apellido: 'Rodríguez',
-    email: 'carlos.rodriguez@ejemplo.com',
-    role: 'docente',
-    status: 'active',
-    createdAt: '2023-09-01T08:00:00Z',
-    clasesAsignadas: 12,
-  },
-  {
-    id: '3',
-    nombre: 'Laura',
-    apellido: 'Martínez',
-    email: 'laura.martinez@ejemplo.com',
-    role: 'tutor',
-    status: 'active',
-    createdAt: '2024-02-20T14:00:00Z',
-    estudiantesACargo: 3,
-  },
-  {
-    id: '4',
-    nombre: 'Admin',
-    apellido: 'Sistema',
-    email: 'admin@mateatletas.com',
-    role: 'admin',
-    status: 'active',
-    createdAt: '2023-01-01T00:00:00Z',
-  },
-];
 
 interface UsePersonasReturn {
   isLoading: boolean;
@@ -91,11 +48,9 @@ interface UsePersonasReturn {
  * - GET /admin/estudiantes
  * - GET /admin/usuarios (admins y tutores)
  * - GET /docentes
- *
- * Fallback a mock data si hay error (desarrollo sin backend)
  */
 export function usePersonas(): UsePersonasReturn {
-  const [people, setPeople] = useState<AdminPerson[]>(MOCK_PERSONAS);
+  const [people, setPeople] = useState<AdminPerson[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -118,8 +73,12 @@ export function usePersonas(): UsePersonasReturn {
 
       const personas: AdminPerson[] = [];
 
-      // Mapear estudiantes
-      estudiantesRes.data.forEach((est) => {
+      // Mapear estudiantes (con validación de estructura)
+      // estudiantesRes puede ser { data: [...] } o directamente [...]
+      const estudiantesData = Array.isArray(estudiantesRes)
+        ? estudiantesRes
+        : (estudiantesRes?.data ?? []);
+      estudiantesData.forEach((est) => {
         personas.push({
           id: est.id,
           nombre: est.nombre,
@@ -128,15 +87,16 @@ export function usePersonas(): UsePersonasReturn {
           role: 'estudiante' as UserRole,
           status: 'active',
           createdAt: est.createdAt,
-          casa: est.equipo?.nombre,
-          puntos: est.puntos_totales,
+          casa: est.casa?.nombre ?? est.equipo?.nombre,
+          puntos: est.xp_total ?? est.puntos_totales ?? 0,
           edad: est.edad,
-          nivelEscolar: est.nivel_escolar,
+          nivelEscolar: est.nivelEscolar ?? est.nivel_escolar,
         });
       });
 
-      // Mapear usuarios (admins y tutores)
-      users.forEach((user) => {
+      // Mapear usuarios (admins y tutores) - con validación
+      const usersData = users ?? [];
+      usersData.forEach((user) => {
         const roles = user.roles ?? [user.role];
         const role = roles.includes('admin') ? 'admin' : 'tutor';
         personas.push({
@@ -150,8 +110,9 @@ export function usePersonas(): UsePersonasReturn {
         });
       });
 
-      // Mapear docentes
-      docentes.forEach((doc) => {
+      // Mapear docentes - con validación
+      const docentesData = docentes ?? [];
+      docentesData.forEach((doc) => {
         personas.push({
           id: doc.id,
           nombre: doc.nombre,
@@ -170,9 +131,7 @@ export function usePersonas(): UsePersonasReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cargar personas';
       setError(message);
-      console.warn('usePersonas: Usando datos mock por error:', message);
-      // Mantener mock data como fallback
-      setPeople(MOCK_PERSONAS);
+      console.error('usePersonas: Error al cargar:', message);
     } finally {
       setIsLoading(false);
     }
@@ -210,7 +169,8 @@ export function usePersonas(): UsePersonasReturn {
   const handleCreate = useCallback(
     async (data: PersonaFormData) => {
       if (data.role === 'estudiante') {
-        await createEstudiante({
+        // Crear estudiante
+        const result = await createEstudiante({
           nombre: data.nombre,
           apellido: data.apellido,
           edad: data.edad ?? 10,
@@ -220,6 +180,33 @@ export function usePersonas(): UsePersonasReturn {
           tutorEmail: data.tutorEmail,
           tutorTelefono: data.tutorTelefono,
         });
+
+        // Generar credenciales para el estudiante recién creado
+        const estudianteId = result.estudiante?.id;
+        if (estudianteId) {
+          try {
+            const credResult = await resetCredenciales(estudianteId, 'estudiante');
+            const mensaje = [
+              `✅ Estudiante creado: ${data.nombre} ${data.apellido}`,
+              '',
+              '📋 CREDENCIALES DEL ESTUDIANTE:',
+              `   Usuario: ${result.estudiante.username}`,
+              `   PIN: ${credResult.nuevaPassword}`,
+            ];
+
+            // Copiar al clipboard
+            const textoCredenciales = mensaje.join('\n');
+            navigator.clipboard.writeText(textoCredenciales).then(() => {
+              toast.success('Credenciales copiadas al portapapeles', { duration: 5000 });
+            });
+
+            alert(textoCredenciales);
+          } catch {
+            toast.success('Estudiante creado (sin PIN generado)');
+          }
+        } else {
+          toast.success('Estudiante creado exitosamente');
+        }
       } else if (data.role === 'docente') {
         await createDocente({
           nombre: data.nombre,
@@ -228,6 +215,7 @@ export function usePersonas(): UsePersonasReturn {
           titulo: data.titulo,
           telefono: data.telefono,
         });
+        toast.success('Docente creado exitosamente');
       }
       // Refetch para actualizar la lista
       await fetchPeople();

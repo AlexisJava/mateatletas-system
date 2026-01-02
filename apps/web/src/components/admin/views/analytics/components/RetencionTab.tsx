@@ -11,7 +11,6 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { MOCK_RETENTION_DATA } from '@/lib/constants/admin-mock-data';
 import { SectionHeader } from './SectionHeader';
 import { RetentionStatCard } from './RetentionStatCard';
 import { RetentionRateCard } from './RetentionRateCard';
@@ -23,11 +22,11 @@ import type { RetentionDataPoint } from '../hooks';
  */
 
 interface RetencionTabProps {
-  retentionData?: RetentionDataPoint[];
+  retentionData: RetentionDataPoint[];
 }
 
 export function RetencionTab({ retentionData }: RetencionTabProps) {
-  const data = retentionData ?? MOCK_RETENTION_DATA;
+  const data = retentionData;
 
   // Calcular stats del último mes
   const lastMonth = data[data.length - 1];

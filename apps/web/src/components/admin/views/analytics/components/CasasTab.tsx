@@ -2,7 +2,6 @@
 
 import { Home } from 'lucide-react';
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
-import { MOCK_CASA_DISTRIBUTION } from '@/lib/constants/admin-mock-data';
 import { SectionHeader } from './SectionHeader';
 import type { CasaDistribution } from '../hooks';
 
@@ -11,11 +10,11 @@ import type { CasaDistribution } from '../hooks';
  */
 
 interface CasasTabProps {
-  casaDistribution?: CasaDistribution[];
+  casaDistribution: CasaDistribution[];
 }
 
 export function CasasTab({ casaDistribution }: CasasTabProps) {
-  const data = casaDistribution ?? MOCK_CASA_DISTRIBUTION;
+  const data = casaDistribution;
   const total = data.reduce((acc, c) => acc + c.value, 0);
 
   return (
