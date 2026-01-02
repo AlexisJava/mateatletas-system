@@ -20,18 +20,13 @@ interface LessonRendererProps {
 }
 
 /**
- * Componente principal para renderizar contenido de lecciones.
+ * Componente para renderizar el contenido de UNA microlección/nodo.
+ * La navegación entre nodos se maneja en el componente padre (LeccionPage).
  *
- * Parsea el JSON del contenido y lo renderiza usando el DesignSystem.
- * Inyecta las CSS variables de colores de la casa para theming.
- *
- * Uso:
- * ```tsx
- * <LessonRenderer
- *   contenidoJson={nodo.contenidoJson}
- *   houseColors={{ primary: '#F472B6', secondary: '#EC4899', accent: '#FBCFE8' }}
- * />
- * ```
+ * Modelo de datos:
+ * - Cada nodo del árbol tiene su propio contenidoJson
+ * - Cada nodo = 1 "slide" o microlección
+ * - La navegación entre slides es navegación entre nodos
  */
 export function LessonRenderer({
   contenidoJson,
@@ -58,10 +53,7 @@ export function LessonRenderer({
 
   return (
     <ViewportContext.Provider value={{ isMobile }}>
-      <div
-        className="h-full w-full flex items-center justify-center relative overflow-hidden"
-        style={themeStyle}
-      >
+      <div className="h-full w-full relative" style={themeStyle}>
         <div className="w-full h-full relative z-10">
           {error ? (
             <div className="flex items-center justify-center h-full">

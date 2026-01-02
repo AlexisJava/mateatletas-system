@@ -164,15 +164,24 @@ export default function CursoPage({
       try {
         setLoading(true);
         const data = await getContenidoEstudiante(cursoId);
+        console.log('[CursoPage] Respuesta del backend:', data);
+
+        if (!data) {
+          console.error('[CursoPage] Respuesta vacía del backend');
+          setError('El curso no devolvió datos.');
+          return;
+        }
+
         setContenido(data);
 
         // Extraer microlecciones del árbol de nodos
         const leccionesExtraidas = extraerMicrolecciones(
-          data.nodos,
+          data.nodos ?? [],
           data.progreso?.nodoActualId ?? null,
         );
         setLecciones(leccionesExtraidas);
-      } catch {
+      } catch (err) {
+        console.error('[CursoPage] Error al cargar curso:', err);
         setError('No pudimos cargar el curso. Por favor intenta de nuevo.');
       } finally {
         setLoading(false);

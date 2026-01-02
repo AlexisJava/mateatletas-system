@@ -19,25 +19,27 @@ export class ContenidoEstudianteService {
   ) {}
 
   /**
-   * Obtiene la casa del estudiante
+   * Obtiene la casa del estudiante (puede ser null si no tiene casa asignada)
    */
-  private async getEstudianteCasa(estudianteId: string): Promise<CasaTipo> {
+  private async getEstudianteCasa(
+    estudianteId: string,
+  ): Promise<CasaTipo | null> {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: estudianteId },
       select: { casa: { select: { tipo: true } } },
     });
 
-    if (!estudiante?.casa) {
-      throw new NotFoundException(
-        'Estudiante no encontrado o sin casa asignada',
-      );
+    if (!estudiante) {
+      throw new NotFoundException('Estudiante no encontrado');
     }
 
-    return estudiante.casa.tipo;
+    // Retornar null si no tiene casa asignada (acceso a todos los contenidos)
+    return estudiante.casa?.tipo ?? null;
   }
 
   /**
    * Lista contenidos publicados para la casa del estudiante
+   * Si el estudiante no tiene casa asignada, muestra TODOS los contenidos publicados
    * @param estudianteId - ID del estudiante
    * @param mundoTipo - Filtrar por mundo (opcional)
    */
@@ -47,7 +49,8 @@ export class ContenidoEstudianteService {
     const contenidos = await this.prisma.contenido.findMany({
       where: {
         estado: EstadoContenido.PUBLICADO,
-        casaTipo,
+        // Si tiene casa, filtrar por casa; si no, mostrar todos
+        ...(casaTipo && { casaTipo }),
         ...(mundoTipo && { mundoTipo }),
       },
       select: {
@@ -86,7 +89,7 @@ export class ContenidoEstudianteService {
 
   /**
    * Obtiene un contenido completo para reproducir
-   * Valida que el estudiante tiene acceso (mismo casa)
+   * Valida que el estudiante tiene acceso (mismo casa o sin casa = acceso total)
    * @param estudianteId - ID del estudiante
    * @param contenidoId - ID del contenido
    * @returns Contenido con árbol jerárquico de nodos
@@ -108,7 +111,9 @@ export class ContenidoEstudianteService {
       throw new NotFoundException('Contenido no disponible');
     }
 
-    if (contenido.casaTipo !== casaTipo) {
+    // Validar acceso: si el estudiante tiene casa, debe coincidir
+    // Si no tiene casa (casaTipo = null), tiene acceso a todos
+    if (casaTipo !== null && contenido.casaTipo !== casaTipo) {
       throw new ForbiddenException('No tienes acceso a este contenido');
     }
 

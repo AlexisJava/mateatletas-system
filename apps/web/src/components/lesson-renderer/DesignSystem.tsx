@@ -80,21 +80,19 @@ export function Stage({ children, pattern = 'dots', background }: StageProps) {
   };
 
   return (
-    <div className="w-full h-full min-h-full flex flex-col animate-in fade-in duration-700 overflow-hidden relative text-slate-100 font-sans">
+    <div className="w-full h-full min-h-full flex flex-col animate-in fade-in duration-700 relative text-slate-100 font-sans overflow-y-auto custom-scrollbar scroll-smooth">
       {/* Base Background */}
-      <div className="absolute inset-0 bg-[#030014] z-0" />
+      <div className="fixed inset-0 bg-[#030014] z-0 pointer-events-none" />
 
       {/* Pattern Layer */}
       <div
-        className="absolute inset-0 pointer-events-none z-0 transition-all duration-1000 ease-in-out"
+        className="fixed inset-0 pointer-events-none z-0 transition-all duration-1000 ease-in-out"
         style={getBackgroundStyle()}
       />
 
       {/* Content Layer */}
-      <div className="relative z-10 w-full h-full flex flex-col overflow-y-auto custom-scrollbar scroll-smooth">
-        <div className="w-full min-h-full p-6 md:p-8 md:pt-12 md:pb-20 flex flex-col">
-          {children}
-        </div>
+      <div className="relative z-10 w-full flex-1">
+        <div className="w-full p-6 md:p-8 md:pt-12 md:pb-20 flex flex-col">{children}</div>
       </div>
     </div>
   );

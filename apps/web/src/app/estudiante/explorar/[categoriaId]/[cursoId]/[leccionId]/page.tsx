@@ -109,52 +109,27 @@ const categoriaDefault: Categoria = {
 
 /**
  * Extrae todos los nodos hoja (microlecciones) del árbol de nodos
- * y determina su estado basado en el progreso
+ * y determina su estado basado en el progreso.
+ *
+ * Lógica de estados:
+ * - Sin progreso (progresoNodoId = null): primera = 'en-progreso', resto = 'bloqueada'
+ * - Con progreso: antes del actual = 'completada', actual = 'en-progreso', siguiente = 'disponible', resto = 'bloqueada'
  */
 function extraerLecciones(nodos: NodoBackend[], progresoNodoId: string | null): LeccionUI[] {
   const lecciones: LeccionUI[] = [];
-  let encontradoActual = false;
-  let primeraDisponible = false;
 
   function recorrer(nodo: NodoBackend) {
     // Si tiene hijos, es contenedor - recursar
     if (nodo.hijos && nodo.hijos.length > 0) {
-      // Ordenar hijos por orden
       const hijosOrdenados = [...nodo.hijos].sort((a, b) => a.orden - b.orden);
       hijosOrdenados.forEach(recorrer);
     } else if (nodo.contenidoJson !== null && !nodo.bloqueado) {
       // Es nodo hoja con contenido - es una microlección
-      let estado: LeccionUI['estado'] = 'bloqueada';
-
-      if (progresoNodoId === nodo.id) {
-        // Este es el nodo actual (en progreso)
-        estado = 'en-progreso';
-        encontradoActual = true;
-      } else if (!encontradoActual) {
-        // Aún no llegamos al actual, significa que está completado
-        // O si no hay progreso, la primera es disponible
-        if (progresoNodoId === null && !primeraDisponible) {
-          estado = 'disponible';
-          primeraDisponible = true;
-        } else if (progresoNodoId !== null) {
-          estado = 'completada';
-        }
-      } else {
-        // Ya pasamos el actual
-        // La siguiente inmediata es disponible, el resto bloqueadas
-        if (!primeraDisponible) {
-          estado = 'disponible';
-          primeraDisponible = true;
-        } else {
-          estado = 'bloqueada';
-        }
-      }
-
       lecciones.push({
         id: nodo.id,
         titulo: nodo.titulo,
         contenidoJson: nodo.contenidoJson,
-        estado,
+        estado: 'bloqueada', // Se asigna después
         orden: nodo.orden,
       });
     }
@@ -163,6 +138,28 @@ function extraerLecciones(nodos: NodoBackend[], progresoNodoId: string | null): 
   // Procesar nodos raíz ordenados
   const nodosOrdenados = [...nodos].sort((a, b) => a.orden - b.orden);
   nodosOrdenados.forEach(recorrer);
+
+  // Ahora asignar estados basados en progreso
+  if (lecciones.length === 0) return lecciones;
+
+  // Encontrar índice del nodo actual
+  const indexActual = progresoNodoId ? lecciones.findIndex((l) => l.id === progresoNodoId) : 0; // Si no hay progreso, la primera es la actual
+
+  lecciones.forEach((leccion, index) => {
+    if (index < indexActual) {
+      // Antes del actual = completada
+      leccion.estado = 'completada';
+    } else if (index === indexActual) {
+      // Es el nodo actual = en progreso
+      leccion.estado = 'en-progreso';
+    } else if (index === indexActual + 1) {
+      // Siguiente inmediato = disponible
+      leccion.estado = 'disponible';
+    } else {
+      // El resto = bloqueada
+      leccion.estado = 'bloqueada';
+    }
+  });
 
   return lecciones;
 }
@@ -182,8 +179,6 @@ export default function LeccionPage({
   const [cursoNombre, setCursoNombre] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [completando, setCompletando] = useState(false);
-  const [completadaLocal, setCompletadaLocal] = useState(false);
 
   const categoria = categoriasData[categoriaId] || categoriaDefault;
 
@@ -219,36 +214,6 @@ export default function LeccionPage({
 
   // Verificar si la siguiente está disponible
   const siguienteDisponible = siguienteLeccion && siguienteLeccion.estado !== 'bloqueada';
-
-  // Handler para marcar como completada
-  const handleCompletar = async () => {
-    if (!leccionActual || completando) return;
-
-    try {
-      setCompletando(true);
-
-      // Si hay siguiente lección, actualizar progreso al siguiente nodo
-      // Si no hay siguiente, marcar como completado
-      if (siguienteLeccion) {
-        await updateProgresoEstudiante(cursoId, {
-          nodoActualId: siguienteLeccion.id,
-        });
-      } else {
-        await updateProgresoEstudiante(cursoId, {
-          completado: true,
-        });
-      }
-
-      setCompletadaLocal(true);
-
-      // Recargar para actualizar estados
-      await cargarDatos();
-    } catch (err) {
-      console.error('Error al completar lección:', err);
-    } finally {
-      setCompletando(false);
-    }
-  };
 
   // Estado de carga
   if (loading) {
@@ -297,11 +262,38 @@ export default function LeccionPage({
     );
   }
 
-  const estaCompletada = leccionActual.estado === 'completada' || completadaLocal;
+  const estaCompletada = leccionActual.estado === 'completada';
   const leccionNumero = currentIndex + 1;
 
   return (
-    <div className="min-h-screen bg-[#030014] text-white relative overflow-hidden flex">
+    <div className="min-h-screen bg-[#030014] text-white relative flex">
+      {/* Flechas de navegación flotantes - FUERA del overflow */}
+      {anteriorLeccion && (
+        <Link
+          href={`/estudiante/explorar/${categoriaId}/${cursoId}/${anteriorLeccion.id}`}
+          className="fixed left-24 top-1/2 -translate-y-1/2 z-[100] w-14 h-14 rounded-full bg-black/70 backdrop-blur-md border-2 border-white/20 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/90 hover:border-white/40 hover:scale-110 transition-all shadow-2xl group"
+          title={`Anterior: ${anteriorLeccion.titulo}`}
+        >
+          <ChevronLeft className="w-7 h-7 group-hover:-translate-x-0.5 transition-transform" />
+        </Link>
+      )}
+
+      {siguienteLeccion && (
+        <Link
+          href={`/estudiante/explorar/${categoriaId}/${cursoId}/${siguienteLeccion.id}`}
+          onClick={() => {
+            // Auto-completar la lección actual al navegar a la siguiente
+            updateProgresoEstudiante(cursoId, { nodoActualId: siguienteLeccion.id }).catch(
+              console.error,
+            );
+          }}
+          className="fixed right-8 top-1/2 -translate-y-1/2 z-[100] w-14 h-14 rounded-full bg-black/70 backdrop-blur-md border-2 border-white/20 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/90 hover:border-white/40 hover:scale-110 transition-all shadow-2xl group"
+          title={`Siguiente: ${siguienteLeccion.titulo}`}
+        >
+          <ChevronRight className="w-7 h-7 group-hover:translate-x-0.5 transition-transform" />
+        </Link>
+      )}
+
       {/* Sidebar izquierdo - Navegación */}
       <div
         className={`w-16 md:w-20 ${categoria.bgSidebar} flex flex-col items-center py-6 transition-all duration-300 z-20 shrink-0`}
@@ -402,15 +394,15 @@ export default function LeccionPage({
         </header>
 
         {/* Área de contenido - LessonRenderer */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto pb-24">
           <LessonRenderer
             contenidoJson={leccionActual.contenidoJson}
             houseColors={categoria.houseColors}
           />
         </main>
 
-        {/* Footer con acciones */}
-        <footer className="h-20 px-6 flex items-center justify-between bg-black/50 backdrop-blur-md border-t border-white/5 shrink-0 z-10">
+        {/* Footer con acciones - FIXED para que siempre sea visible */}
+        <footer className="fixed bottom-0 left-16 md:left-20 right-0 h-20 px-6 flex items-center justify-between bg-black/80 backdrop-blur-md border-t border-white/10 z-[90]">
           {/* Navegación anterior */}
           {anteriorLeccion ? (
             <Link
@@ -427,76 +419,58 @@ export default function LeccionPage({
             <div />
           )}
 
-          {/* Botón completar */}
-          <div className="flex items-center gap-4">
-            {!estaCompletada ? (
-              <button
-                onClick={handleCompletar}
-                disabled={completando}
-                className={`
-                  px-6 py-3 rounded-xl font-bold text-sm
-                  ${categoria.bgSidebar}
-                  hover:opacity-90 transition-all hover:scale-105 active:scale-95
-                  flex items-center gap-2
-                  disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
-                  shadow-lg
-                `}
-              >
-                {completando ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    Completar Lección
-                  </>
-                )}
-              </button>
-            ) : (
-              <div className="px-6 py-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-emerald-400" />
-                <span className="font-bold text-emerald-400 text-sm">¡Completada!</span>
+          {/* Indicador de progreso central */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+              <span className="text-lg font-bold text-white">{leccionNumero}</span>
+              <span className="text-slate-500">/</span>
+              <span className="text-slate-400">{lecciones.length}</span>
+            </div>
+            {estaCompletada && (
+              <div className="flex items-center gap-1 px-3 py-1 bg-emerald-500/20 rounded-full">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs text-emerald-400">Completada</span>
               </div>
             )}
           </div>
 
-          {/* Navegación siguiente */}
+          {/* Navegación siguiente - siempre clickeable, auto-completa */}
           {siguienteLeccion ? (
-            siguienteDisponible || estaCompletada ? (
-              <Link
-                href={`/estudiante/explorar/${categoriaId}/${cursoId}/${siguienteLeccion.id}`}
-                className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group"
-              >
-                <div className="text-right">
-                  <p className="text-xs text-slate-500">Siguiente</p>
-                  <p className="text-sm max-w-[150px] truncate">{siguienteLeccion.titulo}</p>
-                </div>
-                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            ) : (
-              <div className="flex items-center gap-2 text-slate-500 cursor-not-allowed">
-                <div className="text-right">
-                  <p className="text-xs">Siguiente</p>
-                  <p className="text-sm flex items-center gap-1">
-                    <span>🔒</span>
-                    <span className="max-w-[120px] truncate">{siguienteLeccion.titulo}</span>
-                  </p>
-                </div>
-                <ChevronRight className="w-5 h-5" />
+            <Link
+              href={`/estudiante/explorar/${categoriaId}/${cursoId}/${siguienteLeccion.id}`}
+              onClick={() => {
+                // Auto-completar al navegar
+                updateProgresoEstudiante(cursoId, { nodoActualId: siguienteLeccion.id }).catch(
+                  console.error,
+                );
+              }}
+              className={`
+                flex items-center gap-2 px-4 py-2 rounded-xl transition-all group
+                ${categoria.bgSidebar} hover:opacity-90 hover:scale-105
+              `}
+            >
+              <div className="text-right">
+                <p className="text-[10px] text-white/60 uppercase tracking-wide">Siguiente</p>
+                <p className="text-sm font-bold text-white max-w-[150px] truncate">
+                  {siguienteLeccion.titulo}
+                </p>
               </div>
-            )
+              <ChevronRight className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
+            </Link>
           ) : (
             <Link
               href={`/estudiante/explorar/${categoriaId}/${cursoId}`}
-              className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors group"
+              onClick={() => {
+                // Marcar curso como completado
+                updateProgresoEstudiante(cursoId, { completado: true }).catch(console.error);
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 transition-all group"
             >
               <div className="text-right">
-                <p className="text-xs text-slate-500">Terminaste</p>
-                <p className="text-sm">Ver todas las lecciones</p>
+                <p className="text-[10px] text-emerald-100 uppercase tracking-wide">Terminaste</p>
+                <p className="text-sm font-bold text-white">Ver curso</p>
               </div>
-              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <Trophy className="w-5 h-5 text-white" />
             </Link>
           )}
         </footer>
