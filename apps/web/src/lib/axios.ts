@@ -90,14 +90,20 @@ apiClient.interceptors.response.use(
       switch (status) {
         case 401: {
           // Unauthorized - Sesión expirada o inválida
-          console.warn('🔒 Sesión expirada. Redirigiendo a login...');
+          // NO redirigir automáticamente en rutas protegidas (tienen ProtectedLayout que maneja auth)
+          const isProtectedRoute =
+            currentPath.startsWith('/docente') ||
+            currentPath.startsWith('/admin') ||
+            currentPath.startsWith('/estudiante') ||
+            currentPath.startsWith('/tutor');
 
-          // Redirigir a login solo si no estamos en páginas de auth
-          if (!isAuthPage) {
+          if (!isAuthPage && !isProtectedRoute) {
+            console.warn('🔒 Sesión expirada. Redirigiendo a login...');
             // Guardar la URL actual para redirigir después del login
             sessionStorage.setItem('redirectAfterLogin', currentPath);
             window.location.href = '/login';
           }
+          // En rutas protegidas, solo propagar el error para que ProtectedLayout lo maneje
           break;
         }
 

@@ -11,6 +11,8 @@ import {
   LayoutDashboard,
   Calendar,
   FileText,
+  BookOpen,
+  User,
   LogOut,
   Sun,
   Moon,
@@ -33,8 +35,10 @@ import {
 
 const navItems = [
   { href: '/docente/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/docente/planificaciones', label: 'Planificaciones', icon: BookOpen },
   { href: '/docente/calendario', label: 'Calendario', icon: Calendar },
   { href: '/docente/observaciones', label: 'Observaciones', icon: FileText },
+  { href: '/docente/perfil', label: 'Mi Perfil', icon: User },
 ];
 
 export default function DocenteLayout({ children }: { children: React.ReactNode }) {
