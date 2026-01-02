@@ -1133,3 +1133,110 @@ export const crearEstudianteConCredenciales = async (
     throw error;
   }
 };
+
+// ============================================================================
+// TAREAS ADMINISTRATIVAS
+// ============================================================================
+
+/** Prioridad de tarea (mapea a enum Prisma PrioridadTarea) */
+export type TareaPrioridad = 'BAJA' | 'MEDIA' | 'ALTA' | 'URGENTE';
+
+/** Estado de tarea (mapea a enum Prisma EstadoTarea) */
+export type TareaEstado = 'PENDIENTE' | 'EN_PROGRESO' | 'COMPLETADA' | 'CANCELADA';
+
+/** Tarea administrativa del dashboard */
+export interface TareaAdmin {
+  id: string;
+  title: string;
+  description: string | null;
+  priority: TareaPrioridad;
+  status: TareaEstado;
+  dueDate: string | null;
+  assignee: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** DTO para crear tarea */
+export interface CreateTareaDto {
+  title: string;
+  description?: string;
+  priority?: TareaPrioridad;
+  dueDate?: string;
+  assignee?: string;
+}
+
+/** DTO para actualizar tarea */
+export interface UpdateTareaDto {
+  title?: string;
+  description?: string | null;
+  priority?: TareaPrioridad;
+  status?: TareaEstado;
+  dueDate?: string | null;
+  assignee?: string | null;
+}
+
+/**
+ * Listar todas las tareas administrativas
+ * GET /admin/tareas
+ */
+export const getTareas = async (): Promise<TareaAdmin[]> => {
+  try {
+    return await axios.get<TareaAdmin[]>('/admin/tareas');
+  } catch (error) {
+    console.error('Error al obtener tareas:', error);
+    throw error;
+  }
+};
+
+/**
+ * Crear una nueva tarea
+ * POST /admin/tareas
+ */
+export const createTarea = async (dto: CreateTareaDto): Promise<TareaAdmin> => {
+  try {
+    return await axios.post<TareaAdmin>('/admin/tareas', dto);
+  } catch (error) {
+    console.error('Error al crear tarea:', error);
+    throw error;
+  }
+};
+
+/**
+ * Actualizar una tarea
+ * PUT /admin/tareas/:id
+ */
+export const updateTarea = async (id: string, dto: UpdateTareaDto): Promise<TareaAdmin> => {
+  try {
+    return await axios.put<TareaAdmin>(`/admin/tareas/${id}`, dto);
+  } catch (error) {
+    console.error('Error al actualizar tarea:', error);
+    throw error;
+  }
+};
+
+/**
+ * Toggle estado de tarea (PENDIENTE <-> COMPLETADA)
+ * PATCH /admin/tareas/:id/toggle
+ */
+export const toggleTarea = async (id: string): Promise<TareaAdmin> => {
+  try {
+    return await axios.patch<TareaAdmin>(`/admin/tareas/${id}/toggle`);
+  } catch (error) {
+    console.error('Error al toggle tarea:', error);
+    throw error;
+  }
+};
+
+/**
+ * Eliminar una tarea
+ * DELETE /admin/tareas/:id
+ */
+export const deleteTarea = async (id: string): Promise<void> => {
+  try {
+    await axios.delete(`/admin/tareas/${id}`);
+  } catch (error) {
+    console.error('Error al eliminar tarea:', error);
+    throw error;
+  }
+};

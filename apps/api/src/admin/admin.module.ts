@@ -7,6 +7,7 @@ import { AdminUsuariosService } from './services/admin-usuarios.service';
 import { AdminRolesService } from './services/admin-roles.service';
 import { AdminEstudiantesService } from './services/admin-estudiantes.service';
 import { AdminCredencialesService } from './services/admin-credenciales.service';
+import { AdminTareasService } from './services/admin-tareas.service';
 import { SectoresRutasService } from './services/sectores-rutas.service';
 import { ClaseGruposService } from './clase-grupos.service';
 import { AsistenciasService } from './asistencias.service';
@@ -34,6 +35,7 @@ import { DatabaseModule } from '../core/database/database.module';
     AdminRolesService, // ✅ NUEVO: Gestión de roles separada
     AdminEstudiantesService, // ✅ NUEVO: Gestión de estudiantes separada
     AdminCredencialesService, // ✅ NUEVO: Gestión de credenciales separada
+    AdminTareasService, // ✅ NUEVO: Gestión de tareas del dashboard
     SectoresRutasService,
     ClaseGruposService, // ✅ NUEVO: Gestión de grupos de clases recurrentes
     AsistenciasService, // ✅ NUEVO: Gestión de asistencias

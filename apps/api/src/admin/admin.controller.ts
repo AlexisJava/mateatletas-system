@@ -52,6 +52,11 @@ import {
   ActualizarInscripcionDto,
 } from './dto/comision.dto';
 import { ComisionesService } from './comisiones.service';
+import {
+  AdminTareasService,
+  CreateTareaDto,
+  UpdateTareaDto,
+} from './services/admin-tareas.service';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -63,6 +68,7 @@ export class AdminController {
     private readonly claseGruposService: ClaseGruposService,
     private readonly asistenciasService: AsistenciasService,
     private readonly comisionesService: ComisionesService,
+    private readonly tareasService: AdminTareasService,
   ) {}
 
   /**
@@ -899,5 +905,80 @@ export class AdminController {
     @Param('estudianteId', ParseIdPipe) estudianteId: string,
   ) {
     return this.comisionesService.removerEstudiante(id, estudianteId);
+  }
+
+  // ============================================================================
+  // TAREAS ADMINISTRATIVAS (Dashboard)
+  // ============================================================================
+
+  /**
+   * Listar todas las tareas
+   * GET /api/admin/tareas
+   * Rol: Admin
+   */
+  @Get('tareas')
+  @ApiOperation({ summary: 'Listar tareas administrativas' })
+  async listarTareas() {
+    return this.tareasService.listarTareas();
+  }
+
+  /**
+   * Obtener una tarea por ID
+   * GET /api/admin/tareas/:id
+   * Rol: Admin
+   */
+  @Get('tareas/:id')
+  @ApiOperation({ summary: 'Obtener tarea por ID' })
+  async obtenerTarea(@Param('id', ParseIdPipe) id: string) {
+    return this.tareasService.obtenerTarea(id);
+  }
+
+  /**
+   * Crear una nueva tarea
+   * POST /api/admin/tareas
+   * Rol: Admin
+   */
+  @Post('tareas')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crear tarea administrativa' })
+  async crearTarea(@Body() dto: CreateTareaDto) {
+    return this.tareasService.crearTarea(dto);
+  }
+
+  /**
+   * Actualizar una tarea
+   * PUT /api/admin/tareas/:id
+   * Rol: Admin
+   */
+  @Put('tareas/:id')
+  @ApiOperation({ summary: 'Actualizar tarea' })
+  async actualizarTarea(
+    @Param('id', ParseIdPipe) id: string,
+    @Body() dto: UpdateTareaDto,
+  ) {
+    return this.tareasService.actualizarTarea(id, dto);
+  }
+
+  /**
+   * Toggle estado de tarea (PENDIENTE <-> COMPLETADA)
+   * PATCH /api/admin/tareas/:id/toggle
+   * Rol: Admin
+   */
+  @Patch('tareas/:id/toggle')
+  @ApiOperation({ summary: 'Toggle estado de tarea' })
+  async toggleTarea(@Param('id', ParseIdPipe) id: string) {
+    return this.tareasService.toggleTarea(id);
+  }
+
+  /**
+   * Eliminar una tarea
+   * DELETE /api/admin/tareas/:id
+   * Rol: Admin
+   */
+  @Delete('tareas/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Eliminar tarea' })
+  async eliminarTarea(@Param('id', ParseIdPipe) id: string) {
+    await this.tareasService.eliminarTarea(id);
   }
 }

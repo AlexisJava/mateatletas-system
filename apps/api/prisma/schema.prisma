@@ -2405,3 +2405,43 @@ model InscripcionComision {
   @@index([estado])
   @@map("inscripciones_comision")
 }
+
+// =============================================================================
+// TAREAS ADMINISTRATIVAS (Dashboard)
+// =============================================================================
+
+/// Modelo para tareas del dashboard administrativo
+/// Permite a los administradores trackear pendientes y recordatorios
+model TareaAdmin {
+  /// Identificador único de la tarea
+  id          String   @id @default(cuid())
+
+  /// Título de la tarea
+  title       String
+
+  /// Descripción detallada (opcional)
+  description String?
+
+  /// Prioridad: BAJA, MEDIA, ALTA, URGENTE
+  priority    PrioridadTarea @default(MEDIA)
+
+  /// Estado: PENDIENTE, EN_PROGRESO, COMPLETADA, CANCELADA
+  status      EstadoTarea @default(PENDIENTE)
+
+  /// Fecha límite (opcional)
+  dueDate     DateTime?
+
+  /// Persona asignada (texto libre, opcional)
+  assignee    String?
+
+  /// Timestamp de creación
+  createdAt   DateTime @default(now())
+
+  /// Timestamp de última actualización
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([priority])
+  @@index([dueDate])
+  @@map("tareas_admin")
+}

@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Users, GraduationCap, DollarSign, Clock } from 'lucide-react';
-import { MOCK_TASKS, formatCompactCurrency, type MockTask } from '@/lib/constants/admin-mock-data';
-import type { TaskStatus } from '@/types/admin-dashboard.types';
+import { formatCompactCurrency } from '@/lib/constants/admin-mock-data';
 import {
   StatCard,
   RevenueChart,
@@ -16,7 +15,7 @@ import {
   NotesButton,
   NotesModal,
 } from './components';
-import { useDashboardStats } from './hooks';
+import { useDashboardStats, useTareas } from './hooks';
 
 /**
  * DashboardView - Vista principal del admin
@@ -27,19 +26,9 @@ import { useDashboardStats } from './hooks';
 
 export function DashboardView() {
   const { stats, isLoading, error } = useDashboardStats();
-  const [tasks, setTasks] = useState<MockTask[]>(MOCK_TASKS);
+  const { tasks, isLoading: tasksLoading, error: tasksError, toggleTask } = useTareas();
   const [notes, setNotes] = useState('');
   const [showNotesModal, setShowNotesModal] = useState(false);
-
-  const handleToggleTask = useCallback((id: string) => {
-    setTasks((prev) =>
-      prev.map((task) => {
-        if (task.id !== id) return task;
-        const newStatus: TaskStatus = task.status === 'completed' ? 'pending' : 'completed';
-        return { ...task, status: newStatus };
-      }),
-    );
-  }, []);
 
   if (isLoading) {
     return (
@@ -108,7 +97,12 @@ export function DashboardView() {
 
         {/* Right Column - Tasks & Alerts */}
         <div className="space-y-6">
-          <TasksPanel tasks={tasks} onToggleTask={handleToggleTask} />
+          <TasksPanel
+            tasks={tasks}
+            isLoading={tasksLoading}
+            error={tasksError}
+            onToggleTask={toggleTask}
+          />
           <AlertsPanel ingresosPendientes={stats.ingresosPendientes} />
           <QuickStatsSummary
             tasaCobro={stats.tasaCobro}

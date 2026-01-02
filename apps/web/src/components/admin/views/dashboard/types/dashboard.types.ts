@@ -3,7 +3,7 @@
  */
 
 import type { LucideIcon } from 'lucide-react';
-import type { MockTask } from '@/lib/constants/admin-mock-data';
+import type { TaskItemData } from '../hooks/useTareas';
 
 // =============================================================================
 // STAT CARD
@@ -50,7 +50,7 @@ export interface AlertItemProps {
 // =============================================================================
 
 export interface TaskItemProps {
-  task: MockTask;
+  task: TaskItemData;
   onToggle: (id: string) => void;
 }
 
