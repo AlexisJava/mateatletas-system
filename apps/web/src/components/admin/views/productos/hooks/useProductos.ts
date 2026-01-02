@@ -116,7 +116,7 @@ export function useProductos(): UseProductosReturn {
       // Adaptar al tipo AdminProducto
       const productosUnicos: AdminProducto[] = data.map((p: Producto) => ({
         ...p,
-        ventas: 0, // TODO: Obtener ventas desde endpoint específico
+        ventas: 0, // Backend no tiene endpoint de ventas agregadas por producto
       }));
 
       setProducts(productosUnicos);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Users, GraduationCap, DollarSign, Clock } from 'lucide-react';
 import { formatCompactCurrency } from '@/lib/constants/admin-mock-data';
 import {
@@ -29,6 +29,19 @@ export function DashboardView() {
   const { tasks, isLoading: tasksLoading, error: tasksError, toggleTask } = useTareas();
   const [notes, setNotes] = useState('');
   const [showNotesModal, setShowNotesModal] = useState(false);
+
+  // Persistir notas en localStorage
+  useEffect(() => {
+    const savedNotes = localStorage.getItem('admin-dashboard-notes');
+    if (savedNotes) {
+      setNotes(savedNotes);
+    }
+  }, []);
+
+  const handleSaveNotes = (newNotes: string) => {
+    setNotes(newNotes);
+    localStorage.setItem('admin-dashboard-notes', newNotes);
+  };
 
   if (isLoading) {
     return (
@@ -117,7 +130,7 @@ export function DashboardView() {
         isOpen={showNotesModal}
         onClose={() => setShowNotesModal(false)}
         notes={notes}
-        onSave={setNotes}
+        onSave={handleSaveNotes}
       />
     </div>
   );

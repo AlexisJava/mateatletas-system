@@ -8,6 +8,7 @@ import type { NotesModalProps } from '../types/dashboard.types';
  * NotesModal - Modal para editar notas del día
  *
  * Modal con textarea y botones de cancelar/guardar.
+ * Las notas se persisten en localStorage desde DashboardView.
  */
 
 export function NotesModal({ isOpen, onClose, notes, onSave }: NotesModalProps) {
@@ -18,9 +19,8 @@ export function NotesModal({ isOpen, onClose, notes, onSave }: NotesModalProps) 
     setLocalNotes(notes);
   }, [notes]);
 
-  const handleSave = async () => {
+  const handleSave = () => {
     setSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
     onSave(localNotes);
     setSaving(false);
     onClose();
