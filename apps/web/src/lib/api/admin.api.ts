@@ -151,6 +151,32 @@ export const deleteUser = async (userId: string): Promise<void> => {
   }
 };
 
+/**
+ * Eliminar un estudiante
+ * DELETE /api/admin/estudiantes/:id
+ */
+export const deleteEstudiante = async (estudianteId: string): Promise<void> => {
+  try {
+    await axios.delete(`/admin/estudiantes/${estudianteId}`);
+  } catch (error) {
+    console.error('Error al eliminar el estudiante:', error);
+    throw error;
+  }
+};
+
+/**
+ * Eliminar un docente
+ * DELETE /api/docentes/:id
+ */
+export const deleteDocente = async (docenteId: string): Promise<void> => {
+  try {
+    await axios.delete(`/docentes/${docenteId}`);
+  } catch (error) {
+    console.error('Error al eliminar el docente:', error);
+    throw error;
+  }
+};
+
 export const getAllClasses = async (): Promise<ClasesResponse> => {
   try {
     // El interceptor ya retorna response.data directamente

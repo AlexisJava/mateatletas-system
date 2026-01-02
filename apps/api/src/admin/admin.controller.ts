@@ -288,6 +288,18 @@ export class AdminController {
   }
 
   /**
+   * Eliminar un estudiante
+   * DELETE /api/admin/estudiantes/:id
+   * Rol: Admin
+   */
+  @Delete('estudiantes/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Eliminar estudiante' })
+  async eliminarEstudiante(@Param('id', ParseIdPipe) id: string) {
+    return this.adminService.eliminarEstudiante(id);
+  }
+
+  /**
    * Cambiar rol de un usuario (agregar un rol)
    * POST /api/admin/usuarios/:id/role
    * Rol: Admin

@@ -1,5 +1,12 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { getAllEstudiantes, getAllUsers, getDocentes } from '@/lib/api/admin.api';
+import {
+  getAllEstudiantes,
+  getAllUsers,
+  getDocentes,
+  deleteUser,
+  deleteEstudiante,
+  deleteDocente,
+} from '@/lib/api/admin.api';
 import type { AdminPerson, UserRole } from '@/types/admin-dashboard.types';
 import type { RoleFilter, StatusFilter, PersonasStats } from '../types/personas.types';
 
@@ -63,7 +70,7 @@ interface UsePersonasReturn {
   stats: PersonasStats;
   totalCount: number;
   handleEdit: (person: AdminPerson) => void;
-  handleDelete: (person: AdminPerson) => void;
+  handleDelete: (person: AdminPerson) => Promise<void>;
   refetch: () => Promise<void>;
 }
 
@@ -185,15 +192,44 @@ export function usePersonas(): UsePersonasReturn {
     [people],
   );
 
-  const handleEdit = useCallback((_person: AdminPerson) => {
-    // TODO: Implementar edición con modal
-    console.log('Edit person:', _person.id);
+  const handleEdit = useCallback((person: AdminPerson) => {
+    // Abrir modal de edición mostrando el detalle de la persona
+    setSelectedPerson(person);
   }, []);
 
-  const handleDelete = useCallback((_person: AdminPerson) => {
-    // TODO: Implementar eliminación
-    console.log('Delete person:', _person.id);
-  }, []);
+  const handleDelete = useCallback(
+    async (person: AdminPerson) => {
+      // Confirmación antes de eliminar
+      const confirmMessage = `¿Está seguro de eliminar a ${person.nombre} ${person.apellido}?`;
+      if (!window.confirm(confirmMessage)) {
+        return;
+      }
+
+      try {
+        // Llamar al endpoint correcto según el rol
+        switch (person.role) {
+          case 'estudiante':
+            await deleteEstudiante(person.id);
+            break;
+          case 'docente':
+            await deleteDocente(person.id);
+            break;
+          case 'tutor':
+          case 'admin':
+            await deleteUser(person.id);
+            break;
+        }
+
+        // Actualizar lista local
+        setPeople((prev) => prev.filter((p) => p.id !== person.id));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Error al eliminar persona';
+        console.error('Error al eliminar persona:', message);
+        alert(`Error al eliminar: ${message}`);
+      }
+    },
+    [setPeople],
+  );
 
   return {
     isLoading,

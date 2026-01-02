@@ -137,6 +137,12 @@ export class AdminService {
     resetTimeout: 60000,
   });
 
+  private readonly eliminarEstudianteCircuit = new CircuitBreaker({
+    name: 'AdminEstudiantesService.eliminarEstudiante',
+    failureThreshold: 5,
+    resetTimeout: 60000,
+  });
+
   private readonly rolesCircuit = new CircuitBreaker({
     name: 'AdminRolesService',
     failureThreshold: 5,
@@ -259,6 +265,17 @@ export class AdminService {
   ) {
     return this.crearEstudianteCircuit.execute(() =>
       this.estudiantesService.crearEstudianteConCredenciales(data),
+    );
+  }
+
+  /**
+   * Eliminar estudiante del sistema
+   * DELEGACIÓN: AdminEstudiantesService
+   * PROTECCIÓN: Circuit Breaker (sin fallback - operación crítica)
+   */
+  async eliminarEstudiante(id: string) {
+    return this.eliminarEstudianteCircuit.execute(() =>
+      this.estudiantesService.eliminarEstudiante(id),
     );
   }
 
