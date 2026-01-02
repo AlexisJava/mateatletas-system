@@ -21,13 +21,13 @@ export default function DocentePerfilPage() {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Form state
+  // Form state - usa nombres del backend (titulo, bio)
   const [formData, setFormData] = useState<UpdateDocenteData>({
     nombre: '',
     apellido: '',
     telefono: '',
-    titulo_profesional: '',
-    biografia: '',
+    titulo: '',
+    bio: '',
   });
 
   // Fetch docente profile
@@ -41,8 +41,8 @@ export default function DocentePerfilPage() {
           nombre: data.nombre,
           apellido: data.apellido,
           telefono: data.telefono || '',
-          titulo_profesional: data.titulo_profesional || '',
-          biografia: data.biografia || '',
+          titulo: data.titulo || '',
+          bio: data.bio || '',
         });
       } catch (err) {
         setError(getErrorMessage(err as Error, 'Error al cargar perfil'));
@@ -197,8 +197,8 @@ export default function DocentePerfilPage() {
               </label>
               <input
                 type="text"
-                name="titulo_profesional"
-                value={formData.titulo_profesional}
+                name="titulo"
+                value={formData.titulo}
                 onChange={handleChange}
                 placeholder="Ej: Licenciado en Matemática, Profesor de Matemática"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
@@ -209,15 +209,15 @@ export default function DocentePerfilPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Biografía</label>
               <textarea
-                name="biografia"
-                value={formData.biografia}
+                name="bio"
+                value={formData.bio}
                 onChange={handleChange}
                 rows={6}
                 placeholder="Cuéntanos sobre tu experiencia, especialidades y enfoque pedagógico..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent resize-none"
               />
               <p className="text-sm text-gray-500 mt-1">
-                {formData.biografia?.length || 0} / 500 caracteres
+                {formData.bio?.length || 0} / 500 caracteres
               </p>
             </div>
           </div>
@@ -232,8 +232,8 @@ export default function DocentePerfilPage() {
                   nombre: docente.nombre,
                   apellido: docente.apellido,
                   telefono: docente.telefono || '',
-                  titulo_profesional: docente.titulo_profesional || '',
-                  biografia: docente.biografia || '',
+                  titulo: docente.titulo || '',
+                  bio: docente.bio || '',
                 });
                 setError('');
                 setSuccessMessage('');

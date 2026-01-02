@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from '@/store/auth.store';
 import { gamificacionApi } from '@/lib/api/gamificacion.api';
 import { estudiantesApi } from '@/lib/api/estudiantes.api';
@@ -15,8 +15,11 @@ import {
   Sparkles,
   ChevronRight,
   Zap,
+  LogOut,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import FloatingLines from '@/components/ui/FloatingLines';
+import { animate, stagger } from 'animejs';
 
 interface DashboardData {
   nivel: number;
@@ -31,9 +34,17 @@ interface DashboardData {
 }
 
 export default function EstudianteDashboard() {
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hasAnimated = useRef(false);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/estudiante-login');
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -70,6 +81,50 @@ export default function EstudianteDashboard() {
     fetchData();
   }, [user?.id, user?.nivel_actual, user?.puntos_totales]);
 
+  // Animaciones de entrada con anime.js - sin flash
+  useEffect(() => {
+    if (isLoading || hasAnimated.current) return;
+    hasAnimated.current = true;
+
+    // Pequeño delay para asegurar que el DOM esté listo
+    requestAnimationFrame(() => {
+      // Animar header - slide sutil desde arriba
+      animate('.header-animate', {
+        translateY: [-15, 0],
+        duration: 500,
+        ease: 'outQuad',
+      });
+
+      // Animar stats pills con rebote sutil
+      animate('.stat-pill-animate', {
+        scale: [0.95, 1],
+        delay: stagger(60, { start: 100 }),
+        duration: 400,
+        ease: 'outBack',
+      });
+
+      // Animar event banner - slide desde abajo
+      animate('.event-banner-animate', {
+        translateY: [20, 0],
+        duration: 500,
+        delay: 150,
+        ease: 'outQuad',
+      });
+
+      // Animar bento cards con stagger - efecto de aparición elegante
+      const cards = containerRef.current?.querySelectorAll('.bento-card-animate');
+      if (cards) {
+        animate(cards, {
+          translateY: [30, 0],
+          scale: [0.97, 1],
+          delay: stagger(80, { start: 200 }),
+          duration: 600,
+          ease: 'outQuad',
+        });
+      }
+    });
+  }, [isLoading]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center">
@@ -82,91 +137,125 @@ export default function EstudianteDashboard() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] bg-[#030014] text-white flex flex-col relative overflow-hidden">
-      {/* Fondo FloatingLines */}
-      <div className="absolute inset-0">
+    <div className="min-h-screen bg-[#030014] text-white flex flex-col relative overflow-hidden">
+      {/* Fondo FloatingLines - sin interacción */}
+      <div className="absolute inset-0 pointer-events-none">
         <FloatingLines
           linesGradient={['#E945F5', '#2F4BC0', '#E945F5']}
-          animationSpeed={0.4}
-          interactive
-          bendRadius={3}
-          bendStrength={-1.4}
-          mouseDamping={0.12}
+          animationSpeed={0.3}
+          interactive={false}
           parallax={false}
-          parallaxStrength={0.85}
         />
       </div>
 
-      {/* Header fijo arriba */}
-      <header className="max-w-5xl w-full mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3 relative z-10 shrink-0">
-        <div>
-          <h1 className="text-2xl font-black">
-            ¡Hola, {user?.nombre}! <span className="inline-block animate-bounce">👋</span>
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">Exploremos el universo juntos</p>
-        </div>
+      {/* Header premium integrado - full width */}
+      <header className="header-animate w-full px-8 py-4 relative z-10 shrink-0 bg-black/30 backdrop-blur-md border-b border-white/10">
+        <div className="flex items-center justify-between gap-4">
+          {/* Logo + Saludo */}
+          <div className="flex items-center gap-5">
+            {/* Logo Mateatletas */}
+            <Link href="/estudiante" className="flex items-center gap-2 group">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20 group-hover:shadow-violet-500/40 transition-shadow">
+                <span className="text-lg font-black text-white">M</span>
+              </div>
+              <span className="font-bold text-white hidden sm:inline">Mateatletas</span>
+            </Link>
 
-        {/* Stats Pills */}
-        <div className="flex gap-2">
-          <StatPill
-            icon={<Star className="w-4 h-4" />}
-            label="Nivel"
-            value={data?.nivel ?? 1}
-            gradient="from-amber-500 to-orange-600"
-          />
-          <StatPill
-            icon={<Zap className="w-4 h-4" />}
-            label="XP"
-            value={data?.xp ?? 0}
-            gradient="from-violet-500 to-purple-600"
-          />
-          <StatPill
-            icon={<Flame className="w-4 h-4" />}
-            label="Racha"
-            value={`${data?.racha ?? 0}d`}
-            gradient="from-rose-500 to-red-600"
-          />
+            {/* Divider */}
+            <div className="h-8 w-px bg-white/10 hidden sm:block" />
+
+            {/* Avatar y saludo */}
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-fuchsia-500 via-purple-500 to-violet-500 flex items-center justify-center text-lg font-black text-white shadow-lg shadow-purple-500/20">
+                  {user?.nombre?.charAt(0)?.toUpperCase() || '?'}
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#030014]" />
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-lg font-bold text-white">¡Hola, {user?.nombre}!</h1>
+                <p className="text-slate-400 text-xs flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-violet-400" />
+                  Exploremos el universo
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Pills + Logout */}
+          <div className="flex items-center gap-3">
+            <div className="flex gap-2">
+              <StatPill
+                icon={<Star className="w-4 h-4" />}
+                label="Nivel"
+                value={data?.nivel ?? 1}
+                gradient="from-amber-400 to-orange-500"
+                glowColor="rgba(251, 191, 36, 0.3)"
+                className="stat-pill-animate"
+              />
+              <StatPill
+                icon={<Zap className="w-4 h-4" />}
+                label="XP"
+                value={data?.xp ?? 0}
+                gradient="from-violet-400 to-purple-500"
+                glowColor="rgba(167, 139, 250, 0.3)"
+                className="stat-pill-animate"
+              />
+              <div className="stat-pill-animate">
+                <RachaFlame value={Math.max(data?.racha ?? 1, 1)} />
+              </div>
+            </div>
+
+            {/* Logout button */}
+            <button
+              onClick={handleLogout}
+              className="stat-pill-animate p-2.5 rounded-xl bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 text-slate-400 hover:text-red-400 transition-all"
+              title="Cerrar sesión"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Contenido centrado verticalmente */}
-      <div className="flex-1 flex items-center justify-center px-4 pb-6">
-        <div className="max-w-5xl w-full space-y-6 relative z-10">
+      <div className="flex-1 flex items-center justify-center px-6 pb-6">
+        <div ref={containerRef} className="max-w-6xl w-full space-y-6 relative z-10">
           {/* Event Banner */}
           <EventBanner />
 
           {/* Bento Grid - Layout fijo */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Columna izquierda: Explorar (card grande) */}
             <BentoCard
               href="/estudiante/explorar"
               title="Explorar"
               subtitle="Mapa del Conocimiento"
-              icon={<Compass className="w-10 h-10" />}
-              gradient="from-violet-600 via-purple-600 to-indigo-700"
-              className="h-[400px]"
+              icon={<Compass className="w-12 h-12" />}
+              accentColor="#a855f7"
+              className="h-[560px] bento-card-animate"
               featured
             />
 
             {/* Columna derecha: 3 cards apiladas */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
               {/* Fila superior: Jugar y Mi Viaje */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-5">
                 <BentoCard
                   href="/estudiante/jugar"
                   title="Jugar"
                   subtitle="Arcade Zone"
-                  icon={<Gamepad2 className="w-7 h-7" />}
-                  gradient="from-cyan-500 via-blue-500 to-blue-600"
-                  className="h-[190px]"
+                  icon={<Gamepad2 className="w-8 h-8" />}
+                  accentColor="#06b6d4"
+                  className="h-[265px] bento-card-animate"
                 />
                 <BentoCard
                   href="/estudiante/progreso"
                   title="Mi Viaje"
                   subtitle="Tu progreso"
-                  icon={<Rocket className="w-7 h-7" />}
-                  gradient="from-emerald-500 via-green-500 to-teal-600"
-                  className="h-[190px]"
+                  icon={<Rocket className="w-8 h-8" />}
+                  accentColor="#10b981"
+                  className="h-[265px] bento-card-animate"
                 />
               </div>
 
@@ -179,9 +268,9 @@ export default function EstudianteDashboard() {
                     ? `Próxima con ${data.proximaClase.docente.nombre}`
                     : 'Tu aula virtual'
                 }
-                icon={<GraduationCap className="w-7 h-7" />}
-                gradient="from-amber-500 via-orange-500 to-red-500"
-                className="h-[190px]"
+                icon={<GraduationCap className="w-8 h-8" />}
+                accentColor="#f59e0b"
+                className="h-[265px] bento-card-animate"
               />
             </div>
           </div>
@@ -196,26 +285,168 @@ function StatPill({
   label,
   value,
   gradient,
+  glowColor,
+  className = '',
 }: {
   icon: React.ReactNode;
   label: string;
   value: string | number;
   gradient: string;
+  glowColor?: string;
+  className?: string;
 }) {
   return (
     <div
-      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r ${gradient} text-white text-sm font-semibold shadow-lg`}
+      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r ${gradient} text-white text-sm font-bold transition-all hover:scale-105 ${className}`}
+      style={{
+        boxShadow: glowColor
+          ? `0 4px 20px -2px ${glowColor}, 0 2px 8px -2px rgba(0,0,0,0.3)`
+          : '0 4px 12px rgba(0,0,0,0.3)',
+      }}
     >
       {icon}
-      <span className="hidden sm:inline text-white/80">{label}:</span>
-      <span>{value}</span>
+      <span className="hidden sm:inline text-white/90 font-medium">{label}</span>
+      <span className="font-black">{value}</span>
+    </div>
+  );
+}
+
+function RachaFlame({ value }: { value: number }) {
+  return (
+    <div
+      className="relative inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-bold transition-all hover:scale-110 overflow-visible group"
+      style={{
+        background: 'linear-gradient(135deg, #ff6b00 0%, #ff0000 50%, #ff4500 100%)',
+        boxShadow:
+          '0 0 20px 4px rgba(255, 100, 0, 0.6), 0 0 40px 8px rgba(255, 50, 0, 0.4), 0 0 60px 12px rgba(255, 0, 0, 0.2), inset 0 0 20px rgba(255, 200, 0, 0.3)',
+        animation: 'glow-pulse 1.5s ease-in-out infinite',
+      }}
+    >
+      {/* Llamas de fondo - más grandes y visibles */}
+      <div className="absolute -inset-1 overflow-visible">
+        {/* Llama izquierda */}
+        <div
+          className="absolute -top-3 left-2 w-4 h-8 rounded-full blur-[2px]"
+          style={{
+            background: 'linear-gradient(to top, #ff6600, #ffcc00, transparent)',
+            animation: 'flame-dance 0.4s ease-in-out infinite alternate',
+          }}
+        />
+        {/* Llama central grande */}
+        <div
+          className="absolute -top-5 left-1/2 -translate-x-1/2 w-6 h-10 rounded-full blur-[2px]"
+          style={{
+            background: 'linear-gradient(to top, #ff4400, #ff8800, #ffdd00, transparent)',
+            animation: 'flame-dance 0.3s ease-in-out infinite alternate-reverse',
+          }}
+        />
+        {/* Llama derecha */}
+        <div
+          className="absolute -top-4 right-2 w-5 h-9 rounded-full blur-[2px]"
+          style={{
+            background: 'linear-gradient(to top, #ff5500, #ffaa00, transparent)',
+            animation: 'flame-dance 0.5s ease-in-out infinite alternate',
+          }}
+        />
+        {/* Chispas */}
+        <div
+          className="absolute -top-6 left-4 w-2 h-2 rounded-full bg-yellow-300"
+          style={{ animation: 'spark 0.8s ease-out infinite' }}
+        />
+        <div
+          className="absolute -top-7 right-6 w-1.5 h-1.5 rounded-full bg-orange-300"
+          style={{ animation: 'spark 1s ease-out infinite 0.3s' }}
+        />
+      </div>
+
+      {/* Glow interior */}
+      <div
+        className="absolute inset-0 rounded-xl"
+        style={{
+          background: 'radial-gradient(ellipse at bottom, rgba(255,200,0,0.4) 0%, transparent 70%)',
+        }}
+      />
+
+      {/* Icono de llama animado */}
+      <div className="relative z-10">
+        <Flame
+          className="w-5 h-5 text-yellow-300 drop-shadow-[0_0_8px_rgba(255,200,0,1)]"
+          style={{
+            animation: 'flame-icon 0.5s ease-in-out infinite',
+            filter: 'drop-shadow(0 0 6px #ffcc00) drop-shadow(0 0 12px #ff6600)',
+          }}
+        />
+      </div>
+
+      <span className="hidden sm:inline text-yellow-100 font-semibold relative z-10 drop-shadow-[0_0_4px_rgba(0,0,0,0.5)]">
+        Racha
+      </span>
+      <span
+        className="font-black relative z-10 text-lg"
+        style={{
+          color: '#fffacd',
+          textShadow: '0 0 10px #ffcc00, 0 0 20px #ff6600, 0 0 30px #ff0000',
+        }}
+      >
+        {value}d
+      </span>
+
+      {/* Animaciones */}
+      <style jsx>{`
+        @keyframes glow-pulse {
+          0%,
+          100% {
+            box-shadow:
+              0 0 20px 4px rgba(255, 100, 0, 0.6),
+              0 0 40px 8px rgba(255, 50, 0, 0.4),
+              0 0 60px 12px rgba(255, 0, 0, 0.2),
+              inset 0 0 20px rgba(255, 200, 0, 0.3);
+          }
+          50% {
+            box-shadow:
+              0 0 30px 8px rgba(255, 100, 0, 0.8),
+              0 0 60px 16px rgba(255, 50, 0, 0.5),
+              0 0 90px 24px rgba(255, 0, 0, 0.3),
+              inset 0 0 30px rgba(255, 200, 0, 0.5);
+          }
+        }
+        @keyframes flame-dance {
+          0% {
+            transform: scaleY(1) scaleX(1) translateY(0);
+            opacity: 0.8;
+          }
+          100% {
+            transform: scaleY(1.2) scaleX(0.9) translateY(-3px);
+            opacity: 1;
+          }
+        }
+        @keyframes flame-icon {
+          0%,
+          100% {
+            transform: scale(1) rotate(-5deg);
+          }
+          50% {
+            transform: scale(1.1) rotate(5deg);
+          }
+        }
+        @keyframes spark {
+          0% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-15px) scale(0);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }
 
 function EventBanner() {
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-900/80 via-purple-800/80 to-indigo-900/80 border border-violet-500/30 p-4">
+    <div className="event-banner-animate relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-900/80 via-purple-800/80 to-indigo-900/80 border border-violet-500/30 p-4">
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/20 rounded-full blur-3xl" />
 
@@ -250,7 +481,7 @@ function BentoCard({
   title,
   subtitle,
   icon,
-  gradient,
+  accentColor,
   className = '',
   featured = false,
 }: {
@@ -258,7 +489,7 @@ function BentoCard({
   title: string;
   subtitle: string;
   icon: React.ReactNode;
-  gradient: string;
+  accentColor: string;
   className?: string;
   featured?: boolean;
 }) {
@@ -267,41 +498,62 @@ function BentoCard({
       href={href}
       className={`
         group relative overflow-hidden rounded-2xl
-        bg-gradient-to-br ${gradient}
-        p-5
-        transition-all duration-300
-        hover:scale-[1.02] hover:shadow-2xl hover:shadow-violet-500/20
+        border border-white/10
+        p-6
+        transition-all duration-300 ease-out
+        hover:border-white/20
+        hover:scale-[1.02]
         active:scale-[0.98]
         ${className}
       `}
+      style={{
+        background: `linear-gradient(145deg, ${accentColor}90 0%, ${accentColor}60 30%, ${accentColor}40 60%, ${accentColor}30 100%)`,
+        boxShadow: `0 20px 60px -10px ${accentColor}50, 0 8px 24px -6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)`,
+        backdropFilter: 'blur(16px)',
+      }}
     >
-      {/* Glow effect */}
+      {/* Borde superior con color */}
       <div
-        className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-300`}
+        className="absolute top-0 left-0 right-0 h-[2px]"
+        style={{ background: `linear-gradient(90deg, ${accentColor}, ${accentColor}60)` }}
       />
 
       {/* Content */}
-      <div className="relative h-full flex flex-col justify-between">
+      <div className="relative h-full flex flex-col">
+        {/* Icon */}
         <div
           className={`
-          ${featured ? 'w-16 h-16' : 'w-12 h-12'}
-          rounded-xl bg-white/20 backdrop-blur-sm
-          flex items-center justify-center
-          group-hover:scale-110 transition-transform duration-300
-          shadow-lg
-        `}
+            ${featured ? 'w-14 h-14' : 'w-12 h-12'}
+            rounded-xl
+            flex items-center justify-center
+            mb-auto
+          `}
+          style={{
+            background: `linear-gradient(135deg, ${accentColor}30, ${accentColor}10)`,
+            border: `1px solid ${accentColor}40`,
+          }}
         >
-          {icon}
+          <div style={{ color: accentColor }}>{icon}</div>
         </div>
 
-        <div className="mt-auto">
-          <h2 className={`font-black ${featured ? 'text-2xl' : 'text-xl'}`}>{title}</h2>
-          <p className={`text-white/70 ${featured ? 'text-base' : 'text-sm'} mt-1`}>{subtitle}</p>
+        {/* Text content */}
+        <div className="mt-auto space-y-1">
+          <h2
+            className={`font-bold tracking-tight ${featured ? 'text-2xl' : 'text-xl'} text-white`}
+          >
+            {title}
+          </h2>
+          <p className={`text-white/50 ${featured ? 'text-sm' : 'text-xs'} font-medium`}>
+            {subtitle}
+          </p>
         </div>
 
-        {/* Arrow indicator */}
-        <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <ChevronRight className="w-4 h-4" />
+        {/* Arrow - siempre visible */}
+        <div
+          className="absolute bottom-6 right-6 w-9 h-9 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1"
+          style={{ background: `${accentColor}25`, border: `1px solid ${accentColor}40` }}
+        >
+          <ChevronRight className="w-5 h-5" style={{ color: accentColor }} />
         </div>
       </div>
     </Link>

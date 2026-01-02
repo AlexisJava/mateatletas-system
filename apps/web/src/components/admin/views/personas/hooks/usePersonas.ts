@@ -182,7 +182,7 @@ export function usePersonas(): UsePersonasReturn {
         });
 
         // Generar credenciales para el estudiante recién creado
-        const estudianteId = result.estudiante?.id;
+        const estudianteId = result.id;
         if (estudianteId) {
           try {
             const credResult = await resetCredenciales(estudianteId, 'estudiante');
@@ -190,7 +190,6 @@ export function usePersonas(): UsePersonasReturn {
               `✅ Estudiante creado: ${data.nombre} ${data.apellido}`,
               '',
               '📋 CREDENCIALES DEL ESTUDIANTE:',
-              `   Usuario: ${result.estudiante.username}`,
               `   PIN: ${credResult.nuevaPassword}`,
             ];
 

@@ -136,6 +136,9 @@ model Estudiante {
   /// Inscripciones a comisiones de productos (Colonias, Talleres, etc.)
   inscripcionesComision InscripcionComision[]
 
+  /// LIVEKIT: Registros de asistencia en clases en vivo
+  asistencias_live AsistenciaLive[]
+
   // Índices de performance para rankings y listados
   // NOTA: Índices de puntos_totales eliminados - usar RecursosEstudiante para rankings (SUB-FASE 1.3)
   @@index([tutor_id, apellido], name: "idx_estudiantes_tutor_listado")
@@ -370,9 +373,9 @@ model ProgresoContenido {
   fechaCompletitud DateTime? @map("fecha_completitud")
 
   /// Relaciones
-  estudiante  Estudiante     @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
-  contenido   Contenido      @relation(fields: [contenidoId], references: [id], onDelete: Cascade)
-  nodoActual  NodoContenido? @relation(fields: [nodoActualId], references: [id], onDelete: SetNull)
+  estudiante Estudiante     @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  contenido  Contenido      @relation(fields: [contenidoId], references: [id], onDelete: Cascade)
+  nodoActual NodoContenido? @relation(fields: [nodoActualId], references: [id], onDelete: SetNull)
 
   @@unique([estudianteId, contenidoId])
   @@index([estudianteId], name: "idx_progreso_estudiante")
@@ -780,6 +783,21 @@ model ClaseGrupo {
   /// Indica si el grupo está activo
   activo Boolean @default(true)
 
+  // === LIVEKIT: Campos para clases en vivo ===
+
+  /// Nombre único de la sala en LiveKit (generado automáticamente)
+  /// Formato sugerido: "clase_{id}_{timestamp}"
+  livekit_room_name String? @unique
+
+  /// Estado actual de la clase en vivo
+  estado_clase EstadoClase @default(Programada)
+
+  /// Timestamp de cuando el docente inició la clase en vivo
+  iniciada_en DateTime?
+
+  /// Timestamp de cuando finalizó la clase en vivo
+  finalizada_en DateTime?
+
   /// Timestamp de creación
   createdAt DateTime @default(now())
 
@@ -797,11 +815,16 @@ model ClaseGrupo {
   /// Registros de asistencia del grupo
   asistencias AsistenciaClaseGrupo[]
 
+  /// Registros de asistencia en vivo (LiveKit)
+  asistencias_live AsistenciaLive[]
+
   @@index([docente_id])
   @@index([dia_semana])
   @@index([fecha_inicio, fecha_fin])
   @@index([anio_lectivo])
   @@index([activo])
+  @@index([estado_clase])
+  @@index([livekit_room_name])
   @@map("clase_grupos")
 }
 
@@ -888,6 +911,57 @@ model AsistenciaClaseGrupo {
   // Índice de performance para filtros por estado de asistencia
   @@index([estado], name: "idx_asistencias_estado")
   @@map("asistencias_clase_grupo")
+}
+
+/// Registro de asistencia en tiempo real durante clases LiveKit
+/// Captura entrada/salida, interacciones y estado del participante
+model AsistenciaLive {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID del grupo de clase
+  clase_grupo_id String
+
+  /// ID del estudiante
+  estudiante_id String
+
+  /// Timestamp de cuando entró a la sala LiveKit
+  entro_en DateTime @default(now())
+
+  /// Timestamp de cuando salió de la sala (null si aún está conectado)
+  salio_en DateTime?
+
+  /// Duración total en minutos (calculado al salir o periódicamente)
+  duracion_minutos Int @default(0)
+
+  /// Si el estudiante tiene la mano levantada actualmente
+  levanta_mano Boolean @default(false)
+
+  /// Si el estudiante está muteado actualmente
+  esta_muteado Boolean @default(false)
+
+  /// Si el estudiante tiene la cámara encendida
+  camara_encendida Boolean @default(false)
+
+  /// Si el estudiante está compartiendo pantalla
+  compartiendo_pantalla Boolean @default(false)
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  claseGrupo ClaseGrupo @relation(fields: [clase_grupo_id], references: [id], onDelete: Cascade)
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  /// Un estudiante solo puede tener un registro activo por clase en vivo
+  @@unique([clase_grupo_id, estudiante_id])
+  @@index([clase_grupo_id])
+  @@index([estudiante_id])
+  @@index([entro_en])
+  @@map("asistencias_live")
 }
 
 /// Modelo para inscripciones a clases (reservas)
@@ -1243,12 +1317,12 @@ model DocenteRuta {
 
 /// Enum para tipos de productos disponibles
 enum TipoProducto {
-  Evento        // Colonia, talleres, workshops (con fecha y cupo)
-  Digital       // PDFs, guías, videos descargables
-  Fisico        // Remeras, libros, merch (con stock)
-  Curso         // Cursos online con duración
-  Servicio      // Clase particular, mentoría 1:1
-  Bundle        // Combo de productos
+  Evento // Colonia, talleres, workshops (con fecha y cupo)
+  Digital // PDFs, guías, videos descargables
+  Fisico // Remeras, libros, merch (con stock)
+  Curso // Cursos online con duración
+  Servicio // Clase particular, mentoría 1:1
+  Bundle // Combo de productos
   Certificacion // Examen + certificado
 }
 
@@ -1307,10 +1381,14 @@ enum TierNombre {
 
 // [ELIMINADO] EstadoMembresia y EstadoInscripcionCurso - enums de sistema legacy
 
-/// Enum para estados de clase
+/// Enum para estados de clase (extendido para LiveKit)
 enum EstadoClase {
   Programada
+  EnVivo
+  Finalizada
   Cancelada
+
+  @@map("estado_clase")
 }
 
 /// Enum para estados de asistencia
@@ -2322,10 +2400,10 @@ enum EstadoInscripcionComision {
 /// Ejemplo: Producto "Colonia Verano 2026" → Comisiones: "QUANTUM Mañana", "VERTEX Tarde"
 model Comision {
   /// Identificador único de la comisión
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
   /// Nombre de la comisión (ej: "Turno Mañana", "QUANTUM Tarde")
-  nombre      String
+  nombre String
 
   /// Descripción opcional
   descripcion String?
@@ -2335,33 +2413,33 @@ model Comision {
   producto    Producto @relation(fields: [producto_id], references: [id], onDelete: Cascade)
 
   /// Casa asignada (opcional - QUANTUM/VERTEX/PULSAR)
-  casa_id     String?
-  casa        Casa?    @relation(fields: [casa_id], references: [id])
+  casa_id String?
+  casa    Casa?   @relation(fields: [casa_id], references: [id])
 
   /// Docente a cargo (opcional)
-  docente_id  String?
-  docente     Docente? @relation(fields: [docente_id], references: [id])
+  docente_id String?
+  docente    Docente? @relation(fields: [docente_id], references: [id])
 
   /// Cupo máximo de estudiantes
   cupo_maximo Int?
 
   /// Horario en texto libre (ej: "Lun-Vie 9:00-12:00")
-  horario     String?
+  horario String?
 
   /// Fecha de inicio específica de esta comisión (puede diferir del producto)
   fecha_inicio DateTime?
 
   /// Fecha de fin específica de esta comisión
-  fecha_fin    DateTime?
+  fecha_fin DateTime?
 
   /// Indica si la comisión está activa
-  activo      Boolean  @default(true)
+  activo Boolean @default(true)
 
   /// Timestamp de creación
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   /// Timestamp de última actualización
-  updatedAt   DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
   /// Inscripciones de estudiantes a esta comisión
   inscripciones InscripcionComision[]
@@ -2377,27 +2455,27 @@ model Comision {
 /// Representa la relación entre un Estudiante y una Comisión de un Producto
 model InscripcionComision {
   /// Identificador único de la inscripción
-  id            String   @id @default(cuid())
+  id String @id @default(cuid())
 
   /// Comisión a la que se inscribe
-  comision_id   String
-  comision      Comision @relation(fields: [comision_id], references: [id], onDelete: Cascade)
+  comision_id String
+  comision    Comision @relation(fields: [comision_id], references: [id], onDelete: Cascade)
 
   /// Estudiante inscrito
   estudiante_id String
   estudiante    Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
   /// Estado de la inscripción
-  estado        EstadoInscripcionComision @default(Pendiente)
+  estado EstadoInscripcionComision @default(Pendiente)
 
   /// Fecha de inscripción
   fecha_inscripcion DateTime @default(now())
 
   /// Notas o comentarios sobre la inscripción
-  notas         String?
+  notas String?
 
   /// Timestamp de última actualización
-  updatedAt     DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
   /// Un estudiante solo puede estar inscrito una vez por comisión
   @@unique([comision_id, estudiante_id])
@@ -2414,31 +2492,31 @@ model InscripcionComision {
 /// Permite a los administradores trackear pendientes y recordatorios
 model TareaAdmin {
   /// Identificador único de la tarea
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
   /// Título de la tarea
-  title       String
+  title String
 
   /// Descripción detallada (opcional)
   description String?
 
   /// Prioridad: BAJA, MEDIA, ALTA, URGENTE
-  priority    PrioridadTarea @default(MEDIA)
+  priority PrioridadTarea @default(MEDIA)
 
   /// Estado: PENDIENTE, EN_PROGRESO, COMPLETADA, CANCELADA
-  status      EstadoTarea @default(PENDIENTE)
+  status EstadoTarea @default(PENDIENTE)
 
   /// Fecha límite (opcional)
-  dueDate     DateTime?
+  dueDate DateTime?
 
   /// Persona asignada (texto libre, opcional)
-  assignee    String?
+  assignee String?
 
   /// Timestamp de creación
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   /// Timestamp de última actualización
-  updatedAt   DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
   @@index([status])
   @@index([priority])

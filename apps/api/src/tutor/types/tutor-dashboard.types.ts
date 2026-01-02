@@ -109,7 +109,7 @@ export interface ClaseProxima {
     nombre: string;
     apellido: string;
   };
-  estado: 'Programada' | 'Cancelada';
+  estado: 'Programada' | 'EnVivo' | 'Finalizada' | 'Cancelada';
   urlReunion?: string;
   puedeUnirse: boolean;
   esHoy: boolean;

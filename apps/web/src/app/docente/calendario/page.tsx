@@ -13,6 +13,8 @@ import {
   startOfWeek,
   endOfWeek,
   isToday,
+  isSameDay,
+  parseISO,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
@@ -26,26 +28,18 @@ import {
 } from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { LoadingSpinner } from '@/components/effects';
+import { docentesApi, ClaseCalendario, ClasesDelMesResponse } from '@/lib/api/docentes.api';
 
 /**
  * CALENDARIO DOCENTE - BRUTAL & INTELIGENTE
  *
  * Features:
  * - Vista mensual con grid completo
- * - Integración automática con clases del sistema
+ * - Integración automática con clases del sistema (DATOS REALES)
  * - Quick actions para crear eventos rápido
  * - Navegación fluida entre meses
  * - Resalta hoy, clases y eventos importantes
  */
-
-interface ClaseDelDia {
-  id: string;
-  nombre: string;
-  hora_inicio: string;
-  hora_fin: string;
-  grupo_id: string;
-  estudiantes: Array<{ id: string; nombre: string; apellido: string }>;
-}
 
 interface EventoDia {
   id: string;
@@ -58,7 +52,8 @@ interface EventoDia {
 export default function DocenteCalendarioPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
-  const [, setClasesDelMes] = useState<ClaseDelDia[]>([]); // TODO: usar para mostrar clases
+  const [clasesDelMes, setClasesDelMes] = useState<ClaseCalendario[]>([]);
+  const [stats, setStats] = useState<ClasesDelMesResponse['stats'] | null>(null);
 
   useEffect(() => {
     fetchClasesDelMes();
@@ -67,12 +62,15 @@ export default function DocenteCalendarioPage() {
   const fetchClasesDelMes = async () => {
     try {
       setIsLoading(true);
-      // TODO: Implementar endpoint para traer clases del mes
-      // const response = await docentesApi.getClasesDelMes(format(currentDate, 'yyyy-MM'));
-      // setClasesDelMes(response);
-      setClasesDelMes([]);
+      const mes = currentDate.getMonth() + 1;
+      const anio = currentDate.getFullYear();
+      const response = await docentesApi.getClasesDelMes(mes, anio);
+      setClasesDelMes(response.clases);
+      setStats(response.stats);
     } catch (error) {
       console.error('Error al cargar clases:', error);
+      setClasesDelMes([]);
+      setStats(null);
     } finally {
       setIsLoading(false);
     }
@@ -89,12 +87,23 @@ export default function DocenteCalendarioPage() {
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const goToToday = () => setCurrentDate(new Date());
 
-  // Mock: obtener eventos de un día
-  const getEventosDelDia = (_date: Date): EventoDia[] => {
+  // Obtener eventos de un día (datos reales)
+  const getEventosDelDia = (date: Date): EventoDia[] => {
     const eventos: EventoDia[] = [];
 
-    // Buscar clases de ese día
-    // TODO: Filtrar clasesDelMes por fecha
+    // Filtrar clases del día
+    const clasesDelDia = clasesDelMes.filter((clase) => isSameDay(parseISO(clase.fecha), date));
+
+    // Convertir clases a eventos
+    clasesDelDia.forEach((clase) => {
+      eventos.push({
+        id: clase.id,
+        tipo: 'clase',
+        titulo: clase.codigo || clase.nombre,
+        hora: clase.hora_inicio.slice(0, 5),
+        color: 'purple',
+      });
+    });
 
     return eventos;
   };
@@ -146,7 +155,7 @@ export default function DocenteCalendarioPage() {
           </div>
         </motion.div>
 
-        {/* Stats Rápidos */}
+        {/* Stats Rápidos - DATOS REALES */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -157,7 +166,7 @@ export default function DocenteCalendarioPage() {
             <div className="flex items-center gap-3">
               <Clock className="w-7 h-7 text-blue-400" />
               <div>
-                <p className="text-2xl font-black text-white">12</p>
+                <p className="text-2xl font-black text-white">{stats?.totalClases ?? 0}</p>
                 <p className="text-purple-300 font-semibold text-sm">Clases este mes</p>
               </div>
             </div>
@@ -167,7 +176,7 @@ export default function DocenteCalendarioPage() {
             <div className="flex items-center gap-3">
               <Users className="w-7 h-7 text-green-400" />
               <div>
-                <p className="text-2xl font-black text-white">45</p>
+                <p className="text-2xl font-black text-white">{stats?.totalEstudiantes ?? 0}</p>
                 <p className="text-purple-300 font-semibold text-sm">Estudiantes totales</p>
               </div>
             </div>
@@ -177,8 +186,8 @@ export default function DocenteCalendarioPage() {
             <div className="flex items-center gap-3">
               <BookOpen className="w-7 h-7 text-yellow-400" />
               <div>
-                <p className="text-2xl font-black text-white">3</p>
-                <p className="text-purple-300 font-semibold text-sm">Tareas pendientes</p>
+                <p className="text-2xl font-black text-white">{stats?.totalGrupos ?? 0}</p>
+                <p className="text-purple-300 font-semibold text-sm">Grupos activos</p>
               </div>
             </div>
           </div>

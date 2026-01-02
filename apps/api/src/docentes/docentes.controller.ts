@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ParseIdPipe } from '../common/pipes';
@@ -73,6 +74,26 @@ export class DocentesController {
   @Roles(Role.DOCENTE)
   async getEstadisticasCompletas(@GetUser() user: AuthUser) {
     return this.docentesService.getEstadisticasCompletas(user.id);
+  }
+
+  /**
+   * GET /docentes/me/clases-del-mes - Obtener clases del mes para el calendario
+   * @param user - Usuario autenticado (del JWT)
+   * @param mes - Mes (1-12), por defecto mes actual
+   * @param anio - Año (ej: 2025), por defecto año actual
+   * @returns Clases del mes con stats
+   */
+  @Get('me/clases-del-mes')
+  @Roles(Role.DOCENTE)
+  async getClasesDelMes(
+    @GetUser() user: AuthUser,
+    @Query('mes') mes?: string,
+    @Query('anio') anio?: string,
+  ) {
+    const now = new Date();
+    const mesNum = mes ? parseInt(mes, 10) : now.getMonth() + 1;
+    const anioNum = anio ? parseInt(anio, 10) : now.getFullYear();
+    return this.docentesService.getClasesDelMes(user.id, mesNum, anioNum);
   }
 
   /**

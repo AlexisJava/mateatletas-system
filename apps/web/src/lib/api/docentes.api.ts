@@ -189,6 +189,33 @@ export interface EstadisticasCompletasResponse {
   rankingGruposPorPuntos: GrupoRanking[];
 }
 
+/**
+ * Clase del calendario del mes
+ */
+export interface ClaseCalendario {
+  id: string;
+  fecha: string;
+  nombre: string;
+  codigo: string;
+  hora_inicio: string;
+  hora_fin: string;
+  estudiantesCount: number;
+  cupo_maximo: number;
+  grupo_id: string;
+}
+
+/**
+ * Respuesta del endpoint clases del mes
+ */
+export interface ClasesDelMesResponse {
+  clases: ClaseCalendario[];
+  stats: {
+    totalClases: number;
+    totalGrupos: number;
+    totalEstudiantes: number;
+  };
+}
+
 export const docentesApi = {
   /**
    * Obtener dashboard del docente autenticado
@@ -214,6 +241,25 @@ export const docentesApi = {
       );
     } catch (error) {
       console.error('Error al obtener las estadísticas completas:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener clases del mes para el calendario del docente
+   * @param mes - Mes (1-12), opcional, por defecto mes actual
+   * @param anio - Año (ej: 2025), opcional, por defecto año actual
+   */
+  getClasesDelMes: async (mes?: number, anio?: number): Promise<ClasesDelMesResponse> => {
+    try {
+      const params = new URLSearchParams();
+      if (mes) params.append('mes', mes.toString());
+      if (anio) params.append('anio', anio.toString());
+      const queryString = params.toString();
+      const url = `/docentes/me/clases-del-mes${queryString ? `?${queryString}` : ''}`;
+      return await apiClient.get<ClasesDelMesResponse>(url);
+    } catch (error) {
+      console.error('Error al obtener las clases del mes:', error);
       throw error;
     }
   },

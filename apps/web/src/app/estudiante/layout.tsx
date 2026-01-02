@@ -90,12 +90,12 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="min-h-screen bg-[#0a0a1a]">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a1a]/80 backdrop-blur-lg border-b border-slate-800/50">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          {/* Left side */}
-          <div className="flex items-center gap-3">
-            {!isHomePage && (
+      {/* Header - solo mostrar si NO estamos en home (home tiene su propio header integrado) */}
+      {!isHomePage && (
+        <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a1a]/80 backdrop-blur-lg border-b border-slate-800/50">
+          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+            {/* Left side */}
+            <div className="flex items-center gap-3">
               <Link
                 href="/estudiante"
                 className="p-2 rounded-lg hover:bg-slate-800/50 transition-colors text-slate-400 hover:text-white"
@@ -103,36 +103,36 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
               >
                 <Home className="w-5 h-5" />
               </Link>
-            )}
-            <Link href="/estudiante" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-                <span className="text-sm font-bold">M</span>
-              </div>
-              <span className="font-bold text-white hidden sm:inline">Mateatletas</span>
-            </Link>
-          </div>
+              <Link href="/estudiante" className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                  <span className="text-sm font-bold">M</span>
+                </div>
+                <span className="font-bold text-white hidden sm:inline">Mateatletas</span>
+              </Link>
+            </div>
 
-          {/* Right side */}
-          <div className="flex items-center gap-2">
-            {user && (
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/50 text-sm">
-                <User className="w-4 h-4 text-slate-400" />
-                <span className="text-slate-300">{user.nombre}</span>
-              </div>
-            )}
-            <button
-              onClick={handleLogout}
-              className="p-2 rounded-lg hover:bg-slate-800/50 transition-colors text-slate-400 hover:text-red-400"
-              title="Cerrar sesión"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
+            {/* Right side */}
+            <div className="flex items-center gap-2">
+              {user && (
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/50 text-sm">
+                  <User className="w-4 h-4 text-slate-400" />
+                  <span className="text-slate-300">{user.nombre}</span>
+                </div>
+              )}
+              <button
+                onClick={handleLogout}
+                className="p-2 rounded-lg hover:bg-slate-800/50 transition-colors text-slate-400 hover:text-red-400"
+                title="Cerrar sesión"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
-      {/* Main content with padding for header */}
-      <main className="pt-14">{children}</main>
+      {/* Main content - con padding solo si hay header */}
+      <main className={isHomePage ? '' : 'pt-14'}>{children}</main>
     </div>
   );
 }

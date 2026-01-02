@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -11,16 +11,15 @@ import {
   User,
   ExternalLink,
   FileText,
-  Play,
-  Link2,
-  CheckCircle2,
-  Circle,
   BookOpen,
   Sparkles,
   Loader2,
   AlertCircle,
+  Construction,
 } from 'lucide-react';
 import { estudiantesApi, type ClaseEstudiante } from '@/lib/api/estudiantes.api';
+import FloatingLines from '@/components/ui/FloatingLines';
+import { animate, stagger } from 'animejs';
 
 // ============================================================================
 // TIPOS
@@ -37,21 +36,6 @@ interface DiaHorario {
   dia: string;
   diaCorto: string;
   clases: ClaseHorario[];
-}
-
-interface Tarea {
-  id: string;
-  titulo: string;
-  materia: string;
-  fechaLimite: string;
-  completada: boolean;
-}
-
-interface Material {
-  id: string;
-  nombre: string;
-  tipo: 'PDF' | 'Video' | 'Link';
-  url: string;
 }
 
 interface ProximaClaseData {
@@ -168,41 +152,6 @@ const transformarAHorarioSemanal = (clases: ClaseEstudiante[]): DiaHorario[] => 
 };
 
 // ============================================================================
-// DATOS MOCK (solo para tareas y materiales por ahora)
-// ============================================================================
-
-const tareasPendientesData: Tarea[] = [
-  {
-    id: '1',
-    titulo: 'Resolver ejercicios cap. 5',
-    materia: 'Matemática',
-    fechaLimite: '2 Ene',
-    completada: false,
-  },
-  {
-    id: '2',
-    titulo: 'Leer artículo sobre algoritmos',
-    materia: 'Programación',
-    fechaLimite: '3 Ene',
-    completada: false,
-  },
-  {
-    id: '3',
-    titulo: 'Ver video de física',
-    materia: 'Ciencias',
-    fechaLimite: '5 Ene',
-    completada: true,
-  },
-];
-
-const materialesData: Material[] = [
-  { id: '1', nombre: 'Clase Grabada', tipo: 'Video', url: '#' },
-  { id: '2', nombre: 'Guía de ejercicios', tipo: 'PDF', url: '#' },
-  { id: '3', nombre: 'Presentación', tipo: 'PDF', url: '#' },
-  { id: '4', nombre: 'Recursos extra', tipo: 'Link', url: '#' },
-];
-
-// ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
@@ -210,8 +159,9 @@ export default function ClasesPage() {
   const [clases, setClases] = useState<ClaseEstudiante[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [tareas, setTareas] = useState<Tarea[]>(tareasPendientesData);
   const diaActual = getDiaActual();
+  const hasAnimated = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Cargar clases del estudiante
   useEffect(() => {
@@ -232,72 +182,58 @@ export default function ClasesPage() {
     fetchClases();
   }, []);
 
-  const toggleTarea = (id: string) => {
-    setTareas((prev) => prev.map((t) => (t.id === id ? { ...t, completada: !t.completada } : t)));
-  };
+  // Animaciones de entrada
+  useEffect(() => {
+    if (loading || hasAnimated.current) return;
+    hasAnimated.current = true;
 
-  const tareasIncompletas = tareas.filter((t) => !t.completada).length;
+    requestAnimationFrame(() => {
+      // Animar header
+      animate('.header-animate', {
+        translateY: [-15, 0],
+        duration: 500,
+        ease: 'outQuad',
+      });
+
+      // Animar título
+      animate('.title-animate', {
+        translateX: [-20, 0],
+        duration: 500,
+        delay: 100,
+        ease: 'outQuad',
+      });
+
+      // Animar cards principales con stagger
+      const cards = containerRef.current?.querySelectorAll('.card-animate');
+      if (cards) {
+        animate(cards, {
+          translateY: [30, 0],
+          scale: [0.97, 1],
+          delay: stagger(100, { start: 200 }),
+          duration: 600,
+          ease: 'outQuad',
+        });
+      }
+    });
+  }, [loading]);
 
   // Derivar datos de la UI desde las clases reales
   const proximaClase = clases.length > 0 ? transformarAProximaClase(clases[0]!) : null;
   const horarioSemanal = transformarAHorarioSemanal(clases);
 
   return (
-    <div className="min-h-screen bg-[#0a0a1a] text-white relative overflow-hidden">
-      {/* Starfield background */}
+    <div className="min-h-screen bg-[#030014] text-white relative overflow-hidden">
+      {/* Fondo FloatingLines - Naranja/Amber para Clases */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="stars-layer stars-small" />
-        <div className="stars-layer stars-medium" />
-        <div className="stars-layer stars-large" />
-        <div className="absolute inset-0 bg-gradient-to-b from-amber-950/10 via-transparent to-orange-950/10" />
+        <FloatingLines
+          linesGradient={['#f59e0b', '#d97706', '#fbbf24']}
+          animationSpeed={0.3}
+          interactive={false}
+          parallax={false}
+        />
       </div>
 
       <style jsx>{`
-        .stars-layer {
-          position: absolute;
-          inset: 0;
-          background-repeat: repeat;
-          animation: twinkle 8s ease-in-out infinite;
-        }
-        .stars-small {
-          background-image:
-            radial-gradient(1px 1px at 20px 30px, white, transparent),
-            radial-gradient(1px 1px at 40px 70px, rgba(255, 255, 255, 0.8), transparent),
-            radial-gradient(1px 1px at 50px 160px, rgba(255, 255, 255, 0.6), transparent),
-            radial-gradient(1px 1px at 90px 40px, white, transparent),
-            radial-gradient(1px 1px at 130px 80px, rgba(255, 255, 255, 0.7), transparent),
-            radial-gradient(1px 1px at 160px 120px, white, transparent);
-          background-size: 320px 200px;
-          opacity: 0.4;
-        }
-        .stars-medium {
-          background-image:
-            radial-gradient(1.5px 1.5px at 100px 50px, white, transparent),
-            radial-gradient(1.5px 1.5px at 200px 150px, rgba(255, 255, 255, 0.9), transparent),
-            radial-gradient(1.5px 1.5px at 300px 100px, white, transparent);
-          background-size: 400px 220px;
-          opacity: 0.3;
-          animation-delay: 2s;
-          animation-duration: 10s;
-        }
-        .stars-large {
-          background-image:
-            radial-gradient(2px 2px at 150px 80px, rgba(251, 191, 36, 0.8), transparent),
-            radial-gradient(2px 2px at 350px 200px, rgba(249, 115, 22, 0.7), transparent);
-          background-size: 500px 280px;
-          opacity: 0.5;
-          animation-delay: 4s;
-          animation-duration: 12s;
-        }
-        @keyframes twinkle {
-          0%,
-          100% {
-            opacity: 0.3;
-          }
-          50% {
-            opacity: 0.6;
-          }
-        }
         /* Ocultar scrollbar pero mantener funcionalidad */
         .hide-scrollbar {
           -ms-overflow-style: none;
@@ -309,9 +245,9 @@ export default function ClasesPage() {
       `}</style>
 
       <div className="relative z-10 p-4 md:p-6 lg:p-8 hide-scrollbar overflow-auto h-screen">
-        <div className="max-w-6xl mx-auto">
+        <div ref={containerRef} className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="header-animate flex items-center justify-between mb-6">
             <Link
               href="/estudiante"
               className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
@@ -322,7 +258,7 @@ export default function ClasesPage() {
           </div>
 
           {/* Title Section */}
-          <div className="flex items-center gap-4 mb-8">
+          <div className="title-animate flex items-center gap-4 mb-8">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
               <GraduationCap className="w-7 h-7 text-white" />
             </div>
@@ -376,23 +312,27 @@ export default function ClasesPage() {
               {/* Columna izquierda (2/3) */}
               <div className="lg:col-span-2 space-y-6">
                 {/* PRÓXIMA CLASE - Card destacada */}
-                <ProximaClaseCard clase={proximaClase} />
+                <div className="card-animate">
+                  <ProximaClaseCard clase={proximaClase} />
+                </div>
 
                 {/* HORARIO SEMANAL */}
-                <HorarioSemanal horario={horarioSemanal} diaActual={diaActual} />
+                <div className="card-animate">
+                  <HorarioSemanal horario={horarioSemanal} diaActual={diaActual} />
+                </div>
               </div>
 
               {/* Columna derecha (1/3) */}
               <div className="space-y-6">
-                {/* TAREAS PENDIENTES */}
-                <TareasPendientesCard
-                  tareas={tareas}
-                  onToggle={toggleTarea}
-                  pendientes={tareasIncompletas}
-                />
+                {/* TAREAS PENDIENTES - Próximamente */}
+                <div className="card-animate">
+                  <TareasProximamenteCard />
+                </div>
 
-                {/* MATERIAL DE CLASE */}
-                <MaterialClaseCard materiales={materialesData} />
+                {/* MATERIAL DE CLASE - Próximamente */}
+                <div className="card-animate">
+                  <MaterialProximamenteCard />
+                </div>
               </div>
             </div>
           )}
@@ -600,114 +540,43 @@ function HorarioSemanal({ horario, diaActual }: { horario: DiaHorario[]; diaActu
   );
 }
 
-function TareasPendientesCard({
-  tareas,
-  onToggle,
-  pendientes,
-}: {
-  tareas: Tarea[];
-  onToggle: (id: string) => void;
-  pendientes: number;
-}) {
+/**
+ * Card de Tareas - Próximamente
+ * Muestra un placeholder indicando que esta funcionalidad está en desarrollo
+ */
+function TareasProximamenteCard() {
   return (
     <div className="rounded-2xl bg-slate-800/50 border border-slate-700/50 overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-slate-700/50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-amber-400" />
-            </div>
-            <div>
-              <h3 className="font-bold text-white">Tareas Pendientes</h3>
-              <p className="text-xs text-slate-400">
-                {pendientes > 0 ? `${pendientes} por completar` : 'Todo al día'}
-              </p>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+            <BookOpen className="w-5 h-5 text-amber-400" />
           </div>
-          {pendientes > 0 && (
-            <span className="px-2.5 py-1 text-xs font-bold bg-amber-500/20 text-amber-300 rounded-full">
-              {pendientes}
-            </span>
-          )}
+          <div>
+            <h3 className="font-bold text-white">Tareas Pendientes</h3>
+            <p className="text-xs text-slate-400">Gestiona tus actividades</p>
+          </div>
         </div>
       </div>
 
-      {/* Lista de tareas */}
-      <div className="p-4">
-        {tareas.length === 0 ? (
-          <div className="text-center py-6">
-            <Sparkles className="w-10 h-10 text-amber-400 mx-auto mb-2" />
-            <p className="text-slate-400">¡No tienes tareas pendientes!</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {tareas.map((tarea) => (
-              <button
-                key={tarea.id}
-                onClick={() => onToggle(tarea.id)}
-                className={`
-                  w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all
-                  ${tarea.completada ? 'bg-slate-700/20 opacity-60' : 'bg-slate-700/40 hover:bg-slate-700/60'}
-                `}
-              >
-                {tarea.completada ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                ) : (
-                  <Circle className="w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p
-                    className={`text-sm font-medium ${tarea.completada ? 'line-through text-slate-500' : 'text-white'}`}
-                  >
-                    {tarea.titulo}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-slate-400">{tarea.materia}</span>
-                    <span className="text-slate-600">•</span>
-                    <span
-                      className={`text-xs ${tarea.completada ? 'text-slate-500' : 'text-amber-400'}`}
-                    >
-                      {tarea.fechaLimite}
-                    </span>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+      {/* Contenido Próximamente */}
+      <div className="p-6 flex flex-col items-center justify-center text-center">
+        <div className="w-14 h-14 rounded-2xl bg-amber-500/20 flex items-center justify-center mb-4">
+          <Construction className="w-7 h-7 text-amber-400" />
+        </div>
+        <p className="font-semibold text-amber-200 mb-1">Próximamente</p>
+        <p className="text-sm text-slate-400">Pronto podrás ver y gestionar tus tareas aquí</p>
       </div>
     </div>
   );
 }
 
-function MaterialClaseCard({ materiales }: { materiales: Material[] }) {
-  const getIconForType = (tipo: string) => {
-    switch (tipo) {
-      case 'PDF':
-        return <FileText className="w-5 h-5" />;
-      case 'Video':
-        return <Play className="w-5 h-5" />;
-      case 'Link':
-        return <Link2 className="w-5 h-5" />;
-      default:
-        return <FileText className="w-5 h-5" />;
-    }
-  };
-
-  const getColorForType = (tipo: string) => {
-    switch (tipo) {
-      case 'PDF':
-        return { bg: 'bg-red-500/20', text: 'text-red-400' };
-      case 'Video':
-        return { bg: 'bg-purple-500/20', text: 'text-purple-400' };
-      case 'Link':
-        return { bg: 'bg-blue-500/20', text: 'text-blue-400' };
-      default:
-        return { bg: 'bg-slate-500/20', text: 'text-slate-400' };
-    }
-  };
-
+/**
+ * Card de Material - Próximamente
+ * Muestra un placeholder indicando que esta funcionalidad está en desarrollo
+ */
+function MaterialProximamenteCard() {
   return (
     <div className="rounded-2xl bg-slate-800/50 border border-slate-700/50 overflow-hidden">
       {/* Header */}
@@ -718,46 +587,18 @@ function MaterialClaseCard({ materiales }: { materiales: Material[] }) {
           </div>
           <div>
             <h3 className="font-bold text-white">Material de Clase</h3>
-            <p className="text-xs text-slate-400">{materiales.length} recursos</p>
+            <p className="text-xs text-slate-400">Recursos compartidos</p>
           </div>
         </div>
       </div>
 
-      {/* Grid de materiales */}
-      <div className="p-4">
-        {materiales.length === 0 ? (
-          <div className="text-center py-6">
-            <FileText className="w-10 h-10 text-slate-600 mx-auto mb-2" />
-            <p className="text-slate-400 text-sm">El docente aún no ha compartido material</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-2">
-            {materiales.map((material) => {
-              const colors = getColorForType(material.tipo);
-              return (
-                <a
-                  key={material.id}
-                  href={material.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-700/30 hover:bg-slate-700/50 transition-all hover:scale-105 active:scale-95"
-                >
-                  <div
-                    className={`w-10 h-10 rounded-xl ${colors.bg} flex items-center justify-center ${colors.text}`}
-                  >
-                    {getIconForType(material.tipo)}
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs font-medium text-white truncate w-full">
-                      {material.nombre}
-                    </p>
-                    <p className={`text-[10px] ${colors.text}`}>{material.tipo}</p>
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        )}
+      {/* Contenido Próximamente */}
+      <div className="p-6 flex flex-col items-center justify-center text-center">
+        <div className="w-14 h-14 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-4">
+          <Construction className="w-7 h-7 text-cyan-400" />
+        </div>
+        <p className="font-semibold text-cyan-200 mb-1">Próximamente</p>
+        <p className="text-sm text-slate-400">Aquí encontrarás el material de tus clases</p>
       </div>
     </div>
   );

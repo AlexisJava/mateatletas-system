@@ -219,12 +219,13 @@ export class ClasesController {
   // ==================== ENDPOINTS COMUNES ====================
 
   /**
-   * Obtener estudiantes inscritos en una clase (Admin)
+   * Obtener estudiantes inscritos en una clase
    * GET /api/clases/:id/estudiantes
    * IMPORTANTE: Debe estar ANTES de GET /api/clases/:id
+   * Acceso: Admin y Docente (titular de la clase)
    */
   @Get(':id/estudiantes')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.DOCENTE)
   async obtenerEstudiantes(@Param('id', ParseIdPipe) claseId: string) {
     return this.clasesService.obtenerEstudiantesDeClase(claseId);
   }

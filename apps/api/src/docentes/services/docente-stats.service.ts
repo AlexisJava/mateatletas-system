@@ -832,6 +832,124 @@ export class DocenteStatsService {
   }
 
   /**
+   * Obtiene las clases del mes para el calendario del docente
+   * @param docenteId - ID del docente
+   * @param mes - Mes (1-12)
+   * @param anio - Año (ej: 2025)
+   * @returns Clases del mes con información de estudiantes
+   */
+  async getClasesDelMes(docenteId: string, mes: number, anio: number) {
+    await this.validator.validarDocenteExiste(docenteId);
+
+    // Obtener grupos activos del docente
+    const gruposDocente = await this.prisma.claseGrupo.findMany({
+      where: {
+        docente_id: docenteId,
+        activo: true,
+      },
+      select: {
+        id: true,
+        nombre: true,
+        codigo: true,
+        dia_semana: true,
+        hora_inicio: true,
+        hora_fin: true,
+        cupo_maximo: true,
+        inscripciones: {
+          select: {
+            estudiante: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Generar las fechas de clase del mes
+    const primerDiaDelMes = new Date(anio, mes - 1, 1);
+    const ultimoDiaDelMes = new Date(anio, mes, 0);
+
+    const diasSemanaMap: Record<DiaSemana, number> = {
+      [DiaSemana.DOMINGO]: 0,
+      [DiaSemana.LUNES]: 1,
+      [DiaSemana.MARTES]: 2,
+      [DiaSemana.MIERCOLES]: 3,
+      [DiaSemana.JUEVES]: 4,
+      [DiaSemana.VIERNES]: 5,
+      [DiaSemana.SABADO]: 6,
+    };
+
+    const clasesDelMes: Array<{
+      id: string;
+      fecha: string;
+      nombre: string;
+      codigo: string;
+      hora_inicio: string;
+      hora_fin: string;
+      estudiantesCount: number;
+      cupo_maximo: number;
+      grupo_id: string;
+    }> = [];
+
+    for (const grupo of gruposDocente) {
+      const diaSemanaNum = diasSemanaMap[grupo.dia_semana];
+
+      // Encontrar el primer día del mes que coincida con el día de la semana
+      const fechaInicial = new Date(primerDiaDelMes);
+      const diasHastaProximo = (diaSemanaNum - fechaInicial.getDay() + 7) % 7;
+      let fechaMs =
+        fechaInicial.getTime() + diasHastaProximo * 24 * 60 * 60 * 1000;
+
+      // Generar todas las fechas de este grupo en el mes
+      while (fechaMs <= ultimoDiaDelMes.getTime()) {
+        const fechaActual = new Date(fechaMs);
+        clasesDelMes.push({
+          id: `${grupo.id}-${fechaActual.toISOString().split('T')[0]}`,
+          fecha: fechaActual.toISOString().split('T')[0]!,
+          nombre: grupo.nombre,
+          codigo: grupo.codigo,
+          hora_inicio: grupo.hora_inicio,
+          hora_fin: grupo.hora_fin,
+          estudiantesCount: grupo.inscripciones.length,
+          cupo_maximo: grupo.cupo_maximo,
+          grupo_id: grupo.id,
+        });
+
+        // Avanzar una semana (7 días en milisegundos)
+        fechaMs += 7 * 24 * 60 * 60 * 1000;
+      }
+    }
+
+    // Ordenar por fecha y hora
+    clasesDelMes.sort((a, b) => {
+      const fechaComparison = a.fecha.localeCompare(b.fecha);
+      if (fechaComparison !== 0) return fechaComparison;
+      return a.hora_inicio.localeCompare(b.hora_inicio);
+    });
+
+    // Calcular stats del mes
+    const estudiantesUnicos = new Set<string>();
+    gruposDocente.forEach((grupo) => {
+      grupo.inscripciones.forEach((insc) => {
+        estudiantesUnicos.add(insc.estudiante.id);
+      });
+    });
+
+    return {
+      clases: clasesDelMes,
+      stats: {
+        totalClases: clasesDelMes.length,
+        totalGrupos: gruposDocente.length,
+        totalEstudiantes: estudiantesUnicos.size,
+      },
+    };
+  }
+
+  /**
    * Calcula asistencia por estudiante
    *
    * OPTIMIZACIÓN N+1:

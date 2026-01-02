@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { CreditCard } from 'lucide-react';
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts';
-import { getPaymentStatusDistribution, type PaymentStatusDistribution } from '@/lib/api/admin.api';
+import { getPaymentStatusDistribution } from '@/lib/api/admin.api';
 
 /**
  * PaymentStatusChart - Gráfico de estados de pago
@@ -28,11 +28,7 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELADO: 'Cancelados',
 };
 
-interface ChartData {
-  name: string;
-  value: number;
-  color: string;
-}
+type ChartData = Record<string, string | number>;
 
 export function PaymentStatusChart() {
   const [data, setData] = useState<ChartData[]>([]);
@@ -104,7 +100,7 @@ export function PaymentStatusChart() {
                 labelLine={false}
               >
                 {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                  <Cell key={`cell-${index}`} fill={entry.color as string} />
                 ))}
               </Pie>
               <Legend

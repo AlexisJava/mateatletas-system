@@ -118,4 +118,15 @@ export class DocentesFacade {
   async getEstadisticasCompletas(docenteId: string) {
     return this.statsService.getEstadisticasCompletas(docenteId);
   }
+
+  /**
+   * Obtiene las clases del mes para el calendario del docente
+   * @param docenteId - ID del docente
+   * @param mes - Mes (1-12)
+   * @param anio - Año (ej: 2025)
+   * @returns Clases del mes con stats
+   */
+  async getClasesDelMes(docenteId: string, mes: number, anio: number) {
+    return this.statsService.getClasesDelMes(docenteId, mes, anio);
+  }
 }
