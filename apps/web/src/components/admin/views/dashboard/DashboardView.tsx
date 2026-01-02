@@ -91,7 +91,7 @@ export function DashboardView() {
         <div className="lg:col-span-2 space-y-6">
           <RevenueChart />
           <QuickActionsGrid />
-          <CasaDistributionChart />
+          <CasaDistributionChart distribucion={stats.distribucionCasas} />
           <ColoniaHighlight />
         </div>
 
