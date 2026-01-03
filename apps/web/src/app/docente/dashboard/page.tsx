@@ -12,6 +12,7 @@ import {
   docentesApi,
   ClaseDelDia,
   GrupoResumen,
+  ComisionResumen,
   EstudianteConFalta,
   StatsResumen,
 } from '@/lib/api/docentes.api';
@@ -28,6 +29,7 @@ export default function DocenteDashboardBrutal() {
   const [isLoading, setIsLoading] = useState(true);
   const [clasesHoy, setClasesHoy] = useState<ClaseDelDia[]>([]);
   const [misGrupos, setMisGrupos] = useState<GrupoResumen[]>([]);
+  const [misComisiones, setMisComisiones] = useState<ComisionResumen[]>([]);
   const [, setEstudiantesConFaltas] = useState<EstudianteConFalta[]>([]); // TODO: mostrar en sección de alertas
   const [stats, setStats] = useState<StatsResumen | null>(null);
   const [greeting, setGreeting] = useState('Bienvenido');
@@ -51,6 +53,7 @@ export default function DocenteDashboardBrutal() {
       const response = await docentesApi.getDashboard();
       setClasesHoy(response.clasesHoy);
       setMisGrupos(response.misGrupos);
+      setMisComisiones(response.misComisiones || []);
       setEstudiantesConFaltas(response.estudiantesConFaltas);
       setStats(response.stats);
     } catch (error) {
@@ -164,6 +167,51 @@ export default function DocenteDashboardBrutal() {
                 </button>
               </div>
             ))}
+          </motion.div>
+        )}
+
+        {/* TUS COMISIONES (CURSOS) - BRUTAL */}
+        {misComisiones.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+          >
+            <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2">
+              <BookOpen className="w-6 h-6 text-blue-400" />
+              TUS {misComisiones.length} COMISIONES
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {misComisiones.map((comision) => (
+                <motion.div
+                  key={comision.id}
+                  whileHover={{ scale: 1.03, y: -4 }}
+                  className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10 hover:border-blue-400/70 hover:bg-white/10 transition-all cursor-pointer shadow-lg hover:shadow-xl"
+                  onClick={() => router.push(`/docente/comisiones/${comision.id}`)}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-white font-bold text-base">{comision.nombre}</h3>
+                    {comision.casa && (
+                      <span className="text-2xl" title={comision.casa.nombre}>
+                        {comision.casa.emoji}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-purple-300 text-sm mb-2">{comision.producto.nombre}</p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-purple-300 font-semibold">
+                      {comision.horario || 'Sin horario definido'}
+                    </span>
+                    <div className="flex items-center gap-1 bg-blue-500 text-white px-3 py-1 rounded-full font-black">
+                      <Users className="w-4 h-4" />
+                      {comision.estudiantesInscritos}
+                      {comision.cupo_maximo && `/${comision.cupo_maximo}`}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
         )}
 

@@ -42,6 +42,7 @@ export class ProductosService {
       precio: createDto.precio,
       tipo: createDto.tipo,
       activo: createDto.activo ?? true,
+      subcategoria: createDto.subcategoria,
     };
 
     // Agregar campos específicos según el tipo

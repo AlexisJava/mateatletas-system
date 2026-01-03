@@ -99,14 +99,27 @@ main {
 
   /* ─────────────────────────────────────────────
      PORTAL DOCENTE - Purple Professional
+     Sistema de capas igual que admin pero con accent purple
      ───────────────────────────────────────────── */
-  --docente-bg: #0c0a12;
-  --docente-surface: #12101a;
+  --docente-bg: #09090b;
+  --docente-surface-0: #0c0c0e;
+  --docente-surface: #111113;
+  --docente-surface-1: #111113;
+  --docente-surface-2: #18181b;
+  --docente-surface-3: #1f1f23;
+  --docente-surface-hover: #27272a;
   --docente-accent: #8b5cf6;
   --docente-accent-hover: #7c3aed;
+  --docente-accent-muted: rgba(139, 92, 246, 0.12);
+  --docente-accent-glow: rgba(139, 92, 246, 0.25);
   --docente-text: #fafafa;
+  --docente-text-secondary: #a1a1aa;
   --docente-text-muted: #a78bfa;
-  --docente-border: #27242f;
+  --docente-text-disabled: #52525b;
+  --docente-border: #27272a;
+  --docente-border-subtle: #1c1c1f;
+  --docente-border-accent: rgba(139, 92, 246, 0.4);
+  --docente-shadow-glow: 0 0 24px rgba(139, 92, 246, 0.15);
 
   /* ─────────────────────────────────────────────
      PORTAL ESTUDIANTE - Teal Friendly
@@ -599,4 +612,88 @@ pre,
 
 .admin-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   DOCENTE PORTAL TYPOGRAPHY - Inter for professional look
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Docente portal uses Inter instead of Nunito (same as admin) */
+[data-docente='true'],
+.docente-layout {
+  font-family: var(--font-inter);
+}
+
+/* Docente-specific heading styles */
+[data-docente='true'] h1,
+[data-docente='true'] h2,
+[data-docente='true'] h3,
+[data-docente='true'] h4,
+[data-docente='true'] h5,
+[data-docente='true'] h6 {
+  font-family: var(--font-inter);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   DOCENTE COMPONENT STYLES
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Card base */
+.docente-card {
+  background: var(--docente-surface-1);
+  border: 1px solid var(--docente-border);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.docente-card:hover {
+  border-color: var(--docente-border-accent);
+  box-shadow: var(--docente-shadow-glow);
+}
+
+/* Stat card */
+.docente-stat-card {
+  background: var(--docente-surface-1);
+  border: 1px solid var(--docente-border);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.docente-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--docente-accent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.docente-stat-card:hover::before {
+  opacity: 1;
+}
+
+/* Custom scrollbar for docente */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--docente-border);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--docente-text-muted);
 }

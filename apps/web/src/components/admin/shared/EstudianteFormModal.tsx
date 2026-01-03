@@ -108,7 +108,8 @@ export function EstudianteFormModal({
         if (currentRequestRef.current !== requestId) return;
 
         setSectores(sectoresData.filter((s) => s.activo));
-        setCasas(casasData.filter((c) => c.activo));
+        // Casa no tiene campo 'activo', mostrar todas
+        setCasas(casasData);
       })
       .catch((error) => {
         // Solo mostrar error si el request sigue siendo actual

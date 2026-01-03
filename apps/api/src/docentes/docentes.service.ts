@@ -130,4 +130,14 @@ export class DocentesService {
   async getClasesDelMes(docenteId: string, mes: number, anio: number) {
     return this.facade.getClasesDelMes(docenteId, mes, anio);
   }
+
+  /**
+   * Obtiene el detalle de una comisión específica con sus estudiantes
+   * @param comisionId - ID de la comisión
+   * @param docenteId - ID del docente (para verificar ownership)
+   * @returns Detalle de la comisión con lista de estudiantes
+   */
+  async getComisionDetalle(comisionId: string, docenteId: string) {
+    return this.facade.getComisionDetalle(comisionId, docenteId);
+  }
 }

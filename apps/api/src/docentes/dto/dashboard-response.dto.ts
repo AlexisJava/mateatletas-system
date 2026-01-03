@@ -58,6 +58,31 @@ export interface GrupoResumen {
 }
 
 /**
+ * Resumen de una comisión asignada al docente
+ */
+export interface ComisionResumen {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  producto: {
+    id: string;
+    nombre: string;
+    tipo: string;
+  };
+  casa: {
+    id: string;
+    nombre: string;
+    emoji: string;
+  } | null;
+  horario: string | null;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  cupo_maximo: number | null;
+  estudiantesInscritos: number;
+  activo: boolean;
+}
+
+/**
  * Estudiante con faltas consecutivas
  */
 export interface EstudianteConFalta {
@@ -101,6 +126,7 @@ export interface DashboardDocenteResponse {
   claseInminente: ClaseInminente | null;
   clasesHoy: ClaseDelDia[];
   misGrupos: GrupoResumen[];
+  misComisiones: ComisionResumen[];
   estudiantesConFaltas: EstudianteConFalta[];
   alertas: Alerta[];
   stats: StatsResumen;

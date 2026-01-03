@@ -2,23 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import {
-  misAsignaciones,
-  activarSemana,
-  desactivarSemana,
-  verProgresoEstudiantes,
-  type PlanificacionSimple,
-  type SemanaActiva,
+  planificacionesApi,
+  type Asignacion,
   type ProgresoEstudiante,
-} from '@/lib/api/planificaciones-simples.api';
+} from '@/lib/api/docentes.api';
 import { getErrorMessage } from '@/lib/utils/error-handler';
 import { Calendar, CheckCircle, XCircle, Eye } from 'lucide-react';
-
-interface Asignacion {
-  id: string;
-  planificacion: PlanificacionSimple;
-  claseGrupo: { id: string; nombre: string };
-  semanas_activas: SemanaActiva[];
-}
 
 export default function DocentePlanificacionesPage() {
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
@@ -36,7 +25,7 @@ export default function DocentePlanificacionesPage() {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await misAsignaciones();
+      const data = await planificacionesApi.getMisAsignaciones();
       setAsignaciones(data);
     } catch (err) {
       const errorMessage = getErrorMessage(err as Error, 'Error al cargar planificaciones');
@@ -54,9 +43,9 @@ export default function DocentePlanificacionesPage() {
   ) => {
     try {
       if (activa) {
-        await desactivarSemana(asignacionId, semanaNumero);
+        await planificacionesApi.desactivarSemana(asignacionId, semanaNumero);
       } else {
-        await activarSemana(asignacionId, semanaNumero);
+        await planificacionesApi.activarSemana(asignacionId, semanaNumero);
       }
       await loadAsignaciones();
     } catch (err) {
@@ -67,7 +56,7 @@ export default function DocentePlanificacionesPage() {
 
   const handleVerProgreso = async (asignacionId: string) => {
     try {
-      const data = await verProgresoEstudiantes(asignacionId);
+      const data = await planificacionesApi.getProgresoEstudiantes(asignacionId);
       setProgresos(data.progresos);
       setSelectedAsignacion(asignacionId);
       setShowProgressModal(true);

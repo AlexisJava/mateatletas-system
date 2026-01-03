@@ -8,9 +8,11 @@ import {
   Param,
   Query,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ParseIdPipe } from '../common/pipes';
 import { DocentesService } from './docentes.service';
+import { DocentePlanificacionesService } from './services/docente-planificaciones.service';
 import { CreateDocenteDto } from './dto/create-docente.dto';
 import { UpdateDocenteDto } from './dto/update-docente.dto';
 import { ReasignarClasesDto } from './dto/reasignar-clases.dto';
@@ -28,7 +30,10 @@ import { AuthUser } from '../auth/interfaces';
 @Controller('docentes')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class DocentesController {
-  constructor(private readonly docentesService: DocentesService) {}
+  constructor(
+    private readonly docentesService: DocentesService,
+    private readonly planificacionesService: DocentePlanificacionesService,
+  ) {}
 
   /**
    * POST /docentes - Crear nuevo docente (Admin only)
@@ -121,6 +126,93 @@ export class DocentesController {
   ) {
     return this.docentesService.update(user.id, updateDto);
   }
+
+  // ============================================================================
+  // COMISIONES - Endpoints para ver comisiones asignadas al docente
+  // ============================================================================
+
+  /**
+   * GET /docentes/me/comisiones/:id - Obtener detalles de una comisión
+   * @param id - ID de la comisión
+   * @param user - Usuario autenticado (del JWT)
+   * @returns Detalles de la comisión con estudiantes inscritos
+   */
+  @Get('me/comisiones/:id')
+  @Roles(Role.DOCENTE)
+  async getComisionDetalle(
+    @Param('id', ParseIdPipe) id: string,
+    @GetUser() user: AuthUser,
+  ) {
+    return this.docentesService.getComisionDetalle(id, user.id);
+  }
+
+  // ============================================================================
+  // PLANIFICACIONES - Endpoints para gestión de planificaciones docente
+  // ============================================================================
+
+  /**
+   * GET /docentes/me/asignaciones - Obtener asignaciones de planificaciones
+   * @param user - Usuario autenticado (del JWT)
+   * @returns Lista de asignaciones con planificación, grupo y semanas activas
+   */
+  @Get('me/asignaciones')
+  @Roles(Role.DOCENTE)
+  async getMisAsignaciones(@GetUser() user: AuthUser) {
+    return this.planificacionesService.getMisAsignaciones(user.id);
+  }
+
+  /**
+   * POST /docentes/asignaciones/:id/semanas/:numero/activar - Activar una semana
+   * @param id - ID de la asignación
+   * @param numero - Número de semana (1 a semanas_total)
+   * @param user - Usuario autenticado (del JWT)
+   */
+  @Post('asignaciones/:id/semanas/:numero/activar')
+  @Roles(Role.DOCENTE)
+  async activarSemana(
+    @Param('id', ParseIdPipe) id: string,
+    @Param('numero', ParseIntPipe) numero: number,
+    @GetUser() user: AuthUser,
+  ) {
+    await this.planificacionesService.activarSemana(id, numero, user.id);
+    return { success: true, message: `Semana ${numero} activada` };
+  }
+
+  /**
+   * POST /docentes/asignaciones/:id/semanas/:numero/desactivar - Desactivar una semana
+   * @param id - ID de la asignación
+   * @param numero - Número de semana (1 a semanas_total)
+   * @param user - Usuario autenticado (del JWT)
+   */
+  @Post('asignaciones/:id/semanas/:numero/desactivar')
+  @Roles(Role.DOCENTE)
+  async desactivarSemana(
+    @Param('id', ParseIdPipe) id: string,
+    @Param('numero', ParseIntPipe) numero: number,
+    @GetUser() user: AuthUser,
+  ) {
+    await this.planificacionesService.desactivarSemana(id, numero, user.id);
+    return { success: true, message: `Semana ${numero} desactivada` };
+  }
+
+  /**
+   * GET /docentes/asignaciones/:id/progreso - Obtener progreso de estudiantes
+   * @param id - ID de la asignación
+   * @param user - Usuario autenticado (del JWT)
+   * @returns Lista de progresos de estudiantes
+   */
+  @Get('asignaciones/:id/progreso')
+  @Roles(Role.DOCENTE)
+  async getProgresoEstudiantes(
+    @Param('id', ParseIdPipe) id: string,
+    @GetUser() user: AuthUser,
+  ) {
+    return this.planificacionesService.getProgresoEstudiantes(id, user.id);
+  }
+
+  // ============================================================================
+  // ADMIN ENDPOINTS
+  // ============================================================================
 
   /**
    * GET /docentes/:id - Obtener un docente específico (Admin only)

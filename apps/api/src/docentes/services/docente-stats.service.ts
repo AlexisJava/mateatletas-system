@@ -7,6 +7,7 @@ import {
   ClaseInminente,
   ClaseDelDia,
   GrupoResumen,
+  ComisionResumen,
   EstudianteConFalta,
   Alerta,
   StatsResumen,
@@ -85,12 +86,14 @@ export class DocenteStatsService {
       claseInminente,
       clasesDelDiaData,
       misGruposData,
+      misComisionesData,
       estudiantesConFaltasFormatted,
       stats,
     ] = await Promise.all([
       this.calcularClaseInminente(docenteId, now),
       this.obtenerClasesDelDia(docenteId, now),
       this.obtenerMisGrupos(docenteId),
+      this.obtenerMisComisiones(docenteId),
       this.obtenerEstudiantesConFaltas(docenteId),
       this.calcularStatsResumen(docenteId, now),
     ]);
@@ -102,6 +105,7 @@ export class DocenteStatsService {
       claseInminente,
       clasesHoy: clasesDelDiaData,
       misGrupos: misGruposData,
+      misComisiones: misComisionesData,
       estudiantesConFaltas: estudiantesConFaltasFormatted,
       alertas,
       stats,
@@ -361,6 +365,66 @@ export class DocenteStatsService {
       estudiantesActivos: grupo.inscripciones.length,
       cupo_maximo: grupo.cupo_maximo,
       nivel: grupo.nivel,
+    }));
+  }
+
+  /**
+   * Obtiene las comisiones asignadas al docente
+   */
+  private async obtenerMisComisiones(
+    docenteId: string,
+  ): Promise<ComisionResumen[]> {
+    const comisiones = await this.prisma.comision.findMany({
+      where: {
+        docente_id: docenteId,
+        activo: true,
+      },
+      include: {
+        producto: {
+          select: {
+            id: true,
+            nombre: true,
+            tipo: true,
+          },
+        },
+        casa: {
+          select: {
+            id: true,
+            nombre: true,
+            emoji: true,
+          },
+        },
+        inscripciones: {
+          where: {
+            estado: { in: ['Pendiente', 'Confirmada'] },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return comisiones.map((comision) => ({
+      id: comision.id,
+      nombre: comision.nombre,
+      descripcion: comision.descripcion,
+      producto: {
+        id: comision.producto.id,
+        nombre: comision.producto.nombre,
+        tipo: comision.producto.tipo,
+      },
+      casa: comision.casa
+        ? {
+            id: comision.casa.id,
+            nombre: comision.casa.nombre,
+            emoji: comision.casa.emoji,
+          }
+        : null,
+      horario: comision.horario,
+      fecha_inicio: comision.fecha_inicio?.toISOString() ?? null,
+      fecha_fin: comision.fecha_fin?.toISOString() ?? null,
+      cupo_maximo: comision.cupo_maximo,
+      estudiantesInscritos: comision.inscripciones.length,
+      activo: comision.activo,
     }));
   }
 
@@ -946,6 +1010,90 @@ export class DocenteStatsService {
         totalGrupos: gruposDocente.length,
         totalEstudiantes: estudiantesUnicos.size,
       },
+    };
+  }
+
+  /**
+   * Obtiene el detalle de una comisión específica con sus estudiantes inscritos
+   * @param comisionId - ID de la comisión
+   * @param docenteId - ID del docente (para verificar ownership)
+   * @returns Detalle de la comisión con lista de estudiantes
+   */
+  async getComisionDetalle(comisionId: string, docenteId: string) {
+    // Verificar que el docente existe
+    await this.validator.validarDocenteExiste(docenteId);
+
+    // Obtener la comisión verificando que pertenece al docente
+    const comision = await this.prisma.comision.findFirst({
+      where: {
+        id: comisionId,
+        docente_id: docenteId,
+      },
+      include: {
+        producto: {
+          select: {
+            id: true,
+            nombre: true,
+            tipo: true,
+          },
+        },
+        casa: {
+          select: {
+            id: true,
+            nombre: true,
+            emoji: true,
+          },
+        },
+        inscripciones: {
+          where: {
+            estado: { in: ['Pendiente', 'Confirmada'] },
+          },
+          include: {
+            estudiante: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!comision) {
+      throw new Error('Comisión no encontrada o no tienes acceso');
+    }
+
+    return {
+      id: comision.id,
+      nombre: comision.nombre,
+      descripcion: comision.descripcion,
+      producto: {
+        id: comision.producto.id,
+        nombre: comision.producto.nombre,
+        tipo: comision.producto.tipo,
+      },
+      casa: comision.casa
+        ? {
+            id: comision.casa.id,
+            nombre: comision.casa.nombre,
+            emoji: comision.casa.emoji,
+          }
+        : null,
+      horario: comision.horario,
+      fecha_inicio: comision.fecha_inicio?.toISOString() ?? null,
+      fecha_fin: comision.fecha_fin?.toISOString() ?? null,
+      cupo_maximo: comision.cupo_maximo,
+      activo: comision.activo,
+      estudiantes: comision.inscripciones.map((insc) => ({
+        id: insc.estudiante.id,
+        nombre: insc.estudiante.nombre,
+        apellido: insc.estudiante.apellido,
+        email: insc.estudiante.email,
+        estado: insc.estado,
+      })),
     };
   }
 

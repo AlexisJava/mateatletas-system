@@ -1229,8 +1229,8 @@ export interface Sector {
 export interface Casa {
   id: string;
   nombre: string;
-  color?: string;
-  activo: boolean;
+  emoji?: string;
+  colorPrimary?: string;
 }
 
 /**
@@ -1248,11 +1248,11 @@ export const getSectores = async (): Promise<Sector[]> => {
 
 /**
  * Obtener todas las casas/equipos
- * GET /equipos
+ * GET /casas
  */
 export const getCasas = async (): Promise<Casa[]> => {
   try {
-    return await axios.get('/equipos');
+    return await axios.get('/casas');
   } catch (error) {
     console.error('Error al obtener casas:', error);
     throw error;

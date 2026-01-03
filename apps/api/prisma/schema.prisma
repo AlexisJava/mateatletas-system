@@ -139,6 +139,9 @@ model Estudiante {
   /// LIVEKIT: Registros de asistencia en clases en vivo
   asistencias_live AsistenciaLive[]
 
+  /// PLANIFICACIONES: Progreso semanal del estudiante en planificaciones asignadas
+  progresosSemanales ProgresoSemanalEstudiante[]
+
   // Índices de performance para rankings y listados
   // NOTA: Índices de puntos_totales eliminados - usar RecursosEstudiante para rankings (SUB-FASE 1.3)
   @@index([tutor_id, apellido], name: "idx_estudiantes_tutor_listado")
@@ -472,6 +475,9 @@ model Docente {
   puntosOtorgados        PuntoObtenido[] @relation("PuntosOtorgados")
   /// Comisiones a cargo de este docente
   comisiones             Comision[]
+
+  /// Asignaciones de planificaciones a grupos
+  asignacionesPlanificacion AsignacionPlanificacion[]
 
   @@map("docentes")
 }
@@ -817,6 +823,9 @@ model ClaseGrupo {
 
   /// Registros de asistencia en vivo (LiveKit)
   asistencias_live AsistenciaLive[]
+
+  /// Asignaciones de planificaciones a este grupo
+  asignacionesPlanificacion AsignacionPlanificacion[]
 
   @@index([docente_id])
   @@index([dia_semana])
@@ -2522,4 +2531,127 @@ model TareaAdmin {
   @@index([priority])
   @@index([dueDate])
   @@map("tareas_admin")
+}
+
+// =============================================================================
+// PLANIFICACIONES DOCENTE
+// Sistema de planificaciones semanales para grupos pedagógicos
+// =============================================================================
+
+/// Planificación semanal de contenido para grupos pedagógicos
+model Planificacion {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// Título de la planificación
+  titulo String
+
+  /// Descripción opcional
+  descripcion String?
+
+  /// Cantidad total de semanas de la planificación
+  semanas_total Int @default(12)
+
+  /// Si la planificación está activa
+  activa Boolean @default(true)
+
+  /// Timestamp de creación
+  creado_en DateTime @default(now())
+
+  /// Timestamp de última actualización
+  actualizado_en DateTime @updatedAt
+
+  /// Asignaciones de esta planificación a grupos
+  asignaciones AsignacionPlanificacion[]
+
+  @@map("planificaciones")
+}
+
+/// Asignación de una planificación a un ClaseGrupo específico por un docente
+model AsignacionPlanificacion {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID de la planificación
+  planificacion_id String
+
+  /// ID del grupo de clase
+  clase_grupo_id String
+
+  /// ID del docente que asignó
+  docente_id String
+
+  /// Timestamp de creación
+  creado_en DateTime @default(now())
+
+  /// Relaciones
+  planificacion Planificacion @relation(fields: [planificacion_id], references: [id])
+  claseGrupo    ClaseGrupo    @relation(fields: [clase_grupo_id], references: [id])
+  docente       Docente       @relation(fields: [docente_id], references: [id])
+
+  /// Semanas activas para esta asignación
+  semanasActivas SemanaActivaPlanificacion[]
+
+  /// Progresos de estudiantes en esta asignación
+  progresos ProgresoSemanalEstudiante[]
+
+  @@unique([planificacion_id, clase_grupo_id])
+  @@index([docente_id])
+  @@map("asignaciones_planificacion")
+}
+
+/// Semanas activas/visibles para los estudiantes en una asignación
+model SemanaActivaPlanificacion {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID de la asignación
+  asignacion_id String
+
+  /// Número de semana (1 a semanas_total)
+  semana_numero Int
+
+  /// Si la semana está activa/visible para estudiantes
+  activa Boolean @default(false)
+
+  /// Fecha en que se activó (null si nunca se activó)
+  activada_en DateTime?
+
+  /// Relación con la asignación
+  asignacion AsignacionPlanificacion @relation(fields: [asignacion_id], references: [id], onDelete: Cascade)
+
+  @@unique([asignacion_id, semana_numero])
+  @@map("semanas_activas_planificacion")
+}
+
+/// Progreso de estudiantes en una asignación de planificación
+model ProgresoSemanalEstudiante {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID de la asignación
+  asignacion_id String
+
+  /// ID del estudiante
+  estudiante_id String
+
+  /// Semana actual en la que está el estudiante
+  semana_actual Int @default(1)
+
+  /// Tiempo total dedicado en minutos
+  tiempo_total_min Int @default(0)
+
+  /// Puntos totales acumulados
+  puntos_totales Int @default(0)
+
+  /// Timestamp de última actualización
+  actualizado_en DateTime @updatedAt
+
+  /// Relaciones
+  asignacion AsignacionPlanificacion @relation(fields: [asignacion_id], references: [id], onDelete: Cascade)
+  estudiante Estudiante              @relation(fields: [estudiante_id], references: [id])
+
+  @@unique([asignacion_id, estudiante_id])
+  @@index([estudiante_id])
+  @@map("progresos_semanales_estudiante")
 }

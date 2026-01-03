@@ -253,6 +253,10 @@ export const useAuthStore = create<AuthState>()(
           // Limpiar localStorage para asegurar estado limpio
           localStorage.removeItem('auth-storage');
 
+          // Limpiar sessionStorage de validación de sesión
+          // Esto evita que ProtectedLayout confíe en sesión antigua
+          sessionStorage.removeItem('mateatletas_auth_validated');
+
           // Limpiar estado completamente
           set({
             user: null,

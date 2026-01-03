@@ -70,6 +70,15 @@ export class CrearProductoDto {
   @IsOptional()
   activo?: boolean;
 
+  @ApiPropertyOptional({
+    description: 'Subcategoría del producto para agrupación',
+    example: 'Matemáticas',
+    type: String,
+  })
+  @IsString({ message: 'La subcategoría debe ser un texto' })
+  @IsOptional()
+  subcategoria?: string;
+
   // --- Campos específicos para tipo Curso ---
   // Soportamos tanto snake_case (BD) como camelCase (JS/TS convention)
 
