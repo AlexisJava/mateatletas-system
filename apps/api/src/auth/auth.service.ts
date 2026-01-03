@@ -337,7 +337,10 @@ export class AuthService {
     } else if (tipoUsuario === 'docente') {
       await this.prisma.docente.update({
         where: { id: userId },
-        data: updateData,
+        data: {
+          ...updateData,
+          must_change_password: false, // Resetear flag al cambiar password
+        },
       });
     } else {
       await this.prisma.admin.update({
