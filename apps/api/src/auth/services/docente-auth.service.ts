@@ -24,6 +24,8 @@ export interface DocenteLoginResult {
     role: Role;
     roles: Role[];
   };
+  /** Indica si el docente debe cambiar su contraseña (primer ingreso o reset por admin) */
+  must_change_password: boolean;
 }
 
 // ============================================================================
@@ -128,6 +130,7 @@ export class DocenteAuthService {
         role: Role.DOCENTE,
         roles: finalRoles,
       },
+      must_change_password: docente.must_change_password,
     };
   }
 

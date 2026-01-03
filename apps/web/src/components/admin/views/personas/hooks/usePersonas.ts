@@ -95,9 +95,15 @@ export function usePersonas(): UsePersonasReturn {
       });
 
       // Mapear usuarios (admins y tutores) - con validación
+      // IMPORTANTE: Excluir docentes aquí porque se traen desde getDocentes() separadamente
       const usersData = users ?? [];
       usersData.forEach((user) => {
-        const roles = user.roles ?? [user.role];
+        const roles = (user.roles ?? [user.role]).map((r) => r?.toLowerCase());
+        const isDocente = roles.includes('docente');
+
+        // Saltar docentes - se agregan desde getDocentes() para evitar duplicados
+        if (isDocente) return;
+
         const role = roles.includes('admin') ? 'admin' : 'tutor';
         personas.push({
           id: user.id,

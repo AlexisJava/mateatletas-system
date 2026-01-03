@@ -35,4 +35,11 @@ export class LoginResponseDto {
     required: false,
   })
   mfa_token?: string;
+
+  @ApiProperty({
+    description:
+      'Indica si el usuario debe cambiar su contraseña (primer ingreso o reset por admin)',
+    required: false,
+  })
+  must_change_password?: boolean;
 }

@@ -28,6 +28,7 @@ describe('DocenteAuthService', () => {
     titulo: 'Licenciada en Matemáticas',
     bio: 'Profesora con 10 años de experiencia',
     roles: 'Docente',
+    must_change_password: true,
   };
 
   beforeEach(async () => {
@@ -217,6 +218,41 @@ describe('DocenteAuthService', () => {
 
       expect(result.user.titulo).toBeNull();
       expect(result.user.bio).toBeNull();
+    });
+
+    it('should return must_change_password flag from docente', async () => {
+      // Test con must_change_password = true (primer ingreso)
+      prisma.docente.findUnique.mockResolvedValue(mockDocente as any);
+      passwordService.verifyWithTimingProtection.mockResolvedValue({
+        isValid: true,
+        needsRehash: false,
+      });
+      tokenService.generateAccessToken.mockReturnValue('jwt-token');
+
+      const result = await service.login(
+        'docente@test.com',
+        'password123',
+        '127.0.0.1',
+      );
+
+      expect(result.must_change_password).toBe(true);
+
+      // Test con must_change_password = false (ya cambió password)
+      const docentePasswordChanged = {
+        ...mockDocente,
+        must_change_password: false,
+      };
+      prisma.docente.findUnique.mockResolvedValue(
+        docentePasswordChanged as any,
+      );
+
+      const result2 = await service.login(
+        'docente@test.com',
+        'password123',
+        '127.0.0.1',
+      );
+
+      expect(result2.must_change_password).toBe(false);
     });
   });
 });

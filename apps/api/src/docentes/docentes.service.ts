@@ -149,4 +149,59 @@ export class DocentesService {
   async getMisComisiones(docenteId: string) {
     return this.facade.getMisComisiones(docenteId);
   }
+
+  /**
+   * Obtiene la próxima clase del docente
+   * @param docenteId - ID del docente
+   * @returns Próxima clase con comisión, fecha_hora y minutos_restantes, o null
+   */
+  async getProximaClase(docenteId: string) {
+    return this.facade.getProximaClase(docenteId);
+  }
+
+  // ============================================================================
+  // COMISION QUERIES - Delegación a Facade → ComisionQueriesService
+  // ============================================================================
+
+  /**
+   * Obtiene la lista de estudiantes de una comisión con stats
+   * @param comisionId - ID de la comisión
+   * @param docenteId - ID del docente (para verificar ownership)
+   * @returns Lista de estudiantes con stats completos
+   */
+  async getEstudiantesComision(comisionId: string, docenteId: string) {
+    return this.facade.getEstudiantesComision(comisionId, docenteId);
+  }
+
+  /**
+   * Obtiene métricas de una comisión
+   * @param comisionId - ID de la comisión
+   * @param docenteId - ID del docente (para verificar ownership)
+   * @returns Métricas: asistencia promedio, total estudiantes, clases, puntos
+   */
+  async getMetricasComision(comisionId: string, docenteId: string) {
+    return this.facade.getMetricasComision(comisionId, docenteId);
+  }
+
+  /**
+   * Obtiene historial de asistencia de una comisión
+   * @param comisionId - ID de la comisión
+   * @param docenteId - ID del docente (para verificar ownership)
+   * @param desde - Fecha desde (opcional)
+   * @param hasta - Fecha hasta (opcional)
+   * @returns Historial de asistencia agrupado por fecha
+   */
+  async getHistorialAsistencia(
+    comisionId: string,
+    docenteId: string,
+    desde?: Date,
+    hasta?: Date,
+  ) {
+    return this.facade.getHistorialAsistencia(
+      comisionId,
+      docenteId,
+      desde,
+      hasta,
+    );
+  }
 }

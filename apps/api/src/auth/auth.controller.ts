@@ -215,9 +215,18 @@ export class AuthController {
       userAgent,
     );
 
+    // Extraer must_change_password si existe (solo docentes)
+    const mustChangePassword =
+      'must_change_password' in result
+        ? (result as { must_change_password?: boolean }).must_change_password
+        : undefined;
+
     return {
       user: loginResult.user,
       roles: loginResult.user.roles ?? [],
+      ...(mustChangePassword !== undefined && {
+        must_change_password: mustChangePassword,
+      }),
     };
   }
 

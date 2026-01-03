@@ -43,6 +43,9 @@ describe('DocenteStatsService', () => {
             progresoEstudianteActividad: {
               findMany: jest.fn(),
             },
+            comision: {
+              findMany: jest.fn(),
+            },
             $queryRaw: jest.fn(),
           },
         },
@@ -69,6 +72,7 @@ describe('DocenteStatsService', () => {
         .spyOn(prisma.inscripcionClaseGrupo, 'findMany')
         .mockResolvedValue([]);
       jest.spyOn(prisma.asistenciaClaseGrupo, 'findMany').mockResolvedValue([]);
+      jest.spyOn(prisma.comision, 'findMany').mockResolvedValue([]);
       (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
       const result = await service.getDashboard('docente-123');
@@ -89,6 +93,7 @@ describe('DocenteStatsService', () => {
         .spyOn(prisma.inscripcionClaseGrupo, 'findMany')
         .mockResolvedValue([]);
       jest.spyOn(prisma.asistenciaClaseGrupo, 'findMany').mockResolvedValue([]);
+      jest.spyOn(prisma.comision, 'findMany').mockResolvedValue([]);
       (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
       const result = await service.getDashboard('docente-123');
@@ -121,6 +126,7 @@ describe('DocenteStatsService', () => {
           { estado: 'Presente' },
           { estado: 'Ausente' },
         ] as any);
+      jest.spyOn(prisma.comision, 'findMany').mockResolvedValue([]);
       (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
       const result = await service.getDashboard('docente-123');

@@ -308,21 +308,21 @@ describe('CreateEstudianteDto - Validation Tests', () => {
       expect(errors.some((e) => e.property === 'fotoUrl')).toBe(true);
     });
 
-    it('debe fallar con equipoId no UUID', async () => {
+    it('debe aceptar casaId como string (CUID)', async () => {
+      // casaId ya no valida formato UUID - Prisma usa CUID
       const dto = plainToClass(CreateEstudianteDto, {
         nombre: 'Juan',
         apellido: 'Pérez',
         edad: 10,
         nivelEscolar: 'Primaria',
-        casaId: 'not-a-uuid',
+        casaId: 'clxyz1234567890abcdef', // CUID válido
       });
 
       const errors = await validate(dto);
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors.some((e) => e.property === 'casaId')).toBe(true);
+      expect(errors.length).toBe(0);
     });
 
-    it('debe aceptar equipoId con UUID válido', async () => {
+    it('debe aceptar casaId con formato UUID también', async () => {
       const dto = plainToClass(CreateEstudianteDto, {
         nombre: 'Juan',
         apellido: 'Pérez',

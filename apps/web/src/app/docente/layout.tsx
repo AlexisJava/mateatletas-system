@@ -3,6 +3,8 @@
 import { ProtectedLayout } from '@/components/shared/ProtectedLayout';
 import { LoadingScreen } from '@/components/shared/LoadingScreen';
 import { Header, TabNavigation } from '@/components/docente';
+import ModalCambioPasswordObligatorio from '@/components/auth/ModalCambioPasswordObligatorio';
+import { useAuthStore } from '@/store/auth.store';
 
 /**
  * Portal Docente Layout v2.0 - Horizontal Tabs Design
@@ -27,8 +29,13 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
 }
 
 function DocenteLayoutContent({ children }: { children: React.ReactNode }) {
+  const user = useAuthStore((state) => state.user);
+  const mustChangePassword = user?.debe_cambiar_password === true;
+
   return (
     <div className="min-h-screen bg-[var(--docente-bg)] flex flex-col" data-docente="true">
+      {/* Modal de cambio de contraseña obligatorio */}
+      <ModalCambioPasswordObligatorio isOpen={mustChangePassword} />
       {/* Background Glows - sutiles como admin */}
       <div className="fixed top-0 left-[20%] w-[500px] h-[500px] bg-[var(--docente-accent)]/10 rounded-full blur-[120px] pointer-events-none z-0" />
       <div className="fixed bottom-0 right-[10%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none z-0" />

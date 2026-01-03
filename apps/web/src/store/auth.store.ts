@@ -129,6 +129,11 @@ export const useAuthStore = create<AuthState>()(
             const roles = response.roles.map((r) => r.toLowerCase()) as UserRole[];
 
             // Mapear AuthUser a User del store
+            // NOTA: El backend envía must_change_password, lo mapeamos a debe_cambiar_password
+            const mustChangePassword =
+              (response as unknown as { must_change_password?: boolean }).must_change_password ??
+              authUser.debe_cambiar_password;
+
             const user: User = {
               id: authUser.id,
               email: authUser.email,
@@ -136,7 +141,7 @@ export const useAuthStore = create<AuthState>()(
               apellido: authUser.apellido,
               role: authUser.role.toLowerCase() as UserRole,
               roles: roles,
-              debe_cambiar_password: authUser.debe_cambiar_password,
+              debe_cambiar_password: mustChangePassword,
               dni: authUser.dni,
               telefono: authUser.telefono,
               fecha_registro: authUser.fecha_registro,

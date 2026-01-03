@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DocenteQueryService } from './docente-query.service';
 import { DocenteCommandService } from './docente-command.service';
 import { DocenteStatsService } from './docente-stats.service';
+import { DocenteComisionQueriesService } from './docente-comision-queries.service';
 import { CreateDocenteDto } from '../dto/create-docente.dto';
 import { UpdateDocenteDto } from '../dto/update-docente.dto';
 
@@ -20,6 +21,7 @@ export class DocentesFacade {
     private queryService: DocenteQueryService,
     private commandService: DocenteCommandService,
     private statsService: DocenteStatsService,
+    private comisionQueriesService: DocenteComisionQueriesService,
   ) {}
 
   // ============================================================================
@@ -147,5 +149,66 @@ export class DocentesFacade {
    */
   async getMisComisiones(docenteId: string) {
     return this.statsService.getMisComisiones(docenteId);
+  }
+
+  /**
+   * Obtiene la próxima clase del docente
+   * @param docenteId - ID del docente
+   * @returns Próxima clase con comisión, fecha_hora y minutos_restantes, o null
+   */
+  async getProximaClase(docenteId: string) {
+    return this.statsService.getProximaClase(docenteId);
+  }
+
+  // ============================================================================
+  // COMISION QUERIES - Delegación a ComisionQueriesService
+  // ============================================================================
+
+  /**
+   * Obtiene la lista de estudiantes de una comisión con stats
+   * @param comisionId - ID de la comisión
+   * @param docenteId - ID del docente (para verificar ownership)
+   * @returns Lista de estudiantes con stats completos
+   */
+  async getEstudiantesComision(comisionId: string, docenteId: string) {
+    return this.comisionQueriesService.getEstudiantesComision(
+      comisionId,
+      docenteId,
+    );
+  }
+
+  /**
+   * Obtiene métricas de una comisión
+   * @param comisionId - ID de la comisión
+   * @param docenteId - ID del docente (para verificar ownership)
+   * @returns Métricas: asistencia promedio, total estudiantes, clases, puntos
+   */
+  async getMetricasComision(comisionId: string, docenteId: string) {
+    return this.comisionQueriesService.getMetricasComision(
+      comisionId,
+      docenteId,
+    );
+  }
+
+  /**
+   * Obtiene historial de asistencia de una comisión
+   * @param comisionId - ID de la comisión
+   * @param docenteId - ID del docente (para verificar ownership)
+   * @param desde - Fecha desde (opcional)
+   * @param hasta - Fecha hasta (opcional)
+   * @returns Historial de asistencia agrupado por fecha
+   */
+  async getHistorialAsistencia(
+    comisionId: string,
+    docenteId: string,
+    desde?: Date,
+    hasta?: Date,
+  ) {
+    return this.comisionQueriesService.getHistorialAsistencia(
+      comisionId,
+      docenteId,
+      desde,
+      hasta,
+    );
   }
 }

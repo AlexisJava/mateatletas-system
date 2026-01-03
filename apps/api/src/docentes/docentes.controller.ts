@@ -127,6 +127,17 @@ export class DocentesController {
     return this.docentesService.update(user.id, updateDto);
   }
 
+  /**
+   * GET /docentes/me/proxima-clase - Obtener la próxima clase del docente
+   * @param user - Usuario autenticado (del JWT)
+   * @returns Próxima clase con comisión, fecha_hora y minutos_restantes, o null
+   */
+  @Get('me/proxima-clase')
+  @Roles(Role.DOCENTE)
+  async getProximaClase(@GetUser() user: AuthUser) {
+    return this.docentesService.getProximaClase(user.id);
+  }
+
   // ============================================================================
   // COMISIONES - Endpoints para ver comisiones asignadas al docente
   // ============================================================================
@@ -155,6 +166,62 @@ export class DocentesController {
     @GetUser() user: AuthUser,
   ) {
     return this.docentesService.getComisionDetalle(id, user.id);
+  }
+
+  /**
+   * GET /docentes/me/comisiones/:id/estudiantes - Listar estudiantes de una comisión
+   * @param id - ID de la comisión
+   * @param user - Usuario autenticado (del JWT)
+   * @returns Lista de estudiantes con stats, tutor, casa, etc.
+   */
+  @Get('me/comisiones/:id/estudiantes')
+  @Roles(Role.DOCENTE)
+  async getEstudiantesComision(
+    @Param('id', ParseIdPipe) id: string,
+    @GetUser() user: AuthUser,
+  ) {
+    return this.docentesService.getEstudiantesComision(id, user.id);
+  }
+
+  /**
+   * GET /docentes/me/comisiones/:id/metricas - Obtener métricas de una comisión
+   * @param id - ID de la comisión
+   * @param user - Usuario autenticado (del JWT)
+   * @returns Métricas: asistencia promedio, total estudiantes, clases, puntos
+   */
+  @Get('me/comisiones/:id/metricas')
+  @Roles(Role.DOCENTE)
+  async getMetricasComision(
+    @Param('id', ParseIdPipe) id: string,
+    @GetUser() user: AuthUser,
+  ) {
+    return this.docentesService.getMetricasComision(id, user.id);
+  }
+
+  /**
+   * GET /docentes/me/comisiones/:id/historial-asistencia - Historial de asistencia
+   * @param id - ID de la comisión
+   * @param user - Usuario autenticado (del JWT)
+   * @param desde - Fecha desde (YYYY-MM-DD), opcional
+   * @param hasta - Fecha hasta (YYYY-MM-DD), opcional
+   * @returns Historial de asistencia agrupado por fecha
+   */
+  @Get('me/comisiones/:id/historial-asistencia')
+  @Roles(Role.DOCENTE)
+  async getHistorialAsistencia(
+    @Param('id', ParseIdPipe) id: string,
+    @GetUser() user: AuthUser,
+    @Query('desde') desde?: string,
+    @Query('hasta') hasta?: string,
+  ) {
+    const desdeDate = desde ? new Date(desde) : undefined;
+    const hastaDate = hasta ? new Date(hasta) : undefined;
+    return this.docentesService.getHistorialAsistencia(
+      id,
+      user.id,
+      desdeDate,
+      hastaDate,
+    );
   }
 
   // ============================================================================

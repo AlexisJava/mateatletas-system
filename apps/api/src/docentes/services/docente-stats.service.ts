@@ -1247,6 +1247,85 @@ export class DocenteStatsService {
   }
 
   /**
+   * Obtiene la próxima clase del docente basado en sus comisiones activas
+   * @param docenteId - ID del docente
+   * @returns Próxima clase con comisión, fecha_hora y minutos_restantes, o null
+   */
+  async getProximaClase(docenteId: string): Promise<{
+    comision: {
+      id: string;
+      nombre: string;
+      horario: string | null;
+    };
+    fecha_hora: string;
+    minutos_restantes: number;
+  } | null> {
+    await this.validator.validarDocenteExiste(docenteId);
+
+    const now = new Date();
+
+    // Obtener comisiones activas del docente
+    const comisiones = await this.prisma.comision.findMany({
+      where: {
+        docente_id: docenteId,
+        activo: true,
+        OR: [{ fecha_fin: null }, { fecha_fin: { gte: now } }],
+      },
+      select: {
+        id: true,
+        nombre: true,
+        horario: true,
+        fecha_fin: true,
+      },
+    });
+
+    if (comisiones.length === 0) {
+      return null;
+    }
+
+    // Calcular la próxima clase para cada comisión
+    let proximaClase: {
+      comision: { id: string; nombre: string; horario: string | null };
+      fecha_hora: Date;
+    } | null = null;
+
+    for (const comision of comisiones) {
+      const fechaProxima = this.calcularProximaClase(
+        comision.horario,
+        comision.fecha_fin,
+      );
+
+      if (fechaProxima) {
+        if (!proximaClase || fechaProxima < proximaClase.fecha_hora) {
+          proximaClase = {
+            comision: {
+              id: comision.id,
+              nombre: comision.nombre,
+              horario: comision.horario,
+            },
+            fecha_hora: fechaProxima,
+          };
+        }
+      }
+    }
+
+    if (!proximaClase) {
+      return null;
+    }
+
+    // Calcular minutos restantes
+    const minutosRestantes = Math.floor(
+      (proximaClase.fecha_hora.getTime() - now.getTime()) / (60 * 1000),
+    );
+
+    return {
+      comision: proximaClase.comision,
+      fecha_hora: proximaClase.fecha_hora.toISOString(),
+      minutos_restantes: minutosRestantes,
+    };
+  }
+
+  /**
    * Calcula la próxima ocurrencia de una clase basado en el horario
    * Soporta formatos: "Lunes 14:30", "Lun y Mie 19:00", "Lun-Vie 9:00-12:00"
    *

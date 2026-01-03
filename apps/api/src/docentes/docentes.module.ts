@@ -10,6 +10,7 @@ import { DocenteCommandService } from './services/docente-command.service';
 import { DocenteStatsService } from './services/docente-stats.service';
 import { DocentesFacade } from './services/docentes-facade.service';
 import { DocentePlanificacionesService } from './services/docente-planificaciones.service';
+import { DocenteComisionQueriesService } from './services/docente-comision-queries.service';
 
 @Module({
   controllers: [DocentesController],
@@ -24,6 +25,8 @@ import { DocentePlanificacionesService } from './services/docente-planificacione
     DocentesFacade,
     // Planificaciones
     DocentePlanificacionesService,
+    // Comisión Queries
+    DocenteComisionQueriesService,
   ],
   exports: [DocentesService], // Exportar para uso en AuthService
 })
