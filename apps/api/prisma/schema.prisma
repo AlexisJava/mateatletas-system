@@ -573,8 +573,8 @@ model PasswordResetToken {
 model RefreshTokenSession {
   /// Identificador único (JTI del refresh token)
   id            String   @id @db.VarChar(36)
-  /// ID del usuario
-  user_id       String   @db.Uuid
+  /// ID del usuario (CUID - compatible con Tutor, Docente, Admin, Estudiante)
+  user_id       String   @db.VarChar(30)
   /// Tipo de usuario (tutor, docente, admin, estudiante)
   user_type     String   @db.VarChar(20)
   /// Dirección IP desde donde se creó la sesión
@@ -618,6 +618,8 @@ model Producto {
   tipo                    TipoProducto
   /// Subcategoría del producto (opcional, para agrupar por tipo)
   subcategoria            String?
+  /// URL de imagen de portada del producto (opcional)
+  imagenPortada           String?              @map("imagen_portada")
   /// Indica si el producto está activo y disponible para compra
   activo                  Boolean              @default(true)
   /// Fecha de inicio del curso (solo para tipo Curso)

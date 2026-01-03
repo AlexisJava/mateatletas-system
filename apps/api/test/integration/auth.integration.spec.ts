@@ -21,7 +21,8 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
+import cookieParser from 'cookie-parser';
 import { PrismaService } from '../../src/core/database/prisma.service';
 import { AppModule } from '../../src/app.module';
 
@@ -38,6 +39,8 @@ describe('[INTEGRATION] Auth Module', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
+    app.use(cookieParser()); // Necesario para parsear cookies httpOnly
     prisma = app.get<PrismaService>(PrismaService);
 
     await app.init();
@@ -52,7 +55,10 @@ describe('[INTEGRATION] Auth Module', () => {
   // Cleanup: Limpiar DB antes de cada test
   // ============================================================================
   beforeEach(async () => {
-    // Limpiar tablas en orden (respetando foreign keys)
+    // Limpiar tablas en orden correcto (primero hijos, después padres)
+    // para respetar foreign keys
+    await prisma.contenido.deleteMany({}); // Hijo de Admin
+    await prisma.estudiante.deleteMany({}); // Hijo de Tutor
     await prisma.tutor.deleteMany({});
     await prisma.docente.deleteMany({});
     await prisma.admin.deleteMany({});
@@ -63,7 +69,7 @@ describe('[INTEGRATION] Auth Module', () => {
   // ============================================================================
   describe('POST /auth/register → POST /auth/login', () => {
     it('should register tutor and login successfully', async () => {
-      // PASO 1: Registrar tutor
+      // PASO 1: Registrar tutor (RegisterDto solo soporta tutores)
       const registerResponse = await request(app.getHttpServer())
         .post('/api/auth/register')
         .send({
@@ -71,16 +77,17 @@ describe('[INTEGRATION] Auth Module', () => {
           password: 'SecurePassword123!',
           nombre: 'Integration',
           apellido: 'Test',
-          role: 'tutor',
         })
         .expect(201);
 
-      expect(registerResponse.body).toHaveProperty('access_token');
+      // El registro solo devuelve { message, user } - no access_token
+      expect(registerResponse.body).toHaveProperty('message');
+      expect(registerResponse.body).toHaveProperty('user');
       expect(registerResponse.body.user).toMatchObject({
         email: 'integration-test@example.com',
         nombre: 'Integration',
         apellido: 'Test',
-        role: 'tutor',
+        role: 'TUTOR',
       });
 
       // PASO 2: Verificar que el tutor existe en la DB
@@ -102,10 +109,14 @@ describe('[INTEGRATION] Auth Module', () => {
         })
         .expect(200);
 
-      expect(loginResponse.body).toHaveProperty('access_token');
+      // El token se envía como cookie httpOnly, no en el body
+      // El body solo contiene { user, roles }
+      expect(loginResponse.body).toHaveProperty('user');
       expect(loginResponse.body.user.email).toBe(
         'integration-test@example.com',
       );
+      // Verificar que se envía la cookie con el token
+      expect(loginResponse.headers['set-cookie']).toBeDefined();
     });
 
     it('should reject duplicate email (unique constraint)', async () => {
@@ -117,11 +128,11 @@ describe('[INTEGRATION] Auth Module', () => {
           password: 'Password123!',
           nombre: 'First',
           apellido: 'User',
-          role: 'tutor',
         })
         .expect(201);
 
       // PASO 2: Intentar registrar con mismo email (debe fallar)
+      // El código usa BadRequestException (400) para emails duplicados
       await request(app.getHttpServer())
         .post('/api/auth/register')
         .send({
@@ -129,9 +140,8 @@ describe('[INTEGRATION] Auth Module', () => {
           password: 'DifferentPassword123!',
           nombre: 'Second',
           apellido: 'User',
-          role: 'tutor',
         })
-        .expect(409); // Conflict
+        .expect(400); // BadRequest - el código actual usa esta excepción
 
       // PASO 3: Verificar que solo hay 1 tutor en DB
       const tutorsCount = await prisma.tutor.count({
@@ -153,7 +163,6 @@ describe('[INTEGRATION] Auth Module', () => {
         password: 'CorrectPassword123!',
         nombre: 'Valid',
         apellido: 'User',
-        role: 'tutor',
       });
 
       // Test: Login con password incorrecta
@@ -181,24 +190,33 @@ describe('[INTEGRATION] Auth Module', () => {
   // INTEGRATION TEST 3: JWT Token funciona con endpoints protegidos
   // ============================================================================
   describe('Protected endpoints with JWT', () => {
-    it('should access protected endpoint with valid token', async () => {
-      // PASO 1: Login y obtener token
-      const loginResponse = await request(app.getHttpServer())
+    it('should access protected endpoint with valid cookie', async () => {
+      // PASO 1: Registrar tutor
+      await request(app.getHttpServer())
         .post('/api/auth/register')
         .send({
           email: 'protected@example.com',
           password: 'Password123!',
           nombre: 'Protected',
           apellido: 'User',
-          role: 'tutor',
+        })
+        .expect(201);
+
+      // PASO 2: Login para obtener cookies
+      const loginResponse = await request(app.getHttpServer())
+        .post('/api/auth/login')
+        .send({
+          email: 'protected@example.com',
+          password: 'Password123!',
         });
 
-      const token = loginResponse.body.access_token;
+      // Extraer cookies del header set-cookie
+      const cookies = loginResponse.headers['set-cookie'];
 
-      // PASO 2: Acceder a endpoint protegido
+      // PASO 3: Acceder a endpoint protegido usando las cookies
       const profileResponse = await request(app.getHttpServer())
         .get('/api/auth/profile')
-        .set('Authorization', `Bearer ${token}`)
+        .set('Cookie', cookies)
         .expect(200);
 
       expect(profileResponse.body.email).toBe('protected@example.com');

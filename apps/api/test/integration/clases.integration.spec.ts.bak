@@ -19,9 +19,12 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../src/core/database/prisma.service';
 import { AppModule } from '../../src/app.module';
+
+const BCRYPT_ROUNDS = 12;
 
 describe('[INTEGRATION] Clases Module', () => {
   let app: INestApplication;
@@ -44,6 +47,7 @@ describe('[INTEGRATION] Clases Module', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
 
     app.useGlobalPipes(
       new ValidationPipe({
@@ -77,20 +81,31 @@ describe('[INTEGRATION] Clases Module', () => {
     await prisma.docente.deleteMany({});
     await prisma.admin.deleteMany({});
 
-    // Crear admin
-    const adminResponse = await request(app.getHttpServer())
-      .post('/api/auth/register')
+    // Crear admin directamente con Prisma (RegisterDto no soporta role)
+    const adminPasswordHash = await bcrypt.hash(
+      'AdminPassword123!',
+      BCRYPT_ROUNDS,
+    );
+    const admin = await prisma.admin.create({
+      data: {
+        email: 'admin@example.com',
+        password_hash: adminPasswordHash,
+        nombre: 'Admin',
+        apellido: 'Test',
+      },
+    });
+    adminId = admin.id;
+
+    // Login admin para obtener token
+    const adminLoginResponse = await request(app.getHttpServer())
+      .post('/api/auth/login')
       .send({
         email: 'admin@example.com',
         password: 'AdminPassword123!',
-        nombre: 'Admin',
-        apellido: 'Test',
-        role: 'admin',
       });
-    adminToken = adminResponse.body.access_token;
-    adminId = adminResponse.body.user.adminId;
+    adminToken = adminLoginResponse.body.access_token;
 
-    // Crear tutor
+    // Crear tutor via API (RegisterDto soporta tutores)
     const tutorResponse = await request(app.getHttpServer())
       .post('/api/auth/register')
       .send({
@@ -98,23 +113,33 @@ describe('[INTEGRATION] Clases Module', () => {
         password: 'TutorPassword123!',
         nombre: 'Tutor',
         apellido: 'Test',
-        role: 'tutor',
       });
     tutorToken = tutorResponse.body.access_token;
     tutorId = tutorResponse.body.user.tutorId;
 
-    // Crear docente
-    const docenteResponse = await request(app.getHttpServer())
-      .post('/api/auth/register')
+    // Crear docente directamente con Prisma (RegisterDto no soporta role)
+    const docentePasswordHash = await bcrypt.hash(
+      'DocentePassword123!',
+      BCRYPT_ROUNDS,
+    );
+    const docente = await prisma.docente.create({
+      data: {
+        email: 'docente@example.com',
+        password_hash: docentePasswordHash,
+        nombre: 'Docente',
+        apellido: 'Test',
+      },
+    });
+    docenteId = docente.id;
+
+    // Login docente para obtener token
+    const docenteLoginResponse = await request(app.getHttpServer())
+      .post('/api/auth/login')
       .send({
         email: 'docente@example.com',
         password: 'DocentePassword123!',
-        nombre: 'Docente',
-        apellido: 'Test',
-        role: 'docente',
       });
-    docenteToken = docenteResponse.body.access_token;
-    docenteId = docenteResponse.body.user.docenteId;
+    docenteToken = docenteLoginResponse.body.access_token;
 
     // Crear estudiante
     const estudiante = await prisma.estudiante.create({
@@ -723,7 +748,6 @@ describe('[INTEGRATION] Clases Module', () => {
           password: 'Password123!',
           nombre: 'Tutor2',
           apellido: 'Test',
-          role: 'tutor',
         });
 
       const token2 = response2.body.access_token;

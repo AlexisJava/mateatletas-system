@@ -140,4 +140,13 @@ export class DocentesService {
   async getComisionDetalle(comisionId: string, docenteId: string) {
     return this.facade.getComisionDetalle(comisionId, docenteId);
   }
+
+  /**
+   * Obtiene todas las comisiones asignadas al docente
+   * @param docenteId - ID del docente
+   * @returns Lista de comisiones con inscripciones_count y proxima_clase
+   */
+  async getMisComisiones(docenteId: string) {
+    return this.facade.getMisComisiones(docenteId);
+  }
 }

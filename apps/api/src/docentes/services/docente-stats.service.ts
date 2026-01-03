@@ -1158,4 +1158,189 @@ export class DocenteStatsService {
       };
     });
   }
+
+  /**
+   * Obtiene todas las comisiones asignadas al docente
+   * Incluye: producto, casa, inscripciones_count, proxima_clase
+   * Filtra comisiones con fecha_fin pasada
+   * Ordena por próxima clase (más cercana primero)
+   *
+   * @param docenteId - ID del docente
+   * @returns Lista de comisiones formateadas
+   */
+  async getMisComisiones(docenteId: string) {
+    await this.validator.validarDocenteExiste(docenteId);
+
+    const now = new Date();
+
+    // Obtener comisiones del docente que no hayan finalizado
+    const comisiones = await this.prisma.comision.findMany({
+      where: {
+        docente_id: docenteId,
+        OR: [{ fecha_fin: null }, { fecha_fin: { gte: now } }],
+      },
+      select: {
+        id: true,
+        nombre: true,
+        horario: true,
+        cupo_maximo: true,
+        fecha_fin: true,
+        producto: {
+          select: {
+            id: true,
+            nombre: true,
+            descripcion: true,
+            imagenPortada: true,
+          },
+        },
+        casa: {
+          select: {
+            id: true,
+            tipo: true,
+            nombre: true,
+            colorPrimary: true,
+            colorSecondary: true,
+          },
+        },
+        inscripciones: {
+          where: {
+            estado: 'Confirmada',
+          },
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    // Mapear y calcular proxima_clase para cada comisión
+    const comisionesConProxima = comisiones.map((comision) => {
+      const proximaClase = this.calcularProximaClase(
+        comision.horario,
+        comision.fecha_fin,
+      );
+
+      return {
+        id: comision.id,
+        nombre: comision.nombre,
+        horario: comision.horario,
+        cupo_maximo: comision.cupo_maximo,
+        producto: comision.producto,
+        casa: comision.casa,
+        inscripciones_count: comision.inscripciones.length,
+        proxima_clase: proximaClase?.toISOString() ?? null,
+      };
+    });
+
+    // Ordenar por próxima clase (más cercana primero, nulls al final)
+    comisionesConProxima.sort((a, b) => {
+      if (!a.proxima_clase && !b.proxima_clase) return 0;
+      if (!a.proxima_clase) return 1;
+      if (!b.proxima_clase) return -1;
+      return (
+        new Date(a.proxima_clase).getTime() -
+        new Date(b.proxima_clase).getTime()
+      );
+    });
+
+    return comisionesConProxima;
+  }
+
+  /**
+   * Calcula la próxima ocurrencia de una clase basado en el horario
+   * Soporta formatos: "Lunes 14:30", "Lun y Mie 19:00", "Lun-Vie 9:00-12:00"
+   *
+   * @param horario - String con el horario (ej: "Lunes 14:30")
+   * @param fechaFin - Fecha de fin de la comisión (opcional)
+   * @returns Date de la próxima clase o null
+   */
+  private calcularProximaClase(
+    horario: string | null,
+    fechaFin: Date | null,
+  ): Date | null {
+    if (!horario) return null;
+
+    const now = new Date();
+
+    // Si la comisión ya terminó, no hay próxima clase
+    if (fechaFin && fechaFin < now) return null;
+
+    // Mapeo de días en español a número (0=Domingo, 1=Lunes, etc.)
+    const diasMap: Record<string, number> = {
+      domingo: 0,
+      dom: 0,
+      lunes: 1,
+      lun: 1,
+      martes: 2,
+      mar: 2,
+      miercoles: 3,
+      miércoles: 3,
+      mie: 3,
+      jueves: 4,
+      jue: 4,
+      viernes: 5,
+      vie: 5,
+      sabado: 6,
+      sábado: 6,
+      sab: 6,
+    };
+
+    // Extraer días del horario
+    const horarioLower = horario.toLowerCase();
+    const diasEncontrados: number[] = [];
+
+    // Buscar días individuales
+    for (const [dia, num] of Object.entries(diasMap)) {
+      if (horarioLower.includes(dia)) {
+        if (!diasEncontrados.includes(num)) {
+          diasEncontrados.push(num);
+        }
+      }
+    }
+
+    // Extraer hora (formato HH:MM)
+    const horaMatch = horario.match(/(\d{1,2}):(\d{2})/);
+    if (!horaMatch?.[1] || !horaMatch[2] || diasEncontrados.length === 0) {
+      return null;
+    }
+
+    const hora = parseInt(horaMatch[1], 10);
+    const minutos = parseInt(horaMatch[2], 10);
+
+    // Encontrar la próxima ocurrencia
+    const diaActual = now.getDay();
+    const horaActual = now.getHours() * 60 + now.getMinutes();
+    const horaClase = hora * 60 + minutos;
+
+    let diasHastaProxima = Infinity;
+    let diaProximo = -1;
+
+    for (const diaClase of diasEncontrados) {
+      let diasHasta = diaClase - diaActual;
+
+      // Si es hoy pero ya pasó la hora, buscar la próxima semana
+      if (diasHasta === 0 && horaActual >= horaClase) {
+        diasHasta = 7;
+      } else if (diasHasta < 0) {
+        diasHasta += 7;
+      }
+
+      if (diasHasta < diasHastaProxima) {
+        diasHastaProxima = diasHasta;
+        diaProximo = diaClase;
+      }
+    }
+
+    if (diaProximo === -1) return null;
+
+    // Construir la fecha de la próxima clase
+    const proximaClase = new Date(now);
+    proximaClase.setDate(now.getDate() + diasHastaProxima);
+    proximaClase.setHours(hora, minutos, 0, 0);
+
+    // Verificar que no exceda la fecha de fin
+    if (fechaFin && proximaClase > fechaFin) return null;
+
+    return proximaClase;
+  }
 }

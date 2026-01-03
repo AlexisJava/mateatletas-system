@@ -132,6 +132,17 @@ export class DocentesController {
   // ============================================================================
 
   /**
+   * GET /docentes/me/comisiones - Listar todas las comisiones del docente
+   * @param user - Usuario autenticado (del JWT)
+   * @returns Lista de comisiones con inscripciones_count y proxima_clase
+   */
+  @Get('me/comisiones')
+  @Roles(Role.DOCENTE)
+  async getMisComisiones(@GetUser() user: AuthUser) {
+    return this.docentesService.getMisComisiones(user.id);
+  }
+
+  /**
    * GET /docentes/me/comisiones/:id - Obtener detalles de una comisión
    * @param id - ID de la comisión
    * @param user - Usuario autenticado (del JWT)

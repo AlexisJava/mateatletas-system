@@ -8,7 +8,6 @@ import {
   IsOptional,
   IsUrl,
   MaxLength,
-  IsUUID,
   Matches,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -136,14 +135,12 @@ export class CreateEstudianteDto {
    * Normalmente se asigna automáticamente por edad
    */
   @ApiPropertyOptional({
-    description: 'UUID de la casa a la que pertenece el estudiante',
-    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID de la casa a la que pertenece el estudiante (CUID)',
+    example: 'clxyz1234567890abcdef',
     type: String,
-    format: 'uuid',
   })
   @IsOptional()
   @IsString({ message: 'El ID de la casa debe ser un texto' })
-  @IsUUID('4', { message: 'El ID de la casa debe ser un UUID válido' })
   @Trim()
   casaId?: string;
 }

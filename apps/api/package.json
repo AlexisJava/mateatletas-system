@@ -17,7 +17,7 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:unit": "jest --testPathIgnorePatterns=integration.spec.ts --testPathIgnorePatterns=e2e-spec.ts",
-    "test:integration": "jest --testPathPattern=integration.spec.ts --runInBand",
+    "test:integration": "jest --config ./test/jest-e2e.json --testPathPatterns=integration.spec.ts --runInBand",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:cov:unit": "jest --coverage --testPathIgnorePatterns=integration.spec.ts --testPathIgnorePatterns=e2e-spec.ts",
