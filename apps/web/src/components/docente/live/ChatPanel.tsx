@@ -1,7 +1,16 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Wifi, WifiOff, AlertCircle, RefreshCw } from 'lucide-react';
+import {
+  Send,
+  Wifi,
+  WifiOff,
+  AlertCircle,
+  RefreshCw,
+  MessageCircleOff,
+  ToggleLeft,
+  ToggleRight,
+} from 'lucide-react';
 import type { MensajeChat, ChatConnectionState } from './types';
 
 interface ChatPanelProps {
@@ -11,8 +20,14 @@ interface ChatPanelProps {
   connectionState: ChatConnectionState;
   /** Error actual (si hay) */
   error: string | null;
+  /** Si el chat está habilitado (controlado por el docente) */
+  chatHabilitado?: boolean;
+  /** Si el usuario actual es docente (para mostrar toggle) */
+  isDocente?: boolean;
   /** Función para enviar mensaje */
   onSendMessage: (contenido: string) => Promise<{ exito: boolean; error?: string }>;
+  /** Función para toggle del chat (solo docentes) */
+  onToggleChat?: (habilitado: boolean) => Promise<{ exito: boolean; error?: string }>;
   /** Función para reconectar */
   onReconnect: () => void;
   /** ID del usuario actual (para diferenciar mensajes propios) */
@@ -26,15 +41,27 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   mensajes,
   connectionState,
   error,
+  chatHabilitado = true,
+  isDocente = false,
   onSendMessage,
+  onToggleChat,
   onReconnect,
   currentUserId,
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [isToggling, setIsToggling] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Handler para toggle del chat
+  const handleToggleChat = async () => {
+    if (!onToggleChat || isToggling) return;
+    setIsToggling(true);
+    await onToggleChat(!chatHabilitado);
+    setIsToggling(false);
+  };
 
   // Auto-scroll al final cuando llegan nuevos mensajes
   useEffect(() => {
@@ -156,7 +183,31 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     <div className="flex flex-col h-full bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900/80">
-        <h3 className="font-semibold text-white">Chat</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold text-white">Chat</h3>
+          {/* Toggle para docente */}
+          {isDocente && onToggleChat && (
+            <button
+              onClick={handleToggleChat}
+              disabled={isToggling || connectionState !== 'connected'}
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                chatHabilitado
+                  ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
+                  : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              title={chatHabilitado ? 'Deshabilitar chat' : 'Habilitar chat'}
+            >
+              {isToggling ? (
+                <RefreshCw size={14} className="animate-spin" />
+              ) : chatHabilitado ? (
+                <ToggleRight size={14} />
+              ) : (
+                <ToggleLeft size={14} />
+              )}
+              <span>{chatHabilitado ? 'Activo' : 'Pausado'}</span>
+            </button>
+          )}
+        </div>
         {renderConnectionStatus()}
       </div>
 
@@ -212,6 +263,13 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
 
       {/* Input area */}
       <div className="p-3 border-t border-slate-800 bg-slate-900/80">
+        {/* Banner de chat deshabilitado (solo para no-docentes) */}
+        {!chatHabilitado && !isDocente && (
+          <div className="flex items-center justify-center gap-2 py-2 mb-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+            <MessageCircleOff size={16} className="text-amber-400" />
+            <span className="text-xs text-amber-400">El chat está pausado por el docente</span>
+          </div>
+        )}
         {sendError && <p className="text-xs text-red-400 mb-2">{sendError}</p>}
         <div className="flex gap-2">
           <input
@@ -221,15 +279,26 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={
-              connectionState === 'connected' ? 'Escribe un mensaje...' : 'Conectando...'
+              !chatHabilitado && !isDocente
+                ? 'Chat pausado...'
+                : connectionState === 'connected'
+                  ? 'Escribe un mensaje...'
+                  : 'Conectando...'
             }
-            disabled={connectionState !== 'connected' || isSending}
+            disabled={
+              connectionState !== 'connected' || isSending || (!chatHabilitado && !isDocente)
+            }
             className="flex-1 px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             maxLength={2000}
           />
           <button
             onClick={handleSend}
-            disabled={connectionState !== 'connected' || isSending || !inputValue.trim()}
+            disabled={
+              connectionState !== 'connected' ||
+              isSending ||
+              !inputValue.trim() ||
+              (!chatHabilitado && !isDocente)
+            }
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
           >
             <Send size={18} />

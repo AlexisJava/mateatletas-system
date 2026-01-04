@@ -23,7 +23,15 @@ interface ClassRoomWithChatProps {
 }
 
 const ClassRoomWithChat: React.FC<ClassRoomWithChatProps> = ({ config, onEndClass }) => {
-  const { mensajes, connectionState, error, enviarMensaje, reconectar } = useAulaVivaChat({
+  const {
+    mensajes,
+    connectionState,
+    error,
+    chatHabilitado,
+    enviarMensaje,
+    toggleChat,
+    reconectar,
+  } = useAulaVivaChat({
     claseGrupoId: config.claseGrupoId,
     comisionId: config.comisionId,
   });
@@ -36,6 +44,13 @@ const ClassRoomWithChat: React.FC<ClassRoomWithChatProps> = ({ config, onEndClas
     [enviarMensaje],
   );
 
+  const handleToggleChat = useCallback(
+    async (habilitado: boolean) => {
+      return toggleChat(habilitado);
+    },
+    [toggleChat],
+  );
+
   return (
     <ClassRoom
       title={config.title}
@@ -44,7 +59,9 @@ const ClassRoomWithChat: React.FC<ClassRoomWithChatProps> = ({ config, onEndClas
         mensajes,
         connectionState,
         error,
+        chatHabilitado,
         onSendMessage: handleSendMessage,
+        onToggleChat: handleToggleChat,
         onReconnect: reconectar,
       }}
     />

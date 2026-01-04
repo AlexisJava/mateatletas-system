@@ -21,7 +21,9 @@ interface ClassRoomProps {
     mensajes: MensajeChat[];
     connectionState: ChatConnectionState;
     error: string | null;
+    chatHabilitado: boolean;
     onSendMessage: (contenido: string) => Promise<{ exito: boolean; error?: string }>;
+    onToggleChat: (habilitado: boolean) => Promise<{ exito: boolean; error?: string }>;
     onReconnect: () => void;
     currentUserId?: string;
   };
@@ -165,7 +167,10 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({ title, onEndClass, chat })
               mensajes={chat.mensajes}
               connectionState={chat.connectionState}
               error={chat.error}
+              chatHabilitado={chat.chatHabilitado}
+              isDocente={true}
               onSendMessage={chat.onSendMessage}
+              onToggleChat={chat.onToggleChat}
               onReconnect={chat.onReconnect}
               currentUserId={chat.currentUserId}
             />

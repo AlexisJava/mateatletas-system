@@ -14,7 +14,12 @@ import { Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { createWsJwtMiddleware } from './middleware/ws-jwt.middleware';
 import type { AuthenticatedSocket } from './interfaces';
 import { PresenciaService, Participante } from './services/presencia.service';
-import { UnirseSalaDto, SalirSalaDto, EnviarMensajeDto } from './dto';
+import {
+  UnirseSalaDto,
+  SalirSalaDto,
+  EnviarMensajeDto,
+  ToggleChatDto,
+} from './dto';
 import { randomUUID } from 'crypto';
 
 /** Respuesta al unirse a una sala */
@@ -228,6 +233,14 @@ export class AulaVivaGateway
       return { exito: false, error: 'No estás en esta sala' };
     }
 
+    // Verificar que el chat esté habilitado
+    if (!this.presenciaService.isChatHabilitado(salaId)) {
+      return {
+        exito: false,
+        error: 'El chat está deshabilitado por el docente',
+      };
+    }
+
     // Construir el mensaje
     const mensaje: MensajeChat = {
       id: randomUUID(),
@@ -247,5 +260,46 @@ export class AulaVivaGateway
     );
 
     return { exito: true, mensaje };
+  }
+
+  /**
+   * Permite al docente habilitar/deshabilitar el chat de una sala
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   */
+  @SubscribeMessage('toggle-chat')
+  handleToggleChat(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: ToggleChatDto,
+  ): { exito: boolean; habilitado?: boolean; error?: string } {
+    const { salaId, habilitado } = payload;
+
+    // Solo docentes pueden controlar el chat
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo el docente puede controlar el chat' };
+    }
+
+    // Verificar que el docente está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Actualizar estado del chat
+    this.presenciaService.setChatHabilitado(salaId, habilitado);
+
+    // Notificar a todos en la sala del cambio
+    this.server.to(salaId).emit('chat-toggle', {
+      salaId,
+      habilitado,
+      mensaje: habilitado
+        ? 'El docente ha habilitado el chat'
+        : 'El docente ha deshabilitado el chat',
+    });
+
+    this.logger.log(
+      `Chat ${habilitado ? 'habilitado' : 'deshabilitado'} en sala ${salaId} por ${client.data.nombre}`,
+    );
+
+    return { exito: true, habilitado };
   }
 }

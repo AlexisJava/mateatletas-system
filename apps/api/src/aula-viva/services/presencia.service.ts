@@ -36,6 +36,9 @@ export class PresenciaService {
   private salaToParticipantes: Map<string, Map<string, Participante>> =
     new Map();
 
+  /** Mapa de salaId -> boolean indicando si el chat está habilitado */
+  private salaChatHabilitado: Map<string, boolean> = new Map();
+
   /**
    * Agrega un participante a una sala
    * Un mismo socket puede estar en múltiples salas
@@ -188,5 +191,24 @@ export class PresenciaService {
     }
 
     return false;
+  }
+
+  /**
+   * Habilita o deshabilita el chat de una sala
+   * Por defecto, el chat está habilitado (true)
+   */
+  setChatHabilitado(salaId: string, habilitado: boolean): void {
+    this.salaChatHabilitado.set(salaId, habilitado);
+    this.logger.log(
+      `Chat ${habilitado ? 'habilitado' : 'deshabilitado'} en sala ${salaId}`,
+    );
+  }
+
+  /**
+   * Verifica si el chat está habilitado en una sala
+   * Si no hay registro, asume que está habilitado (true)
+   */
+  isChatHabilitado(salaId: string): boolean {
+    return this.salaChatHabilitado.get(salaId) ?? true;
   }
 }

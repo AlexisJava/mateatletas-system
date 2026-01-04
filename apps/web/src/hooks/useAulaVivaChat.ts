@@ -23,6 +23,7 @@ interface SocketHandlers {
   handleNuevoMensaje: (mensaje: MensajeChat) => void;
   handleParticipanteEntro: (data: { nombre: string }) => void;
   handleParticipanteSalio: (data: { nombre: string }) => void;
+  handleChatToggle: (data: { habilitado: boolean; mensaje: string }) => void;
 }
 
 /**
@@ -60,8 +61,12 @@ interface UseAulaVivaChatReturn {
   error: string | null;
   /** ID de la sala actual */
   salaId: string | null;
+  /** Si el chat está habilitado (controlado por el docente) */
+  chatHabilitado: boolean;
   /** Función para enviar un mensaje */
   enviarMensaje: (contenido: string) => Promise<EnviarMensajeResponse>;
+  /** Función para habilitar/deshabilitar chat (solo docentes) */
+  toggleChat: (habilitado: boolean) => Promise<{ exito: boolean; error?: string }>;
   /** Función para reconectar manualmente */
   reconectar: () => void;
   /** Función para desconectar */
@@ -91,6 +96,7 @@ export function useAulaVivaChat(options: UseAulaVivaChatOptions): UseAulaVivaCha
   const [connectionState, setConnectionState] = useState<ChatConnectionState>('disconnected');
   const [error, setError] = useState<string | null>(null);
   const [salaId, setSalaId] = useState<string | null>(null);
+  const [chatHabilitado, setChatHabilitado] = useState(true);
 
   const socketRef = useRef<Socket | null>(null);
   const handlersRef = useRef<SocketHandlers | null>(null);
@@ -190,6 +196,11 @@ export function useAulaVivaChat(options: UseAulaVivaChatOptions): UseAulaVivaCha
         console.log(`${data.nombre} salió del chat`);
       };
 
+      const handleChatToggle = (data: { habilitado: boolean; mensaje: string }) => {
+        setChatHabilitado(data.habilitado);
+        console.log(`Chat toggle: ${data.mensaje}`);
+      };
+
       // Guardar referencias para cleanup
       handlersRef.current = {
         handleConnect,
@@ -198,6 +209,7 @@ export function useAulaVivaChat(options: UseAulaVivaChatOptions): UseAulaVivaCha
         handleNuevoMensaje,
         handleParticipanteEntro,
         handleParticipanteSalio,
+        handleChatToggle,
       };
 
       // Registrar listeners
@@ -207,6 +219,7 @@ export function useAulaVivaChat(options: UseAulaVivaChatOptions): UseAulaVivaCha
       socket.on('nuevo-mensaje', handleNuevoMensaje);
       socket.on('participante-entro', handleParticipanteEntro);
       socket.on('participante-salio', handleParticipanteSalio);
+      socket.on('chat-toggle', handleChatToggle);
     } catch (err) {
       console.error('Error al conectar WebSocket:', err);
       setError(err instanceof Error ? err.message : 'Error al conectar al chat');
@@ -231,6 +244,7 @@ export function useAulaVivaChat(options: UseAulaVivaChatOptions): UseAulaVivaCha
       socket.off('nuevo-mensaje', handlers.handleNuevoMensaje);
       socket.off('participante-entro', handlers.handleParticipanteEntro);
       socket.off('participante-salio', handlers.handleParticipanteSalio);
+      socket.off('chat-toggle', handlers.handleChatToggle);
 
       socket.disconnect();
     }
@@ -281,6 +295,32 @@ export function useAulaVivaChat(options: UseAulaVivaChatOptions): UseAulaVivaCha
     [salaId],
   );
 
+  /**
+   * Habilitar/deshabilitar chat (solo docentes)
+   */
+  const toggleChat = useCallback(
+    async (habilitado: boolean): Promise<{ exito: boolean; error?: string }> => {
+      if (!socketRef.current?.connected) {
+        return { exito: false, error: 'No conectado al chat' };
+      }
+
+      if (!salaId) {
+        return { exito: false, error: 'No está en una sala' };
+      }
+
+      return new Promise((resolve) => {
+        socketRef.current!.emit(
+          'toggle-chat',
+          { salaId, habilitado },
+          (response: { exito: boolean; habilitado?: boolean; error?: string }) => {
+            resolve(response);
+          },
+        );
+      });
+    },
+    [salaId],
+  );
+
   // Conectar automáticamente cuando hay un ID de sala
   useEffect(() => {
     if (claseGrupoId || comisionId) {
@@ -297,7 +337,9 @@ export function useAulaVivaChat(options: UseAulaVivaChatOptions): UseAulaVivaCha
     connectionState,
     error,
     salaId,
+    chatHabilitado,
     enviarMensaje,
+    toggleChat,
     reconectar,
     desconectar,
   };
