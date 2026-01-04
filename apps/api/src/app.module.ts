@@ -36,6 +36,7 @@ import { EmailModule } from './email/email.module';
 import { SuscripcionesModule } from './suscripciones/suscripciones.module';
 import { ContenidosModule } from './contenidos/contenidos.module';
 import { LivekitModule } from './livekit/livekit.module';
+import { AulaVivaModule } from './aula-viva/aula-viva.module';
 
 /**
  * AppModule
@@ -90,6 +91,7 @@ import { LivekitModule } from './livekit/livekit.module';
     SuscripcionesModule, // Suscripciones MercadoPago PreApproval
     ContenidosModule, // Sistema de contenido educativo (Sandbox)
     LivekitModule, // Clases en vivo (video/audio)
+    AulaVivaModule, // WebSocket para aula virtual en tiempo real
     // [ELIMINADO] CursosModule, StudioModule - sistema legacy de contenido
   ],
   controllers: [AppController],

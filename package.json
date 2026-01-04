@@ -116,6 +116,9 @@
     "camera-controls": "2.9.0"
   },
   "dependencies": {
-    "react-use": "^17.6.0"
+    "@nestjs/platform-socket.io": "^11.1.11",
+    "@nestjs/websockets": "^11.1.11",
+    "react-use": "^17.6.0",
+    "socket.io": "^4.8.3"
   }
 }

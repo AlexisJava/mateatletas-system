@@ -128,6 +128,7 @@ import { SessionService } from './services/session.service';
     PasswordService,
     UserLookupService,
     SessionService,
+    JwtModule, // Exportado para uso en WebSocket (AulaVivaModule)
   ],
 })
 export class AuthModule {}
