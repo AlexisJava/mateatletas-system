@@ -183,33 +183,38 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     <div className="flex flex-col h-full bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900/80">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-white">Chat</h3>
-          {/* Toggle para docente */}
-          {isDocente && onToggleChat && (
-            <button
-              onClick={handleToggleChat}
-              disabled={isToggling || connectionState !== 'connected'}
-              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                chatHabilitado
-                  ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
-                  : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-              title={chatHabilitado ? 'Deshabilitar chat' : 'Habilitar chat'}
-            >
-              {isToggling ? (
-                <RefreshCw size={14} className="animate-spin" />
-              ) : chatHabilitado ? (
-                <ToggleRight size={14} />
-              ) : (
-                <ToggleLeft size={14} />
-              )}
-              <span>{chatHabilitado ? 'Activo' : 'Pausado'}</span>
-            </button>
-          )}
-        </div>
+        <h3 className="font-semibold text-white">Chat en vivo</h3>
         {renderConnectionStatus()}
       </div>
+
+      {/* Control de chat para docente - barra dedicada y prominente */}
+      {isDocente && onToggleChat && (
+        <div className="px-3 py-2 border-b border-slate-800 bg-slate-800/50">
+          <button
+            onClick={handleToggleChat}
+            disabled={isToggling || connectionState !== 'connected'}
+            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl font-medium transition-all ${
+              chatHabilitado
+                ? 'bg-emerald-500/20 border-2 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30 hover:border-emerald-500/60'
+                : 'bg-red-500/20 border-2 border-red-500/40 text-red-400 hover:bg-red-500/30 hover:border-red-500/60'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            <div className="flex items-center gap-2">
+              {isToggling ? (
+                <RefreshCw size={18} className="animate-spin" />
+              ) : chatHabilitado ? (
+                <ToggleRight size={20} />
+              ) : (
+                <ToggleLeft size={20} />
+              )}
+              <span className="text-sm">{chatHabilitado ? 'Chat habilitado' : 'Chat pausado'}</span>
+            </div>
+            <span className="text-xs opacity-75">
+              {chatHabilitado ? 'Click para pausar' : 'Click para habilitar'}
+            </span>
+          </button>
+        </div>
+      )}
 
       {/* Error banner */}
       {error && (
