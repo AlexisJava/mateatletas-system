@@ -168,15 +168,22 @@ describe('Chat E2E (AulaVivaGateway)', () => {
     });
   };
 
+  // CUIDs de prueba válidos (formato: c + 24 caracteres alfanuméricos = 25 total)
+  const TEST_CUIDS = {
+    sala1: 'ctest00000000000000000001',
+    sala2: 'ctest00000000000000000002',
+    sala3a: 'ctest0000000000000000003a',
+    sala3b: 'ctest0000000000000000003b',
+    sala4: 'ctest00000000000000000004',
+    sala5: 'ctest00000000000000000005',
+  };
+
   describe('enviar-mensaje', () => {
     it('should_receive_own_message_after_sending', async () => {
       // Arrange
       const token = generarToken(docenteData);
       clienteA = await crearCliente(token);
-      const { salaId } = await unirseSala(
-        clienteA,
-        '11111111-1111-4111-8111-111111111101',
-      );
+      const { salaId } = await unirseSala(clienteA, TEST_CUIDS.sala1);
 
       // 1. Registrar listener ANTES de enviar
       const mensajeRecibido = new Promise<MensajeChat>((resolve) => {
@@ -204,11 +211,8 @@ describe('Chat E2E (AulaVivaGateway)', () => {
       clienteA = await crearCliente(tokenA);
       clienteB = await crearCliente(tokenB);
 
-      const { salaId } = await unirseSala(
-        clienteA,
-        '22222222-2222-4222-8222-222222222202',
-      );
-      await unirseSala(clienteB, '22222222-2222-4222-8222-222222222202');
+      const { salaId } = await unirseSala(clienteA, TEST_CUIDS.sala2);
+      await unirseSala(clienteB, TEST_CUIDS.sala2);
 
       const mensajeRecibidoPorB = new Promise<MensajeChat>((resolve) => {
         clienteB!.on('nuevo-mensaje', (mensaje: MensajeChat) => {
@@ -233,11 +237,8 @@ describe('Chat E2E (AulaVivaGateway)', () => {
       clienteA = await crearCliente(tokenA);
       clienteB = await crearCliente(tokenB);
 
-      const { salaId: sala1 } = await unirseSala(
-        clienteA,
-        '33333333-3333-4333-8333-333333333301',
-      );
-      await unirseSala(clienteB, '33333333-3333-4333-8333-333333333302');
+      const { salaId: sala1 } = await unirseSala(clienteA, TEST_CUIDS.sala3a);
+      await unirseSala(clienteB, TEST_CUIDS.sala3b);
 
       let mensajeRecibido = false;
       clienteB!.on('nuevo-mensaje', () => {
@@ -257,10 +258,7 @@ describe('Chat E2E (AulaVivaGateway)', () => {
       // Arrange
       const token = generarToken(estudianteAData);
       clienteA = await crearCliente(token);
-      const { salaId } = await unirseSala(
-        clienteA,
-        '44444444-4444-4444-8444-444444444403',
-      );
+      const { salaId } = await unirseSala(clienteA, TEST_CUIDS.sala4);
 
       const mensajeRecibido = new Promise<MensajeChat>((resolve) => {
         clienteA!.on('nuevo-mensaje', (mensaje: MensajeChat) => {
@@ -311,11 +309,8 @@ describe('Chat E2E (AulaVivaGateway)', () => {
       // Arrange
       const token = generarToken(docenteData);
       clienteA = await crearCliente(token);
-      // UUID válido v4 para pasar validación del DTO
-      const { salaId } = await unirseSala(
-        clienteA,
-        '11111111-1111-4111-8111-111111111104',
-      );
+      // CUID válido para pasar validación del DTO
+      const { salaId } = await unirseSala(clienteA, TEST_CUIDS.sala1);
 
       // Act
       const response = await enviarMensaje(clienteA, salaId, '   ');
@@ -329,10 +324,7 @@ describe('Chat E2E (AulaVivaGateway)', () => {
       // Arrange
       const token = generarToken(docenteData);
       clienteA = await crearCliente(token);
-      const { salaId } = await unirseSala(
-        clienteA,
-        '55555555-5555-4555-8555-555555555505',
-      );
+      const { salaId } = await unirseSala(clienteA, TEST_CUIDS.sala5);
       const mensajeLargo = 'a'.repeat(2001);
 
       // Act

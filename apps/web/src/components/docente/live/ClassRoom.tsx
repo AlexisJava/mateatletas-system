@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   VideoTrack,
   useLocalParticipant,
@@ -8,19 +8,31 @@ import {
   useRoomContext,
 } from '@livekit/components-react';
 import { Track, RoomEvent } from 'livekit-client';
-import { Users, Clock, Wifi } from 'lucide-react';
+import { Users, Clock, Wifi, MessageSquare, X } from 'lucide-react';
 import { ControlBar } from './ControlBar';
+import { ChatPanel } from './ChatPanel';
+import type { MensajeChat, ChatConnectionState } from './types';
 
 interface ClassRoomProps {
   title: string;
   onEndClass: () => void;
+  /** Props del chat */
+  chat?: {
+    mensajes: MensajeChat[];
+    connectionState: ChatConnectionState;
+    error: string | null;
+    onSendMessage: (contenido: string) => Promise<{ exito: boolean; error?: string }>;
+    onReconnect: () => void;
+    currentUserId?: string;
+  };
 }
 
-export const ClassRoom: React.FC<ClassRoomProps> = ({ title, onEndClass }) => {
+export const ClassRoom: React.FC<ClassRoomProps> = ({ title, onEndClass, chat }) => {
   const room = useRoomContext();
   const { localParticipant } = useLocalParticipant();
   const [elapsedTime, setElapsedTime] = React.useState(0);
   const [participantCount, setParticipantCount] = React.useState(1);
+  const [isChatOpen, setIsChatOpen] = useState(chat !== undefined);
 
   // Timer
   React.useEffect(() => {
@@ -93,37 +105,70 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({ title, onEndClass }) => {
           <div className="flex items-center gap-2 text-emerald-400">
             <Wifi size={16} />
           </div>
+          {/* Chat toggle button */}
+          {chat && (
+            <button
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
+                isChatOpen
+                  ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+                  : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+              }`}
+            >
+              {isChatOpen ? <X size={16} /> : <MessageSquare size={16} />}
+              <span className="text-sm font-medium hidden sm:inline">
+                {isChatOpen ? 'Cerrar' : 'Chat'}
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Main Video Area */}
-      <div className="flex-1 relative flex items-center justify-center p-4 bg-slate-950">
-        {/* Screen Share (main view when active) */}
-        {screenShareTrack ? (
-          <div className="w-full h-full max-w-6xl aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
-            <VideoTrack trackRef={screenShareTrack} className="w-full h-full object-contain" />
-          </div>
-        ) : cameraTrack ? (
-          <div className="w-full h-full max-w-4xl aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
-            <VideoTrack trackRef={cameraTrack} className="w-full h-full object-cover" />
-          </div>
-        ) : (
-          <div className="w-full h-full max-w-4xl aspect-video bg-slate-900 rounded-2xl flex items-center justify-center border border-slate-800">
-            <div className="text-center">
-              <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center">
-                <span className="text-3xl font-bold text-white">
-                  {localParticipant?.name?.[0]?.toUpperCase() || 'D'}
-                </span>
-              </div>
-              <p className="text-slate-400">Cámara apagada</p>
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Video Area */}
+        <div className="flex-1 relative flex items-center justify-center p-4 bg-slate-950">
+          {/* Screen Share (main view when active) */}
+          {screenShareTrack ? (
+            <div className="w-full h-full max-w-6xl aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
+              <VideoTrack trackRef={screenShareTrack} className="w-full h-full object-contain" />
             </div>
-          </div>
-        )}
+          ) : cameraTrack ? (
+            <div className="w-full h-full max-w-4xl aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
+              <VideoTrack trackRef={cameraTrack} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <div className="w-full h-full max-w-4xl aspect-video bg-slate-900 rounded-2xl flex items-center justify-center border border-slate-800">
+              <div className="text-center">
+                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center">
+                  <span className="text-3xl font-bold text-white">
+                    {localParticipant?.name?.[0]?.toUpperCase() || 'D'}
+                  </span>
+                </div>
+                <p className="text-slate-400">Cámara apagada</p>
+              </div>
+            </div>
+          )}
 
-        {/* Picture-in-Picture camera when screen sharing */}
-        {screenShareTrack && cameraTrack && (
-          <div className="absolute bottom-20 right-8 w-48 aspect-video bg-slate-900 rounded-xl overflow-hidden shadow-xl border border-slate-700">
-            <VideoTrack trackRef={cameraTrack} className="w-full h-full object-cover" />
+          {/* Picture-in-Picture camera when screen sharing */}
+          {screenShareTrack && cameraTrack && (
+            <div className="absolute bottom-20 right-8 w-48 aspect-video bg-slate-900 rounded-xl overflow-hidden shadow-xl border border-slate-700">
+              <VideoTrack trackRef={cameraTrack} className="w-full h-full object-cover" />
+            </div>
+          )}
+        </div>
+
+        {/* Chat Sidebar */}
+        {chat && isChatOpen && (
+          <div className="w-80 lg:w-96 flex-shrink-0 border-l border-slate-800">
+            <ChatPanel
+              mensajes={chat.mensajes}
+              connectionState={chat.connectionState}
+              error={chat.error}
+              onSendMessage={chat.onSendMessage}
+              onReconnect={chat.onReconnect}
+              currentUserId={chat.currentUserId}
+            />
           </div>
         )}
       </div>

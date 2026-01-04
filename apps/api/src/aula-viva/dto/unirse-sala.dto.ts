@@ -1,19 +1,20 @@
-import { IsString, IsOptional, IsUUID, ValidateIf } from 'class-validator';
+import { IsString, IsOptional, ValidateIf } from 'class-validator';
+import { IsCuid } from '../../common/decorators';
 
 /**
  * DTO para unirse a una sala de aula virtual
  *
  * Exactamente uno de los campos debe estar presente:
- * - claseGrupoId: para unirse a una clase en vivo
- * - comisionId: para unirse a una comisión/grupo de estudiantes
+ * - claseGrupoId: para unirse a una clase en vivo (CUID)
+ * - comisionId: para unirse a una comisión/grupo de estudiantes (CUID)
  */
 export class UnirseSalaDto {
   @IsOptional()
-  @IsUUID('4', { message: 'claseGrupoId debe ser un UUID válido' })
+  @IsCuid({ message: 'claseGrupoId debe ser un CUID válido' })
   claseGrupoId?: string;
 
   @IsOptional()
-  @IsUUID('4', { message: 'comisionId debe ser un UUID válido' })
+  @IsCuid({ message: 'comisionId debe ser un CUID válido' })
   comisionId?: string;
 
   /**

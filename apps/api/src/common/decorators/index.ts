@@ -12,3 +12,8 @@ export * from './sanitize-html.decorator';
  * Security decorator para protección CSRF opt-in
  */
 export * from './require-csrf.decorator';
+
+/**
+ * Validation decorators
+ */
+export * from './is-cuid.decorator';

@@ -1,17 +1,27 @@
 /**
- * Tipos para LiveKit - Clase en Vivo
+ * Tipos para Clase en Vivo (LiveKit + Chat WebSocket)
  */
 
 export type RoomState = 'preClass' | 'connecting' | 'connected' | 'ended' | 'error';
 
-export interface ChatMessage {
+/**
+ * Mensaje de chat del servidor WebSocket
+ * Coincide con el formato del backend aula-viva
+ */
+export interface MensajeChat {
   id: string;
-  senderId: string;
-  senderName: string;
-  text: string;
-  timestamp: number;
-  isTeacher: boolean;
+  visibleIdUsuario: string;
+  nombreUsuario: string;
+  rol: 'DOCENTE' | 'ESTUDIANTE' | 'ADMIN';
+  contenido: string;
+  timestamp: string;
+  salaId: string;
 }
+
+/**
+ * Estado de conexión del chat
+ */
+export type ChatConnectionState = 'disconnected' | 'connecting' | 'connected' | 'error';
 
 export interface LiveClassConfig {
   comisionId?: string;

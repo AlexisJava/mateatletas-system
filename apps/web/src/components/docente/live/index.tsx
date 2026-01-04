@@ -4,6 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { LiveKitRoom, RoomAudioRenderer } from '@livekit/components-react';
 
 import { livekitApi } from '@/lib/api/livekit.api';
+import { useAulaVivaChat } from '@/hooks/useAulaVivaChat';
 import { PreClassView } from './PreClassView';
 import { ClassRoom } from './ClassRoom';
 import type { RoomState, LiveClassConfig } from './types';
@@ -11,6 +12,44 @@ import type { RoomState, LiveClassConfig } from './types';
 interface LiveClassPageProps {
   config: LiveClassConfig;
 }
+
+/**
+ * Componente interno que maneja el chat
+ * Separado para poder usar hooks sin condicionales
+ */
+interface ClassRoomWithChatProps {
+  config: LiveClassConfig;
+  onEndClass: () => void;
+}
+
+const ClassRoomWithChat: React.FC<ClassRoomWithChatProps> = ({ config, onEndClass }) => {
+  const { mensajes, connectionState, error, enviarMensaje, reconectar } = useAulaVivaChat({
+    claseGrupoId: config.claseGrupoId,
+    comisionId: config.comisionId,
+  });
+
+  const handleSendMessage = useCallback(
+    async (contenido: string) => {
+      const result = await enviarMensaje(contenido);
+      return { exito: result.exito, error: result.error };
+    },
+    [enviarMensaje],
+  );
+
+  return (
+    <ClassRoom
+      title={config.title}
+      onEndClass={onEndClass}
+      chat={{
+        mensajes,
+        connectionState,
+        error,
+        onSendMessage: handleSendMessage,
+        onReconnect: reconectar,
+      }}
+    />
+  );
+};
 
 export const LiveClassPage: React.FC<LiveClassPageProps> = ({ config }) => {
   const [roomState, setRoomState] = useState<RoomState>('preClass');
@@ -115,7 +154,7 @@ export const LiveClassPage: React.FC<LiveClassPageProps> = ({ config }) => {
       className="h-full"
     >
       <RoomAudioRenderer />
-      <ClassRoom title={config.title} onEndClass={handleEndClass} />
+      <ClassRoomWithChat config={config} onEndClass={handleEndClass} />
     </LiveKitRoom>
   );
 };
