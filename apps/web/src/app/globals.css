@@ -23,6 +23,13 @@ main {
   min-height: 100vh;
 }
 
+/* Portal Docente: contenido debe caber en viewport sin scroll */
+[data-docente='true'] main,
+[data-docente='true'] #__next {
+  min-height: 0;
+  height: 100%;
+}
+
 @theme inline {
   --font-nunito: 'Nunito', sans-serif;
   --font-inter:

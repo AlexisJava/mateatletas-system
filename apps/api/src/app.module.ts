@@ -35,6 +35,7 @@ import { EmailModule } from './email/email.module';
 // [ELIMINADO] CursosModule, StudioModule - sistema de contenido legacy
 import { SuscripcionesModule } from './suscripciones/suscripciones.module';
 import { ContenidosModule } from './contenidos/contenidos.module';
+import { LivekitModule } from './livekit/livekit.module';
 
 /**
  * AppModule
@@ -88,6 +89,7 @@ import { ContenidosModule } from './contenidos/contenidos.module';
     HealthModule,
     SuscripcionesModule, // Suscripciones MercadoPago PreApproval
     ContenidosModule, // Sistema de contenido educativo (Sandbox)
+    LivekitModule, // Clases en vivo (video/audio)
     // [ELIMINADO] CursosModule, StudioModule - sistema legacy de contenido
   ],
   controllers: [AppController],

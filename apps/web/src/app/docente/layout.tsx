@@ -2,20 +2,17 @@
 
 import { ProtectedLayout } from '@/components/shared/ProtectedLayout';
 import { LoadingScreen } from '@/components/shared/LoadingScreen';
-import { Header, TabNavigation } from '@/components/docente';
 import ModalCambioPasswordObligatorio from '@/components/auth/ModalCambioPasswordObligatorio';
 import { useAuthStore } from '@/store/auth.store';
 
 /**
- * Portal Docente Layout v2.0 - Horizontal Tabs Design
+ * Portal Docente Layout - TeacherDash Pro Design
  *
- * Estructura igual que admin:
- * - Header con saludo, reloj y acciones de usuario
- * - TabNavigation horizontal (reemplaza sidebar vertical)
- * - Contenido principal
+ * Layout minimalista que solo maneja:
+ * - Proteccion de rutas (solo DOCENTE)
+ * - Modal de cambio de password obligatorio
  *
- * Colores: Purple accent (#8b5cf6)
- * Autenticación manejada por ProtectedLayout.
+ * El dashboard maneja su propio header, sidebar y background effects.
  */
 export default function DocenteLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -33,28 +30,12 @@ function DocenteLayoutContent({ children }: { children: React.ReactNode }) {
   const mustChangePassword = user?.debe_cambiar_password === true;
 
   return (
-    <div className="min-h-screen bg-[var(--docente-bg)] flex flex-col" data-docente="true">
-      {/* Modal de cambio de contraseña obligatorio */}
+    <div className="fixed inset-0 bg-[#020617] flex flex-col overflow-hidden" data-docente="true">
+      {/* Modal de cambio de password obligatorio */}
       <ModalCambioPasswordObligatorio isOpen={mustChangePassword} />
-      {/* Background Glows - sutiles como admin */}
-      <div className="fixed top-0 left-[20%] w-[500px] h-[500px] bg-[var(--docente-accent)]/10 rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="fixed bottom-0 right-[10%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none z-0" />
 
-      {/* Main Container */}
-      <div className="relative z-10 flex flex-col flex-1 max-w-[1920px] mx-auto w-full p-4 lg:p-6">
-        {/* Header - Saludo, reloj, notificaciones, avatar */}
-        <Header />
-
-        {/* Tab Navigation - Horizontal tabs */}
-        <TabNavigation />
-
-        {/* Main Content Area */}
-        <main className="flex-1 relative min-h-0">
-          <div className="absolute inset-0 overflow-y-auto pr-2 pb-2 custom-scrollbar">
-            {children}
-          </div>
-        </main>
-      </div>
+      {/* Main Content - Full height */}
+      {children}
     </div>
   );
 }

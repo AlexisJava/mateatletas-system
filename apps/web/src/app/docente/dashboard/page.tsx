@@ -1,45 +1,98 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Bell, Radio, LogOut, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Clock, Users, BookOpen, TrendingUp, Calendar, GraduationCap } from 'lucide-react';
-import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { useAuthStore } from '@/store/auth.store';
+import { docentesApi, ComisionResumen, EstudianteConFalta } from '@/lib/api/docentes.api';
 import { toast } from '@/components/ui/Toast';
 import { LoadingSpinner } from '@/components/effects';
-import { useAuthStore } from '@/store/auth.store';
-import {
-  docentesApi,
-  ClaseDelDia,
-  GrupoResumen,
-  ComisionResumen,
-  EstudianteConFalta,
-  StatsResumen,
-} from '@/lib/api/docentes.api';
+
+// New Components
+import { Sidebar } from '@/components/docente/Sidebar';
+import { LiveClassPage } from '@/components/docente/LiveClassPage';
+import { StudentList } from '@/components/docente/StudentList';
+import { CalendarPage } from '@/components/docente/CalendarPage';
+import { PlanificacionesPage } from '@/components/docente/PlanificacionesPage';
+import { AlertsPage } from '@/components/docente/AlertsPage';
+import { NotificationsDropdown } from '@/components/docente/NotificationsDropdown';
+import { DarkVeil } from '@/components/docente/DarkVeil';
+import { DashboardModal } from '@/components/docente/DashboardModals';
+import { ProximaClaseCard } from '@/components/docente/ProximaClaseCard';
+import { StatsDocente } from '@/components/docente/StatsDocente';
+import { ComisionesGrid } from '@/components/docente/ComisionesGrid';
+
+// Types
+import { Comision, DashboardStats, Alerta } from '@/types/docente.types';
 
 /**
- * Dashboard Docente BRUTAL
- * Información CONCRETA y ACCIONABLE
- * Nada de ambigüedades
+ * Dashboard Docente - TeacherDash Pro Design
+ * Replica exacta del App.tsx original adaptado a Next.js
  */
-
-export default function DocenteDashboardBrutal() {
+export default function DocenteDashboard() {
   const router = useRouter();
-  const { user } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(true);
-  const [clasesHoy, setClasesHoy] = useState<ClaseDelDia[]>([]);
-  const [misGrupos, setMisGrupos] = useState<GrupoResumen[]>([]);
-  const [misComisiones, setMisComisiones] = useState<ComisionResumen[]>([]);
-  const [, setEstudiantesConFaltas] = useState<EstudianteConFalta[]>([]); // TODO: mostrar en sección de alertas
-  const [stats, setStats] = useState<StatsResumen | null>(null);
-  const [greeting, setGreeting] = useState('Bienvenido');
+  const { user, logout } = useAuthStore();
 
-  // Set greeting based on time of day
+  const [isLoading, setIsLoading] = useState(true);
+  const [greeting, setGreeting] = useState<string>('');
+  const [currentView, setCurrentView] = useState<string>('dashboard');
+  const [currentDateStr, setCurrentDateStr] = useState<string>('');
+  const [currentTime, setCurrentTime] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    }
+    return '--:--';
+  });
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  // Navigation State
+  const [selectedComisionId, setSelectedComisionId] = useState<string | null>(null);
+
+  // Dashboard Interaction State
+  const [selectedStat, setSelectedStat] = useState<string | null>(null);
+
+  // Data from API
+  const [comisiones, setComisiones] = useState<Comision[]>([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [alertas, setAlertas] = useState<Alerta[]>([]);
+
+  // Close dropdown when clicking outside
+  const headerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) setGreeting('Buenos días');
-    else if (hour < 20) setGreeting('Buenas tardes');
+    const date = new Date();
+    const hour = date.getHours();
+    if (hour < 12) setGreeting('Buenos dias');
+    else if (hour < 19) setGreeting('Buenas tardes');
     else setGreeting('Buenas noches');
+
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    };
+    const formattedDate = date.toLocaleDateString('es-ES', options);
+    setCurrentDateStr(formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1));
+
+    // Actualizar hora inicial
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
+    };
+    updateTime();
+    const timeInterval = setInterval(updateTime, 1000);
+    return () => clearInterval(timeInterval);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Fetch data
@@ -51,34 +104,73 @@ export default function DocenteDashboardBrutal() {
     try {
       setIsLoading(true);
       const response = await docentesApi.getDashboard();
-      setClasesHoy(response.clasesHoy);
-      setMisGrupos(response.misGrupos);
-      setMisComisiones(response.misComisiones || []);
-      setEstudiantesConFaltas(response.estudiantesConFaltas);
-      setStats(response.stats);
+
+      // Transform API data to component format
+      const transformedComisiones: Comision[] = (response.misComisiones || []).map(
+        (c: ComisionResumen) => ({
+          id: c.id,
+          producto: c.nombre || c.producto?.nombre || 'Sin nombre',
+          horario: c.horario || 'Sin horario',
+          casa: c.casa?.nombre || 'VERTEX',
+          inscripciones: c.estudiantesInscritos || 0,
+          cupo_maximo: c.cupo_maximo || 20,
+          thumbnail: `https://picsum.photos/seed/${c.id}/800/600`,
+          proximaClase: undefined,
+        }),
+      );
+
+      const transformedStats: DashboardStats = {
+        clasesSemana: response.stats?.clasesEstaSemana || 0,
+        totalEstudiantes: response.stats?.estudiantesTotal || 0,
+        asistenciaPromedio: response.stats?.asistenciaPromedio || 0,
+        puntosOtorgados: 0,
+      };
+
+      // Transform alerts from students with attendance issues
+      const transformedAlertas: Alerta[] = (response.estudiantesConFaltas || [])
+        .slice(0, 5)
+        .map((e: EstudianteConFalta, i: number) => ({
+          id: `alert-${i}`,
+          tipo: 'asistencia',
+          severidad: e.faltas_consecutivas >= 3 ? 'alta' : ('media' as 'alta' | 'media'),
+          mensaje: `Tiene ${e.faltas_consecutivas} faltas consecutivas en ${e.ultimo_grupo}`,
+          estudiante: `${e.nombre} ${e.apellido}`,
+          comision_id: e.id,
+        }));
+
+      setComisiones(transformedComisiones);
+      setStats(transformedStats);
+      setAlertas(transformedAlertas);
     } catch (error) {
       console.error('Error al cargar el dashboard:', error);
       toast.error('Error al cargar el dashboard');
-      setClasesHoy([]);
-      setMisGrupos([]);
-      setEstudiantesConFaltas([]);
-      setStats(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getDiaSemanaLabel = (dia: string) => {
-    const dias: Record<string, string> = {
-      LUNES: 'Lunes',
-      MARTES: 'Martes',
-      MIERCOLES: 'Miércoles',
-      JUEVES: 'Jueves',
-      VIERNES: 'Viernes',
-      SABADO: 'Sábado',
-      DOMINGO: 'Domingo',
-    };
-    return dias[dia] || dia;
+  // Handler for navigation
+  const handleNavigate = (view: string) => {
+    setCurrentView(view);
+    // Reset selected commission if navigating away from commissions tab
+    if (view !== 'comisiones') {
+      setSelectedComisionId(null);
+    }
+  };
+
+  const handleSelectComision = (id: string) => {
+    setSelectedComisionId(id);
+    setCurrentView('comisiones');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      toast.error('Error al cerrar sesión');
+    }
   };
 
   if (isLoading) {
@@ -90,201 +182,198 @@ export default function DocenteDashboardBrutal() {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      <div className="w-full px-8 h-full flex flex-col gap-6 overflow-y-auto">
-        {/* Breadcrumbs */}
-        <Breadcrumbs items={[{ label: 'Dashboard' }]} />
+    <div className="h-full w-full text-slate-200 font-sans overflow-hidden flex flex-col relative z-0">
+      {/* Background Effect */}
+      <div className="absolute inset-0 -z-10 opacity-60">
+        <DarkVeil
+          hueShift={25}
+          noiseIntensity={0}
+          scanlineIntensity={0.1}
+          speed={0.8}
+          scanlineFrequency={42}
+          warpAmount={0.6}
+          resolutionScale={1.5}
+        />
+      </div>
 
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-3xl font-black text-white mb-2">
-            {greeting}, {user?.nombre || 'Docente'}! 👋
-          </h1>
-          <p className="text-purple-300 font-semibold text-base">
-            {new Date().toLocaleDateString('es-ES', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-        </motion.div>
+      {/* 1. Header Area */}
+      <header
+        ref={headerRef}
+        className="shrink-0 bg-[#020617]/50 border-b border-slate-800/50 px-6 py-2 flex items-center justify-between z-50 relative backdrop-blur-md"
+      >
+        <div
+          className="flex items-center gap-4 cursor-pointer"
+          onClick={() => handleNavigate('dashboard')}
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <span className="font-bold text-white text-xl">M</span>
+          </div>
+          <div>
+            <h1 className="font-bold text-white text-base tracking-tight leading-none">
+              Mateatletas
+            </h1>
+            <span className="text-xs text-slate-500 font-medium">Panel Docente</span>
+          </div>
+        </div>
 
-        {/* TU CLASE DE HOY - BRUTAL */}
-        {clasesHoy.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="relative"
+        {/* Reloj Digital */}
+        <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-slate-900/60 border border-slate-700/50 rounded-xl backdrop-blur-sm">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50"></div>
+          <span className="text-lg font-mono font-bold text-white tracking-wider tabular-nums">
+            {currentTime}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            className={`relative p-2.5 rounded-full transition-colors group ${showNotifications ? 'bg-slate-800 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
           >
-            <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2">
-              <Clock className="w-6 h-6 text-yellow-400" />
-              TU CLASE DE HOY
-            </h2>
+            <Bell size={22} />
+            {alertas.length > 0 && (
+              <span className="absolute top-2 right-2 w-2 h-2 bg-amber-500 rounded-full ring-2 ring-[#020617] animate-pulse"></span>
+            )}
+          </button>
 
-            {clasesHoy.map((clase) => (
+          {showNotifications && (
+            <NotificationsDropdown
+              alertas={alertas}
+              onClose={() => setShowNotifications(false)}
+              onViewAll={() => handleNavigate('alerts')}
+            />
+          )}
+
+          <div className="h-10 w-[1px] bg-slate-800 mx-1"></div>
+
+          <div
+            className={`flex items-center gap-3 bg-indigo-950/30 border pl-1.5 pr-5 py-1.5 rounded-full cursor-pointer transition-all group ${
+              currentView === 'live'
+                ? 'border-indigo-500 bg-indigo-900/50'
+                : 'border-indigo-500/20 hover:bg-indigo-900/40'
+            }`}
+            onClick={() => handleNavigate('live')}
+          >
+            <div className="relative">
               <div
-                key={clase.id}
-                className="bg-white/5 backdrop-blur-xl rounded-xl p-5 shadow-lg border border-white/10 hover:bg-white/10 transition-all"
+                className={`w-10 h-10 rounded-full flex items-center justify-center shadow-inner ${currentView === 'live' ? 'bg-red-600' : 'bg-indigo-600'}`}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-2xl font-black text-white mb-2">{clase.nombre}</h3>
-                    <p className="text-purple-200 font-bold text-base">
-                      {clase.hora_inicio} - {clase.hora_fin}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-black text-yellow-300">
-                      {clase.estudiantes.length}
-                    </p>
-                    <p className="text-purple-200 font-bold text-sm">estudiantes</p>
-                  </div>
-                </div>
+                <Radio size={18} className="text-white animate-pulse" />
+              </div>
+              <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#020617] rounded-full"></span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-white leading-none mb-0.5 group-hover:text-indigo-300 transition-colors">
+                Clases en Vivo
+              </span>
+              <span className="text-xs text-indigo-300/70 font-medium">Transmitiendo ahora</span>
+            </div>
+          </div>
 
-                {/* Lista de estudiantes BRUTAL */}
-                {clase.estudiantes.length > 0 && (
-                  <div>
-                    <p className="text-white font-bold mb-3">TUS ESTUDIANTES HOY:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {clase.estudiantes.map((est) => (
-                        <div
-                          key={est.id}
-                          className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-white font-semibold hover:bg-white/30 transition-all cursor-pointer"
-                        >
-                          {est.nombre} {est.apellido}
-                        </div>
-                      ))}
-                    </div>
+          <div className="h-10 w-[1px] bg-slate-800 mx-1"></div>
+
+          {/* Botón Cerrar Sesión */}
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all"
+            title="Cerrar sesión"
+          >
+            <LogOut size={18} />
+            <span className="hidden lg:inline text-sm font-medium">Salir</span>
+          </button>
+        </div>
+      </header>
+
+      {/* 2. Navbar (Horizontal Sidebar) */}
+      <Sidebar currentView={currentView} onNavigate={handleNavigate} />
+
+      {/* 3. Main Content */}
+      <main className="flex-1 min-h-0 p-6 lg:p-8 overflow-hidden w-full flex flex-col gap-6 relative">
+        {currentView === 'dashboard' ? (
+          <>
+            {/* Top Section: Greeting & Quick Stats */}
+            <div className="shrink-0 flex flex-col gap-4">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
+                <div>
+                  <h2 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">
+                    {greeting}, {user?.nombre || 'Docente'}
+                  </h2>
+                  <p className="text-base text-slate-400 capitalize mt-1">{currentDateStr}</p>
+                </div>
+              </div>
+              {stats && <StatsDocente stats={stats} onStatClick={setSelectedStat} />}
+            </div>
+
+            {/* Dashboard Grid - usa grid-rows para altura fija */}
+            <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 grid-rows-1 gap-8">
+              {/* Left Column (Next Class) - 8/12 */}
+              <div className="lg:col-span-8 h-full min-h-0 overflow-hidden">
+                {comisiones.length > 0 ? (
+                  <ProximaClaseCard comision={comisiones[0] ?? null} />
+                ) : (
+                  <div className="h-full flex items-center justify-center bg-slate-900/40 border border-slate-800 rounded-2xl">
+                    <p className="text-slate-500">No hay comisiones asignadas</p>
                   </div>
                 )}
-
-                <button
-                  onClick={() => router.push(`/docente/grupos/${clase.grupo_id}`)}
-                  className="mt-4 w-full bg-yellow-400 hover:bg-yellow-300 text-purple-900 font-black py-3 rounded-xl transition-all hover:scale-[1.02] shadow-lg"
-                >
-                  VER DETALLES DEL GRUPO
-                </button>
               </div>
-            ))}
-          </motion.div>
-        )}
 
-        {/* TUS COMISIONES (CURSOS) - BRUTAL */}
-        {misComisiones.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-          >
-            <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2">
-              <BookOpen className="w-6 h-6 text-blue-400" />
-              TUS {misComisiones.length} COMISIONES
-            </h2>
+              {/* Right Column (My Commissions Grid) - 4/12 */}
+              <div className="lg:col-span-4 h-full min-h-0 overflow-hidden">
+                <ComisionesGrid comisiones={comisiones} onSelect={handleSelectComision} />
+              </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {misComisiones.map((comision) => (
-                <motion.div
-                  key={comision.id}
-                  whileHover={{ scale: 1.03, y: -4 }}
-                  className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10 hover:border-blue-400/70 hover:bg-white/10 transition-all cursor-pointer shadow-lg hover:shadow-xl"
-                  onClick={() => router.push(`/docente/comisiones/${comision.id}`)}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-white font-bold text-base">{comision.nombre}</h3>
-                    {comision.casa && (
-                      <span className="text-2xl" title={comision.casa.nombre}>
-                        {comision.casa.emoji}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-purple-300 text-sm mb-2">{comision.producto.nombre}</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-purple-300 font-semibold">
-                      {comision.horario || 'Sin horario definido'}
-                    </span>
-                    <div className="flex items-center gap-1 bg-blue-500 text-white px-3 py-1 rounded-full font-black">
-                      <Users className="w-4 h-4" />
-                      {comision.estudiantesInscritos}
-                      {comision.cupo_maximo && `/${comision.cupo_maximo}`}
+            {/* Interactive Modals Layer */}
+            <DashboardModal type={selectedStat} onClose={() => setSelectedStat(null)} />
+          </>
+        ) : currentView === 'live' ? (
+          <LiveClassPage />
+        ) : currentView === 'alerts' ? (
+          <AlertsPage />
+        ) : currentView === 'comisiones' ? (
+          selectedComisionId ? (
+            <StudentList
+              comisionId={selectedComisionId}
+              onBack={() => setSelectedComisionId(null)}
+            />
+          ) : (
+            <div className="flex flex-col h-full gap-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-white">Selecciona una Comision</h2>
+                <div className="text-sm text-slate-400">
+                  Mostrando {comisiones.length} cursos activos
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto no-scrollbar">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {comisiones.map((c) => (
+                    <div
+                      key={c.id}
+                      onClick={() => handleSelectComision(c.id)}
+                      className="cursor-pointer h-full"
+                    >
+                      <ComisionesGrid comisiones={[c]} onSelect={handleSelectComision} />
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+                  ))}
+                </div>
+              </div>
             </div>
-          </motion.div>
+          )
+        ) : currentView === 'calendar' ? (
+          <CalendarPage />
+        ) : currentView === 'plannings' ? (
+          <PlanificacionesPage />
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-slate-500">
+            <p>Seccion en construccion</p>
+            <button
+              onClick={() => handleNavigate('dashboard')}
+              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm"
+            >
+              Volver
+            </button>
+          </div>
         )}
-
-        {/* TUS 7 GRUPOS - BRUTAL */}
-        {misGrupos.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2">
-              <GraduationCap className="w-6 h-6 text-green-400" />
-              TUS {misGrupos.length} GRUPOS
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {misGrupos.map((grupo) => (
-                <motion.div
-                  key={grupo.id}
-                  whileHover={{ scale: 1.03, y: -4 }}
-                  className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10 hover:border-green-400/70 hover:bg-white/10 transition-all cursor-pointer shadow-lg hover:shadow-xl"
-                  onClick={() => router.push(`/docente/grupos/${grupo.id}`)}
-                >
-                  <h3 className="text-white font-bold text-base mb-2">{grupo.nombre}</h3>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-purple-300 font-semibold">
-                      {getDiaSemanaLabel(grupo.dia_semana)} {grupo.hora_inicio}
-                    </span>
-                    <div className="flex items-center gap-1 bg-green-500 text-white px-3 py-1 rounded-full font-black">
-                      <Users className="w-4 h-4" />
-                      {grupo.estudiantesActivos}/{grupo.cupo_maximo}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* STATS BRUTALES */}
-        {stats && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4"
-          >
-            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 text-center border border-white/10 shadow-lg hover:bg-white/10 transition-all">
-              <Calendar className="w-7 h-7 text-purple-400 mx-auto mb-2" />
-              <p className="text-3xl font-black text-white">{stats.clasesEstaSemana}</p>
-              <p className="text-purple-300 font-bold text-sm">Clases Esta Semana</p>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 text-center border border-white/10 shadow-lg hover:bg-white/10 transition-all">
-              <Users className="w-7 h-7 text-green-400 mx-auto mb-2" />
-              <p className="text-3xl font-black text-white">{stats.estudiantesTotal}</p>
-              <p className="text-purple-300 font-bold text-sm">Total Estudiantes</p>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 text-center border border-white/10 shadow-lg hover:bg-white/10 transition-all">
-              <TrendingUp className="w-7 h-7 text-blue-400 mx-auto mb-2" />
-              <p className="text-3xl font-black text-white">{stats.asistenciaPromedio}%</p>
-              <p className="text-purple-300 font-bold text-sm">Asistencia Promedio</p>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 text-center border border-white/10 shadow-lg hover:bg-white/10 transition-all">
-              <BookOpen className="w-7 h-7 text-yellow-400 mx-auto mb-2" />
-              <p className="text-3xl font-black text-white">{stats.observacionesPendientes}</p>
-              <p className="text-purple-300 font-bold text-sm">Observaciones Pendientes</p>
-            </div>
-          </motion.div>
-        )}
-      </div>
+      </main>
     </div>
   );
 }

@@ -71,7 +71,7 @@ export default function RootLayout({
         <CosmosBackground />
 
         {/* Contenido del sitio */}
-        <div className="relative z-10">
+        <div className="relative z-10 min-h-screen">
           <QueryProvider>{children}</QueryProvider>
           <Toaster position="top-right" richColors />
         </div>
