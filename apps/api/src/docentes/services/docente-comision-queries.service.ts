@@ -51,10 +51,10 @@ export interface EstudianteComisionResponse {
 }
 
 export interface MetricasComisionResponse {
-  asistencia_promedio: number;
-  total_estudiantes: number;
-  total_clases_dadas: number;
-  total_puntos_otorgados: number;
+  asistenciaPromedio: number;
+  totalEstudiantes: number;
+  totalClases: number;
+  totalPuntos: number;
 }
 
 export interface AsistenciaFechaResponse {
@@ -249,10 +249,10 @@ export class DocenteComisionQueriesService {
     const totalPuntosOtorgados = 0;
 
     return {
-      asistencia_promedio: asistenciaPromedio,
-      total_estudiantes: totalEstudiantes,
-      total_clases_dadas: totalClasesDadas,
-      total_puntos_otorgados: totalPuntosOtorgados,
+      asistenciaPromedio,
+      totalEstudiantes,
+      totalClases: totalClasesDadas,
+      totalPuntos: totalPuntosOtorgados,
     };
   }
 
