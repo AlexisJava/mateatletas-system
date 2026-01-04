@@ -337,4 +337,142 @@ export class AsistenciaService {
       mensaje: `Asistencia guardada exitosamente para ${asistencias.length} estudiantes`,
     };
   }
+
+  /**
+   * Tomar asistencia de múltiples estudiantes en una Comisión (batch)
+   * Usado en el portal docente para tomar asistencia de colonias/cursos
+   */
+  async tomarAsistenciaComisionBatch(
+    comision_id: string,
+    fecha: string,
+    asistencias: Array<{
+      estudianteId: string;
+      estado: import('@prisma/client').EstadoAsistencia;
+      observacion?: string;
+    }>,
+    docente_id: string,
+  ): Promise<{
+    success: boolean;
+    registrosCreados: number;
+    registrosActualizados: number;
+    estudiantes: Array<{
+      estudianteId: string;
+      nombre: string;
+      apellido: string;
+      estado: import('@prisma/client').EstadoAsistencia;
+      observacion: string | null;
+    }>;
+    mensaje: string;
+  }> {
+    // 1. Verificar que la comisión existe y el docente es el titular
+    const comision = await this.prisma.comision.findUnique({
+      where: { id: comision_id },
+    });
+
+    if (!comision) {
+      throw new NotFoundException('Comisión no encontrada');
+    }
+
+    if (comision.docente_id !== docente_id) {
+      throw new ForbiddenException(
+        'Solo el docente titular puede tomar asistencia de esta comisión',
+      );
+    }
+
+    // 2. Verificar que todos los estudiantes están inscritos en la comisión
+    const estudiantesIds = asistencias.map((a) => a.estudianteId);
+    const inscripciones = await this.prisma.inscripcionComision.findMany({
+      where: {
+        comision_id,
+        estudiante_id: { in: estudiantesIds },
+        estado: { not: 'Cancelada' },
+      },
+      include: {
+        estudiante: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+      },
+    });
+
+    if (inscripciones.length !== estudiantesIds.length) {
+      const inscritosIds = inscripciones.map((i) => i.estudiante_id);
+      const noInscritos = estudiantesIds.filter(
+        (id) => !inscritosIds.includes(id),
+      );
+      throw new BadRequestException(
+        `Los siguientes estudiantes no están inscritos en la comisión: ${noInscritos.join(', ')}`,
+      );
+    }
+
+    // 3. Usar transacción para crear/actualizar registros de asistencia
+    const fechaISO = new Date(fecha);
+
+    const resultados = await this.prisma.$transaction(
+      asistencias.map((asistencia) => {
+        return this.prisma.asistenciaComision.upsert({
+          where: {
+            comision_id_estudiante_id_fecha: {
+              comision_id,
+              estudiante_id: asistencia.estudianteId,
+              fecha: fechaISO,
+            },
+          },
+          create: {
+            comision_id,
+            estudiante_id: asistencia.estudianteId,
+            fecha: fechaISO,
+            estado: asistencia.estado,
+            observacion: asistencia.observacion || null,
+          },
+          update: {
+            estado: asistencia.estado,
+            observacion: asistencia.observacion || null,
+          },
+          include: {
+            estudiante: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+              },
+            },
+          },
+        });
+      }),
+    );
+
+    // Contar creados vs actualizados
+    const existentes = await this.prisma.asistenciaComision.findMany({
+      where: {
+        comision_id,
+        estudiante_id: { in: estudiantesIds },
+        fecha: fechaISO,
+        created_at: { lt: new Date(Date.now() - 1000) },
+      },
+    });
+
+    const registrosActualizados = existentes.length;
+    const registrosCreados = asistencias.length - registrosActualizados;
+
+    // 4. Formatear response
+    const estudiantesResponse = resultados.map((r) => ({
+      estudianteId: r.estudiante.id,
+      nombre: r.estudiante.nombre,
+      apellido: r.estudiante.apellido,
+      estado: r.estado,
+      observacion: r.observacion,
+    }));
+
+    return {
+      success: true,
+      registrosCreados,
+      registrosActualizados,
+      estudiantes: estudiantesResponse,
+      mensaje: `Asistencia guardada exitosamente para ${asistencias.length} estudiantes`,
+    };
+  }
 }

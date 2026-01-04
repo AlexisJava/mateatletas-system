@@ -138,6 +138,39 @@ export class DocentesController {
     return this.docentesService.getProximaClase(user.id);
   }
 
+  /**
+   * GET /docentes/me/carga-horaria-semanal - Distribución de clases por día
+   * @param user - Usuario autenticado (del JWT)
+   * @returns { data: [{ day: 'Lun', classes: 2 }, ...] }
+   */
+  @Get('me/carga-horaria-semanal')
+  @Roles(Role.DOCENTE)
+  async getCargaHorariaSemanal(@GetUser() user: AuthUser) {
+    return this.docentesService.getCargaHorariaSemanal(user.id);
+  }
+
+  /**
+   * GET /docentes/me/tendencia-asistencia - Tendencia de asistencia últimas 5 semanas
+   * @param user - Usuario autenticado (del JWT)
+   * @returns { data: [{ week: 'S1', avg: 85 }, ...] }
+   */
+  @Get('me/tendencia-asistencia')
+  @Roles(Role.DOCENTE)
+  async getTendenciaAsistencia(@GetUser() user: AuthUser) {
+    return this.docentesService.getTendenciaAsistencia(user.id);
+  }
+
+  /**
+   * GET /docentes/me/distribucion-estudiantes - Estudiantes por comisión
+   * @param user - Usuario autenticado (del JWT)
+   * @returns { data: [{ name: 'Comisión', value: 15 }, ...], total: 60 }
+   */
+  @Get('me/distribucion-estudiantes')
+  @Roles(Role.DOCENTE)
+  async getDistribucionEstudiantes(@GetUser() user: AuthUser) {
+    return this.docentesService.getDistribucionEstudiantes(user.id);
+  }
+
   // ============================================================================
   // COMISIONES - Endpoints para ver comisiones asignadas al docente
   // ============================================================================
@@ -196,6 +229,21 @@ export class DocentesController {
     @GetUser() user: AuthUser,
   ) {
     return this.docentesService.getMetricasComision(id, user.id);
+  }
+
+  /**
+   * GET /docentes/me/comisiones/:id/progreso - Obtener progreso de sesiones
+   * @param id - ID de la comisión
+   * @param user - Usuario autenticado (del JWT)
+   * @returns { sesionActual, totalSesiones, porcentajeCompletado }
+   */
+  @Get('me/comisiones/:id/progreso')
+  @Roles(Role.DOCENTE)
+  async getProgresoComision(
+    @Param('id', ParseIdPipe) id: string,
+    @GetUser() user: AuthUser,
+  ) {
+    return this.docentesService.getProgresoComision(id, user.id);
   }
 
   /**

@@ -211,4 +211,45 @@ export class DocentesFacade {
       hasta,
     );
   }
+
+  // ============================================================================
+  // DASHBOARD GRAPHS - Delegación a StatsService
+  // ============================================================================
+
+  /**
+   * Obtiene la carga horaria semanal del docente
+   * @param docenteId - ID del docente
+   * @returns Distribución de clases por día de la semana
+   */
+  async getCargaHorariaSemanal(docenteId: string) {
+    return this.statsService.getCargaHorariaSemanal(docenteId);
+  }
+
+  /**
+   * Obtiene la tendencia de asistencia de las últimas 5 semanas
+   * @param docenteId - ID del docente
+   * @returns Promedio de asistencia por semana
+   */
+  async getTendenciaAsistencia(docenteId: string) {
+    return this.statsService.getTendenciaAsistencia(docenteId);
+  }
+
+  /**
+   * Obtiene la distribución de estudiantes por comisión
+   * @param docenteId - ID del docente
+   * @returns Cantidad de estudiantes por comisión
+   */
+  async getDistribucionEstudiantes(docenteId: string) {
+    return this.statsService.getDistribucionEstudiantes(docenteId);
+  }
+
+  /**
+   * Obtiene el progreso de sesiones de una comisión
+   * @param comisionId - ID de la comisión
+   * @param docenteId - ID del docente (para verificar ownership)
+   * @returns Sesión actual, total de sesiones y porcentaje completado
+   */
+  async getProgresoComision(comisionId: string, docenteId: string) {
+    return this.statsService.getProgresoComision(comisionId, docenteId);
+  }
 }

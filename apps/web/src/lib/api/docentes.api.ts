@@ -156,6 +156,7 @@ export interface StatsResumen {
   tendenciaAsistencia: TendenciaAsistencia;
   observacionesPendientes: number;
   estudiantesTotal: number;
+  puntosOtorgados: number;
 }
 
 export interface DashboardDocenteResponse {
@@ -240,6 +241,102 @@ export interface ClasesDelMesResponse {
     totalGrupos: number;
     totalEstudiantes: number;
   };
+}
+
+// ============================================================================
+// COMISIÓN - Tipos para detalle y estudiantes
+// ============================================================================
+
+/**
+ * Estudiante inscrito en una comisión con sus stats completos
+ */
+export interface EstudianteComision {
+  id: string;
+  nombre: string;
+  apellido: string;
+  avatar_url: string | null;
+  edad: number;
+  casa: {
+    id: string;
+    tipo: string;
+    nombre: string;
+    colorPrimario: string;
+  } | null;
+  stats: {
+    xp_total: number;
+    nivel: number;
+    racha_actual: number;
+    asistencia_porcentaje: number;
+    ultima_asistencia: {
+      fecha: string;
+      estado: string;
+    } | null;
+  };
+  tutor: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email: string | null;
+    telefono: string | null;
+  } | null;
+  estado_inscripcion: string;
+  inscripcion_fecha: string;
+}
+
+/**
+ * Detalle completo de una comisión
+ */
+export interface ComisionDetalleResponse {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  producto: {
+    id: string;
+    nombre: string;
+    tipo: string;
+  };
+  casa: {
+    id: string;
+    nombre: string;
+    emoji: string;
+  } | null;
+  horario: string | null;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  cupo_maximo: number | null;
+  activo: boolean;
+  estudiantes: Array<{
+    id: string;
+    nombre: string;
+    apellido: string;
+    email: string | null;
+    estado: string;
+  }>;
+}
+
+/**
+ * Asistencia de un estudiante en una fecha
+ */
+export interface AsistenciaEstudianteFecha {
+  estudiante_id: string;
+  nombre: string;
+  estado: 'Presente' | 'Ausente' | 'Justificado';
+  observacion: string | null;
+}
+
+/**
+ * Asistencias agrupadas por fecha
+ */
+export interface AsistenciaFecha {
+  fecha: string;
+  asistencias: AsistenciaEstudianteFecha[];
+}
+
+/**
+ * Respuesta del historial de asistencia
+ */
+export interface HistorialAsistenciaResponse {
+  fechas: AsistenciaFecha[];
 }
 
 export const docentesApi = {
@@ -393,6 +490,174 @@ export const docentesApi = {
       throw error;
     }
   },
+
+  // ============================================================================
+  // DASHBOARD GRAPHS - Endpoints para gráficos del dashboard
+  // ============================================================================
+
+  /**
+   * Obtener carga horaria semanal del docente
+   * @returns Distribución de clases por día de la semana
+   */
+  getCargaHorariaSemanal: async (): Promise<{
+    data: { day: string; classes: number }[];
+  }> => {
+    try {
+      return await apiClient.get<{ data: { day: string; classes: number }[] }>(
+        '/docentes/me/carga-horaria-semanal',
+      );
+    } catch (error) {
+      console.error('Error al obtener carga horaria semanal:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener tendencia de asistencia de las últimas 5 semanas
+   * @returns Promedio de asistencia por semana
+   */
+  getTendenciaAsistencia: async (): Promise<{
+    data: { week: string; avg: number }[];
+  }> => {
+    try {
+      return await apiClient.get<{ data: { week: string; avg: number }[] }>(
+        '/docentes/me/tendencia-asistencia',
+      );
+    } catch (error) {
+      console.error('Error al obtener tendencia asistencia:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener distribución de estudiantes por comisión
+   * @returns Cantidad de estudiantes por comisión y total
+   */
+  getDistribucionEstudiantes: async (): Promise<{
+    data: { name: string; value: number }[];
+    total: number;
+  }> => {
+    try {
+      return await apiClient.get<{
+        data: { name: string; value: number }[];
+        total: number;
+      }>('/docentes/me/distribucion-estudiantes');
+    } catch (error) {
+      console.error('Error al obtener distribución estudiantes:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener progreso de sesiones de una comisión
+   * @param comisionId - ID de la comisión
+   * @returns Sesión actual, total de sesiones y porcentaje completado
+   */
+  getProgresoComision: async (
+    comisionId: string,
+  ): Promise<{
+    sesionActual: number;
+    totalSesiones: number;
+    porcentajeCompletado: number;
+  }> => {
+    try {
+      return await apiClient.get<{
+        sesionActual: number;
+        totalSesiones: number;
+        porcentajeCompletado: number;
+      }>(`/docentes/me/comisiones/${comisionId}/progreso`);
+    } catch (error) {
+      console.error('Error al obtener progreso comisión:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener métricas de una comisión
+   * @param comisionId - ID de la comisión
+   * @returns Métricas: asistencia promedio, total estudiantes, clases, puntos
+   */
+  getMetricasComision: async (
+    comisionId: string,
+  ): Promise<{
+    asistenciaPromedio: number;
+    totalEstudiantes: number;
+    totalClases: number;
+    totalPuntos: number;
+  }> => {
+    try {
+      return await apiClient.get<{
+        asistenciaPromedio: number;
+        totalEstudiantes: number;
+        totalClases: number;
+        totalPuntos: number;
+      }>(`/docentes/me/comisiones/${comisionId}/metricas`);
+    } catch (error) {
+      console.error('Error al obtener métricas comisión:', error);
+      throw error;
+    }
+  },
+
+  // ============================================================================
+  // COMISIÓN - Detalle y Estudiantes
+  // ============================================================================
+
+  /**
+   * Obtener detalle de una comisión específica
+   * @param comisionId - ID de la comisión
+   * @returns Detalle de la comisión con lista de estudiantes
+   */
+  getComisionDetalle: async (comisionId: string): Promise<ComisionDetalleResponse> => {
+    try {
+      return await apiClient.get<ComisionDetalleResponse>(`/docentes/me/comisiones/${comisionId}`);
+    } catch (error) {
+      console.error('Error al obtener detalle de comisión:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener estudiantes de una comisión con sus stats
+   * @param comisionId - ID de la comisión
+   * @returns Lista de estudiantes con stats, tutor, casa
+   */
+  getEstudiantesComision: async (
+    comisionId: string,
+  ): Promise<{ estudiantes: EstudianteComision[] }> => {
+    try {
+      return await apiClient.get<{ estudiantes: EstudianteComision[] }>(
+        `/docentes/me/comisiones/${comisionId}/estudiantes`,
+      );
+    } catch (error) {
+      console.error('Error al obtener estudiantes de comisión:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener historial de asistencia de una comisión
+   * @param comisionId - ID de la comisión
+   * @param desde - Fecha desde (opcional, formato YYYY-MM-DD)
+   * @param hasta - Fecha hasta (opcional, formato YYYY-MM-DD)
+   * @returns Historial de asistencia agrupado por fecha
+   */
+  getHistorialAsistencia: async (
+    comisionId: string,
+    desde?: string,
+    hasta?: string,
+  ): Promise<HistorialAsistenciaResponse> => {
+    try {
+      const params = new URLSearchParams();
+      if (desde) params.append('desde', desde);
+      if (hasta) params.append('hasta', hasta);
+      const queryString = params.toString();
+      const url = `/docentes/me/comisiones/${comisionId}/historial-asistencia${queryString ? `?${queryString}` : ''}`;
+      return await apiClient.get<HistorialAsistenciaResponse>(url);
+    } catch (error) {
+      console.error('Error al obtener historial de asistencia:', error);
+      throw error;
+    }
+  },
 };
 
 // Exportar getDashboard como función standalone para facilitar imports
@@ -432,6 +697,51 @@ export interface ProgresoEstudiante {
   tiempo_total_minutos: number;
   puntos_totales: number;
 }
+
+// ============================================================================
+// ASISTENCIA COMISION - Tomar asistencia batch
+// ============================================================================
+
+export type EstadoAsistencia = 'Presente' | 'Ausente' | 'Justificado';
+
+export interface AsistenciaComisionItem {
+  estudianteId: string;
+  estado: EstadoAsistencia;
+  observacion?: string;
+}
+
+export interface TomarAsistenciaComisionDto {
+  comisionId: string;
+  fecha: string;
+  asistencias: AsistenciaComisionItem[];
+}
+
+export interface AsistenciaComisionBatchResponse {
+  success: boolean;
+  registrosCreados: number;
+  registrosActualizados: number;
+  estudiantes: Array<{
+    estudianteId: string;
+    nombre: string;
+    apellido: string;
+    estado: EstadoAsistencia;
+    observacion: string | null;
+  }>;
+  mensaje: string;
+}
+
+export const asistenciaApi = {
+  /**
+   * Tomar asistencia de múltiples estudiantes en una comisión
+   * @param dto - Datos de asistencia
+   * @returns Resultado del batch
+   */
+  tomarAsistenciaComision: async (
+    dto: TomarAsistenciaComisionDto,
+  ): Promise<AsistenciaComisionBatchResponse> => {
+    return apiClient.post<AsistenciaComisionBatchResponse>('/asistencia/comision/batch', dto);
+  },
+};
 
 export const planificacionesApi = {
   /**

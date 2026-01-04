@@ -1,11 +1,32 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Play, Clock, Users, Calendar, ArrowRight, BookOpen, Target, Zap } from 'lucide-react';
+import {
+  Play,
+  Clock,
+  Users,
+  Calendar,
+  ArrowRight,
+  BookOpen,
+  Target,
+  Zap,
+  Loader2,
+} from 'lucide-react';
 import { Comision } from '../../types/docente.types';
+import { docentesApi } from '@/lib/api/docentes.api';
 
 interface ProximaClaseProps {
   comision: Comision | null;
+}
+
+interface ProgresoComision {
+  sesionActual: number;
+  totalSesiones: number;
+  porcentajeCompletado: number;
+}
+
+interface MetricasComision {
+  asistenciaPromedio: number;
 }
 
 // Función para calcular la próxima clase basada en el horario
@@ -38,6 +59,38 @@ export const ProximaClaseCard: React.FC<ProximaClaseProps> = ({ comision }) => {
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [isLiveish, setIsLiveish] = useState(false);
   const [nextClassDate, setNextClassDate] = useState<Date | null>(null);
+
+  // Estados para progreso y métricas de la comisión
+  const [progreso, setProgreso] = useState<ProgresoComision | null>(null);
+  const [metricas, setMetricas] = useState<MetricasComision | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
+
+  // Cargar progreso y métricas cuando hay comisión
+  useEffect(() => {
+    if (!comision?.id) return;
+
+    const fetchStats = async () => {
+      setIsLoadingStats(true);
+      try {
+        const [progresoRes, metricasRes] = await Promise.all([
+          docentesApi.getProgresoComision(comision.id),
+          docentesApi.getMetricasComision(comision.id),
+        ]);
+        setProgreso(progresoRes);
+        setMetricas({
+          asistenciaPromedio: metricasRes.asistenciaPromedio,
+        });
+      } catch (error) {
+        console.error('Error al cargar stats de comisión:', error);
+        setProgreso(null);
+        setMetricas(null);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+
+    fetchStats();
+  }, [comision?.id]);
 
   useEffect(() => {
     if (!comision) return;
@@ -196,22 +249,50 @@ export const ProximaClaseCard: React.FC<ProximaClaseProps> = ({ comision }) => {
               </div>
             </div>
 
+            {/* Sesión actual / total */}
             <div className="bg-slate-900/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/30">
               <div className="flex items-center gap-2 mb-2">
                 <Target size={18} className="text-purple-400" />
                 <span className="text-xs font-semibold text-slate-400 uppercase">Sesión</span>
               </div>
-              <span className="text-2xl font-bold text-white">#12</span>
-              <p className="text-xs text-slate-500 mt-1">de 24 clases</p>
+              {isLoadingStats ? (
+                <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+              ) : progreso ? (
+                <>
+                  <span className="text-2xl font-bold text-white">#{progreso.sesionActual}</span>
+                  <p className="text-xs text-slate-500 mt-1">
+                    de {progreso.totalSesiones} sesiones
+                  </p>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl font-bold text-white">#1</span>
+                  <p className="text-xs text-slate-500 mt-1">sin datos</p>
+                </>
+              )}
             </div>
 
+            {/* Asistencia promedio */}
             <div className="bg-slate-900/40 backdrop-blur-sm rounded-xl p-4 border border-slate-700/30">
               <div className="flex items-center gap-2 mb-2">
                 <Zap size={18} className="text-amber-400" />
                 <span className="text-xs font-semibold text-slate-400 uppercase">Asistencia</span>
               </div>
-              <span className="text-2xl font-bold text-white">94%</span>
-              <p className="text-xs text-slate-500 mt-1">promedio</p>
+              {isLoadingStats ? (
+                <Loader2 className="w-6 h-6 animate-spin text-amber-400" />
+              ) : metricas ? (
+                <>
+                  <span className="text-2xl font-bold text-white">
+                    {Math.round(metricas.asistenciaPromedio)}%
+                  </span>
+                  <p className="text-xs text-slate-500 mt-1">promedio</p>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl font-bold text-white">--%</span>
+                  <p className="text-xs text-slate-500 mt-1">sin datos</p>
+                </>
+              )}
             </div>
           </div>
         </div>

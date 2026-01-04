@@ -123,7 +123,7 @@ export default function DocenteDashboard() {
         clasesSemana: response.stats?.clasesEstaSemana || 0,
         totalEstudiantes: response.stats?.estudiantesTotal || 0,
         asistenciaPromedio: response.stats?.asistenciaPromedio || 0,
-        puntosOtorgados: 0,
+        puntosOtorgados: response.stats?.puntosOtorgados || 0,
       };
 
       // Transform alerts from students with attendance issues

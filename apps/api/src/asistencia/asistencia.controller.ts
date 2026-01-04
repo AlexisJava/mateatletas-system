@@ -191,4 +191,26 @@ export class AsistenciaController {
       user.id,
     );
   }
+
+  /**
+   * Tomar asistencia de múltiples estudiantes en Comisión (batch)
+   * POST /api/asistencia/comision/batch
+   * Rol: Docente
+   *
+   * Usado en el portal docente para tomar asistencia de colonias/cursos
+   */
+  @Post('comision/batch')
+  @Roles(Role.DOCENTE)
+  async tomarAsistenciaComisionBatch(
+    @Body()
+    dto: import('./dto/tomar-asistencia-comision.dto').TomarAsistenciaComisionDto,
+    @GetUser() user: AuthUser,
+  ) {
+    return this.asistenciaService.tomarAsistenciaComisionBatch(
+      dto.comisionId,
+      dto.fecha,
+      dto.asistencias,
+      user.id,
+    );
+  }
 }

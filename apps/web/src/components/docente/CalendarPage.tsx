@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -14,6 +14,7 @@ import {
   X,
   Check,
 } from 'lucide-react';
+import { docentesApi, ClaseCalendario } from '@/lib/api/docentes.api';
 
 interface CalendarEvent {
   id: string;
@@ -23,78 +24,74 @@ interface CalendarEvent {
   duration: string;
   date: number; // Day of the month
   month: number; // 0-11
+  grupoId?: string;
+  estudiantesCount?: number;
 }
-
-const initialEvents: CalendarEvent[] = [
-  {
-    id: '1',
-    title: 'Intro a React Hooks',
-    time: '14:00',
-    type: 'class',
-    duration: '90m',
-    date: 5,
-    month: new Date().getMonth(),
-  },
-  {
-    id: '2',
-    title: 'Entrega Final UX/UI',
-    time: '23:59',
-    type: 'exam',
-    duration: 'Deadline',
-    date: 8,
-    month: new Date().getMonth(),
-  },
-  {
-    id: '3',
-    title: 'Revisión de Código',
-    time: '10:00',
-    type: 'mentoring',
-    duration: '45m',
-    date: 5,
-    month: new Date().getMonth(),
-  },
-  {
-    id: '4',
-    title: 'Workshop: State Mgmt',
-    time: '18:00',
-    type: 'class',
-    duration: '120m',
-    date: 12,
-    month: new Date().getMonth(),
-  },
-  {
-    id: '5',
-    title: 'Q&A Sesión 4',
-    time: '16:00',
-    type: 'class',
-    duration: '60m',
-    date: 15,
-    month: new Date().getMonth(),
-  },
-  {
-    id: '6',
-    title: 'Mentoria 1:1 - Juan',
-    time: '09:00',
-    type: 'mentoring',
-    duration: '30m',
-    date: 20,
-    month: new Date().getMonth(),
-  },
-  {
-    id: '7',
-    title: 'Examen Teórico JS',
-    time: '19:00',
-    type: 'exam',
-    duration: '2h',
-    date: 25,
-    month: new Date().getMonth(),
-  },
-];
 
 export const CalendarPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate());
-  const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [, setIsLoading] = useState(true);
+  const [, setStats] = useState<{
+    totalClases: number;
+    totalGrupos: number;
+    totalEstudiantes: number;
+  } | null>(null);
+
+  // Cargar clases del mes desde el backend
+  useEffect(() => {
+    fetchClasesDelMes();
+  }, [currentDate]);
+
+  const fetchClasesDelMes = async () => {
+    try {
+      setIsLoading(true);
+      const mes = currentDate.getMonth() + 1; // API usa 1-12
+      const anio = currentDate.getFullYear();
+      const response = await docentesApi.getClasesDelMes(mes, anio);
+
+      // Transformar clases del backend al formato de CalendarEvent
+      const transformedEvents: CalendarEvent[] = response.clases.map((clase: ClaseCalendario) => {
+        const fechaClase = new Date(clase.fecha);
+        const horaInicio = clase.hora_inicio.slice(0, 5); // "HH:MM"
+        const horaFin = clase.hora_fin.slice(0, 5);
+
+        // Calcular duración
+        const partesInicio = horaInicio.split(':').map(Number);
+        const partesFin = horaFin.split(':').map(Number);
+        const hI = partesInicio[0] ?? 0;
+        const mI = partesInicio[1] ?? 0;
+        const hF = partesFin[0] ?? 0;
+        const mF = partesFin[1] ?? 0;
+        const duracionMin = hF * 60 + mF - (hI * 60 + mI);
+        const duracion =
+          duracionMin >= 60
+            ? `${Math.floor(duracionMin / 60)}h${duracionMin % 60 > 0 ? ` ${duracionMin % 60}m` : ''}`
+            : `${duracionMin}m`;
+
+        return {
+          id: clase.id,
+          title: clase.nombre || clase.codigo,
+          time: horaInicio,
+          type: 'class' as const,
+          duration: duracion,
+          date: fechaClase.getDate(),
+          month: fechaClase.getMonth(),
+          grupoId: clase.grupo_id,
+          estudiantesCount: clase.estudiantesCount,
+        };
+      });
+
+      setEvents(transformedEvents);
+      setStats(response.stats);
+    } catch (error) {
+      console.error('Error al cargar clases del mes:', error);
+      setEvents([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -139,7 +136,7 @@ export const CalendarPage: React.FC = () => {
     if (!newEvent.title) return;
 
     const event: CalendarEvent = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).substring(2, 11),
       title: newEvent.title,
       time: newEvent.time,
       type: newEvent.type,

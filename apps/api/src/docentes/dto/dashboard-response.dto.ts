@@ -117,6 +117,7 @@ export interface StatsResumen {
   tendenciaAsistencia: TendenciaAsistencia;
   observacionesPendientes: number;
   estudiantesTotal: number;
+  puntosOtorgados: number;
 }
 
 /**
