@@ -28,9 +28,19 @@ export class LivekitTokenService {
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
-    this.apiKey = this.configService.get<string>('LIVEKIT_API_KEY') || '';
-    this.apiSecret = this.configService.get<string>('LIVEKIT_API_SECRET') || '';
-    this.wsUrl = this.configService.get<string>('LIVEKIT_URL') || '';
+    const apiKey = this.configService.get<string>('LIVEKIT_API_KEY');
+    const apiSecret = this.configService.get<string>('LIVEKIT_API_SECRET');
+    const wsUrl = this.configService.get<string>('LIVEKIT_URL');
+
+    if (!apiKey || !apiSecret || !wsUrl) {
+      throw new Error(
+        'LiveKit configuration missing. Required env vars: LIVEKIT_API_KEY, LIVEKIT_API_SECRET, LIVEKIT_URL',
+      );
+    }
+
+    this.apiKey = apiKey;
+    this.apiSecret = apiSecret;
+    this.wsUrl = wsUrl;
   }
 
   async generarTokenDocente(
@@ -212,6 +222,7 @@ export class LivekitTokenService {
       room: roomName,
       canPublish,
       canSubscribe: true,
+      canPublishData: true, // Permite enviar mensajes de chat via DataChannel
     });
 
     return await token.toJwt();

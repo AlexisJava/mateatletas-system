@@ -7,7 +7,37 @@ import { PrismaService } from '../../core/database/prisma.service';
 describe('LivekitTokenService', () => {
   let service: LivekitTokenService;
   let prisma: PrismaService;
-  let configService: ConfigService;
+
+  // Mock ConfigService que retorna valores válidos
+  const createMockConfigService = (
+    overrides: Record<string, string | undefined> = {},
+  ) => ({
+    get: jest.fn((key: string) => {
+      const config: Record<string, string | undefined> = {
+        LIVEKIT_API_KEY: 'test-api-key',
+        LIVEKIT_API_SECRET: 'test-api-secret-minimum-32-chars-long',
+        LIVEKIT_URL: 'wss://test.livekit.cloud',
+        ...overrides,
+      };
+      return config[key];
+    }),
+  });
+
+  // Mock PrismaService reutilizable
+  const createMockPrismaService = () => ({
+    claseGrupo: {
+      findUnique: jest.fn(),
+    },
+    comision: {
+      findUnique: jest.fn(),
+    },
+    inscripcionClaseGrupo: {
+      findFirst: jest.fn(),
+    },
+    inscripcionComision: {
+      findFirst: jest.fn(),
+    },
+  });
 
   const mockClaseGrupo = {
     id: 'clase-grupo-123',
@@ -43,40 +73,95 @@ describe('LivekitTokenService', () => {
         LivekitTokenService,
         {
           provide: ConfigService,
-          useValue: {
-            get: jest.fn((key: string) => {
-              const config: Record<string, string> = {
-                LIVEKIT_API_KEY: 'test-api-key',
-                LIVEKIT_API_SECRET: 'test-api-secret-minimum-32-chars-long',
-                LIVEKIT_URL: 'wss://test.livekit.cloud',
-              };
-              return config[key];
-            }),
-          },
+          useValue: createMockConfigService(),
         },
         {
           provide: PrismaService,
-          useValue: {
-            claseGrupo: {
-              findUnique: jest.fn(),
-            },
-            comision: {
-              findUnique: jest.fn(),
-            },
-            inscripcionClaseGrupo: {
-              findFirst: jest.fn(),
-            },
-            inscripcionComision: {
-              findFirst: jest.fn(),
-            },
-          },
+          useValue: createMockPrismaService(),
         },
       ],
     }).compile();
 
     service = module.get<LivekitTokenService>(LivekitTokenService);
     prisma = module.get<PrismaService>(PrismaService);
-    configService = module.get<ConfigService>(ConfigService);
+  });
+
+  describe('constructor - env vars validation', () => {
+    it('should_throw_error_when_LIVEKIT_API_KEY_is_missing', async () => {
+      await expect(
+        Test.createTestingModule({
+          providers: [
+            LivekitTokenService,
+            {
+              provide: ConfigService,
+              useValue: createMockConfigService({ LIVEKIT_API_KEY: undefined }),
+            },
+            {
+              provide: PrismaService,
+              useValue: createMockPrismaService(),
+            },
+          ],
+        }).compile(),
+      ).rejects.toThrow('LiveKit configuration missing');
+    });
+
+    it('should_throw_error_when_LIVEKIT_API_SECRET_is_missing', async () => {
+      await expect(
+        Test.createTestingModule({
+          providers: [
+            LivekitTokenService,
+            {
+              provide: ConfigService,
+              useValue: createMockConfigService({
+                LIVEKIT_API_SECRET: undefined,
+              }),
+            },
+            {
+              provide: PrismaService,
+              useValue: createMockPrismaService(),
+            },
+          ],
+        }).compile(),
+      ).rejects.toThrow('LiveKit configuration missing');
+    });
+
+    it('should_throw_error_when_LIVEKIT_URL_is_missing', async () => {
+      await expect(
+        Test.createTestingModule({
+          providers: [
+            LivekitTokenService,
+            {
+              provide: ConfigService,
+              useValue: createMockConfigService({ LIVEKIT_URL: undefined }),
+            },
+            {
+              provide: PrismaService,
+              useValue: createMockPrismaService(),
+            },
+          ],
+        }).compile(),
+      ).rejects.toThrow('LiveKit configuration missing');
+    });
+
+    it('should_throw_error_when_all_env_vars_are_missing', async () => {
+      await expect(
+        Test.createTestingModule({
+          providers: [
+            LivekitTokenService,
+            {
+              provide: ConfigService,
+              useValue: {
+                get: jest.fn().mockReturnValue(undefined),
+              },
+            },
+            {
+              provide: PrismaService,
+              useValue: createMockPrismaService(),
+            },
+          ],
+        }).compile(),
+      ).rejects.toThrow('LiveKit configuration missing');
+    });
   });
 
   describe('generarTokenDocente', () => {

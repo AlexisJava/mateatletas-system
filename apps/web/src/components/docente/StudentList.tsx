@@ -32,7 +32,6 @@ import {
   EstadoAsistencia,
 } from '@/lib/api/docentes.api';
 import { gamificacionApi, AccionPuntuable } from '@/lib/api/gamificacion.api';
-import { livekitApi } from '@/lib/api/livekit.api';
 import { toast } from '@/components/ui/Toast';
 
 // Emojis por código de acción (fallback)
@@ -49,6 +48,7 @@ const ACCION_EMOJIS: Record<string, string> = {
 interface StudentListProps {
   comisionId: string;
   onBack?: () => void;
+  onStartLiveClass?: (comisionId: string) => void;
 }
 
 interface ComisionInfo {
@@ -66,7 +66,11 @@ interface MetricasData {
   totalPuntos: number;
 }
 
-export const StudentList: React.FC<StudentListProps> = ({ comisionId, onBack }) => {
+export const StudentList: React.FC<StudentListProps> = ({
+  comisionId,
+  onBack,
+  onStartLiveClass,
+}) => {
   const [activeTab, setActiveTab] = useState<
     'students' | 'attendance' | 'observations' | 'metrics'
   >('students');
@@ -109,9 +113,6 @@ export const StudentList: React.FC<StudentListProps> = ({ comisionId, onBack }) 
     new Date().toISOString().split('T')[0] as string,
   );
   const [attendanceMode, setAttendanceMode] = useState<'take' | 'history'>('take');
-
-  // LiveKit / Iniciar Clase State
-  const [isStartingClass, setIsStartingClass] = useState(false);
 
   // Cargar datos de la comisión y estudiantes
   useEffect(() => {
@@ -406,20 +407,10 @@ export const StudentList: React.FC<StudentListProps> = ({ comisionId, onBack }) 
     );
   };
 
-  // Iniciar clase en vivo con LiveKit
-  const handleIniciarClase = async () => {
-    setIsStartingClass(true);
-    try {
-      const response = await livekitApi.getTokenDocente({ comisionId });
-      // Abrir la sala de LiveKit en una nueva pestaña
-      const liveClassUrl = `/docente/clase-en-vivo?token=${encodeURIComponent(response.token)}&ws=${encodeURIComponent(response.wsUrl)}&room=${encodeURIComponent(response.roomName)}`;
-      window.open(liveClassUrl, '_blank');
-      toast.success('Clase iniciada correctamente');
-    } catch (err) {
-      console.error('Error al iniciar clase:', err);
-      toast.error('Error al iniciar la clase. Intenta de nuevo.');
-    } finally {
-      setIsStartingClass(false);
+  // Iniciar clase en vivo - navega a la pestaña de clases en vivo
+  const handleIniciarClase = () => {
+    if (onStartLiveClass) {
+      onStartLiveClass(comisionId);
     }
   };
 
@@ -816,10 +807,10 @@ export const StudentList: React.FC<StudentListProps> = ({ comisionId, onBack }) 
 
           <button
             onClick={handleIniciarClase}
-            disabled={isStartingClass}
-            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 disabled:cursor-wait text-white rounded-xl font-bold shadow-lg shadow-indigo-600/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+            disabled={!onStartLiveClass}
+            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 disabled:cursor-not-allowed text-white rounded-xl font-bold shadow-lg shadow-indigo-600/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
           >
-            {isStartingClass ? <Loader2 size={18} className="animate-spin" /> : <Video size={18} />}
+            <Video size={18} />
             INICIAR CLASE
           </button>
         </div>

@@ -17,6 +17,7 @@ import { docentesApi } from '@/lib/api/docentes.api';
 
 interface ProximaClaseProps {
   comision: Comision | null;
+  onStartLiveClass?: (comisionId: string) => void;
 }
 
 interface ProgresoComision {
@@ -55,7 +56,7 @@ function getNextClassTime(horario: string): Date {
   return nextClass;
 }
 
-export const ProximaClaseCard: React.FC<ProximaClaseProps> = ({ comision }) => {
+export const ProximaClaseCard: React.FC<ProximaClaseProps> = ({ comision, onStartLiveClass }) => {
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [isLiveish, setIsLiveish] = useState(false);
   const [nextClassDate, setNextClassDate] = useState<Date | null>(null);
@@ -320,7 +321,7 @@ export const ProximaClaseCard: React.FC<ProximaClaseProps> = ({ comision }) => {
           </div>
 
           <button
-            onClick={() => console.log('Iniciar Clase', comision.id)}
+            onClick={() => onStartLiveClass?.(comision.id)}
             className={`group relative px-6 py-3 rounded-xl font-bold text-white text-base shadow-lg flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 overflow-hidden ${
               isUrgent
                 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-indigo-500/30'

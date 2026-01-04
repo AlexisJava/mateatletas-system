@@ -47,6 +47,7 @@ export default function DocenteDashboard() {
 
   // Navigation State
   const [selectedComisionId, setSelectedComisionId] = useState<string | null>(null);
+  const [liveComisionId, setLiveComisionId] = useState<string | null>(null);
 
   // Dashboard Interaction State
   const [selectedStat, setSelectedStat] = useState<string | null>(null);
@@ -161,6 +162,11 @@ export default function DocenteDashboard() {
   const handleSelectComision = (id: string) => {
     setSelectedComisionId(id);
     setCurrentView('comisiones');
+  };
+
+  const handleStartLiveClass = (comisionId: string) => {
+    setLiveComisionId(comisionId);
+    setCurrentView('live');
   };
 
   const handleLogout = async () => {
@@ -308,7 +314,10 @@ export default function DocenteDashboard() {
               {/* Left Column (Next Class) - 8/12 */}
               <div className="lg:col-span-8 h-full min-h-0 overflow-hidden">
                 {comisiones.length > 0 ? (
-                  <ProximaClaseCard comision={comisiones[0] ?? null} />
+                  <ProximaClaseCard
+                    comision={comisiones[0] ?? null}
+                    onStartLiveClass={handleStartLiveClass}
+                  />
                 ) : (
                   <div className="h-full flex items-center justify-center bg-slate-900/40 border border-slate-800 rounded-2xl">
                     <p className="text-slate-500">No hay comisiones asignadas</p>
@@ -326,7 +335,7 @@ export default function DocenteDashboard() {
             <DashboardModal type={selectedStat} onClose={() => setSelectedStat(null)} />
           </>
         ) : currentView === 'live' ? (
-          <LiveClassPage />
+          <LiveClassPage comisionId={liveComisionId ?? undefined} />
         ) : currentView === 'alerts' ? (
           <AlertsPage />
         ) : currentView === 'comisiones' ? (
@@ -334,6 +343,7 @@ export default function DocenteDashboard() {
             <StudentList
               comisionId={selectedComisionId}
               onBack={() => setSelectedComisionId(null)}
+              onStartLiveClass={handleStartLiveClass}
             />
           ) : (
             <div className="flex flex-col h-full gap-4">

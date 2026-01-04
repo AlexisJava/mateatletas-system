@@ -1,11 +1,19 @@
 import { Module } from '@nestjs/common';
 import { LivekitController } from './livekit.controller';
 import { LivekitTokenService } from './services/livekit-token.service';
-import { PrismaService } from '../core/database/prisma.service';
 
+/**
+ * LivekitModule
+ *
+ * Módulo para clases en vivo con video/audio.
+ *
+ * Dependencias globales (no necesitan importarse):
+ * - ConfigService: desde CoreModule (global)
+ * - PrismaService: desde DatabaseModule (global)
+ */
 @Module({
   controllers: [LivekitController],
-  providers: [LivekitTokenService, PrismaService],
+  providers: [LivekitTokenService],
   exports: [LivekitTokenService],
 })
 export class LivekitModule {}
