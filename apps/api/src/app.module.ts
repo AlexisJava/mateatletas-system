@@ -37,6 +37,7 @@ import { SuscripcionesModule } from './suscripciones/suscripciones.module';
 import { ContenidosModule } from './contenidos/contenidos.module';
 import { LivekitModule } from './livekit/livekit.module';
 import { AulaVivaModule } from './aula-viva/aula-viva.module';
+import { ObservacionesModule } from './observaciones/observaciones.module';
 
 /**
  * AppModule
@@ -92,6 +93,7 @@ import { AulaVivaModule } from './aula-viva/aula-viva.module';
     ContenidosModule, // Sistema de contenido educativo (Sandbox)
     LivekitModule, // Clases en vivo (video/audio)
     AulaVivaModule, // WebSocket para aula virtual en tiempo real
+    ObservacionesModule, // Sistema de observaciones docente
     // [ELIMINADO] CursosModule, StudioModule - sistema legacy de contenido
   ],
   controllers: [AppController],

@@ -23,6 +23,8 @@ import {
   BookOpen,
   Video,
   FileText,
+  Trophy,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   docentesApi,
@@ -32,7 +34,26 @@ import {
   EstadoAsistencia,
 } from '@/lib/api/docentes.api';
 import { gamificacionApi, AccionPuntuable } from '@/lib/api/gamificacion.api';
+import {
+  observacionesApi,
+  Observacion,
+  TipoObservacion,
+  PrioridadObservacion,
+  EstadoObservacion,
+} from '@/lib/api/observaciones.api';
 import { toast } from '@/components/ui/Toast';
+
+/**
+ * Helper para obtener la fecha local en formato YYYY-MM-DD
+ * Evita problemas de timezone con toISOString() que usa UTC
+ */
+const getLocalDateString = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 // Emojis por código de acción (fallback)
 const ACCION_EMOJIS: Record<string, string> = {
@@ -102,16 +123,30 @@ export const StudentList: React.FC<StudentListProps> = ({
 
   // Observation Modal States
   const [obsModalOpen, setObsModalOpen] = useState(false);
-  const [currentStudentForObs, setCurrentStudentForObs] = useState<string | null>(null);
+  const [currentStudentForObs, setCurrentStudentForObs] = useState<EstudianteComision | null>(null);
   const [newObservation, setNewObservation] = useState('');
+  const [obsTipo, setObsTipo] = useState<TipoObservacion>('Academica');
+  const [obsPrioridad, setObsPrioridad] = useState<PrioridadObservacion>('Baja');
+  const [obsFechaEvento, setObsFechaEvento] = useState<string>(getLocalDateString());
+  const [isSubmittingObs, setIsSubmittingObs] = useState(false);
+
+  // Observaciones Tab States
+  const [observacionesData, setObservacionesData] = useState<Observacion[]>([]);
+  const [isLoadingObservaciones, setIsLoadingObservaciones] = useState(false);
+  const [observacionesLoaded, setObservacionesLoaded] = useState(false);
+
+  // Observation Detail Modal States
+  const [selectedObservacion, setSelectedObservacion] = useState<Observacion | null>(null);
+  const [obsDetailModalOpen, setObsDetailModalOpen] = useState(false);
+  const [nuevoSeguimiento, setNuevoSeguimiento] = useState('');
+  const [isSubmittingSeguimiento, setIsSubmittingSeguimiento] = useState(false);
+  const [isChangingEstado, setIsChangingEstado] = useState(false);
 
   // Attendance Tab States (for marking attendance today)
   const [attendanceStates, setAttendanceStates] = useState<Record<string, EstadoAsistencia>>({});
   const [attendanceObservations, setAttendanceObservations] = useState<Record<string, string>>({});
   const [isSavingAttendance, setIsSavingAttendance] = useState(false);
-  const [attendanceDate, setAttendanceDate] = useState<string>(
-    new Date().toISOString().split('T')[0] as string,
-  );
+  const [attendanceDate, setAttendanceDate] = useState<string>(getLocalDateString());
   const [attendanceMode, setAttendanceMode] = useState<'take' | 'history'>('take');
 
   // Cargar datos de la comisión y estudiantes
@@ -189,6 +224,27 @@ export const StudentList: React.FC<StudentListProps> = ({
     }
   }, [activeTab, comisionId, historialAsistencia]);
 
+  // Cargar observaciones cuando se abre el tab
+  useEffect(() => {
+    if (activeTab === 'observations' && !observacionesLoaded) {
+      const fetchObservaciones = async () => {
+        setIsLoadingObservaciones(true);
+        try {
+          const res = await observacionesApi.listar({ comisionId, limit: 50 });
+          setObservacionesData(res.data ?? []);
+          setObservacionesLoaded(true);
+        } catch (err) {
+          console.error('Error al cargar observaciones:', err);
+          setObservacionesData([]);
+          setObservacionesLoaded(true);
+        } finally {
+          setIsLoadingObservaciones(false);
+        }
+      };
+      fetchObservaciones();
+    }
+  }, [activeTab, comisionId, observacionesLoaded]);
+
   // Abrir modal de puntos - cargar acciones del backend
   const openPuntosModal = async (student: EstudianteComision) => {
     setCurrentStudentForPuntos(student);
@@ -251,21 +307,103 @@ export const StudentList: React.FC<StudentListProps> = ({
     }
   };
 
-  const openObsModal = (id: string) => {
-    setCurrentStudentForObs(id);
+  const openObsModal = (student: EstudianteComision) => {
+    setCurrentStudentForObs(student);
     setNewObservation('');
+    setObsTipo('Academica');
+    setObsPrioridad('Baja');
+    setObsFechaEvento(getLocalDateString());
     setObsModalOpen(true);
   };
 
-  const saveObservation = () => {
-    if (currentStudentForObs && newObservation.trim()) {
-      // TODO: POST /estudiantes/:id/observaciones cuando exista el endpoint
-      console.log('TODO: Guardar observación', {
-        estudianteId: currentStudentForObs,
-        observacion: newObservation,
-      });
-      toast.success('Observación guardada');
+  const saveObservation = async () => {
+    if (!currentStudentForObs || !newObservation.trim()) return;
+
+    // Validación: mínimo 10 caracteres
+    if (newObservation.trim().length < 10) {
+      toast.error('La observación debe tener al menos 10 caracteres');
+      return;
+    }
+
+    setIsSubmittingObs(true);
+
+    const payload = {
+      estudianteIds: [currentStudentForObs.id],
+      comisionId,
+      contenido: newObservation.trim(),
+      fechaEvento: obsFechaEvento,
+      tipo: obsTipo,
+      prioridad: obsPrioridad,
+    };
+
+    try {
+      await observacionesApi.crear(payload);
+
+      toast.success(`Observación guardada para ${currentStudentForObs.nombre}`);
       setObsModalOpen(false);
+      // Invalidar cache de observaciones para forzar recarga
+      setObservacionesData([]);
+      setObservacionesLoaded(false);
+    } catch (err: unknown) {
+      // Extraer mensaje de error del backend si existe
+      const axiosError = err as { response?: { data?: { message?: string | string[] } } };
+      const errorMessage = axiosError?.response?.data?.message || 'Error al guardar la observación';
+      const displayMessage = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
+      toast.error(displayMessage);
+    } finally {
+      setIsSubmittingObs(false);
+    }
+  };
+
+  // Abrir modal de detalle de observación
+  const openObsDetailModal = (obs: Observacion) => {
+    setSelectedObservacion(obs);
+    setNuevoSeguimiento('');
+    setObsDetailModalOpen(true);
+  };
+
+  // Agregar seguimiento a una observación
+  const handleAgregarSeguimiento = async () => {
+    if (!selectedObservacion || !nuevoSeguimiento.trim()) return;
+
+    setIsSubmittingSeguimiento(true);
+    try {
+      const updated = await observacionesApi.agregarSeguimiento(selectedObservacion.id, {
+        contenido: nuevoSeguimiento.trim(),
+      });
+
+      // Actualizar la observación en el estado local
+      setObservacionesData((prev) => prev.map((obs) => (obs.id === updated.id ? updated : obs)));
+      setSelectedObservacion(updated);
+      setNuevoSeguimiento('');
+      toast.success('Seguimiento agregado');
+    } catch (err) {
+      console.error('Error al agregar seguimiento:', err);
+      toast.error('Error al agregar seguimiento');
+    } finally {
+      setIsSubmittingSeguimiento(false);
+    }
+  };
+
+  // Cambiar estado de una observación
+  const handleCambiarEstado = async (nuevoEstado: EstadoObservacion) => {
+    if (!selectedObservacion || selectedObservacion.estado === nuevoEstado) return;
+
+    setIsChangingEstado(true);
+    try {
+      const updated = await observacionesApi.cambiarEstado(selectedObservacion.id, {
+        estado: nuevoEstado,
+      });
+
+      // Actualizar la observación en el estado local
+      setObservacionesData((prev) => prev.map((obs) => (obs.id === updated.id ? updated : obs)));
+      setSelectedObservacion(updated);
+      toast.success(`Estado cambiado a ${nuevoEstado}`);
+    } catch (err) {
+      console.error('Error al cambiar estado:', err);
+      toast.error('Error al cambiar estado');
+    } finally {
+      setIsChangingEstado(false);
     }
   };
 
@@ -414,38 +552,53 @@ export const StudentList: React.FC<StudentListProps> = ({
     }
   };
 
-  // Renderizar tab Observaciones (basado en últimas asistencias con observaciones)
-  const renderObservationsTab = () => {
-    // Extraer observaciones del historial de asistencia
-    const observaciones: Array<{
-      fecha: string;
-      estudianteId: string;
-      nombre: string;
-      observacion: string;
-    }> = [];
+  // Helper para color de prioridad
+  const getPrioridadColor = (prioridad: PrioridadObservacion) => {
+    switch (prioridad) {
+      case 'Urgente':
+        return 'bg-red-500/20 text-red-400 border-red-500/30';
+      case 'Alta':
+        return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+      case 'Media':
+        return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+      default:
+        return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+    }
+  };
 
-    if (historialAsistencia) {
-      for (const fechaData of historialAsistencia.fechas) {
-        for (const asist of fechaData.asistencias) {
-          if (asist.observacion) {
-            observaciones.push({
-              fecha: fechaData.fecha,
-              estudianteId: asist.estudiante_id,
-              nombre: asist.nombre,
-              observacion: asist.observacion,
-            });
-          }
-        }
-      }
+  // Helper para color de tipo
+  const getTipoColor = (tipo: TipoObservacion) => {
+    switch (tipo) {
+      case 'Incidente':
+        return 'bg-red-500/20 text-red-400';
+      case 'Conductual':
+        return 'bg-orange-500/20 text-orange-400';
+      case 'Logro':
+        return 'bg-emerald-500/20 text-emerald-400';
+      case 'Asistencia':
+        return 'bg-cyan-500/20 text-cyan-400';
+      default:
+        return 'bg-indigo-500/20 text-indigo-400';
+    }
+  };
+
+  // Renderizar tab Observaciones con datos de la API
+  const renderObservationsTab = () => {
+    if (isLoadingObservaciones) {
+      return (
+        <div className="h-full flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+        </div>
+      );
     }
 
-    if (observaciones.length === 0) {
+    if (observacionesData.length === 0) {
       return (
         <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-4">
           <FileText size={48} className="opacity-20" />
           <p>No hay observaciones registradas</p>
           <p className="text-xs text-slate-600">
-            Las observaciones se agregan desde la asistencia o al otorgar puntos
+            Usa el botón de observación en cada estudiante para agregar una
           </p>
         </div>
       );
@@ -453,16 +606,52 @@ export const StudentList: React.FC<StudentListProps> = ({
 
     return (
       <div className="p-4 space-y-3 overflow-y-auto h-full">
-        {observaciones.map((obs, idx) => {
-          const fecha = new Date(obs.fecha);
+        {observacionesData.map((obs) => {
+          const fecha = new Date(obs.fecha_evento);
+          const estudiantesNombres = obs.estudiantes
+            .map((e) => `${e.estudiante.nombre} ${e.estudiante.apellido}`)
+            .join(', ');
+
           return (
-            <div
-              key={`${obs.estudianteId}-${idx}`}
-              className="bg-slate-900/40 border border-slate-800 rounded-xl p-4"
+            <button
+              key={obs.id}
+              onClick={() => openObsDetailModal(obs)}
+              className={`w-full text-left bg-slate-900/40 border rounded-xl p-4 hover:bg-slate-800/40 transition-all cursor-pointer ${
+                obs.prioridad === 'Urgente'
+                  ? 'border-red-500/30 hover:border-red-500/50'
+                  : obs.prioridad === 'Alta'
+                    ? 'border-orange-500/30 hover:border-orange-500/50'
+                    : 'border-slate-800 hover:border-slate-700'
+              }`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-white">{obs.nombre}</span>
-                <span className="text-xs text-slate-500">
+              <div className="flex items-start justify-between mb-2 gap-2">
+                <div className="flex-1">
+                  <span className="text-sm font-bold text-white">{estudiantesNombres}</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${getTipoColor(obs.tipo)}`}
+                    >
+                      {obs.tipo}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${getPrioridadColor(obs.prioridad)}`}
+                    >
+                      {obs.prioridad}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                        obs.estado === 'Resuelta' || obs.estado === 'Cerrada'
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : obs.estado === 'EnSeguimiento'
+                            ? 'bg-amber-500/20 text-amber-400'
+                            : 'bg-slate-500/20 text-slate-400'
+                      }`}
+                    >
+                      {obs.estado}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-xs text-slate-500 whitespace-nowrap">
                   {fecha.toLocaleDateString('es-ES', {
                     day: 'numeric',
                     month: 'short',
@@ -470,8 +659,15 @@ export const StudentList: React.FC<StudentListProps> = ({
                   })}
                 </span>
               </div>
-              <p className="text-sm text-slate-400">{obs.observacion}</p>
-            </div>
+              <p className="text-sm text-slate-300 mt-2">{obs.contenido}</p>
+              {obs.seguimientos && obs.seguimientos.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-slate-800/50">
+                  <span className="text-xs text-slate-500 font-semibold">
+                    {obs.seguimientos.length} seguimiento(s)
+                  </span>
+                </div>
+              )}
+            </button>
           );
         })}
       </div>
@@ -941,7 +1137,7 @@ export const StudentList: React.FC<StudentListProps> = ({
                           <Star size={18} />
                         </button>
                         <button
-                          onClick={() => openObsModal(student.id)}
+                          onClick={() => openObsModal(student)}
                           className="p-2 bg-slate-800 hover:bg-indigo-500/20 hover:text-indigo-400 text-slate-400 rounded-xl transition-colors"
                           title="Agregar Observación"
                         >
@@ -1066,11 +1262,16 @@ export const StudentList: React.FC<StudentListProps> = ({
       )}
 
       {/* Observation Modal */}
-      {obsModalOpen && (
+      {obsModalOpen && currentStudentForObs && (
         <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
           <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-bold text-white">Nueva Observación</h3>
+              <div>
+                <h3 className="text-lg font-bold text-white">Nueva Observación</h3>
+                <p className="text-sm text-slate-400">
+                  para {currentStudentForObs.nombre} {currentStudentForObs.apellido}
+                </p>
+              </div>
               <button
                 onClick={() => setObsModalOpen(false)}
                 className="text-slate-500 hover:text-white"
@@ -1078,20 +1279,301 @@ export const StudentList: React.FC<StudentListProps> = ({
                 <X size={20} />
               </button>
             </div>
+
+            {/* Tipo y Prioridad */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">Tipo</label>
+                <select
+                  value={obsTipo}
+                  onChange={(e) => setObsTipo(e.target.value as TipoObservacion)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                >
+                  <option value="Academica">Académica</option>
+                  <option value="Conductual">Conductual</option>
+                  <option value="Asistencia">Asistencia</option>
+                  <option value="Logro">Logro</option>
+                  <option value="Incidente">Incidente</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">Prioridad</label>
+                <select
+                  value={obsPrioridad}
+                  onChange={(e) => setObsPrioridad(e.target.value as PrioridadObservacion)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                >
+                  <option value="Baja">Baja</option>
+                  <option value="Media">Media</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Urgente">Urgente</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Fecha del evento */}
+            <div className="mb-4">
+              <label className="block text-xs text-slate-400 mb-1">Fecha del evento</label>
+              <input
+                type="date"
+                value={obsFechaEvento}
+                onChange={(e) => setObsFechaEvento(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            {/* Contenido */}
             <textarea
               value={newObservation}
               onChange={(e) => setNewObservation(e.target.value)}
-              placeholder="Escribe una observación..."
-              className="w-full h-32 bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500 resize-none mb-4"
+              placeholder="Describe la observación..."
+              className="w-full h-28 bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-indigo-500 resize-none mb-4"
               autoFocus
             />
+
             <button
               onClick={saveObservation}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+              disabled={isSubmittingObs || !newObservation.trim()}
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
             >
-              <Save size={18} />
-              Guardar
+              {isSubmittingObs ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Save size={18} />
+              )}
+              Guardar Observación
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Observation Detail Modal */}
+      {obsDetailModalOpen && selectedObservacion && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-slate-700">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`p-2 rounded-lg ${
+                    selectedObservacion.tipo === 'Logro'
+                      ? 'bg-emerald-500/20'
+                      : selectedObservacion.tipo === 'Incidente'
+                        ? 'bg-red-500/20'
+                        : selectedObservacion.tipo === 'Conductual'
+                          ? 'bg-amber-500/20'
+                          : 'bg-blue-500/20'
+                  }`}
+                >
+                  {selectedObservacion.tipo === 'Logro' ? (
+                    <Trophy size={20} className="text-emerald-400" />
+                  ) : selectedObservacion.tipo === 'Incidente' ? (
+                    <AlertTriangle size={20} className="text-red-400" />
+                  ) : (
+                    <FileText size={20} className="text-blue-400" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Detalle de Observación</h3>
+                  <p className="text-xs text-slate-400">
+                    {new Date(selectedObservacion.fecha_evento).toLocaleDateString('es-AR')}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setObsDetailModalOpen(false)}
+                className="p-2 rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                <X size={20} className="text-slate-400" />
+              </button>
+            </div>
+
+            {/* Content - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {/* Info básica */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    selectedObservacion.tipo === 'Logro'
+                      ? 'bg-emerald-500/20 text-emerald-400'
+                      : selectedObservacion.tipo === 'Incidente'
+                        ? 'bg-red-500/20 text-red-400'
+                        : selectedObservacion.tipo === 'Conductual'
+                          ? 'bg-amber-500/20 text-amber-400'
+                          : 'bg-blue-500/20 text-blue-400'
+                  }`}
+                >
+                  {selectedObservacion.tipo}
+                </span>
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    selectedObservacion.prioridad === 'Urgente'
+                      ? 'bg-red-500/20 text-red-400'
+                      : selectedObservacion.prioridad === 'Alta'
+                        ? 'bg-orange-500/20 text-orange-400'
+                        : selectedObservacion.prioridad === 'Media'
+                          ? 'bg-yellow-500/20 text-yellow-400'
+                          : 'bg-slate-500/20 text-slate-400'
+                  }`}
+                >
+                  Prioridad: {selectedObservacion.prioridad}
+                </span>
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    selectedObservacion.estado === 'Abierta'
+                      ? 'bg-blue-500/20 text-blue-400'
+                      : selectedObservacion.estado === 'EnSeguimiento'
+                        ? 'bg-amber-500/20 text-amber-400'
+                        : selectedObservacion.estado === 'Resuelta'
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : 'bg-slate-500/20 text-slate-400'
+                  }`}
+                >
+                  {selectedObservacion.estado === 'EnSeguimiento'
+                    ? 'En Seguimiento'
+                    : selectedObservacion.estado}
+                </span>
+              </div>
+
+              {/* Estudiantes involucrados */}
+              <div className="bg-slate-800/50 rounded-xl p-3">
+                <h4 className="text-xs font-semibold text-slate-400 mb-2">
+                  Estudiantes ({selectedObservacion.estudiantes.length})
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {selectedObservacion.estudiantes.map((e) => (
+                    <span
+                      key={e.estudiante.id}
+                      className="px-2 py-1 bg-slate-700 rounded-lg text-sm text-white"
+                    >
+                      {e.estudiante.nombre} {e.estudiante.apellido}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Contenido de la observación */}
+              <div className="bg-slate-800/50 rounded-xl p-3">
+                <h4 className="text-xs font-semibold text-slate-400 mb-2">Contenido</h4>
+                <p className="text-sm text-white whitespace-pre-wrap">
+                  {selectedObservacion.contenido}
+                </p>
+              </div>
+
+              {/* Seguimientos */}
+              <div className="bg-slate-800/50 rounded-xl p-3">
+                <h4 className="text-xs font-semibold text-slate-400 mb-2">
+                  Seguimientos ({selectedObservacion.seguimientos?.length || 0})
+                </h4>
+                {selectedObservacion.seguimientos && selectedObservacion.seguimientos.length > 0 ? (
+                  <div className="space-y-3">
+                    {selectedObservacion.seguimientos.map((seg) => (
+                      <div key={seg.id} className="border-l-2 border-indigo-500 pl-3 py-1">
+                        <p className="text-sm text-white">{seg.contenido}</p>
+                        <p className="text-xs text-slate-500 mt-1">
+                          {new Date(seg.created_at).toLocaleString('es-AR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 italic">Sin seguimientos aún</p>
+                )}
+
+                {/* Agregar nuevo seguimiento */}
+                {selectedObservacion.estado !== 'Cerrada' && (
+                  <div className="mt-3 pt-3 border-t border-slate-700">
+                    <textarea
+                      value={nuevoSeguimiento}
+                      onChange={(e) => setNuevoSeguimiento(e.target.value)}
+                      placeholder="Agregar seguimiento..."
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white resize-none focus:outline-none focus:border-indigo-500"
+                      rows={2}
+                    />
+                    <button
+                      onClick={handleAgregarSeguimiento}
+                      disabled={isSubmittingSeguimiento || !nuevoSeguimiento.trim()}
+                      className="mt-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-sm rounded-lg flex items-center gap-2 transition-all"
+                    >
+                      {isSubmittingSeguimiento ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <MessageSquare size={14} />
+                      )}
+                      Agregar Seguimiento
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Cambiar Estado */}
+              {selectedObservacion.estado !== 'Cerrada' && (
+                <div className="bg-slate-800/50 rounded-xl p-3">
+                  <h4 className="text-xs font-semibold text-slate-400 mb-2">Cambiar Estado</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedObservacion.estado === 'Abierta' && (
+                      <button
+                        onClick={() => handleCambiarEstado('EnSeguimiento')}
+                        disabled={isChangingEstado}
+                        className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 text-white text-sm rounded-lg flex items-center gap-1.5 transition-all"
+                      >
+                        {isChangingEstado ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Clock size={14} />
+                        )}
+                        Iniciar Seguimiento
+                      </button>
+                    )}
+                    {(selectedObservacion.estado === 'Abierta' ||
+                      selectedObservacion.estado === 'EnSeguimiento') && (
+                      <button
+                        onClick={() => handleCambiarEstado('Resuelta')}
+                        disabled={isChangingEstado}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 text-white text-sm rounded-lg flex items-center gap-1.5 transition-all"
+                      >
+                        {isChangingEstado ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <CheckCircle size={14} />
+                        )}
+                        Marcar Resuelta
+                      </button>
+                    )}
+                    {selectedObservacion.estado === 'Resuelta' && (
+                      <button
+                        onClick={() => handleCambiarEstado('Cerrada')}
+                        disabled={isChangingEstado}
+                        className="px-3 py-1.5 bg-slate-600 hover:bg-slate-500 disabled:bg-slate-700 text-white text-sm rounded-lg flex items-center gap-1.5 transition-all"
+                      >
+                        {isChangingEstado ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <X size={14} />
+                        )}
+                        Cerrar Observación
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-700">
+              <button
+                onClick={() => setObsDetailModalOpen(false)}
+                className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-all"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

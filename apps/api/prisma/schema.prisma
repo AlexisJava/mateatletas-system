@@ -145,6 +145,9 @@ model Estudiante {
   /// COMISIONES: Registros de asistencia en comisiones (talleres, colonias)
   asistencias_comision AsistenciaComision[]
 
+  /// Observaciones recibidas de docentes
+  observaciones ObservacionEstudiante[]
+
   // Índices de performance para rankings y listados
   // NOTA: Índices de puntos_totales eliminados - usar RecursosEstudiante para rankings (SUB-FASE 1.3)
   @@index([tutor_id, apellido], name: "idx_estudiantes_tutor_listado")
@@ -484,6 +487,9 @@ model Docente {
 
   /// Asignaciones de planificaciones a grupos
   asignacionesPlanificacion AsignacionPlanificacion[]
+
+  /// Observaciones creadas por este docente
+  observaciones Observacion[]
 
   @@map("docentes")
 }
@@ -2464,6 +2470,9 @@ model Comision {
   /// Registros de asistencia en esta comisión
   asistencias AsistenciaComision[]
 
+  /// Observaciones de docentes en esta comisión
+  observaciones Observacion[]
+
   @@index([producto_id])
   @@index([docente_id])
   @@index([casa_id])
@@ -2699,4 +2708,137 @@ model ProgresoSemanalEstudiante {
   @@unique([asignacion_id, estudiante_id])
   @@index([estudiante_id])
   @@map("progresos_semanales_estudiante")
+}
+
+// ============================================================
+// SISTEMA DE OBSERVACIONES DOCENTE
+// ============================================================
+
+/// Tipos de observación disponibles
+enum TipoObservacion {
+  Academica
+  Conductual
+  Asistencia
+  Logro
+  Incidente
+
+  @@map("tipo_observacion")
+}
+
+/// Prioridad de la observación
+enum PrioridadObservacion {
+  Baja
+  Media
+  Alta
+  Urgente
+
+  @@map("prioridad_observacion")
+}
+
+/// Estado del ciclo de vida de la observación
+enum EstadoObservacion {
+  Abierta
+  EnSeguimiento
+  Resuelta
+  Cerrada
+
+  @@map("estado_observacion")
+}
+
+/// Tipo de autor de un seguimiento
+enum TipoAutorSeguimiento {
+  Docente
+  Admin
+
+  @@map("tipo_autor_seguimiento")
+}
+
+/// Observación de docente sobre estudiante(s)
+/// Sistema inmutable para data analysis - NO se pueden eliminar
+model Observacion {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// Docente que creó la observación
+  docente_id String
+  docente    Docente @relation(fields: [docente_id], references: [id], onDelete: Cascade)
+
+  /// Comisión/contexto donde ocurrió (opcional)
+  comision_id String?
+  comision    Comision? @relation(fields: [comision_id], references: [id], onDelete: SetNull)
+
+  /// Contenido de la observación
+  contenido String @db.Text
+
+  /// Fecha en que ocurrió el evento observado
+  fecha_evento DateTime
+
+  /// Clasificación
+  tipo      TipoObservacion
+  prioridad PrioridadObservacion @default(Baja)
+
+  /// Flags de notificación
+  requiere_seguimiento Boolean @default(false)
+  notificar_admin      Boolean @default(false)
+  notificar_pedagogia  Boolean @default(false)
+
+  /// Estado del ciclo de vida
+  estado EstadoObservacion @default(Abierta)
+
+  /// Timestamps
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  /// Relaciones
+  estudiantes  ObservacionEstudiante[]
+  seguimientos SeguimientoObservacion[]
+
+  @@index([docente_id])
+  @@index([comision_id])
+  @@index([tipo])
+  @@index([prioridad])
+  @@index([estado])
+  @@index([requiere_seguimiento, estado])
+  @@index([fecha_evento])
+  @@index([created_at])
+  @@map("observaciones_docente")
+}
+
+/// Relación N:M entre Observación y Estudiante
+/// Permite observaciones grupales (múltiples estudiantes)
+model ObservacionEstudiante {
+  observacion_id String
+  estudiante_id  String
+
+  observacion Observacion @relation(fields: [observacion_id], references: [id], onDelete: Cascade)
+  estudiante  Estudiante  @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  @@id([observacion_id, estudiante_id])
+  @@index([estudiante_id])
+  @@map("observaciones_estudiantes")
+}
+
+/// Seguimiento agregado a una observación
+/// Inmutable: no se puede editar, solo agregar nuevos
+model SeguimientoObservacion {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// Observación padre
+  observacion_id String
+  observacion    Observacion @relation(fields: [observacion_id], references: [id], onDelete: Cascade)
+
+  /// Autor del seguimiento (puede ser docente o admin)
+  autor_id   String
+  autor_tipo TipoAutorSeguimiento
+
+  /// Contenido del seguimiento
+  contenido String @db.Text
+
+  /// Timestamp
+  created_at DateTime @default(now())
+
+  @@index([observacion_id])
+  @@index([autor_id])
+  @@map("seguimientos_observacion")
 }
