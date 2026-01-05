@@ -7,22 +7,24 @@ import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { ClassRoom } from '@/components/docente/live/ClassRoom';
 
 /**
- * Página de Clase en Vivo
+ * Página de Clase en Vivo - Portal Estudiante
+ *
+ * El estudiante se conecta como viewer (solo ve/escucha, no transmite).
  *
  * Recibe los parámetros de LiveKit via query string:
- * - token: JWT token de LiveKit
- * - ws: WebSocket URL del servidor LiveKit
- * - room: Nombre de la sala
- * - title: Título de la clase (opcional)
+ * - token: JWT token de LiveKit (con canPublish: false)
+ * - wsUrl: WebSocket URL del servidor LiveKit
+ * - roomName: Nombre de la sala
+ * - nombreClase: Título de la clase (opcional)
  */
-function ClaseEnVivoContent() {
+function ClaseEnVivoEstudianteContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const token = searchParams.get('token');
-  const wsUrl = searchParams.get('ws');
-  const roomName = searchParams.get('room');
-  const title = searchParams.get('title') || 'Clase en Vivo';
+  const wsUrl = searchParams.get('wsUrl');
+  const roomName = searchParams.get('roomName');
+  const nombreClase = searchParams.get('nombreClase') || 'Clase en Vivo';
 
   // Validar parámetros requeridos
   if (!token || !wsUrl || !roomName) {
@@ -32,25 +34,25 @@ function ClaseEnVivoContent() {
           <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
             <AlertCircle size={32} className="text-red-400" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Parámetros Inválidos</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">Error de Conexión</h1>
           <p className="text-slate-400 mb-6">
-            Faltan parámetros necesarios para conectar a la clase en vivo. Por favor, inicia la
-            clase desde el dashboard.
+            No se pudo conectar a la clase en vivo. Faltan parámetros de conexión. Intenta unirte
+            nuevamente desde la sección de clases.
           </p>
           <button
-            onClick={() => router.push('/docente/dashboard')}
+            onClick={() => router.push('/estudiante/clases')}
             className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all flex items-center gap-2 mx-auto"
           >
             <ArrowLeft size={18} />
-            Volver al Dashboard
+            Volver a Clases
           </button>
         </div>
       </div>
     );
   }
 
-  const handleEndClass = () => {
-    router.push('/docente/dashboard');
+  const handleLeaveClass = () => {
+    router.push('/estudiante/clases');
   };
 
   return (
@@ -59,27 +61,30 @@ function ClaseEnVivoContent() {
         token={token}
         serverUrl={wsUrl}
         connect={true}
-        video={true}
-        audio={true}
+        video={false} // Estudiante no transmite video
+        audio={false} // Estudiante no transmite audio
         className="h-full"
       >
         <RoomAudioRenderer />
-        <ClassRoom title={title} onEndClass={handleEndClass} />
+        <ClassRoom title={nombreClase} onEndClass={handleLeaveClass} mode="student" />
       </LiveKitRoom>
     </div>
   );
 }
 
-export default function ClaseEnVivoPage() {
+export default function ClaseEnVivoEstudiantePage() {
   return (
     <Suspense
       fallback={
         <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-          <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-slate-400">Conectando a la clase...</p>
+          </div>
         </div>
       }
     >
-      <ClaseEnVivoContent />
+      <ClaseEnVivoEstudianteContent />
     </Suspense>
   );
 }

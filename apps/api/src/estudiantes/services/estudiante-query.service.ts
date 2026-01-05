@@ -505,8 +505,10 @@ export class EstudianteQueryService {
   }
 
   /**
-   * Obtener TODAS las clases (ClaseGrupo) en las que está inscrito el estudiante
-   * Incluye docente, grupo, sector y link de videollamada
+   * Obtener TODAS las clases del estudiante para el portal
+   * Incluye:
+   * - ClaseGrupo (clases regulares semanales)
+   * - Comisiones (talleres, colonias, etc.)
    * @param estudianteId - ID del estudiante autenticado
    * @returns Array de clases con información completa para el portal
    */
@@ -535,78 +537,79 @@ export class EstudianteQueryService {
       DOMINGO: 'Domingo',
     };
 
-    // Buscar todas las inscripciones activas del estudiante
-    const inscripciones = await this.prisma.inscripcionClaseGrupo.findMany({
-      where: {
-        estudiante_id: estudianteId,
-        fecha_baja: null, // Solo inscripciones activas
-      },
-      include: {
-        claseGrupo: {
-          include: {
-            docente: {
-              select: {
-                id: true,
-                nombre: true,
-                apellido: true,
+    // Buscar inscripciones a ClaseGrupo Y Comisiones en paralelo
+    const [inscripcionesClaseGrupo, inscripcionesComision] = await Promise.all([
+      // 1. Inscripciones a ClaseGrupo (clases regulares semanales)
+      this.prisma.inscripcionClaseGrupo.findMany({
+        where: {
+          estudiante_id: estudianteId,
+          fecha_baja: null,
+        },
+        include: {
+          claseGrupo: {
+            include: {
+              docente: {
+                select: { id: true, nombre: true, apellido: true },
               },
-            },
-            grupo: {
-              select: {
-                id: true,
-                codigo: true,
-                nombre: true,
-                link_meet: true,
+              grupo: {
+                select: {
+                  id: true,
+                  codigo: true,
+                  nombre: true,
+                  link_meet: true,
+                },
               },
-            },
-            sector: {
-              select: {
-                id: true,
-                nombre: true,
-                color: true,
-                icono: true,
+              sector: {
+                select: { id: true, nombre: true, color: true, icono: true },
               },
             },
           },
         },
-      },
-    });
+      }),
+      // 2. Inscripciones a Comisiones (talleres, colonias, etc)
+      this.prisma.inscripcionComision.findMany({
+        where: {
+          estudiante_id: estudianteId,
+          estado: { in: ['Confirmada', 'Pendiente'] },
+        },
+        include: {
+          comision: {
+            include: {
+              docente: {
+                select: { id: true, nombre: true, apellido: true },
+              },
+              producto: {
+                select: { id: true, nombre: true, descripcion: true },
+              },
+            },
+          },
+        },
+      }),
+    ]);
 
-    // Mapear a formato para el frontend y calcular próxima fecha
-    const clases = inscripciones
+    // Mapear ClaseGrupo a formato para el frontend
+    const clasesGrupales = inscripcionesClaseGrupo
       .filter((i) => i.claseGrupo.activo)
       .map((inscripcion) => {
         const cg = inscripcion.claseGrupo;
-
-        // Calcular próxima fecha de la clase
         const diaActual = ahora.getDay();
         const diaClase = diasSemanaMap[cg.dia_semana] ?? -1;
-
         const { horas, minutos } = parseHorario(cg.hora_inicio);
 
         let diasHasta = diaClase - diaActual;
-
-        // Si es hoy mismo, verificar si la hora ya pasó
         if (diasHasta === 0) {
           const horaClase = horas * 60 + minutos;
           const horaActual = ahora.getHours() * 60 + ahora.getMinutes();
           if (horaActual >= horaClase) {
-            // La clase de hoy ya pasó, próxima semana
             diasHasta = 7;
           }
         } else if (diasHasta < 0) {
-          // El día ya pasó esta semana, próxima semana
           diasHasta += 7;
         }
 
         const fechaProxima = new Date(ahora);
         fechaProxima.setDate(ahora.getDate() + diasHasta);
         fechaProxima.setHours(horas, minutos, 0, 0);
-
-        const duracionMinutos = calcularDuracionMinutos(
-          cg.hora_inicio,
-          cg.hora_fin,
-        );
 
         return {
           id: cg.id,
@@ -617,20 +620,127 @@ export class EstudianteQueryService {
           dia_nombre: nombresDia[cg.dia_semana] || cg.dia_semana,
           hora_inicio: cg.hora_inicio,
           hora_fin: cg.hora_fin,
-          duracion_minutos: duracionMinutos,
+          duracion_minutos: calcularDuracionMinutos(
+            cg.hora_inicio,
+            cg.hora_fin,
+          ),
           fecha_proxima: fechaProxima,
           docente: cg.docente,
           grupo: cg.grupo,
           sector: cg.sector,
           link_meet: cg.grupo?.link_meet || null,
           fecha_inscripcion: inscripcion.fecha_inscripcion,
+          tipo: 'clase_grupal' as const,
         };
       });
 
-    // Ordenar por próxima fecha (más cercana primero)
-    return clases.sort(
-      (a, b) => a.fecha_proxima.getTime() - b.fecha_proxima.getTime(),
+    // Mapear Comisiones a formato para el frontend
+    // No filtramos por activo porque las comisiones pueden no tenerlo seteado
+    const comisiones = inscripcionesComision.map((inscripcion) => {
+      const com = inscripcion.comision;
+      // Usar fecha_inicio de la comisión si existe, sino hoy
+      const fechaProxima = com.fecha_inicio || ahora;
+
+      return {
+        id: com.id,
+        nombre: com.producto?.nombre || com.nombre,
+        codigo: com.nombre,
+        nivel: null,
+        dia_semana: null,
+        dia_nombre: com.horario || 'Ver horario',
+        hora_inicio: '09:00',
+        hora_fin: '12:00',
+        duracion_minutos: 180,
+        fecha_proxima: fechaProxima,
+        docente: com.docente || {
+          id: '',
+          nombre: 'Por',
+          apellido: 'asignar',
+        },
+        grupo: null,
+        sector: {
+          id: 'comision',
+          nombre: 'Taller',
+          color: '#8b5cf6',
+          icono: '🎮',
+        },
+        link_meet: null,
+        fecha_inscripcion: inscripcion.fecha_inscripcion,
+        tipo: 'comision' as const,
+        comision_id: com.id,
+      };
+    });
+
+    // Combinar y ordenar por próxima fecha
+    const todas = [...clasesGrupales, ...comisiones];
+    return todas.sort(
+      (a, b) =>
+        new Date(a.fecha_proxima).getTime() -
+        new Date(b.fecha_proxima).getTime(),
     );
+  }
+
+  /**
+   * Obtener el plan de suscripción del estudiante (a través del tutor)
+   * Usado para validar acceso a clases en vivo (solo STEAM_SINCRONICO)
+   * @param estudianteId - ID del estudiante autenticado
+   * @returns Plan de suscripción con información de acceso
+   */
+  async obtenerMiPlan(estudianteId: string) {
+    // 1. Obtener el estudiante con su tutor_id
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: estudianteId },
+      select: { tutor_id: true },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException('Estudiante no encontrado');
+    }
+
+    // 2. Buscar suscripción activa del tutor
+    const suscripcion = await this.prisma.suscripcion.findFirst({
+      where: {
+        tutor_id: estudiante.tutor_id,
+        estado: {
+          in: ['ACTIVA', 'EN_GRACIA'],
+        },
+      },
+      include: {
+        plan: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    if (!suscripcion || !suscripcion.plan) {
+      return {
+        tiene_plan: false,
+        plan: null,
+        acceso_clases_vivo: false,
+        mensaje: 'Sin suscripción activa',
+      };
+    }
+
+    // 3. Determinar acceso a clases en vivo según el plan
+    // Solo STEAM_SINCRONICO tiene acceso a clases en vivo
+    const planNombre = suscripcion.plan.nombre;
+    const accesoClasesVivo = planNombre === 'STEAM_SINCRONICO';
+
+    return {
+      tiene_plan: true,
+      plan: {
+        id: suscripcion.plan.id,
+        nombre: planNombre,
+        descripcion: suscripcion.plan.descripcion,
+        precio_base: suscripcion.plan.precio_base,
+      },
+      estado_suscripcion: suscripcion.estado,
+      acceso_clases_vivo: accesoClasesVivo,
+      mensaje: accesoClasesVivo
+        ? 'Acceso completo a clases en vivo'
+        : 'Tu plan no incluye clases en vivo. Actualiza a STEAM Sincrónico para acceder.',
+    };
   }
 
   /**

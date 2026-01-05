@@ -26,10 +26,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[var(--admin-bg)] flex flex-col" data-admin="true">
-      {/* Background Glows (del mockup) */}
-      <div className="fixed top-0 left-[20%] w-[500px] h-[500px] bg-[var(--status-info)]/10 rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="fixed bottom-0 right-[10%] w-[500px] h-[500px] bg-[var(--admin-accent-secondary)]/10 rounded-full blur-[120px] pointer-events-none z-0" />
-
       {/* Main Container */}
       <div className="relative z-10 flex flex-col flex-1 max-w-[1920px] mx-auto w-full p-4 lg:p-6">
         {/* Header - Saludo, reloj, notificaciones, avatar */}

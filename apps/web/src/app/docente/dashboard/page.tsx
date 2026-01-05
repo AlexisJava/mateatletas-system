@@ -16,7 +16,6 @@ import { CalendarPage } from '@/components/docente/CalendarPage';
 import { PlanificacionesPage } from '@/components/docente/PlanificacionesPage';
 import { AlertsPage } from '@/components/docente/AlertsPage';
 import { NotificationsDropdown } from '@/components/docente/NotificationsDropdown';
-import { DarkVeil } from '@/components/docente/DarkVeil';
 import { DashboardModal } from '@/components/docente/DashboardModals';
 import { ProximaClaseCard } from '@/components/docente/ProximaClaseCard';
 import { StatsDocente } from '@/components/docente/StatsDocente';
@@ -189,19 +188,6 @@ export default function DocenteDashboard() {
 
   return (
     <div className="h-full w-full text-slate-200 font-sans overflow-hidden flex flex-col relative z-0">
-      {/* Background Effect */}
-      <div className="absolute inset-0 -z-10 opacity-60">
-        <DarkVeil
-          hueShift={25}
-          noiseIntensity={0}
-          scanlineIntensity={0.1}
-          speed={0.8}
-          scanlineFrequency={42}
-          warpAmount={0.6}
-          resolutionScale={1.5}
-        />
-      </div>
-
       {/* 1. Header Area */}
       <header
         ref={headerRef}

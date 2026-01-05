@@ -107,6 +107,14 @@ export class EstudiantesFacadeService {
     return this.queryService.obtenerMisClases(estudianteId);
   }
 
+  /**
+   * Obtener el plan de suscripción del estudiante
+   * Usado para validar acceso a clases en vivo
+   */
+  async obtenerMiPlan(estudianteId: string) {
+    return this.queryService.obtenerMiPlan(estudianteId);
+  }
+
   // ==================== COMMANDS (Delegadas a CommandService) ====================
 
   /**

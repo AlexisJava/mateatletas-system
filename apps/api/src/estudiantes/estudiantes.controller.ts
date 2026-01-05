@@ -159,6 +159,20 @@ export class EstudiantesController {
   }
 
   /**
+   * GET /estudiantes/mi-plan - Obtener plan de suscripción del estudiante logueado
+   * Para validar acceso a clases en vivo (solo STEAM_SINCRONICO)
+   * @param req - Request con usuario autenticado
+   * @returns Plan con información de acceso a clases en vivo
+   */
+  @Get('mi-plan')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async obtenerMiPlan(@Request() req: RequestWithAuthUser) {
+    const estudianteId = req.user.id;
+    return this.estudiantesService.obtenerMiPlan(estudianteId);
+  }
+
+  /**
    * GET /estudiantes/:id/detalle-completo - Obtener detalle COMPLETO del estudiante
    * Para el portal de tutores - pestaña "Mis Hijos"
    * Incluye: gamificación, asistencias, inscripciones, estadísticas

@@ -107,7 +107,7 @@ const claseEstudianteSchema = z.object({
   nombre: z.string(),
   codigo: z.string(),
   nivel: z.string().nullable(),
-  dia_semana: z.string(),
+  dia_semana: z.string().nullable(), // Nullable para comisiones
   dia_nombre: z.string(),
   hora_inicio: z.string(),
   hora_fin: z.string(),
@@ -136,9 +136,30 @@ const claseEstudianteSchema = z.object({
     .nullable(),
   link_meet: z.string().nullable(),
   fecha_inscripcion: z.string(),
+  // Nuevos campos para distinguir tipo de clase
+  tipo: z.enum(['clase_grupal', 'comision']).optional(),
+  comision_id: z.string().optional(),
 });
 
 const clasesEstudianteList = z.array(claseEstudianteSchema);
+
+/**
+ * Schema para plan del estudiante
+ */
+const miPlanSchema = z.object({
+  tiene_plan: z.boolean(),
+  plan: z
+    .object({
+      id: z.string(),
+      nombre: z.string(),
+      descripcion: z.string().nullable(),
+      precio_base: z.union([z.string(), z.number()]),
+    })
+    .nullable(),
+  estado_suscripcion: z.string().optional(),
+  acceso_clases_vivo: z.boolean(),
+  mensaje: z.string(),
+});
 
 // Tipos inferidos de los schemas
 type DeleteResponse = z.infer<typeof deleteResponseSchema>;
@@ -147,6 +168,7 @@ type ProximaClase = z.infer<typeof proximaClaseSchema>;
 type Companero = z.infer<typeof companeroSchema>;
 type Sector = z.infer<typeof sectorSchema>;
 export type ClaseEstudiante = z.infer<typeof claseEstudianteSchema>;
+export type MiPlan = z.infer<typeof miPlanSchema>;
 
 /**
  * API Client para operaciones de estudiantes
@@ -352,6 +374,21 @@ export const estudiantesApi = {
       return clasesEstudianteList.parse(response);
     } catch (error) {
       console.error('Error al obtener clases:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener el plan de suscripción del estudiante autenticado
+   * Usado para validar acceso a clases en vivo (solo STEAM_SINCRONICO)
+   * @returns Plan con información de acceso a clases en vivo
+   */
+  getMiPlan: async (): Promise<MiPlan> => {
+    try {
+      const response = await apiClient.get<MiPlan>('/estudiantes/mi-plan');
+      return miPlanSchema.parse(response);
+    } catch (error) {
+      console.error('Error al obtener plan:', error);
       throw error;
     }
   },

@@ -6,6 +6,7 @@ import {
   useLocalParticipant,
   useTracks,
   useRoomContext,
+  useRemoteParticipants,
 } from '@livekit/components-react';
 import { Track, RoomEvent } from 'livekit-client';
 import { Users, Clock, Wifi, MessageSquare, X } from 'lucide-react';
@@ -16,6 +17,12 @@ import type { MensajeChat, ChatConnectionState } from './types';
 interface ClassRoomProps {
   title: string;
   onEndClass: () => void;
+  /**
+   * Modo de la sala:
+   * - 'teacher': El usuario es docente, muestra tracks locales y puede transmitir
+   * - 'student': El usuario es estudiante, ve los tracks del docente (remoto)
+   */
+  mode?: 'teacher' | 'student';
   /** Props del chat */
   chat?: {
     mensajes: MensajeChat[];
@@ -23,18 +30,26 @@ interface ClassRoomProps {
     error: string | null;
     chatHabilitado: boolean;
     onSendMessage: (contenido: string) => Promise<{ exito: boolean; error?: string }>;
-    onToggleChat: (habilitado: boolean) => Promise<{ exito: boolean; error?: string }>;
+    onToggleChat?: (habilitado: boolean) => Promise<{ exito: boolean; error?: string }>;
     onReconnect: () => void;
     currentUserId?: string;
   };
 }
 
-export const ClassRoom: React.FC<ClassRoomProps> = ({ title, onEndClass, chat }) => {
+export const ClassRoom: React.FC<ClassRoomProps> = ({
+  title,
+  onEndClass,
+  mode = 'teacher',
+  chat,
+}) => {
   const room = useRoomContext();
   const { localParticipant } = useLocalParticipant();
+  const remoteParticipants = useRemoteParticipants();
   const [elapsedTime, setElapsedTime] = React.useState(0);
   const [participantCount, setParticipantCount] = React.useState(1);
   const [isChatOpen, setIsChatOpen] = useState(chat !== undefined);
+
+  const isStudent = mode === 'student';
 
   // Timer
   React.useEffect(() => {
@@ -67,21 +82,27 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({ title, onEndClass, chat })
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Get local tracks
+  // Get tracks - for students, we subscribe to remote tracks; for teachers, we show local tracks
   const tracks = useTracks([Track.Source.Camera, Track.Source.ScreenShare], {
-    onlySubscribed: false,
+    onlySubscribed: isStudent, // Students only see subscribed (remote) tracks
   });
 
+  // For students: find the teacher's tracks (first remote participant with video)
+  // For teachers: find their own local tracks
+  const targetIdentity = isStudent
+    ? remoteParticipants[0]?.identity // First remote participant (the teacher)
+    : localParticipant?.identity;
+
   const screenShareTrack = tracks.find(
-    (t) =>
-      t.source === Track.Source.ScreenShare &&
-      t.participant.identity === localParticipant?.identity,
+    (t) => t.source === Track.Source.ScreenShare && t.participant.identity === targetIdentity,
   );
 
   const cameraTrack = tracks.find(
-    (t) =>
-      t.source === Track.Source.Camera && t.participant.identity === localParticipant?.identity,
+    (t) => t.source === Track.Source.Camera && t.participant.identity === targetIdentity,
   );
+
+  // Get teacher name for student view
+  const teacherName = isStudent ? remoteParticipants[0]?.name : localParticipant?.name;
 
   return (
     <div className="flex flex-col h-full bg-slate-950 relative">
@@ -144,10 +165,12 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({ title, onEndClass, chat })
               <div className="text-center">
                 <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center">
                   <span className="text-3xl font-bold text-white">
-                    {localParticipant?.name?.[0]?.toUpperCase() || 'D'}
+                    {teacherName?.[0]?.toUpperCase() || (isStudent ? 'P' : 'D')}
                   </span>
                 </div>
-                <p className="text-slate-400">Cámara apagada</p>
+                <p className="text-slate-400">
+                  {isStudent ? 'Esperando al profesor...' : 'Cámara apagada'}
+                </p>
               </div>
             </div>
           )}
@@ -168,9 +191,9 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({ title, onEndClass, chat })
               connectionState={chat.connectionState}
               error={chat.error}
               chatHabilitado={chat.chatHabilitado}
-              isDocente={true}
+              isDocente={!isStudent}
               onSendMessage={chat.onSendMessage}
-              onToggleChat={chat.onToggleChat}
+              onToggleChat={isStudent ? undefined : chat.onToggleChat}
               onReconnect={chat.onReconnect}
               currentUserId={chat.currentUserId}
             />
@@ -179,7 +202,7 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({ title, onEndClass, chat })
       </div>
 
       {/* Control Bar */}
-      <ControlBar onEndClass={onEndClass} variant="teacher" />
+      <ControlBar onEndClass={onEndClass} variant={isStudent ? 'student' : 'teacher'} />
     </div>
   );
 };

@@ -2,10 +2,8 @@ import type { Metadata } from 'next';
 import { Nunito, Lilita_One, Orbitron, Rajdhani, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 import './animations.css';
-import '@/components/backgrounds/CosmosBackgroundGlobal.css';
 import { QueryProvider } from '@/lib/providers/QueryProvider';
 import { Toaster } from 'sonner';
-import CosmosBackground from '@/components/backgrounds/CosmosBackground';
 
 // Nunito: Fuente oficial de Mateatletas Club
 const nunito = Nunito({
@@ -67,14 +65,8 @@ export default function RootLayout({
         className={`${nunito.variable} ${lilitaOne.variable} ${orbitron.variable} ${rajdhani.variable} ${ibmPlexMono.variable} antialiased text-white min-h-screen`}
         style={{ background: 'transparent' }}
       >
-        {/* Fondo cosmos MEGA PREMIUM */}
-        <CosmosBackground />
-
-        {/* Contenido del sitio */}
-        <div className="relative z-10 min-h-screen">
-          <QueryProvider>{children}</QueryProvider>
-          <Toaster position="top-right" richColors />
-        </div>
+        <QueryProvider>{children}</QueryProvider>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
