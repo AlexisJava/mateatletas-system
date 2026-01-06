@@ -313,7 +313,18 @@ export class AdminController {
       nivelEscolar?: string;
     },
   ) {
-    return this.estudiantesService.actualizarEstudiante(id, dto);
+    // Mapear nivelEscolar del frontend a nivel_escolar del servicio
+    const serviceDto = {
+      nombre: dto.nombre,
+      apellido: dto.apellido,
+      edad: dto.edad,
+      nivel_escolar: dto.nivelEscolar as
+        | 'Primaria'
+        | 'Secundaria'
+        | 'Universidad'
+        | undefined,
+    };
+    return this.estudiantesService.actualizarEstudiante(id, serviceDto);
   }
 
   /**

@@ -609,66 +609,6 @@ export class AdminEstudiantesService {
   }
 
   /**
-   * Actualizar datos básicos de un estudiante
-   * Permite al admin editar nombre, apellido, edad, nivel escolar
-   *
-   * @param estudianteId - ID del estudiante
-   * @param data - Datos a actualizar
-   */
-  async actualizarEstudiante(
-    estudianteId: string,
-    data: {
-      nombre?: string;
-      apellido?: string;
-      edad?: number;
-      nivelEscolar?: string;
-    },
-  ) {
-    // Verificar que el estudiante existe
-    const estudiante = await this.prisma.estudiante.findUnique({
-      where: { id: estudianteId },
-      select: { id: true },
-    });
-
-    if (!estudiante) {
-      throw new NotFoundException(
-        `Estudiante con ID ${estudianteId} no encontrado`,
-      );
-    }
-
-    // Construir datos a actualizar
-    const updateData: {
-      nombre?: string;
-      apellido?: string;
-      edad?: number;
-      nivel_escolar?: string;
-    } = {};
-
-    if (data.nombre) updateData.nombre = data.nombre;
-    if (data.apellido) updateData.apellido = data.apellido;
-    if (data.edad) updateData.edad = data.edad;
-    if (data.nivelEscolar) updateData.nivel_escolar = data.nivelEscolar;
-
-    const estudianteActualizado = await this.prisma.estudiante.update({
-      where: { id: estudianteId },
-      data: updateData,
-      select: {
-        id: true,
-        nombre: true,
-        apellido: true,
-        edad: true,
-        nivel_escolar: true,
-      },
-    });
-
-    return {
-      success: true,
-      message: 'Estudiante actualizado correctamente',
-      estudiante: estudianteActualizado,
-    };
-  }
-
-  /**
    * Asignar plan directamente a un estudiante
    * Permite al admin configurar el tier de cada estudiante individualmente
    *
