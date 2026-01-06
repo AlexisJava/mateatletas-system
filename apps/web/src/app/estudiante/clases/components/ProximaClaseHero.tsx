@@ -31,16 +31,19 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
   }, [clase?.estado_clase]);
 
   // Polling para detectar cuando la clase pasa a EnVivo
-  // Solo si: la clase es HOY, estado es Programada, y NO es comisión
+  // Siempre activo si el estado es Programada (el docente puede iniciar cuando quiera)
   useEffect(() => {
     if (!clase) return;
-    if (clase.tipo === 'comision') return; // Comisiones no usan LiveKit
-    if (!esHoy(clase.fecha_proxima)) return; // Solo polling si es hoy
     if (estadoClase !== 'Programada') return; // Solo si aún no inició
 
     const checkEstado = async () => {
       try {
-        const estado = await livekitApi.obtenerEstadoClase(clase.id);
+        // Usar endpoint correcto según tipo de clase
+        const estado =
+          clase.tipo === 'comision'
+            ? await livekitApi.obtenerEstadoComision(clase.id)
+            : await livekitApi.obtenerEstadoClase(clase.id);
+
         if (estado.estado_clase !== estadoClase) {
           setEstadoClase(estado.estado_clase);
         }
@@ -70,20 +73,15 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
       return;
     }
 
-    // Las comisiones no usan LiveKit (por ahora)
-    if (clase.tipo === 'comision') {
-      setErrorAcceso('Las comisiones aún no soportan clases en vivo.');
-      return;
-    }
-
     setIsConnecting(true);
     setErrorAcceso(null);
 
     try {
       // Obtener token de LiveKit para estudiante
-      const tokenData = await livekitApi.getTokenEstudiante({
-        claseGrupoId: clase.id,
-      });
+      // Usamos claseGrupoId o comisionId según el tipo
+      const tokenData = await livekitApi.getTokenEstudiante(
+        clase.tipo === 'comision' ? { comisionId: clase.id } : { claseGrupoId: clase.id },
+      );
 
       // Navegar a la página de clase en vivo con los parámetros
       const params = new URLSearchParams({
@@ -154,7 +152,7 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
       };
     }
 
-    if (esEnVivo && !esComision) {
+    if (esEnVivo) {
       return {
         texto: '🔴 UNIRSE EN VIVO',
         disabled: false,
@@ -207,7 +205,7 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2 flex-wrap">
             {/* EN VIVO badge - Solo si está en vivo */}
-            {esEnVivo && !esComision && (
+            {esEnVivo && (
               <span
                 className="flex items-center gap-1.5 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase animate-pulse"
                 style={{
@@ -351,7 +349,7 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
                   </>
                 ) : (
                   <>
-                    {esEnVivo && !esComision && <Play className="w-5 h-5" fill="white" />}
+                    {esEnVivo && <Play className="w-5 h-5" fill="white" />}
                     {botonConfig.texto}
                   </>
                 )}

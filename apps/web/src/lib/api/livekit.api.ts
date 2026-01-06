@@ -92,10 +92,40 @@ export const livekitApi = {
   },
 
   /**
-   * Obtener estado actual de una clase
+   * Obtener estado actual de una clase (ClaseGrupo)
    * @param claseGrupoId - ID del ClaseGrupo
    */
   obtenerEstadoClase: async (claseGrupoId: string): Promise<ClaseEnVivoResponse> => {
     return apiClient.get<ClaseEnVivoResponse>(`/clase-grupos/${claseGrupoId}/estado-clase`);
+  },
+
+  // ============================================================================
+  // GESTIÓN DE ESTADO DE COMISIÓN EN VIVO
+  // ============================================================================
+
+  /**
+   * Iniciar una clase de comisión en vivo (solo docente asignado)
+   * Cambia el estado a EnVivo
+   * @param comisionId - ID de la Comisión
+   */
+  iniciarClaseComision: async (comisionId: string): Promise<IniciarClaseResponse> => {
+    return apiClient.patch<IniciarClaseResponse>(`/comisiones/${comisionId}/iniciar-clase`);
+  },
+
+  /**
+   * Finalizar una clase de comisión en vivo (solo docente asignado)
+   * Cambia el estado a Finalizada
+   * @param comisionId - ID de la Comisión
+   */
+  finalizarClaseComision: async (comisionId: string): Promise<FinalizarClaseResponse> => {
+    return apiClient.patch<FinalizarClaseResponse>(`/comisiones/${comisionId}/finalizar-clase`);
+  },
+
+  /**
+   * Obtener estado actual de una comisión
+   * @param comisionId - ID de la Comisión
+   */
+  obtenerEstadoComision: async (comisionId: string): Promise<ClaseEnVivoResponse> => {
+    return apiClient.get<ClaseEnVivoResponse>(`/comisiones/${comisionId}/estado-clase`);
   },
 };

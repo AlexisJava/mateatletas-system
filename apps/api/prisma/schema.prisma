@@ -2534,6 +2534,23 @@ model Comision {
   /// Indica si la comisión está activa
   activo Boolean @default(true)
 
+  // ========== LIVEKIT - Clases en vivo ==========
+
+  /// Nombre único de la sala en LiveKit (generado automáticamente)
+  /// Formato: "comision_{id}_{timestamp}"
+  livekit_room_name String? @unique
+
+  /// Estado actual de la clase en vivo
+  estado_clase EstadoClase @default(Programada)
+
+  /// Timestamp de cuando el docente inició la clase en vivo
+  iniciada_en DateTime?
+
+  /// Timestamp de cuando el docente finalizó la clase en vivo
+  finalizada_en DateTime?
+
+  // ========== FIN LIVEKIT ==========
+
   /// Timestamp de creación
   createdAt DateTime @default(now())
 
@@ -2553,6 +2570,8 @@ model Comision {
   @@index([docente_id])
   @@index([casa_id])
   @@index([activo])
+  @@index([estado_clase])
+  @@index([livekit_room_name])
   @@map("comisiones")
 }
 
