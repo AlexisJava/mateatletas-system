@@ -8,6 +8,7 @@ import { EstudianteCommandService } from './services/estudiante-command.service'
 import { EstudianteCopyService } from './services/estudiante-copy.service';
 import { EstudianteStatsService } from './services/estudiante-stats.service';
 import { AccesoEstudianteService } from './services/acceso-estudiante.service';
+import { InscripcionesListener } from './listeners/inscripciones.listener';
 
 /**
  * Módulo de Estudiantes - Refactorizado con CQRS + Facade Pattern
@@ -37,6 +38,8 @@ import { AccesoEstudianteService } from './services/acceso-estudiante.service';
     EstudianteCopyService,
     EstudianteStatsService,
     AccesoEstudianteService,
+    // Event Listeners
+    InscripcionesListener,
     // Facade (API pública) - Usado por EstudiantesController
     EstudiantesFacadeService,
   ],

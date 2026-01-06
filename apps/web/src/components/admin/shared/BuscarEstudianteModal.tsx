@@ -50,8 +50,10 @@ export function BuscarEstudianteModal({
           return; // Request obsoleto, ignorar resultado
         }
 
+        // Normalizar respuesta (puede ser array o { data: [...] })
+        const estudiantesData = Array.isArray(response) ? response : (response?.data ?? []);
         // Filtrar los ya inscriptos
-        const filtrados = response.data.filter((e) => !excludeIds.includes(e.id));
+        const filtrados = estudiantesData.filter((e) => !excludeIds.includes(e.id));
         setEstudiantes(filtrados);
       } catch (error) {
         // Solo actualizar estado si el request sigue siendo actual

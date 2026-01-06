@@ -176,7 +176,7 @@ export class AccesoEstudianteService {
           },
         },
         inscripcionesComision: {
-          where: { estado: 'Confirmada' },
+          where: { estado: { in: ['Confirmada', 'Pendiente'] } },
           include: {
             comision: true,
           },
@@ -214,6 +214,9 @@ export class AccesoEstudianteService {
         return inicioOk && finOk && comision.activo !== false;
       },
     );
+
+    // Auto-confirmar inscripciones pendientes al acceder
+    await this.confirmarInscripcionesPendientes(comisionesActivas);
 
     // 3. Verificar plan directo
     if (estudiante.plan) {
@@ -626,5 +629,32 @@ export class AccesoEstudianteService {
   private esPlanVigente(fechaVencimiento: Date | null): boolean {
     if (!fechaVencimiento) return true; // Sin fecha = indefinido
     return fechaVencimiento >= new Date();
+  }
+
+  /**
+   * Auto-confirma inscripciones pendientes cuando el estudiante accede
+   * Esto cambia el estado de Pendiente a Confirmada
+   */
+  private async confirmarInscripcionesPendientes(
+    inscripciones: Array<{
+      id: string;
+      estado: string;
+      comision: { id: string; nombre: string };
+    }>,
+  ): Promise<void> {
+    const pendientes = inscripciones.filter((i) => i.estado === 'Pendiente');
+
+    if (pendientes.length === 0) return;
+
+    // Actualizar todas las inscripciones pendientes a Confirmada
+    const ids = pendientes.map((i) => i.id);
+    await this.prisma.inscripcionComision.updateMany({
+      where: { id: { in: ids } },
+      data: { estado: 'Confirmada' },
+    });
+
+    this.logger.log(
+      `Auto-confirmadas ${pendientes.length} inscripciones: ${pendientes.map((p) => p.comision.nombre).join(', ')}`,
+    );
   }
 }
