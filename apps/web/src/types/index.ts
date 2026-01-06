@@ -18,7 +18,7 @@ export type { Clase, InscripcionClase, RutaCurricular } from './clases.types';
 export type { Producto, TipoProducto, CrearProductoDto } from '@/lib/api/catalogo.api';
 
 // Pagos types - import from types files
-export type { Membresia, InscripcionCurso } from './pago.types';
+export type { Membresia } from './pago.types';
 
 // Tutor Dashboard types - import from types files
 export type {

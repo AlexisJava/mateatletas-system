@@ -2,17 +2,11 @@ import { z } from 'zod';
 
 /**
  * Estados de membresía disponibles para los tutores.
+ * NOTA: Sistema legacy - el nuevo sistema usa Suscripciones PreApproval
  */
 export const estadoMembresiaEnum = z.enum(['Pendiente', 'Activa', 'Vencida', 'Cancelada']);
 
 export type EstadoMembresia = z.infer<typeof estadoMembresiaEnum>;
-
-/**
- * Estados de inscripción a cursos individuales.
- */
-export const estadoInscripcionEnum = z.enum(['PreInscrito', 'Inscrito', 'Cancelado']);
-
-export type EstadoInscripcion = z.infer<typeof estadoInscripcionEnum>;
 
 const isoDate = z.union([z.string().datetime(), z.date()]);
 
@@ -26,6 +20,7 @@ export const productoPagoSchema = z.object({
 
 /**
  * Schema de membresía activa.
+ * NOTA: Sistema legacy - el nuevo sistema usa Suscripciones PreApproval
  */
 export const membresiaSchema = z.object({
   id: z.string(),
@@ -41,23 +36,6 @@ export const membresiaSchema = z.object({
 });
 
 export type Membresia = z.infer<typeof membresiaSchema>;
-
-/**
- * Schema de inscripción a curso.
- */
-export const inscripcionCursoSchema = z.object({
-  id: z.string(),
-  estudiante_id: z.string(),
-  producto_id: z.string(),
-  estado: estadoInscripcionEnum,
-  fecha_inscripcion: isoDate.nullable(),
-  pago_id: z.string(),
-  createdAt: isoDate,
-  updatedAt: isoDate,
-  producto: productoPagoSchema.optional(),
-});
-
-export type InscripcionCurso = z.infer<typeof inscripcionCursoSchema>;
 
 /**
  * Schema de preferencia de pago (MercadoPago).
@@ -78,16 +56,6 @@ export const crearPreferenciaSuscripcionSchema = z.object({
 });
 
 export type CrearPreferenciaSuscripcionRequest = z.infer<typeof crearPreferenciaSuscripcionSchema>;
-
-/**
- * Request para crear preferencia de pago por curso.
- */
-export const crearPreferenciaCursoSchema = z.object({
-  producto_id: z.string(),
-  estudiante_id: z.string(),
-});
-
-export type CrearPreferenciaCursoRequest = z.infer<typeof crearPreferenciaCursoSchema>;
 
 /**
  * Estado actual de la membresía de un tutor.

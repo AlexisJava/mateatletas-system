@@ -1,25 +1,23 @@
 import { getErrorMessage } from '@/lib/utils/error-handler';
 /**
  * Zustand Store para Pagos y Membresías
+ * NOTA: Sistema de membresías legacy - el nuevo sistema usa Suscripciones PreApproval
  */
 
 import { create } from 'zustand';
-import { Membresia, InscripcionCurso, PreferenciaPago } from '@/types/pago.types';
+import { Membresia, PreferenciaPago } from '@/types/pago.types';
 import * as pagosApi from '@/lib/api/pagos.api';
 
 interface PagosStore {
   // State
   membresiaActual: Membresia | null;
-  inscripciones: InscripcionCurso[];
   isLoading: boolean;
   error: string | null;
   preferenciaPago: PreferenciaPago | null;
 
   // Actions
   fetchMembresiaActual: () => Promise<void>;
-  fetchInscripciones: () => Promise<void>;
   crearPreferenciaSuscripcion: (_productoId: string) => Promise<string | null>;
-  crearPreferenciaCurso: (_productoId: string, _estudianteId: string) => Promise<string | null>;
   activarMembresiaManual: (_membresiaId: string) => Promise<void>;
   clearError: () => void;
   reset: () => void;
@@ -28,7 +26,6 @@ interface PagosStore {
 export const usePagosStore = create<PagosStore>((set) => ({
   // Initial state
   membresiaActual: null,
-  inscripciones: [],
   isLoading: false,
   error: null,
   preferenciaPago: null,
@@ -47,41 +44,11 @@ export const usePagosStore = create<PagosStore>((set) => ({
     }
   },
 
-  // Fetch inscripciones a cursos
-  fetchInscripciones: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const inscripciones = await pagosApi.getInscripciones();
-      set({ inscripciones, isLoading: false });
-    } catch (error: unknown) {
-      set({
-        error: getErrorMessage(error, 'Error al cargar inscripciones'),
-        isLoading: false,
-      });
-    }
-  },
-
   // Crear preferencia de suscripción y retornar URL
   crearPreferenciaSuscripcion: async (productoId: string) => {
     set({ isLoading: true, error: null });
     try {
       const preferencia = await pagosApi.crearPreferenciaSuscripcion(productoId);
-      set({ preferenciaPago: preferencia, isLoading: false });
-      return preferencia.init_point;
-    } catch (error: unknown) {
-      set({
-        error: getErrorMessage(error, 'Error al crear preferencia de pago'),
-        isLoading: false,
-      });
-      return null;
-    }
-  },
-
-  // Crear preferencia de curso y retornar URL
-  crearPreferenciaCurso: async (productoId: string, estudianteId: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      const preferencia = await pagosApi.crearPreferenciaCurso(productoId, estudianteId);
       set({ preferenciaPago: preferencia, isLoading: false });
       return preferencia.init_point;
     } catch (error: unknown) {
@@ -116,7 +83,6 @@ export const usePagosStore = create<PagosStore>((set) => ({
   reset: () => {
     set({
       membresiaActual: null,
-      inscripciones: [],
       isLoading: false,
       error: null,
       preferenciaPago: null,

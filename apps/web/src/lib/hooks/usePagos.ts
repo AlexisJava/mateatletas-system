@@ -1,14 +1,15 @@
 /**
  * React Query hooks para Pagos y Membresías
+ * NOTA: Sistema de membresías legacy - el nuevo sistema usa Suscripciones PreApproval
  *
  * Migrado de Zustand a React Query para:
- * - Cache automático de membresía e inscripciones
+ * - Cache automático de membresía
  * - Invalidación tras pagos exitosos
  * - Mejor manejo de estados de pago
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Membresia, InscripcionCurso, PreferenciaPago } from '@/types/pago.types';
+import { Membresia, PreferenciaPago } from '@/types/pago.types';
 import * as pagosApi from '@/lib/api/pagos.api';
 
 // ============================================================================
@@ -18,7 +19,6 @@ import * as pagosApi from '@/lib/api/pagos.api';
 export const pagosKeys = {
   all: ['pagos'] as const,
   membresia: () => [...pagosKeys.all, 'membresia'] as const,
-  inscripciones: () => [...pagosKeys.all, 'inscripciones'] as const,
 };
 
 // ============================================================================
@@ -27,6 +27,7 @@ export const pagosKeys = {
 
 /**
  * Hook para obtener membresía actual
+ * NOTA: Sistema legacy - el nuevo sistema usa Suscripciones PreApproval
  *
  * @example
  * const { data: membresia } = useMembresiaActual();
@@ -37,21 +38,6 @@ export function useMembresiaActual() {
     queryFn: pagosApi.getMembresiaActual,
     staleTime: 1000 * 60 * 5, // 5 minutos
     retry: 1, // Solo reintentar 1 vez (pagos son críticos)
-  });
-}
-
-/**
- * Hook para obtener inscripciones a cursos
- *
- * @example
- * const { data: inscripciones } = useInscripciones();
- */
-export function useInscripciones() {
-  return useQuery<InscripcionCurso[], Error>({
-    queryKey: pagosKeys.inscripciones(),
-    queryFn: pagosApi.getInscripciones,
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    retry: 1,
   });
 }
 
@@ -73,26 +59,8 @@ export function useCrearPreferenciaSuscripcion() {
 }
 
 /**
- * Hook para crear preferencia de curso (MercadoPago)
- *
- * @example
- * const crearPreferencia = useCrearPreferenciaCurso();
- * const url = await crearPreferencia.mutateAsync({ productoId: '...', estudianteId: '...' });
- */
-export function useCrearPreferenciaCurso() {
-  type Variables = {
-    productoId: string;
-    estudianteId: string;
-  };
-
-  return useMutation<PreferenciaPago, Error, Variables>({
-    mutationFn: ({ productoId, estudianteId }) =>
-      pagosApi.crearPreferenciaCurso(productoId, estudianteId),
-  });
-}
-
-/**
  * Hook para activar membresía manualmente (modo desarrollo/testing)
+ * NOTA: Sistema legacy - el nuevo sistema usa Suscripciones PreApproval
  *
  * @example
  * const activar = useActivarMembresiaManual();
@@ -117,14 +85,13 @@ export function useActivarMembresiaManual() {
 
 /**
  * Hook combinado para componentes de pagos
+ * NOTA: Sistema legacy - el nuevo sistema usa Suscripciones PreApproval
  *
  * @example
  * const {
  *   membresia,
- *   inscripciones,
  *   isLoading,
- *   crearPreferenciaSuscripcion,
- *   crearPreferenciaCurso
+ *   crearPreferenciaSuscripcion
  * } = usePagosCompleto();
  */
 export function usePagosCompleto() {
@@ -134,30 +101,19 @@ export function usePagosCompleto() {
     error: errorMembresia,
   } = useMembresiaActual();
 
-  const { data: inscripciones = [], isLoading: isLoadingInscripciones } = useInscripciones();
-
   const preferenciaSuscripcion = useCrearPreferenciaSuscripcion();
-  const preferenciaCurso = useCrearPreferenciaCurso();
   const activarManual = useActivarMembresiaManual();
 
   return {
     membresia,
-    inscripciones,
-    isLoading: isLoadingMembresia || isLoadingInscripciones,
+    isLoading: isLoadingMembresia,
     error: errorMembresia?.message ?? null,
     crearPreferenciaSuscripcion: async (productoId: string) => {
       const preferencia = await preferenciaSuscripcion.mutateAsync(productoId);
       return preferencia.init_point;
     },
-    crearPreferenciaCurso: async (productoId: string, estudianteId: string) => {
-      const preferencia = await preferenciaCurso.mutateAsync({
-        productoId,
-        estudianteId,
-      });
-      return preferencia.init_point;
-    },
     activarManual: (membresiaId: string) => activarManual.mutate(membresiaId),
-    isCreatingPreferencia: preferenciaSuscripcion.isPending || preferenciaCurso.isPending,
+    isCreatingPreferencia: preferenciaSuscripcion.isPending,
     isActivating: activarManual.isPending,
   };
 }

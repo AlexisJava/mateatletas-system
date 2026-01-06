@@ -8,9 +8,7 @@ import { isAxiosError } from '@/lib/utils/error-handler';
 import {
   PreferenciaPago,
   CrearPreferenciaSuscripcionRequest,
-  CrearPreferenciaCursoRequest,
   Membresia,
-  InscripcionCurso,
   EstadoMembresiaResponse,
   MetricasDashboardResponse,
   ConfiguracionPrecios,
@@ -18,9 +16,10 @@ import {
   InscripcionMensualConRelaciones,
   EstudianteConDescuento,
   ActualizarConfiguracionRequest,
+  membresiaSchemaClient as membresiaSchema,
+  estadoMembresiaResponseSchemaClient as estadoMembresiaResponseSchema,
+  preferenciaPagoSchemaClient as preferenciaPagoSchema,
 } from '@/types/pago.types';
-import { membresiaSchema, estadoMembresiaResponseSchema } from '@/lib/schemas/membresia.schema';
-import { preferenciaPagoSchema, inscripcionesCursoListSchema } from '@/lib/schemas/pago.schema';
 
 /**
  * Crear preferencia de pago para suscripción
@@ -40,29 +39,9 @@ export const crearPreferenciaSuscripcion = async (productoId: string): Promise<P
 };
 
 /**
- * Crear preferencia de pago para curso
- * POST /api/pagos/curso
- */
-export const crearPreferenciaCurso = async (
-  productoId: string,
-  estudianteId: string,
-): Promise<PreferenciaPago> => {
-  try {
-    // El interceptor ya retorna response.data directamente
-    const response = await axios.post('/pagos/curso', {
-      producto_id: productoId,
-      estudiante_id: estudianteId,
-    } as CrearPreferenciaCursoRequest);
-    return preferenciaPagoSchema.parse(response) as PreferenciaPago;
-  } catch (error) {
-    console.error('Error al crear la preferencia de curso:', error);
-    throw error;
-  }
-};
-
-/**
  * Obtener membresía activa del tutor
  * GET /api/pagos/membresia
+ * NOTA: Sistema legacy - el nuevo sistema usa Suscripciones PreApproval
  */
 export const getMembresiaActual = async (): Promise<Membresia | null> => {
   try {
@@ -80,6 +59,7 @@ export const getMembresiaActual = async (): Promise<Membresia | null> => {
 /**
  * Obtener estado de una membresía específica
  * GET /api/pagos/membresia/:id/estado
+ * NOTA: Sistema legacy - el nuevo sistema usa Suscripciones PreApproval
  */
 export const getEstadoMembresia = async (membresiaId: string): Promise<EstadoMembresiaResponse> => {
   try {
@@ -93,23 +73,9 @@ export const getEstadoMembresia = async (membresiaId: string): Promise<EstadoMem
 };
 
 /**
- * Obtener inscripciones a cursos del tutor
- * GET /api/pagos/inscripciones
- */
-export const getInscripciones = async (): Promise<InscripcionCurso[]> => {
-  try {
-    // El interceptor ya retorna response.data directamente
-    const response = await axios.get('/pagos/inscripciones');
-    return inscripcionesCursoListSchema.parse(response) as InscripcionCurso[];
-  } catch (error) {
-    console.error('Error al obtener las inscripciones a cursos:', error);
-    throw error;
-  }
-};
-
-/**
  * Activar membresía manualmente (MOCK para desarrollo)
  * POST /api/pagos/mock/activar-membresia/:id
+ * NOTA: Sistema legacy - el nuevo sistema usa Suscripciones PreApproval
  */
 export const activarMembresiaManual = async (membresiaId: string): Promise<Membresia> => {
   try {
