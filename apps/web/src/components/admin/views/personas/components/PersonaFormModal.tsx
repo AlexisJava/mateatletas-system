@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { X, UserPlus, GraduationCap, Users } from 'lucide-react';
-import type { UserRole } from '@/types/admin-dashboard.types';
+import { useState, useEffect } from 'react';
+import { X, UserPlus, GraduationCap, Users, CreditCard } from 'lucide-react';
+import { getPlanesSuscripcion, type PlanSuscripcion } from '@/lib/api/admin.api';
 
 /**
  * PersonaFormModal - Modal para crear nuevas personas
@@ -29,6 +29,9 @@ export interface PersonaFormData {
   tutorApellido?: string;
   tutorEmail?: string;
   tutorTelefono?: string;
+  // Plan de suscripción (estudiante)
+  planId?: string | null;
+  estadoAcceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
   // Docente fields
   titulo?: string;
   telefono?: string;
@@ -58,6 +61,25 @@ export function PersonaFormModal({ isOpen, onClose, onSubmit }: PersonaFormModal
   const [titulo, setTitulo] = useState('');
   const [telefono, setTelefono] = useState('');
 
+  // Plan de suscripción (solo estudiantes)
+  const [planesDisponibles, setPlanesDisponibles] = useState<PlanSuscripcion[]>([]);
+  const [planId, setPlanId] = useState<string | null>(null);
+  const [estadoAcceso, setEstadoAcceso] = useState<'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA'>(
+    'ACTIVO',
+  );
+  const [isLoadingPlanes, setIsLoadingPlanes] = useState(false);
+
+  // Cargar planes cuando se abre el modal y el rol es estudiante
+  useEffect(() => {
+    if (isOpen && role === 'estudiante' && planesDisponibles.length === 0) {
+      setIsLoadingPlanes(true);
+      getPlanesSuscripcion()
+        .then((planes) => setPlanesDisponibles(planes))
+        .catch((err) => console.error('Error al cargar planes:', err))
+        .finally(() => setIsLoadingPlanes(false));
+    }
+  }, [isOpen, role, planesDisponibles.length]);
+
   const resetForm = () => {
     setNombre('');
     setApellido('');
@@ -70,6 +92,8 @@ export function PersonaFormModal({ isOpen, onClose, onSubmit }: PersonaFormModal
     setTutorTelefono('');
     setTitulo('');
     setTelefono('');
+    setPlanId(null);
+    setEstadoAcceso('ACTIVO');
     setError(null);
   };
 
@@ -97,6 +121,9 @@ export function PersonaFormModal({ isOpen, onClose, onSubmit }: PersonaFormModal
         if (tutorApellido) data.tutorApellido = tutorApellido;
         if (tutorEmail) data.tutorEmail = tutorEmail;
         if (tutorTelefono) data.tutorTelefono = tutorTelefono;
+        // Plan de suscripción
+        data.planId = planId;
+        data.estadoAcceso = estadoAcceso;
       } else {
         data.email = email;
         if (titulo) data.titulo = titulo;
@@ -282,6 +309,68 @@ export function PersonaFormModal({ isOpen, onClose, onSubmit }: PersonaFormModal
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Plan de Suscripción */}
+              <div className="border-t border-[var(--admin-border)] pt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <CreditCard className="w-4 h-4 text-[var(--admin-accent)]" />
+                  <h3 className="text-sm font-medium text-[var(--admin-text)]">
+                    Plan de Suscripción
+                  </h3>
+                </div>
+
+                {isLoadingPlanes ? (
+                  <div className="flex items-center gap-2 py-2">
+                    <div className="w-4 h-4 border-2 border-[var(--admin-accent)] border-t-transparent rounded-full animate-spin" />
+                    <span className="text-sm text-[var(--admin-text-muted)]">
+                      Cargando planes...
+                    </span>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--admin-text-muted)] mb-1">
+                        Plan
+                      </label>
+                      <select
+                        value={planId ?? ''}
+                        onChange={(e) => setPlanId(e.target.value || null)}
+                        className="w-full px-3 py-2 rounded-lg bg-[var(--admin-surface-2)] border border-[var(--admin-border)] text-[var(--admin-text)] focus:border-[var(--admin-accent)] focus:outline-none"
+                      >
+                        <option value="">Sin plan (usa suscripción tutor)</option>
+                        {planesDisponibles.map((plan) => (
+                          <option key={plan.id} value={plan.id}>
+                            {plan.nombre.replace('STEAM_', '')}
+                            {plan.nombre === 'STEAM_SINCRONICO' && ' ✓'}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[var(--admin-text-muted)] mb-1">
+                        Estado
+                      </label>
+                      <select
+                        value={estadoAcceso}
+                        onChange={(e) =>
+                          setEstadoAcceso(
+                            e.target.value as 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA',
+                          )
+                        }
+                        className="w-full px-3 py-2 rounded-lg bg-[var(--admin-surface-2)] border border-[var(--admin-border)] text-[var(--admin-text)] focus:border-[var(--admin-accent)] focus:outline-none"
+                      >
+                        <option value="ACTIVO">Activo</option>
+                        <option value="BECA">Beca</option>
+                        <option value="SUSPENDIDO">Suspendido</option>
+                        <option value="VENCIDO">Vencido</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+                <p className="mt-2 text-xs text-[var(--admin-text-muted)]">
+                  Solo SINCRONICO permite clases en vivo. Puede editarse después.
+                </p>
               </div>
             </>
           )}

@@ -187,6 +187,9 @@ export function usePersonas(): UsePersonasReturn {
           tutorApellido: data.tutorApellido,
           tutorEmail: data.tutorEmail,
           tutorTelefono: data.tutorTelefono,
+          // Plan de suscripción
+          plan_id: data.planId ?? undefined,
+          estado_acceso: data.estadoAcceso,
         });
 
         // Generar credenciales para el estudiante recién creado

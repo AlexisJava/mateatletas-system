@@ -220,6 +220,9 @@ export class AdminEstudiantesService {
     tutorApellido?: string;
     tutorEmail?: string;
     tutorTelefono?: string;
+    // Plan de suscripción (opcional)
+    plan_id?: string | null;
+    estado_acceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
   }) {
     // Validar datos del estudiante
     if (!data.nombre || !data.apellido) {
@@ -283,6 +286,9 @@ export class AdminEstudiantesService {
         nivelEscolar: data.nivelEscolar,
         tutor_id: tutor.id,
         nivel_actual: 1,
+        // Plan de suscripción (opcional)
+        ...(data.plan_id && { plan_id: data.plan_id }),
+        ...(data.estado_acceso && { estado_acceso: data.estado_acceso }),
       },
       include: {
         tutor: {
@@ -291,6 +297,12 @@ export class AdminEstudiantesService {
             nombre: true,
             apellido: true,
             email: true,
+          },
+        },
+        plan: {
+          select: {
+            id: true,
+            nombre: true,
           },
         },
       },

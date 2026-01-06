@@ -214,6 +214,9 @@ export interface CrearEstudianteDto {
   tutorApellido?: string;
   tutorEmail?: string;
   tutorTelefono?: string;
+  // Plan de suscripción (opcional)
+  plan_id?: string;
+  estado_acceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
 }
 
 export interface CrearDocenteDto {
