@@ -25,6 +25,7 @@ import {
   estudiantesResponseSchema,
   estadisticasEstudiantesSchema,
   equiposListSchema,
+  estadoClaseEnum,
 } from '@mateatletas/contracts';
 import { z } from 'zod';
 
@@ -143,6 +144,9 @@ const claseEstudianteSchema = z.object({
   // Nuevos campos para distinguir tipo de clase
   tipo: z.enum(['clase_grupal', 'comision']).optional(),
   comision_id: z.string().optional(),
+  // LiveKit: estado de clase en vivo
+  estado_clase: estadoClaseEnum.optional().default('Programada'),
+  iniciada_en: z.string().datetime().nullable().optional(),
 });
 
 const clasesEstudianteList = z.array(claseEstudianteSchema);

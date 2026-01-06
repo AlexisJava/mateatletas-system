@@ -1,18 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import {
-  Play,
-  Clock,
-  MapPin,
-  ExternalLink,
-  Video,
-  Rocket,
-  Loader2,
-  AlertTriangle,
-} from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Play, Clock, MapPin, Video, Rocket, Loader2, AlertTriangle, Radio } from 'lucide-react';
 import type { ClaseEstudiante } from '@/lib/api/estudiantes.api';
-import { estudiantesApi } from '@/lib/api/estudiantes.api';
+import { livekitApi } from '@/lib/api/livekit.api';
+import type { EstadoClase } from '@mateatletas/contracts';
 
 interface ProximaClaseHeroProps {
   clase: ClaseEstudiante | null;
@@ -25,40 +18,100 @@ const esHoy = (fechaStr: string): boolean => {
 };
 
 export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
-  const [isValidating, setIsValidating] = useState(false);
+  const router = useRouter();
+  const [isConnecting, setIsConnecting] = useState(false);
   const [errorAcceso, setErrorAcceso] = useState<string | null>(null);
+  const [estadoClase, setEstadoClase] = useState<EstadoClase>(clase?.estado_clase || 'Programada');
+
+  // Sincronizar estado cuando cambia la clase
+  useEffect(() => {
+    if (clase?.estado_clase) {
+      setEstadoClase(clase.estado_clase);
+    }
+  }, [clase?.estado_clase]);
+
+  // Polling para detectar cuando la clase pasa a EnVivo
+  // Solo si: la clase es HOY, estado es Programada, y NO es comisión
+  useEffect(() => {
+    if (!clase) return;
+    if (clase.tipo === 'comision') return; // Comisiones no usan LiveKit
+    if (!esHoy(clase.fecha_proxima)) return; // Solo polling si es hoy
+    if (estadoClase !== 'Programada') return; // Solo si aún no inició
+
+    const checkEstado = async () => {
+      try {
+        const estado = await livekitApi.obtenerEstadoClase(clase.id);
+        if (estado.estado_clase !== estadoClase) {
+          setEstadoClase(estado.estado_clase);
+        }
+      } catch (e) {
+        console.error('Error polling estado clase:', e);
+      }
+    };
+
+    // Polling cada 30 segundos
+    const interval = setInterval(checkEstado, 30000);
+
+    // Check inicial
+    checkEstado();
+
+    return () => clearInterval(interval);
+  }, [clase, estadoClase]);
 
   /**
-   * Validar acceso antes de entrar a la clase
-   * Llama a puedeEntrarClase() y solo navega si tiene permiso
+   * Conectar a la clase en vivo via LiveKit
    */
   const handleEntrarClase = useCallback(async () => {
-    if (!clase?.link_meet) return;
+    if (!clase) return;
 
-    setIsValidating(true);
+    // Validar que la clase esté en vivo
+    if (estadoClase !== 'EnVivo') {
+      setErrorAcceso('La clase aún no ha comenzado. Esperá a que el docente la inicie.');
+      return;
+    }
+
+    // Las comisiones no usan LiveKit (por ahora)
+    if (clase.tipo === 'comision') {
+      setErrorAcceso('Las comisiones aún no soportan clases en vivo.');
+      return;
+    }
+
+    setIsConnecting(true);
     setErrorAcceso(null);
 
     try {
-      // Determinar si es clase grupal o comisión
-      const claseGrupoId = clase.tipo !== 'comision' ? clase.id : undefined;
-      const comisionId = clase.tipo === 'comision' ? clase.comision_id : undefined;
+      // Obtener token de LiveKit para estudiante
+      const tokenData = await livekitApi.getTokenEstudiante({
+        claseGrupoId: clase.id,
+      });
 
-      const resultado = await estudiantesApi.puedeEntrarClase(claseGrupoId, comisionId);
+      // Navegar a la página de clase en vivo con los parámetros
+      const params = new URLSearchParams({
+        token: tokenData.token,
+        wsUrl: tokenData.wsUrl,
+        roomName: tokenData.roomName,
+        nombreClase: clase.nombre,
+      });
 
-      if (resultado.puedeEntrar) {
-        // Puede entrar → abrir link
-        window.open(clase.link_meet, '_blank', 'noopener,noreferrer');
-      } else {
-        // No puede entrar → mostrar mensaje
-        setErrorAcceso(resultado.mensaje);
-      }
+      router.push(`/estudiante/clase-en-vivo?${params.toString()}`);
     } catch (error) {
-      console.error('Error al validar acceso a clase:', error);
-      setErrorAcceso('Error al verificar acceso. Intentá de nuevo.');
+      console.error('Error al conectar a clase:', error);
+      if (error instanceof Error) {
+        // Mensajes específicos según el error
+        if (error.message.includes('inscri')) {
+          setErrorAcceso('No estás inscrito en esta clase.');
+        } else if (error.message.includes('permiso') || error.message.includes('plan')) {
+          setErrorAcceso('Tu plan no incluye acceso a clases en vivo.');
+        } else {
+          setErrorAcceso(error.message);
+        }
+      } else {
+        setErrorAcceso('Error al conectar. Verificá tu conexión e intentá de nuevo.');
+      }
     } finally {
-      setIsValidating(false);
+      setIsConnecting(false);
     }
-  }, [clase]);
+  }, [clase, estadoClase, router]);
 
   if (!clase) {
     return (
@@ -86,6 +139,49 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
 
   const claseEsHoy = esHoy(clase.fecha_proxima);
   const hora = clase.hora_inicio.slice(0, 5);
+  const esEnVivo = estadoClase === 'EnVivo';
+  const esFinalizada = estadoClase === 'Finalizada';
+  const esComision = clase.tipo === 'comision';
+
+  // Configuración del botón según estado
+  const getBotonConfig = () => {
+    if (isConnecting) {
+      return {
+        texto: 'Conectando...',
+        disabled: true,
+        gradiente: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+        showPulse: false,
+      };
+    }
+
+    if (esEnVivo && !esComision) {
+      return {
+        texto: '🔴 UNIRSE EN VIVO',
+        disabled: false,
+        gradiente: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+        showPulse: true,
+      };
+    }
+
+    if (esFinalizada) {
+      return {
+        texto: 'Clase finalizada',
+        disabled: true,
+        gradiente: 'linear-gradient(135deg, #475569 0%, #334155 100%)',
+        showPulse: false,
+      };
+    }
+
+    // Programada o comisión
+    return {
+      texto: claseEsHoy ? 'Esperando al docente...' : 'Clase programada',
+      disabled: true,
+      gradiente: 'linear-gradient(135deg, #475569 0%, #334155 100%)',
+      showPulse: false,
+    };
+  };
+
+  const botonConfig = getBotonConfig();
 
   return (
     <div className="h-[300px] lg:h-[55%] relative group rounded-2xl overflow-hidden border border-white/10 shadow-2xl shrink-0">
@@ -110,13 +206,26 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
         {/* Top row */}
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Live badge */}
-            {claseEsHoy && (
+            {/* EN VIVO badge - Solo si está en vivo */}
+            {esEnVivo && !esComision && (
+              <span
+                className="flex items-center gap-1.5 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase animate-pulse"
+                style={{
+                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                  boxShadow: '0 4px 16px rgba(239,68,68,0.5)',
+                }}
+              >
+                <Radio className="w-3 h-3" />
+                EN VIVO
+              </span>
+            )}
+            {/* HOY badge */}
+            {claseEsHoy && !esEnVivo && (
               <span
                 className="flex items-center gap-1.5 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase"
                 style={{
-                  background: 'linear-gradient(135deg, #ef4444 0%, #f97316 100%)',
-                  boxShadow: '0 4px 16px rgba(239,68,68,0.4)',
+                  background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                  boxShadow: '0 4px 16px rgba(249,115,22,0.4)',
                 }}
               >
                 <span className="relative flex h-2 w-2">
@@ -134,7 +243,7 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
                 border: '1px solid rgba(255,255,255,0.1)',
               }}
             >
-              <MapPin className="w-3 h-3" /> Canal Principal
+              <MapPin className="w-3 h-3" /> {esComision ? 'Taller' : 'Canal Principal'}
             </span>
           </div>
 
@@ -185,12 +294,14 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
           <h4
             className="font-bold text-sm uppercase tracking-widest mb-2"
             style={{
-              background: 'linear-gradient(135deg, #fbbf24 0%, #f97316 100%)',
+              background: esEnVivo
+                ? 'linear-gradient(135deg, #ef4444 0%, #f97316 100%)'
+                : 'linear-gradient(135deg, #fbbf24 0%, #f97316 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}
           >
-            Próxima Clase
+            {esEnVivo ? '¡Clase en Vivo!' : 'Próxima Clase'}
           </h4>
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight mb-4 drop-shadow-2xl">
             {clase.nombre}
@@ -210,51 +321,42 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            {clase.link_meet ? (
-              <button
-                onClick={handleEntrarClase}
-                disabled={isValidating}
-                className="group relative flex-1 sm:flex-none disabled:opacity-70 disabled:cursor-not-allowed"
-              >
+            <button
+              onClick={handleEntrarClase}
+              disabled={botonConfig.disabled}
+              className="group relative flex-1 sm:flex-none disabled:cursor-not-allowed"
+            >
+              {/* Glow effect para EN VIVO */}
+              {botonConfig.showPulse && (
                 <div
-                  className="absolute inset-0 rounded-xl blur-sm opacity-50 group-hover:opacity-70 transition"
-                  style={{
-                    background: 'linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #ef4444 100%)',
-                  }}
+                  className="absolute inset-0 rounded-xl blur-md opacity-60 animate-pulse"
+                  style={{ background: botonConfig.gradiente }}
                 />
-                <div
-                  className="relative flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-black text-sm uppercase tracking-wider text-white transition transform hover:-translate-y-0.5 disabled:hover:translate-y-0"
-                  style={{
-                    background: 'linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #ef4444 100%)',
-                    boxShadow: '0 8px 32px rgba(251,146,60,0.4)',
-                  }}
-                >
-                  {isValidating ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Verificando...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-5 h-5" fill="white" />
-                      Acceder a Clase
-                      <ExternalLink className="w-4 h-4" />
-                    </>
-                  )}
-                </div>
-              </button>
-            ) : (
+              )}
               <div
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-sm text-white/50"
+                className={`relative flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-black text-sm uppercase tracking-wider text-white transition transform ${
+                  !botonConfig.disabled ? 'hover:-translate-y-0.5' : 'opacity-60'
+                }`}
                 style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: botonConfig.gradiente,
+                  boxShadow: botonConfig.showPulse
+                    ? '0 8px 32px rgba(239,68,68,0.5)'
+                    : '0 4px 16px rgba(0,0,0,0.3)',
                 }}
               >
-                <Video className="w-5 h-5" />
-                Link pronto disponible
+                {isConnecting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    {botonConfig.texto}
+                  </>
+                ) : (
+                  <>
+                    {esEnVivo && !esComision && <Play className="w-5 h-5" fill="white" />}
+                    {botonConfig.texto}
+                  </>
+                )}
               </div>
-            )}
+            </button>
 
             {/* Error de acceso */}
             {errorAcceso && (
@@ -265,25 +367,43 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
                   border: '1px solid rgba(239,68,68,0.4)',
                 }}
               >
-                <AlertTriangle className="w-4 h-4 text-red-400" />
+                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
                 <span className="text-red-300">{errorAcceso}</span>
               </div>
             )}
 
-            {/* Countdown */}
-            <div
-              className="px-6 py-4 rounded-xl flex flex-col items-center justify-center leading-none"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255,255,255,0.1)',
-              }}
-            >
-              <span className="text-[9px] text-white/50 font-bold uppercase mb-1">Inicia en</span>
-              <span className="text-sm font-black font-mono tracking-wider text-white">
-                {claseEsHoy ? '00:15:30' : clase.dia_nombre}
-              </span>
-            </div>
+            {/* Estado indicator */}
+            {!esEnVivo && !esFinalizada && claseEsHoy && (
+              <div
+                className="px-6 py-4 rounded-xl flex flex-col items-center justify-center leading-none"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}
+              >
+                <span className="text-[9px] text-white/50 font-bold uppercase mb-1">Estado</span>
+                <span className="text-sm font-black font-mono tracking-wider text-amber-400">
+                  {esComision ? 'Ver horario' : 'Esperando...'}
+                </span>
+              </div>
+            )}
+
+            {!claseEsHoy && (
+              <div
+                className="px-6 py-4 rounded-xl flex flex-col items-center justify-center leading-none"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}
+              >
+                <span className="text-[9px] text-white/50 font-bold uppercase mb-1">Próxima</span>
+                <span className="text-sm font-black font-mono tracking-wider text-white">
+                  {clase.dia_nombre}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
