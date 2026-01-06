@@ -60,4 +60,23 @@ export class CrearEstudianteRapidoDto {
   @IsString()
   @IsOptional()
   tutorTelefono?: string;
+
+  /**
+   * Plan de suscripción directo para el estudiante (opcional)
+   * Si no se provee, el estudiante hereda el plan del tutor
+   */
+  @IsOptional()
+  @IsCuid()
+  plan_id?: string;
+
+  /**
+   * Estado de acceso del estudiante
+   * ACTIVO: Acceso completo
+   * SUSPENDIDO: Sin acceso temporal
+   * VENCIDO: Sin acceso por falta de pago
+   * BECA: Acceso gratuito
+   */
+  @IsOptional()
+  @IsEnum(['ACTIVO', 'SUSPENDIDO', 'VENCIDO', 'BECA'])
+  estado_acceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
 }

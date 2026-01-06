@@ -10,7 +10,7 @@ export async function seedProductos(prisma: PrismaClient) {
       descripcion:
         'Acceso ilimitado a todos los cursos y recursos de la plataforma durante un mes. Incluye clases en vivo, ejercicios interactivos, seguimiento personalizado y sistema de gamificación.',
       precio: 2500.0,
-      tipo: TipoProducto.Suscripcion,
+      tipo: TipoProducto.Servicio,
       activo: true,
       duracion_meses: 1,
     },
@@ -20,7 +20,7 @@ export async function seedProductos(prisma: PrismaClient) {
       descripcion:
         'Acceso ilimitado por 12 meses con 20% de descuento. Incluye todos los beneficios de la suscripción mensual más acceso prioritario a nuevos cursos y contenido exclusivo.',
       precio: 24000.0,
-      tipo: TipoProducto.Suscripcion,
+      tipo: TipoProducto.Servicio,
       activo: true,
       duracion_meses: 12,
     },
@@ -54,7 +54,7 @@ export async function seedProductos(prisma: PrismaClient) {
       descripcion:
         'Colección digital de más de 500 ejercicios resueltos y explicados paso a paso. Incluye todos los temas de matemática de nivel secundario.',
       precio: 1500.0,
-      tipo: TipoProducto.RecursoDigital,
+      tipo: TipoProducto.Digital,
       activo: true,
     },
   ];

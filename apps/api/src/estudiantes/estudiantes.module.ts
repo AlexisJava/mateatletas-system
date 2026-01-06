@@ -7,6 +7,7 @@ import { EstudianteQueryService } from './services/estudiante-query.service';
 import { EstudianteCommandService } from './services/estudiante-command.service';
 import { EstudianteCopyService } from './services/estudiante-copy.service';
 import { EstudianteStatsService } from './services/estudiante-stats.service';
+import { AccesoEstudianteService } from './services/acceso-estudiante.service';
 
 /**
  * Módulo de Estudiantes - Refactorizado con CQRS + Facade Pattern
@@ -35,6 +36,7 @@ import { EstudianteStatsService } from './services/estudiante-stats.service';
     EstudianteCommandService,
     EstudianteCopyService,
     EstudianteStatsService,
+    AccesoEstudianteService,
     // Facade (API pública) - Usado por EstudiantesController
     EstudiantesFacadeService,
   ],

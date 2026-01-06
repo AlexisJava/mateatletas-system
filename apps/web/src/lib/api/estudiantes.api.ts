@@ -117,6 +117,10 @@ const claseEstudianteSchema = z.object({
     id: z.string(),
     nombre: z.string(),
     apellido: z.string(),
+    titulo: z.string().nullable().optional(),
+    bio: z.string().nullable().optional(),
+    especialidades: z.array(z.string()).nullable().optional(),
+    experiencia_anos: z.number().nullable().optional(),
   }),
   grupo: z
     .object({
@@ -145,6 +149,7 @@ const clasesEstudianteList = z.array(claseEstudianteSchema);
 
 /**
  * Schema para plan del estudiante
+ * Soporta tanto plan directo del estudiante como heredado del tutor
  */
 const miPlanSchema = z.object({
   tiene_plan: z.boolean(),
@@ -157,7 +162,11 @@ const miPlanSchema = z.object({
     })
     .nullable(),
   estado_suscripcion: z.string().optional(),
+  estado_acceso: z.string().optional(), // ACTIVO, SUSPENDIDO, VENCIDO, BECA
   acceso_clases_vivo: z.boolean(),
+  es_plan_directo: z.boolean().optional(), // true si el plan es asignado directamente al estudiante
+  notas_plan: z.string().nullable().optional(), // Notas admin (ej: "Beca olimpiada")
+  fecha_vencimiento: z.string().nullable().optional(), // Fecha de vencimiento del plan
   mensaje: z.string(),
 });
 
@@ -169,6 +178,74 @@ type Companero = z.infer<typeof companeroSchema>;
 type Sector = z.infer<typeof sectorSchema>;
 export type ClaseEstudiante = z.infer<typeof claseEstudianteSchema>;
 export type MiPlan = z.infer<typeof miPlanSchema>;
+
+/**
+ * Schema para verificar acceso del estudiante
+ */
+const accesoEstudianteSchema = z.object({
+  puedeAcceder: z.boolean(),
+  motivo: z.enum([
+    'PLAN_DIRECTO',
+    'SUSCRIPCION_TUTOR',
+    'COMISION_ACTIVA',
+    'OVERRIDE',
+    'SIN_ACCESO',
+  ]),
+  permisos: z.object({
+    accesoLibros: z.boolean(),
+    accesoPlanificaciones: z.boolean(),
+    accesoClasesVivo: z.boolean(),
+  }),
+  detalles: z.object({
+    planDirecto: z
+      .object({
+        id: z.string(),
+        nombre: z.string(),
+      })
+      .optional(),
+    suscripcionTutor: z
+      .object({
+        suscripcionId: z.string(),
+        planNombre: z.string(),
+        estado: z.string(),
+      })
+      .optional(),
+    comisionesActivas: z.array(
+      z.object({
+        comisionId: z.string(),
+        nombre: z.string(),
+        fechaInicio: z.string().nullable(),
+        fechaFin: z.string().nullable(),
+      }),
+    ),
+    override: z
+      .object({
+        motivo: z.string().nullable(),
+        hasta: z.string().nullable(),
+      })
+      .optional(),
+  }),
+  mensaje: z.string(),
+});
+
+/**
+ * Schema para verificar si puede entrar a una clase
+ */
+const puedeEntrarClaseSchema = z.object({
+  puedeEntrar: z.boolean(),
+  motivo: z.enum([
+    'COMISION_INSCRIPTO',
+    'PLAN_SINCRONICO',
+    'SUSCRIPCION_TUTOR_SINCRONICO',
+    'SIN_INSCRIPCION',
+    'SIN_PERMISO',
+    'COMISION_VENCIDA',
+  ]),
+  mensaje: z.string(),
+});
+
+export type AccesoEstudiante = z.infer<typeof accesoEstudianteSchema>;
+export type PuedeEntrarClase = z.infer<typeof puedeEntrarClaseSchema>;
 
 /**
  * API Client para operaciones de estudiantes
@@ -389,6 +466,46 @@ export const estudiantesApi = {
       return miPlanSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener plan:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Verificar acceso del estudiante autenticado a la plataforma
+   * Determina permisos basado en: plan directo, suscripción tutor, comisión, override
+   * @returns Resultado con permisos y detalles de acceso
+   */
+  verificarAcceso: async (): Promise<AccesoEstudiante> => {
+    try {
+      const response = await apiClient.get<AccesoEstudiante>('/estudiantes/verificar-acceso');
+      return accesoEstudianteSchema.parse(response);
+    } catch (error) {
+      console.error('Error al verificar acceso:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Verificar si el estudiante puede entrar a una clase específica
+   * @param claseGrupoId - ID de la clase de grupo (opcional)
+   * @param comisionId - ID de la comisión (opcional)
+   * @returns Resultado con permiso y motivo
+   */
+  puedeEntrarClase: async (
+    claseGrupoId?: string,
+    comisionId?: string,
+  ): Promise<PuedeEntrarClase> => {
+    try {
+      const params: Record<string, string> = {};
+      if (claseGrupoId) params.claseGrupoId = claseGrupoId;
+      if (comisionId) params.comisionId = comisionId;
+
+      const response = await apiClient.get<PuedeEntrarClase>('/estudiantes/puede-entrar-clase', {
+        params,
+      });
+      return puedeEntrarClaseSchema.parse(response);
+    } catch (error) {
+      console.error('Error al verificar entrada a clase:', error);
       throw error;
     }
   },

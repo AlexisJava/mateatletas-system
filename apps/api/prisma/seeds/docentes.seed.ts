@@ -1,10 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
-
-export async function seedDocentes() {
-  console.log('🧑‍🏫 Seeding docentes...');
+/**
+ * Seed: Docentes reales de Mateatletas
+ * Crea los docentes del equipo
+ */
+export async function seedDocentes(prisma: PrismaClient) {
+  console.log('🧑‍🏫 Creando docentes del equipo...');
 
   const docentes = [
     {

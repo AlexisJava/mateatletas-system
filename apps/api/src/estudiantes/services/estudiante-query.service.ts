@@ -549,7 +549,15 @@ export class EstudianteQueryService {
           claseGrupo: {
             include: {
               docente: {
-                select: { id: true, nombre: true, apellido: true },
+                select: {
+                  id: true,
+                  nombre: true,
+                  apellido: true,
+                  titulo: true,
+                  bio: true,
+                  especialidades: true,
+                  experiencia_anos: true,
+                },
               },
               grupo: {
                 select: {
@@ -576,7 +584,15 @@ export class EstudianteQueryService {
           comision: {
             include: {
               docente: {
-                select: { id: true, nombre: true, apellido: true },
+                select: {
+                  id: true,
+                  nombre: true,
+                  apellido: true,
+                  titulo: true,
+                  bio: true,
+                  especialidades: true,
+                  experiencia_anos: true,
+                },
               },
               producto: {
                 select: { id: true, nombre: true, descripcion: true },
@@ -681,23 +697,80 @@ export class EstudianteQueryService {
   }
 
   /**
-   * Obtener el plan de suscripción del estudiante (a través del tutor)
+   * Obtener el plan de suscripción del estudiante
+   * PRIORIDAD: 1) plan_id directo del estudiante, 2) suscripción del tutor (legacy)
    * Usado para validar acceso a clases en vivo (solo STEAM_SINCRONICO)
    * @param estudianteId - ID del estudiante autenticado
    * @returns Plan de suscripción con información de acceso
    */
   async obtenerMiPlan(estudianteId: string) {
-    // 1. Obtener el estudiante con su tutor_id
+    // 1. Obtener el estudiante con plan directo y tutor_id
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: estudianteId },
-      select: { tutor_id: true },
+      select: {
+        tutor_id: true,
+        plan_id: true,
+        estado_acceso: true,
+        fecha_vencimiento_plan: true,
+        notas_plan: true,
+        plan: true, // Relación directa con PlanSuscripcion
+      },
     });
 
     if (!estudiante) {
       throw new NotFoundException('Estudiante no encontrado');
     }
 
-    // 2. Buscar suscripción activa del tutor
+    // 2. Verificar estado de acceso del estudiante
+    if (estudiante.estado_acceso === 'SUSPENDIDO') {
+      return {
+        tiene_plan: false,
+        plan: null,
+        acceso_clases_vivo: false,
+        estado_acceso: 'SUSPENDIDO',
+        mensaje: 'Tu acceso está suspendido. Contacta a soporte.',
+      };
+    }
+
+    // 3. Verificar si el plan venció
+    if (
+      estudiante.fecha_vencimiento_plan &&
+      new Date(estudiante.fecha_vencimiento_plan) < new Date()
+    ) {
+      return {
+        tiene_plan: false,
+        plan: null,
+        acceso_clases_vivo: false,
+        estado_acceso: 'VENCIDO',
+        mensaje: 'Tu plan ha vencido. Contacta a tu tutor para renovar.',
+      };
+    }
+
+    // 4. PRIORIDAD 1: Plan asignado directamente al estudiante
+    if (estudiante.plan_id && estudiante.plan) {
+      const planNombre = estudiante.plan.nombre;
+      const accesoClasesVivo = planNombre === 'STEAM_SINCRONICO';
+
+      return {
+        tiene_plan: true,
+        plan: {
+          id: estudiante.plan.id,
+          nombre: planNombre,
+          descripcion: estudiante.plan.descripcion,
+          precio_base: estudiante.plan.precio_base,
+        },
+        estado_acceso: estudiante.estado_acceso,
+        acceso_clases_vivo: accesoClasesVivo,
+        es_plan_directo: true, // Indica que el plan es asignado directamente
+        notas_plan: estudiante.notas_plan,
+        fecha_vencimiento: estudiante.fecha_vencimiento_plan,
+        mensaje: accesoClasesVivo
+          ? 'Acceso completo a clases en vivo'
+          : 'Tu plan no incluye clases en vivo. Actualiza a STEAM Sincrónico para acceder.',
+      };
+    }
+
+    // 5. PRIORIDAD 2: Buscar suscripción activa del tutor (comportamiento legacy)
     const suscripcion = await this.prisma.suscripcion.findFirst({
       where: {
         tutor_id: estudiante.tutor_id,
@@ -718,12 +791,13 @@ export class EstudianteQueryService {
         tiene_plan: false,
         plan: null,
         acceso_clases_vivo: false,
+        estado_acceso: estudiante.estado_acceso,
+        es_plan_directo: false,
         mensaje: 'Sin suscripción activa',
       };
     }
 
-    // 3. Determinar acceso a clases en vivo según el plan
-    // Solo STEAM_SINCRONICO tiene acceso a clases en vivo
+    // 6. Determinar acceso a clases en vivo según el plan del tutor
     const planNombre = suscripcion.plan.nombre;
     const accesoClasesVivo = planNombre === 'STEAM_SINCRONICO';
 
@@ -736,7 +810,9 @@ export class EstudianteQueryService {
         precio_base: suscripcion.plan.precio_base,
       },
       estado_suscripcion: suscripcion.estado,
+      estado_acceso: estudiante.estado_acceso,
       acceso_clases_vivo: accesoClasesVivo,
+      es_plan_directo: false, // Plan heredado del tutor
       mensaje: accesoClasesVivo
         ? 'Acceso completo a clases en vivo'
         : 'Tu plan no incluye clases en vivo. Actualiza a STEAM Sincrónico para acceder.',

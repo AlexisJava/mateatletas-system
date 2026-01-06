@@ -24,6 +24,13 @@ AUDITORÍA → PLANIFICACIÓN → ATOMIZACIÓN → VERIFICACIÓN
 - ❌ PROHIBIDO: `any`, `unknown`, `@ts-ignore`, `@ts-nocheck`, `as` sin justificar
 - ✅ OBLIGATORIO: Tipos explícitos, interfaces para DTOs, generics cuando aplique
 
+### Prisma / Base de Datos
+
+- ❌ PROHIBIDO: `prisma db push` (causa drift y desincronización)
+- ✅ OBLIGATORIO: `prisma migrate dev --name descripcion` para cambios de schema
+- ✅ Para ver SQL sin aplicar: `prisma migrate dev --create-only --name descripcion`
+- Si hay error de migración: analizar causa, NO usar db push como parche
+
 ### Seguridad
 
 - ParseUUIDPipe en todos los @Param de IDs

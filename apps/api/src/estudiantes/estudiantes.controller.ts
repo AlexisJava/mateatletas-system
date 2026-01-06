@@ -9,9 +9,11 @@ import {
   Query,
   UseGuards,
   Request,
+  BadRequestException,
 } from '@nestjs/common';
 import { ParseIdPipe } from '../common/pipes';
 import { EstudiantesFacadeService } from './estudiantes-facade.service';
+import { AccesoEstudianteService } from './services/acceso-estudiante.service';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
 import { QueryEstudiantesDto } from './dto/query-estudiantes.dto';
@@ -36,7 +38,10 @@ import { AuthUser, RequestWithAuthUser } from '../auth/interfaces';
 @Controller('estudiantes')
 @UseGuards(JwtAuthGuard)
 export class EstudiantesController {
-  constructor(private readonly estudiantesService: EstudiantesFacadeService) {}
+  constructor(
+    private readonly estudiantesService: EstudiantesFacadeService,
+    private readonly accesoService: AccesoEstudianteService,
+  ) {}
 
   /**
    * POST /estudiantes - Crear nuevo estudiante
@@ -170,6 +175,58 @@ export class EstudiantesController {
   async obtenerMiPlan(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.estudiantesService.obtenerMiPlan(estudianteId);
+  }
+
+  /**
+   * GET /estudiantes/verificar-acceso - Verificar acceso del estudiante logueado
+   * Determina si el estudiante puede acceder a la plataforma
+   * basado en: plan directo, suscripción del tutor, comisión activa, o override
+   * @param req - Request con usuario autenticado
+   * @returns ResultadoAccesoEstudiante con permisos y detalles
+   */
+  @Get('verificar-acceso')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async verificarAcceso(@Request() req: RequestWithAuthUser) {
+    const estudianteId = req.user.id;
+    return this.accesoService.verificarAccesoEstudiante(estudianteId);
+  }
+
+  /**
+   * GET /estudiantes/puede-entrar-clase - Verificar si puede entrar a una clase
+   * Valida permisos para entrar a una clase específica (grupo o comisión)
+   * @param req - Request con usuario autenticado
+   * @param claseGrupoId - ID de la clase de grupo (opcional)
+   * @param comisionId - ID de la comisión (opcional)
+   * @returns ResultadoEntrarClase con permiso y motivo
+   */
+  @Get('puede-entrar-clase')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async puedeEntrarClase(
+    @Request() req: RequestWithAuthUser,
+    @Query('claseGrupoId') claseGrupoId?: string,
+    @Query('comisionId') comisionId?: string,
+  ) {
+    const estudianteId = req.user.id;
+
+    // Validar que se proporcione exactamente uno de los IDs
+    if (!claseGrupoId && !comisionId) {
+      throw new BadRequestException(
+        'Debe proporcionar claseGrupoId o comisionId',
+      );
+    }
+    if (claseGrupoId && comisionId) {
+      throw new BadRequestException(
+        'Solo uno de claseGrupoId o comisionId debe ser proporcionado',
+      );
+    }
+
+    return this.accesoService.puedeEntrarAClase(
+      estudianteId,
+      claseGrupoId,
+      comisionId,
+    );
   }
 
   /**

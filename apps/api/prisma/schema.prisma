@@ -111,6 +111,32 @@ model Estudiante {
   /// DEPRECADO: ID del sector al que pertenece el estudiante (usar sectores[] en su lugar)
   /// Mantener temporalmente para migración gradual
   sector_id                 String?
+
+  // === PLAN DE SUSCRIPCIÓN DIRECTO (2026) ===
+  /// ID del plan asignado directamente al estudiante
+  /// Si es null, se hereda del tutor (comportamiento legacy)
+  /// Permite asignar planes diferentes a cada hijo del mismo tutor
+  plan_id                   String?                 @map("plan_id")
+  /// Estado del acceso del estudiante (independiente del pago)
+  /// Permite becas, suspensiones temporales, etc.
+  estado_acceso             EstadoAccesoEstudiante  @default(ACTIVO)
+  /// Fecha de vencimiento del plan (para becas temporales, promociones)
+  /// Si es null, el plan no vence
+  fecha_vencimiento_plan    DateTime?               @map("fecha_vencimiento_plan")
+  /// Notas administrativas sobre el plan (ej: "Beca olimpiada 2026")
+  notas_plan                String?                 @map("notas_plan")
+
+  // === SISTEMA DE ACCESO FLEXIBLE (2026) ===
+  /// Override manual de acceso (admin puede dar acceso temporal sin plan/comisión)
+  acceso_override           Boolean                 @default(false)
+  /// Fecha hasta la cual el override es válido (null = indefinido)
+  acceso_override_hasta     DateTime?               @map("acceso_override_hasta")
+  /// Motivo del override (ej: "Prueba gratuita", "Cortesía evento")
+  acceso_override_motivo    String?                 @map("acceso_override_motivo")
+
+  // Relación con PlanSuscripcion
+  plan                      PlanSuscripcion?        @relation(fields: [plan_id], references: [id])
+
   alertas                   Alerta[]
   asistencias               Asistencia[]
   casa                      Casa?                   @relation(fields: [casaId], references: [id])
@@ -148,10 +174,48 @@ model Estudiante {
   /// Observaciones recibidas de docentes
   observaciones ObservacionEstudiante[]
 
+  /// SISTEMA ACCESO: Historial de cambios de acceso del estudiante
+  historial_acceso HistorialAccesoEstudiante[]
+
   // Índices de performance para rankings y listados
   // NOTA: Índices de puntos_totales eliminados - usar RecursosEstudiante para rankings (SUB-FASE 1.3)
   @@index([tutor_id, apellido], name: "idx_estudiantes_tutor_listado")
   @@map("estudiantes")
+}
+
+/// Historial de cambios de acceso de un estudiante
+/// Registra todas las modificaciones de acceso para auditoría y trazabilidad
+model HistorialAccesoEstudiante {
+  /// Identificador único del registro
+  id            String   @id @default(cuid())
+  /// ID del estudiante al que pertenece este registro
+  estudiante_id String
+  /// Fecha y hora del cambio
+  fecha         DateTime @default(now())
+
+  /// Acción realizada (ej: "PLAN_ASIGNADO", "COMISION_INSCRIPCION", "OVERRIDE_ACTIVADO", "ACCESO_REVOCADO")
+  accion        String
+  /// Origen del acceso (ej: "PLAN_DIRECTO", "SUSCRIPCION_TUTOR", "COMISION", "OVERRIDE")
+  origen        String
+  /// ID del recurso origen (plan_id, suscripcion_id, comision_id, etc.)
+  origen_id     String?
+
+  /// Estado anterior del acceso (JSON con permisos anteriores)
+  estado_anterior Json?
+  /// Estado nuevo del acceso (JSON con permisos nuevos)
+  estado_nuevo    Json?
+  /// ID del usuario que ejecutó el cambio (admin, sistema, etc.)
+  ejecutado_por   String?
+
+  /// Metadata adicional (motivo, notas, contexto)
+  metadata      Json?
+
+  /// Relación con Estudiante
+  estudiante    Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  @@index([estudiante_id, fecha])
+  @@index([accion, fecha])
+  @@map("historial_acceso_estudiante")
 }
 
 /// Modelo para casas del sistema 2026
@@ -2170,6 +2234,15 @@ enum EstadoSuscripcion {
   CANCELADA /// Cancelada definitivamente
 }
 
+/// Estado del acceso de un estudiante a la plataforma
+/// Independiente del estado de pago del tutor
+enum EstadoAccesoEstudiante {
+  ACTIVO /// Acceso normal según su plan
+  SUSPENDIDO /// Suspendido temporalmente por admin
+  VENCIDO /// Plan venció (fecha_vencimiento_plan pasó)
+  BECA /// Acceso por beca (puede tener plan sin pago del tutor)
+}
+
 /// Plan de suscripción disponible
 /// Define precios y configuración de cobro
 model PlanSuscripcion {
@@ -2203,8 +2276,11 @@ model PlanSuscripcion {
   /// Timestamp de última actualización
   updated_at DateTime @updatedAt
 
-  /// Suscripciones asociadas a este plan
+  /// Suscripciones asociadas a este plan (pagos de tutores)
   suscripciones Suscripcion[]
+
+  /// Estudiantes con este plan asignado directamente
+  estudiantes Estudiante[]
 
   @@map("planes_suscripcion")
 }

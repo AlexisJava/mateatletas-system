@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/auth.store';
 import { gamificacionApi } from '@/lib/api/gamificacion.api';
-import { estudiantesApi } from '@/lib/api/estudiantes.api';
+import { estudiantesApi, type MiPlan } from '@/lib/api/estudiantes.api';
 import Link from 'next/link';
 import {
   Compass,
@@ -11,15 +11,18 @@ import {
   GraduationCap,
   Rocket,
   Flame,
-  Star,
-  Sparkles,
   ChevronRight,
   Zap,
   LogOut,
+  Lock,
+  Video,
+  Sparkles,
+  Play,
+  Crown,
 } from 'lucide-react';
+
 import { useRouter } from 'next/navigation';
 import FloatingLines from '@/components/ui/FloatingLines';
-import { animate, stagger } from 'animejs';
 
 interface DashboardData {
   nivel: number;
@@ -30,7 +33,9 @@ interface DashboardData {
     tipo: string;
     fecha_hora_inicio: string;
     docente: { nombre: string; apellido: string };
+    link_meet?: string | null;
   } | null;
+  plan: MiPlan | null;
 }
 
 export default function EstudianteDashboard() {
@@ -38,8 +43,6 @@ export default function EstudianteDashboard() {
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const hasAnimated = useRef(false);
 
   const handleLogout = async () => {
     await logout();
@@ -51,9 +54,10 @@ export default function EstudianteDashboard() {
       if (!user?.id) return;
 
       try {
-        const [recursos, proximaClase] = await Promise.all([
+        const [recursos, proximaClase, miPlan] = await Promise.all([
           gamificacionApi.obtenerRecursos(user.id).catch(() => null),
           estudiantesApi.getProximaClase().catch(() => null),
+          estudiantesApi.getMiPlan().catch(() => null),
         ]);
 
         setData({
@@ -62,16 +66,17 @@ export default function EstudianteDashboard() {
           xpSiguienteNivel: recursos?.xp_siguiente_nivel ?? 100,
           racha: recursos?.racha?.dias_consecutivos ?? 0,
           proximaClase,
+          plan: miPlan,
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
-        // Usar datos del usuario como fallback
         setData({
           nivel: user.nivel_actual ?? 1,
           xp: user.puntos_totales ?? 0,
           xpSiguienteNivel: 100,
           racha: 0,
           proximaClase: null,
+          plan: null,
         });
       } finally {
         setIsLoading(false);
@@ -81,196 +86,223 @@ export default function EstudianteDashboard() {
     fetchData();
   }, [user?.id, user?.nivel_actual, user?.puntos_totales]);
 
-  // Animaciones de entrada con anime.js - sin flash
-  useEffect(() => {
-    if (isLoading || hasAnimated.current) return;
-    hasAnimated.current = true;
-
-    // Pequeño delay para asegurar que el DOM esté listo
-    requestAnimationFrame(() => {
-      // Animar header - slide sutil desde arriba
-      animate('.header-animate', {
-        translateY: [-15, 0],
-        duration: 500,
-        ease: 'outQuad',
-      });
-
-      // Animar stats pills con rebote sutil
-      animate('.stat-pill-animate', {
-        scale: [0.95, 1],
-        delay: stagger(60, { start: 100 }),
-        duration: 400,
-        ease: 'outBack',
-      });
-
-      // Animar event banner - slide desde abajo
-      animate('.event-banner-animate', {
-        translateY: [20, 0],
-        duration: 500,
-        delay: 150,
-        ease: 'outQuad',
-      });
-
-      // Animar bento cards con stagger - efecto de aparición elegante
-      const cards = containerRef.current?.querySelectorAll('.bento-card-animate');
-      if (cards) {
-        animate(cards, {
-          translateY: [30, 0],
-          scale: [0.97, 1],
-          delay: stagger(80, { start: 200 }),
-          duration: 600,
-          ease: 'outQuad',
-        });
-      }
-    });
-  }, [isLoading]);
+  // TODO: En producción, usar data?.plan?.acceso_clases_vivo
+  const tieneAccesoClases = true; // Habilitado para testing
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-400 text-lg">Preparando tu aventura...</p>
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            style={{
+              background: 'linear-gradient(135deg, #f472b6 0%, #c026d3 50%, #7c3aed 100%)',
+              boxShadow: '0 8px 32px rgba(192,38,211,0.5)',
+            }}
+          >
+            <Sparkles className="w-8 h-8 text-white animate-pulse" />
+          </div>
+          <p className="text-white/70 text-lg font-bold">Cargando...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#030014] text-white flex flex-col relative overflow-hidden">
-      {/* Fondo FloatingLines - sin interacción */}
-      <div className="absolute inset-0 pointer-events-none">
+    <div className="min-h-screen bg-[#070711] text-white flex flex-col relative overflow-hidden">
+      {/* FloatingLines Background */}
+      <div className="absolute inset-0 pointer-events-none opacity-40">
         <FloatingLines
-          linesGradient={['#E945F5', '#2F4BC0', '#E945F5']}
-          animationSpeed={0.3}
+          linesGradient={['#ff6b9d', '#c44cff', '#6b5bff', '#00d4ff']}
+          animationSpeed={0.1}
           interactive={false}
           parallax={false}
         />
       </div>
 
-      {/* Header premium integrado - full width */}
-      <header className="header-animate w-full px-8 py-4 relative z-10 shrink-0 bg-black/30 backdrop-blur-md border-b border-white/10">
-        <div className="flex items-center justify-between gap-4">
-          {/* Logo + Saludo */}
-          <div className="flex items-center gap-5">
-            {/* Logo Mateatletas */}
-            <Link href="/estudiante" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20 group-hover:shadow-violet-500/40 transition-shadow">
-                <span className="text-lg font-black text-white">M</span>
-              </div>
-              <span className="font-bold text-white hidden sm:inline">Mateatletas</span>
-            </Link>
+      {/* Gradient orbs sutiles */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-fuchsia-600/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-cyan-500/10 rounded-full blur-[80px]" />
+      </div>
 
-            {/* Divider */}
-            <div className="h-8 w-px bg-white/10 hidden sm:block" />
-
-            {/* Avatar y saludo */}
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-fuchsia-500 via-purple-500 to-violet-500 flex items-center justify-center text-lg font-black text-white shadow-lg shadow-purple-500/20">
-                  {user?.nombre?.charAt(0)?.toUpperCase() || '?'}
+      {/* Header */}
+      <header className="w-full px-4 lg:px-8 py-4 relative z-10 shrink-0">
+        <div className="max-w-7xl mx-auto">
+          <div
+            className="flex items-center justify-between gap-4 px-5 py-3 rounded-2xl"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            }}
+          >
+            {/* Logo + Avatar */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              <Link href="/estudiante" className="flex items-center gap-2.5 group">
+                <div
+                  className="w-11 h-11 rounded-2xl flex items-center justify-center"
+                  style={{
+                    background: 'linear-gradient(135deg, #f472b6 0%, #c026d3 50%, #7c3aed 100%)',
+                    boxShadow:
+                      '0 4px 20px rgba(192,38,211,0.5), inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -2px 0 rgba(0,0,0,0.2)',
+                  }}
+                >
+                  <span className="text-xl font-black text-white">M</span>
                 </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#030014]" />
+              </Link>
+
+              {/* Casa badge */}
+              <div
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
+                style={{
+                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
+                  boxShadow:
+                    '0 2px 10px rgba(251,191,36,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.1)',
+                }}
+              >
+                <span className="text-white">Casa Pulsar</span>
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-white">¡Hola, {user?.nombre}!</h1>
-                <p className="text-slate-400 text-xs flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-violet-400" />
-                  Exploremos el universo
-                </p>
+
+              {/* Avatar */}
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center text-lg font-black text-white"
+                    style={{
+                      background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%)',
+                      boxShadow:
+                        '0 4px 16px rgba(59,130,246,0.4), inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -2px 0 rgba(0,0,0,0.2)',
+                    }}
+                  >
+                    {user?.nombre?.charAt(0)?.toUpperCase() || '?'}
+                  </div>
+                  {/* Badge de nivel */}
+                  <div
+                    className="absolute -bottom-1 -right-1 w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black text-white"
+                    style={{
+                      background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                      boxShadow: '0 2px 8px rgba(251,191,36,0.5)',
+                    }}
+                  >
+                    {data?.nivel ?? 1}
+                  </div>
+                </div>
+                <div className="hidden sm:block">
+                  <h1 className="text-base font-bold text-white flex items-center gap-1.5">
+                    ¡Hola, {user?.nombre}!
+                    <Sparkles className="w-4 h-4 text-yellow-400" />
+                  </h1>
+                  <p className="text-white/50 text-xs font-medium">Exploremos juntos</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Stats Pills + Logout */}
-          <div className="flex items-center gap-3">
-            <div className="flex gap-2">
-              <StatPill
-                icon={<Star className="w-4 h-4" />}
-                label="Nivel"
+            {/* Stats Pills - Los colores que te gustan */}
+            <div className="flex items-center gap-2">
+              <CandyPill
+                icon={<Crown className="w-4 h-4" />}
                 value={data?.nivel ?? 1}
-                gradient="from-amber-400 to-orange-500"
-                glowColor="rgba(251, 191, 36, 0.3)"
-                className="stat-pill-animate"
+                label="Nivel"
+                colors={['#fbbf24', '#f59e0b', '#d97706']}
               />
-              <StatPill
+              <CandyPill
                 icon={<Zap className="w-4 h-4" />}
-                label="XP"
                 value={data?.xp ?? 0}
-                gradient="from-violet-400 to-purple-500"
-                glowColor="rgba(167, 139, 250, 0.3)"
-                className="stat-pill-animate"
+                label="XP"
+                colors={['#a855f7', '#7c3aed', '#6366f1']}
               />
-              <div className="stat-pill-animate">
-                <RachaFlame value={Math.max(data?.racha ?? 1, 1)} />
-              </div>
-            </div>
+              <CandyPill
+                icon={<Flame className="w-4 h-4" />}
+                value={`${Math.max(data?.racha ?? 1, 1)}d`}
+                label="Racha"
+                colors={['#f43f5e', '#ec4899', '#db2777']}
+              />
 
-            {/* Logout button */}
-            <button
-              onClick={handleLogout}
-              className="stat-pill-animate p-2.5 rounded-xl bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 text-slate-400 hover:text-red-400 transition-all"
-              title="Cerrar sesión"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
+              <button
+                onClick={handleLogout}
+                className="ml-1 p-2.5 rounded-xl bg-white/5 hover:bg-rose-500/20 border border-white/10 hover:border-rose-500/40 text-white/50 hover:text-rose-400 transition-all"
+                title="Cerrar sesión"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Contenido centrado verticalmente */}
-      <div className="flex-1 flex items-center justify-center px-6 pb-6">
-        <div ref={containerRef} className="max-w-6xl w-full space-y-6 relative z-10">
-          {/* Event Banner */}
-          <EventBanner />
-
-          {/* Bento Grid - Layout fijo */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Columna izquierda: Explorar (card grande) */}
-            <BentoCard
-              href="/estudiante/explorar"
-              title="Explorar"
-              subtitle="Mapa del Conocimiento"
-              icon={<Compass className="w-12 h-12" />}
-              accentColor="#a855f7"
-              className="h-[560px] bento-card-animate"
-              featured
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center px-4 pb-6 pt-2">
+        <div className="max-w-7xl w-full space-y-4 relative z-10">
+          {/* Live Class Banner */}
+          {tieneAccesoClases && data?.proximaClase && (
+            <LiveBanner
+              docente={data.proximaClase.docente}
+              linkMeet={data.proximaClase.link_meet}
             />
+          )}
 
-            {/* Columna derecha: 3 cards apiladas */}
-            <div className="flex flex-col gap-5">
-              {/* Fila superior: Jugar y Mi Viaje */}
-              <div className="grid grid-cols-2 gap-5">
-                <BentoCard
+          {/* Bento Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            {/* Explorar - Card grande */}
+            <div className="lg:col-span-5">
+              <CandyCard
+                href="/estudiante/explorar"
+                title="Explorar"
+                subtitle="Mapa del Conocimiento"
+                description="Descubre mundos de Matemáticas, Programación y Ciencias"
+                icon={<Compass className="w-10 h-10 text-white" />}
+                colors={['#f472b6', '#c026d3', '#7c3aed']}
+                featured
+              />
+            </div>
+
+            {/* Columna derecha */}
+            <div className="lg:col-span-7 flex flex-col gap-4">
+              {/* Fila superior */}
+              <div className="grid grid-cols-2 gap-4">
+                <CandyCard
                   href="/estudiante/jugar"
                   title="Jugar"
                   subtitle="Arcade Zone"
-                  icon={<Gamepad2 className="w-8 h-8" />}
-                  accentColor="#06b6d4"
-                  className="h-[265px] bento-card-animate"
+                  icon={<Gamepad2 className="w-8 h-8 text-white" />}
+                  colors={['#06b6d4', '#14b8a6', '#10b981']}
                 />
-                <BentoCard
+                <CandyCard
                   href="/estudiante/progreso"
-                  title="Mi Viaje"
-                  subtitle="Tu progreso"
-                  icon={<Rocket className="w-8 h-8" />}
-                  accentColor="#10b981"
-                  className="h-[265px] bento-card-animate"
+                  title="Mi Progreso"
+                  subtitle="Tu viaje épico"
+                  icon={<Rocket className="w-8 h-8 text-white" />}
+                  colors={['#10b981', '#22c55e', '#84cc16']}
+                  extraContent={
+                    <div className="mt-2">
+                      <div className="flex items-center justify-between text-xs mb-1">
+                        <span className="text-white/80 font-bold">Nivel {data?.nivel ?? 1}</span>
+                        <span className="text-white/50">
+                          {data?.xp ?? 0}/{data?.xpSiguienteNivel ?? 100} XP
+                        </span>
+                      </div>
+                      <div className="h-2 bg-black/30 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${Math.min(((data?.xp ?? 0) / (data?.xpSiguienteNivel ?? 100)) * 100, 100)}%`,
+                            background: 'linear-gradient(90deg, #10b981, #22c55e, #84cc16)',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  }
                 />
               </div>
 
-              {/* Fila inferior: Clases (ancho completo) */}
-              <BentoCard
+              {/* Clases */}
+              <ClasesCard
                 href="/estudiante/clases"
-                title="Clases"
-                subtitle={
-                  data?.proximaClase
-                    ? `Próxima con ${data.proximaClase.docente.nombre}`
-                    : 'Tu aula virtual'
-                }
-                icon={<GraduationCap className="w-8 h-8" />}
-                accentColor="#f59e0b"
-                className="h-[265px] bento-card-animate"
+                proximaClase={data?.proximaClase}
+                tieneAcceso={tieneAccesoClases}
               />
             </div>
           </div>
@@ -280,280 +312,276 @@ export default function EstudianteDashboard() {
   );
 }
 
-function StatPill({
+// ============================================================================
+// CANDY PILL - Los botones de stats que te gustan
+// ============================================================================
+function CandyPill({
   icon,
-  label,
   value,
-  gradient,
-  glowColor,
-  className = '',
+  label,
+  colors,
 }: {
   icon: React.ReactNode;
-  label: string;
   value: string | number;
-  gradient: string;
-  glowColor?: string;
-  className?: string;
+  label: string;
+  colors: [string, string, string];
 }) {
   return (
     <div
-      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r ${gradient} text-white text-sm font-bold transition-all hover:scale-105 ${className}`}
+      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-white text-sm font-bold"
       style={{
-        boxShadow: glowColor
-          ? `0 4px 20px -2px ${glowColor}, 0 2px 8px -2px rgba(0,0,0,0.3)`
-          : '0 4px 12px rgba(0,0,0,0.3)',
+        background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 50%, ${colors[2]} 100%)`,
+        boxShadow: `0 4px 16px ${colors[0]}60, inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -2px 0 rgba(0,0,0,0.15)`,
       }}
     >
       {icon}
-      <span className="hidden sm:inline text-white/90 font-medium">{label}</span>
       <span className="font-black">{value}</span>
+      <span className="text-white/80 text-xs font-semibold hidden lg:inline">{label}</span>
     </div>
   );
 }
 
-function RachaFlame({ value }: { value: number }) {
+// ============================================================================
+// LIVE BANNER
+// ============================================================================
+function LiveBanner({
+  docente,
+  linkMeet,
+}: {
+  docente: { nombre: string; apellido: string };
+  linkMeet?: string | null;
+}) {
   return (
     <div
-      className="relative inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-bold transition-all hover:scale-110 overflow-visible group"
+      className="relative overflow-hidden rounded-2xl p-5"
       style={{
-        background: 'linear-gradient(135deg, #ff6b00 0%, #ff0000 50%, #ff4500 100%)',
+        background: 'linear-gradient(135deg, #ef4444 0%, #f97316 50%, #fbbf24 100%)',
         boxShadow:
-          '0 0 20px 4px rgba(255, 100, 0, 0.6), 0 0 40px 8px rgba(255, 50, 0, 0.4), 0 0 60px 12px rgba(255, 0, 0, 0.2), inset 0 0 20px rgba(255, 200, 0, 0.3)',
-        animation: 'glow-pulse 1.5s ease-in-out infinite',
+          '0 8px 32px rgba(239,68,68,0.4), inset 0 2px 0 rgba(255,255,255,0.2), inset 0 -2px 0 rgba(0,0,0,0.15)',
       }}
     >
-      {/* Llamas de fondo - más grandes y visibles */}
-      <div className="absolute -inset-1 overflow-visible">
-        {/* Llama izquierda */}
-        <div
-          className="absolute -top-3 left-2 w-4 h-8 rounded-full blur-[2px]"
-          style={{
-            background: 'linear-gradient(to top, #ff6600, #ffcc00, transparent)',
-            animation: 'flame-dance 0.4s ease-in-out infinite alternate',
-          }}
-        />
-        {/* Llama central grande */}
-        <div
-          className="absolute -top-5 left-1/2 -translate-x-1/2 w-6 h-10 rounded-full blur-[2px]"
-          style={{
-            background: 'linear-gradient(to top, #ff4400, #ff8800, #ffdd00, transparent)',
-            animation: 'flame-dance 0.3s ease-in-out infinite alternate-reverse',
-          }}
-        />
-        {/* Llama derecha */}
-        <div
-          className="absolute -top-4 right-2 w-5 h-9 rounded-full blur-[2px]"
-          style={{
-            background: 'linear-gradient(to top, #ff5500, #ffaa00, transparent)',
-            animation: 'flame-dance 0.5s ease-in-out infinite alternate',
-          }}
-        />
-        {/* Chispas */}
-        <div
-          className="absolute -top-6 left-4 w-2 h-2 rounded-full bg-yellow-300"
-          style={{ animation: 'spark 0.8s ease-out infinite' }}
-        />
-        <div
-          className="absolute -top-7 right-6 w-1.5 h-1.5 rounded-full bg-orange-300"
-          style={{ animation: 'spark 1s ease-out infinite 0.3s' }}
-        />
-      </div>
-
-      {/* Glow interior */}
-      <div
-        className="absolute inset-0 rounded-xl"
-        style={{
-          background: 'radial-gradient(ellipse at bottom, rgba(255,200,0,0.4) 0%, transparent 70%)',
-        }}
-      />
-
-      {/* Icono de llama animado */}
-      <div className="relative z-10">
-        <Flame
-          className="w-5 h-5 text-yellow-300 drop-shadow-[0_0_8px_rgba(255,200,0,1)]"
-          style={{
-            animation: 'flame-icon 0.5s ease-in-out infinite',
-            filter: 'drop-shadow(0 0 6px #ffcc00) drop-shadow(0 0 12px #ff6600)',
-          }}
-        />
-      </div>
-
-      <span className="hidden sm:inline text-yellow-100 font-semibold relative z-10 drop-shadow-[0_0_4px_rgba(0,0,0,0.5)]">
-        Racha
-      </span>
-      <span
-        className="font-black relative z-10 text-lg"
-        style={{
-          color: '#fffacd',
-          textShadow: '0 0 10px #ffcc00, 0 0 20px #ff6600, 0 0 30px #ff0000',
-        }}
-      >
-        {value}d
-      </span>
-
-      {/* Animaciones */}
-      <style jsx>{`
-        @keyframes glow-pulse {
-          0%,
-          100% {
-            box-shadow:
-              0 0 20px 4px rgba(255, 100, 0, 0.6),
-              0 0 40px 8px rgba(255, 50, 0, 0.4),
-              0 0 60px 12px rgba(255, 0, 0, 0.2),
-              inset 0 0 20px rgba(255, 200, 0, 0.3);
-          }
-          50% {
-            box-shadow:
-              0 0 30px 8px rgba(255, 100, 0, 0.8),
-              0 0 60px 16px rgba(255, 50, 0, 0.5),
-              0 0 90px 24px rgba(255, 0, 0, 0.3),
-              inset 0 0 30px rgba(255, 200, 0, 0.5);
-          }
-        }
-        @keyframes flame-dance {
-          0% {
-            transform: scaleY(1) scaleX(1) translateY(0);
-            opacity: 0.8;
-          }
-          100% {
-            transform: scaleY(1.2) scaleX(0.9) translateY(-3px);
-            opacity: 1;
-          }
-        }
-        @keyframes flame-icon {
-          0%,
-          100% {
-            transform: scale(1) rotate(-5deg);
-          }
-          50% {
-            transform: scale(1.1) rotate(5deg);
-          }
-        }
-        @keyframes spark {
-          0% {
-            transform: translateY(0) scale(1);
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(-15px) scale(0);
-            opacity: 0;
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function EventBanner() {
-  return (
-    <div className="event-banner-animate relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-900/80 via-purple-800/80 to-indigo-900/80 border border-violet-500/30 p-4">
-      {/* Decorative elements */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/20 rounded-full blur-3xl" />
-
       <div className="relative flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shrink-0">
-          <Sparkles className="w-6 h-6 text-white" />
+        {/* Live icon */}
+        <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+          <Video className="w-7 h-7 text-white" />
         </div>
+
         <div className="flex-1 min-w-0">
-          <span className="inline-block px-2 py-0.5 text-xs font-bold bg-violet-500/30 text-violet-200 rounded-full mb-1">
-            NUEVA EXHIBICIÓN
-          </span>
-          <h3 className="text-lg font-bold text-white">Aventura Matemática</h3>
-          <p className="text-sm text-violet-200/80 hidden sm:block">
-            Descubre los secretos de los números
-          </p>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-black rounded-lg bg-white/20">
+              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              EN VIVO
+            </span>
+          </div>
+          <h3 className="text-xl font-bold text-white">
+            Clase con {docente.nombre} {docente.apellido}
+          </h3>
+          <p className="text-white/80 text-sm font-medium">Tu clase está comenzando ahora</p>
         </div>
 
         <Link
-          href="/estudiante/explorar"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white text-violet-900 font-bold rounded-xl hover:bg-violet-100 transition-all shadow-lg hover:scale-105 active:scale-95 shrink-0"
+          href={linkMeet || '/estudiante/clases'}
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-orange-600 bg-white hover:bg-white/90 transition-all shrink-0"
+          style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}
         >
-          Ver ahora
-          <ChevronRight className="w-4 h-4" />
+          <Play className="w-5 h-5" />
+          Entrar ahora
         </Link>
       </div>
     </div>
   );
 }
 
-function BentoCard({
+// ============================================================================
+// CANDY CARD - Cards con el estilo candy como los pills
+// ============================================================================
+function CandyCard({
   href,
   title,
   subtitle,
+  description,
   icon,
-  accentColor,
-  className = '',
+  colors,
   featured = false,
+  extraContent,
 }: {
   href: string;
   title: string;
   subtitle: string;
+  description?: string;
   icon: React.ReactNode;
-  accentColor: string;
-  className?: string;
+  colors: [string, string, string];
   featured?: boolean;
+  extraContent?: React.ReactNode;
 }) {
   return (
     <Link
       href={href}
-      className={`
-        group relative overflow-hidden rounded-2xl
-        border border-white/10
-        p-6
-        transition-all duration-300 ease-out
-        hover:border-white/20
-        hover:scale-[1.02]
-        active:scale-[0.98]
-        ${className}
-      `}
+      className={`group relative overflow-hidden rounded-3xl p-6 transition-transform hover:scale-[1.02] active:scale-[0.98] flex flex-col ${featured ? 'h-full min-h-[500px]' : 'h-[240px]'}`}
       style={{
-        background: `linear-gradient(145deg, ${accentColor}90 0%, ${accentColor}60 30%, ${accentColor}40 60%, ${accentColor}30 100%)`,
-        boxShadow: `0 20px 60px -10px ${accentColor}50, 0 8px 24px -6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)`,
-        backdropFilter: 'blur(16px)',
+        background: `linear-gradient(145deg, ${colors[0]} 0%, ${colors[1]} 50%, ${colors[2]} 100%)`,
+        boxShadow: `0 8px 32px ${colors[0]}50, inset 0 2px 0 rgba(255,255,255,0.25), inset 0 -3px 0 rgba(0,0,0,0.15)`,
       }}
     >
-      {/* Borde superior con color */}
+      {/* Shine effect */}
       <div
-        className="absolute top-0 left-0 right-0 h-[2px]"
-        style={{ background: `linear-gradient(90deg, ${accentColor}, ${accentColor}60)` }}
+        className="absolute top-0 left-0 right-0 h-1/2 pointer-events-none"
+        style={{
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%)',
+          borderRadius: '24px 24px 0 0',
+        }}
       />
 
       {/* Content */}
-      <div className="relative h-full flex flex-col">
+      <div className="relative flex flex-col h-full">
         {/* Icon */}
         <div
-          className={`
-            ${featured ? 'w-14 h-14' : 'w-12 h-12'}
-            rounded-xl
-            flex items-center justify-center
-            mb-auto
-          `}
+          className={`${featured ? 'w-20 h-20' : 'w-14 h-14'} rounded-2xl bg-white/20 flex items-center justify-center mb-auto`}
           style={{
-            background: `linear-gradient(135deg, ${accentColor}30, ${accentColor}10)`,
-            border: `1px solid ${accentColor}40`,
+            boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.1)',
           }}
         >
-          <div style={{ color: accentColor }}>{icon}</div>
+          {icon}
         </div>
 
-        {/* Text content */}
-        <div className="mt-auto space-y-1">
-          <h2
-            className={`font-bold tracking-tight ${featured ? 'text-2xl' : 'text-xl'} text-white`}
-          >
+        {/* Extra content */}
+        {extraContent}
+
+        {/* Text */}
+        <div className="mt-auto">
+          <h2 className={`font-black text-white ${featured ? 'text-3xl' : 'text-2xl'} mb-1`}>
             {title}
           </h2>
-          <p className={`text-white/50 ${featured ? 'text-sm' : 'text-xs'} font-medium`}>
+          <p className={`text-white/80 font-semibold ${featured ? 'text-lg' : 'text-sm'}`}>
             {subtitle}
           </p>
+          {description && featured && <p className="text-white/60 text-sm mt-2">{description}</p>}
         </div>
 
-        {/* Arrow - siempre visible */}
+        {/* Arrow */}
         <div
-          className="absolute bottom-6 right-6 w-9 h-9 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1"
-          style={{ background: `${accentColor}25`, border: `1px solid ${accentColor}40` }}
+          className={`absolute ${featured ? 'bottom-6 right-6 w-12 h-12' : 'bottom-5 right-5 w-10 h-10'} rounded-xl bg-white/20 flex items-center justify-center transition-transform group-hover:translate-x-1`}
         >
-          <ChevronRight className="w-5 h-5" style={{ color: accentColor }} />
+          <ChevronRight className={`${featured ? 'w-6 h-6' : 'w-5 h-5'} text-white`} />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// ============================================================================
+// CLASES CARD - Con estado bloqueado/desbloqueado
+// ============================================================================
+function ClasesCard({
+  href,
+  proximaClase,
+  tieneAcceso,
+}: {
+  href: string;
+  proximaClase: DashboardData['proximaClase'] | undefined;
+  tieneAcceso: boolean;
+}) {
+  // CARD BLOQUEADA
+  if (!tieneAcceso) {
+    return (
+      <div
+        className="relative overflow-hidden rounded-3xl p-6 h-[240px] flex flex-col"
+        style={{
+          background: 'linear-gradient(145deg, #64748b 0%, #475569 50%, #334155 100%)',
+          boxShadow:
+            '0 8px 32px rgba(100,116,139,0.3), inset 0 2px 0 rgba(255,255,255,0.1), inset 0 -3px 0 rgba(0,0,0,0.15)',
+          opacity: 0.7,
+        }}
+      >
+        {/* Shine */}
+        <div
+          className="absolute top-0 left-0 right-0 h-1/2 pointer-events-none"
+          style={{
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%)',
+            borderRadius: '24px 24px 0 0',
+          }}
+        />
+
+        <div className="relative flex flex-col h-full">
+          <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mb-auto">
+            <Lock className="w-7 h-7 text-white/60" />
+          </div>
+
+          <div className="mt-auto">
+            <h2 className="text-2xl font-black text-white/60 mb-1">Clases</h2>
+            <p className="text-white/40 text-sm font-semibold">Tu aula virtual</p>
+          </div>
+        </div>
+
+        {/* Lock overlay */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-3xl">
+          <div
+            className="text-center px-6 py-4 rounded-2xl"
+            style={{
+              background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
+              boxShadow:
+                '0 8px 32px rgba(251,191,36,0.4), inset 0 2px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.15)',
+            }}
+          >
+            <Lock className="w-6 h-6 text-white mx-auto mb-2" />
+            <p className="text-white/90 text-sm font-bold">Desbloquea con</p>
+            <p className="text-white text-lg font-black">STEAM Sincrónico</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // CARD DESBLOQUEADA - Colores amber/naranja
+  const subtitle = proximaClase ? `Próxima con ${proximaClase.docente.nombre}` : 'Tu aula virtual';
+
+  return (
+    <Link
+      href={href}
+      className="group relative overflow-hidden rounded-3xl p-6 h-[240px] transition-transform hover:scale-[1.02] active:scale-[0.98] flex flex-col"
+      style={{
+        background: 'linear-gradient(145deg, #fbbf24 0%, #f59e0b 50%, #ea580c 100%)',
+        boxShadow:
+          '0 8px 32px rgba(251,146,60,0.4), inset 0 2px 0 rgba(255,255,255,0.25), inset 0 -3px 0 rgba(0,0,0,0.15)',
+      }}
+    >
+      {/* Shine effect */}
+      <div
+        className="absolute top-0 left-0 right-0 h-1/2 pointer-events-none"
+        style={{
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%)',
+          borderRadius: '24px 24px 0 0',
+        }}
+      />
+
+      <div className="relative flex flex-col h-full">
+        {/* Icon */}
+        <div
+          className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mb-auto"
+          style={{
+            boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.1)',
+          }}
+        >
+          <GraduationCap className="w-8 h-8 text-white" />
+        </div>
+
+        {/* Badge si hay clase */}
+        {proximaClase && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-white/20 mb-3 self-start">
+            <Video className="w-3.5 h-3.5" />
+            Clase programada
+          </div>
+        )}
+
+        {/* Text */}
+        <div className="mt-auto">
+          <h2 className="text-2xl font-black text-white mb-1">Clases</h2>
+          <p className="text-white/80 text-sm font-semibold">{subtitle}</p>
+        </div>
+
+        {/* Arrow */}
+        <div className="absolute bottom-5 right-5 w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center transition-transform group-hover:translate-x-1">
+          <ChevronRight className="w-5 h-5 text-white" />
         </div>
       </div>
     </Link>
