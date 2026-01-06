@@ -647,6 +647,9 @@ export class EstudianteQueryService {
           link_meet: cg.grupo?.link_meet || null,
           fecha_inscripcion: inscripcion.fecha_inscripcion,
           tipo: 'clase_grupal' as const,
+          // LiveKit: estado de clase en vivo
+          estado_clase: cg.estado_clase,
+          iniciada_en: cg.iniciada_en,
         };
       });
 
@@ -684,6 +687,9 @@ export class EstudianteQueryService {
         fecha_inscripcion: inscripcion.fecha_inscripcion,
         tipo: 'comision' as const,
         comision_id: com.id,
+        // LiveKit: comisiones no usan clases en vivo (por ahora)
+        estado_clase: 'Programada' as const,
+        iniciada_en: null,
       };
     });
 
