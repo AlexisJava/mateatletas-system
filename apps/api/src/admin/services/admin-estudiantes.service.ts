@@ -149,6 +149,12 @@ export class AdminEstudiantesService {
           recursos: {
             select: { xp_total: true },
           },
+          plan: {
+            select: {
+              id: true,
+              nombre: true,
+            },
+          },
         },
         orderBy: {
           apellido: 'asc',
@@ -185,6 +191,9 @@ export class AdminEstudiantesService {
       })),
       createdAt: est.createdAt,
       updatedAt: est.updatedAt,
+      // Plan de suscripción
+      plan: est.plan,
+      estado_acceso: est.estado_acceso,
     }));
 
     return {

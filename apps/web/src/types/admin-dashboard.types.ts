@@ -92,6 +92,10 @@ export interface AdminPerson {
   edad?: number;
   /** Solo estudiantes: Nivel escolar */
   nivelEscolar?: string;
+  /** Solo estudiantes: Nombre del plan asignado directamente */
+  planNombre?: string;
+  /** Solo estudiantes: Estado de acceso (ACTIVO, BECA, SUSPENDIDO, VENCIDO) */
+  estadoAcceso?: string;
   /** Solo docentes: Cantidad de clases asignadas */
   clasesAsignadas?: number;
   /** Solo docentes: Título profesional */

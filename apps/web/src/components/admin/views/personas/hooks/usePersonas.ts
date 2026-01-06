@@ -91,6 +91,8 @@ export function usePersonas(): UsePersonasReturn {
           puntos: est.xp_total ?? est.puntos_totales ?? 0,
           edad: est.edad,
           nivelEscolar: est.nivelEscolar ?? est.nivel_escolar,
+          planNombre: est.plan?.nombre ?? undefined,
+          estadoAcceso: est.estado_acceso ?? undefined,
         });
       });
 

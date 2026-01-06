@@ -67,19 +67,30 @@ export interface EstudianteAdmin {
   nombre: string;
   apellido: string;
   edad: number;
-  nivel_escolar: string;
+  nivel_escolar?: string;
+  nivelEscolar?: string;
   nivel_actual: string | null;
-  puntos_totales: number;
+  puntos_totales?: number;
+  xp_total?: number;
   tutor: {
     id: string;
     nombre: string;
     apellido: string;
     email: string;
   } | null;
-  equipo: {
+  equipo?: {
     nombre: string;
     color_primario: string;
   } | null;
+  casa?: {
+    nombre: string;
+    colorPrimary: string;
+  } | null;
+  plan?: {
+    id: string;
+    nombre: string;
+  } | null;
+  estado_acceso?: string | null;
   createdAt: string;
   updatedAt: string;
 }
