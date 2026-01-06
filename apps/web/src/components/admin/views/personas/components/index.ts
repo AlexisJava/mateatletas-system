@@ -12,3 +12,4 @@ export type { PersonaEditData } from './PersonaEditModal';
 export { PersonasTable } from './PersonasTable';
 export { PersonasFilters } from './PersonasFilters';
 export { PersonasStatsGrid } from './PersonasStatsGrid';
+export { CredencialesModal } from './CredencialesModal';

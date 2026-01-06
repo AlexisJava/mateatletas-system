@@ -10,6 +10,7 @@ import {
   PersonDetailModal,
   PersonaFormModal,
   PersonaEditModal,
+  CredencialesModal,
 } from './components';
 
 /**
@@ -41,6 +42,8 @@ export function PersonasView() {
     handleUpdate,
     handleDelete,
     handleCredenciales,
+    credencialesModal,
+    closeCredencialesModal,
     refetch,
   } = usePersonas();
 
@@ -128,6 +131,17 @@ export function PersonasView() {
         person={editingPerson}
         onClose={() => setEditingPerson(null)}
         onSubmit={handleUpdate}
+      />
+
+      {/* Credenciales Modal */}
+      <CredencialesModal
+        isOpen={credencialesModal.isOpen}
+        onClose={closeCredencialesModal}
+        nombre={credencialesModal.nombre}
+        apellido={credencialesModal.apellido}
+        username={credencialesModal.username}
+        pin={credencialesModal.pin}
+        isNewStudent={credencialesModal.isNewStudent}
       />
     </div>
   );

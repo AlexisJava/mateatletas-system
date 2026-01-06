@@ -18,6 +18,16 @@ import type { RoleFilter, StatusFilter, PersonasStats } from '../types/personas.
 import type { PersonaFormData } from '../components/PersonaFormModal';
 import type { PersonaEditData } from '../components/PersonaEditModal';
 
+/** Estado del modal de credenciales */
+export interface CredencialesModalState {
+  isOpen: boolean;
+  nombre: string;
+  apellido: string;
+  username: string;
+  pin: string;
+  isNewStudent: boolean;
+}
+
 interface UsePersonasReturn {
   isLoading: boolean;
   error: string | null;
@@ -39,6 +49,8 @@ interface UsePersonasReturn {
   handleUpdate: (personId: string, data: PersonaEditData) => Promise<void>;
   handleDelete: (person: AdminPerson) => Promise<void>;
   handleCredenciales: (person: AdminPerson) => Promise<void>;
+  credencialesModal: CredencialesModalState;
+  closeCredencialesModal: () => void;
   refetch: () => Promise<void>;
 }
 
@@ -50,6 +62,15 @@ interface UsePersonasReturn {
  * - GET /admin/usuarios (admins y tutores)
  * - GET /docentes
  */
+const initialCredencialesState: CredencialesModalState = {
+  isOpen: false,
+  nombre: '',
+  apellido: '',
+  username: '',
+  pin: '',
+  isNewStudent: false,
+};
+
 export function usePersonas(): UsePersonasReturn {
   const [people, setPeople] = useState<AdminPerson[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -59,6 +80,12 @@ export function usePersonas(): UsePersonasReturn {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedPerson, setSelectedPerson] = useState<AdminPerson | null>(null);
   const [editingPerson, setEditingPerson] = useState<AdminPerson | null>(null);
+  const [credencialesModal, setCredencialesModal] =
+    useState<CredencialesModalState>(initialCredencialesState);
+
+  const closeCredencialesModal = useCallback(() => {
+    setCredencialesModal(initialCredencialesState);
+  }, []);
 
   const fetchPeople = useCallback(async () => {
     setIsLoading(true);
@@ -205,23 +232,15 @@ export function usePersonas(): UsePersonasReturn {
         if (estudianteId) {
           try {
             const credResult = await resetCredenciales(estudianteId, 'estudiante');
-            const mensaje = [
-              `✅ Estudiante creado: ${data.nombre} ${data.apellido}`,
-              '',
-              '📋 CREDENCIALES DEL ESTUDIANTE:',
-              `   Usuario: ${username ?? credResult.usuario?.username ?? 'N/A'}`,
-              `   PIN: ${credResult.nuevaPassword}`,
-              '',
-              '⚠️ Comparta estas credenciales con el tutor.',
-            ];
-
-            // Copiar al clipboard
-            const textoCredenciales = mensaje.join('\n');
-            navigator.clipboard.writeText(textoCredenciales).then(() => {
-              toast.success('Credenciales copiadas al portapapeles', { duration: 5000 });
+            // Mostrar modal de credenciales
+            setCredencialesModal({
+              isOpen: true,
+              nombre: data.nombre,
+              apellido: data.apellido,
+              username: username ?? credResult.usuario?.username ?? 'N/A',
+              pin: credResult.nuevaPassword,
+              isNewStudent: true,
             });
-
-            alert(textoCredenciales);
           } catch {
             toast.success('Estudiante creado (sin PIN generado)');
           }
@@ -366,22 +385,15 @@ export function usePersonas(): UsePersonasReturn {
     try {
       // Regenerar PIN (el username ya lo tenemos)
       const credResult = await resetCredenciales(person.id, 'estudiante');
-      const mensaje = [
-        `📋 CREDENCIALES DE ${person.nombre.toUpperCase()} ${person.apellido.toUpperCase()}`,
-        '',
-        `   Usuario: ${person.username ?? credResult.usuario?.username ?? 'N/A'}`,
-        `   PIN: ${credResult.nuevaPassword}`,
-        '',
-        '⚠️ El PIN ha sido regenerado. Comparta estas credenciales con el tutor.',
-      ];
-
-      // Copiar al clipboard
-      const textoCredenciales = mensaje.join('\n');
-      navigator.clipboard.writeText(textoCredenciales).then(() => {
-        toast.success('Credenciales copiadas al portapapeles', { duration: 5000 });
+      // Mostrar modal de credenciales
+      setCredencialesModal({
+        isOpen: true,
+        nombre: person.nombre,
+        apellido: person.apellido,
+        username: person.username ?? credResult.usuario?.username ?? 'N/A',
+        pin: credResult.nuevaPassword,
+        isNewStudent: false,
       });
-
-      alert(textoCredenciales);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al obtener credenciales';
       console.error('Error al obtener credenciales:', message);
@@ -410,6 +422,8 @@ export function usePersonas(): UsePersonasReturn {
     handleUpdate,
     handleDelete,
     handleCredenciales,
+    credencialesModal,
+    closeCredencialesModal,
     refetch: fetchPeople,
   };
 }

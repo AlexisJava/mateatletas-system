@@ -1,0 +1,148 @@
+'use client';
+
+import { X, Key, User, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
+
+interface CredencialesModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  nombre: string;
+  apellido: string;
+  username: string;
+  pin: string;
+  isNewStudent?: boolean;
+}
+
+/**
+ * CredencialesModal - Modal para mostrar credenciales de estudiante
+ * Diseño consistente con el admin panel
+ */
+export function CredencialesModal({
+  isOpen,
+  onClose,
+  nombre,
+  apellido,
+  username,
+  pin,
+  isNewStudent = false,
+}: CredencialesModalProps) {
+  const [copied, setCopied] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleCopy = () => {
+    const texto = [
+      `CREDENCIALES DE ${nombre.toUpperCase()} ${apellido.toUpperCase()}`,
+      '',
+      `Usuario: ${username}`,
+      `PIN: ${pin}`,
+    ].join('\n');
+
+    navigator.clipboard.writeText(texto).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-2xl max-w-md w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-[var(--admin-border)]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[var(--admin-accent)]/20 flex items-center justify-center">
+              <Key className="w-5 h-5 text-[var(--admin-accent)]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-[var(--admin-text)]">
+                {isNewStudent ? 'Estudiante Creado' : 'Credenciales'}
+              </h3>
+              <p className="text-sm text-[var(--admin-text-muted)]">
+                {nombre} {apellido}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-[var(--admin-surface-2)] transition-colors"
+          >
+            <X className="w-5 h-5 text-[var(--admin-text-muted)]" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-5 space-y-4">
+          {isNewStudent && (
+            <div className="p-3 bg-[var(--status-success)]/10 border border-[var(--status-success)]/20 rounded-xl">
+              <p className="text-sm text-[var(--status-success)]">
+                El estudiante ha sido creado exitosamente.
+              </p>
+            </div>
+          )}
+
+          {!isNewStudent && (
+            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+              <p className="text-sm text-amber-400">
+                El PIN ha sido regenerado. El anterior ya no es válido.
+              </p>
+            </div>
+          )}
+
+          {/* Credentials */}
+          <div className="space-y-3">
+            <div className="p-4 bg-[var(--admin-surface-2)] rounded-xl">
+              <div className="flex items-center gap-2 text-[var(--admin-text-muted)] mb-2">
+                <User className="w-4 h-4" />
+                <span className="text-xs uppercase tracking-wider">Usuario</span>
+              </div>
+              <p className="text-xl font-mono font-bold text-[var(--admin-text)]">{username}</p>
+            </div>
+
+            <div className="p-4 bg-[var(--admin-surface-2)] rounded-xl">
+              <div className="flex items-center gap-2 text-[var(--admin-text-muted)] mb-2">
+                <Key className="w-4 h-4" />
+                <span className="text-xs uppercase tracking-wider">PIN</span>
+              </div>
+              <p className="text-3xl font-mono font-bold text-[var(--admin-accent)] tracking-widest">
+                {pin}
+              </p>
+            </div>
+          </div>
+
+          {/* Info */}
+          <p className="text-xs text-[var(--admin-text-muted)] text-center">
+            Comparta estas credenciales de forma segura con el tutor del estudiante.
+          </p>
+        </div>
+
+        {/* Footer */}
+        <div className="flex gap-3 p-5 border-t border-[var(--admin-border)]">
+          <button
+            onClick={handleCopy}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--admin-surface-2)] text-[var(--admin-text)] rounded-xl font-medium hover:bg-[var(--admin-surface-1)] border border-[var(--admin-border)] transition-colors"
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4 text-[var(--status-success)]" />
+                Copiado
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" />
+                Copiar
+              </>
+            )}
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 bg-[var(--admin-accent)] text-black rounded-xl font-medium hover:opacity-90 transition-opacity"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default CredencialesModal;
