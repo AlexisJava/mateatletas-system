@@ -167,6 +167,7 @@ export class AdminEstudiantesService {
       id: est.id,
       nombre: est.nombre,
       apellido: est.apellido,
+      username: est.username, // Para credenciales en admin
       edad: est.edad,
       nivelEscolar: est.nivelEscolar, // Convertir a camelCase para el frontend
       nivel_actual: est.nivel_actual,

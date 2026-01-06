@@ -96,6 +96,8 @@ export interface AdminPerson {
   planNombre?: string;
   /** Solo estudiantes: Estado de acceso (ACTIVO, BECA, SUSPENDIDO, VENCIDO) */
   estadoAcceso?: string;
+  /** Solo estudiantes: Username para login */
+  username?: string;
   /** Solo docentes: Cantidad de clases asignadas */
   clasesAsignadas?: number;
   /** Solo docentes: Título profesional */

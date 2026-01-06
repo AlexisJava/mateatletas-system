@@ -13,9 +13,16 @@ interface PersonasTableProps {
   onView: (person: AdminPerson) => void;
   onEdit: (person: AdminPerson) => void;
   onDelete: (person: AdminPerson) => void;
+  onCredenciales?: (person: AdminPerson) => void;
 }
 
-export function PersonasTable({ people, onView, onEdit, onDelete }: PersonasTableProps) {
+export function PersonasTable({
+  people,
+  onView,
+  onEdit,
+  onDelete,
+  onCredenciales,
+}: PersonasTableProps) {
   return (
     <div className="bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
@@ -48,6 +55,7 @@ export function PersonasTable({ people, onView, onEdit, onDelete }: PersonasTabl
                 onView={onView}
                 onEdit={onEdit}
                 onDelete={onDelete}
+                onCredenciales={onCredenciales}
               />
             ))}
           </tbody>

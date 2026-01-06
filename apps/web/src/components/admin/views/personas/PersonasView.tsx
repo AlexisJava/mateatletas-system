@@ -40,6 +40,7 @@ export function PersonasView() {
     handleEdit,
     handleUpdate,
     handleDelete,
+    handleCredenciales,
     refetch,
   } = usePersonas();
 
@@ -104,6 +105,7 @@ export function PersonasView() {
         onView={setSelectedPerson}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onCredenciales={handleCredenciales}
       />
 
       {/* Results count */}

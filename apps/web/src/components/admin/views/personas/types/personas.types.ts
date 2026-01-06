@@ -31,6 +31,7 @@ export interface PersonRowProps {
   onView: (person: AdminPerson) => void;
   onEdit: (person: AdminPerson) => void;
   onDelete: (person: AdminPerson) => void;
+  onCredenciales?: (person: AdminPerson) => void;
 }
 
 export interface PersonDetailModalProps {

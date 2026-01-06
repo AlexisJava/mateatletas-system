@@ -38,6 +38,7 @@ interface UsePersonasReturn {
   handleEdit: (person: AdminPerson) => void;
   handleUpdate: (personId: string, data: PersonaEditData) => Promise<void>;
   handleDelete: (person: AdminPerson) => Promise<void>;
+  handleCredenciales: (person: AdminPerson) => Promise<void>;
   refetch: () => Promise<void>;
 }
 
@@ -93,6 +94,7 @@ export function usePersonas(): UsePersonasReturn {
           nivelEscolar: est.nivelEscolar ?? est.nivel_escolar,
           planNombre: est.plan?.nombre ?? undefined,
           estadoAcceso: est.estado_acceso ?? undefined,
+          username: est.username ?? undefined,
         });
       });
 
@@ -351,6 +353,42 @@ export function usePersonas(): UsePersonasReturn {
     [setPeople],
   );
 
+  /**
+   * Ver/regenerar credenciales de un estudiante
+   * Muestra username actual y genera nuevo PIN
+   */
+  const handleCredenciales = useCallback(async (person: AdminPerson) => {
+    if (person.role !== 'estudiante') {
+      toast.error('Solo se pueden ver credenciales de estudiantes');
+      return;
+    }
+
+    try {
+      // Regenerar PIN (el username ya lo tenemos)
+      const credResult = await resetCredenciales(person.id, 'estudiante');
+      const mensaje = [
+        `📋 CREDENCIALES DE ${person.nombre.toUpperCase()} ${person.apellido.toUpperCase()}`,
+        '',
+        `   Usuario: ${person.username ?? credResult.usuario?.username ?? 'N/A'}`,
+        `   PIN: ${credResult.nuevaPassword}`,
+        '',
+        '⚠️ El PIN ha sido regenerado. Comparta estas credenciales con el tutor.',
+      ];
+
+      // Copiar al clipboard
+      const textoCredenciales = mensaje.join('\n');
+      navigator.clipboard.writeText(textoCredenciales).then(() => {
+        toast.success('Credenciales copiadas al portapapeles', { duration: 5000 });
+      });
+
+      alert(textoCredenciales);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al obtener credenciales';
+      console.error('Error al obtener credenciales:', message);
+      toast.error(`Error: ${message}`);
+    }
+  }, []);
+
   return {
     isLoading,
     error,
@@ -371,6 +409,7 @@ export function usePersonas(): UsePersonasReturn {
     handleEdit,
     handleUpdate,
     handleDelete,
+    handleCredenciales,
     refetch: fetchPeople,
   };
 }

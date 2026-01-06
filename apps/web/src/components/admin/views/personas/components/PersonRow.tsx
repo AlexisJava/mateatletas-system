@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { MoreVertical, Eye, Edit, Trash2, Home, CreditCard } from 'lucide-react';
+import { MoreVertical, Eye, Edit, Trash2, Home, CreditCard, Key } from 'lucide-react';
 import { formatDate } from '@/lib/constants/admin-mock-data';
 import type { PersonRowProps } from '../types/personas.types';
 import { ROLE_CONFIG } from '../constants/role-config';
@@ -21,7 +21,7 @@ function formatPlanName(planNombre?: string): string {
   );
 }
 
-export function PersonRow({ person, onView, onEdit, onDelete }: PersonRowProps) {
+export function PersonRow({ person, onView, onEdit, onDelete, onCredenciales }: PersonRowProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -157,6 +157,18 @@ export function PersonRow({ person, onView, onEdit, onDelete }: PersonRowProps) 
                     <Edit className="w-4 h-4" />
                     Editar
                   </button>
+                  {person.role === 'estudiante' && onCredenciales && (
+                    <button
+                      onClick={() => {
+                        onCredenciales(person);
+                        setMenuOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-[var(--admin-accent)] hover:bg-[var(--admin-accent)]/10 flex items-center gap-2"
+                    >
+                      <Key className="w-4 h-4" />
+                      Credenciales
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       onDelete(person);
