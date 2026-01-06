@@ -330,16 +330,17 @@ export function PersonaEditModal({ person, onClose, onSubmit }: PersonaEditModal
                           onChange={(e) => setPlanId(e.target.value || null)}
                           className="w-full px-3 py-2 rounded-lg bg-[var(--admin-surface-2)] border border-[var(--admin-border)] text-[var(--admin-text)] focus:border-[var(--admin-accent)] focus:outline-none"
                         >
-                          <option value="">Heredar del tutor</option>
+                          <option value="">Sin plan directo (usa suscripción del tutor)</option>
                           {planesDisponibles.map((plan) => (
                             <option key={plan.id} value={plan.id}>
                               {plan.nombre}
-                              {plan.nombre === 'STEAM_SINCRONICO' && ' (Clases en vivo)'}
+                              {plan.nombre === 'STEAM_SINCRONICO' && ' ✓ Clases en vivo'}
                             </option>
                           ))}
                         </select>
                         <p className="mt-1 text-xs text-[var(--admin-text-muted)]">
-                          Solo STEAM_SINCRONICO permite acceso a clases en vivo
+                          Solo STEAM_SINCRONICO permite acceso a clases en vivo. Cada estudiante
+                          puede tener un plan diferente.
                         </p>
                       </div>
 

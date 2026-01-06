@@ -291,6 +291,32 @@ export class AdminController {
   }
 
   /**
+   * Actualizar datos de un estudiante
+   * PATCH /api/admin/estudiantes/:id
+   * Rol: Admin
+   *
+   * Permite al admin editar nombre, apellido, edad, nivel escolar
+   */
+  @Patch('estudiantes/:id')
+  @ApiOperation({
+    summary: 'Actualizar estudiante',
+    description:
+      'Actualiza datos básicos del estudiante (nombre, apellido, edad, nivel escolar)',
+  })
+  async actualizarEstudiante(
+    @Param('id', ParseIdPipe) id: string,
+    @Body()
+    dto: {
+      nombre?: string;
+      apellido?: string;
+      edad?: number;
+      nivelEscolar?: string;
+    },
+  ) {
+    return this.estudiantesService.actualizarEstudiante(id, dto);
+  }
+
+  /**
    * Eliminar un estudiante
    * DELETE /api/admin/estudiantes/:id
    * Rol: Admin

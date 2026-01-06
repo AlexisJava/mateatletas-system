@@ -290,15 +290,17 @@ export interface UpdateDocenteDto {
 }
 
 /**
- * Actualizar un estudiante
- * PATCH /api/estudiantes/:id
+ * Actualizar un estudiante (Admin)
+ * PATCH /api/admin/estudiantes/:id
+ *
+ * Usa el endpoint de admin para evitar el ownership guard
  */
 export const updateEstudiante = async (
   estudianteId: string,
   dto: UpdateEstudianteDto,
 ): Promise<EstudianteAdmin> => {
   try {
-    return await axios.patch(`/estudiantes/${estudianteId}`, dto);
+    return await axios.patch(`/admin/estudiantes/${estudianteId}`, dto);
   } catch (error) {
     console.error('Error al actualizar estudiante:', error);
     throw error;
