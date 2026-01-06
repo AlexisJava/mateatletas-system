@@ -6,8 +6,9 @@ import { z } from 'zod';
 
 /**
  * Enum para estado de clase
+ * Sincronizado con Prisma enum EstadoClase
  */
-export const estadoClaseEnum = z.enum(['Programada', 'Cancelada']);
+export const estadoClaseEnum = z.enum(['Programada', 'EnVivo', 'Finalizada', 'Cancelada']);
 
 export type EstadoClase = z.infer<typeof estadoClaseEnum>;
 
@@ -17,6 +18,8 @@ export type EstadoClase = z.infer<typeof estadoClaseEnum>;
  */
 export const ESTADO_CLASE = {
   Programada: 'Programada',
+  EnVivo: 'EnVivo',
+  Finalizada: 'Finalizada',
   Cancelada: 'Cancelada',
 } as const satisfies Record<EstadoClase, EstadoClase>;
 

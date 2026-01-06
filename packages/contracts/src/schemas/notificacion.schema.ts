@@ -6,20 +6,32 @@ import { z } from 'zod';
 
 /**
  * Enum para tipo de notificación
+ * Sincronizado con Prisma enum TipoNotificacion
  */
 export const tipoNotificacionEnum = z.enum([
-  'CLASE_PROGRAMADA',
-  'CLASE_CANCELADA',
-  'NUEVA_RESERVA',
-  'CANCELACION_RESERVA',
-  'ESTUDIANTE_NUEVO',
-  'PAGO_RECIBIDO',
-  'MEMBRESIA_PROXIMO_VENCIMIENTO',
-  'MEMBRESIA_VENCIDA',
-  'SISTEMA',
+  'ClaseProxima',
+  'AsistenciaPendiente',
+  'EstudianteAlerta',
+  'ClaseCancelada',
+  'LogroEstudiante',
+  'Recordatorio',
+  'General',
 ]);
 
 export type TipoNotificacion = z.infer<typeof tipoNotificacionEnum>;
+
+/**
+ * Objeto constante runtime para acceder a valores de TipoNotificacion
+ */
+export const TIPO_NOTIFICACION = {
+  ClaseProxima: 'ClaseProxima',
+  AsistenciaPendiente: 'AsistenciaPendiente',
+  EstudianteAlerta: 'EstudianteAlerta',
+  ClaseCancelada: 'ClaseCancelada',
+  LogroEstudiante: 'LogroEstudiante',
+  Recordatorio: 'Recordatorio',
+  General: 'General',
+} as const satisfies Record<TipoNotificacion, TipoNotificacion>;
 
 /**
  * Schema base de Notificación

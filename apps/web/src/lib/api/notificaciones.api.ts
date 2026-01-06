@@ -116,26 +116,23 @@ export const eliminarNotificacion = async (id: string): Promise<{ message: strin
 
 /**
  * Obtener ícono según tipo de notificación
+ * Sincronizado con Prisma TipoNotificacion enum
  */
 export const getNotificacionIcon = (tipo: TipoNotificacion): string => {
   switch (tipo) {
-    case 'CLASE_PROGRAMADA':
+    case 'ClaseProxima':
       return '📅';
-    case 'CLASE_CANCELADA':
-      return '❌';
-    case 'NUEVA_RESERVA':
-      return '✅';
-    case 'CANCELACION_RESERVA':
-      return '🔴';
-    case 'ESTUDIANTE_NUEVO':
-      return '👤';
-    case 'PAGO_RECIBIDO':
-      return '💰';
-    case 'MEMBRESIA_PROXIMO_VENCIMIENTO':
+    case 'AsistenciaPendiente':
+      return '📝';
+    case 'EstudianteAlerta':
       return '⚠️';
-    case 'MEMBRESIA_VENCIDA':
+    case 'ClaseCancelada':
+      return '❌';
+    case 'LogroEstudiante':
+      return '🏆';
+    case 'Recordatorio':
       return '⏰';
-    case 'SISTEMA':
+    case 'General':
       return '🔔';
     default:
       return '📬';
@@ -144,26 +141,23 @@ export const getNotificacionIcon = (tipo: TipoNotificacion): string => {
 
 /**
  * Obtener color según tipo de notificación
+ * Sincronizado con Prisma TipoNotificacion enum
  */
 export const getNotificacionColor = (tipo: TipoNotificacion): string => {
   switch (tipo) {
-    case 'CLASE_PROGRAMADA':
+    case 'ClaseProxima':
       return 'bg-blue-100 border-blue-500 text-blue-900';
-    case 'CLASE_CANCELADA':
-      return 'bg-red-100 border-red-500 text-red-900';
-    case 'NUEVA_RESERVA':
-      return 'bg-green-100 border-green-500 text-green-900';
-    case 'CANCELACION_RESERVA':
+    case 'AsistenciaPendiente':
       return 'bg-orange-100 border-orange-500 text-orange-900';
-    case 'ESTUDIANTE_NUEVO':
-      return 'bg-purple-100 border-purple-500 text-purple-900';
-    case 'PAGO_RECIBIDO':
-      return 'bg-emerald-100 border-emerald-500 text-emerald-900';
-    case 'MEMBRESIA_PROXIMO_VENCIMIENTO':
+    case 'EstudianteAlerta':
       return 'bg-yellow-100 border-yellow-500 text-yellow-900';
-    case 'MEMBRESIA_VENCIDA':
+    case 'ClaseCancelada':
       return 'bg-red-100 border-red-500 text-red-900';
-    case 'SISTEMA':
+    case 'LogroEstudiante':
+      return 'bg-purple-100 border-purple-500 text-purple-900';
+    case 'Recordatorio':
+      return 'bg-cyan-100 border-cyan-500 text-cyan-900';
+    case 'General':
       return 'bg-gray-100 border-gray-500 text-gray-900';
     default:
       return 'bg-gray-100 border-gray-500 text-gray-900';

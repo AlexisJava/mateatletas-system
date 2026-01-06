@@ -41,3 +41,6 @@ export * from './schemas/tienda.schema';
 
 // Progreso de Actividades
 export * from './schemas/progreso-actividad.schema';
+
+// Enums compartidos (sincronizados con Prisma)
+export * from './schemas/enums.schema';
