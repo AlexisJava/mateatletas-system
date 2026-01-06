@@ -1,14 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Edit2, GraduationCap, Users, UserCog, Shield } from 'lucide-react';
+import { X, Edit2, GraduationCap, Users, UserCog, Shield, CreditCard } from 'lucide-react';
 import type { AdminPerson, UserRole } from '@/types/admin-dashboard.types';
+import {
+  getPlanesSuscripcion,
+  asignarPlanEstudiante,
+  type PlanSuscripcion,
+  type AsignarPlanEstudianteDto,
+} from '@/lib/api/admin.api';
+import { toast } from 'react-hot-toast';
 
 /**
  * PersonaEditModal - Modal para editar personas existentes
  *
  * Permite editar estudiantes o docentes según el rol existente.
  * Conectado al backend: PATCH /estudiantes/:id, PATCH /docentes/:id
+ * Para estudiantes: También permite asignar plan de suscripción (PATCH /admin/estudiantes/:id/plan)
  *
  * Nota: Tutores y admins solo pueden editar roles, no otros campos.
  */
@@ -28,6 +36,8 @@ export interface PersonaEditData {
   titulo?: string;
   telefono?: string;
 }
+
+type EstadoAcceso = 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
 
 const RoleIcon: Record<UserRole, React.ComponentType<{ className?: string }>> = {
   estudiante: GraduationCap,
@@ -58,6 +68,15 @@ export function PersonaEditModal({ person, onClose, onSubmit }: PersonaEditModal
   const [titulo, setTitulo] = useState('');
   const [telefono, setTelefono] = useState('');
 
+  // Plan de suscripción (solo para estudiantes)
+  const [planesDisponibles, setPlanesDisponibles] = useState<PlanSuscripcion[]>([]);
+  const [planId, setPlanId] = useState<string | null>(null);
+  const [estadoAcceso, setEstadoAcceso] = useState<EstadoAcceso>('ACTIVO');
+  const [fechaVencimiento, setFechaVencimiento] = useState<string>('');
+  const [notasPlan, setNotasPlan] = useState<string>('');
+  const [isLoadingPlanes, setIsLoadingPlanes] = useState(false);
+  const [isSavingPlan, setIsSavingPlan] = useState(false);
+
   // Initialize form when person changes
   useEffect(() => {
     if (person) {
@@ -71,12 +90,56 @@ export function PersonaEditModal({ person, onClose, onSubmit }: PersonaEditModal
       setTitulo(person.titulo ?? '');
       setTelefono(person.telefono ?? '');
       setError(null);
+
+      // Reset plan fields
+      setPlanId(null);
+      setEstadoAcceso('ACTIVO');
+      setFechaVencimiento('');
+      setNotasPlan('');
+
+      // Cargar planes disponibles si es estudiante
+      if (person.role === 'estudiante') {
+        setIsLoadingPlanes(true);
+        getPlanesSuscripcion()
+          .then((planes) => {
+            setPlanesDisponibles(planes);
+          })
+          .catch((err) => {
+            console.error('Error al cargar planes:', err);
+          })
+          .finally(() => {
+            setIsLoadingPlanes(false);
+          });
+      }
     }
   }, [person]);
 
   const handleClose = () => {
     setError(null);
     onClose();
+  };
+
+  // Guardar plan de suscripción (solo para estudiantes)
+  const handleSavePlan = async () => {
+    if (!person || person.role !== 'estudiante') return;
+
+    setIsSavingPlan(true);
+    try {
+      const dto: AsignarPlanEstudianteDto = {
+        plan_id: planId,
+        estado_acceso: estadoAcceso,
+        fecha_vencimiento_plan: fechaVencimiento || null,
+        notas_plan: notasPlan || null,
+      };
+
+      await asignarPlanEstudiante(person.id, dto);
+      toast.success('Plan asignado correctamente');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al asignar plan';
+      toast.error(message);
+    } finally {
+      setIsSavingPlan(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -205,38 +268,140 @@ export function PersonaEditModal({ person, onClose, onSubmit }: PersonaEditModal
 
             {/* Estudiante-specific fields */}
             {person.role === 'estudiante' && (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-[var(--admin-text-muted)] mb-1">
-                    Edad *
-                  </label>
-                  <input
-                    type="number"
-                    value={edad}
-                    onChange={(e) => setEdad(parseInt(e.target.value))}
-                    min={3}
-                    max={99}
-                    required
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--admin-surface-2)] border border-[var(--admin-border)] text-[var(--admin-text)] focus:border-[var(--admin-accent)] focus:outline-none"
-                  />
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--admin-text-muted)] mb-1">
+                      Edad *
+                    </label>
+                    <input
+                      type="number"
+                      value={edad}
+                      onChange={(e) => setEdad(parseInt(e.target.value))}
+                      min={3}
+                      max={99}
+                      required
+                      className="w-full px-3 py-2 rounded-lg bg-[var(--admin-surface-2)] border border-[var(--admin-border)] text-[var(--admin-text)] focus:border-[var(--admin-accent)] focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--admin-text-muted)] mb-1">
+                      Nivel Escolar *
+                    </label>
+                    <select
+                      value={nivelEscolar}
+                      onChange={(e) =>
+                        setNivelEscolar(e.target.value as 'Primaria' | 'Secundaria' | 'Universidad')
+                      }
+                      className="w-full px-3 py-2 rounded-lg bg-[var(--admin-surface-2)] border border-[var(--admin-border)] text-[var(--admin-text)] focus:border-[var(--admin-accent)] focus:outline-none"
+                    >
+                      <option value="Primaria">Primaria</option>
+                      <option value="Secundaria">Secundaria</option>
+                      <option value="Universidad">Universidad</option>
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-[var(--admin-text-muted)] mb-1">
-                    Nivel Escolar *
-                  </label>
-                  <select
-                    value={nivelEscolar}
-                    onChange={(e) =>
-                      setNivelEscolar(e.target.value as 'Primaria' | 'Secundaria' | 'Universidad')
-                    }
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--admin-surface-2)] border border-[var(--admin-border)] text-[var(--admin-text)] focus:border-[var(--admin-accent)] focus:outline-none"
-                  >
-                    <option value="Primaria">Primaria</option>
-                    <option value="Secundaria">Secundaria</option>
-                    <option value="Universidad">Universidad</option>
-                  </select>
+
+                {/* Plan de Suscripción */}
+                <div className="mt-6 pt-5 border-t border-[var(--admin-border)]">
+                  <div className="flex items-center gap-2 mb-4">
+                    <CreditCard className="w-5 h-5 text-[var(--admin-accent)]" />
+                    <h3 className="text-base font-semibold text-[var(--admin-text)]">
+                      Plan de Suscripción
+                    </h3>
+                  </div>
+
+                  {isLoadingPlanes ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="w-5 h-5 border-2 border-[var(--admin-accent)] border-t-transparent rounded-full animate-spin" />
+                      <span className="ml-2 text-sm text-[var(--admin-text-muted)]">
+                        Cargando planes...
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* Select de Plan */}
+                      <div>
+                        <label className="block text-sm font-medium text-[var(--admin-text-muted)] mb-1">
+                          Plan
+                        </label>
+                        <select
+                          value={planId ?? ''}
+                          onChange={(e) => setPlanId(e.target.value || null)}
+                          className="w-full px-3 py-2 rounded-lg bg-[var(--admin-surface-2)] border border-[var(--admin-border)] text-[var(--admin-text)] focus:border-[var(--admin-accent)] focus:outline-none"
+                        >
+                          <option value="">Heredar del tutor</option>
+                          {planesDisponibles.map((plan) => (
+                            <option key={plan.id} value={plan.id}>
+                              {plan.nombre}
+                              {plan.nombre === 'STEAM_SINCRONICO' && ' (Clases en vivo)'}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="mt-1 text-xs text-[var(--admin-text-muted)]">
+                          Solo STEAM_SINCRONICO permite acceso a clases en vivo
+                        </p>
+                      </div>
+
+                      {/* Estado de Acceso */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-[var(--admin-text-muted)] mb-1">
+                            Estado de Acceso
+                          </label>
+                          <select
+                            value={estadoAcceso}
+                            onChange={(e) => setEstadoAcceso(e.target.value as EstadoAcceso)}
+                            className="w-full px-3 py-2 rounded-lg bg-[var(--admin-surface-2)] border border-[var(--admin-border)] text-[var(--admin-text)] focus:border-[var(--admin-accent)] focus:outline-none"
+                          >
+                            <option value="ACTIVO">Activo</option>
+                            <option value="BECA">Beca</option>
+                            <option value="SUSPENDIDO">Suspendido</option>
+                            <option value="VENCIDO">Vencido</option>
+                          </select>
+                        </div>
+
+                        {/* Fecha de Vencimiento */}
+                        <div>
+                          <label className="block text-sm font-medium text-[var(--admin-text-muted)] mb-1">
+                            Fecha Vencimiento
+                          </label>
+                          <input
+                            type="date"
+                            value={fechaVencimiento}
+                            onChange={(e) => setFechaVencimiento(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg bg-[var(--admin-surface-2)] border border-[var(--admin-border)] text-[var(--admin-text)] focus:border-[var(--admin-accent)] focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Notas del Plan */}
+                      <div>
+                        <label className="block text-sm font-medium text-[var(--admin-text-muted)] mb-1">
+                          Notas (opcional)
+                        </label>
+                        <textarea
+                          value={notasPlan}
+                          onChange={(e) => setNotasPlan(e.target.value)}
+                          placeholder="Ej: Beca por olimpiada matemática 2026"
+                          rows={2}
+                          className="w-full px-3 py-2 rounded-lg bg-[var(--admin-surface-2)] border border-[var(--admin-border)] text-[var(--admin-text)] focus:border-[var(--admin-accent)] focus:outline-none resize-none"
+                        />
+                      </div>
+
+                      {/* Botón Guardar Plan */}
+                      <button
+                        type="button"
+                        onClick={handleSavePlan}
+                        disabled={isSavingPlan}
+                        className="w-full px-4 py-2 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSavingPlan ? 'Guardando plan...' : 'Guardar Plan'}
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
+              </>
             )}
 
             {/* Docente-specific fields */}

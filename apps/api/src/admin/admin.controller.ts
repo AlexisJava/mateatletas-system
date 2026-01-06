@@ -57,6 +57,8 @@ import {
   CreateTareaDto,
   UpdateTareaDto,
 } from './services/admin-tareas.service';
+import { AsignarPlanEstudianteDto } from './dto/asignar-plan-estudiante.dto';
+import { AdminEstudiantesService } from './services/admin-estudiantes.service';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -69,6 +71,7 @@ export class AdminController {
     private readonly asistenciasService: AsistenciasService,
     private readonly comisionesService: ComisionesService,
     private readonly tareasService: AdminTareasService,
+    private readonly estudiantesService: AdminEstudiantesService,
   ) {}
 
   /**
@@ -297,6 +300,52 @@ export class AdminController {
   @ApiOperation({ summary: 'Eliminar estudiante' })
   async eliminarEstudiante(@Param('id', ParseIdPipe) id: string) {
     return this.adminService.eliminarEstudiante(id);
+  }
+
+  /**
+   * Asignar plan directamente a un estudiante
+   * PATCH /api/admin/estudiantes/:id/plan
+   * Rol: Admin
+   *
+   * Permite asignar un plan específico a un estudiante,
+   * independiente de la suscripción del tutor.
+   * Si plan_id es null, el estudiante hereda el plan del tutor.
+   */
+  @Patch('estudiantes/:id/plan')
+  @ApiOperation({
+    summary: 'Asignar plan a estudiante',
+    description: `
+      Asigna un plan de suscripción directamente al estudiante.
+
+      Casos de uso:
+      - Becas: Asignar STEAM_SINCRONICO sin que el tutor pague
+      - Planes mixtos: Cada hijo con plan diferente
+      - Suspensiones: Bloquear acceso temporalmente
+
+      Si plan_id es null, el estudiante hereda el plan del tutor (comportamiento legacy).
+    `,
+  })
+  async asignarPlanEstudiante(
+    @Param('id', ParseIdPipe) id: string,
+    @Body() dto: AsignarPlanEstudianteDto,
+  ) {
+    return this.estudiantesService.asignarPlan(id, dto);
+  }
+
+  /**
+   * Obtener planes de suscripción disponibles
+   * GET /api/admin/planes-suscripcion
+   * Rol: Admin
+   *
+   * Retorna todos los planes activos para poblar el selector
+   */
+  @Get('planes-suscripcion')
+  @ApiOperation({
+    summary: 'Listar planes de suscripción',
+    description: 'Obtiene todos los planes activos para asignar a estudiantes',
+  })
+  async obtenerPlanesSuscripcion() {
+    return this.estudiantesService.obtenerPlanesDisponibles();
   }
 
   /**

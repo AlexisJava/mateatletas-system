@@ -607,4 +607,111 @@ export class AdminEstudiantesService {
       },
     };
   }
+
+  /**
+   * Asignar plan directamente a un estudiante
+   * Permite al admin configurar el tier de cada estudiante individualmente
+   *
+   * @param estudianteId - ID del estudiante
+   * @param data - Datos del plan a asignar
+   */
+  async asignarPlan(
+    estudianteId: string,
+    data: {
+      plan_id?: string | null;
+      estado_acceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
+      fecha_vencimiento_plan?: string | null;
+      notas_plan?: string | null;
+    },
+  ) {
+    // Verificar que el estudiante existe
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: estudianteId },
+      select: { id: true, nombre: true, apellido: true },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException(
+        `Estudiante con ID ${estudianteId} no encontrado`,
+      );
+    }
+
+    // Si se proporciona plan_id, verificar que el plan existe
+    if (data.plan_id) {
+      const planExiste = await this.prisma.planSuscripcion.findUnique({
+        where: { id: data.plan_id },
+      });
+
+      if (!planExiste) {
+        throw new NotFoundException(
+          `Plan con ID ${data.plan_id} no encontrado`,
+        );
+      }
+    }
+
+    // Actualizar el estudiante con el plan
+    const estudianteActualizado = await this.prisma.estudiante.update({
+      where: { id: estudianteId },
+      data: {
+        plan_id: data.plan_id === null ? null : data.plan_id,
+        estado_acceso: data.estado_acceso,
+        fecha_vencimiento_plan: data.fecha_vencimiento_plan
+          ? new Date(data.fecha_vencimiento_plan)
+          : data.fecha_vencimiento_plan === null
+            ? null
+            : undefined,
+        notas_plan: data.notas_plan === null ? null : data.notas_plan,
+      },
+      include: {
+        plan: true,
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+      },
+    });
+
+    this.logger.log(
+      `Plan asignado a estudiante ${estudiante.nombre} ${estudiante.apellido}: ${data.plan_id ?? 'heredado del tutor'}`,
+    );
+
+    return {
+      success: true,
+      message: data.plan_id
+        ? `Plan asignado exitosamente a ${estudiante.nombre} ${estudiante.apellido}`
+        : `Plan removido - ${estudiante.nombre} ${estudiante.apellido} ahora hereda del tutor`,
+      estudiante: {
+        id: estudianteActualizado.id,
+        nombre: estudianteActualizado.nombre,
+        apellido: estudianteActualizado.apellido,
+        plan: estudianteActualizado.plan,
+        estado_acceso: estudianteActualizado.estado_acceso,
+        fecha_vencimiento_plan: estudianteActualizado.fecha_vencimiento_plan,
+        notas_plan: estudianteActualizado.notas_plan,
+        tutor: estudianteActualizado.tutor,
+      },
+    };
+  }
+
+  /**
+   * Obtener todos los planes de suscripción disponibles
+   * Para poblar el selector en el admin
+   */
+  async obtenerPlanesDisponibles() {
+    const planes = await this.prisma.planSuscripcion.findMany({
+      where: { activo: true },
+      orderBy: { precio_base: 'asc' },
+      select: {
+        id: true,
+        nombre: true,
+        descripcion: true,
+        precio_base: true,
+      },
+    });
+
+    return planes;
+  }
 }

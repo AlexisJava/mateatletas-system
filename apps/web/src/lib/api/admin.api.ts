@@ -321,6 +321,81 @@ export const updateDocente = async (
   }
 };
 
+// =============================================================================
+// PLANES DE SUSCRIPCIÓN
+// =============================================================================
+
+/**
+ * Plan de suscripción disponible
+ */
+export interface PlanSuscripcion {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  precio_base: number | string;
+}
+
+/**
+ * DTO para asignar plan a un estudiante
+ */
+export interface AsignarPlanEstudianteDto {
+  plan_id?: string | null;
+  estado_acceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
+  fecha_vencimiento_plan?: string | null;
+  notas_plan?: string | null;
+}
+
+/**
+ * Respuesta al asignar plan
+ */
+export interface AsignarPlanResponse {
+  success: boolean;
+  message: string;
+  estudiante: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    plan: PlanSuscripcion | null;
+    estado_acceso: string;
+    fecha_vencimiento_plan: string | null;
+    notas_plan: string | null;
+    tutor: {
+      id: string;
+      nombre: string;
+      apellido: string;
+    };
+  };
+}
+
+/**
+ * Obtener todos los planes de suscripción disponibles
+ * GET /api/admin/planes-suscripcion
+ */
+export const getPlanesSuscripcion = async (): Promise<PlanSuscripcion[]> => {
+  try {
+    return await axios.get('/admin/planes-suscripcion');
+  } catch (error) {
+    console.error('Error al obtener planes de suscripción:', error);
+    throw error;
+  }
+};
+
+/**
+ * Asignar plan directamente a un estudiante
+ * PATCH /api/admin/estudiantes/:id/plan
+ */
+export const asignarPlanEstudiante = async (
+  estudianteId: string,
+  dto: AsignarPlanEstudianteDto,
+): Promise<AsignarPlanResponse> => {
+  try {
+    return await axios.patch(`/admin/estudiantes/${estudianteId}/plan`, dto);
+  } catch (error) {
+    console.error('Error al asignar plan a estudiante:', error);
+    throw error;
+  }
+};
+
 export const getAllClasses = async (): Promise<ClasesResponse> => {
   try {
     // El interceptor ya retorna response.data directamente

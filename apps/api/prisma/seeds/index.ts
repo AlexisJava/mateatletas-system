@@ -5,6 +5,7 @@ import { seedTutor } from './tutor.seed';
 import { seedCasas } from './casas.seed';
 import { seedMundos } from './mundos.seed';
 import { seedTiers } from './tiers.seed';
+import { seedPlanesSuscripcion } from './planes-suscripcion.seed';
 import { seedProductos } from './productos.seed';
 import { seedAccionesPuntuables } from './acciones-puntuables.seed';
 import { seedLogros } from './logros.seed';
@@ -29,6 +30,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedCasas(prisma); // ESENCIAL: Casas 2026 (Quantum, Vertex, Pulsar)
     await seedMundos(prisma); // ESENCIAL: Mundos STEAM 2026 (Mat, Prog, Ciencias)
     await seedTiers(prisma); // ESENCIAL: Tiers STEAM 2026
+    await seedPlanesSuscripcion(prisma); // ESENCIAL: Planes de suscripción STEAM
     await seedProductos(prisma); // Productos del catálogo (pueden ser reales)
     await seedAccionesPuntuables(prisma); // Configuración de gamificación
     await seedLogros(prisma); // Logros del sistema
@@ -43,6 +45,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedCasas(prisma);
     await seedMundos(prisma); // Mundos STEAM 2026
     await seedTiers(prisma); // Tiers STEAM 2026
+    await seedPlanesSuscripcion(prisma); // Planes de suscripción STEAM
     await seedProductos(prisma);
     await seedAccionesPuntuables(prisma);
     await seedLogros(prisma);
@@ -62,6 +65,7 @@ export {
   seedCasas,
   seedMundos,
   seedTiers,
+  seedPlanesSuscripcion,
   seedProductos,
   seedAccionesPuntuables,
   seedLogros,
