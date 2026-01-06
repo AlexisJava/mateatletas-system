@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Patch,
   Param,
   UseGuards,
   Request,
@@ -13,6 +14,12 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { RequestWithAuthUser } from '../auth/interfaces';
 import { GruposService } from './services/grupos.service';
+import { ClaseGrupoLiveService } from './services/clase-grupo-live.service';
+import {
+  IniciarClaseResponseDto,
+  FinalizarClaseResponseDto,
+  ClaseEnVivoResponseDto,
+} from './dto/clase-en-vivo.dto';
 
 /**
  * Controller para ClaseGrupo - Grupos de clases con docentes
@@ -22,7 +29,10 @@ import { GruposService } from './services/grupos.service';
 @Controller('clase-grupos')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ClaseGrupoController {
-  constructor(private readonly gruposService: GruposService) {}
+  constructor(
+    private readonly gruposService: GruposService,
+    private readonly claseGrupoLiveService: ClaseGrupoLiveService,
+  ) {}
 
   /**
    * GET /api/clase-grupos/:id/detalle-completo
@@ -135,5 +145,153 @@ export class ClaseGrupoController {
     }
 
     return detalle;
+  }
+
+  // ==================== ENDPOINTS PARA CLASE EN VIVO (LiveKit) ====================
+
+  /**
+   * PATCH /api/clase-grupos/:id/iniciar-clase
+   * Iniciar una clase en vivo (cambiar estado a EnVivo)
+   *
+   * Solo el docente titular puede iniciar la clase
+   */
+  @Patch(':id/iniciar-clase')
+  @Roles(Role.DOCENTE)
+  @ApiOperation({
+    summary: 'Iniciar clase en vivo',
+    description:
+      'Cambia el estado de la clase a EnVivo y registra el timestamp de inicio. Solo el docente titular puede iniciar.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del grupo de clase (ClaseGrupo)',
+    example: 'cmh6d8pqn0001xwd0wf5sv4d8',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Clase iniciada exitosamente',
+    type: IniciarClaseResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'La clase ya está en vivo, finalizada o cancelada',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Solo el docente titular puede iniciar esta clase',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Grupo de clase no encontrado',
+  })
+  async iniciarClase(
+    @Param('id', ParseIdPipe) claseGrupoId: string,
+    @Request() req: RequestWithAuthUser,
+  ): Promise<IniciarClaseResponseDto> {
+    return this.claseGrupoLiveService.iniciarClase(claseGrupoId, req.user.id);
+  }
+
+  /**
+   * PATCH /api/clase-grupos/:id/finalizar-clase
+   * Finalizar una clase en vivo (cambiar estado a Finalizada)
+   *
+   * Solo el docente titular puede finalizar la clase
+   */
+  @Patch(':id/finalizar-clase')
+  @Roles(Role.DOCENTE)
+  @ApiOperation({
+    summary: 'Finalizar clase en vivo',
+    description:
+      'Cambia el estado de la clase a Finalizada y registra el timestamp de fin. Calcula la duración total.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del grupo de clase (ClaseGrupo)',
+    example: 'cmh6d8pqn0001xwd0wf5sv4d8',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Clase finalizada exitosamente',
+    type: FinalizarClaseResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'La clase no está en vivo',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Solo el docente titular puede finalizar esta clase',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Grupo de clase no encontrado',
+  })
+  async finalizarClase(
+    @Param('id', ParseIdPipe) claseGrupoId: string,
+    @Request() req: RequestWithAuthUser,
+  ): Promise<FinalizarClaseResponseDto> {
+    return this.claseGrupoLiveService.finalizarClase(claseGrupoId, req.user.id);
+  }
+
+  /**
+   * GET /api/clase-grupos/:id/estado-clase
+   * Obtener el estado actual de una clase
+   */
+  @Get(':id/estado-clase')
+  @Roles(Role.DOCENTE, Role.ESTUDIANTE, Role.ADMIN)
+  @ApiOperation({
+    summary: 'Obtener estado de la clase',
+    description:
+      'Retorna el estado actual de la clase (Programada, EnVivo, Finalizada, Cancelada)',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del grupo de clase (ClaseGrupo)',
+    example: 'cmh6d8pqn0001xwd0wf5sv4d8',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estado de la clase obtenido exitosamente',
+    type: ClaseEnVivoResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Grupo de clase no encontrado',
+  })
+  async obtenerEstadoClase(
+    @Param('id', ParseIdPipe) claseGrupoId: string,
+  ): Promise<ClaseEnVivoResponseDto> {
+    return this.claseGrupoLiveService.obtenerEstadoClase(claseGrupoId);
+  }
+
+  /**
+   * PATCH /api/clase-grupos/:id/reiniciar-estado
+   * Reiniciar estado de clase a Programada (solo admin)
+   */
+  @Patch(':id/reiniciar-estado')
+  @Roles(Role.ADMIN)
+  @ApiOperation({
+    summary: 'Reiniciar estado de clase (Admin)',
+    description:
+      'Reinicia el estado de la clase a Programada. Útil para reprogramar clases finalizadas o canceladas.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del grupo de clase (ClaseGrupo)',
+    example: 'cmh6d8pqn0001xwd0wf5sv4d8',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estado reiniciado exitosamente',
+    type: ClaseEnVivoResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Grupo de clase no encontrado',
+  })
+  async reiniciarEstadoClase(
+    @Param('id', ParseIdPipe) claseGrupoId: string,
+  ): Promise<ClaseEnVivoResponseDto> {
+    return this.claseGrupoLiveService.reiniciarEstadoClase(claseGrupoId);
   }
 }

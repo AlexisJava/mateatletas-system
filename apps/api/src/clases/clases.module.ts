@@ -6,6 +6,7 @@ import { ClasesService } from './clases.service';
 import { ClasesReservasService } from './services/clases-reservas.service';
 import { ClasesAsistenciaService } from './services/clases-asistencia.service';
 import { GruposService } from './services/grupos.service';
+import { ClaseGrupoLiveService } from './services/clase-grupo-live.service';
 
 // 🆕 Nuevos servicios CQRS + Facade
 import { ClaseBusinessValidator } from './validators/clase-business.validator';
@@ -30,6 +31,7 @@ import { NotificacionesModule } from '../notificaciones/notificaciones.module';
     // Servicios principales
     ClasesService,
     GruposService,
+    ClaseGrupoLiveService,
 
     // Servicios ya refactorizados
     ClasesReservasService,

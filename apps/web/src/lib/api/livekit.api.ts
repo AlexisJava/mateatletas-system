@@ -26,6 +26,26 @@ export interface TokenResponseDto {
   roomName: string;
 }
 
+export type EstadoClase = 'Programada' | 'EnVivo' | 'Finalizada' | 'Cancelada';
+
+export interface ClaseEnVivoResponse {
+  id: string;
+  nombre: string;
+  estado_clase: EstadoClase;
+  iniciada_en: string | null;
+  finalizada_en: string | null;
+  livekit_room_name: string | null;
+}
+
+export interface IniciarClaseResponse extends ClaseEnVivoResponse {
+  mensaje: string;
+}
+
+export interface FinalizarClaseResponse extends ClaseEnVivoResponse {
+  mensaje: string;
+  duracion_minutos: number;
+}
+
 // ============================================================================
 // API
 // ============================================================================
@@ -47,5 +67,35 @@ export const livekitApi = {
    */
   getTokenEstudiante: async (data: TokenRequestDto): Promise<TokenResponseDto> => {
     return apiClient.post<TokenResponseDto>('/livekit/token/estudiante', data);
+  },
+
+  // ============================================================================
+  // GESTIÓN DE ESTADO DE CLASE EN VIVO
+  // ============================================================================
+
+  /**
+   * Iniciar una clase en vivo (solo docente titular)
+   * Cambia el estado a EnVivo
+   * @param claseGrupoId - ID del ClaseGrupo
+   */
+  iniciarClase: async (claseGrupoId: string): Promise<IniciarClaseResponse> => {
+    return apiClient.patch<IniciarClaseResponse>(`/clase-grupos/${claseGrupoId}/iniciar-clase`);
+  },
+
+  /**
+   * Finalizar una clase en vivo (solo docente titular)
+   * Cambia el estado a Finalizada
+   * @param claseGrupoId - ID del ClaseGrupo
+   */
+  finalizarClase: async (claseGrupoId: string): Promise<FinalizarClaseResponse> => {
+    return apiClient.patch<FinalizarClaseResponse>(`/clase-grupos/${claseGrupoId}/finalizar-clase`);
+  },
+
+  /**
+   * Obtener estado actual de una clase
+   * @param claseGrupoId - ID del ClaseGrupo
+   */
+  obtenerEstadoClase: async (claseGrupoId: string): Promise<ClaseEnVivoResponse> => {
+    return apiClient.get<ClaseEnVivoResponse>(`/clase-grupos/${claseGrupoId}/estado-clase`);
   },
 };

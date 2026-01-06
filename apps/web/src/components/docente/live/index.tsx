@@ -80,6 +80,12 @@ export const LiveClassPage: React.FC<LiveClassPageProps> = ({ config }) => {
     setError(null);
 
     try {
+      // 1. Actualizar estado de la clase a EnVivo en el backend
+      if (config.claseGrupoId) {
+        await livekitApi.iniciarClase(config.claseGrupoId);
+      }
+
+      // 2. Obtener token de LiveKit
       const response = await livekitApi.getTokenDocente({
         comisionId: config.comisionId,
         claseGrupoId: config.claseGrupoId,
@@ -89,7 +95,7 @@ export const LiveClassPage: React.FC<LiveClassPageProps> = ({ config }) => {
       setWsUrl(response.wsUrl);
       setRoomState('connecting');
     } catch (err) {
-      console.error('Error getting LiveKit token:', err);
+      console.error('Error starting class:', err);
       setError(
         err instanceof Error
           ? err.message
@@ -101,11 +107,21 @@ export const LiveClassPage: React.FC<LiveClassPageProps> = ({ config }) => {
     }
   }, [config]);
 
-  const handleEndClass = useCallback(() => {
+  const handleEndClass = useCallback(async () => {
+    try {
+      // Actualizar estado de la clase a Finalizada en el backend
+      if (config.claseGrupoId) {
+        await livekitApi.finalizarClase(config.claseGrupoId);
+      }
+    } catch (err) {
+      console.error('Error finalizando clase:', err);
+      // Continuamos aunque falle, para no bloquear la salida
+    }
+
     setRoomState('ended');
     setToken(null);
     setWsUrl(null);
-  }, []);
+  }, [config.claseGrupoId]);
 
   const handleRoomConnected = useCallback(() => {
     setRoomState('connected');
