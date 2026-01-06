@@ -178,7 +178,8 @@ export function usePersonas(): UsePersonasReturn {
     async (data: PersonaFormData) => {
       if (data.role === 'estudiante') {
         // Crear estudiante
-        const result = await createEstudiante({
+        // El backend retorna { success, message, estudiante, tutor_creado }
+        const response = (await createEstudiante({
           nombre: data.nombre,
           apellido: data.apellido,
           edad: data.edad ?? 10,
@@ -190,10 +191,15 @@ export function usePersonas(): UsePersonasReturn {
           // Plan de suscripción
           plan_id: data.planId ?? undefined,
           estado_acceso: data.estadoAcceso,
-        });
+        })) as unknown as {
+          success: boolean;
+          estudiante: { id: string; username?: string };
+          tutor_creado: boolean;
+        };
 
         // Generar credenciales para el estudiante recién creado
-        const estudianteId = result.id;
+        const estudianteId = response.estudiante?.id;
+        const username = response.estudiante?.username;
         if (estudianteId) {
           try {
             const credResult = await resetCredenciales(estudianteId, 'estudiante');
@@ -201,7 +207,10 @@ export function usePersonas(): UsePersonasReturn {
               `✅ Estudiante creado: ${data.nombre} ${data.apellido}`,
               '',
               '📋 CREDENCIALES DEL ESTUDIANTE:',
+              `   Usuario: ${username ?? credResult.usuario?.username ?? 'N/A'}`,
               `   PIN: ${credResult.nuevaPassword}`,
+              '',
+              '⚠️ Comparta estas credenciales con el tutor.',
             ];
 
             // Copiar al clipboard
