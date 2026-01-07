@@ -3,11 +3,22 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Users, Calendar, Clock, BookOpen } from 'lucide-react';
+import {
+  ArrowLeft,
+  Users,
+  Calendar,
+  Clock,
+  BookOpen,
+  Video,
+  Radio,
+  RefreshCw,
+  Play,
+} from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { toast } from '@/components/ui/Toast';
 import { LoadingSpinner } from '@/components/effects';
 import apiClient from '@/lib/axios';
+import { livekitApi, type EstadoClase } from '@/lib/api/livekit.api';
 
 interface EstudianteInscrito {
   id: string;
@@ -37,6 +48,8 @@ interface ComisionDetalle {
   cupo_maximo: number | null;
   activo: boolean;
   estudiantes: EstudianteInscrito[];
+  // LiveKit
+  estado_clase?: EstadoClase;
 }
 
 export default function ComisionDetallePage() {
@@ -46,12 +59,61 @@ export default function ComisionDetallePage() {
 
   const [comision, setComision] = useState<ComisionDetalle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [estadoClase, setEstadoClase] = useState<EstadoClase>('Programada');
+  const [isLoadingLiveKit, setIsLoadingLiveKit] = useState(false);
 
   useEffect(() => {
     if (comisionId) {
       fetchComision();
+      fetchEstadoClase();
     }
   }, [comisionId]);
+
+  const fetchEstadoClase = async () => {
+    try {
+      const estado = await livekitApi.obtenerEstadoComision(comisionId);
+      setEstadoClase(estado.estado_clase);
+    } catch (error) {
+      console.error('Error al obtener estado de clase:', error);
+    }
+  };
+
+  const handleIniciarClase = async () => {
+    setIsLoadingLiveKit(true);
+    try {
+      await livekitApi.iniciarClaseComision(comisionId);
+      const tokenData = await livekitApi.getTokenDocente({ comisionId });
+
+      // Navegar a la página de clase en vivo
+      const params = new URLSearchParams({
+        token: tokenData.token,
+        ws: tokenData.wsUrl,
+        room: tokenData.roomName,
+        title: comision?.nombre || 'Clase en Vivo',
+      });
+      router.push(`/docente/clase-en-vivo?${params.toString()}`);
+    } catch (error) {
+      console.error('Error al iniciar clase:', error);
+      toast.error(error instanceof Error ? error.message : 'Error al iniciar clase');
+    } finally {
+      setIsLoadingLiveKit(false);
+    }
+  };
+
+  const handleReiniciarEstado = async () => {
+    setIsLoadingLiveKit(true);
+    try {
+      // Llamar al endpoint de reiniciar (requiere rol admin, pero para dev lo probamos)
+      await apiClient.patch(`/comisiones/${comisionId}/reiniciar-estado`);
+      setEstadoClase('Programada');
+      toast.success('Estado reiniciado a Programada');
+    } catch (error) {
+      console.error('Error al reiniciar estado:', error);
+      toast.error('Error al reiniciar. ¿Tienes permisos de admin?');
+    } finally {
+      setIsLoadingLiveKit(false);
+    }
+  };
 
   const fetchComision = async () => {
     try {
@@ -124,6 +186,92 @@ export default function ComisionDetallePage() {
             <p className="text-purple-300">{comision.producto.nombre}</p>
           </div>
         </div>
+
+        {/* Panel de Clase en Vivo */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 backdrop-blur-xl rounded-xl p-5 border border-indigo-500/30"
+        >
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-4">
+              <div
+                className={`p-3 rounded-xl ${
+                  estadoClase === 'EnVivo'
+                    ? 'bg-red-500/20 border border-red-500/50'
+                    : estadoClase === 'Finalizada'
+                      ? 'bg-gray-500/20 border border-gray-500/50'
+                      : 'bg-green-500/20 border border-green-500/50'
+                }`}
+              >
+                {estadoClase === 'EnVivo' ? (
+                  <Radio className="w-6 h-6 text-red-400 animate-pulse" />
+                ) : (
+                  <Video className="w-6 h-6 text-green-400" />
+                )}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Clase en Vivo</h3>
+                <p className="text-sm text-purple-300">
+                  Estado:{' '}
+                  <span
+                    className={`font-bold ${
+                      estadoClase === 'EnVivo'
+                        ? 'text-red-400'
+                        : estadoClase === 'Finalizada'
+                          ? 'text-gray-400'
+                          : 'text-green-400'
+                    }`}
+                  >
+                    {estadoClase}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Botón Iniciar Clase - Solo si está Programada */}
+              {estadoClase === 'Programada' && (
+                <button
+                  onClick={handleIniciarClase}
+                  disabled={isLoadingLiveKit}
+                  className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold rounded-xl transition-all disabled:opacity-50"
+                >
+                  {isLoadingLiveKit ? (
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Play className="w-5 h-5" />
+                  )}
+                  Iniciar Clase
+                </button>
+              )}
+
+              {/* Botón Reiniciar - Solo si está Finalizada o Cancelada */}
+              {(estadoClase === 'Finalizada' || estadoClase === 'Cancelada') && (
+                <button
+                  onClick={handleReiniciarEstado}
+                  disabled={isLoadingLiveKit}
+                  className="flex items-center gap-2 px-5 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl transition-all disabled:opacity-50"
+                >
+                  {isLoadingLiveKit ? (
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-5 h-5" />
+                  )}
+                  Reiniciar para nueva clase
+                </button>
+              )}
+
+              {/* Badge En Vivo */}
+              {estadoClase === 'EnVivo' && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-xl">
+                  <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                  <span className="text-red-400 font-bold">EN VIVO</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
 
         {/* Info Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
