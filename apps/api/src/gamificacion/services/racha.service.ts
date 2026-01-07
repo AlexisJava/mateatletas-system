@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../core/database/prisma.service';
+import { RachaActualizadaEvent } from '../../common/events';
 
 @Injectable()
 export class RachaService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   /**
    * Obtener racha actual del estudiante
@@ -91,6 +96,18 @@ export class RachaService {
         total_dias_activos: racha.total_dias_activos + 1,
       },
     });
+
+    // Emitir evento RACHA_ACTUALIZADA
+    this.eventEmitter.emit(
+      'racha.actualizada',
+      new RachaActualizadaEvent(
+        estudianteId,
+        rachaActualizada.racha_actual,
+        rachaActualizada.racha_maxima,
+        esNuevaRacha,
+        rompioRacha,
+      ),
+    );
 
     return {
       racha_actual: rachaActualizada.racha_actual,

@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../core/database/prisma.service';
 import { RecursosService } from './recursos.service';
 import { Prisma } from '@prisma/client';
+import { LogroDesbloqueadoEvent } from '../../common/events';
 
 @Injectable()
 export class LogrosService {
   constructor(
     private prisma: PrismaService,
     private recursosService: RecursosService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -123,6 +126,14 @@ export class LogrosService {
       logro.xp_recompensa,
       `Logro desbloqueado: ${logro.nombre}`,
       { logro_id: logro.id },
+    );
+
+    // Emitir evento LOGRO_DESBLOQUEADO
+    this.eventEmitter.emit(
+      'logro.desbloqueado',
+      new LogroDesbloqueadoEvent(estudianteId, logro.codigo, logro.nombre, {
+        xp: logro.xp_recompensa,
+      }),
     );
 
     return {

@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../core/database/prisma.service';
 import { UpdateProgresoDto } from '../dto';
+import { LeccionCompletadaEvent } from '../../common/events';
 
 /**
  * Service para gestionar el progreso de estudiantes en contenidos
@@ -8,7 +10,10 @@ import { UpdateProgresoDto } from '../dto';
  */
 @Injectable()
 export class ProgresoService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   /**
    * Obtiene el progreso de un estudiante en un contenido específico
@@ -89,17 +94,36 @@ export class ProgresoService {
     }
 
     // Marcar como completado (no se revierte)
-    if (dto.completado && !existente.completado) {
+    const esNuevoCompletado = dto.completado && !existente.completado;
+    if (esNuevoCompletado) {
       updateData.completado = true;
       updateData.fechaCompletitud = new Date();
     }
 
-    return this.prisma.progresoContenido.update({
+    const progresoActualizado = await this.prisma.progresoContenido.update({
       where: {
         estudianteId_contenidoId: { estudianteId, contenidoId },
       },
       data: updateData,
+      include: {
+        contenido: { select: { titulo: true } },
+      },
     });
+
+    // Emitir evento LECCION_COMPLETADA si se marcó como completado
+    if (esNuevoCompletado) {
+      this.eventEmitter.emit(
+        'leccion.completada',
+        new LeccionCompletadaEvent(
+          estudianteId,
+          contenidoId,
+          progresoActualizado.contenido.titulo,
+          progresoActualizado.tiempoTotalSegundos,
+        ),
+      );
+    }
+
+    return progresoActualizado;
   }
 
   /**

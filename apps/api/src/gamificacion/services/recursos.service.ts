@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Prisma } from '@prisma/client';
+import { XpGainedEvent, EstudianteNivelUpEvent } from '../../common/events';
 
 @Injectable()
 export class RecursosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   /**
    * Obtener recursos de un estudiante
@@ -77,6 +82,25 @@ export class RecursosService {
 
     // Detectar subida de nivel
     const subioNivel = nivelNuevo > nivelAnterior;
+
+    // Emitir evento XP_GANADO
+    this.eventEmitter.emit(
+      'xp.ganado',
+      new XpGainedEvent(
+        estudianteId,
+        cantidad,
+        razon,
+        metadata as Record<string, unknown>,
+      ),
+    );
+
+    // Emitir evento NIVEL_SUBIDO si corresponde
+    if (subioNivel) {
+      this.eventEmitter.emit(
+        'estudiante.nivel-up',
+        new EstudianteNivelUpEvent(estudianteId, nivelAnterior, nivelNuevo, {}),
+      );
+    }
 
     return {
       recursos: recursosActualizados,

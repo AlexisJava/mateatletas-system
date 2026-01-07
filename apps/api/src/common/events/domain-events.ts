@@ -163,3 +163,43 @@ export class PasswordChangedEvent {
     public readonly timestamp: Date,
   ) {}
 }
+
+/**
+ * Evento: Racha de estudiante fue actualizada
+ *
+ * Se emite cuando:
+ * - Un estudiante extiende su racha de días consecutivos
+ * - Un estudiante rompe su racha
+ *
+ * Listeners:
+ * - ActividadFeedModule: Mostrar en feed de compañeros
+ * - LogrosModule: Verificar logros de racha
+ */
+export class RachaActualizadaEvent {
+  constructor(
+    public readonly estudianteId: string,
+    public readonly rachaActual: number,
+    public readonly rachaMaxima: number,
+    public readonly esNuevaRacha: boolean,
+    public readonly rompioRacha: boolean,
+  ) {}
+}
+
+/**
+ * Evento: Estudiante completó una lección/contenido
+ *
+ * Se emite cuando:
+ * - Un estudiante marca un contenido como completado
+ *
+ * Listeners:
+ * - GamificacionModule: Otorgar XP
+ * - ActividadFeedModule: Mostrar en feed de compañeros
+ */
+export class LeccionCompletadaEvent {
+  constructor(
+    public readonly estudianteId: string,
+    public readonly contenidoId: string,
+    public readonly contenidoTitulo: string,
+    public readonly tiempoTotalSegundos: number,
+  ) {}
+}
