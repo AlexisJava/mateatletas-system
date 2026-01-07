@@ -121,6 +121,20 @@ export default function ComisionDetallePage() {
     }
   };
 
+  const handleReiniciarEstado = async () => {
+    setIsLoadingLiveKit(true);
+    try {
+      await livekitApi.reiniciarEstadoComision(comisionId);
+      setEstadoClase('Programada');
+      toast.success('Estado reiniciado. Ya podés iniciar la clase.');
+    } catch (error) {
+      console.error('Error al reiniciar estado:', error);
+      toast.error(error instanceof Error ? error.message : 'Error al reiniciar');
+    } finally {
+      setIsLoadingLiveKit(false);
+    }
+  };
+
   const fetchComision = async () => {
     try {
       setIsLoading(true);
@@ -252,14 +266,20 @@ export default function ComisionDetallePage() {
                 </button>
               )}
 
-              {/* Mensaje cuando está Finalizada - Se reinicia automáticamente */}
+              {/* Botón Reiniciar - Cuando está Finalizada o Cancelada */}
               {(estadoClase === 'Finalizada' || estadoClase === 'Cancelada') && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-gray-500/20 border border-gray-500/50 rounded-xl">
-                  <RefreshCw className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-400 text-sm">
-                    Se reiniciará automáticamente en 12 horas
-                  </span>
-                </div>
+                <button
+                  onClick={handleReiniciarEstado}
+                  disabled={isLoadingLiveKit}
+                  className="flex items-center gap-2 px-5 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl transition-all disabled:opacity-50"
+                >
+                  {isLoadingLiveKit ? (
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-5 h-5" />
+                  )}
+                  Reiniciar Clase
+                </button>
               )}
 
               {/* Botón Entrar al Aula - Cuando está En Vivo */}
