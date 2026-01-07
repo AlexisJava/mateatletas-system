@@ -582,7 +582,18 @@ export class EstudianteQueryService {
         },
         include: {
           comision: {
-            include: {
+            select: {
+              id: true,
+              nombre: true,
+              descripcion: true,
+              horario: true,
+              fecha_inicio: true,
+              fecha_fin: true,
+              activo: true,
+              // Campos LiveKit
+              estado_clase: true,
+              iniciada_en: true,
+              // Relaciones
               docente: {
                 select: {
                   id: true,
@@ -687,9 +698,9 @@ export class EstudianteQueryService {
         fecha_inscripcion: inscripcion.fecha_inscripcion,
         tipo: 'comision' as const,
         comision_id: com.id,
-        // LiveKit: comisiones no usan clases en vivo (por ahora)
-        estado_clase: 'Programada' as const,
-        iniciada_en: null,
+        // LiveKit: estado real de la comisión
+        estado_clase: com.estado_clase,
+        iniciada_en: com.iniciada_en,
       };
     });
 

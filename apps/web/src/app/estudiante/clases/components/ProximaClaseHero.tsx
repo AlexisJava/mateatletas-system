@@ -33,22 +33,46 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
   // Polling para detectar cuando la clase pasa a EnVivo
   // Siempre activo si el estado es Programada (el docente puede iniciar cuando quiera)
   useEffect(() => {
-    if (!clase) return;
-    if (estadoClase !== 'Programada') return; // Solo si aún no inició
+    if (!clase) {
+      console.log('[LiveKit Polling] No hay clase');
+      return;
+    }
+    console.log(
+      '[LiveKit Polling] Clase:',
+      clase.id,
+      'tipo:',
+      clase.tipo,
+      'estadoLocal:',
+      estadoClase,
+      'estadoClase:',
+      clase.estado_clase,
+    );
+
+    if (estadoClase !== 'Programada') {
+      console.log(
+        '[LiveKit Polling] Clase no está Programada, no hacemos polling. Estado:',
+        estadoClase,
+      );
+      return;
+    }
 
     const checkEstado = async () => {
       try {
+        console.log('[LiveKit Polling] Consultando estado para', clase.tipo, clase.id);
         // Usar endpoint correcto según tipo de clase
         const estado =
           clase.tipo === 'comision'
             ? await livekitApi.obtenerEstadoComision(clase.id)
             : await livekitApi.obtenerEstadoClase(clase.id);
 
+        console.log('[LiveKit Polling] Respuesta:', estado);
+
         if (estado.estado_clase !== estadoClase) {
+          console.log('[LiveKit Polling] ¡Estado cambió!', estadoClase, '->', estado.estado_clase);
           setEstadoClase(estado.estado_clase);
         }
       } catch (e) {
-        console.error('Error polling estado clase:', e);
+        console.error('[LiveKit Polling] Error:', e);
       }
     };
 
@@ -56,6 +80,7 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
     const interval = setInterval(checkEstado, 30000);
 
     // Check inicial
+    console.log('[LiveKit Polling] Iniciando check inicial...');
     checkEstado();
 
     return () => clearInterval(interval);
