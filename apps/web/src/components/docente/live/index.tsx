@@ -81,8 +81,11 @@ export const LiveClassPage: React.FC<LiveClassPageProps> = ({ config }) => {
 
     try {
       // 1. Actualizar estado de la clase a EnVivo en el backend
+      // Llamar al endpoint correcto según el tipo (clase grupal o comisión)
       if (config.claseGrupoId) {
         await livekitApi.iniciarClase(config.claseGrupoId);
+      } else if (config.comisionId) {
+        await livekitApi.iniciarClaseComision(config.comisionId);
       }
 
       // 2. Obtener token de LiveKit
@@ -110,8 +113,11 @@ export const LiveClassPage: React.FC<LiveClassPageProps> = ({ config }) => {
   const handleEndClass = useCallback(async () => {
     try {
       // Actualizar estado de la clase a Finalizada en el backend
+      // Llamar al endpoint correcto según el tipo (clase grupal o comisión)
       if (config.claseGrupoId) {
         await livekitApi.finalizarClase(config.claseGrupoId);
+      } else if (config.comisionId) {
+        await livekitApi.finalizarClaseComision(config.comisionId);
       }
     } catch (err) {
       console.error('Error finalizando clase:', err);
@@ -121,7 +127,7 @@ export const LiveClassPage: React.FC<LiveClassPageProps> = ({ config }) => {
     setRoomState('ended');
     setToken(null);
     setWsUrl(null);
-  }, [config.claseGrupoId]);
+  }, [config.claseGrupoId, config.comisionId]);
 
   const handleRoomConnected = useCallback(() => {
     setRoomState('connected');
