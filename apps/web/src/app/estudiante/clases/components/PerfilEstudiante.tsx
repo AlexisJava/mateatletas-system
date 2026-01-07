@@ -21,17 +21,21 @@ export function PerfilEstudiante({ user }: PerfilEstudianteProps) {
   const progreso = Math.min((xp / xpParaSiguiente) * 100, 100);
 
   return (
-    <div className="rounded-2xl bg-white/[0.03] border border-white/10 p-5 shrink-0">
+    <div className="relative rounded-2xl bg-gradient-to-br from-amber-950/30 via-[#0f0f1a]/95 to-rose-950/20 backdrop-blur-sm border border-amber-500/20 p-5 shrink-0 shadow-lg shadow-amber-500/5 overflow-hidden">
+      {/* Brillo sutil superior */}
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-amber-500/10 via-orange-500/5 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-amber-400/50 to-transparent rounded-full blur-sm" />
+
       {/* Online indicator */}
-      <div className="flex justify-end mb-2">
-        <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-          <span className="text-[10px] text-white/40">En línea</span>
+      <div className="relative flex justify-end mb-2">
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30">
+          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-500/50" />
+          <span className="text-[10px] font-semibold text-emerald-400">En linea</span>
         </div>
       </div>
 
       {/* Avatar */}
-      <div className="flex flex-col items-center">
+      <div className="relative flex flex-col items-center">
         <div className="relative mb-4">
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 flex items-center justify-center text-2xl font-bold text-white">
             {user?.nombre?.charAt(0)?.toUpperCase() || '?'}

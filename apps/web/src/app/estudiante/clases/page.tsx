@@ -7,11 +7,10 @@ import { estudiantesApi, type ClaseEstudiante } from '@/lib/api/estudiantes.api'
 import FloatingLines from '@/components/ui/FloatingLines';
 
 import { PerfilEstudiante } from './components/PerfilEstudiante';
-import { CompanerosEquipo } from './components/CompanerosEquipo';
 import { ProximaClaseHero } from './components/ProximaClaseHero';
 import { CanalComunicacion } from './components/CanalComunicacion';
 import { TareasActivas } from './components/TareasActivas';
-import { RachaSemanal } from './components/RachaSemanal';
+import { ActividadEquipo } from './components/ActividadEquipo';
 
 export interface Companero {
   id: string;
@@ -59,11 +58,17 @@ export default function ClasesPage() {
 
   return (
     <div className="h-[calc(100vh-6rem)] bg-[#070711] text-white relative overflow-hidden">
-      {/* Background sutil */}
-      <div className="absolute inset-0 pointer-events-none opacity-20">
+      {/* Background animado */}
+      <div className="absolute inset-0 pointer-events-none opacity-60">
         <FloatingLines
-          linesGradient={['#ff6b9d', '#c44cff', '#6b5bff', '#00d4ff']}
-          animationSpeed={0.08}
+          linesGradient={['#ff6b9d', '#c44cff', '#6b5bff', '#00d4ff', '#10b981']}
+          enabledWaves={['top', 'middle', 'bottom']}
+          lineCount={[8, 10, 6]}
+          lineDistance={[4, 6, 8]}
+          animationSpeed={0.4}
+          topWavePosition={{ x: 8.0, y: 0.8, rotate: -0.3 }}
+          middleWavePosition={{ x: 4.0, y: 0.0, rotate: 0.15 }}
+          bottomWavePosition={{ x: 2.0, y: -0.8, rotate: -0.2 }}
           interactive={false}
           parallax={false}
         />
@@ -75,7 +80,7 @@ export default function ClasesPage() {
           {/* Columna Izquierda */}
           <div className="lg:col-span-3 flex flex-col gap-6 min-h-0">
             <PerfilEstudiante user={user} />
-            <CompanerosEquipo companeros={companeros} />
+            <TareasActivas />
           </div>
 
           {/* Columna Central */}
@@ -84,10 +89,9 @@ export default function ClasesPage() {
             <CanalComunicacion />
           </div>
 
-          {/* Columna Derecha */}
-          <div className="lg:col-span-3 flex flex-col gap-6 min-h-0">
-            <TareasActivas />
-            <RachaSemanal />
+          {/* Columna Derecha - Actividad del Equipo (ocupa todo el alto) */}
+          <div className="lg:col-span-3 flex flex-col min-h-0">
+            <ActividadEquipo companeros={companeros} />
           </div>
         </div>
       </div>
