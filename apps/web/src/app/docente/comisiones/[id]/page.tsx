@@ -100,21 +100,6 @@ export default function ComisionDetallePage() {
     }
   };
 
-  const handleReiniciarEstado = async () => {
-    setIsLoadingLiveKit(true);
-    try {
-      // Llamar al endpoint de reiniciar (requiere rol admin, pero para dev lo probamos)
-      await apiClient.patch(`/comisiones/${comisionId}/reiniciar-estado`);
-      setEstadoClase('Programada');
-      toast.success('Estado reiniciado a Programada');
-    } catch (error) {
-      console.error('Error al reiniciar estado:', error);
-      toast.error('Error al reiniciar. ¿Tienes permisos de admin?');
-    } finally {
-      setIsLoadingLiveKit(false);
-    }
-  };
-
   const fetchComision = async () => {
     try {
       setIsLoading(true);
@@ -246,20 +231,14 @@ export default function ComisionDetallePage() {
                 </button>
               )}
 
-              {/* Botón Reiniciar - Solo si está Finalizada o Cancelada */}
+              {/* Mensaje cuando está Finalizada - Se reinicia automáticamente */}
               {(estadoClase === 'Finalizada' || estadoClase === 'Cancelada') && (
-                <button
-                  onClick={handleReiniciarEstado}
-                  disabled={isLoadingLiveKit}
-                  className="flex items-center gap-2 px-5 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl transition-all disabled:opacity-50"
-                >
-                  {isLoadingLiveKit ? (
-                    <RefreshCw className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <RefreshCw className="w-5 h-5" />
-                  )}
-                  Reiniciar para nueva clase
-                </button>
+                <div className="flex items-center gap-2 px-4 py-2 bg-gray-500/20 border border-gray-500/50 rounded-xl">
+                  <RefreshCw className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-400 text-sm">
+                    Se reiniciará automáticamente en 12 horas
+                  </span>
+                </div>
               )}
 
               {/* Badge En Vivo */}
