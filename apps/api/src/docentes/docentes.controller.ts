@@ -8,7 +8,6 @@ import {
   Param,
   Query,
   UseGuards,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { ParseIdPipe } from '../common/pipes';
 import { DocentesService } from './docentes.service';
@@ -288,37 +287,37 @@ export class DocentesController {
   }
 
   /**
-   * POST /docentes/asignaciones/:id/semanas/:numero/activar - Activar una semana
+   * POST /docentes/asignaciones/:id/clases/:claseId/activar - Activar una clase (teoría + práctica)
    * @param id - ID de la asignación
-   * @param numero - Número de semana (1 a semanas_total)
+   * @param claseId - ID de la clase
    * @param user - Usuario autenticado (del JWT)
    */
-  @Post('asignaciones/:id/semanas/:numero/activar')
+  @Post('asignaciones/:id/clases/:claseId/activar')
   @Roles(Role.DOCENTE)
-  async activarSemana(
+  async activarClase(
     @Param('id', ParseIdPipe) id: string,
-    @Param('numero', ParseIntPipe) numero: number,
+    @Param('claseId', ParseIdPipe) claseId: string,
     @GetUser() user: AuthUser,
   ) {
-    await this.planificacionesService.activarSemana(id, numero, user.id);
-    return { success: true, message: `Semana ${numero} activada` };
+    await this.planificacionesService.activarClase(id, claseId, user.id);
+    return { success: true, message: 'Clase activada' };
   }
 
   /**
-   * POST /docentes/asignaciones/:id/semanas/:numero/desactivar - Desactivar una semana
+   * POST /docentes/asignaciones/:id/clases/:claseId/desactivar - Desactivar una clase
    * @param id - ID de la asignación
-   * @param numero - Número de semana (1 a semanas_total)
+   * @param claseId - ID de la clase
    * @param user - Usuario autenticado (del JWT)
    */
-  @Post('asignaciones/:id/semanas/:numero/desactivar')
+  @Post('asignaciones/:id/clases/:claseId/desactivar')
   @Roles(Role.DOCENTE)
-  async desactivarSemana(
+  async desactivarClase(
     @Param('id', ParseIdPipe) id: string,
-    @Param('numero', ParseIntPipe) numero: number,
+    @Param('claseId', ParseIdPipe) claseId: string,
     @GetUser() user: AuthUser,
   ) {
-    await this.planificacionesService.desactivarSemana(id, numero, user.id);
-    return { success: true, message: `Semana ${numero} desactivada` };
+    await this.planificacionesService.desactivarClase(id, claseId, user.id);
+    return { success: true, message: 'Clase desactivada' };
   }
 
   /**

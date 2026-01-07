@@ -6,17 +6,12 @@ import {
 import { PrismaService } from '../../core/database/prisma.service';
 
 /**
- * Interfaces para respuestas tipadas
+ * Interfaces para respuestas tipadas - Modelo v2 (Clases)
  */
 export interface PlanificacionSimple {
   id: string;
   titulo: string;
-  semanas_total: number;
-}
-
-export interface SemanaActiva {
-  semana_numero: number;
-  activa: boolean;
+  cantidad_clases: number;
 }
 
 export interface ClaseGrupoSimple {
@@ -24,30 +19,49 @@ export interface ClaseGrupoSimple {
   nombre: string;
 }
 
+export interface ClaseInfo {
+  id: string;
+  numero: number;
+  titulo: string;
+}
+
+export interface EstadoClase {
+  clase: ClaseInfo;
+  teoria_activa: boolean;
+  practica_activa: boolean;
+}
+
 export interface AsignacionResponse {
   id: string;
   planificacion: PlanificacionSimple;
   claseGrupo: ClaseGrupoSimple;
-  semanas_activas: SemanaActiva[];
+  clases: ClaseInfo[];
+  estados_clases: EstadoClase[];
 }
 
-export interface ProgresoEstudiante {
+export interface ProgresoEstudianteClase {
   id: string;
   estudiante: { nombre: string; apellido: string } | null;
-  semana_actual: number;
-  tiempo_total_minutos: number;
-  puntos_totales: number;
+  clase_numero: number;
+  clase_titulo: string;
+  teoria_completada: boolean;
+  practica_completada: boolean;
+  tiempo_teoria_segundos: number;
+  tiempo_practica_segundos: number;
 }
 
 /**
- * Servicio de Planificaciones para Docentes
+ * Servicio de Planificaciones para Docentes - v2 (Modelo de Clases)
  *
  * Responsabilidades:
  * - Obtener asignaciones de planificaciones del docente
- * - Activar/desactivar semanas de planificaciones
- * - Consultar progreso de estudiantes en planificaciones
+ * - Activar/desactivar teoría y práctica por clase
+ * - Consultar progreso de estudiantes en clases
  *
- * Patrón: CQRS (lectura y escritura en mismo servicio por simplicidad)
+ * Modelo nuevo:
+ * - Planificacion → ClasePlanificacion[] (cada clase tiene teoría y práctica)
+ * - AsignacionPlanificacion → EstadoClaseGrupo[] (qué está activo por grupo)
+ * - ProgresoClaseEstudiante (progreso individual por clase)
  */
 @Injectable()
 export class DocentePlanificacionesService {
@@ -56,17 +70,24 @@ export class DocentePlanificacionesService {
   /**
    * Obtiene todas las asignaciones de planificaciones del docente autenticado
    * @param docenteId - ID del docente
-   * @returns Lista de asignaciones con planificación, grupo y semanas activas
+   * @returns Lista de asignaciones con planificación, grupo, clases y estados
    */
   async getMisAsignaciones(docenteId: string): Promise<AsignacionResponse[]> {
     const asignaciones = await this.prisma.asignacionPlanificacion.findMany({
       where: { docente_id: docenteId },
       include: {
         planificacion: {
-          select: {
-            id: true,
-            titulo: true,
-            semanas_total: true,
+          include: {
+            clases: {
+              select: {
+                id: true,
+                numero: true,
+                titulo: true,
+              },
+              orderBy: {
+                numero: 'asc',
+              },
+            },
           },
         },
         claseGrupo: {
@@ -75,18 +96,25 @@ export class DocentePlanificacionesService {
             nombre: true,
           },
         },
-        semanasActivas: {
-          select: {
-            semana_numero: true,
-            activa: true,
+        estadosClases: {
+          include: {
+            clase: {
+              select: {
+                id: true,
+                numero: true,
+                titulo: true,
+              },
+            },
           },
           orderBy: {
-            semana_numero: 'asc',
+            clase: {
+              numero: 'asc',
+            },
           },
         },
       },
       orderBy: {
-        creado_en: 'desc',
+        created_at: 'desc',
       },
     });
 
@@ -95,81 +123,213 @@ export class DocentePlanificacionesService {
       planificacion: {
         id: asig.planificacion.id,
         titulo: asig.planificacion.titulo,
-        semanas_total: asig.planificacion.semanas_total,
+        cantidad_clases: asig.planificacion.cantidad_clases,
       },
       claseGrupo: {
         id: asig.claseGrupo.id,
         nombre: asig.claseGrupo.nombre,
       },
-      semanas_activas: asig.semanasActivas.map((s) => ({
-        semana_numero: s.semana_numero,
-        activa: s.activa,
+      clases: asig.planificacion.clases.map((c) => ({
+        id: c.id,
+        numero: c.numero,
+        titulo: c.titulo,
+      })),
+      estados_clases: asig.estadosClases.map((e) => ({
+        clase: {
+          id: e.clase.id,
+          numero: e.clase.numero,
+          titulo: e.clase.titulo,
+        },
+        teoria_activa: e.teoria_activa,
+        practica_activa: e.practica_activa,
       })),
     }));
   }
 
   /**
-   * Activa una semana específica de una asignación
+   * Activa teoría de una clase específica para un grupo
    * @param asignacionId - ID de la asignación
-   * @param semanaNumero - Número de semana a activar
+   * @param claseId - ID de la clase a activar
    * @param docenteId - ID del docente (para validar ownership)
    */
-  async activarSemana(
+  async activarTeoria(
     asignacionId: string,
-    semanaNumero: number,
+    claseId: string,
     docenteId: string,
   ): Promise<void> {
     await this.validarOwnership(asignacionId, docenteId);
+    await this.validarClaseEnPlanificacion(asignacionId, claseId);
 
-    // Upsert: crear si no existe, actualizar si existe
-    await this.prisma.semanaActivaPlanificacion.upsert({
+    await this.prisma.estadoClaseGrupo.upsert({
       where: {
-        asignacion_id_semana_numero: {
+        asignacion_id_clase_id: {
           asignacion_id: asignacionId,
-          semana_numero: semanaNumero,
+          clase_id: claseId,
         },
       },
       update: {
-        activa: true,
+        teoria_activa: true,
         activada_en: new Date(),
       },
       create: {
         asignacion_id: asignacionId,
-        semana_numero: semanaNumero,
-        activa: true,
+        clase_id: claseId,
+        teoria_activa: true,
+        practica_activa: false,
         activada_en: new Date(),
       },
     });
   }
 
   /**
-   * Desactiva una semana específica de una asignación
-   * @param asignacionId - ID de la asignación
-   * @param semanaNumero - Número de semana a desactivar
-   * @param docenteId - ID del docente (para validar ownership)
+   * Desactiva teoría de una clase específica
    */
-  async desactivarSemana(
+  async desactivarTeoria(
     asignacionId: string,
-    semanaNumero: number,
+    claseId: string,
     docenteId: string,
   ): Promise<void> {
     await this.validarOwnership(asignacionId, docenteId);
 
-    // Upsert: crear como desactivada si no existe, actualizar si existe
-    await this.prisma.semanaActivaPlanificacion.upsert({
+    await this.prisma.estadoClaseGrupo.upsert({
       where: {
-        asignacion_id_semana_numero: {
+        asignacion_id_clase_id: {
           asignacion_id: asignacionId,
-          semana_numero: semanaNumero,
+          clase_id: claseId,
         },
       },
       update: {
-        activa: false,
+        teoria_activa: false,
       },
       create: {
         asignacion_id: asignacionId,
-        semana_numero: semanaNumero,
-        activa: false,
+        clase_id: claseId,
+        teoria_activa: false,
+        practica_activa: false,
+      },
+    });
+  }
+
+  /**
+   * Activa práctica de una clase específica para un grupo
+   */
+  async activarPractica(
+    asignacionId: string,
+    claseId: string,
+    docenteId: string,
+  ): Promise<void> {
+    await this.validarOwnership(asignacionId, docenteId);
+    await this.validarClaseEnPlanificacion(asignacionId, claseId);
+
+    await this.prisma.estadoClaseGrupo.upsert({
+      where: {
+        asignacion_id_clase_id: {
+          asignacion_id: asignacionId,
+          clase_id: claseId,
+        },
+      },
+      update: {
+        practica_activa: true,
+        activada_en: new Date(),
+      },
+      create: {
+        asignacion_id: asignacionId,
+        clase_id: claseId,
+        teoria_activa: false,
+        practica_activa: true,
+        activada_en: new Date(),
+      },
+    });
+  }
+
+  /**
+   * Desactiva práctica de una clase específica
+   */
+  async desactivarPractica(
+    asignacionId: string,
+    claseId: string,
+    docenteId: string,
+  ): Promise<void> {
+    await this.validarOwnership(asignacionId, docenteId);
+
+    await this.prisma.estadoClaseGrupo.upsert({
+      where: {
+        asignacion_id_clase_id: {
+          asignacion_id: asignacionId,
+          clase_id: claseId,
+        },
+      },
+      update: {
+        practica_activa: false,
+      },
+      create: {
+        asignacion_id: asignacionId,
+        clase_id: claseId,
+        teoria_activa: false,
+        practica_activa: false,
+      },
+    });
+  }
+
+  /**
+   * Activa tanto teoría como práctica de una clase (toggle completo)
+   */
+  async activarClase(
+    asignacionId: string,
+    claseId: string,
+    docenteId: string,
+  ): Promise<void> {
+    await this.validarOwnership(asignacionId, docenteId);
+    await this.validarClaseEnPlanificacion(asignacionId, claseId);
+
+    await this.prisma.estadoClaseGrupo.upsert({
+      where: {
+        asignacion_id_clase_id: {
+          asignacion_id: asignacionId,
+          clase_id: claseId,
+        },
+      },
+      update: {
+        teoria_activa: true,
+        practica_activa: true,
+        activada_en: new Date(),
+      },
+      create: {
+        asignacion_id: asignacionId,
+        clase_id: claseId,
+        teoria_activa: true,
+        practica_activa: true,
+        activada_en: new Date(),
+      },
+    });
+  }
+
+  /**
+   * Desactiva tanto teoría como práctica de una clase
+   */
+  async desactivarClase(
+    asignacionId: string,
+    claseId: string,
+    docenteId: string,
+  ): Promise<void> {
+    await this.validarOwnership(asignacionId, docenteId);
+
+    await this.prisma.estadoClaseGrupo.upsert({
+      where: {
+        asignacion_id_clase_id: {
+          asignacion_id: asignacionId,
+          clase_id: claseId,
+        },
+      },
+      update: {
+        teoria_activa: false,
+        practica_activa: false,
+      },
+      create: {
+        asignacion_id: asignacionId,
+        clase_id: claseId,
+        teoria_activa: false,
+        practica_activa: false,
       },
     });
   }
@@ -178,16 +338,58 @@ export class DocentePlanificacionesService {
    * Obtiene el progreso de todos los estudiantes en una asignación
    * @param asignacionId - ID de la asignación
    * @param docenteId - ID del docente (para validar ownership)
-   * @returns Lista de progresos de estudiantes
+   * @returns Lista de progresos de estudiantes por clase
    */
   async getProgresoEstudiantes(
     asignacionId: string,
     docenteId: string,
-  ): Promise<{ progresos: ProgresoEstudiante[] }> {
+  ): Promise<{ progresos: ProgresoEstudianteClase[] }> {
     await this.validarOwnership(asignacionId, docenteId);
 
-    const progresos = await this.prisma.progresoSemanalEstudiante.findMany({
-      where: { asignacion_id: asignacionId },
+    // Obtener la asignación para saber qué planificación es
+    const asignacion = await this.prisma.asignacionPlanificacion.findUnique({
+      where: { id: asignacionId },
+      include: {
+        planificacion: {
+          include: {
+            clases: {
+              orderBy: { numero: 'asc' },
+            },
+          },
+        },
+        claseGrupo: {
+          include: {
+            inscripciones: {
+              where: { fecha_baja: null },
+              include: {
+                estudiante: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!asignacion) {
+      throw new NotFoundException('Asignación no encontrada');
+    }
+
+    // Obtener todos los progresos de estudiantes del grupo en las clases de esta planificación
+    const claseIds = asignacion.planificacion.clases.map((c) => c.id);
+
+    const progresos = await this.prisma.progresoClaseEstudiante.findMany({
+      where: {
+        clase_id: { in: claseIds },
+        estudiante_id: {
+          in: asignacion.claseGrupo.inscripciones.map((i) => i.estudiante.id),
+        },
+      },
       include: {
         estudiante: {
           select: {
@@ -195,8 +397,17 @@ export class DocentePlanificacionesService {
             apellido: true,
           },
         },
+        clase: {
+          select: {
+            numero: true,
+            titulo: true,
+          },
+        },
       },
-      orderBy: [{ semana_actual: 'desc' }, { puntos_totales: 'desc' }],
+      orderBy: [
+        { clase: { numero: 'asc' } },
+        { estudiante: { apellido: 'asc' } },
+      ],
     });
 
     return {
@@ -205,19 +416,18 @@ export class DocentePlanificacionesService {
         estudiante: p.estudiante
           ? { nombre: p.estudiante.nombre, apellido: p.estudiante.apellido }
           : null,
-        semana_actual: p.semana_actual,
-        tiempo_total_minutos: p.tiempo_total_min,
-        puntos_totales: p.puntos_totales,
+        clase_numero: p.clase.numero,
+        clase_titulo: p.clase.titulo,
+        teoria_completada: p.teoria_completada,
+        practica_completada: p.practica_completada,
+        tiempo_teoria_segundos: p.tiempo_teoria_segundos,
+        tiempo_practica_segundos: p.tiempo_practica_segundos,
       })),
     };
   }
 
   /**
    * Valida que el docente es dueño de la asignación
-   * @param asignacionId - ID de la asignación
-   * @param docenteId - ID del docente
-   * @throws NotFoundException si la asignación no existe
-   * @throws ForbiddenException si el docente no es dueño
    */
   private async validarOwnership(
     asignacionId: string,
@@ -236,6 +446,31 @@ export class DocentePlanificacionesService {
       throw new ForbiddenException(
         'No tienes permisos para modificar esta asignación',
       );
+    }
+  }
+
+  /**
+   * Valida que la clase pertenece a la planificación de la asignación
+   */
+  private async validarClaseEnPlanificacion(
+    asignacionId: string,
+    claseId: string,
+  ): Promise<void> {
+    const asignacion = await this.prisma.asignacionPlanificacion.findUnique({
+      where: { id: asignacionId },
+      include: {
+        planificacion: {
+          include: {
+            clases: {
+              where: { id: claseId },
+            },
+          },
+        },
+      },
+    });
+
+    if (!asignacion || asignacion.planificacion.clases.length === 0) {
+      throw new NotFoundException('La clase no pertenece a esta planificación');
     }
   }
 }

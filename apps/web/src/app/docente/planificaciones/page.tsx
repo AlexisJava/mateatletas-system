@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import {
   planificacionesApi,
   type Asignacion,
-  type ProgresoEstudiante,
+  type ProgresoEstudianteClase,
 } from '@/lib/api/docentes.api';
 import { getErrorMessage } from '@/lib/utils/error-handler';
-import { Calendar, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { Calendar, CheckCircle, XCircle, Eye, BookOpen, FlaskConical } from 'lucide-react';
 
 export default function DocentePlanificacionesPage() {
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
@@ -15,7 +15,7 @@ export default function DocentePlanificacionesPage() {
   const [error, setError] = useState<string | null>(null);
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [, setSelectedAsignacion] = useState<string | null>(null);
-  const [progresos, setProgresos] = useState<ProgresoEstudiante[]>([]);
+  const [progresos, setProgresos] = useState<ProgresoEstudianteClase[]>([]);
 
   useEffect(() => {
     loadAsignaciones();
@@ -36,20 +36,16 @@ export default function DocentePlanificacionesPage() {
     }
   };
 
-  const handleToggleSemana = async (
-    asignacionId: string,
-    semanaNumero: number,
-    activa: boolean,
-  ) => {
+  const handleToggleClase = async (asignacionId: string, claseId: string, activa: boolean) => {
     try {
       if (activa) {
-        await planificacionesApi.desactivarSemana(asignacionId, semanaNumero);
+        await planificacionesApi.desactivarClase(asignacionId, claseId);
       } else {
-        await planificacionesApi.activarSemana(asignacionId, semanaNumero);
+        await planificacionesApi.activarClase(asignacionId, claseId);
       }
       await loadAsignaciones();
     } catch (err) {
-      const errorMessage = getErrorMessage(err as Error, 'Error al actualizar semana');
+      const errorMessage = getErrorMessage(err as Error, 'Error al actualizar clase');
       alert(errorMessage);
     }
   };
@@ -64,6 +60,16 @@ export default function DocentePlanificacionesPage() {
       const errorMessage = getErrorMessage(err as Error, 'Error al cargar progreso');
       alert(errorMessage);
     }
+  };
+
+  // Helper para obtener el estado de una clase
+  const getEstadoClase = (asignacion: Asignacion, claseId: string) => {
+    const estado = asignacion.estados_clases.find((e) => e.clase.id === claseId);
+    return {
+      teoria_activa: estado?.teoria_activa ?? false,
+      practica_activa: estado?.practica_activa ?? false,
+      activa: (estado?.teoria_activa || estado?.practica_activa) ?? false,
+    };
   };
 
   if (isLoading) {
@@ -102,7 +108,7 @@ export default function DocentePlanificacionesPage() {
         <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-emerald-200 to-green-200 bg-clip-text text-transparent drop-shadow-lg mb-1">
           Mis Planificaciones
         </h1>
-        <p className="text-sm text-slate-300 font-medium">Gestionar semanas activas</p>
+        <p className="text-sm text-slate-300 font-medium">Gestionar clases activas</p>
       </div>
 
       {/* Stats */}
@@ -127,69 +133,96 @@ export default function DocentePlanificacionesPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {asignaciones.map((asignacion) => {
-            const semanasActivasNums = asignacion.semanas_activas
-              .filter((s) => s.activa)
-              .map((s) => s.semana_numero);
-
-            return (
-              <div
-                key={asignacion.id}
-                className="rounded-2xl bg-gradient-to-br from-slate-800/50 via-slate-700/50 to-slate-800/50 backdrop-blur-xl border-2 border-slate-600/50 p-6"
-              >
-                {/* Header */}
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-1">
-                      {asignacion.planificacion.titulo}
-                    </h3>
-                    <p className="text-sm text-slate-400">
-                      Grupo: {asignacion.claseGrupo.nombre} •{' '}
-                      {asignacion.planificacion.semanas_total} semanas
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => handleVerProgreso(asignacion.id)}
-                    className="px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 font-bold hover:bg-emerald-500/30 transition-all flex items-center gap-2"
-                  >
-                    <Eye className="w-4 h-4" />
-                    Ver Progreso
-                  </button>
+          {asignaciones.map((asignacion) => (
+            <div
+              key={asignacion.id}
+              className="rounded-2xl bg-gradient-to-br from-slate-800/50 via-slate-700/50 to-slate-800/50 backdrop-blur-xl border-2 border-slate-600/50 p-6"
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-1">
+                    {asignacion.planificacion.titulo}
+                  </h3>
+                  <p className="text-sm text-slate-400">
+                    Grupo: {asignacion.claseGrupo.nombre} •{' '}
+                    {asignacion.planificacion.cantidad_clases} clases
+                  </p>
                 </div>
-
-                {/* Semanas */}
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                  {Array.from(
-                    { length: asignacion.planificacion.semanas_total },
-                    (_, i) => i + 1,
-                  ).map((semana) => {
-                    const activa = semanasActivasNums.includes(semana);
-                    return (
-                      <button
-                        key={semana}
-                        onClick={() => handleToggleSemana(asignacion.id, semana, activa)}
-                        className={`p-4 rounded-xl border-2 font-bold transition-all ${
-                          activa
-                            ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-300 hover:bg-emerald-500/30'
-                            : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:bg-slate-600/30'
-                        }`}
-                      >
-                        <div className="flex items-center justify-center gap-2 mb-1">
-                          {activa ? (
-                            <CheckCircle className="w-4 h-4" />
-                          ) : (
-                            <XCircle className="w-4 h-4" />
-                          )}
-                          <span className="text-xs">Semana</span>
-                        </div>
-                        <p className="text-2xl">{semana}</p>
-                      </button>
-                    );
-                  })}
-                </div>
+                <button
+                  onClick={() => handleVerProgreso(asignacion.id)}
+                  className="px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 font-bold hover:bg-emerald-500/30 transition-all flex items-center gap-2"
+                >
+                  <Eye className="w-4 h-4" />
+                  Ver Progreso
+                </button>
               </div>
-            );
-          })}
+
+              {/* Clases */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {asignacion.clases.map((clase) => {
+                  const estado = getEstadoClase(asignacion, clase.id);
+                  return (
+                    <div
+                      key={clase.id}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        estado.activa
+                          ? 'bg-emerald-500/20 border-emerald-400/50'
+                          : 'bg-slate-700/30 border-slate-600'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl font-black text-white">{clase.numero}</span>
+                          <span className="text-xs text-slate-400 uppercase">Clase</span>
+                        </div>
+                        <button
+                          onClick={() => handleToggleClase(asignacion.id, clase.id, estado.activa)}
+                          className={`p-2 rounded-lg transition-all ${
+                            estado.activa
+                              ? 'bg-emerald-500/30 text-emerald-300 hover:bg-emerald-500/40'
+                              : 'bg-slate-600/50 text-slate-400 hover:bg-slate-600/70'
+                          }`}
+                        >
+                          {estado.activa ? (
+                            <CheckCircle className="w-5 h-5" />
+                          ) : (
+                            <XCircle className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                      <p className="text-sm text-white font-medium mb-3 line-clamp-2">
+                        {clase.titulo}
+                      </p>
+                      {/* Estado de teoría y práctica */}
+                      <div className="flex gap-2">
+                        <div
+                          className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-bold ${
+                            estado.teoria_activa
+                              ? 'bg-blue-500/30 text-blue-300'
+                              : 'bg-slate-600/30 text-slate-500'
+                          }`}
+                        >
+                          <BookOpen className="w-3 h-3" />
+                          Teoría
+                        </div>
+                        <div
+                          className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-bold ${
+                            estado.practica_activa
+                              ? 'bg-purple-500/30 text-purple-300'
+                              : 'bg-slate-600/30 text-slate-500'
+                          }`}
+                        >
+                          <FlaskConical className="w-3 h-3" />
+                          Práctica
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -219,14 +252,17 @@ export default function DocentePlanificacionesPage() {
                       <th className="text-left px-4 py-3 text-xs font-bold text-slate-300 uppercase">
                         Estudiante
                       </th>
-                      <th className="text-center px-4 py-3 text-xs font-bold text-slate-300 uppercase">
-                        Semana
+                      <th className="text-left px-4 py-3 text-xs font-bold text-slate-300 uppercase">
+                        Clase
                       </th>
                       <th className="text-center px-4 py-3 text-xs font-bold text-slate-300 uppercase">
-                        Tiempo (min)
+                        Teoría
                       </th>
                       <th className="text-center px-4 py-3 text-xs font-bold text-slate-300 uppercase">
-                        Puntos
+                        Práctica
+                      </th>
+                      <th className="text-center px-4 py-3 text-xs font-bold text-slate-300 uppercase">
+                        Tiempo
                       </th>
                     </tr>
                   </thead>
@@ -241,14 +277,32 @@ export default function DocentePlanificacionesPage() {
                             {progreso.estudiante?.nombre} {progreso.estudiante?.apellido}
                           </p>
                         </td>
-                        <td className="px-4 py-3 text-center text-white font-bold">
-                          {progreso.semana_actual}
+                        <td className="px-4 py-3">
+                          <p className="text-white">
+                            <span className="font-bold">{progreso.clase_numero}.</span>{' '}
+                            <span className="text-slate-400">{progreso.clase_titulo}</span>
+                          </p>
                         </td>
-                        <td className="px-4 py-3 text-center text-white">
-                          {progreso.tiempo_total_minutos}
+                        <td className="px-4 py-3 text-center">
+                          {progreso.teoria_completada ? (
+                            <CheckCircle className="w-5 h-5 text-emerald-400 mx-auto" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-slate-500 mx-auto" />
+                          )}
                         </td>
-                        <td className="px-4 py-3 text-center text-emerald-300 font-bold">
-                          {progreso.puntos_totales}
+                        <td className="px-4 py-3 text-center">
+                          {progreso.practica_completada ? (
+                            <CheckCircle className="w-5 h-5 text-emerald-400 mx-auto" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-slate-500 mx-auto" />
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-center text-slate-300 text-sm">
+                          {Math.round(
+                            (progreso.tiempo_teoria_segundos + progreso.tiempo_practica_segundos) /
+                              60,
+                          )}{' '}
+                          min
                         </td>
                       </tr>
                     ))}

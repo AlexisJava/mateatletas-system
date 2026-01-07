@@ -165,8 +165,9 @@ model Estudiante {
   /// LIVEKIT: Registros de asistencia en clases en vivo
   asistencias_live AsistenciaLive[]
 
-  /// PLANIFICACIONES: Progreso semanal del estudiante en planificaciones asignadas
-  progresosSemanales ProgresoSemanalEstudiante[]
+  /// PLANIFICACIONES v2: Progreso del estudiante en clases y tareas
+  progresosClase ProgresoClaseEstudiante[]
+  progresosTarea ProgresoTareaEstudiante[]
 
   /// COMISIONES: Registros de asistencia en comisiones (talleres, colonias)
   asistencias_comision AsistenciaComision[]
@@ -327,6 +328,9 @@ model Contenido {
   /// Estado actual del contenido
   estado EstadoContenido @default(BORRADOR)
 
+  /// Tipo de contenido educativo
+  tipo TipoContenido @default(MICROLECCION)
+
   /// ID del admin que creó el contenido
   creadorId String @map("creador_id")
 
@@ -342,6 +346,9 @@ model Contenido {
   /// Duración estimada en minutos
   duracionMinutos Int? @map("duracion_minutos")
 
+  /// Para JUEGO/SIMULACION: ID del componente React/Phaser
+  juegoCodigo String? @map("juego_codigo")
+
   /// Fecha de publicación (null si es borrador)
   fechaPublicacion DateTime? @map("fecha_publicacion")
 
@@ -356,9 +363,15 @@ model Contenido {
   nodos     NodoContenido[]
   progresos ProgresoContenido[]
 
+  /// Relaciones con sistema de Planificaciones
+  clasesTeoria   ClasePlanificacion[] @relation("ClaseTeoria")
+  clasesPractica ClasePlanificacion[] @relation("ClasePractica")
+  tareasClase    TareaClase[]
+
   @@index([casaTipo, mundoTipo, estado], name: "idx_contenidos_casa_mundo_estado")
   @@index([creadorId], name: "idx_contenidos_creador")
   @@index([estado], name: "idx_contenidos_estado")
+  @@index([tipo], name: "idx_contenidos_tipo")
   @@map("contenidos")
 }
 
@@ -1443,6 +1456,19 @@ enum EstadoContenido {
   @@map("estado_contenido")
 }
 
+/// Tipo de contenido educativo
+enum TipoContenido {
+  LECCION      // Clase en vivo (teoría/práctica)
+  TAREA        // Trabajo asignable
+  MICROLECCION // Cápsula autoguiada
+  EVALUACION   // Quiz, examen
+  JUEGO        // Minijuego Phaser
+  SIMULACION   // Experimento interactivo
+  RECURSO      // Material de consulta (no se completa)
+
+  @@map("tipo_contenido")
+}
+
 /// Enum para estado del onboarding del estudiante (2026)
 /// Flujo: PENDIENTE -> SELECCION_MUNDOS -> TEST_UBICACION -> CONFIRMACION_CASA -> CREACION_AVATAR -> COMPLETADO
 enum OnboardingEstado {
@@ -1512,10 +1538,11 @@ enum TipoEvento {
 
 /// Estados de una tarea
 enum EstadoTarea {
-  PENDIENTE
-  EN_PROGRESO
-  COMPLETADA
-  CANCELADA
+  PENDIENTE     // No iniciada
+  EN_PROGRESO   // Iniciada pero no completada
+  COMPLETADA    // Terminada exitosamente
+  CANCELADA     // Cancelada por admin/docente
+  VENCIDA       // Pasó la fecha límite sin completar
 
   @@map("estado_tarea")
 }
@@ -2683,126 +2710,274 @@ model TareaAdmin {
 }
 
 // =============================================================================
-// PLANIFICACIONES DOCENTE
-// Sistema de planificaciones semanales para grupos pedagógicos
+// SISTEMA DE PLANIFICACIONES DOCENTE v2
+// Cursos de larga duración con clases, teoría/práctica y tareas
 // =============================================================================
 
-/// Planificación semanal de contenido para grupos pedagógicos
+/// Planificación: un curso completo (ej: 16 clases de Scratch)
 model Planificacion {
-  /// Identificador único
-  id String @id @default(cuid())
+  id              String @id @default(cuid())
 
-  /// Título de la planificación
-  titulo String
+  /// Título del curso/planificación
+  titulo          String
 
-  /// Descripción opcional
-  descripcion String?
+  /// Descripción del curso
+  descripcion     String?
 
-  /// Cantidad total de semanas de la planificación
-  semanas_total Int @default(12)
+  /// Cantidad total de clases en la planificación
+  cantidad_clases Int
 
-  /// Si la planificación está activa
-  activa Boolean @default(true)
+  /// Días entre clases (default: 7 = semanal)
+  duracion_clase_dias Int @default(7)
 
-  /// Timestamp de creación
-  creado_en DateTime @default(now())
+  /// Casa objetivo (QUANTUM, VERTEX, PULSAR)
+  casa_tipo       CasaTipo @map("casa_tipo")
 
-  /// Timestamp de última actualización
-  actualizado_en DateTime @updatedAt
+  /// Mundo/materia (MATEMATICA, PROGRAMACION, CIENCIAS)
+  mundo_tipo      MundoTipo @map("mundo_tipo")
 
-  /// Asignaciones de esta planificación a grupos
-  asignaciones AsignacionPlanificacion[]
+  /// Estado de publicación
+  estado          EstadoContenido @default(BORRADOR)
 
+  /// Timestamps
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  /// Relaciones
+  clases          ClasePlanificacion[]
+  asignaciones    AsignacionPlanificacion[]
+
+  @@index([casa_tipo, mundo_tipo])
+  @@index([estado])
   @@map("planificaciones")
 }
 
-/// Asignación de una planificación a un ClaseGrupo específico por un docente
-model AsignacionPlanificacion {
-  /// Identificador único
-  id String @id @default(cuid())
+/// Clase dentro de una planificación (ej: Clase 1 de 16)
+model ClasePlanificacion {
+  id                String @id @default(cuid())
 
-  /// ID de la planificación
-  planificacion_id String
+  /// ID de la planificación padre
+  planificacion_id  String
 
-  /// ID del grupo de clase
-  clase_grupo_id String
+  /// Número de clase (1, 2, 3... cantidad_clases)
+  numero            Int
 
-  /// ID del docente que asignó
-  docente_id String
+  /// Título de la clase
+  titulo            String
 
-  /// Timestamp de creación
-  creado_en DateTime @default(now())
+  /// Descripción/objetivos de la clase
+  descripcion       String?
+
+  /// ID del contenido de TEORIA
+  teoria_id         String
+
+  /// ID del contenido de PRACTICA
+  practica_id       String
+
+  /// Timestamps
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
 
   /// Relaciones
-  planificacion Planificacion @relation(fields: [planificacion_id], references: [id])
-  claseGrupo    ClaseGrupo    @relation(fields: [clase_grupo_id], references: [id])
-  docente       Docente       @relation(fields: [docente_id], references: [id])
+  planificacion     Planificacion @relation(fields: [planificacion_id], references: [id], onDelete: Cascade)
+  teoria            Contenido @relation("ClaseTeoria", fields: [teoria_id], references: [id])
+  practica          Contenido @relation("ClasePractica", fields: [practica_id], references: [id])
 
-  /// Semanas activas para esta asignación
-  semanasActivas SemanaActivaPlanificacion[]
+  tareas            TareaClase[]
+  estadosClase      EstadoClaseGrupo[]
+  progresosClase    ProgresoClaseEstudiante[]
 
-  /// Progresos de estudiantes en esta asignación
-  progresos ProgresoSemanalEstudiante[]
+  @@unique([planificacion_id, numero])
+  @@index([teoria_id])
+  @@index([practica_id])
+  @@map("clases_planificacion")
+}
+
+/// Tarea asociada a una clase (contenido asignable como tarea)
+model TareaClase {
+  id           String @id @default(cuid())
+
+  /// ID de la clase a la que pertenece
+  clase_id     String
+
+  /// ID del contenido que es la tarea
+  contenido_id String
+
+  /// Orden de la tarea dentro de la clase
+  orden        Int @default(0)
+
+  /// Si la tarea es obligatoria para completar la clase
+  obligatoria  Boolean @default(false)
+
+  /// Relaciones
+  clase        ClasePlanificacion @relation(fields: [clase_id], references: [id], onDelete: Cascade)
+  contenido    Contenido @relation(fields: [contenido_id], references: [id])
+
+  asignaciones TareaAsignada[]
+
+  @@unique([clase_id, contenido_id])
+  @@index([contenido_id])
+  @@map("tareas_clase")
+}
+
+/// Asignación de una planificación a un ClaseGrupo por un docente
+model AsignacionPlanificacion {
+  id                String @id @default(cuid())
+
+  /// ID de la planificación
+  planificacion_id  String
+
+  /// ID del grupo de clase (comisión)
+  clase_grupo_id    String
+
+  /// ID del docente responsable
+  docente_id        String
+
+  /// Fecha de inicio del curso para este grupo
+  fecha_inicio      DateTime @default(now())
+
+  /// Si la asignación está activa
+  activa            Boolean @default(true)
+
+  /// Timestamps
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  /// Relaciones
+  planificacion     Planificacion @relation(fields: [planificacion_id], references: [id])
+  claseGrupo        ClaseGrupo @relation(fields: [clase_grupo_id], references: [id])
+  docente           Docente @relation(fields: [docente_id], references: [id])
+
+  estadosClases     EstadoClaseGrupo[]
+  tareasAsignadas   TareaAsignada[]
 
   @@unique([planificacion_id, clase_grupo_id])
   @@index([docente_id])
+  @@index([clase_grupo_id])
   @@map("asignaciones_planificacion")
 }
 
-/// Semanas activas/visibles para los estudiantes en una asignación
-model SemanaActivaPlanificacion {
-  /// Identificador único
-  id String @id @default(cuid())
+/// Estado de una clase para un grupo específico (qué está activo/desbloqueado)
+model EstadoClaseGrupo {
+  id              String @id @default(cuid())
 
-  /// ID de la asignación
-  asignacion_id String
+  /// ID de la asignación planificación-grupo
+  asignacion_id   String
 
-  /// Número de semana (1 a semanas_total)
-  semana_numero Int
+  /// ID de la clase
+  clase_id        String
 
-  /// Si la semana está activa/visible para estudiantes
-  activa Boolean @default(false)
+  /// Si la teoría está activa/visible para estudiantes
+  teoria_activa   Boolean @default(false)
 
-  /// Fecha en que se activó (null si nunca se activó)
-  activada_en DateTime?
+  /// Si la práctica está activa/visible para estudiantes
+  practica_activa Boolean @default(false)
 
-  /// Relación con la asignación
-  asignacion AsignacionPlanificacion @relation(fields: [asignacion_id], references: [id], onDelete: Cascade)
+  /// Timestamp de cuando se activó la clase
+  activada_en     DateTime?
 
-  @@unique([asignacion_id, semana_numero])
-  @@map("semanas_activas_planificacion")
-}
-
-/// Progreso de estudiantes en una asignación de planificación
-model ProgresoSemanalEstudiante {
-  /// Identificador único
-  id String @id @default(cuid())
-
-  /// ID de la asignación
-  asignacion_id String
-
-  /// ID del estudiante
-  estudiante_id String
-
-  /// Semana actual en la que está el estudiante
-  semana_actual Int @default(1)
-
-  /// Tiempo total dedicado en minutos
-  tiempo_total_min Int @default(0)
-
-  /// Puntos totales acumulados
-  puntos_totales Int @default(0)
-
-  /// Timestamp de última actualización
-  actualizado_en DateTime @updatedAt
+  /// Timestamp de cuando se marcó como completada
+  completada_en   DateTime?
 
   /// Relaciones
-  asignacion AsignacionPlanificacion @relation(fields: [asignacion_id], references: [id], onDelete: Cascade)
-  estudiante Estudiante              @relation(fields: [estudiante_id], references: [id])
+  asignacion      AsignacionPlanificacion @relation(fields: [asignacion_id], references: [id], onDelete: Cascade)
+  clase           ClasePlanificacion @relation(fields: [clase_id], references: [id])
 
-  @@unique([asignacion_id, estudiante_id])
-  @@index([estudiante_id])
-  @@map("progresos_semanales_estudiante")
+  @@unique([asignacion_id, clase_id])
+  @@index([clase_id])
+  @@map("estados_clase_grupo")
+}
+
+/// Tarea asignada a un grupo (instancia de TareaClase para una asignación)
+model TareaAsignada {
+  id               String @id @default(cuid())
+
+  /// ID de la asignación planificación-grupo
+  asignacion_id    String
+
+  /// ID de la tarea de clase
+  tarea_clase_id   String
+
+  /// Fecha en que se asignó la tarea
+  fecha_asignacion DateTime @default(now())
+
+  /// Fecha límite de entrega (opcional)
+  fecha_limite     DateTime?
+
+  /// Si la tarea está activa/visible
+  activa           Boolean @default(true)
+
+  /// Relaciones
+  asignacion       AsignacionPlanificacion @relation(fields: [asignacion_id], references: [id], onDelete: Cascade)
+  tareaClase       TareaClase @relation(fields: [tarea_clase_id], references: [id])
+
+  progresos        ProgresoTareaEstudiante[]
+
+  @@unique([asignacion_id, tarea_clase_id])
+  @@index([tarea_clase_id])
+  @@map("tareas_asignadas")
+}
+
+/// Progreso de un estudiante en una clase (teoría + práctica)
+model ProgresoClaseEstudiante {
+  id                     String @id @default(cuid())
+
+  /// ID del estudiante
+  estudiante_id          String
+
+  /// ID de la clase
+  clase_id               String
+
+  /// Si completó la teoría
+  teoria_completada      Boolean @default(false)
+  teoria_completada_en   DateTime?
+
+  /// Si completó la práctica
+  practica_completada    Boolean @default(false)
+  practica_completada_en DateTime?
+
+  /// Tiempo dedicado en segundos
+  tiempo_teoria_segundos   Int @default(0)
+  tiempo_practica_segundos Int @default(0)
+
+  /// Relaciones
+  estudiante             Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  clase                  ClasePlanificacion @relation(fields: [clase_id], references: [id])
+
+  @@unique([estudiante_id, clase_id])
+  @@index([clase_id])
+  @@map("progresos_clase_estudiante")
+}
+
+/// Progreso de un estudiante en una tarea asignada
+model ProgresoTareaEstudiante {
+  id                    String @id @default(cuid())
+
+  /// ID del estudiante
+  estudiante_id         String
+
+  /// ID de la tarea asignada
+  tarea_asignada_id     String
+
+  /// Estado de la tarea
+  estado                EstadoTarea @default(PENDIENTE)
+
+  /// Timestamps de progreso
+  iniciada_en           DateTime?
+  completada_en         DateTime?
+
+  /// Métricas
+  tiempo_total_segundos Int @default(0)
+  intentos              Int @default(0)
+  calificacion          Float?
+
+  /// Relaciones
+  estudiante            Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  tareaAsignada         TareaAsignada @relation(fields: [tarea_asignada_id], references: [id], onDelete: Cascade)
+
+  @@unique([estudiante_id, tarea_asignada_id])
+  @@index([tarea_asignada_id])
+  @@map("progresos_tarea_estudiante")
 }
 
 // ============================================================

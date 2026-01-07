@@ -664,18 +664,25 @@ export const docentesApi = {
 export const getDashboardDocente = docentesApi.getDashboard;
 
 // ============================================================================
-// PLANIFICACIONES DOCENTE
+// PLANIFICACIONES DOCENTE - v2 (Modelo de Clases)
 // ============================================================================
 
 export interface PlanificacionSimple {
   id: string;
   titulo: string;
-  semanas_total: number;
+  cantidad_clases: number;
 }
 
-export interface SemanaActiva {
-  semana_numero: number;
-  activa: boolean;
+export interface ClaseInfo {
+  id: string;
+  numero: number;
+  titulo: string;
+}
+
+export interface EstadoClase {
+  clase: ClaseInfo;
+  teoria_activa: boolean;
+  practica_activa: boolean;
 }
 
 export interface ClaseGrupoSimple {
@@ -687,15 +694,19 @@ export interface Asignacion {
   id: string;
   planificacion: PlanificacionSimple;
   claseGrupo: ClaseGrupoSimple;
-  semanas_activas: SemanaActiva[];
+  clases: ClaseInfo[];
+  estados_clases: EstadoClase[];
 }
 
-export interface ProgresoEstudiante {
+export interface ProgresoEstudianteClase {
   id: string;
   estudiante: { nombre: string; apellido: string } | null;
-  semana_actual: number;
-  tiempo_total_minutos: number;
-  puntos_totales: number;
+  clase_numero: number;
+  clase_titulo: string;
+  teoria_completada: boolean;
+  practica_completada: boolean;
+  tiempo_teoria_segundos: number;
+  tiempo_practica_segundos: number;
 }
 
 // ============================================================================
@@ -746,49 +757,49 @@ export const asistenciaApi = {
 export const planificacionesApi = {
   /**
    * Obtener todas las asignaciones de planificaciones del docente autenticado
-   * @returns Lista de asignaciones con planificación, grupo y semanas activas
+   * @returns Lista de asignaciones con planificación, grupo, clases y estados
    */
   getMisAsignaciones: async (): Promise<Asignacion[]> => {
     return apiClient.get<Asignacion[]>('/docentes/me/asignaciones');
   },
 
   /**
-   * Activar una semana específica de una asignación
+   * Activar una clase (teoría + práctica) de una asignación
    * @param asignacionId - ID de la asignación
-   * @param semanaNumero - Número de semana a activar
+   * @param claseId - ID de la clase a activar
    */
-  activarSemana: async (
+  activarClase: async (
     asignacionId: string,
-    semanaNumero: number,
+    claseId: string,
   ): Promise<{ success: boolean; message: string }> => {
     return apiClient.post<{ success: boolean; message: string }>(
-      `/docentes/asignaciones/${asignacionId}/semanas/${semanaNumero}/activar`,
+      `/docentes/asignaciones/${asignacionId}/clases/${claseId}/activar`,
     );
   },
 
   /**
-   * Desactivar una semana específica de una asignación
+   * Desactivar una clase de una asignación
    * @param asignacionId - ID de la asignación
-   * @param semanaNumero - Número de semana a desactivar
+   * @param claseId - ID de la clase a desactivar
    */
-  desactivarSemana: async (
+  desactivarClase: async (
     asignacionId: string,
-    semanaNumero: number,
+    claseId: string,
   ): Promise<{ success: boolean; message: string }> => {
     return apiClient.post<{ success: boolean; message: string }>(
-      `/docentes/asignaciones/${asignacionId}/semanas/${semanaNumero}/desactivar`,
+      `/docentes/asignaciones/${asignacionId}/clases/${claseId}/desactivar`,
     );
   },
 
   /**
    * Obtener el progreso de estudiantes en una asignación
    * @param asignacionId - ID de la asignación
-   * @returns Lista de progresos de estudiantes
+   * @returns Lista de progresos de estudiantes por clase
    */
   getProgresoEstudiantes: async (
     asignacionId: string,
-  ): Promise<{ progresos: ProgresoEstudiante[] }> => {
-    return apiClient.get<{ progresos: ProgresoEstudiante[] }>(
+  ): Promise<{ progresos: ProgresoEstudianteClase[] }> => {
+    return apiClient.get<{ progresos: ProgresoEstudianteClase[] }>(
       `/docentes/asignaciones/${asignacionId}/progreso`,
     );
   },
