@@ -10,8 +10,8 @@ import {
   Clock,
   BookOpen,
   Video,
-  Radio,
   RefreshCw,
+  Radio,
   Play,
 } from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -116,20 +116,6 @@ export default function ComisionDetallePage() {
     } catch (error) {
       console.error('Error al entrar al aula:', error);
       toast.error(error instanceof Error ? error.message : 'Error al entrar al aula');
-    } finally {
-      setIsLoadingLiveKit(false);
-    }
-  };
-
-  const handleReiniciarEstado = async () => {
-    setIsLoadingLiveKit(true);
-    try {
-      await livekitApi.reiniciarEstadoComision(comisionId);
-      setEstadoClase('Programada');
-      toast.success('Estado reiniciado. Ya podés iniciar la clase.');
-    } catch (error) {
-      console.error('Error al reiniciar estado:', error);
-      toast.error(error instanceof Error ? error.message : 'Error al reiniciar');
     } finally {
       setIsLoadingLiveKit(false);
     }
@@ -266,19 +252,19 @@ export default function ComisionDetallePage() {
                 </button>
               )}
 
-              {/* Botón Reiniciar - Cuando está Finalizada o Cancelada */}
+              {/* Botón Iniciar Clase - Cuando está Finalizada o Cancelada (ahora es idempotente) */}
               {(estadoClase === 'Finalizada' || estadoClase === 'Cancelada') && (
                 <button
-                  onClick={handleReiniciarEstado}
+                  onClick={handleIniciarClase}
                   disabled={isLoadingLiveKit}
-                  className="flex items-center gap-2 px-5 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold rounded-xl transition-all disabled:opacity-50"
                 >
                   {isLoadingLiveKit ? (
                     <RefreshCw className="w-5 h-5 animate-spin" />
                   ) : (
-                    <RefreshCw className="w-5 h-5" />
+                    <Play className="w-5 h-5" />
                   )}
-                  Reiniciar Clase
+                  Iniciar Clase
                 </button>
               )}
 

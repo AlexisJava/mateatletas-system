@@ -89,28 +89,11 @@ export class ComisionLiveService {
       throw new BadRequestException('Esta comisión no está activa');
     }
 
-    // 4. Validar estado actual
-    if (comision.estado_clase === 'EnVivo') {
-      throw new BadRequestException('La clase ya está en vivo');
-    }
-
-    if (comision.estado_clase === 'Finalizada') {
-      throw new BadRequestException(
-        'La clase ya ha finalizado. Debe reiniciarse desde el panel de administración.',
-      );
-    }
-
-    if (comision.estado_clase === 'Cancelada') {
-      throw new BadRequestException(
-        'La clase está cancelada. Debe reactivarse desde el panel de administración.',
-      );
-    }
-
-    // 5. Generar nombre de sala si no existe
+    // 4. Generar nombre de sala si no existe
     const livekitRoomName =
       comision.livekit_room_name || `comision-${comisionId}`;
 
-    // 6. Actualizar estado a EnVivo
+    // 5. Actualizar estado a EnVivo
     const updated = await this.prisma.comision.update({
       where: { id: comisionId },
       data: {
@@ -252,104 +235,5 @@ export class ComisionLiveService {
     }
 
     return comision;
-  }
-
-  /**
-   * Reiniciar estado de comisión a Programada (solo admin)
-   * Útil para reprogramar clases finalizadas o canceladas
-   *
-   * @param comisionId - ID de la comisión
-   * @returns Datos actualizados de la comisión
-   */
-  async reiniciarEstadoClase(
-    comisionId: string,
-  ): Promise<ComisionEnVivoResponse> {
-    const comision = await this.prisma.comision.findUnique({
-      where: { id: comisionId },
-      select: { id: true },
-    });
-
-    if (!comision) {
-      throw new NotFoundException(
-        `Comisión con ID "${comisionId}" no encontrada`,
-      );
-    }
-
-    const updated = await this.prisma.comision.update({
-      where: { id: comisionId },
-      data: {
-        estado_clase: 'Programada',
-        iniciada_en: null,
-        finalizada_en: null,
-      },
-      select: {
-        id: true,
-        nombre: true,
-        estado_clase: true,
-        iniciada_en: true,
-        finalizada_en: true,
-        livekit_room_name: true,
-      },
-    });
-
-    this.logger.log(
-      `Estado de comisión reiniciado: ${updated.nombre} (${comisionId})`,
-    );
-
-    return updated;
-  }
-
-  /**
-   * Reiniciar estado de comisión a Programada (docente asignado)
-   * Valida que el docente sea el asignado a la comisión
-   *
-   * @param comisionId - ID de la comisión
-   * @param docenteId - ID del docente que solicita el reinicio
-   * @returns Datos actualizados de la comisión
-   */
-  async reiniciarEstadoClaseDocente(
-    comisionId: string,
-    docenteId: string,
-  ): Promise<ComisionEnVivoResponse> {
-    const comision = await this.prisma.comision.findUnique({
-      where: { id: comisionId },
-      select: { id: true, docente_id: true },
-    });
-
-    if (!comision) {
-      throw new NotFoundException(
-        `Comisión con ID "${comisionId}" no encontrada`,
-      );
-    }
-
-    // Validar que el docente es el asignado
-    if (comision.docente_id !== docenteId) {
-      throw new ForbiddenException(
-        'Solo el docente asignado puede reiniciar esta comisión',
-      );
-    }
-
-    const updated = await this.prisma.comision.update({
-      where: { id: comisionId },
-      data: {
-        estado_clase: 'Programada',
-        iniciada_en: null,
-        finalizada_en: null,
-      },
-      select: {
-        id: true,
-        nombre: true,
-        estado_clase: true,
-        iniciada_en: true,
-        finalizada_en: true,
-        livekit_room_name: true,
-      },
-    });
-
-    this.logger.log(
-      `Estado de comisión reiniciado por docente: ${updated.nombre} (${comisionId})`,
-    );
-
-    return updated;
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   VideoTrack,
   useLocalParticipant,
@@ -10,6 +10,7 @@ import {
 } from '@livekit/components-react';
 import { Track, RoomEvent } from 'livekit-client';
 import { Users, Clock, Wifi, MessageSquare, X } from 'lucide-react';
+import { toast } from '@/components/ui/Toast';
 import { ControlBar } from './ControlBar';
 import { ChatPanel } from './ChatPanel';
 import type { MensajeChat, ChatConnectionState } from './types';
@@ -74,6 +75,43 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({
       room.off(RoomEvent.ParticipantDisconnected, updateCount);
     };
   }, [room]);
+
+  // Listener para notificaciones de mano levantada (solo docente)
+  const handleDataReceived = useCallback(
+    (payload: Uint8Array, participant: { identity: string; name?: string } | undefined) => {
+      if (isStudent) return; // Solo el docente recibe notificaciones
+
+      try {
+        const decoder = new TextDecoder();
+        const message = JSON.parse(decoder.decode(payload));
+
+        if (message.type === 'hand_raised' && message.raised === true) {
+          const studentName = message.participantName || participant?.name || 'Un estudiante';
+          toast(`✋ ${studentName} levantó la mano`, {
+            duration: 5000,
+            icon: '🙋',
+            style: {
+              background: '#1e293b',
+              color: '#fbbf24',
+              border: '1px solid #f59e0b',
+            },
+          });
+        }
+      } catch {
+        // Ignorar mensajes que no sean JSON válido
+      }
+    },
+    [isStudent],
+  );
+
+  useEffect(() => {
+    if (isStudent) return;
+
+    room.on(RoomEvent.DataReceived, handleDataReceived);
+    return () => {
+      room.off(RoomEvent.DataReceived, handleDataReceived);
+    };
+  }, [room, isStudent, handleDataReceived]);
 
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);

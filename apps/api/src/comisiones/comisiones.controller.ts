@@ -144,39 +144,4 @@ export class ComisionesController {
   ): Promise<ClaseEnVivoResponseDto> {
     return this.comisionLiveService.obtenerEstadoClase(comisionId);
   }
-
-  /**
-   * PATCH /api/comisiones/:id/reiniciar-estado
-   * Reiniciar estado de comisión a Programada (docente asignado)
-   */
-  @Patch(':id/reiniciar-estado')
-  @Roles(Role.DOCENTE)
-  @ApiOperation({
-    summary: 'Reiniciar estado de comisión',
-    description:
-      'Reinicia el estado de la comisión a Programada. Solo el docente asignado puede reiniciar.',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'ID de la comisión',
-    example: 'cmh6d8pqn0001xwd0wf5sv4d8',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Estado reiniciado exitosamente',
-    type: ClaseEnVivoResponseDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Comisión no encontrada',
-  })
-  async reiniciarEstado(
-    @Param('id', ParseIdPipe) comisionId: string,
-    @Req() req: { user: { sub: string } },
-  ): Promise<ClaseEnVivoResponseDto> {
-    return this.comisionLiveService.reiniciarEstadoClaseDocente(
-      comisionId,
-      req.user.sub,
-    );
-  }
 }

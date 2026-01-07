@@ -128,12 +128,4 @@ export const livekitApi = {
   obtenerEstadoComision: async (comisionId: string): Promise<ClaseEnVivoResponse> => {
     return apiClient.get<ClaseEnVivoResponse>(`/comisiones/${comisionId}/estado-clase`);
   },
-
-  /**
-   * Reiniciar estado de comisión a Programada (docente asignado)
-   * @param comisionId - ID de la Comisión
-   */
-  reiniciarEstadoComision: async (comisionId: string): Promise<ClaseEnVivoResponse> => {
-    return apiClient.patch<ClaseEnVivoResponse>(`/comisiones/${comisionId}/reiniciar-estado`);
-  },
 };
