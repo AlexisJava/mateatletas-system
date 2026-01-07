@@ -114,6 +114,8 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
         wsUrl: tokenData.wsUrl,
         roomName: tokenData.roomName,
         nombreClase: clase.nombre,
+        // Pasar IDs para el chat WebSocket
+        ...(clase.tipo === 'comision' ? { comisionId: clase.id } : { claseGrupoId: clase.id }),
       });
 
       router.push(`/estudiante/clase-en-vivo?${params.toString()}`);

@@ -1,10 +1,11 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useCallback } from 'react';
 import { LiveKitRoom, RoomAudioRenderer } from '@livekit/components-react';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { ClassRoom } from '@/components/docente/live/ClassRoom';
+import { useAulaVivaChat } from '@/hooks/useAulaVivaChat';
 
 /**
  * Página de Clase en Vivo - Portal Estudiante
@@ -16,6 +17,8 @@ import { ClassRoom } from '@/components/docente/live/ClassRoom';
  * - wsUrl: WebSocket URL del servidor LiveKit
  * - roomName: Nombre de la sala
  * - nombreClase: Título de la clase (opcional)
+ * - claseGrupoId: ID de la clase grupal (para chat)
+ * - comisionId: ID de la comisión (para chat)
  */
 function ClaseEnVivoEstudianteContent() {
   const searchParams = useSearchParams();
@@ -25,6 +28,30 @@ function ClaseEnVivoEstudianteContent() {
   const wsUrl = searchParams.get('wsUrl');
   const roomName = searchParams.get('roomName');
   const nombreClase = searchParams.get('nombreClase') || 'Clase en Vivo';
+  const claseGrupoId = searchParams.get('claseGrupoId') || undefined;
+  const comisionId = searchParams.get('comisionId') || undefined;
+
+  // Hook de chat WebSocket
+  const {
+    mensajes,
+    connectionState,
+    error: chatError,
+    chatHabilitado,
+    enviarMensaje,
+    reconectar,
+  } = useAulaVivaChat({
+    claseGrupoId,
+    comisionId,
+  });
+
+  // Handler para enviar mensajes
+  const handleSendMessage = useCallback(
+    async (contenido: string) => {
+      const result = await enviarMensaje(contenido);
+      return { exito: result.exito, error: result.error };
+    },
+    [enviarMensaje],
+  );
 
   // Validar parámetros requeridos
   if (!token || !wsUrl || !roomName) {
@@ -66,7 +93,19 @@ function ClaseEnVivoEstudianteContent() {
         className="h-full"
       >
         <RoomAudioRenderer />
-        <ClassRoom title={nombreClase} onEndClass={handleLeaveClass} mode="student" />
+        <ClassRoom
+          title={nombreClase}
+          onEndClass={handleLeaveClass}
+          mode="student"
+          chat={{
+            mensajes,
+            connectionState,
+            error: chatError,
+            chatHabilitado,
+            onSendMessage: handleSendMessage,
+            onReconnect: reconectar,
+          }}
+        />
       </LiveKitRoom>
     </div>
   );
