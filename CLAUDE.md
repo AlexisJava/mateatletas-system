@@ -27,9 +27,60 @@ AUDITORÍA → PLANIFICACIÓN → ATOMIZACIÓN → VERIFICACIÓN
 ### Prisma / Base de Datos
 
 - ❌ PROHIBIDO: `prisma db push` (causa drift y desincronización)
-- ✅ OBLIGATORIO: `prisma migrate dev --name descripcion` para cambios de schema
+- ❌ PROHIBIDO: `prisma migrate dev` sin backup previo (puede resetear la DB)
+- ✅ OBLIGATORIO: Backup ANTES de cualquier migración
 - ✅ Para ver SQL sin aplicar: `prisma migrate dev --create-only --name descripcion`
 - Si hay error de migración: analizar causa, NO usar db push como parche
+
+## MIGRACIONES DE BASE DE DATOS - REGLAS CRÍTICAS
+
+**NUNCA uses `prisma migrate dev` directamente.** Puede resetear la base de datos y perder todos los datos.
+
+### Proceso seguro de migración:
+
+1. **SIEMPRE hacer backup antes de migrar:**
+
+```bash
+pg_dump -U postgres mateatletas_dev > backups/pre_migrate_$(date +%Y%m%d_%H%M%S).sql
+```
+
+2. **Crear la carpeta de backups si no existe:**
+
+```bash
+mkdir -p backups
+```
+
+3. **Para migraciones en desarrollo, usar:**
+
+```bash
+# Opción A: migrate deploy (no resetea, solo aplica migraciones pendientes)
+npx prisma migrate deploy
+
+# Opción B: si necesitás crear nueva migración
+pg_dump -U postgres mateatletas_dev > backups/pre_migrate_$(date +%Y%m%d_%H%M%S).sql
+npx prisma migrate dev --name nombre_migracion
+```
+
+4. **Si la migración falla o resetea la DB, restaurar:**
+
+```bash
+psql -U postgres mateatletas_dev < backups/pre_migrate_XXXXX.sql
+```
+
+### Script recomendado (usar siempre):
+
+```bash
+# scripts/safe-migrate.sh
+#!/bin/bash
+mkdir -p backups
+echo "Haciendo backup..."
+pg_dump -U postgres mateatletas_dev > backups/pre_migrate_$(date +%Y%m%d_%H%M%S).sql
+echo "Migrando..."
+npx prisma migrate dev --name "$1"
+echo "Listo. Backup guardado en /backups"
+```
+
+**IMPORTANTE:** Si Alexis pide hacer una migración, SIEMPRE hacer backup primero. Sin excepciones.
 
 ### Seguridad
 
