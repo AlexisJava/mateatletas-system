@@ -100,6 +100,27 @@ export default function ComisionDetallePage() {
     }
   };
 
+  const handleEntrarAula = async () => {
+    setIsLoadingLiveKit(true);
+    try {
+      const tokenData = await livekitApi.getTokenDocente({ comisionId });
+
+      // Navegar a la página de clase en vivo (sin iniciar, ya está en vivo)
+      const params = new URLSearchParams({
+        token: tokenData.token,
+        ws: tokenData.wsUrl,
+        room: tokenData.roomName,
+        title: comision?.nombre || 'Clase en Vivo',
+      });
+      router.push(`/docente/clase-en-vivo?${params.toString()}`);
+    } catch (error) {
+      console.error('Error al entrar al aula:', error);
+      toast.error(error instanceof Error ? error.message : 'Error al entrar al aula');
+    } finally {
+      setIsLoadingLiveKit(false);
+    }
+  };
+
   const fetchComision = async () => {
     try {
       setIsLoading(true);
@@ -241,12 +262,26 @@ export default function ComisionDetallePage() {
                 </div>
               )}
 
-              {/* Badge En Vivo */}
+              {/* Botón Entrar al Aula - Cuando está En Vivo */}
               {estadoClase === 'EnVivo' && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-xl">
-                  <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                  <span className="text-red-400 font-bold">EN VIVO</span>
-                </div>
+                <>
+                  <button
+                    onClick={handleEntrarAula}
+                    disabled={isLoadingLiveKit}
+                    className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold rounded-xl transition-all disabled:opacity-50 animate-pulse"
+                  >
+                    {isLoadingLiveKit ? (
+                      <RefreshCw className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Video className="w-5 h-5" />
+                    )}
+                    Entrar al Aula
+                  </button>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-xl">
+                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                    <span className="text-red-400 font-bold">EN VIVO</span>
+                  </div>
+                </>
               )}
             </div>
           </div>
