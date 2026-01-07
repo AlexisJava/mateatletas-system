@@ -84,7 +84,19 @@ describe('[INTEGRATION] Docentes - Próxima Clase', () => {
       .post('/api/auth/login')
       .send({ email, password });
 
-    return loginResponse.headers['set-cookie'];
+    // Verificar que el login fue exitoso
+    if (loginResponse.status !== 200) {
+      throw new Error(
+        `Login failed for ${email}: ${loginResponse.status} - ${JSON.stringify(loginResponse.body)}`,
+      );
+    }
+
+    const cookies = loginResponse.headers['set-cookie'];
+    if (!cookies) {
+      throw new Error(`No cookies returned for ${email}`);
+    }
+
+    return cookies;
   }
 
   // ============================================================================
