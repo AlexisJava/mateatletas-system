@@ -50,3 +50,33 @@ export class TokenResponseDto {
   })
   roomName!: string;
 }
+
+/**
+ * DTO para dar/quitar palabra a un estudiante
+ */
+export class ControlPalabraDto extends TokenRequestDto {
+  @ApiProperty({
+    description: 'ID del estudiante (identity en LiveKit)',
+    example: 'clk789xyz',
+    type: String,
+  })
+  @IsString({ message: 'estudianteId debe ser un texto' })
+  estudianteId!: string;
+}
+
+/**
+ * Response DTO para operaciones de control de palabra
+ */
+export class ControlPalabraResponseDto {
+  @ApiProperty({
+    description: 'Indica si la operación fue exitosa',
+    type: Boolean,
+  })
+  exito!: boolean;
+
+  @ApiProperty({
+    description: 'Mensaje descriptivo',
+    type: String,
+  })
+  mensaje!: string;
+}

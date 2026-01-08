@@ -90,6 +90,7 @@ export default function ComisionDetallePage() {
         ws: tokenData.wsUrl,
         room: tokenData.roomName,
         title: comision?.nombre || 'Clase en Vivo',
+        comisionId: comisionId,
       });
       router.push(`/docente/clase-en-vivo?${params.toString()}`);
     } catch (error) {
@@ -111,6 +112,7 @@ export default function ComisionDetallePage() {
         ws: tokenData.wsUrl,
         room: tokenData.roomName,
         title: comision?.nombre || 'Clase en Vivo',
+        comisionId: comisionId,
       });
       router.push(`/docente/clase-en-vivo?${params.toString()}`);
     } catch (error) {

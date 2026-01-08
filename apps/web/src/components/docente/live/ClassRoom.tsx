@@ -13,6 +13,7 @@ import { Users, Clock, Wifi, MessageSquare, X } from 'lucide-react';
 import { toast } from '@/components/ui/Toast';
 import { ControlBar } from './ControlBar';
 import { ChatPanel } from './ChatPanel';
+import { ParticipantsList } from './ParticipantsList';
 import type { MensajeChat, ChatConnectionState } from './types';
 
 interface ClassRoomProps {
@@ -24,6 +25,10 @@ interface ClassRoomProps {
    * - 'student': El usuario es estudiante, ve los tracks del docente (remoto)
    */
   mode?: 'teacher' | 'student';
+  /** ID del ClaseGrupo (para control de palabra) */
+  claseGrupoId?: string;
+  /** ID de la Comisión (para control de palabra) */
+  comisionId?: string;
   /** Props del chat */
   chat?: {
     mensajes: MensajeChat[];
@@ -41,6 +46,8 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({
   title,
   onEndClass,
   mode = 'teacher',
+  claseGrupoId,
+  comisionId,
   chat,
 }) => {
   const room = useRoomContext();
@@ -187,7 +194,14 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({
 
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Video Area */}
+        {/* Participants Sidebar - SIEMPRE visible para docente, a la IZQUIERDA */}
+        {!isStudent && (
+          <div className="w-72 lg:w-80 flex-shrink-0 border-r border-slate-800">
+            <ParticipantsList claseGrupoId={claseGrupoId} comisionId={comisionId} />
+          </div>
+        )}
+
+        {/* Video Area - CENTRO */}
         <div className="flex-1 relative flex items-center justify-center p-4 bg-slate-950">
           {/* Screen Share (main view when active) */}
           {screenShareTrack ? (
@@ -221,7 +235,7 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({
           )}
         </div>
 
-        {/* Chat Sidebar */}
+        {/* Chat Sidebar - DERECHA */}
         {chat && isChatOpen && (
           <div className="w-80 lg:w-96 flex-shrink-0 border-l border-slate-800">
             <ChatPanel

@@ -46,6 +46,18 @@ export interface FinalizarClaseResponse extends ClaseEnVivoResponse {
   duracion_minutos: number;
 }
 
+export interface ControlPalabraDto extends TokenRequestDto {
+  /** ID del estudiante */
+  estudianteId: string;
+}
+
+export interface ControlPalabraResponse {
+  /** Indica si la operación fue exitosa */
+  exito: boolean;
+  /** Mensaje descriptivo */
+  mensaje: string;
+}
+
 // ============================================================================
 // API
 // ============================================================================
@@ -127,5 +139,25 @@ export const livekitApi = {
    */
   obtenerEstadoComision: async (comisionId: string): Promise<ClaseEnVivoResponse> => {
     return apiClient.get<ClaseEnVivoResponse>(`/comisiones/${comisionId}/estado-clase`);
+  },
+
+  // ============================================================================
+  // CONTROL DE PALABRA (DAR/QUITAR MICRÓFONO)
+  // ============================================================================
+
+  /**
+   * Dar palabra a un estudiante (habilitar micrófono)
+   * @param data - { claseGrupoId o comisionId, estudianteId }
+   */
+  darPalabra: async (data: ControlPalabraDto): Promise<ControlPalabraResponse> => {
+    return apiClient.post<ControlPalabraResponse>('/livekit/dar-palabra', data);
+  },
+
+  /**
+   * Quitar palabra a un estudiante (deshabilitar micrófono)
+   * @param data - { claseGrupoId o comisionId, estudianteId }
+   */
+  quitarPalabra: async (data: ControlPalabraDto): Promise<ControlPalabraResponse> => {
+    return apiClient.post<ControlPalabraResponse>('/livekit/quitar-palabra', data);
   },
 };

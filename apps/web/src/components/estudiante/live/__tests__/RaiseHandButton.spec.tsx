@@ -12,19 +12,23 @@ import userEvent from '@testing-library/user-event';
 // 1. Crear mocks con vi.hoisted para que estén disponibles durante el hoisting
 const mocks = vi.hoisted(() => {
   return {
-    send: vi.fn(),
+    publishData: vi.fn().mockResolvedValue(undefined),
   };
 });
 
 // 2. vi.mock retorna siempre el mismo objeto mock
 vi.mock('@livekit/components-react', () => ({
-  useDataChannel: vi.fn(() => ({
-    send: mocks.send,
-  })),
   useLocalParticipant: vi.fn(() => ({
     localParticipant: {
       identity: 'estudiante-123',
       name: 'Juan Pérez',
+    },
+  })),
+  useRoomContext: vi.fn(() => ({
+    localParticipant: {
+      identity: 'estudiante-123',
+      name: 'Juan Pérez',
+      publishData: mocks.publishData,
     },
   })),
 }));
@@ -34,11 +38,11 @@ import { RaiseHandButton } from '../RaiseHandButton';
 
 // Helper para decodificar los datos enviados
 function decodeLastSentData(): Record<string, unknown> | null {
-  if (mocks.send.mock.calls.length === 0) {
+  if (mocks.publishData.mock.calls.length === 0) {
     return null;
   }
 
-  const lastCall = mocks.send.mock.calls[mocks.send.mock.calls.length - 1];
+  const lastCall = mocks.publishData.mock.calls[mocks.publishData.mock.calls.length - 1];
   const data = lastCall?.[0];
 
   // Usar ArrayBuffer.isView() en lugar de instanceof Uint8Array
@@ -52,7 +56,7 @@ function decodeLastSentData(): Record<string, unknown> | null {
 
 describe('RaiseHandButton', () => {
   beforeEach(() => {
-    mocks.send.mockClear();
+    mocks.publishData.mockClear();
   });
 
   /* ============================================================================
@@ -118,7 +122,7 @@ describe('RaiseHandButton', () => {
   /* ============================================================================
      COMUNICACIÓN VIA DATA CHANNEL
      ============================================================================ */
-  describe('Comunicación via data channel', () => {
+  describe('Comunicación via publishData', () => {
     it('should_send_raise_hand_event_when_raising', async () => {
       const user = userEvent.setup();
       render(<RaiseHandButton />);
@@ -126,12 +130,13 @@ describe('RaiseHandButton', () => {
       await user.click(screen.getByRole('button', { name: /levantar mano/i }));
 
       await waitFor(() => {
-        expect(mocks.send).toHaveBeenCalled();
+        expect(mocks.publishData).toHaveBeenCalled();
       });
 
       const sentData = decodeLastSentData();
       expect(sentData).toMatchObject({
         type: 'hand_raised',
+        raised: true,
         participantId: 'estudiante-123',
         participantName: 'Juan Pérez',
       });
@@ -144,18 +149,19 @@ describe('RaiseHandButton', () => {
 
       // Levantar
       await user.click(screen.getByRole('button', { name: /levantar mano/i }));
-      mocks.send.mockClear();
+      mocks.publishData.mockClear();
 
       // Bajar
       await user.click(screen.getByRole('button', { name: /bajar mano/i }));
 
       await waitFor(() => {
-        expect(mocks.send).toHaveBeenCalled();
+        expect(mocks.publishData).toHaveBeenCalled();
       });
 
       const sentData = decodeLastSentData();
       expect(sentData).toMatchObject({
-        type: 'hand_lowered',
+        type: 'hand_raised',
+        raised: false,
         participantId: 'estudiante-123',
       });
     });

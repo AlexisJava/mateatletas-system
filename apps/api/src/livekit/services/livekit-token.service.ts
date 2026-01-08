@@ -2,9 +2,10 @@ import {
   Injectable,
   ForbiddenException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AccessToken } from 'livekit-server-sdk';
+import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
 import { PrismaService } from '../../core/database/prisma.service';
 
 interface TokenRequest {
@@ -23,6 +24,8 @@ export class LivekitTokenService {
   private readonly apiKey: string;
   private readonly apiSecret: string;
   private readonly wsUrl: string;
+  private readonly roomService: RoomServiceClient;
+  private readonly logger = new Logger(LivekitTokenService.name);
 
   constructor(
     private readonly configService: ConfigService,
@@ -41,6 +44,13 @@ export class LivekitTokenService {
     this.apiKey = apiKey;
     this.apiSecret = apiSecret;
     this.wsUrl = wsUrl;
+
+    // RoomServiceClient para controlar participantes (dar/quitar palabra)
+    // Convertir wss:// a https:// para la API HTTP de LiveKit
+    const httpUrl = wsUrl
+      .replace('wss://', 'https://')
+      .replace('ws://', 'http://');
+    this.roomService = new RoomServiceClient(httpUrl, apiKey, apiSecret);
   }
 
   async generarTokenDocente(
@@ -57,7 +67,22 @@ export class LivekitTokenService {
       await this.validarDocenteComision(docenteId, request.comisionId!);
     }
 
-    const token = await this.generarToken(docenteId, roomName, true);
+    // Obtener nombre del docente
+    const docente = await this.prisma.docente.findUnique({
+      where: { id: docenteId },
+      select: { nombre: true, apellido: true },
+    });
+    const nombreDocente = docente
+      ? `${docente.nombre} ${docente.apellido}`.trim()
+      : 'Docente';
+
+    const token = await this.generarToken(
+      docenteId,
+      roomName,
+      true,
+      true,
+      nombreDocente,
+    );
 
     return {
       token,
@@ -83,7 +108,22 @@ export class LivekitTokenService {
       await this.validarEstudianteComision(estudianteId, request.comisionId!);
     }
 
-    const token = await this.generarToken(estudianteId, roomName, false);
+    // Obtener nombre del estudiante
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: estudianteId },
+      select: { nombre: true, apellido: true },
+    });
+    const nombreEstudiante = estudiante
+      ? `${estudiante.nombre} ${estudiante.apellido}`.trim()
+      : 'Estudiante';
+
+    const token = await this.generarToken(
+      estudianteId,
+      roomName,
+      false,
+      false,
+      nombreEstudiante,
+    );
 
     return {
       token,
@@ -211,9 +251,12 @@ export class LivekitTokenService {
     identity: string,
     roomName: string,
     canPublish: boolean,
+    isDocente: boolean = false,
+    name?: string,
   ): Promise<string> {
     const token = new AccessToken(this.apiKey, this.apiSecret, {
       identity,
+      name: name || identity, // Nombre visible en la sala
       ttl: '4h',
     });
 
@@ -223,8 +266,100 @@ export class LivekitTokenService {
       canPublish,
       canSubscribe: true,
       canPublishData: true, // Permite enviar mensajes de chat via DataChannel
+      roomAdmin: isDocente, // Docente puede controlar participantes
     });
 
     return await token.toJwt();
+  }
+
+  // ============================================================================
+  // CONTROL DE PARTICIPANTES (DAR/QUITAR PALABRA)
+  // ============================================================================
+
+  /**
+   * Dar palabra a un estudiante (habilitar su micrófono)
+   * @param roomName - Nombre de la sala LiveKit
+   * @param participantIdentity - Identity del participante (estudianteId)
+   */
+  async darPalabra(
+    roomName: string,
+    participantIdentity: string,
+  ): Promise<void> {
+    this.logger.log(
+      `darPalabra: roomName=${roomName}, participantIdentity=${participantIdentity}`,
+    );
+
+    // Primero verificar que el participante existe en la sala
+    const participants = await this.roomService.listParticipants(roomName);
+    const participantExists = participants.some(
+      (p) => p.identity === participantIdentity,
+    );
+
+    this.logger.log(
+      `Participantes en sala: ${participants.map((p) => p.identity).join(', ')}`,
+    );
+
+    if (!participantExists) {
+      throw new Error(
+        `Participante ${participantIdentity} no encontrado en sala ${roomName}`,
+      );
+    }
+
+    const result = await this.roomService.updateParticipant(
+      roomName,
+      participantIdentity,
+      {
+        permission: {
+          canPublish: true,
+          canSubscribe: true,
+          canPublishData: true,
+        },
+      },
+    );
+
+    this.logger.log(`darPalabra result: ${JSON.stringify(result)}`);
+  }
+
+  /**
+   * Quitar palabra a un estudiante (deshabilitar su micrófono)
+   * @param roomName - Nombre de la sala LiveKit
+   * @param participantIdentity - Identity del participante (estudianteId)
+   */
+  async quitarPalabra(
+    roomName: string,
+    participantIdentity: string,
+  ): Promise<void> {
+    this.logger.log(
+      `quitarPalabra: roomName=${roomName}, participantIdentity=${participantIdentity}`,
+    );
+
+    const result = await this.roomService.updateParticipant(
+      roomName,
+      participantIdentity,
+      {
+        permission: {
+          canPublish: false,
+          canSubscribe: true,
+          canPublishData: true,
+        },
+      },
+    );
+
+    this.logger.log(`quitarPalabra result: ${JSON.stringify(result)}`);
+  }
+
+  /**
+   * Obtener lista de participantes de una sala
+   * @param roomName - Nombre de la sala LiveKit
+   */
+  async getParticipantes(roomName: string) {
+    return this.roomService.listParticipants(roomName);
+  }
+
+  /**
+   * Construir nombre de sala a partir de IDs
+   */
+  buildRoomName(request: TokenRequest): string {
+    return this.getRoomInfo(request).roomName;
   }
 }

@@ -24,6 +24,17 @@ function ClaseEnVivoContent() {
   const roomName = searchParams.get('room');
   const title = searchParams.get('title') || 'Clase en Vivo';
 
+  // Primero intentar obtener IDs de parámetros explícitos
+  // Si no existen, extraer del roomName (formato: clase-grupo-{id} o comision-{id})
+  const claseGrupoId =
+    searchParams.get('claseGrupoId') ||
+    (roomName?.startsWith('clase-grupo-') ? roomName.replace('clase-grupo-', '') : undefined);
+  const comisionId =
+    searchParams.get('comisionId') ||
+    (roomName?.startsWith('comision-') ? roomName.replace('comision-', '') : undefined);
+
+  console.log('[ClaseEnVivo Docente] IDs:', { claseGrupoId, comisionId, roomName });
+
   // Validar parámetros requeridos
   if (!token || !wsUrl || !roomName) {
     return (
@@ -64,7 +75,12 @@ function ClaseEnVivoContent() {
         className="h-full"
       >
         <RoomAudioRenderer />
-        <ClassRoom title={title} onEndClass={handleEndClass} />
+        <ClassRoom
+          title={title}
+          onEndClass={handleEndClass}
+          claseGrupoId={claseGrupoId}
+          comisionId={comisionId}
+        />
       </LiveKitRoom>
     </div>
   );

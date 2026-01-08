@@ -2,13 +2,13 @@
  * RaiseHandButton - Botón para levantar la mano en clase en vivo
  *
  * Permite al estudiante señalar que tiene una pregunta.
- * Comunica el estado via LiveKit data channel.
+ * Comunica el estado via LiveKit publishData (broadcast a toda la sala).
  */
 'use client';
 
 import { useState, useCallback } from 'react';
 import { Hand } from 'lucide-react';
-import { useDataChannel, useLocalParticipant } from '@livekit/components-react';
+import { useLocalParticipant, useRoomContext } from '@livekit/components-react';
 
 // ============================================================================
 // TIPOS
@@ -19,13 +19,6 @@ interface RaiseHandButtonProps {
   variant?: 'full' | 'compact';
 }
 
-interface HandEvent {
-  type: 'hand_raised' | 'hand_lowered';
-  participantId: string;
-  participantName?: string;
-  timestamp: number;
-}
-
 // ============================================================================
 // COMPONENTE
 // ============================================================================
@@ -33,27 +26,33 @@ interface HandEvent {
 export function RaiseHandButton({ variant = 'full' }: RaiseHandButtonProps) {
   const [isRaised, setIsRaised] = useState(false);
   const { localParticipant } = useLocalParticipant();
+  const room = useRoomContext();
 
-  // Data channel para comunicar eventos de mano
-  const { send } = useDataChannel('hand-signals');
-
-  const handleToggle = useCallback(() => {
+  const handleToggle = useCallback(async () => {
     const newState = !isRaised;
     setIsRaised(newState);
 
-    // Preparar evento
-    const event: HandEvent = {
-      type: newState ? 'hand_raised' : 'hand_lowered',
-      participantId: localParticipant?.identity || '',
-      participantName: localParticipant?.name || undefined,
-      timestamp: Date.now(),
-    };
+    try {
+      // Enviar mensaje a todos los participantes (especialmente al docente)
+      // Formato unificado compatible con ControlBar y ParticipantsList
+      const encoder = new TextEncoder();
+      const data = encoder.encode(
+        JSON.stringify({
+          type: 'hand_raised',
+          raised: newState,
+          participantId: localParticipant?.identity || '',
+          participantName: localParticipant?.name || room.localParticipant.identity,
+          timestamp: Date.now(),
+        }),
+      );
 
-    // Enviar via data channel (a todos los participantes)
-    const encoder = new TextEncoder();
-    const data = encoder.encode(JSON.stringify(event));
-    send(data, { reliable: true });
-  }, [isRaised, localParticipant, send]);
+      await room.localParticipant.publishData(data, { reliable: true });
+    } catch (error) {
+      console.error('Error enviando señal de mano:', error);
+      // Revertir estado si falla
+      setIsRaised(!newState);
+    }
+  }, [isRaised, localParticipant, room]);
 
   // Variante compact: solo icono
   if (variant === 'compact') {
