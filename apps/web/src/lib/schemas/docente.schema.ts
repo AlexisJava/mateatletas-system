@@ -33,7 +33,7 @@ export const docentesListSchema = z.array(docenteSchema);
  */
 export const docentesResponseSchema = z.object({
   data: z.array(docenteSchema),
-  metadata: z
+  meta: z
     .object({
       total: z.number(),
       page: z.number(),

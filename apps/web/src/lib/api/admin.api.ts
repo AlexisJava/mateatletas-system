@@ -24,7 +24,7 @@ import {
   clasesResponseSchema,
   type ClasesResponse,
 } from '@/lib/schemas/clase.schema';
-import { docentesListSchema } from '@/lib/schemas/docente.schema';
+import { docentesResponseSchema } from '@/lib/schemas/docente.schema';
 import { rutasListSchema } from '@/lib/schemas/ruta.schema';
 import { productoSchema, productosListSchema } from '@/lib/schemas/producto.schema';
 
@@ -525,7 +525,8 @@ export const getDocentes = async () => {
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.get('/docentes');
-    return docentesListSchema.parse(response);
+    const parsed = docentesResponseSchema.parse(response);
+    return parsed.data;
   } catch (error) {
     console.error('Error al obtener los docentes (admin):', error);
     throw error;
