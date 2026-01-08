@@ -73,6 +73,11 @@ apiClient.interceptors.response.use(
 
     // Si la respuesta tiene el formato del backend { data: ... }, extraer data
     if (axiosData && typeof axiosData === 'object' && 'data' in axiosData) {
+      // PERO: si tiene 'meta' junto con 'data', es una respuesta paginada
+      // En ese caso, devolver el objeto completo { data, meta } sin desenvolver
+      if ('meta' in axiosData) {
+        return axiosData;
+      }
       return axiosData.data;
     }
 
