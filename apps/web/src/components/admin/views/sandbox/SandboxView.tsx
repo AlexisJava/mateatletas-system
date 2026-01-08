@@ -12,6 +12,7 @@ import { LessonPlayer } from './components/LessonPlayer';
 import { PreviewErrorBoundary } from './components/PreviewErrorBoundary';
 import { PublishModal, SuccessToast } from './components/PublishModal';
 import { WelcomeScreen } from './components/WelcomeScreen';
+import { PlanificacionSidebar, type ContentSection } from './components/PlanificacionSidebar';
 import { ViewportContext } from './components/DesignSystem';
 import { SandboxIcons } from './components/SandboxIcons';
 import { SaveStatusIndicator } from './components/SaveStatusIndicator';
@@ -26,6 +27,8 @@ import {
   type SandboxViewMode,
   type PreviewMode,
 } from './types';
+import type { StartParams, ContentType } from './components/WelcomeScreen';
+import type { Planificacion } from '@/lib/api/planificaciones-admin.api';
 import { INITIAL_JSON, HOUSES } from './constants';
 
 // Hooks
@@ -45,6 +48,11 @@ import {
   type NodoBackend,
   type CasaTipo,
 } from '@/lib/api/contenidos.api';
+import {
+  crearPlanificacion,
+  type CasaTipo as PlanCasaTipo,
+  type MundoTipo as PlanMundoTipo,
+} from '@/lib/api/planificaciones-admin.api';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TREE HELPERS
@@ -140,6 +148,12 @@ export function SandboxView() {
   const [isLoading, setIsLoading] = useState(false);
   const [backendId, setBackendId] = useState<string | null>(null);
   const initialJsonString = JSON.stringify(INITIAL_JSON, null, 2);
+
+  // ─── Content Type State ───
+  const [contentType, setContentType] = useState<ContentType>('microleccion');
+  const [planificacion, setPlanificacion] = useState<Planificacion | null>(null);
+  const [activeClaseIndex, setActiveClaseIndex] = useState<number>(0);
+  const [activeSection, setActiveSection] = useState<ContentSection>('teoria');
 
   const [lesson, setLesson] = useState<Lesson>({
     id: 'new',
@@ -483,45 +497,84 @@ export function SandboxView() {
   );
 
   // ─── Start Handler ───
-  const handleStart = async (house: House, subject: Subject, _pattern: string) => {
+  const handleStart = async (params: StartParams) => {
+    const { house, subject, contentType: type, cantidadClases, titulo } = params;
+
     setIsLoading(true);
+    setContentType(type);
+
     try {
-      // Crear borrador en backend (el backend crea los 3 nodos raíz automáticamente)
-      const contenido = await createContenido({
-        titulo: 'Nueva Lección',
-        casaTipo: house as CasaTipo,
-        mundoTipo: subjectToMundoTipo(subject),
-      });
+      if (type === 'planificacion') {
+        // Crear planificación con clases
+        const plan = await crearPlanificacion({
+          titulo: titulo || 'Nueva Planificación',
+          cantidad_clases: cantidadClases || 8,
+          casa_tipo: house as PlanCasaTipo,
+          mundo_tipo: subjectToMundoTipo(subject) as PlanMundoTipo,
+        });
 
-      // Obtener árbol jerárquico con hijos (createContenido devuelve nodos planos)
-      const arbol = await getArbol(contenido.id);
+        setPlanificacion(plan);
+        setActiveClaseIndex(0);
 
-      // Actualizar estado local con datos del backend
-      setBackendId(contenido.id);
-      const newLesson: Lesson = {
-        id: contenido.id,
-        title: contenido.titulo,
-        house: contenido.casaTipo as House,
-        subject: mundoTipoToSubject(contenido.mundoTipo),
-        estado: contenido.estado,
-        nodos: arbol.map(mapNodoBackendToFrontend),
-      };
-      setLesson(newLesson);
+        // Cargar la primera clase (teoría) en el editor
+        const primeraClase = plan.clases[0];
+        if (primeraClase) {
+          // Cargar el contenido de teoría de la primera clase
+          const arbol = await getArbol(primeraClase.teoria_id);
 
-      // Select first leaf node if available
-      const firstLeaf = findFirstLeafNode(newLesson.nodos);
-      if (firstLeaf) {
-        handleSelectNodo(firstLeaf);
+          setBackendId(primeraClase.teoria_id);
+          const newLesson: Lesson = {
+            id: primeraClase.teoria_id,
+            title: `${plan.titulo} - Clase 1: ${primeraClase.titulo} (Teoría)`,
+            house: plan.casa_tipo as House,
+            subject: mundoTipoToSubject(plan.mundo_tipo),
+            estado: plan.estado,
+            nodos: arbol.map(mapNodoBackendToFrontend),
+          };
+          setLesson(newLesson);
+
+          const firstLeaf = findFirstLeafNode(newLesson.nodos);
+          if (firstLeaf) {
+            handleSelectNodo(firstLeaf);
+          }
+        }
+
+        setHasStarted(true);
+      } else {
+        // Flujo original: crear microlección
+        const contenido = await createContenido({
+          titulo: titulo || 'Nueva Lección',
+          casaTipo: house as CasaTipo,
+          mundoTipo: subjectToMundoTipo(subject),
+        });
+
+        const arbol = await getArbol(contenido.id);
+
+        setBackendId(contenido.id);
+        const newLesson: Lesson = {
+          id: contenido.id,
+          title: contenido.titulo,
+          house: contenido.casaTipo as House,
+          subject: mundoTipoToSubject(contenido.mundoTipo),
+          estado: contenido.estado,
+          nodos: arbol.map(mapNodoBackendToFrontend),
+        };
+        setLesson(newLesson);
+
+        const firstLeaf = findFirstLeafNode(newLesson.nodos);
+        if (firstLeaf) {
+          handleSelectNodo(firstLeaf);
+        }
+
+        setHasStarted(true);
       }
-
-      setHasStarted(true);
     } catch (error) {
       console.error('Error al crear contenido:', error);
       showError('Error al crear contenido. Continuando en modo local.');
       // Fallback: continuar sin backend con nodos vacíos
       setLesson({
         id: 'local',
-        title: 'Nueva Lección',
+        title: titulo || 'Nueva Lección',
         house,
         subject,
         estado: 'BORRADOR',
@@ -585,6 +638,59 @@ export function SandboxView() {
       },
     ];
   }
+
+  // ─── Planificación Navigation Handler ───
+  const handleSelectClase = useCallback(
+    async (index: number, section: ContentSection) => {
+      if (!planificacion || index >= planificacion.clases.length) return;
+
+      // Guardar cambios pendientes antes de cambiar
+      await flushPendingChanges();
+
+      const clase = planificacion.clases[index];
+      if (!clase) return;
+
+      const contenidoId = section === 'teoria' ? clase.teoria_id : clase.practica_id;
+
+      setIsLoading(true);
+      try {
+        const arbol = await getArbol(contenidoId);
+
+        setBackendId(contenidoId);
+        setActiveClaseIndex(index);
+        setActiveSection(section);
+
+        const sectionLabel = section === 'teoria' ? 'Teoría' : 'Práctica';
+        const newLesson: Lesson = {
+          id: contenidoId,
+          title: `${planificacion.titulo} - Clase ${clase.numero}: ${clase.titulo} (${sectionLabel})`,
+          house: planificacion.casa_tipo as House,
+          subject: mundoTipoToSubject(planificacion.mundo_tipo),
+          estado: planificacion.estado,
+          nodos: arbol.map(mapNodoBackendToFrontend),
+        };
+        setLesson(newLesson);
+
+        // Select first leaf node
+        const firstLeaf = findFirstLeafNode(newLesson.nodos);
+        if (firstLeaf) {
+          setActiveNodoId(firstLeaf.id);
+          setActiveNodo(firstLeaf);
+          setEditorContent(firstLeaf.contenidoJson || initialJsonString);
+        } else {
+          setActiveNodoId(null);
+          setActiveNodo(null);
+          setEditorContent(initialJsonString);
+        }
+      } catch (error) {
+        console.error('Error al cargar clase:', error);
+        showError('Error al cargar la clase. Intenta de nuevo.');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [planificacion, flushPendingChanges, initialJsonString, showError],
+  );
 
   // ─── Publish Handler ───
   const handlePublish = async () => {
@@ -724,6 +830,18 @@ export function SandboxView() {
         isOpen={isSidebarOpen}
         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       />
+
+      {/* Planificación Sidebar (cuando es planificación) */}
+      {contentType === 'planificacion' && planificacion && (
+        <div className="w-72 h-full bg-[#02040a] border-r border-[rgba(255,255,255,0.05)] flex flex-col shrink-0">
+          <PlanificacionSidebar
+            planificacion={planificacion}
+            activeClaseIndex={activeClaseIndex}
+            activeSection={activeSection}
+            onSelectClase={handleSelectClase}
+          />
+        </div>
+      )}
 
       {/* Tree Sidebar (Content Structure) */}
       {isTreeSidebarOpen && (

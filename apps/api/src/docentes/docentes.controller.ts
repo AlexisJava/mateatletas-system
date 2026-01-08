@@ -321,6 +321,74 @@ export class DocentesController {
   }
 
   /**
+   * POST /docentes/asignaciones/:id/clases/:claseId/teoria/activar - Activar solo teoría
+   * @param id - ID de la asignación
+   * @param claseId - ID de la clase
+   * @param user - Usuario autenticado (del JWT)
+   */
+  @Post('asignaciones/:id/clases/:claseId/teoria/activar')
+  @Roles(Role.DOCENTE)
+  async activarTeoria(
+    @Param('id', ParseIdPipe) id: string,
+    @Param('claseId', ParseIdPipe) claseId: string,
+    @GetUser() user: AuthUser,
+  ) {
+    await this.planificacionesService.activarTeoria(id, claseId, user.id);
+    return { success: true, message: 'Teoría activada' };
+  }
+
+  /**
+   * POST /docentes/asignaciones/:id/clases/:claseId/teoria/desactivar - Desactivar solo teoría
+   * @param id - ID de la asignación
+   * @param claseId - ID de la clase
+   * @param user - Usuario autenticado (del JWT)
+   */
+  @Post('asignaciones/:id/clases/:claseId/teoria/desactivar')
+  @Roles(Role.DOCENTE)
+  async desactivarTeoria(
+    @Param('id', ParseIdPipe) id: string,
+    @Param('claseId', ParseIdPipe) claseId: string,
+    @GetUser() user: AuthUser,
+  ) {
+    await this.planificacionesService.desactivarTeoria(id, claseId, user.id);
+    return { success: true, message: 'Teoría desactivada' };
+  }
+
+  /**
+   * POST /docentes/asignaciones/:id/clases/:claseId/practica/activar - Activar solo práctica
+   * @param id - ID de la asignación
+   * @param claseId - ID de la clase
+   * @param user - Usuario autenticado (del JWT)
+   */
+  @Post('asignaciones/:id/clases/:claseId/practica/activar')
+  @Roles(Role.DOCENTE)
+  async activarPractica(
+    @Param('id', ParseIdPipe) id: string,
+    @Param('claseId', ParseIdPipe) claseId: string,
+    @GetUser() user: AuthUser,
+  ) {
+    await this.planificacionesService.activarPractica(id, claseId, user.id);
+    return { success: true, message: 'Práctica activada' };
+  }
+
+  /**
+   * POST /docentes/asignaciones/:id/clases/:claseId/practica/desactivar - Desactivar solo práctica
+   * @param id - ID de la asignación
+   * @param claseId - ID de la clase
+   * @param user - Usuario autenticado (del JWT)
+   */
+  @Post('asignaciones/:id/clases/:claseId/practica/desactivar')
+  @Roles(Role.DOCENTE)
+  async desactivarPractica(
+    @Param('id', ParseIdPipe) id: string,
+    @Param('claseId', ParseIdPipe) claseId: string,
+    @GetUser() user: AuthUser,
+  ) {
+    await this.planificacionesService.desactivarPractica(id, claseId, user.id);
+    return { success: true, message: 'Práctica desactivada' };
+  }
+
+  /**
    * GET /docentes/asignaciones/:id/progreso - Obtener progreso de estudiantes
    * @param id - ID de la asignación
    * @param user - Usuario autenticado (del JWT)
@@ -333,6 +401,88 @@ export class DocentesController {
     @GetUser() user: AuthUser,
   ) {
     return this.planificacionesService.getProgresoEstudiantes(id, user.id);
+  }
+
+  // ============================================================================
+  // TAREAS - Endpoints para gestión de tareas por clase
+  // ============================================================================
+
+  /**
+   * GET /docentes/asignaciones/:id/clases/:claseId/tareas - Obtener tareas de una clase
+   * @param id - ID de la asignación
+   * @param claseId - ID de la clase
+   * @param user - Usuario autenticado (del JWT)
+   * @returns Lista de tareas con estado de asignación
+   */
+  @Get('asignaciones/:id/clases/:claseId/tareas')
+  @Roles(Role.DOCENTE)
+  async getTareasClase(
+    @Param('id', ParseIdPipe) id: string,
+    @Param('claseId', ParseIdPipe) claseId: string,
+    @GetUser() user: AuthUser,
+  ) {
+    return this.planificacionesService.getTareasClase(id, claseId, user.id);
+  }
+
+  /**
+   * POST /docentes/asignaciones/:id/tareas/:tareaClaseId/asignar - Asignar tarea al grupo
+   * @param id - ID de la asignación
+   * @param tareaClaseId - ID de la tarea de clase
+   * @param body - Fecha límite opcional
+   * @param user - Usuario autenticado (del JWT)
+   */
+  @Post('asignaciones/:id/tareas/:tareaClaseId/asignar')
+  @Roles(Role.DOCENTE)
+  async asignarTarea(
+    @Param('id', ParseIdPipe) id: string,
+    @Param('tareaClaseId', ParseIdPipe) tareaClaseId: string,
+    @Body() body: { fecha_limite?: string },
+    @GetUser() user: AuthUser,
+  ) {
+    const fechaLimite = body.fecha_limite
+      ? new Date(body.fecha_limite)
+      : undefined;
+    return this.planificacionesService.asignarTarea(
+      id,
+      tareaClaseId,
+      user.id,
+      fechaLimite,
+    );
+  }
+
+  /**
+   * POST /docentes/asignaciones/:id/tareas/:tareaClaseId/desasignar - Desasignar tarea
+   * @param id - ID de la asignación
+   * @param tareaClaseId - ID de la tarea de clase
+   * @param user - Usuario autenticado (del JWT)
+   */
+  @Post('asignaciones/:id/tareas/:tareaClaseId/desasignar')
+  @Roles(Role.DOCENTE)
+  async desasignarTarea(
+    @Param('id', ParseIdPipe) id: string,
+    @Param('tareaClaseId', ParseIdPipe) tareaClaseId: string,
+    @GetUser() user: AuthUser,
+  ) {
+    return this.planificacionesService.desasignarTarea(
+      id,
+      tareaClaseId,
+      user.id,
+    );
+  }
+
+  /**
+   * GET /docentes/asignaciones/:id/tareas/progreso - Obtener progreso de tareas
+   * @param id - ID de la asignación
+   * @param user - Usuario autenticado (del JWT)
+   * @returns Progreso de tareas por estudiante
+   */
+  @Get('asignaciones/:id/tareas/progreso')
+  @Roles(Role.DOCENTE)
+  async getProgresoTareas(
+    @Param('id', ParseIdPipe) id: string,
+    @GetUser() user: AuthUser,
+  ) {
+    return this.planificacionesService.getProgresoTareas(id, user.id);
   }
 
   // ============================================================================

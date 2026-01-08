@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AdminController } from './admin.controller';
+import { PlanificacionesAdminController } from './planificaciones-admin.controller';
 import { AdminService } from './admin.service';
 import { AdminStatsService } from './services/admin-stats.service';
 import { AdminAlertasService } from './services/admin-alertas.service';
@@ -8,6 +9,7 @@ import { AdminRolesService } from './services/admin-roles.service';
 import { AdminEstudiantesService } from './services/admin-estudiantes.service';
 import { AdminCredencialesService } from './services/admin-credenciales.service';
 import { AdminTareasService } from './services/admin-tareas.service';
+import { AdminPlanificacionesService } from './services/admin-planificaciones.service';
 import { SectoresRutasService } from './services/sectores-rutas.service';
 import { ClaseGruposService } from './clase-grupos.service';
 import { AsistenciasService } from './asistencias.service';
@@ -25,29 +27,31 @@ import { DatabaseModule } from '../core/database/database.module';
  */
 @Module({
   imports: [DatabaseModule],
-  controllers: [AdminController],
+  controllers: [AdminController, PlanificacionesAdminController],
   providers: [
     AdminService,
     // Servicios especializados (extraídos de AdminService monolítico)
     AdminStatsService,
     AdminAlertasService,
     AdminUsuariosService,
-    AdminRolesService, // ✅ NUEVO: Gestión de roles separada
-    AdminEstudiantesService, // ✅ NUEVO: Gestión de estudiantes separada
-    AdminCredencialesService, // ✅ NUEVO: Gestión de credenciales separada
-    AdminTareasService, // ✅ NUEVO: Gestión de tareas del dashboard
+    AdminRolesService,
+    AdminEstudiantesService,
+    AdminCredencialesService,
+    AdminTareasService,
+    AdminPlanificacionesService,
     SectoresRutasService,
-    ClaseGruposService, // ✅ NUEVO: Gestión de grupos de clases recurrentes
-    AsistenciasService, // ✅ NUEVO: Gestión de asistencias
-    ComisionesService, // ✅ NUEVO: Gestión de comisiones de productos
+    ClaseGruposService,
+    AsistenciasService,
+    ComisionesService,
   ],
   exports: [
     AdminService,
     AdminStatsService,
     AdminAlertasService,
     AdminUsuariosService,
-    AdminRolesService, // ✅ Exportar para uso en otros módulos
-    AdminEstudiantesService, // ✅ Exportar para uso en otros módulos
+    AdminRolesService,
+    AdminEstudiantesService,
+    AdminPlanificacionesService,
     SectoresRutasService,
   ],
 })

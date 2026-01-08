@@ -473,4 +473,266 @@ export class DocentePlanificacionesService {
       throw new NotFoundException('La clase no pertenece a esta planificación');
     }
   }
+
+  // ============================================================================
+  // TAREAS - Gestión de tareas asignadas a grupos
+  // ============================================================================
+
+  /**
+   * Obtiene las tareas disponibles para una clase (pool de tareas)
+   * @param asignacionId - ID de la asignación
+   * @param claseId - ID de la clase
+   * @param docenteId - ID del docente (para validar ownership)
+   * @returns Lista de tareas de la clase con estado de asignación
+   */
+  async getTareasClase(
+    asignacionId: string,
+    claseId: string,
+    docenteId: string,
+  ): Promise<{
+    tareas: Array<{
+      id: string;
+      contenido_id: string;
+      contenido_titulo: string;
+      orden: number;
+      obligatoria: boolean;
+      asignada: boolean;
+      tarea_asignada_id: string | null;
+      fecha_limite: Date | null;
+    }>;
+  }> {
+    await this.validarOwnership(asignacionId, docenteId);
+    await this.validarClaseEnPlanificacion(asignacionId, claseId);
+
+    // Obtener todas las tareas de la clase
+    const tareasClase = await this.prisma.tareaClase.findMany({
+      where: { clase_id: claseId },
+      include: {
+        contenido: {
+          select: { id: true, titulo: true },
+        },
+        asignaciones: {
+          where: { asignacion_id: asignacionId },
+          select: { id: true, fecha_limite: true, activa: true },
+        },
+      },
+      orderBy: { orden: 'asc' },
+    });
+
+    return {
+      tareas: tareasClase.map((t) => ({
+        id: t.id,
+        contenido_id: t.contenido_id,
+        contenido_titulo: t.contenido.titulo,
+        orden: t.orden,
+        obligatoria: t.obligatoria,
+        asignada:
+          t.asignaciones.length > 0 && (t.asignaciones[0]?.activa ?? false),
+        tarea_asignada_id:
+          t.asignaciones.length > 0 ? t.asignaciones[0]!.id : null,
+        fecha_limite:
+          t.asignaciones.length > 0 ? t.asignaciones[0]!.fecha_limite : null,
+      })),
+    };
+  }
+
+  /**
+   * Asigna una tarea a un grupo (la hace visible para los estudiantes)
+   * @param asignacionId - ID de la asignación
+   * @param tareaClaseId - ID de la tarea de clase
+   * @param docenteId - ID del docente
+   * @param fechaLimite - Fecha límite opcional
+   */
+  async asignarTarea(
+    asignacionId: string,
+    tareaClaseId: string,
+    docenteId: string,
+    fechaLimite?: Date,
+  ): Promise<{ success: boolean; tarea_asignada_id: string }> {
+    await this.validarOwnership(asignacionId, docenteId);
+
+    // Verificar que la tarea existe
+    const tareaClase = await this.prisma.tareaClase.findUnique({
+      where: { id: tareaClaseId },
+      include: { clase: true },
+    });
+
+    if (!tareaClase) {
+      throw new NotFoundException('Tarea no encontrada');
+    }
+
+    // Verificar que la clase pertenece a la planificación de la asignación
+    const asignacion = await this.prisma.asignacionPlanificacion.findUnique({
+      where: { id: asignacionId },
+      include: {
+        planificacion: {
+          include: {
+            clases: { where: { id: tareaClase.clase_id } },
+          },
+        },
+      },
+    });
+
+    if (!asignacion || asignacion.planificacion.clases.length === 0) {
+      throw new NotFoundException('La tarea no pertenece a esta planificación');
+    }
+
+    // Crear o actualizar la asignación de tarea
+    const tareaAsignada = await this.prisma.tareaAsignada.upsert({
+      where: {
+        asignacion_id_tarea_clase_id: {
+          asignacion_id: asignacionId,
+          tarea_clase_id: tareaClaseId,
+        },
+      },
+      update: {
+        activa: true,
+        fecha_limite: fechaLimite ?? null,
+        fecha_asignacion: new Date(),
+      },
+      create: {
+        asignacion_id: asignacionId,
+        tarea_clase_id: tareaClaseId,
+        activa: true,
+        fecha_limite: fechaLimite ?? null,
+      },
+    });
+
+    return { success: true, tarea_asignada_id: tareaAsignada.id };
+  }
+
+  /**
+   * Desasigna una tarea (la oculta de los estudiantes)
+   * @param asignacionId - ID de la asignación
+   * @param tareaClaseId - ID de la tarea de clase
+   * @param docenteId - ID del docente
+   */
+  async desasignarTarea(
+    asignacionId: string,
+    tareaClaseId: string,
+    docenteId: string,
+  ): Promise<{ success: boolean }> {
+    await this.validarOwnership(asignacionId, docenteId);
+
+    // Desactivar la tarea asignada
+    await this.prisma.tareaAsignada.updateMany({
+      where: {
+        asignacion_id: asignacionId,
+        tarea_clase_id: tareaClaseId,
+      },
+      data: { activa: false },
+    });
+
+    return { success: true };
+  }
+
+  /**
+   * Actualiza la fecha límite de una tarea asignada
+   * @param asignacionId - ID de la asignación
+   * @param tareaClaseId - ID de la tarea de clase
+   * @param docenteId - ID del docente
+   * @param fechaLimite - Nueva fecha límite (null para quitar)
+   */
+  async actualizarFechaLimiteTarea(
+    asignacionId: string,
+    tareaClaseId: string,
+    docenteId: string,
+    fechaLimite: Date | null,
+  ): Promise<{ success: boolean }> {
+    await this.validarOwnership(asignacionId, docenteId);
+
+    await this.prisma.tareaAsignada.updateMany({
+      where: {
+        asignacion_id: asignacionId,
+        tarea_clase_id: tareaClaseId,
+      },
+      data: { fecha_limite: fechaLimite },
+    });
+
+    return { success: true };
+  }
+
+  /**
+   * Obtiene el progreso de tareas de los estudiantes
+   * @param asignacionId - ID de la asignación
+   * @param docenteId - ID del docente
+   * @returns Progreso de tareas por estudiante
+   */
+  async getProgresoTareas(
+    asignacionId: string,
+    docenteId: string,
+  ): Promise<{
+    progresos: Array<{
+      estudiante_id: string;
+      estudiante_nombre: string;
+      tarea_titulo: string;
+      completada: boolean;
+      fecha_completado: Date | null;
+      calificacion: number | null;
+    }>;
+  }> {
+    await this.validarOwnership(asignacionId, docenteId);
+
+    // Obtener estudiantes del grupo
+    const asignacion = await this.prisma.asignacionPlanificacion.findUnique({
+      where: { id: asignacionId },
+      include: {
+        claseGrupo: {
+          include: {
+            inscripciones: {
+              where: { fecha_baja: null },
+              include: {
+                estudiante: {
+                  select: { id: true, nombre: true, apellido: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!asignacion) {
+      throw new NotFoundException('Asignación no encontrada');
+    }
+
+    // Obtener progresos de tareas
+    const progresos = await this.prisma.progresoTareaEstudiante.findMany({
+      where: {
+        tareaAsignada: {
+          asignacion_id: asignacionId,
+        },
+        estudiante_id: {
+          in: asignacion.claseGrupo.inscripciones.map((i) => i.estudiante.id),
+        },
+      },
+      include: {
+        estudiante: {
+          select: { id: true, nombre: true, apellido: true },
+        },
+        tareaAsignada: {
+          include: {
+            tareaClase: {
+              include: {
+                contenido: {
+                  select: { titulo: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      progresos: progresos.map((p) => ({
+        estudiante_id: p.estudiante_id,
+        estudiante_nombre: `${p.estudiante.nombre} ${p.estudiante.apellido}`,
+        tarea_titulo: p.tareaAsignada.tareaClase.contenido.titulo,
+        completada: p.completada_en !== null,
+        fecha_completado: p.completada_en,
+        calificacion: p.calificacion,
+      })),
+    };
+  }
 }

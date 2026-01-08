@@ -709,6 +709,26 @@ export interface ProgresoEstudianteClase {
   tiempo_practica_segundos: number;
 }
 
+export interface TareaClaseInfo {
+  id: string;
+  contenido_id: string;
+  contenido_titulo: string;
+  orden: number;
+  obligatoria: boolean;
+  asignada: boolean;
+  tarea_asignada_id: string | null;
+  fecha_limite: string | null;
+}
+
+export interface ProgresoTareaEstudiante {
+  estudiante_id: string;
+  estudiante_nombre: string;
+  tarea_titulo: string;
+  completada: boolean;
+  fecha_completado: string | null;
+  calificacion: number | null;
+}
+
 // ============================================================================
 // ASISTENCIA COMISION - Tomar asistencia batch
 // ============================================================================
@@ -792,6 +812,62 @@ export const planificacionesApi = {
   },
 
   /**
+   * Activar solo la teoría de una clase
+   * @param asignacionId - ID de la asignación
+   * @param claseId - ID de la clase
+   */
+  activarTeoria: async (
+    asignacionId: string,
+    claseId: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    return apiClient.post<{ success: boolean; message: string }>(
+      `/docentes/asignaciones/${asignacionId}/clases/${claseId}/teoria/activar`,
+    );
+  },
+
+  /**
+   * Desactivar solo la teoría de una clase
+   * @param asignacionId - ID de la asignación
+   * @param claseId - ID de la clase
+   */
+  desactivarTeoria: async (
+    asignacionId: string,
+    claseId: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    return apiClient.post<{ success: boolean; message: string }>(
+      `/docentes/asignaciones/${asignacionId}/clases/${claseId}/teoria/desactivar`,
+    );
+  },
+
+  /**
+   * Activar solo la práctica de una clase
+   * @param asignacionId - ID de la asignación
+   * @param claseId - ID de la clase
+   */
+  activarPractica: async (
+    asignacionId: string,
+    claseId: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    return apiClient.post<{ success: boolean; message: string }>(
+      `/docentes/asignaciones/${asignacionId}/clases/${claseId}/practica/activar`,
+    );
+  },
+
+  /**
+   * Desactivar solo la práctica de una clase
+   * @param asignacionId - ID de la asignación
+   * @param claseId - ID de la clase
+   */
+  desactivarPractica: async (
+    asignacionId: string,
+    claseId: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    return apiClient.post<{ success: boolean; message: string }>(
+      `/docentes/asignaciones/${asignacionId}/clases/${claseId}/practica/desactivar`,
+    );
+  },
+
+  /**
    * Obtener el progreso de estudiantes en una asignación
    * @param asignacionId - ID de la asignación
    * @returns Lista de progresos de estudiantes por clase
@@ -801,6 +877,69 @@ export const planificacionesApi = {
   ): Promise<{ progresos: ProgresoEstudianteClase[] }> => {
     return apiClient.get<{ progresos: ProgresoEstudianteClase[] }>(
       `/docentes/asignaciones/${asignacionId}/progreso`,
+    );
+  },
+
+  // ============================================================================
+  // TAREAS - Gestión de tareas por clase
+  // ============================================================================
+
+  /**
+   * Obtener tareas disponibles de una clase
+   * @param asignacionId - ID de la asignación
+   * @param claseId - ID de la clase
+   * @returns Lista de tareas con estado de asignación
+   */
+  getTareasClase: async (
+    asignacionId: string,
+    claseId: string,
+  ): Promise<{ tareas: TareaClaseInfo[] }> => {
+    return apiClient.get<{ tareas: TareaClaseInfo[] }>(
+      `/docentes/asignaciones/${asignacionId}/clases/${claseId}/tareas`,
+    );
+  },
+
+  /**
+   * Asignar una tarea al grupo (hacerla visible para estudiantes)
+   * @param asignacionId - ID de la asignación
+   * @param tareaClaseId - ID de la tarea de clase
+   * @param fechaLimite - Fecha límite opcional (ISO string)
+   */
+  asignarTarea: async (
+    asignacionId: string,
+    tareaClaseId: string,
+    fechaLimite?: string,
+  ): Promise<{ success: boolean; tarea_asignada_id: string }> => {
+    return apiClient.post<{ success: boolean; tarea_asignada_id: string }>(
+      `/docentes/asignaciones/${asignacionId}/tareas/${tareaClaseId}/asignar`,
+      { fecha_limite: fechaLimite },
+    );
+  },
+
+  /**
+   * Desasignar una tarea (ocultarla de estudiantes)
+   * @param asignacionId - ID de la asignación
+   * @param tareaClaseId - ID de la tarea de clase
+   */
+  desasignarTarea: async (
+    asignacionId: string,
+    tareaClaseId: string,
+  ): Promise<{ success: boolean }> => {
+    return apiClient.post<{ success: boolean }>(
+      `/docentes/asignaciones/${asignacionId}/tareas/${tareaClaseId}/desasignar`,
+    );
+  },
+
+  /**
+   * Obtener progreso de tareas de los estudiantes
+   * @param asignacionId - ID de la asignación
+   * @returns Progreso de tareas por estudiante
+   */
+  getProgresoTareas: async (
+    asignacionId: string,
+  ): Promise<{ progresos: ProgresoTareaEstudiante[] }> => {
+    return apiClient.get<{ progresos: ProgresoTareaEstudiante[] }>(
+      `/docentes/asignaciones/${asignacionId}/tareas/progreso`,
     );
   },
 };
