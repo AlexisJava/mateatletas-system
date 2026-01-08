@@ -197,4 +197,96 @@ export class LivekitController {
       };
     }
   }
+
+  /**
+   * POST /livekit/dar-palabra-todos - Habilitar micrófono de TODOS los estudiantes
+   * @param user - Usuario autenticado (docente)
+   * @param dto - { claseGrupoId o comisionId }
+   */
+  @Post('dar-palabra-todos')
+  @Roles(Role.DOCENTE)
+  @ApiOperation({
+    summary: 'Dar palabra a todos los estudiantes',
+    description:
+      'Habilita el micrófono de todos los estudiantes en la clase en vivo',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Operación completada',
+    type: ControlPalabraResponseDto,
+  })
+  async darPalabraTodos(
+    @GetUser() user: AuthUser,
+    @Body() dto: TokenRequestDto,
+  ): Promise<ControlPalabraResponseDto> {
+    const roomName = this.livekitTokenService.buildRoomName(dto);
+
+    try {
+      const result = await this.livekitTokenService.darPalabraTodos(
+        roomName,
+        user.id,
+      );
+      this.logger.log(
+        `Docente ${user.id} habilitó todos los micrófonos en sala ${roomName}: ${result.exitosos} exitosos, ${result.fallidos} fallidos`,
+      );
+      return {
+        exito: true,
+        mensaje: `Se habilitaron ${result.exitosos} estudiantes.${result.fallidos > 0 ? ` (${result.fallidos} fallaron)` : ''}`,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error al dar palabra a todos: ${error instanceof Error ? error.message : 'Unknown'}`,
+      );
+      return {
+        exito: false,
+        mensaje: 'No se pudo habilitar los micrófonos.',
+      };
+    }
+  }
+
+  /**
+   * POST /livekit/quitar-palabra-todos - Deshabilitar micrófono de TODOS los estudiantes
+   * @param user - Usuario autenticado (docente)
+   * @param dto - { claseGrupoId o comisionId }
+   */
+  @Post('quitar-palabra-todos')
+  @Roles(Role.DOCENTE)
+  @ApiOperation({
+    summary: 'Quitar palabra a todos los estudiantes',
+    description:
+      'Deshabilita el micrófono de todos los estudiantes en la clase en vivo',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Operación completada',
+    type: ControlPalabraResponseDto,
+  })
+  async quitarPalabraTodos(
+    @GetUser() user: AuthUser,
+    @Body() dto: TokenRequestDto,
+  ): Promise<ControlPalabraResponseDto> {
+    const roomName = this.livekitTokenService.buildRoomName(dto);
+
+    try {
+      const result = await this.livekitTokenService.quitarPalabraTodos(
+        roomName,
+        user.id,
+      );
+      this.logger.log(
+        `Docente ${user.id} deshabilitó todos los micrófonos en sala ${roomName}: ${result.exitosos} exitosos, ${result.fallidos} fallidos`,
+      );
+      return {
+        exito: true,
+        mensaje: `Se deshabilitaron ${result.exitosos} estudiantes.${result.fallidos > 0 ? ` (${result.fallidos} fallaron)` : ''}`,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error al quitar palabra a todos: ${error instanceof Error ? error.message : 'Unknown'}`,
+      );
+      return {
+        exito: false,
+        mensaje: 'No se pudo deshabilitar los micrófonos.',
+      };
+    }
+  }
 }

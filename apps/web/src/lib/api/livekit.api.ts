@@ -160,4 +160,20 @@ export const livekitApi = {
   quitarPalabra: async (data: ControlPalabraDto): Promise<ControlPalabraResponse> => {
     return apiClient.post<ControlPalabraResponse>('/livekit/quitar-palabra', data);
   },
+
+  /**
+   * Dar palabra a TODOS los estudiantes (habilitar todos los micrófonos)
+   * @param data - { claseGrupoId o comisionId }
+   */
+  darPalabraTodos: async (data: TokenRequestDto): Promise<ControlPalabraResponse> => {
+    return apiClient.post<ControlPalabraResponse>('/livekit/dar-palabra-todos', data);
+  },
+
+  /**
+   * Quitar palabra a TODOS los estudiantes (silenciar todos)
+   * @param data - { claseGrupoId o comisionId }
+   */
+  quitarPalabraTodos: async (data: TokenRequestDto): Promise<ControlPalabraResponse> => {
+    return apiClient.post<ControlPalabraResponse>('/livekit/quitar-palabra-todos', data);
+  },
 };

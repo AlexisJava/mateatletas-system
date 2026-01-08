@@ -357,6 +357,110 @@ export class LivekitTokenService {
   }
 
   /**
+   * Dar palabra a TODOS los participantes de una sala (excepto el docente)
+   * @param roomName - Nombre de la sala LiveKit
+   * @param docenteIdentity - Identity del docente (para excluirlo)
+   */
+  async darPalabraTodos(
+    roomName: string,
+    docenteIdentity: string,
+  ): Promise<{ exitosos: number; fallidos: number }> {
+    this.logger.log(
+      `darPalabraTodos: roomName=${roomName}, docenteIdentity=${docenteIdentity}`,
+    );
+
+    const participants = await this.roomService.listParticipants(roomName);
+    const estudiantes = participants.filter(
+      (p) => p.identity !== docenteIdentity,
+    );
+
+    this.logger.log(
+      `Estudiantes a habilitar: ${estudiantes.map((p) => p.identity).join(', ')}`,
+    );
+
+    let exitosos = 0;
+    let fallidos = 0;
+
+    for (const estudiante of estudiantes) {
+      try {
+        await this.roomService.updateParticipant(
+          roomName,
+          estudiante.identity,
+          {
+            permission: {
+              canPublish: true,
+              canSubscribe: true,
+              canPublishData: true,
+            },
+          },
+        );
+        exitosos++;
+      } catch (error) {
+        this.logger.error(
+          `Error habilitando ${estudiante.identity}: ${error instanceof Error ? error.message : 'Unknown'}`,
+        );
+        fallidos++;
+      }
+    }
+
+    this.logger.log(
+      `darPalabraTodos completado: ${exitosos} exitosos, ${fallidos} fallidos`,
+    );
+
+    return { exitosos, fallidos };
+  }
+
+  /**
+   * Quitar palabra a TODOS los participantes de una sala (excepto el docente)
+   * @param roomName - Nombre de la sala LiveKit
+   * @param docenteIdentity - Identity del docente (para excluirlo)
+   */
+  async quitarPalabraTodos(
+    roomName: string,
+    docenteIdentity: string,
+  ): Promise<{ exitosos: number; fallidos: number }> {
+    this.logger.log(
+      `quitarPalabraTodos: roomName=${roomName}, docenteIdentity=${docenteIdentity}`,
+    );
+
+    const participants = await this.roomService.listParticipants(roomName);
+    const estudiantes = participants.filter(
+      (p) => p.identity !== docenteIdentity,
+    );
+
+    let exitosos = 0;
+    let fallidos = 0;
+
+    for (const estudiante of estudiantes) {
+      try {
+        await this.roomService.updateParticipant(
+          roomName,
+          estudiante.identity,
+          {
+            permission: {
+              canPublish: false,
+              canSubscribe: true,
+              canPublishData: true,
+            },
+          },
+        );
+        exitosos++;
+      } catch (error) {
+        this.logger.error(
+          `Error deshabilitando ${estudiante.identity}: ${error instanceof Error ? error.message : 'Unknown'}`,
+        );
+        fallidos++;
+      }
+    }
+
+    this.logger.log(
+      `quitarPalabraTodos completado: ${exitosos} exitosos, ${fallidos} fallidos`,
+    );
+
+    return { exitosos, fallidos };
+  }
+
+  /**
    * Construir nombre de sala a partir de IDs
    */
   buildRoomName(request: TokenRequest): string {

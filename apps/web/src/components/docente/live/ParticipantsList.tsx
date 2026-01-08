@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRemoteParticipants, useRoomContext } from '@livekit/components-react';
 import { RoomEvent, Participant, Track } from 'livekit-client';
-import { Users, Hand, Mic, MicOff, X } from 'lucide-react';
+import { Users, Hand, Mic, MicOff, X, Volume2, VolumeX } from 'lucide-react';
 import { toast } from '@/components/ui/Toast';
 import { livekitApi } from '@/lib/api/livekit.api';
 
@@ -39,6 +39,7 @@ export function ParticipantsList({ claseGrupoId, comisionId, onClose }: Particip
     Map<string, ParticipantWithHandRaised>
   >(new Map());
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  const [loadingAll, setLoadingAll] = useState<'dar' | 'quitar' | null>(null);
 
   // Inicializar lista de participantes
   useEffect(() => {
@@ -190,7 +191,70 @@ export function ParticipantsList({ claseGrupoId, comisionId, onClose }: Particip
     }
   };
 
-  // Ordenar: primero los que tienen mano levantada, luego por nombre
+  // Dar palabra a TODOS
+  const handleDarPalabraTodos = async () => {
+    setLoadingAll('dar');
+    try {
+      const result = await livekitApi.darPalabraTodos({
+        claseGrupoId,
+        comisionId,
+      });
+
+      if (result.exito) {
+        toast.success(result.mensaje);
+        // Actualizar estado local - todos pueden hablar
+        setParticipantsWithHand((prev) => {
+          const newMap = new Map(prev);
+          newMap.forEach((participant, key) => {
+            newMap.set(key, {
+              ...participant,
+              canPublish: true,
+              handRaised: false,
+              handRaisedAt: null,
+            });
+          });
+          return newMap;
+        });
+      } else {
+        toast.error(result.mensaje);
+      }
+    } catch {
+      toast.error('Error al habilitar micrófonos');
+    } finally {
+      setLoadingAll(null);
+    }
+  };
+
+  // Quitar palabra a TODOS
+  const handleQuitarPalabraTodos = async () => {
+    setLoadingAll('quitar');
+    try {
+      const result = await livekitApi.quitarPalabraTodos({
+        claseGrupoId,
+        comisionId,
+      });
+
+      if (result.exito) {
+        toast.success(result.mensaje);
+        // Actualizar estado local - nadie puede hablar
+        setParticipantsWithHand((prev) => {
+          const newMap = new Map(prev);
+          newMap.forEach((participant, key) => {
+            newMap.set(key, { ...participant, canPublish: false });
+          });
+          return newMap;
+        });
+      } else {
+        toast.error(result.mensaje);
+      }
+    } catch {
+      toast.error('Error al silenciar micrófonos');
+    } finally {
+      setLoadingAll(null);
+    }
+  };
+
+  // Ordenar: primero los que tienen mano levantada (por orden), luego por nombre
   const sortedParticipants = Array.from(participantsWithHand.values()).sort((a, b) => {
     if (a.handRaised && !b.handRaised) return -1;
     if (!a.handRaised && b.handRaised) return 1;
@@ -200,7 +264,15 @@ export function ParticipantsList({ claseGrupoId, comisionId, onClose }: Particip
     return a.name.localeCompare(b.name);
   });
 
+  // Calcular el número de orden para cada participante con mano levantada
+  const getHandOrder = (participant: ParticipantWithHandRaised): number | null => {
+    if (!participant.handRaised) return null;
+    const handsRaisedSorted = sortedParticipants.filter((p) => p.handRaised);
+    return handsRaisedSorted.findIndex((p) => p.identity === participant.identity) + 1;
+  };
+
   const handsRaisedCount = sortedParticipants.filter((p) => p.handRaised).length;
+  const speakingCount = sortedParticipants.filter((p) => p.canPublish).length;
 
   return (
     <div className="flex flex-col h-full bg-slate-900 border-l border-slate-800">
@@ -228,6 +300,40 @@ export function ParticipantsList({ claseGrupoId, comisionId, onClose }: Particip
         )}
       </div>
 
+      {/* Botones de acción masiva */}
+      {sortedParticipants.length > 0 && (
+        <div className="flex gap-2 p-3 border-b border-slate-800">
+          <button
+            onClick={handleDarPalabraTodos}
+            disabled={loadingAll !== null}
+            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              loadingAll === 'dar'
+                ? 'bg-slate-700 text-slate-400 cursor-wait'
+                : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white border border-emerald-500/30'
+            }`}
+            title="Habilitar todos los micrófonos"
+          >
+            <Volume2 size={16} />
+            <span className="hidden lg:inline">Todos</span>
+          </button>
+          <button
+            onClick={handleQuitarPalabraTodos}
+            disabled={loadingAll !== null || speakingCount === 0}
+            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              loadingAll === 'quitar'
+                ? 'bg-slate-700 text-slate-400 cursor-wait'
+                : speakingCount === 0
+                  ? 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-700'
+                  : 'bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/30'
+            }`}
+            title="Silenciar todos los micrófonos"
+          >
+            <VolumeX size={16} />
+            <span className="hidden lg:inline">Silenciar</span>
+          </button>
+        </div>
+      )}
+
       {/* Lista */}
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {sortedParticipants.length === 0 ? (
@@ -236,87 +342,99 @@ export function ParticipantsList({ claseGrupoId, comisionId, onClose }: Particip
             <p className="text-sm">No hay estudiantes conectados</p>
           </div>
         ) : (
-          sortedParticipants.map((participant) => (
-            <div
-              key={participant.identity}
-              className={`
-                flex items-center justify-between p-3 rounded-lg transition-all
-                ${
-                  participant.handRaised
-                    ? 'bg-amber-500/10 border border-amber-500/30'
-                    : 'bg-slate-800/50 hover:bg-slate-800'
-                }
-              `}
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                {/* Avatar */}
-                <div
-                  className={`
-                    w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                    ${
-                      participant.canPublish
-                        ? 'bg-emerald-500/20 text-emerald-400'
-                        : 'bg-slate-700 text-slate-300'
-                    }
-                  `}
-                >
-                  {participant.name[0]?.toUpperCase() || '?'}
-                </div>
+          sortedParticipants.map((participant) => {
+            const handOrder = getHandOrder(participant);
 
-                {/* Nombre */}
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{participant.name}</p>
-                  {participant.canPublish && (
-                    <p className="text-xs text-emerald-400">Puede hablar</p>
+            return (
+              <div
+                key={participant.identity}
+                className={`
+                  flex items-center justify-between p-3 rounded-lg transition-all
+                  ${
+                    participant.handRaised
+                      ? 'bg-amber-500/10 border border-amber-500/30'
+                      : 'bg-slate-800/50 hover:bg-slate-800'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  {/* Avatar con número de orden si tiene mano levantada */}
+                  <div className="relative">
+                    <div
+                      className={`
+                        w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                        ${
+                          participant.canPublish
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : 'bg-slate-700 text-slate-300'
+                        }
+                      `}
+                    >
+                      {participant.name[0]?.toUpperCase() || '?'}
+                    </div>
+                    {/* Badge con número de orden */}
+                    {handOrder !== null && (
+                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg">
+                        {handOrder}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Nombre */}
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{participant.name}</p>
+                    {participant.canPublish && (
+                      <p className="text-xs text-emerald-400">Puede hablar</p>
+                    )}
+                  </div>
+
+                  {/* Indicador mano levantada */}
+                  {participant.handRaised && (
+                    <Hand size={16} className="text-amber-400 animate-bounce flex-shrink-0" />
                   )}
                 </div>
 
-                {/* Indicador mano levantada */}
-                {participant.handRaised && (
-                  <Hand size={16} className="text-amber-400 animate-bounce flex-shrink-0" />
-                )}
+                {/* Acciones */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {participant.canPublish ? (
+                    <button
+                      onClick={() => handleQuitarPalabra(participant.identity, participant.name)}
+                      disabled={loadingAction === participant.identity}
+                      className={`
+                        p-2 rounded-lg transition-all
+                        ${
+                          loadingAction === participant.identity
+                            ? 'bg-slate-700 text-slate-500 cursor-wait'
+                            : 'bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white'
+                        }
+                      `}
+                      title="Quitar palabra"
+                    >
+                      <MicOff size={16} />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleDarPalabra(participant.identity, participant.name)}
+                      disabled={loadingAction === participant.identity}
+                      className={`
+                        p-2 rounded-lg transition-all
+                        ${
+                          loadingAction === participant.identity
+                            ? 'bg-slate-700 text-slate-500 cursor-wait'
+                            : participant.handRaised
+                              ? 'bg-amber-500 text-white hover:bg-amber-600 animate-pulse'
+                              : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white'
+                        }
+                      `}
+                      title="Dar palabra"
+                    >
+                      <Mic size={16} />
+                    </button>
+                  )}
+                </div>
               </div>
-
-              {/* Acciones */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {participant.canPublish ? (
-                  <button
-                    onClick={() => handleQuitarPalabra(participant.identity, participant.name)}
-                    disabled={loadingAction === participant.identity}
-                    className={`
-                      p-2 rounded-lg transition-all
-                      ${
-                        loadingAction === participant.identity
-                          ? 'bg-slate-700 text-slate-500 cursor-wait'
-                          : 'bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white'
-                      }
-                    `}
-                    title="Quitar palabra"
-                  >
-                    <MicOff size={16} />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleDarPalabra(participant.identity, participant.name)}
-                    disabled={loadingAction === participant.identity}
-                    className={`
-                      p-2 rounded-lg transition-all
-                      ${
-                        loadingAction === participant.identity
-                          ? 'bg-slate-700 text-slate-500 cursor-wait'
-                          : participant.handRaised
-                            ? 'bg-amber-500 text-white hover:bg-amber-600 animate-pulse'
-                            : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white'
-                      }
-                    `}
-                    title="Dar palabra"
-                  >
-                    <Mic size={16} />
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

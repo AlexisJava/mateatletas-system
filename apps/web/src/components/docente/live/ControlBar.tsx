@@ -25,6 +25,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({ onEndClass, variant = 't
   const [handRaised, setHandRaised] = useState(false);
   const [canPublish, setCanPublish] = useState(false);
   const handRaisedRef = useRef(handRaised);
+  const prevCanPublishRef = useRef(false);
 
   // Mantener ref actualizado
   useEffect(() => {
@@ -44,6 +45,25 @@ export const ControlBar: React.FC<ControlBarProps> = ({ onEndClass, variant = 't
   });
 
   const isStudent = variant === 'student';
+
+  // Auto-activar micrófono cuando recibe permiso (de false a true)
+  useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+
+    if (isStudent && canPublish && !prevCanPublishRef.current && !isMicEnabled) {
+      console.log('[ControlBar] Auto-activando micrófono...');
+      // Pequeño delay para asegurar que LiveKit esté listo
+      timer = setTimeout(() => {
+        toggleMic();
+      }, 300);
+    }
+
+    prevCanPublishRef.current = canPublish;
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [canPublish, isStudent, isMicEnabled, toggleMic]);
 
   // Callback estable para actualizar permisos
   const updatePermissions = useCallback(() => {
