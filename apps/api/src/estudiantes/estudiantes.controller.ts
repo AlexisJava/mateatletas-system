@@ -14,6 +14,9 @@ import {
 import { ParseIdPipe } from '../common/pipes';
 import { EstudiantesFacadeService } from './estudiantes-facade.service';
 import { AccesoEstudianteService } from './services/acceso-estudiante.service';
+import { EstudianteAulaService } from './services/estudiante-aula.service';
+import { ActivityFeedService } from './services/activity-feed.service';
+import { TipoActividadFeed } from '@prisma/client';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
 import { QueryEstudiantesDto } from './dto/query-estudiantes.dto';
@@ -41,6 +44,8 @@ export class EstudiantesController {
   constructor(
     private readonly estudiantesService: EstudiantesFacadeService,
     private readonly accesoService: AccesoEstudianteService,
+    private readonly aulaService: EstudianteAulaService,
+    private readonly feedService: ActivityFeedService,
   ) {}
 
   /**
@@ -228,6 +233,300 @@ export class EstudiantesController {
       comisionId,
     );
   }
+
+  // ==================== ENDPOINTS DEL AULA VIRTUAL ====================
+
+  /**
+   * GET /estudiantes/mi-aula - Obtener resumen del aula virtual del estudiante
+   * Incluye planificaciones activas de todos sus grupos con progreso
+   * @param req - Request con usuario autenticado
+   * @returns Resumen del aula con sectores, planificaciones y progreso
+   */
+  @Get('mi-aula')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async obtenerMiAula(@Request() req: RequestWithAuthUser) {
+    const estudianteId = req.user.id;
+    return this.aulaService.getMiAula(estudianteId);
+  }
+
+  /**
+   * GET /estudiantes/aula/planificacion/:asignacionId - Obtener detalle de planificación
+   * Solo muestra clases y contenido que el docente ha activado
+   * @param req - Request con usuario autenticado
+   * @param asignacionId - ID de la asignación de planificación
+   * @returns Detalle de la planificación con clases activadas
+   */
+  @Get('aula/planificacion/:asignacionId')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async obtenerPlanificacionDetalle(
+    @Request() req: RequestWithAuthUser,
+    @Param('asignacionId', ParseIdPipe) asignacionId: string,
+  ) {
+    const estudianteId = req.user.id;
+    return this.aulaService.getPlanificacionDetalle(estudianteId, asignacionId);
+  }
+
+  /**
+   * GET /estudiantes/aula/contenido/:asignacionId/:claseId/:tipo - Obtener contenido de lección
+   * @param req - Request con usuario autenticado
+   * @param asignacionId - ID de la asignación
+   * @param claseId - ID de la clase
+   * @param tipo - 'teoria' o 'practica'
+   * @returns Contenido completo con nodos
+   */
+  @Get('aula/contenido/:asignacionId/:claseId/:tipo')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async obtenerContenidoClase(
+    @Request() req: RequestWithAuthUser,
+    @Param('asignacionId', ParseIdPipe) asignacionId: string,
+    @Param('claseId', ParseIdPipe) claseId: string,
+    @Param('tipo') tipo: 'teoria' | 'practica',
+  ) {
+    const estudianteId = req.user.id;
+
+    if (tipo !== 'teoria' && tipo !== 'practica') {
+      throw new BadRequestException('Tipo debe ser "teoria" o "practica"');
+    }
+
+    return this.aulaService.getContenidoClase(
+      estudianteId,
+      asignacionId,
+      claseId,
+      tipo,
+    );
+  }
+
+  /**
+   * POST /estudiantes/aula/completar-leccion - Marcar lección como completada
+   * @param req - Request con usuario autenticado
+   * @param body - Datos de la lección completada
+   * @returns Resultado con XP ganado
+   */
+  @Post('aula/completar-leccion')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async completarLeccion(
+    @Request() req: RequestWithAuthUser,
+    @Body()
+    body: {
+      asignacionId: string;
+      claseId: string;
+      tipo: 'teoria' | 'practica';
+      tiempoSegundos: number;
+    },
+  ) {
+    const estudianteId = req.user.id;
+
+    if (body.tipo !== 'teoria' && body.tipo !== 'practica') {
+      throw new BadRequestException('Tipo debe ser "teoria" o "practica"');
+    }
+
+    return this.aulaService.completarLeccion(
+      estudianteId,
+      body.asignacionId,
+      body.claseId,
+      body.tipo,
+      body.tiempoSegundos,
+    );
+  }
+
+  /**
+   * GET /estudiantes/mis-tareas - Obtener tareas asignadas al estudiante
+   * @param req - Request con usuario autenticado
+   * @param filtro - 'todas', 'pendientes', 'completadas' (default: 'todas')
+   * @returns Lista de tareas con progreso
+   */
+  @Get('mis-tareas')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async obtenerMisTareas(
+    @Request() req: RequestWithAuthUser,
+    @Query('filtro') filtro?: 'todas' | 'pendientes' | 'completadas',
+  ) {
+    const estudianteId = req.user.id;
+    return this.aulaService.getMisTareas(estudianteId, filtro || 'todas');
+  }
+
+  /**
+   * POST /estudiantes/tareas/:tareaAsignadaId/iniciar - Iniciar una tarea
+   * @param req - Request con usuario autenticado
+   * @param tareaAsignadaId - ID de la tarea asignada
+   * @returns Contenido de la tarea y progreso
+   */
+  @Post('tareas/:tareaAsignadaId/iniciar')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async iniciarTarea(
+    @Request() req: RequestWithAuthUser,
+    @Param('tareaAsignadaId', ParseIdPipe) tareaAsignadaId: string,
+  ) {
+    const estudianteId = req.user.id;
+    return this.aulaService.iniciarTarea(estudianteId, tareaAsignadaId);
+  }
+
+  /**
+   * POST /estudiantes/tareas/:tareaAsignadaId/completar - Completar una tarea
+   * @param req - Request con usuario autenticado
+   * @param tareaAsignadaId - ID de la tarea asignada
+   * @param body - Tiempo dedicado y calificación opcional
+   * @returns Resultado con XP ganado
+   */
+  @Post('tareas/:tareaAsignadaId/completar')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async completarTarea(
+    @Request() req: RequestWithAuthUser,
+    @Param('tareaAsignadaId', ParseIdPipe) tareaAsignadaId: string,
+    @Body() body: { tiempoSegundos: number; calificacion?: number },
+  ) {
+    const estudianteId = req.user.id;
+    return this.aulaService.completarTarea(
+      estudianteId,
+      tareaAsignadaId,
+      body.tiempoSegundos,
+      body.calificacion,
+    );
+  }
+
+  /**
+   * GET /estudiantes/aula/leaderboard/:asignacionId - Obtener leaderboard de una planificación
+   * Muestra ranking de compañeros del mismo grupo ordenado por progreso
+   * @param req - Request con usuario autenticado
+   * @param asignacionId - ID de la asignación de planificación
+   * @returns Leaderboard con posiciones y progreso de cada estudiante
+   */
+  @Get('aula/leaderboard/:asignacionId')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async obtenerLeaderboard(
+    @Request() req: RequestWithAuthUser,
+    @Param('asignacionId', ParseIdPipe) asignacionId: string,
+  ) {
+    const estudianteId = req.user.id;
+    return this.aulaService.getLeaderboard(estudianteId, asignacionId);
+  }
+
+  // ==================== FIN ENDPOINTS DEL AULA VIRTUAL ====================
+
+  // ==================== ENDPOINTS DE ACTIVITY FEED ====================
+
+  /**
+   * GET /estudiantes/feed - Obtener activity feed de estudiantes
+   * Muestra logros, completados y actividades para motivación social
+   * @param casaId - Filtrar por casa (opcional)
+   * @param tipo - Filtrar por tipo de actividad (opcional)
+   * @param page - Página (default: 1)
+   * @param limit - Items por página (default: 20, max: 50)
+   * @returns Feed de actividades con reacciones agrupadas
+   */
+  @Get('feed')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async getFeed(
+    @Query('casaId') casaId?: string,
+    @Query('tipo') tipo?: TipoActividadFeed,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.feedService.getFeed({
+      casaId,
+      tipo,
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
+  }
+
+  /**
+   * GET /estudiantes/feed/mi-casa - Obtener feed de la casa del estudiante logueado
+   * Muestra solo actividades de compañeros de casa
+   * @param req - Request con usuario autenticado
+   * @param limit - Items a mostrar (default: 10)
+   * @returns Feed de actividades de la casa
+   */
+  @Get('feed/mi-casa')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async getFeedMiCasa(
+    @Request() req: RequestWithAuthUser,
+    @Query('limit') limit?: string,
+  ) {
+    const estudianteId = req.user.id;
+    // Obtener la casa del estudiante
+    const estudiante = await this.estudiantesService.findOneById(estudianteId);
+    if (!estudiante.casaId) {
+      return {
+        data: [],
+        meta: { total: 0, page: 1, limit: 10, totalPages: 0, hasMore: false },
+      };
+    }
+    return this.feedService.getFeedByCasa(
+      estudiante.casaId,
+      limit ? parseInt(limit, 10) : 10,
+    );
+  }
+
+  /**
+   * GET /estudiantes/feed/mis-actividades - Obtener actividades del estudiante logueado
+   * @param req - Request con usuario autenticado
+   * @param limit - Items a mostrar (default: 10)
+   * @returns Feed de actividades propias
+   */
+  @Get('feed/mis-actividades')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async getMisActividades(
+    @Request() req: RequestWithAuthUser,
+    @Query('limit') limit?: string,
+  ) {
+    const estudianteId = req.user.id;
+    return this.feedService.getFeedByEstudiante(
+      estudianteId,
+      limit ? parseInt(limit, 10) : 10,
+    );
+  }
+
+  /**
+   * POST /estudiantes/feed/:actividadId/reaccion - Agregar reacción a actividad
+   * @param req - Request con usuario autenticado
+   * @param actividadId - ID de la actividad
+   * @param body - { emoji: string }
+   * @returns Reacción creada
+   */
+  @Post('feed/:actividadId/reaccion')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async addReaction(
+    @Request() req: RequestWithAuthUser,
+    @Param('actividadId', ParseIdPipe) actividadId: string,
+    @Body() body: { emoji: string },
+  ) {
+    const estudianteId = req.user.id;
+    return this.feedService.addReaction(actividadId, estudianteId, body.emoji);
+  }
+
+  /**
+   * DELETE /estudiantes/feed/:actividadId/reaccion - Eliminar reacción de actividad
+   * @param req - Request con usuario autenticado
+   * @param actividadId - ID de la actividad
+   * @param emoji - Emoji a eliminar
+   * @returns Resultado de eliminación
+   */
+  @Delete('feed/:actividadId/reaccion')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async removeReaction(
+    @Request() req: RequestWithAuthUser,
+    @Param('actividadId', ParseIdPipe) actividadId: string,
+    @Query('emoji') emoji: string,
+  ) {
+    const estudianteId = req.user.id;
+    return this.feedService.removeReaction(actividadId, estudianteId, emoji);
+  }
+
+  // ==================== FIN ENDPOINTS DE ACTIVITY FEED ====================
 
   /**
    * GET /estudiantes/:id/detalle-completo - Obtener detalle COMPLETO del estudiante

@@ -14,6 +14,8 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
+import { GetUser } from '../auth/decorators/get-user.decorator';
+import { AuthUser } from '../auth/interfaces';
 import { AdminPlanificacionesService } from './services/admin-planificaciones.service';
 import {
   CrearPlanificacionDto,
@@ -51,8 +53,8 @@ export class PlanificacionesAdminController {
    */
   @Post()
   @ApiOperation({ summary: 'Crear planificación con clases vacías' })
-  async crear(@Body() dto: CrearPlanificacionDto) {
-    return this.planificacionesService.crear(dto);
+  async crear(@GetUser() user: AuthUser, @Body() dto: CrearPlanificacionDto) {
+    return this.planificacionesService.crear(dto, user.id);
   }
 
   /**

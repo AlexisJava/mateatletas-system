@@ -9,6 +9,7 @@ import { seedTiers } from './tiers.seed';
 import { seedPlanesSuscripcion } from './planes-suscripcion.seed';
 import { seedProductos } from './productos.seed';
 import { seedLogros } from './logros.seed';
+import { seedLogrosPlanificaciones } from './logros-planificaciones.seed';
 import { seedSectores } from './sectores.seed';
 import { seedConfiguracionPrecios } from './configuracion-precios.seed';
 import { seedInscripcionesMensuales } from './inscripciones-mensuales.seed';
@@ -33,6 +34,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedPlanesSuscripcion(prisma); // ESENCIAL: Planes de suscripción STEAM
     await seedProductos(prisma); // Productos del catálogo (pueden ser reales)
     await seedLogros(prisma); // Logros del sistema
+    await seedLogrosPlanificaciones(prisma); // Logros de planificaciones
   } else {
     // DEVELOPMENT/TEST: Datos completos de prueba
     console.log('🧪 Modo DESARROLLO: Creando datos de prueba completos\n');
@@ -48,6 +50,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedPlanesSuscripcion(prisma); // Planes de suscripción STEAM
     await seedProductos(prisma);
     await seedLogros(prisma);
+    await seedLogrosPlanificaciones(prisma); // Logros de planificaciones
     await seedInscripcionesMensuales(prisma); // Inscripciones de prueba para el tutor
   }
 
@@ -68,5 +71,6 @@ export {
   seedPlanesSuscripcion,
   seedProductos,
   seedLogros,
+  seedLogrosPlanificaciones,
   seedInscripcionesMensuales,
 };

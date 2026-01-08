@@ -8,6 +8,8 @@ import { EstudianteCommandService } from './services/estudiante-command.service'
 import { EstudianteCopyService } from './services/estudiante-copy.service';
 import { EstudianteStatsService } from './services/estudiante-stats.service';
 import { AccesoEstudianteService } from './services/acceso-estudiante.service';
+import { EstudianteAulaService } from './services/estudiante-aula.service';
+import { ActivityFeedService } from './services/activity-feed.service';
 import { InscripcionesListener } from './listeners/inscripciones.listener';
 
 /**
@@ -38,6 +40,8 @@ import { InscripcionesListener } from './listeners/inscripciones.listener';
     EstudianteCopyService,
     EstudianteStatsService,
     AccesoEstudianteService,
+    EstudianteAulaService,
+    ActivityFeedService,
     // Event Listeners
     InscripcionesListener,
     // Facade (API pública) - Usado por EstudiantesController

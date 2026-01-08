@@ -1,0 +1,1274 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PrismaService } from '../../core/database/prisma.service';
+import { EstadoTarea } from '@prisma/client';
+
+/**
+ * Service para operaciones del Aula Virtual del estudiante
+ * Responsabilidad: Acceso a planificaciones, contenido activado y tareas asignadas
+ *
+ * FUNCIONALIDADES:
+ * - Ver planificaciones activas de sus grupos
+ * - Acceder a teoría/práctica activada por docentes
+ * - Ver y completar tareas asignadas
+ * - Registrar progreso y otorgar XP
+ */
+@Injectable()
+export class EstudianteAulaService {
+  constructor(
+    private prisma: PrismaService,
+    private eventEmitter: EventEmitter2,
+  ) {}
+
+  /**
+   * Obtiene el resumen del aula para un estudiante
+   * Incluye planificaciones activas de todos sus grupos
+   * @param estudianteId - ID del estudiante autenticado
+   * @returns Resumen del aula con planificaciones y progreso
+   */
+  async getMiAula(estudianteId: string) {
+    // 1. Obtener todos los grupos donde el estudiante está inscrito
+    const inscripciones = await this.prisma.inscripcionClaseGrupo.findMany({
+      where: {
+        estudiante_id: estudianteId,
+        fecha_baja: null,
+      },
+      select: {
+        clase_grupo_id: true,
+        claseGrupo: {
+          select: {
+            id: true,
+            nombre: true,
+            codigo: true,
+            grupo: {
+              select: {
+                id: true,
+                nombre: true,
+                sector: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    color: true,
+                    icono: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const claseGrupoIds = inscripciones.map((i) => i.clase_grupo_id);
+
+    // 2. Obtener asignaciones de planificación para esos grupos
+    const asignaciones = await this.prisma.asignacionPlanificacion.findMany({
+      where: {
+        clase_grupo_id: { in: claseGrupoIds },
+        activa: true,
+      },
+      include: {
+        planificacion: {
+          select: {
+            id: true,
+            titulo: true,
+            descripcion: true,
+            cantidad_clases: true,
+            mundo_tipo: true,
+            casa_tipo: true,
+          },
+        },
+        claseGrupo: {
+          select: {
+            id: true,
+            nombre: true,
+            codigo: true,
+            docente: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+              },
+            },
+          },
+        },
+        docente: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+        estadosClases: {
+          where: {
+            OR: [{ teoria_activa: true }, { practica_activa: true }],
+          },
+          select: {
+            id: true,
+            clase_id: true,
+            teoria_activa: true,
+            practica_activa: true,
+            activada_en: true,
+            completada_en: true,
+          },
+        },
+        tareasAsignadas: {
+          where: { activa: true },
+          select: {
+            id: true,
+            tarea_clase_id: true,
+            fecha_limite: true,
+          },
+        },
+      },
+    });
+
+    // 3. Obtener progreso del estudiante en clases
+    const clasesIds = asignaciones.flatMap((a) =>
+      a.estadosClases.map((e) => e.clase_id),
+    );
+
+    const progresosClases = await this.prisma.progresoClaseEstudiante.findMany({
+      where: {
+        estudiante_id: estudianteId,
+        clase_id: { in: clasesIds },
+      },
+    });
+
+    const progresosMap = new Map(progresosClases.map((p) => [p.clase_id, p]));
+
+    // 4. Obtener tareas asignadas y su progreso
+    const tareasAsignadasIds = asignaciones.flatMap((a) =>
+      a.tareasAsignadas.map((t) => t.id),
+    );
+
+    const progresosTareas = await this.prisma.progresoTareaEstudiante.findMany({
+      where: {
+        estudiante_id: estudianteId,
+        tarea_asignada_id: { in: tareasAsignadasIds },
+      },
+    });
+
+    const progresosTareasMap = new Map(
+      progresosTareas.map((p) => [p.tarea_asignada_id, p]),
+    );
+
+    // 5. Estructurar respuesta
+    const planificaciones = asignaciones.map((asignacion) => {
+      const clasesActivas = asignacion.estadosClases.length;
+      const clasesCompletadas = asignacion.estadosClases.filter((e) => {
+        const progreso = progresosMap.get(e.clase_id);
+        return progreso?.teoria_completada && progreso?.practica_completada;
+      }).length;
+
+      const tareasTotal = asignacion.tareasAsignadas.length;
+      const tareasCompletadas = asignacion.tareasAsignadas.filter((t) => {
+        const progreso = progresosTareasMap.get(t.id);
+        return progreso?.estado === EstadoTarea.COMPLETADA;
+      }).length;
+
+      return {
+        asignacion_id: asignacion.id,
+        planificacion: asignacion.planificacion,
+        grupo: {
+          id: asignacion.claseGrupo.id,
+          nombre: asignacion.claseGrupo.nombre,
+          codigo: asignacion.claseGrupo.codigo,
+        },
+        docente: asignacion.docente,
+        fecha_inicio: asignacion.fecha_inicio,
+        progreso: {
+          clases_activas: clasesActivas,
+          clases_completadas: clasesCompletadas,
+          tareas_total: tareasTotal,
+          tareas_completadas: tareasCompletadas,
+          porcentaje:
+            clasesActivas > 0
+              ? Math.round((clasesCompletadas / clasesActivas) * 100)
+              : 0,
+        },
+      };
+    });
+
+    // 6. Agrupar por sector
+    const sectoresMap = new Map<
+      string,
+      {
+        id: string;
+        nombre: string;
+        color: string;
+        icono: string;
+        planificaciones: typeof planificaciones;
+      }
+    >();
+
+    for (const inscripcion of inscripciones) {
+      const sector = inscripcion.claseGrupo.grupo.sector;
+      if (!sector) continue;
+
+      if (!sectoresMap.has(sector.id)) {
+        sectoresMap.set(sector.id, {
+          ...sector,
+          planificaciones: [],
+        });
+      }
+
+      const planificacionesDelGrupo = planificaciones.filter(
+        (p) => p.grupo.id === inscripcion.claseGrupo.id,
+      );
+
+      sectoresMap
+        .get(sector.id)!
+        .planificaciones.push(...planificacionesDelGrupo);
+    }
+
+    return {
+      sectores: Array.from(sectoresMap.values()),
+      resumen: {
+        total_planificaciones: planificaciones.length,
+        total_clases_activas: planificaciones.reduce(
+          (sum, p) => sum + p.progreso.clases_activas,
+          0,
+        ),
+        total_clases_completadas: planificaciones.reduce(
+          (sum, p) => sum + p.progreso.clases_completadas,
+          0,
+        ),
+        total_tareas: planificaciones.reduce(
+          (sum, p) => sum + p.progreso.tareas_total,
+          0,
+        ),
+        total_tareas_completadas: planificaciones.reduce(
+          (sum, p) => sum + p.progreso.tareas_completadas,
+          0,
+        ),
+      },
+    };
+  }
+
+  /**
+   * Obtiene el detalle de una planificación para el estudiante
+   * Solo muestra clases/contenido que el docente ha activado
+   * @param estudianteId - ID del estudiante
+   * @param asignacionId - ID de la asignación de planificación
+   * @returns Detalle de la planificación con clases activadas
+   */
+  async getPlanificacionDetalle(estudianteId: string, asignacionId: string) {
+    // 1. Verificar que el estudiante tiene acceso a esta asignación
+    const asignacion = await this.prisma.asignacionPlanificacion.findFirst({
+      where: {
+        id: asignacionId,
+        activa: true,
+        claseGrupo: {
+          inscripciones: {
+            some: {
+              estudiante_id: estudianteId,
+              fecha_baja: null,
+            },
+          },
+        },
+      },
+      include: {
+        planificacion: {
+          include: {
+            clases: {
+              orderBy: { numero: 'asc' },
+              include: {
+                teoria: {
+                  select: {
+                    id: true,
+                    titulo: true,
+                    descripcion: true,
+                    tipo: true,
+                    duracionMinutos: true,
+                    imagenPortada: true,
+                  },
+                },
+                practica: {
+                  select: {
+                    id: true,
+                    titulo: true,
+                    descripcion: true,
+                    tipo: true,
+                    duracionMinutos: true,
+                    imagenPortada: true,
+                  },
+                },
+                tareas: {
+                  include: {
+                    contenido: {
+                      select: {
+                        id: true,
+                        titulo: true,
+                        tipo: true,
+                        duracionMinutos: true,
+                      },
+                    },
+                  },
+                  orderBy: { orden: 'asc' },
+                },
+              },
+            },
+          },
+        },
+        claseGrupo: {
+          select: {
+            id: true,
+            nombre: true,
+            codigo: true,
+          },
+        },
+        docente: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+        estadosClases: true,
+        tareasAsignadas: {
+          where: { activa: true },
+          include: {
+            tareaClase: true,
+          },
+        },
+      },
+    });
+
+    if (!asignacion) {
+      throw new NotFoundException(
+        'Planificación no encontrada o no tienes acceso',
+      );
+    }
+
+    // 2. Crear mapas para estados
+    const estadosMap = new Map(
+      asignacion.estadosClases.map((e) => [e.clase_id, e]),
+    );
+    const tareasAsignadasMap = new Map(
+      asignacion.tareasAsignadas.map((t) => [t.tarea_clase_id, t]),
+    );
+
+    // 3. Obtener progresos del estudiante
+    const clasesIds = asignacion.planificacion.clases.map((c) => c.id);
+    const progresosClases = await this.prisma.progresoClaseEstudiante.findMany({
+      where: {
+        estudiante_id: estudianteId,
+        clase_id: { in: clasesIds },
+      },
+    });
+    const progresosClasesMap = new Map(
+      progresosClases.map((p) => [p.clase_id, p]),
+    );
+
+    const tareasAsignadasIds = asignacion.tareasAsignadas.map((t) => t.id);
+    const progresosTareas = await this.prisma.progresoTareaEstudiante.findMany({
+      where: {
+        estudiante_id: estudianteId,
+        tarea_asignada_id: { in: tareasAsignadasIds },
+      },
+    });
+    const progresosTareasMap = new Map(
+      progresosTareas.map((p) => [p.tarea_asignada_id, p]),
+    );
+
+    // 4. Estructurar clases con información de activación y progreso
+    const clases = asignacion.planificacion.clases.map((clase) => {
+      const estado = estadosMap.get(clase.id);
+      const progresoClase = progresosClasesMap.get(clase.id);
+
+      // Tareas de esta clase que están asignadas
+      const tareasConEstado = clase.tareas.map((tarea) => {
+        const tareaAsignada = tareasAsignadasMap.get(tarea.id);
+        const progresoTarea = tareaAsignada
+          ? progresosTareasMap.get(tareaAsignada.id)
+          : null;
+
+        return {
+          id: tarea.id,
+          contenido: tarea.contenido,
+          orden: tarea.orden,
+          obligatoria: tarea.obligatoria,
+          asignada: !!tareaAsignada,
+          tarea_asignada_id: tareaAsignada?.id || null,
+          fecha_limite: tareaAsignada?.fecha_limite || null,
+          progreso: progresoTarea
+            ? {
+                estado: progresoTarea.estado,
+                iniciada_en: progresoTarea.iniciada_en,
+                completada_en: progresoTarea.completada_en,
+                calificacion: progresoTarea.calificacion,
+              }
+            : null,
+        };
+      });
+
+      return {
+        id: clase.id,
+        numero: clase.numero,
+        titulo: clase.titulo,
+        descripcion: clase.descripcion,
+        // Teoría (solo si está activada)
+        teoria: estado?.teoria_activa
+          ? {
+              ...clase.teoria,
+              completada: progresoClase?.teoria_completada || false,
+              completada_en: progresoClase?.teoria_completada_en || null,
+              tiempo_segundos: progresoClase?.tiempo_teoria_segundos || 0,
+            }
+          : null,
+        // Práctica (solo si está activada)
+        practica: estado?.practica_activa
+          ? {
+              ...clase.practica,
+              completada: progresoClase?.practica_completada || false,
+              completada_en: progresoClase?.practica_completada_en || null,
+              tiempo_segundos: progresoClase?.tiempo_practica_segundos || 0,
+            }
+          : null,
+        // Estado de activación
+        activada: !!(estado?.teoria_activa || estado?.practica_activa),
+        activada_en: estado?.activada_en || null,
+        // Tareas de esta clase
+        tareas: tareasConEstado.filter((t) => t.asignada),
+      };
+    });
+
+    return {
+      asignacion_id: asignacion.id,
+      planificacion: {
+        id: asignacion.planificacion.id,
+        titulo: asignacion.planificacion.titulo,
+        descripcion: asignacion.planificacion.descripcion,
+        cantidad_clases: asignacion.planificacion.cantidad_clases,
+        mundo_tipo: asignacion.planificacion.mundo_tipo,
+        casa_tipo: asignacion.planificacion.casa_tipo,
+      },
+      grupo: asignacion.claseGrupo,
+      docente: asignacion.docente,
+      fecha_inicio: asignacion.fecha_inicio,
+      clases: clases.filter((c) => c.activada), // Solo clases activadas
+    };
+  }
+
+  /**
+   * Obtiene el contenido de una lección (teoría o práctica)
+   * @param estudianteId - ID del estudiante
+   * @param asignacionId - ID de la asignación
+   * @param claseId - ID de la clase
+   * @param tipo - 'teoria' o 'practica'
+   * @returns Contenido completo con nodos
+   */
+  async getContenidoClase(
+    estudianteId: string,
+    asignacionId: string,
+    claseId: string,
+    tipo: 'teoria' | 'practica',
+  ) {
+    // 1. Verificar acceso y que el contenido esté activado
+    const asignacion = await this.prisma.asignacionPlanificacion.findFirst({
+      where: {
+        id: asignacionId,
+        activa: true,
+        claseGrupo: {
+          inscripciones: {
+            some: {
+              estudiante_id: estudianteId,
+              fecha_baja: null,
+            },
+          },
+        },
+      },
+      include: {
+        estadosClases: {
+          where: { clase_id: claseId },
+        },
+      },
+    });
+
+    if (!asignacion) {
+      throw new NotFoundException('No tienes acceso a esta planificación');
+    }
+
+    const estado = asignacion.estadosClases[0];
+    if (!estado) {
+      throw new NotFoundException('Esta clase no está disponible aún');
+    }
+
+    const activo =
+      tipo === 'teoria' ? estado.teoria_activa : estado.practica_activa;
+    if (!activo) {
+      throw new NotFoundException(
+        `La ${tipo} de esta clase no está activada aún`,
+      );
+    }
+
+    // 2. Obtener la clase con el contenido
+    const clase = await this.prisma.clasePlanificacion.findUnique({
+      where: { id: claseId },
+      include: {
+        teoria:
+          tipo === 'teoria'
+            ? {
+                include: {
+                  nodos: {
+                    orderBy: { orden: 'asc' },
+                  },
+                },
+              }
+            : false,
+        practica:
+          tipo === 'practica'
+            ? {
+                include: {
+                  nodos: {
+                    orderBy: { orden: 'asc' },
+                  },
+                },
+              }
+            : false,
+      },
+    });
+
+    if (!clase) {
+      throw new NotFoundException('Clase no encontrada');
+    }
+
+    const contenido = tipo === 'teoria' ? clase.teoria : clase.practica;
+
+    // 3. Obtener o crear progreso
+    let progreso = await this.prisma.progresoClaseEstudiante.findUnique({
+      where: {
+        estudiante_id_clase_id: {
+          estudiante_id: estudianteId,
+          clase_id: claseId,
+        },
+      },
+    });
+
+    if (!progreso) {
+      progreso = await this.prisma.progresoClaseEstudiante.create({
+        data: {
+          estudiante_id: estudianteId,
+          clase_id: claseId,
+        },
+      });
+    }
+
+    return {
+      clase: {
+        id: clase.id,
+        numero: clase.numero,
+        titulo: clase.titulo,
+      },
+      tipo,
+      contenido,
+      progreso: {
+        completada:
+          tipo === 'teoria'
+            ? progreso.teoria_completada
+            : progreso.practica_completada,
+        completada_en:
+          tipo === 'teoria'
+            ? progreso.teoria_completada_en
+            : progreso.practica_completada_en,
+        tiempo_segundos:
+          tipo === 'teoria'
+            ? progreso.tiempo_teoria_segundos
+            : progreso.tiempo_practica_segundos,
+      },
+    };
+  }
+
+  /**
+   * Marca una lección como completada y otorga XP
+   * @param estudianteId - ID del estudiante
+   * @param asignacionId - ID de la asignación
+   * @param claseId - ID de la clase
+   * @param tipo - 'teoria' o 'practica'
+   * @param tiempoSegundos - Tiempo dedicado en segundos
+   * @returns Resultado con XP ganado
+   */
+  async completarLeccion(
+    estudianteId: string,
+    asignacionId: string,
+    claseId: string,
+    tipo: 'teoria' | 'practica',
+    tiempoSegundos: number,
+  ) {
+    // 1. Verificar acceso
+    const asignacion = await this.prisma.asignacionPlanificacion.findFirst({
+      where: {
+        id: asignacionId,
+        activa: true,
+        claseGrupo: {
+          inscripciones: {
+            some: {
+              estudiante_id: estudianteId,
+              fecha_baja: null,
+            },
+          },
+        },
+      },
+      include: {
+        estadosClases: {
+          where: { clase_id: claseId },
+        },
+        planificacion: {
+          select: {
+            titulo: true,
+          },
+        },
+      },
+    });
+
+    if (!asignacion) {
+      throw new NotFoundException('No tienes acceso a esta planificación');
+    }
+
+    const estado = asignacion.estadosClases[0];
+    if (!estado) {
+      throw new NotFoundException('Esta clase no está disponible');
+    }
+
+    const activo =
+      tipo === 'teoria' ? estado.teoria_activa : estado.practica_activa;
+    if (!activo) {
+      throw new NotFoundException(`La ${tipo} no está activada`);
+    }
+
+    // 2. Obtener clase para el nombre
+    const clase = await this.prisma.clasePlanificacion.findUnique({
+      where: { id: claseId },
+      select: { titulo: true, numero: true },
+    });
+
+    // 3. Actualizar o crear progreso
+    const updateData =
+      tipo === 'teoria'
+        ? {
+            teoria_completada: true,
+            teoria_completada_en: new Date(),
+            tiempo_teoria_segundos: { increment: tiempoSegundos },
+          }
+        : {
+            practica_completada: true,
+            practica_completada_en: new Date(),
+            tiempo_practica_segundos: { increment: tiempoSegundos },
+          };
+
+    const progreso = await this.prisma.progresoClaseEstudiante.upsert({
+      where: {
+        estudiante_id_clase_id: {
+          estudiante_id: estudianteId,
+          clase_id: claseId,
+        },
+      },
+      create: {
+        estudiante_id: estudianteId,
+        clase_id: claseId,
+        ...(tipo === 'teoria'
+          ? {
+              teoria_completada: true,
+              teoria_completada_en: new Date(),
+              tiempo_teoria_segundos: tiempoSegundos,
+            }
+          : {
+              practica_completada: true,
+              practica_completada_en: new Date(),
+              tiempo_practica_segundos: tiempoSegundos,
+            }),
+      },
+      update: updateData,
+    });
+
+    // 4. Calcular XP
+    const xpBase = tipo === 'teoria' ? 50 : 75; // Práctica da más XP
+    const xpBonusTiempo = Math.min(Math.floor(tiempoSegundos / 60) * 2, 20); // Hasta 20 XP bonus por tiempo
+
+    // 5. Emitir evento de gamificación
+    this.eventEmitter.emit('leccion.completada', {
+      estudianteId,
+      tipo,
+      claseId,
+      claseTitulo: clase?.titulo,
+      claseNumero: clase?.numero,
+      planificacionTitulo: asignacion.planificacion.titulo,
+      tiempoSegundos,
+      xpBase,
+      xpBonus: xpBonusTiempo,
+      xpTotal: xpBase + xpBonusTiempo,
+    });
+
+    return {
+      success: true,
+      progreso: {
+        teoria_completada: progreso.teoria_completada,
+        practica_completada: progreso.practica_completada,
+      },
+      xp_ganado: xpBase + xpBonusTiempo,
+      mensaje: `¡${tipo === 'teoria' ? 'Teoría' : 'Práctica'} completada! +${xpBase + xpBonusTiempo} XP`,
+    };
+  }
+
+  /**
+   * Obtiene las tareas asignadas al estudiante
+   * @param estudianteId - ID del estudiante
+   * @param filtro - 'todas', 'pendientes', 'completadas'
+   * @returns Lista de tareas con progreso
+   */
+  async getMisTareas(
+    estudianteId: string,
+    filtro: 'todas' | 'pendientes' | 'completadas' = 'todas',
+  ) {
+    // 1. Obtener grupos del estudiante
+    const inscripciones = await this.prisma.inscripcionClaseGrupo.findMany({
+      where: {
+        estudiante_id: estudianteId,
+        fecha_baja: null,
+      },
+      select: { clase_grupo_id: true },
+    });
+
+    const claseGrupoIds = inscripciones.map((i) => i.clase_grupo_id);
+
+    // 2. Obtener tareas asignadas
+    const tareasAsignadas = await this.prisma.tareaAsignada.findMany({
+      where: {
+        activa: true,
+        asignacion: {
+          activa: true,
+          clase_grupo_id: { in: claseGrupoIds },
+        },
+      },
+      include: {
+        tareaClase: {
+          include: {
+            contenido: {
+              select: {
+                id: true,
+                titulo: true,
+                descripcion: true,
+                tipo: true,
+                duracionMinutos: true,
+                imagenPortada: true,
+              },
+            },
+            clase: {
+              select: {
+                id: true,
+                numero: true,
+                titulo: true,
+                planificacion: {
+                  select: {
+                    id: true,
+                    titulo: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        asignacion: {
+          select: {
+            id: true,
+            docente: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+              },
+            },
+            claseGrupo: {
+              select: {
+                id: true,
+                nombre: true,
+                codigo: true,
+              },
+            },
+          },
+        },
+        progresos: {
+          where: { estudiante_id: estudianteId },
+        },
+      },
+      orderBy: [{ fecha_limite: 'asc' }, { fecha_asignacion: 'desc' }],
+    });
+
+    // 3. Mapear y filtrar
+    const tareas = tareasAsignadas.map((ta) => {
+      const progreso = ta.progresos[0];
+      const vencida = ta.fecha_limite && new Date(ta.fecha_limite) < new Date();
+
+      return {
+        tarea_asignada_id: ta.id,
+        contenido: ta.tareaClase.contenido,
+        clase: ta.tareaClase.clase,
+        obligatoria: ta.tareaClase.obligatoria,
+        fecha_asignacion: ta.fecha_asignacion,
+        fecha_limite: ta.fecha_limite,
+        vencida: vencida && progreso?.estado !== EstadoTarea.COMPLETADA,
+        grupo: ta.asignacion.claseGrupo,
+        docente: ta.asignacion.docente,
+        asignacion_id: ta.asignacion.id,
+        progreso: progreso
+          ? {
+              estado: progreso.estado,
+              iniciada_en: progreso.iniciada_en,
+              completada_en: progreso.completada_en,
+              tiempo_total_segundos: progreso.tiempo_total_segundos,
+              intentos: progreso.intentos,
+              calificacion: progreso.calificacion,
+            }
+          : {
+              estado: EstadoTarea.PENDIENTE,
+              iniciada_en: null,
+              completada_en: null,
+              tiempo_total_segundos: 0,
+              intentos: 0,
+              calificacion: null,
+            },
+      };
+    });
+
+    // 4. Filtrar según parámetro
+    let tareasFiltradas = tareas;
+    if (filtro === 'pendientes') {
+      tareasFiltradas = tareas.filter(
+        (t) => t.progreso.estado !== EstadoTarea.COMPLETADA,
+      );
+    } else if (filtro === 'completadas') {
+      tareasFiltradas = tareas.filter(
+        (t) => t.progreso.estado === EstadoTarea.COMPLETADA,
+      );
+    }
+
+    return {
+      tareas: tareasFiltradas,
+      resumen: {
+        total: tareas.length,
+        pendientes: tareas.filter(
+          (t) => t.progreso.estado === EstadoTarea.PENDIENTE,
+        ).length,
+        en_progreso: tareas.filter(
+          (t) => t.progreso.estado === EstadoTarea.EN_PROGRESO,
+        ).length,
+        completadas: tareas.filter(
+          (t) => t.progreso.estado === EstadoTarea.COMPLETADA,
+        ).length,
+        vencidas: tareas.filter((t) => t.vencida).length,
+      },
+    };
+  }
+
+  /**
+   * Inicia una tarea (marca como EN_PROGRESO)
+   * @param estudianteId - ID del estudiante
+   * @param tareaAsignadaId - ID de la tarea asignada
+   * @returns Progreso actualizado
+   */
+  async iniciarTarea(estudianteId: string, tareaAsignadaId: string) {
+    // 1. Verificar que la tarea está asignada a un grupo del estudiante
+    const tareaAsignada = await this.prisma.tareaAsignada.findFirst({
+      where: {
+        id: tareaAsignadaId,
+        activa: true,
+        asignacion: {
+          activa: true,
+          claseGrupo: {
+            inscripciones: {
+              some: {
+                estudiante_id: estudianteId,
+                fecha_baja: null,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        tareaClase: {
+          include: {
+            contenido: {
+              include: {
+                nodos: {
+                  orderBy: { orden: 'asc' },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!tareaAsignada) {
+      throw new NotFoundException('Tarea no encontrada o no tienes acceso');
+    }
+
+    // 2. Crear o actualizar progreso
+    const progreso = await this.prisma.progresoTareaEstudiante.upsert({
+      where: {
+        estudiante_id_tarea_asignada_id: {
+          estudiante_id: estudianteId,
+          tarea_asignada_id: tareaAsignadaId,
+        },
+      },
+      create: {
+        estudiante_id: estudianteId,
+        tarea_asignada_id: tareaAsignadaId,
+        estado: EstadoTarea.EN_PROGRESO,
+        iniciada_en: new Date(),
+        intentos: 1,
+      },
+      update: {
+        estado: EstadoTarea.EN_PROGRESO,
+        iniciada_en: new Date(),
+        intentos: { increment: 1 },
+      },
+    });
+
+    return {
+      success: true,
+      progreso,
+      contenido: tareaAsignada.tareaClase.contenido,
+    };
+  }
+
+  /**
+   * Obtiene el leaderboard de una planificación (asignación)
+   * Muestra el ranking de compañeros del mismo grupo
+   * @param estudianteId - ID del estudiante autenticado (para verificar acceso)
+   * @param asignacionId - ID de la asignación de planificación
+   * @returns Leaderboard con posiciones y progreso
+   */
+  async getLeaderboard(estudianteId: string, asignacionId: string) {
+    // 1. Verificar que el estudiante tiene acceso a esta asignación
+    const asignacion = await this.prisma.asignacionPlanificacion.findFirst({
+      where: {
+        id: asignacionId,
+        activa: true,
+        claseGrupo: {
+          inscripciones: {
+            some: {
+              estudiante_id: estudianteId,
+              fecha_baja: null,
+            },
+          },
+        },
+      },
+      include: {
+        planificacion: {
+          select: {
+            id: true,
+            titulo: true,
+            cantidad_clases: true,
+          },
+        },
+        claseGrupo: {
+          select: {
+            id: true,
+            nombre: true,
+            inscripciones: {
+              where: { fecha_baja: null },
+              select: {
+                estudiante_id: true,
+                estudiante: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    avatarUrl: true,
+                    recursos: {
+                      select: { xp_total: true },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        estadosClases: {
+          where: {
+            OR: [{ teoria_activa: true }, { practica_activa: true }],
+          },
+          select: { clase_id: true },
+        },
+        tareasAsignadas: {
+          where: { activa: true },
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!asignacion) {
+      throw new NotFoundException(
+        'Planificación no encontrada o no tienes acceso',
+      );
+    }
+
+    const estudiantesIds = asignacion.claseGrupo.inscripciones.map(
+      (i) => i.estudiante_id,
+    );
+    const clasesActivasIds = asignacion.estadosClases.map((e) => e.clase_id);
+    const tareasAsignadasIds = asignacion.tareasAsignadas.map((t) => t.id);
+
+    // 2. Obtener progresos de clases para todos los estudiantes
+    const progresosClases = await this.prisma.progresoClaseEstudiante.findMany({
+      where: {
+        estudiante_id: { in: estudiantesIds },
+        clase_id: { in: clasesActivasIds },
+      },
+    });
+
+    // Agrupar por estudiante
+    const progresosClasesPorEstudiante = new Map<
+      string,
+      typeof progresosClases
+    >();
+    for (const p of progresosClases) {
+      const existing = progresosClasesPorEstudiante.get(p.estudiante_id) || [];
+      existing.push(p);
+      progresosClasesPorEstudiante.set(p.estudiante_id, existing);
+    }
+
+    // 3. Obtener progresos de tareas
+    const progresosTareas = await this.prisma.progresoTareaEstudiante.findMany({
+      where: {
+        estudiante_id: { in: estudiantesIds },
+        tarea_asignada_id: { in: tareasAsignadasIds },
+      },
+    });
+
+    const progresosTareasPorEstudiante = new Map<
+      string,
+      typeof progresosTareas
+    >();
+    for (const p of progresosTareas) {
+      const existing = progresosTareasPorEstudiante.get(p.estudiante_id) || [];
+      existing.push(p);
+      progresosTareasPorEstudiante.set(p.estudiante_id, existing);
+    }
+
+    // 4. Calcular progreso y puntos por estudiante
+    const leaderboardEntries = asignacion.claseGrupo.inscripciones.map((i) => {
+      const est = i.estudiante;
+      const progClases = progresosClasesPorEstudiante.get(est.id) || [];
+      const progTareas = progresosTareasPorEstudiante.get(est.id) || [];
+
+      // Clases completadas (teoría Y práctica)
+      const clasesCompletadas = progClases.filter(
+        (p) => p.teoria_completada && p.practica_completada,
+      ).length;
+
+      // Tareas completadas
+      const tareasCompletadas = progTareas.filter(
+        (p) => p.estado === EstadoTarea.COMPLETADA,
+      ).length;
+
+      // Puntaje de progreso para ordenar:
+      // - Cada clase completa = 10 puntos
+      // - Cada tarea completa = 5 puntos
+      const puntosPlanificacion =
+        clasesCompletadas * 10 + tareasCompletadas * 5;
+
+      // Porcentaje de progreso
+      const totalActividades =
+        clasesActivasIds.length + tareasAsignadasIds.length;
+      const actividadesCompletadas = clasesCompletadas + tareasCompletadas;
+      const porcentaje =
+        totalActividades > 0
+          ? Math.round((actividadesCompletadas / totalActividades) * 100)
+          : 0;
+
+      return {
+        estudiante: {
+          id: est.id,
+          nombre: est.nombre,
+          apellido: est.apellido,
+          avatar: est.avatarUrl,
+          xp_total: est.recursos?.xp_total ?? 0,
+        },
+        progreso: {
+          clases_completadas: clasesCompletadas,
+          clases_totales: clasesActivasIds.length,
+          tareas_completadas: tareasCompletadas,
+          tareas_totales: tareasAsignadasIds.length,
+          porcentaje,
+        },
+        puntos_planificacion: puntosPlanificacion,
+        es_yo: est.id === estudianteId,
+      };
+    });
+
+    // 5. Ordenar por puntos de planificación, luego por XP total como desempate
+    leaderboardEntries.sort((a, b) => {
+      if (b.puntos_planificacion !== a.puntos_planificacion) {
+        return b.puntos_planificacion - a.puntos_planificacion;
+      }
+      return b.estudiante.xp_total - a.estudiante.xp_total;
+    });
+
+    // 6. Asignar posiciones
+    const leaderboard = leaderboardEntries.map((entry, index) => ({
+      posicion: index + 1,
+      ...entry,
+    }));
+
+    // 7. Encontrar mi posición
+    const miPosicion =
+      leaderboard.find((e) => e.es_yo)?.posicion ?? leaderboard.length;
+
+    return {
+      planificacion: asignacion.planificacion,
+      grupo: {
+        id: asignacion.claseGrupo.id,
+        nombre: asignacion.claseGrupo.nombre,
+      },
+      mi_posicion: miPosicion,
+      total_participantes: leaderboard.length,
+      leaderboard,
+    };
+  }
+
+  /**
+   * Completa una tarea y otorga XP
+   * @param estudianteId - ID del estudiante
+   * @param tareaAsignadaId - ID de la tarea asignada
+   * @param tiempoSegundos - Tiempo total dedicado
+   * @param calificacion - Calificación opcional (0-100)
+   * @returns Resultado con XP ganado
+   */
+  async completarTarea(
+    estudianteId: string,
+    tareaAsignadaId: string,
+    tiempoSegundos: number,
+    calificacion?: number,
+  ) {
+    // 1. Verificar acceso
+    const tareaAsignada = await this.prisma.tareaAsignada.findFirst({
+      where: {
+        id: tareaAsignadaId,
+        activa: true,
+        asignacion: {
+          activa: true,
+          claseGrupo: {
+            inscripciones: {
+              some: {
+                estudiante_id: estudianteId,
+                fecha_baja: null,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        tareaClase: {
+          include: {
+            contenido: {
+              select: { titulo: true },
+            },
+            clase: {
+              select: {
+                titulo: true,
+                planificacion: {
+                  select: { titulo: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!tareaAsignada) {
+      throw new NotFoundException('Tarea no encontrada o no tienes acceso');
+    }
+
+    // 2. Verificar si ya está completada
+    const progresoExistente =
+      await this.prisma.progresoTareaEstudiante.findUnique({
+        where: {
+          estudiante_id_tarea_asignada_id: {
+            estudiante_id: estudianteId,
+            tarea_asignada_id: tareaAsignadaId,
+          },
+        },
+      });
+
+    if (progresoExistente?.estado === EstadoTarea.COMPLETADA) {
+      return {
+        success: false,
+        mensaje: 'Esta tarea ya fue completada',
+        progreso: progresoExistente,
+        xp_ganado: 0,
+      };
+    }
+
+    // 3. Actualizar progreso
+    const progreso = await this.prisma.progresoTareaEstudiante.upsert({
+      where: {
+        estudiante_id_tarea_asignada_id: {
+          estudiante_id: estudianteId,
+          tarea_asignada_id: tareaAsignadaId,
+        },
+      },
+      create: {
+        estudiante_id: estudianteId,
+        tarea_asignada_id: tareaAsignadaId,
+        estado: EstadoTarea.COMPLETADA,
+        iniciada_en: new Date(),
+        completada_en: new Date(),
+        tiempo_total_segundos: tiempoSegundos,
+        intentos: 1,
+        calificacion,
+      },
+      update: {
+        estado: EstadoTarea.COMPLETADA,
+        completada_en: new Date(),
+        tiempo_total_segundos: { increment: tiempoSegundos },
+        calificacion,
+      },
+    });
+
+    // 4. Calcular XP
+    const xpBase = tareaAsignada.tareaClase.obligatoria ? 100 : 75;
+    const xpBonusCalificacion = calificacion
+      ? Math.floor((calificacion / 100) * 25)
+      : 0;
+    const xpBonusTiempo =
+      tareaAsignada.fecha_limite &&
+      new Date() < new Date(tareaAsignada.fecha_limite)
+        ? 15
+        : 0; // Bonus por entregar a tiempo
+
+    const xpTotal = xpBase + xpBonusCalificacion + xpBonusTiempo;
+
+    // 5. Emitir evento de gamificación
+    this.eventEmitter.emit('tarea.completada', {
+      estudianteId,
+      tareaAsignadaId,
+      tareaTitulo: tareaAsignada.tareaClase.contenido.titulo,
+      claseTitulo: tareaAsignada.tareaClase.clase.titulo,
+      planificacionTitulo: tareaAsignada.tareaClase.clase.planificacion.titulo,
+      obligatoria: tareaAsignada.tareaClase.obligatoria,
+      tiempoSegundos,
+      calificacion,
+      entregadoATiempo: xpBonusTiempo > 0,
+      xpBase,
+      xpBonusCalificacion,
+      xpBonusTiempo,
+      xpTotal,
+    });
+
+    return {
+      success: true,
+      progreso,
+      xp_ganado: xpTotal,
+      mensaje: `¡Tarea completada! +${xpTotal} XP`,
+      desglose_xp: {
+        base: xpBase,
+        bonus_calificacion: xpBonusCalificacion,
+        bonus_tiempo: xpBonusTiempo,
+      },
+    };
+  }
+}

@@ -513,4 +513,99 @@ export const estudiantesApi = {
       throw error;
     }
   },
+
+  // ==================== ACTIVITY FEED ====================
+
+  /**
+   * Obtener el feed de actividades
+   * @param params - Parámetros de filtrado
+   * @returns Feed con actividades y metadata
+   */
+  getFeed: async (params?: {
+    casaId?: string;
+    tipo?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<FeedResponse> => {
+    const response = await apiClient.get<FeedResponse>('/estudiantes/feed', { params });
+    return response;
+  },
+
+  /**
+   * Obtener feed de la casa del estudiante
+   * @param limit - Cantidad de items (default: 10)
+   * @returns Feed de la casa
+   */
+  getFeedMiCasa: async (limit?: number): Promise<FeedResponse> => {
+    const response = await apiClient.get<FeedResponse>('/estudiantes/feed/mi-casa', {
+      params: { limit },
+    });
+    return response;
+  },
+
+  /**
+   * Obtener actividades propias del estudiante
+   * @param limit - Cantidad de items (default: 10)
+   * @returns Feed de actividades propias
+   */
+  getMisActividades: async (limit?: number): Promise<FeedResponse> => {
+    const response = await apiClient.get<FeedResponse>('/estudiantes/feed/mis-actividades', {
+      params: { limit },
+    });
+    return response;
+  },
+
+  /**
+   * Agregar reacción a una actividad del feed
+   * @param actividadId - ID de la actividad
+   * @param emoji - Emoji de reacción
+   */
+  addReaction: async (actividadId: string, emoji: string): Promise<void> => {
+    await apiClient.post(`/estudiantes/feed/${actividadId}/reaccion`, { emoji });
+  },
+
+  /**
+   * Eliminar reacción de una actividad del feed
+   * @param actividadId - ID de la actividad
+   * @param emoji - Emoji a eliminar
+   */
+  removeReaction: async (actividadId: string, emoji: string): Promise<void> => {
+    await apiClient.delete(`/estudiantes/feed/${actividadId}/reaccion`, {
+      params: { emoji },
+    });
+  },
 };
+
+// ==================== TYPES PARA ACTIVITY FEED ====================
+
+export interface FeedItem {
+  id: string;
+  tipo: string;
+  mensaje: string;
+  xpGanado: number;
+  metadata: Record<string, unknown>;
+  creadoEn: string;
+  estudiante: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    avatarUrl: string | null;
+  };
+  reacciones: Array<{
+    emoji: string;
+    count: number;
+    estudiantesIds: string[];
+  }>;
+  totalReacciones: number;
+}
+
+export interface FeedResponse {
+  data: FeedItem[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
+}

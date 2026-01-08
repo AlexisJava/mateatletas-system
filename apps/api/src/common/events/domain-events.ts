@@ -203,3 +203,71 @@ export class LeccionCompletadaEvent {
     public readonly tiempoTotalSegundos: number,
   ) {}
 }
+
+/**
+ * Evento: Estudiante completó una clase completa (teoría + práctica)
+ *
+ * Se emite cuando:
+ * - Un estudiante completa tanto teoría como práctica de una clase de planificación
+ *
+ * Listeners:
+ * - GamificacionModule: Otorgar XP bonus por clase completa
+ * - ActividadFeedModule: Mostrar logro en feed de compañeros
+ * - LogrosModule: Verificar logros de clases completadas
+ */
+export class ClaseCompletadaEvent {
+  constructor(
+    public readonly estudianteId: string,
+    public readonly claseId: string,
+    public readonly claseTitulo: string,
+    public readonly claseNumero: number,
+    public readonly planificacionId: string,
+    public readonly planificacionTitulo: string,
+    public readonly tiempoTotalSegundos: number,
+    public readonly xpBonus: number,
+  ) {}
+}
+
+/**
+ * Evento: Estudiante completó una planificación completa
+ *
+ * Se emite cuando:
+ * - Un estudiante completa TODAS las clases de una planificación
+ *
+ * Listeners:
+ * - GamificacionModule: Otorgar XP bonus grande + badge especial
+ * - ActividadFeedModule: Mostrar logro destacado en feed
+ * - NotificacionesModule: Notificar al docente del logro
+ */
+export class PlanificacionCompletadaEvent {
+  constructor(
+    public readonly estudianteId: string,
+    public readonly planificacionId: string,
+    public readonly planificacionTitulo: string,
+    public readonly asignacionId: string,
+    public readonly totalClases: number,
+    public readonly tiempoTotalSegundos: number,
+    public readonly xpTotal: number,
+  ) {}
+}
+
+/**
+ * Evento: Estudiante completó una tarea con calificación perfecta
+ *
+ * Se emite cuando:
+ * - Un estudiante completa una tarea con 100% de calificación
+ *
+ * Listeners:
+ * - GamificacionModule: Otorgar XP bonus
+ * - LogrosModule: Verificar rachas de tareas perfectas
+ */
+export class TareaPerfectaEvent {
+  constructor(
+    public readonly estudianteId: string,
+    public readonly tareaAsignadaId: string,
+    public readonly tareaTitulo: string,
+    public readonly claseTitulo: string,
+    public readonly planificacionTitulo: string,
+    public readonly xpBonus: number,
+  ) {}
+}

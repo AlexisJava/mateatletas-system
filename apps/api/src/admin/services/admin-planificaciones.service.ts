@@ -31,9 +31,16 @@ export class AdminPlanificacionesService {
 
   /**
    * Crear nueva planificación con N clases vacías
+   * @param dto - Datos de la planificación
+   * @param creadorId - ID del admin que crea la planificación
    */
-  async crear(dto: CrearPlanificacionDto): Promise<PlanificacionResponse> {
-    this.logger.log(`Creando planificación: ${dto.titulo}`);
+  async crear(
+    dto: CrearPlanificacionDto,
+    creadorId: string,
+  ): Promise<PlanificacionResponse> {
+    this.logger.log(
+      `Creando planificación: ${dto.titulo} por admin ${creadorId}`,
+    );
 
     // Crear contenidos vacíos para teoría y práctica de cada clase
     const planificacion = await this.prisma.$transaction(async (tx) => {
@@ -48,7 +55,7 @@ export class AdminPlanificacionesService {
             mundoTipo: dto.mundo_tipo,
             estado: 'BORRADOR',
             tipo: 'LECCION',
-            creadorId: 'system', // TODO: obtener del contexto de auth
+            creadorId: creadorId,
           },
         });
 
@@ -84,7 +91,7 @@ export class AdminPlanificacionesService {
             mundoTipo: dto.mundo_tipo,
             estado: 'BORRADOR',
             tipo: 'TAREA',
-            creadorId: 'system',
+            creadorId: creadorId,
           },
         });
 
