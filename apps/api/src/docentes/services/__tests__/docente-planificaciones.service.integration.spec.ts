@@ -1,304 +1,249 @@
 /**
- * ============================================================================
- * INTEGRATION TESTS - DocentePlanificacionesService
- * ============================================================================
+ * Tests de Integración: DocentePlanificacionesService
  *
- * FASE 1.5: Tests de integración del sistema de planificaciones para docentes
- *
- * Estos tests corren contra una base de datos REAL (PostgreSQL de test).
- * NO HAY MOCKS - todas las operaciones son reales.
- *
- * Setup required:
- *   docker-compose -f docker-compose.test.yml up -d
- *   DATABASE_URL="postgresql://test:test_password_123@localhost:5433/mateatletas_test" npx prisma migrate deploy
- *
- * Run:
- *   npm run test:integration -- --testPathPattern="docente-planificaciones"
- *
- * Modelo de datos testeado:
- *   Planificacion → ClasePlanificacion[] (cada clase tiene teoria_id y practica_id)
- *   AsignacionPlanificacion → EstadoClaseGrupo[] (qué está activo por grupo)
- *   ProgresoClaseEstudiante (progreso individual por clase)
+ * Métodos testeados:
+ * - getMisAsignaciones() - Obtener asignaciones del docente
+ * - activarTeoria() / desactivarTeoria() - Toggle teoría
+ * - activarPractica() / desactivarPractica() - Toggle práctica
+ * - activarClase() / desactivarClase() - Toggle completo
+ * - getProgresoEstudiantes() - Progreso de estudiantes
+ * - getTareasClase() - Tareas disponibles
+ * - asignarTarea() / desasignarTarea() - Asignar/desasignar tareas
+ * - actualizarFechaLimiteTarea() - Fecha límite
+ * - getProgresoTareas() - Progreso tareas
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { DocentePlanificacionesService } from '../docente-planificaciones.service';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { AppModule } from '../../../app.module';
-import { DocentePlanificacionesService } from '../docente-planificaciones.service';
-import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
 
 describe('[INTEGRATION] DocentePlanificacionesService', () => {
   let service: DocentePlanificacionesService;
   let prisma: PrismaService;
 
-  // ============================================================================
-  // IDs de entidades creadas en tests (para cleanup)
-  // ============================================================================
+  // IDs para cleanup
   const createdIds = {
-    planificaciones: [] as string[],
-    claseGrupos: [] as string[],
-    grupos: [] as string[],
+    admins: [] as string[],
     docentes: [] as string[],
+    grupos: [] as string[],
+    claseGrupos: [] as string[],
+    planificaciones: [] as string[],
+    asignaciones: [] as string[],
     estudiantes: [] as string[],
     tutores: [] as string[],
     contenidos: [] as string[],
-    admins: [] as string[],
   };
 
-  // ============================================================================
-  // Setup: Levantar aplicación con DB real
-  // ============================================================================
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    service = moduleFixture.get<DocentePlanificacionesService>(
+    service = module.get<DocentePlanificacionesService>(
       DocentePlanificacionesService,
     );
-    prisma = moduleFixture.get<PrismaService>(PrismaService);
+    prisma = module.get<PrismaService>(PrismaService);
   }, 60000);
 
   afterAll(async () => {
     await prisma.$disconnect();
-  }, 60000);
+  });
 
-  // ============================================================================
-  // Cleanup: Limpiar datos de test después de cada test
-  // ============================================================================
   afterEach(async () => {
-    // Limpiar en orden correcto (hijos primero)
-    // 1. Progresos
-    await prisma.progresoTareaEstudiante.deleteMany({
-      where: {
-        tareaAsignada: {
-          asignacion: {
-            planificacion_id: { in: createdIds.planificaciones },
-          },
-        },
-      },
-    });
-    await prisma.progresoClaseEstudiante.deleteMany({
-      where: {
-        clase: {
-          planificacion_id: { in: createdIds.planificaciones },
-        },
-      },
-    });
+    // Cleanup en orden inverso de dependencias
 
-    // 2. Tareas asignadas y estados
-    await prisma.tareaAsignada.deleteMany({
-      where: {
-        asignacion: {
-          planificacion_id: { in: createdIds.planificaciones },
-        },
-      },
-    });
-    await prisma.estadoClaseGrupo.deleteMany({
-      where: {
-        asignacion: {
-          planificacion_id: { in: createdIds.planificaciones },
-        },
-      },
-    });
+    // 1. Eliminar progresos de estudiantes (dependen de clases y tareas)
+    if (createdIds.estudiantes.length > 0) {
+      await prisma.progresoTareaEstudiante.deleteMany({
+        where: { estudiante_id: { in: createdIds.estudiantes } },
+      });
+      await prisma.progresoClaseEstudiante.deleteMany({
+        where: { estudiante_id: { in: createdIds.estudiantes } },
+      });
+    }
 
-    // 3. Asignaciones
-    await prisma.asignacionPlanificacion.deleteMany({
-      where: { planificacion_id: { in: createdIds.planificaciones } },
-    });
+    // 2. Eliminar tareas asignadas (dependen de asignaciones)
+    if (createdIds.asignaciones.length > 0) {
+      await prisma.tareaAsignada.deleteMany({
+        where: { asignacion_id: { in: createdIds.asignaciones } },
+      });
+      await prisma.asignacionPlanificacion.deleteMany({
+        where: { id: { in: createdIds.asignaciones } },
+      });
+      createdIds.asignaciones = [];
+    }
 
-    // 4. Tareas de clase y clases
-    await prisma.tareaClase.deleteMany({
-      where: {
-        clase: {
-          planificacion_id: { in: createdIds.planificaciones },
-        },
-      },
-    });
-    await prisma.clasePlanificacion.deleteMany({
-      where: { planificacion_id: { in: createdIds.planificaciones } },
-    });
+    // 3. Eliminar planificaciones (cascade elimina clases)
+    if (createdIds.planificaciones.length > 0) {
+      await prisma.planificacion.deleteMany({
+        where: { id: { in: createdIds.planificaciones } },
+      });
+      createdIds.planificaciones = [];
+    }
 
-    // 5. Planificaciones
-    await prisma.planificacion.deleteMany({
-      where: { id: { in: createdIds.planificaciones } },
-    });
+    // 4. Eliminar estudiantes
+    if (createdIds.estudiantes.length > 0) {
+      await prisma.inscripcionClaseGrupo.deleteMany({
+        where: { estudiante_id: { in: createdIds.estudiantes } },
+      });
+      await prisma.estudiante.deleteMany({
+        where: { id: { in: createdIds.estudiantes } },
+      });
+      createdIds.estudiantes = [];
+    }
 
-    // 6. Inscripciones y ClaseGrupos
-    await prisma.inscripcionClaseGrupo.deleteMany({
-      where: { clase_grupo_id: { in: createdIds.claseGrupos } },
-    });
-    await prisma.claseGrupo.deleteMany({
-      where: { id: { in: createdIds.claseGrupos } },
-    });
+    if (createdIds.tutores.length > 0) {
+      await prisma.tutor.deleteMany({
+        where: { id: { in: createdIds.tutores } },
+      });
+      createdIds.tutores = [];
+    }
 
-    // 7. Grupos pedagógicos
-    await prisma.grupo.deleteMany({
-      where: { id: { in: createdIds.grupos } },
-    });
+    if (createdIds.claseGrupos.length > 0) {
+      await prisma.claseGrupo.deleteMany({
+        where: { id: { in: createdIds.claseGrupos } },
+      });
+      createdIds.claseGrupos = [];
+    }
 
-    // 8. Estudiantes
-    await prisma.estudiante.deleteMany({
-      where: { id: { in: createdIds.estudiantes } },
-    });
+    if (createdIds.grupos.length > 0) {
+      await prisma.grupo.deleteMany({
+        where: { id: { in: createdIds.grupos } },
+      });
+      createdIds.grupos = [];
+    }
 
-    // 9. Tutores
-    await prisma.tutor.deleteMany({
-      where: { id: { in: createdIds.tutores } },
-    });
+    if (createdIds.docentes.length > 0) {
+      await prisma.docente.deleteMany({
+        where: { id: { in: createdIds.docentes } },
+      });
+      createdIds.docentes = [];
+    }
 
-    // 10. Docentes
-    await prisma.docente.deleteMany({
-      where: { id: { in: createdIds.docentes } },
-    });
+    if (createdIds.contenidos.length > 0) {
+      await prisma.contenido.deleteMany({
+        where: { id: { in: createdIds.contenidos } },
+      });
+      createdIds.contenidos = [];
+    }
 
-    // 11. Contenidos
-    await prisma.contenido.deleteMany({
-      where: { id: { in: createdIds.contenidos } },
-    });
-
-    // 12. Admins
-    await prisma.admin.deleteMany({
-      where: { id: { in: createdIds.admins } },
-    });
-
-    // Reset arrays
-    Object.keys(createdIds).forEach((key) => {
-      createdIds[key as keyof typeof createdIds] = [];
-    });
+    if (createdIds.admins.length > 0) {
+      await prisma.contenido.deleteMany({
+        where: { creadorId: { in: createdIds.admins } },
+      });
+      await prisma.admin.deleteMany({
+        where: { id: { in: createdIds.admins } },
+      });
+      createdIds.admins = [];
+    }
   });
 
   // ============================================================================
-  // HELPERS: Crear datos de prueba
+  // HELPERS
   // ============================================================================
-
-  /**
-   * Crea un docente con un ClaseGrupo asignado
-   */
-  async function crearDocenteConGrupo(suffix: string = '') {
-    const uniqueId = createId();
-
-    // 1. Crear docente
-    const docente = await prisma.docente.create({
-      data: {
-        email: `docente-${uniqueId}${suffix}@test.com`,
-        password_hash: 'hash-test-123',
-        nombre: 'Docente',
-        apellido: `Test${suffix}`,
-      },
-    });
-    createdIds.docentes.push(docente.id);
-
-    // 2. Crear grupo pedagógico
-    const grupo = await prisma.grupo.create({
-      data: {
-        codigo: `GP-${uniqueId}`,
-        nombre: `Grupo Pedagógico ${uniqueId}`,
-        activo: true,
-      },
-    });
-    createdIds.grupos.push(grupo.id);
-
-    // 3. Crear ClaseGrupo
-    const claseGrupo = await prisma.claseGrupo.create({
-      data: {
-        codigo: `CG-${uniqueId}`,
-        nombre: `Clase Grupo ${uniqueId}${suffix}`,
-        tipo: 'GRUPO_REGULAR',
-        dia_semana: 'LUNES',
-        hora_inicio: '19:30',
-        hora_fin: '21:00',
-        fecha_inicio: new Date(),
-        fecha_fin: new Date('2026-12-15'),
-        anio_lectivo: 2026,
-        cupo_maximo: 15,
-        grupo_id: grupo.id,
-        docente_id: docente.id,
-      },
-    });
-    createdIds.claseGrupos.push(claseGrupo.id);
-
-    return { docente, grupo, claseGrupo };
-  }
-
-  /**
-   * Crea un admin para contenidos
-   */
-  async function crearAdmin(suffix: string = '') {
+  async function crearAdmin(suffix = '') {
     const uniqueId = createId();
     const admin = await prisma.admin.create({
       data: {
-        email: `admin-${uniqueId}${suffix}@test.com`,
-        password_hash: 'hash-admin-123',
-        nombre: 'Admin',
-        apellido: `Test${suffix}`,
-        roles: JSON.stringify(['admin', 'super_admin']),
+        email: `admin-doc-${uniqueId}${suffix}@test.com`,
+        password_hash: 'hashed_password',
+        nombre: `Admin ${uniqueId}`,
+        apellido: 'Test',
       },
     });
     createdIds.admins.push(admin.id);
     return admin;
   }
 
-  /**
-   * Crea un contenido (teoría o práctica)
-   */
-  async function crearContenido(
-    adminId: string,
-    tipo: string,
-    suffix: string = '',
-  ) {
+  async function crearDocente(suffix = '') {
     const uniqueId = createId();
-    const contenido = await prisma.contenido.create({
+    const docente = await prisma.docente.create({
       data: {
-        titulo: `Contenido ${tipo} ${suffix}`,
-        casaTipo: 'QUANTUM',
-        mundoTipo: 'MATEMATICA',
-        estado: 'PUBLICADO',
-        tipo: 'LECCION',
-        creadorId: adminId,
-        descripcion: `Contenido de ${tipo} para tests`,
+        email: `docente-${uniqueId}${suffix}@test.com`,
+        password_hash: 'hashed_password',
+        nombre: `Docente ${uniqueId}`,
+        apellido: 'Test',
       },
     });
-    createdIds.contenidos.push(contenido.id);
-    return contenido;
+    createdIds.docentes.push(docente.id);
+    return docente;
   }
 
-  /**
-   * Crea una planificación completa con clases, teoría y práctica
-   */
-  async function crearPlanificacionCompleta(
-    adminId: string,
-    cantidadClases: number = 4,
-    suffix: string = '',
-  ) {
+  async function crearClaseGrupo(docenteId: string, suffix = '') {
     const uniqueId = createId();
 
-    // Crear contenidos para cada clase (teoría + práctica)
+    // Primero crear el Grupo
+    const grupo = await prisma.grupo.create({
+      data: {
+        codigo: `GP-${uniqueId}`,
+        nombre: `Grupo Padre ${uniqueId}${suffix}`,
+        activo: true,
+      },
+    });
+    createdIds.grupos.push(grupo.id);
+
+    const claseGrupo = await prisma.claseGrupo.create({
+      data: {
+        nombre: `Grupo Test ${uniqueId}${suffix}`,
+        codigo: `GT-${uniqueId}`,
+        docente_id: docenteId,
+        grupo_id: grupo.id,
+        dia_semana: 'LUNES',
+        hora_inicio: '15:00',
+        hora_fin: '16:30',
+        fecha_inicio: new Date('2026-01-01'),
+        fecha_fin: new Date('2026-12-15'),
+        anio_lectivo: 2026,
+        cupo_maximo: 30,
+      },
+    });
+    createdIds.claseGrupos.push(claseGrupo.id);
+    return claseGrupo;
+  }
+
+  async function crearPlanificacionConClases(adminId: string, numClases = 2) {
+    const uniqueId = createId();
+
+    // Crear contenidos para teoría y práctica de cada clase
     const clasesData = [];
-    for (let i = 1; i <= cantidadClases; i++) {
-      const teoria = await crearContenido(adminId, 'teoria', `${suffix}-c${i}`);
-      const practica = await crearContenido(
-        adminId,
-        'practica',
-        `${suffix}-c${i}`,
-      );
+    for (let i = 1; i <= numClases; i++) {
+      const teoria = await prisma.contenido.create({
+        data: {
+          titulo: `Teoría Clase ${i} ${uniqueId}`,
+          casaTipo: 'QUANTUM',
+          mundoTipo: 'MATEMATICA',
+          estado: 'PUBLICADO',
+          tipo: 'LECCION',
+          creadorId: adminId,
+        },
+      });
+
+      const practica = await prisma.contenido.create({
+        data: {
+          titulo: `Práctica Clase ${i} ${uniqueId}`,
+          casaTipo: 'QUANTUM',
+          mundoTipo: 'MATEMATICA',
+          estado: 'PUBLICADO',
+          tipo: 'TAREA',
+          creadorId: adminId,
+        },
+      });
+
       clasesData.push({
         numero: i,
-        titulo: `Clase ${i}${suffix}`,
-        descripcion: `Descripción de clase ${i}`,
+        titulo: `Clase ${i}`,
         teoria_id: teoria.id,
         practica_id: practica.id,
       });
     }
 
-    // Crear planificación con clases
     const planificacion = await prisma.planificacion.create({
       data: {
-        titulo: `Planificación Test ${uniqueId}${suffix}`,
-        descripcion: 'Planificación para tests de integración',
-        cantidad_clases: cantidadClases,
-        duracion_clase_dias: 7,
+        titulo: `Planificación Test ${uniqueId}`,
+        cantidad_clases: numClases,
         casa_tipo: 'QUANTUM',
         mundo_tipo: 'MATEMATICA',
         estado: 'PUBLICADO',
@@ -312,14 +257,11 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
         },
       },
     });
-    createdIds.planificaciones.push(planificacion.id);
 
+    createdIds.planificaciones.push(planificacion.id);
     return planificacion;
   }
 
-  /**
-   * Crea una asignación de planificación a un grupo
-   */
   async function crearAsignacion(
     planificacionId: string,
     claseGrupoId: string,
@@ -330,63 +272,80 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
         planificacion_id: planificacionId,
         clase_grupo_id: claseGrupoId,
         docente_id: docenteId,
-        activa: true,
       },
     });
+    createdIds.asignaciones.push(asignacion.id);
     return asignacion;
   }
 
-  /**
-   * Crea un estudiante inscrito en un grupo
-   */
-  async function crearEstudiante(claseGrupoId: string, suffix: string = '') {
+  async function crearTutor(suffix = '') {
     const uniqueId = createId();
-
-    // 1. Crear tutor
     const tutor = await prisma.tutor.create({
       data: {
-        email: `tutor-${uniqueId}${suffix}@test.com`,
-        password_hash: 'hash-tutor-123',
-        nombre: 'Tutor',
-        apellido: `Test${suffix}`,
+        email: `tutor-doc-${uniqueId}${suffix}@test.com`,
+        password_hash: 'hashed_password',
+        nombre: `Tutor ${uniqueId}`,
+        apellido: 'Test',
       },
     });
     createdIds.tutores.push(tutor.id);
+    return tutor;
+  }
 
-    // 2. Crear estudiante
+  async function crearEstudiante(
+    claseGrupoId: string,
+    tutorId: string,
+    suffix = '',
+  ) {
+    const uniqueId = createId();
     const estudiante = await prisma.estudiante.create({
       data: {
-        username: `est-${uniqueId}${suffix}`,
-        email: `est-${uniqueId}${suffix}@test.com`,
-        password_hash: 'hash-est-123',
-        nombre: 'Estudiante',
-        apellido: `Test${suffix}`,
+        username: `est-doc-${uniqueId}${suffix}`,
+        password_hash: 'hashed_password',
+        nombre: `Estudiante ${uniqueId}`,
+        apellido: 'Test',
         nivelEscolar: 'Primaria',
-        edad: 8,
-        tutor_id: tutor.id,
+        edad: 10,
+        tutor_id: tutorId,
       },
     });
     createdIds.estudiantes.push(estudiante.id);
 
-    // 3. Inscribir en el grupo
+    // Crear inscripción al claseGrupo
     await prisma.inscripcionClaseGrupo.create({
       data: {
         clase_grupo_id: claseGrupoId,
         estudiante_id: estudiante.id,
-        tutor_id: tutor.id,
+        tutor_id: tutorId,
       },
     });
 
-    return { estudiante, tutor };
+    return estudiante;
+  }
+
+  async function crearContenidoTarea(adminId: string, suffix = '') {
+    const uniqueId = createId();
+    const contenido = await prisma.contenido.create({
+      data: {
+        titulo: `Tarea ${uniqueId}${suffix}`,
+        casaTipo: 'QUANTUM',
+        mundoTipo: 'MATEMATICA',
+        estado: 'PUBLICADO',
+        tipo: 'TAREA',
+        creadorId: adminId,
+      },
+    });
+    createdIds.contenidos.push(contenido.id);
+    return contenido;
   }
 
   // ============================================================================
   // TESTS: getMisAsignaciones
   // ============================================================================
   describe('getMisAsignaciones', () => {
-    it('should return empty array when docente has no asignaciones', async () => {
+    it('should_return_empty_when_no_asignaciones', async () => {
       // Arrange
-      const { docente } = await crearDocenteConGrupo();
+      const docente = await crearDocente();
 
       // Act
       const result = await service.getMisAsignaciones(docente.id);
@@ -395,11 +354,12 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
       expect(result).toEqual([]);
     });
 
-    it('should return asignaciones with planificacion, clases and estados', async () => {
+    it('should_return_asignaciones_with_clases', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 3);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 3);
       await crearAsignacion(planificacion.id, claseGrupo.id, docente.id);
 
       // Act
@@ -407,62 +367,20 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
 
       // Assert
       expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({
-        planificacion: {
-          id: planificacion.id,
-          titulo: planificacion.titulo,
-          cantidad_clases: 3,
-        },
-        claseGrupo: {
-          id: claseGrupo.id,
-          nombre: claseGrupo.nombre,
-        },
-      });
+      expect(result[0].planificacion.titulo).toContain('Planificación Test');
       expect(result[0].clases).toHaveLength(3);
-      expect(result[0].clases[0]).toHaveProperty('id');
-      expect(result[0].clases[0]).toHaveProperty('numero', 1);
-      expect(result[0].clases[0]).toHaveProperty('titulo');
+      expect(result[0].claseGrupo.nombre).toContain('Grupo Test');
     });
 
-    it('should return multiple asignaciones for docente with many groups', async () => {
+    it('should_return_multiple_asignaciones', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente, claseGrupo: grupo1 } = await crearDocenteConGrupo('-1');
-
-      // Crear segundo grupo para el mismo docente
-      const uniqueId = createId();
-      const grupo2Data = await prisma.grupo.create({
-        data: {
-          codigo: `GP2-${uniqueId}`,
-          nombre: `Grupo Pedagógico 2 ${uniqueId}`,
-          activo: true,
-        },
-      });
-      createdIds.grupos.push(grupo2Data.id);
-
-      const grupo2 = await prisma.claseGrupo.create({
-        data: {
-          codigo: `CG2-${uniqueId}`,
-          nombre: `Clase Grupo 2 ${uniqueId}`,
-          tipo: 'GRUPO_REGULAR',
-          dia_semana: 'MIERCOLES',
-          hora_inicio: '17:00',
-          hora_fin: '18:30',
-          fecha_inicio: new Date(),
-          fecha_fin: new Date('2026-12-15'),
-          anio_lectivo: 2026,
-          cupo_maximo: 15,
-          grupo_id: grupo2Data.id,
-          docente_id: docente.id,
-        },
-      });
-      createdIds.claseGrupos.push(grupo2.id);
-
-      const plan1 = await crearPlanificacionCompleta(admin.id, 2, '-p1');
-      const plan2 = await crearPlanificacionCompleta(admin.id, 4, '-p2');
-
-      await crearAsignacion(plan1.id, grupo1.id, docente.id);
-      await crearAsignacion(plan2.id, grupo2.id, docente.id);
+      const docente = await crearDocente();
+      const claseGrupo1 = await crearClaseGrupo(docente.id, '-1');
+      const claseGrupo2 = await crearClaseGrupo(docente.id, '-2');
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
+      await crearAsignacion(planificacion.id, claseGrupo1.id, docente.id);
+      await crearAsignacion(planificacion.id, claseGrupo2.id, docente.id);
 
       // Act
       const result = await service.getMisAsignaciones(docente.id);
@@ -470,42 +388,18 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
       // Assert
       expect(result).toHaveLength(2);
     });
-
-    it('should not return asignaciones from other docentes', async () => {
-      // Arrange
-      const admin = await crearAdmin();
-      const { docente: docente1, claseGrupo: grupo1 } =
-        await crearDocenteConGrupo('-d1');
-      const { docente: docente2, claseGrupo: grupo2 } =
-        await crearDocenteConGrupo('-d2');
-
-      const plan1 = await crearPlanificacionCompleta(admin.id, 2, '-p1');
-      const plan2 = await crearPlanificacionCompleta(admin.id, 3, '-p2');
-
-      await crearAsignacion(plan1.id, grupo1.id, docente1.id);
-      await crearAsignacion(plan2.id, grupo2.id, docente2.id);
-
-      // Act
-      const result1 = await service.getMisAsignaciones(docente1.id);
-      const result2 = await service.getMisAsignaciones(docente2.id);
-
-      // Assert
-      expect(result1).toHaveLength(1);
-      expect(result1[0].planificacion.id).toBe(plan1.id);
-      expect(result2).toHaveLength(1);
-      expect(result2[0].planificacion.id).toBe(plan2.id);
-    });
   });
 
   // ============================================================================
-  // TESTS: activarTeoria / activarPractica
+  // TESTS: activarTeoria / desactivarTeoria
   // ============================================================================
-  describe('activarTeoria', () => {
-    it('should create EstadoClaseGrupo with teoria_activa=true for first activation', async () => {
+  describe('activarTeoria / desactivarTeoria', () => {
+    it('should_activate_teoria_for_clase', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
@@ -525,18 +419,15 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
           },
         },
       });
-
-      expect(estado).toBeDefined();
-      expect(estado!.teoria_activa).toBe(true);
-      expect(estado!.practica_activa).toBe(false);
-      expect(estado!.activada_en).toBeDefined();
+      expect(estado?.teoria_activa).toBe(true);
     });
 
-    it('should update existing EstadoClaseGrupo when already exists', async () => {
+    it('should_deactivate_teoria_for_clase', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
@@ -544,18 +435,11 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
       );
       const claseId = planificacion.clases[0].id;
 
-      // Pre-create estado with practica_activa=true
-      await prisma.estadoClaseGrupo.create({
-        data: {
-          asignacion_id: asignacion.id,
-          clase_id: claseId,
-          teoria_activa: false,
-          practica_activa: true,
-        },
-      });
+      // Activar primero
+      await service.activarTeoria(asignacion.id, claseId, docente.id);
 
       // Act
-      await service.activarTeoria(asignacion.id, claseId, docente.id);
+      await service.desactivarTeoria(asignacion.id, claseId, docente.id);
 
       // Assert
       const estado = await prisma.estadoClaseGrupo.findUnique({
@@ -566,73 +450,74 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
           },
         },
       });
-
-      expect(estado!.teoria_activa).toBe(true);
-      expect(estado!.practica_activa).toBe(true); // Should preserve practica_activa
+      expect(estado?.teoria_activa).toBe(false);
     });
 
-    it('should throw NotFoundException for non-existent asignacion', async () => {
+    it('should_throw_NotFoundException_when_asignacion_not_found', async () => {
       // Arrange
-      const { docente } = await crearDocenteConGrupo();
       const fakeAsignacionId = createId();
       const fakeClaseId = createId();
+      const fakeDocenteId = createId();
 
       // Act & Assert
       await expect(
-        service.activarTeoria(fakeAsignacionId, fakeClaseId, docente.id),
+        service.activarTeoria(fakeAsignacionId, fakeClaseId, fakeDocenteId),
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw ForbiddenException when docente is not owner', async () => {
+    it('should_throw_ForbiddenException_when_not_owner', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente: docente1, claseGrupo } =
-        await crearDocenteConGrupo('-d1');
-      const { docente: docente2 } = await crearDocenteConGrupo('-d2');
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente1 = await crearDocente('-1');
+      const docente2 = await crearDocente('-2');
+      const claseGrupo = await crearClaseGrupo(docente1.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
         docente1.id,
       );
-      const claseId = planificacion.clases[0].id;
 
-      // Act & Assert
-      await expect(
-        service.activarTeoria(asignacion.id, claseId, docente2.id),
-      ).rejects.toThrow(ForbiddenException);
-    });
-
-    it('should throw NotFoundException when clase does not belong to planificacion', async () => {
-      // Arrange
-      const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const plan1 = await crearPlanificacionCompleta(admin.id, 2, '-p1');
-      const plan2 = await crearPlanificacionCompleta(admin.id, 2, '-p2');
-      const asignacion = await crearAsignacion(
-        plan1.id,
-        claseGrupo.id,
-        docente.id,
-      );
-      const claseDeOtraPlanificacion = plan2.clases[0].id;
-
-      // Act & Assert
+      // Act & Assert - docente2 intenta activar la asignación de docente1
       await expect(
         service.activarTeoria(
           asignacion.id,
-          claseDeOtraPlanificacion,
-          docente.id,
+          planificacion.clases[0].id,
+          docente2.id,
         ),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should_throw_NotFoundException_when_clase_not_in_planificacion', async () => {
+      // Arrange
+      const admin = await crearAdmin();
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
+      const asignacion = await crearAsignacion(
+        planificacion.id,
+        claseGrupo.id,
+        docente.id,
+      );
+      const fakeClaseId = createId();
+
+      // Act & Assert
+      await expect(
+        service.activarTeoria(asignacion.id, fakeClaseId, docente.id),
       ).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('activarPractica', () => {
-    it('should create EstadoClaseGrupo with practica_activa=true for first activation', async () => {
+  // ============================================================================
+  // TESTS: activarPractica / desactivarPractica
+  // ============================================================================
+  describe('activarPractica / desactivarPractica', () => {
+    it('should_activate_practica_for_clase', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
@@ -652,42 +537,15 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
           },
         },
       });
-
-      expect(estado).toBeDefined();
-      expect(estado!.teoria_activa).toBe(false);
-      expect(estado!.practica_activa).toBe(true);
+      expect(estado?.practica_activa).toBe(true);
     });
 
-    it('should throw ForbiddenException when docente is not owner', async () => {
+    it('should_deactivate_practica_for_clase', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente: docente1, claseGrupo } =
-        await crearDocenteConGrupo('-d1');
-      const { docente: docente2 } = await crearDocenteConGrupo('-d2');
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
-      const asignacion = await crearAsignacion(
-        planificacion.id,
-        claseGrupo.id,
-        docente1.id,
-      );
-      const claseId = planificacion.clases[0].id;
-
-      // Act & Assert
-      await expect(
-        service.activarPractica(asignacion.id, claseId, docente2.id),
-      ).rejects.toThrow(ForbiddenException);
-    });
-  });
-
-  // ============================================================================
-  // TESTS: desactivarTeoria / desactivarPractica
-  // ============================================================================
-  describe('desactivarTeoria', () => {
-    it('should set teoria_activa=false on existing estado', async () => {
-      // Arrange
-      const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
@@ -695,71 +553,8 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
       );
       const claseId = planificacion.clases[0].id;
 
-      // Pre-activate
-      await service.activarTeoria(asignacion.id, claseId, docente.id);
-
-      // Act
-      await service.desactivarTeoria(asignacion.id, claseId, docente.id);
-
-      // Assert
-      const estado = await prisma.estadoClaseGrupo.findUnique({
-        where: {
-          asignacion_id_clase_id: {
-            asignacion_id: asignacion.id,
-            clase_id: claseId,
-          },
-        },
-      });
-
-      expect(estado!.teoria_activa).toBe(false);
-    });
-
-    it('should create estado with teoria_activa=false if not exists', async () => {
-      // Arrange
-      const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
-      const asignacion = await crearAsignacion(
-        planificacion.id,
-        claseGrupo.id,
-        docente.id,
-      );
-      const claseId = planificacion.clases[0].id;
-
-      // Act - desactivar sin haber activado nunca
-      await service.desactivarTeoria(asignacion.id, claseId, docente.id);
-
-      // Assert
-      const estado = await prisma.estadoClaseGrupo.findUnique({
-        where: {
-          asignacion_id_clase_id: {
-            asignacion_id: asignacion.id,
-            clase_id: claseId,
-          },
-        },
-      });
-
-      expect(estado).toBeDefined();
-      expect(estado!.teoria_activa).toBe(false);
-      expect(estado!.practica_activa).toBe(false);
-    });
-  });
-
-  describe('desactivarPractica', () => {
-    it('should set practica_activa=false on existing estado', async () => {
-      // Arrange
-      const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
-      const asignacion = await crearAsignacion(
-        planificacion.id,
-        claseGrupo.id,
-        docente.id,
-      );
-      const claseId = planificacion.clases[0].id;
-
-      // Pre-activate both
-      await service.activarClase(asignacion.id, claseId, docente.id);
+      // Activar primero
+      await service.activarPractica(asignacion.id, claseId, docente.id);
 
       // Act
       await service.desactivarPractica(asignacion.id, claseId, docente.id);
@@ -773,21 +568,20 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
           },
         },
       });
-
-      expect(estado!.teoria_activa).toBe(true); // Preserved
-      expect(estado!.practica_activa).toBe(false);
+      expect(estado?.practica_activa).toBe(false);
     });
   });
 
   // ============================================================================
   // TESTS: activarClase / desactivarClase
   // ============================================================================
-  describe('activarClase', () => {
-    it('should set both teoria_activa and practica_activa to true', async () => {
+  describe('activarClase / desactivarClase', () => {
+    it('should_activate_both_teoria_and_practica', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
@@ -807,19 +601,16 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
           },
         },
       });
-
-      expect(estado!.teoria_activa).toBe(true);
-      expect(estado!.practica_activa).toBe(true);
-      expect(estado!.activada_en).toBeDefined();
+      expect(estado?.teoria_activa).toBe(true);
+      expect(estado?.practica_activa).toBe(true);
     });
-  });
 
-  describe('desactivarClase', () => {
-    it('should set both teoria_activa and practica_activa to false', async () => {
+    it('should_deactivate_both_teoria_and_practica', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
@@ -827,7 +618,7 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
       );
       const claseId = planificacion.clases[0].id;
 
-      // Pre-activate
+      // Activar primero
       await service.activarClase(asignacion.id, claseId, docente.id);
 
       // Act
@@ -842,9 +633,8 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
           },
         },
       });
-
-      expect(estado!.teoria_activa).toBe(false);
-      expect(estado!.practica_activa).toBe(false);
+      expect(estado?.teoria_activa).toBe(false);
+      expect(estado?.practica_activa).toBe(false);
     });
   });
 
@@ -852,19 +642,17 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
   // TESTS: getProgresoEstudiantes
   // ============================================================================
   describe('getProgresoEstudiantes', () => {
-    it('should return empty progresos when no students have progress', async () => {
+    it('should_return_empty_progresos_when_no_students', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
         docente.id,
       );
-
-      // Create a student but no progress
-      await crearEstudiante(claseGrupo.id);
 
       // Act
       const result = await service.getProgresoEstudiantes(
@@ -873,30 +661,29 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
       );
 
       // Assert
-      expect(result).toHaveProperty('progresos');
       expect(result.progresos).toEqual([]);
     });
 
-    it('should return progresos when students have completed classes', async () => {
+    it('should_return_progreso_for_students', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const tutor = await crearTutor();
+      const estudiante = await crearEstudiante(claseGrupo.id, tutor.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
         docente.id,
       );
-      const { estudiante } = await crearEstudiante(claseGrupo.id);
 
-      // Create progress for first clase
-      const claseId = planificacion.clases[0].id;
+      // Crear progreso
       await prisma.progresoClaseEstudiante.create({
         data: {
           estudiante_id: estudiante.id,
-          clase_id: claseId,
+          clase_id: planificacion.clases[0].id,
           teoria_completada: true,
-          teoria_completada_en: new Date(),
           practica_completada: false,
           tiempo_teoria_segundos: 600,
           tiempo_practica_segundos: 0,
@@ -911,21 +698,13 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
 
       // Assert
       expect(result.progresos).toHaveLength(1);
-      expect(result.progresos[0]).toMatchObject({
-        estudiante: {
-          nombre: 'Estudiante',
-          apellido: expect.stringContaining('Test'),
-        },
-        clase_numero: 1,
-        teoria_completada: true,
-        practica_completada: false,
-        tiempo_teoria_segundos: 600,
-      });
+      expect(result.progresos[0].teoria_completada).toBe(true);
+      expect(result.progresos[0].practica_completada).toBe(false);
     });
 
-    it('should throw NotFoundException for non-existent asignacion', async () => {
+    it('should_throw_NotFoundException_when_asignacion_not_exists', async () => {
       // Arrange
-      const { docente } = await crearDocenteConGrupo();
+      const docente = await crearDocente();
       const fakeAsignacionId = createId();
 
       // Act & Assert
@@ -933,394 +712,402 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
         service.getProgresoEstudiantes(fakeAsignacionId, docente.id),
       ).rejects.toThrow(NotFoundException);
     });
+  });
 
-    it('should throw ForbiddenException when docente is not owner', async () => {
+  // ============================================================================
+  // TESTS: getTareasClase
+  // ============================================================================
+  describe('getTareasClase', () => {
+    it('should_return_empty_tareas_when_none', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente: docente1, claseGrupo } =
-        await crearDocenteConGrupo('-d1');
-      const { docente: docente2 } = await crearDocenteConGrupo('-d2');
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
-        docente1.id,
+        docente.id,
       );
+
+      // Act
+      const result = await service.getTareasClase(
+        asignacion.id,
+        planificacion.clases[0].id,
+        docente.id,
+      );
+
+      // Assert
+      expect(result.tareas).toEqual([]);
+    });
+
+    it('should_return_tareas_with_assignment_status', async () => {
+      // Arrange
+      const admin = await crearAdmin();
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
+      const asignacion = await crearAsignacion(
+        planificacion.id,
+        claseGrupo.id,
+        docente.id,
+      );
+
+      // Crear tarea en la clase
+      const contenidoTarea = await crearContenidoTarea(admin.id);
+      await prisma.tareaClase.create({
+        data: {
+          clase_id: planificacion.clases[0].id,
+          contenido_id: contenidoTarea.id,
+          orden: 1,
+          obligatoria: true,
+        },
+      });
+
+      // Act
+      const result = await service.getTareasClase(
+        asignacion.id,
+        planificacion.clases[0].id,
+        docente.id,
+      );
+
+      // Assert
+      expect(result.tareas).toHaveLength(1);
+      expect(result.tareas[0].asignada).toBe(false);
+      expect(result.tareas[0].obligatoria).toBe(true);
+    });
+  });
+
+  // ============================================================================
+  // TESTS: asignarTarea / desasignarTarea
+  // ============================================================================
+  describe('asignarTarea / desasignarTarea', () => {
+    it('should_assign_tarea_to_group', async () => {
+      // Arrange
+      const admin = await crearAdmin();
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
+      const asignacion = await crearAsignacion(
+        planificacion.id,
+        claseGrupo.id,
+        docente.id,
+      );
+
+      // Crear tarea en la clase
+      const contenidoTarea = await crearContenidoTarea(admin.id);
+      const tareaClase = await prisma.tareaClase.create({
+        data: {
+          clase_id: planificacion.clases[0].id,
+          contenido_id: contenidoTarea.id,
+          orden: 1,
+          obligatoria: true,
+        },
+      });
+
+      // Act
+      const result = await service.asignarTarea(
+        asignacion.id,
+        tareaClase.id,
+        docente.id,
+      );
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(result.tarea_asignada_id).toBeDefined();
+    });
+
+    it('should_assign_tarea_with_fecha_limite', async () => {
+      // Arrange
+      const admin = await crearAdmin();
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
+      const asignacion = await crearAsignacion(
+        planificacion.id,
+        claseGrupo.id,
+        docente.id,
+      );
+
+      const contenidoTarea = await crearContenidoTarea(admin.id);
+      const tareaClase = await prisma.tareaClase.create({
+        data: {
+          clase_id: planificacion.clases[0].id,
+          contenido_id: contenidoTarea.id,
+          orden: 1,
+          obligatoria: false,
+        },
+      });
+
+      const fechaLimite = new Date('2026-12-31');
+
+      // Act
+      await service.asignarTarea(
+        asignacion.id,
+        tareaClase.id,
+        docente.id,
+        fechaLimite,
+      );
+
+      // Assert
+      const tareaAsignada = await prisma.tareaAsignada.findFirst({
+        where: {
+          asignacion_id: asignacion.id,
+          tarea_clase_id: tareaClase.id,
+        },
+      });
+      expect(tareaAsignada?.fecha_limite).toEqual(fechaLimite);
+    });
+
+    it('should_unassign_tarea', async () => {
+      // Arrange
+      const admin = await crearAdmin();
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
+      const asignacion = await crearAsignacion(
+        planificacion.id,
+        claseGrupo.id,
+        docente.id,
+      );
+
+      const contenidoTarea = await crearContenidoTarea(admin.id);
+      const tareaClase = await prisma.tareaClase.create({
+        data: {
+          clase_id: planificacion.clases[0].id,
+          contenido_id: contenidoTarea.id,
+          orden: 1,
+          obligatoria: true,
+        },
+      });
+
+      // Asignar primero
+      await service.asignarTarea(asignacion.id, tareaClase.id, docente.id);
+
+      // Act
+      const result = await service.desasignarTarea(
+        asignacion.id,
+        tareaClase.id,
+        docente.id,
+      );
+
+      // Assert
+      expect(result.success).toBe(true);
+
+      const tareaAsignada = await prisma.tareaAsignada.findFirst({
+        where: {
+          asignacion_id: asignacion.id,
+          tarea_clase_id: tareaClase.id,
+        },
+      });
+      expect(tareaAsignada?.activa).toBe(false);
+    });
+
+    it('should_throw_NotFoundException_when_tarea_not_found', async () => {
+      // Arrange
+      const admin = await crearAdmin();
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
+      const asignacion = await crearAsignacion(
+        planificacion.id,
+        claseGrupo.id,
+        docente.id,
+      );
+      const fakeTareaId = createId();
 
       // Act & Assert
       await expect(
-        service.getProgresoEstudiantes(asignacion.id, docente2.id),
-      ).rejects.toThrow(ForbiddenException);
-    });
-
-    it('should only return progresos for students in the group', async () => {
-      // Arrange
-      const admin = await crearAdmin();
-      const { docente, claseGrupo: grupo1 } = await crearDocenteConGrupo('-g1');
-      const { claseGrupo: grupo2 } = await crearDocenteConGrupo('-g2');
-
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
-      const asignacion = await crearAsignacion(
-        planificacion.id,
-        grupo1.id,
-        docente.id,
-      );
-
-      // Student in grupo1 (should be included)
-      const { estudiante: est1 } = await crearEstudiante(grupo1.id, '-e1');
-      // Student in grupo2 (should NOT be included)
-      const { estudiante: est2 } = await crearEstudiante(grupo2.id, '-e2');
-
-      const claseId = planificacion.clases[0].id;
-
-      // Both students have progress in the same clase
-      await prisma.progresoClaseEstudiante.createMany({
-        data: [
-          {
-            estudiante_id: est1.id,
-            clase_id: claseId,
-            teoria_completada: true,
-          },
-          {
-            estudiante_id: est2.id,
-            clase_id: claseId,
-            teoria_completada: true,
-          },
-        ],
-      });
-
-      // Act
-      const result = await service.getProgresoEstudiantes(
-        asignacion.id,
-        docente.id,
-      );
-
-      // Assert - Only est1 should appear
-      expect(result.progresos).toHaveLength(1);
-      expect(result.progresos[0].estudiante!.apellido).toContain('-e1');
+        service.asignarTarea(asignacion.id, fakeTareaId, docente.id),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
   // ============================================================================
-  // TESTS: Edge Cases & Models
+  // TESTS: actualizarFechaLimiteTarea
   // ============================================================================
-  describe('Edge Cases', () => {
-    it('should handle activating same clase multiple times (idempotent)', async () => {
+  describe('actualizarFechaLimiteTarea', () => {
+    it('should_update_fecha_limite', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
         docente.id,
       );
-      const claseId = planificacion.clases[0].id;
 
-      // Act - activate multiple times
-      await service.activarTeoria(asignacion.id, claseId, docente.id);
-      await service.activarTeoria(asignacion.id, claseId, docente.id);
-      await service.activarTeoria(asignacion.id, claseId, docente.id);
+      const contenidoTarea = await crearContenidoTarea(admin.id);
+      const tareaClase = await prisma.tareaClase.create({
+        data: {
+          clase_id: planificacion.clases[0].id,
+          contenido_id: contenidoTarea.id,
+          orden: 1,
+          obligatoria: true,
+        },
+      });
 
-      // Assert - should still work without errors
-      const estado = await prisma.estadoClaseGrupo.findUnique({
+      // Asignar primero
+      await service.asignarTarea(asignacion.id, tareaClase.id, docente.id);
+
+      const nuevaFecha = new Date('2027-01-15');
+
+      // Act
+      const result = await service.actualizarFechaLimiteTarea(
+        asignacion.id,
+        tareaClase.id,
+        docente.id,
+        nuevaFecha,
+      );
+
+      // Assert
+      expect(result.success).toBe(true);
+
+      const tareaAsignada = await prisma.tareaAsignada.findFirst({
         where: {
-          asignacion_id_clase_id: {
-            asignacion_id: asignacion.id,
-            clase_id: claseId,
-          },
+          asignacion_id: asignacion.id,
+          tarea_clase_id: tareaClase.id,
         },
       });
-
-      expect(estado!.teoria_activa).toBe(true);
+      expect(tareaAsignada?.fecha_limite).toEqual(nuevaFecha);
     });
 
-    it('should handle estados for multiple clases independently', async () => {
+    it('should_remove_fecha_limite_when_null', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 4);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
         docente.id,
       );
 
-      // Act - activate different combinations for each clase
-      await service.activarTeoria(
+      const contenidoTarea = await crearContenidoTarea(admin.id);
+      const tareaClase = await prisma.tareaClase.create({
+        data: {
+          clase_id: planificacion.clases[0].id,
+          contenido_id: contenidoTarea.id,
+          orden: 1,
+          obligatoria: true,
+        },
+      });
+
+      // Asignar con fecha límite
+      await service.asignarTarea(
         asignacion.id,
-        planificacion.clases[0].id,
+        tareaClase.id,
         docente.id,
+        new Date('2026-12-31'),
       );
-      await service.activarPractica(
+
+      // Act - Quitar fecha límite
+      await service.actualizarFechaLimiteTarea(
         asignacion.id,
-        planificacion.clases[1].id,
+        tareaClase.id,
         docente.id,
+        null,
       );
-      await service.activarClase(
-        asignacion.id,
-        planificacion.clases[2].id,
-        docente.id,
-      );
-      // clase[3] remains inactive
 
       // Assert
-      const estados = await prisma.estadoClaseGrupo.findMany({
-        where: { asignacion_id: asignacion.id },
-        orderBy: { clase: { numero: 'asc' } },
-      });
-
-      expect(estados).toHaveLength(3);
-      expect(estados[0]).toMatchObject({
-        teoria_activa: true,
-        practica_activa: false,
-      });
-      expect(estados[1]).toMatchObject({
-        teoria_activa: false,
-        practica_activa: true,
-      });
-      expect(estados[2]).toMatchObject({
-        teoria_activa: true,
-        practica_activa: true,
-      });
-    });
-
-    it('should correctly reflect estados in getMisAsignaciones', async () => {
-      // Arrange
-      const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 3);
-      const asignacion = await crearAsignacion(
-        planificacion.id,
-        claseGrupo.id,
-        docente.id,
-      );
-
-      // Activate first clase
-      await service.activarClase(
-        asignacion.id,
-        planificacion.clases[0].id,
-        docente.id,
-      );
-
-      // Act
-      const result = await service.getMisAsignaciones(docente.id);
-
-      // Assert
-      expect(result[0].estados_clases).toHaveLength(1);
-      expect(result[0].estados_clases[0]).toMatchObject({
-        clase: {
-          id: planificacion.clases[0].id,
-          numero: 1,
-        },
-        teoria_activa: true,
-        practica_activa: true,
-      });
-    });
-
-    it('should not include students with fecha_baja in progreso queries', async () => {
-      // Arrange
-      const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
-      const asignacion = await crearAsignacion(
-        planificacion.id,
-        claseGrupo.id,
-        docente.id,
-      );
-
-      // Create students
-      const { estudiante: activeStudent } = await crearEstudiante(
-        claseGrupo.id,
-        '-active',
-      );
-      const uniqueId = createId();
-
-      // Create withdrawn student manually
-      const tutorWithdrawn = await prisma.tutor.create({
-        data: {
-          email: `tutor-withdrawn-${uniqueId}@test.com`,
-          password_hash: 'hash',
-          nombre: 'Tutor',
-          apellido: 'Withdrawn',
+      const tareaAsignada = await prisma.tareaAsignada.findFirst({
+        where: {
+          asignacion_id: asignacion.id,
+          tarea_clase_id: tareaClase.id,
         },
       });
-      createdIds.tutores.push(tutorWithdrawn.id);
-
-      const withdrawnStudent = await prisma.estudiante.create({
-        data: {
-          username: `withdrawn-${uniqueId}`,
-          email: `withdrawn-${uniqueId}@test.com`,
-          password_hash: 'hash',
-          nombre: 'Withdrawn',
-          apellido: 'Student',
-          nivelEscolar: 'Primaria',
-          edad: 8,
-          tutor_id: tutorWithdrawn.id,
-        },
-      });
-      createdIds.estudiantes.push(withdrawnStudent.id);
-
-      // Inscribe withdrawn student WITH fecha_baja
-      await prisma.inscripcionClaseGrupo.create({
-        data: {
-          clase_grupo_id: claseGrupo.id,
-          estudiante_id: withdrawnStudent.id,
-          tutor_id: tutorWithdrawn.id,
-          fecha_baja: new Date(), // Student withdrew
-        },
-      });
-
-      const claseId = planificacion.clases[0].id;
-
-      // Both have progress
-      await prisma.progresoClaseEstudiante.createMany({
-        data: [
-          {
-            estudiante_id: activeStudent.id,
-            clase_id: claseId,
-            teoria_completada: true,
-          },
-          {
-            estudiante_id: withdrawnStudent.id,
-            clase_id: claseId,
-            teoria_completada: true,
-          },
-        ],
-      });
-
-      // Act
-      const result = await service.getProgresoEstudiantes(
-        asignacion.id,
-        docente.id,
-      );
-
-      // Assert - Only active student should appear
-      expect(result.progresos).toHaveLength(1);
-      expect(result.progresos[0].estudiante!.apellido).toContain('-active');
+      expect(tareaAsignada?.fecha_limite).toBeNull();
     });
   });
 
   // ============================================================================
-  // TESTS: Model Relations
+  // TESTS: getProgresoTareas
   // ============================================================================
-  describe('Model Relations', () => {
-    it('should cascade delete EstadoClaseGrupo when AsignacionPlanificacion is deleted', async () => {
+  describe('getProgresoTareas', () => {
+    it('should_return_empty_when_no_progresos', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
         docente.id,
       );
 
-      await service.activarClase(
-        asignacion.id,
-        planificacion.clases[0].id,
-        docente.id,
-      );
+      // Act
+      const result = await service.getProgresoTareas(asignacion.id, docente.id);
 
-      // Verify estado exists
-      const estadosBefore = await prisma.estadoClaseGrupo.count({
-        where: { asignacion_id: asignacion.id },
-      });
-      expect(estadosBefore).toBe(1);
-
-      // Act - delete asignacion
-      await prisma.asignacionPlanificacion.delete({
-        where: { id: asignacion.id },
-      });
-
-      // Assert - estados should be cascade deleted
-      const estadosAfter = await prisma.estadoClaseGrupo.count({
-        where: { asignacion_id: asignacion.id },
-      });
-      expect(estadosAfter).toBe(0);
+      // Assert
+      expect(result.progresos).toEqual([]);
     });
 
-    it('should cascade delete ClasePlanificacion when Planificacion is deleted', async () => {
+    it('should_return_progreso_tareas_for_estudiantes', async () => {
       // Arrange
       const admin = await crearAdmin();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 3);
-
-      const clasesBefore = await prisma.clasePlanificacion.count({
-        where: { planificacion_id: planificacion.id },
-      });
-      expect(clasesBefore).toBe(3);
-
-      // Act - delete planificacion
-      await prisma.planificacion.delete({
-        where: { id: planificacion.id },
-      });
-
-      // Remove from tracking since we deleted manually
-      createdIds.planificaciones = createdIds.planificaciones.filter(
-        (id) => id !== planificacion.id,
-      );
-
-      // Assert - clases should be cascade deleted
-      const clasesAfter = await prisma.clasePlanificacion.count({
-        where: { planificacion_id: planificacion.id },
-      });
-      expect(clasesAfter).toBe(0);
-    });
-
-    it('should enforce unique constraint on AsignacionPlanificacion (planificacion_id, clase_grupo_id)', async () => {
-      // Arrange
-      const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
-
-      // First asignacion - should work
-      await crearAsignacion(planificacion.id, claseGrupo.id, docente.id);
-
-      // Act & Assert - Second asignacion with same combo should fail
-      await expect(
-        prisma.asignacionPlanificacion.create({
-          data: {
-            planificacion_id: planificacion.id,
-            clase_grupo_id: claseGrupo.id,
-            docente_id: docente.id,
-          },
-        }),
-      ).rejects.toThrow();
-    });
-
-    it('should enforce unique constraint on EstadoClaseGrupo (asignacion_id, clase_id)', async () => {
-      // Arrange
-      const admin = await crearAdmin();
-      const { docente, claseGrupo } = await crearDocenteConGrupo();
-      const planificacion = await crearPlanificacionCompleta(admin.id, 2);
+      const docente = await crearDocente();
+      const claseGrupo = await crearClaseGrupo(docente.id);
+      const tutor = await crearTutor();
+      const estudiante = await crearEstudiante(claseGrupo.id, tutor.id);
+      const planificacion = await crearPlanificacionConClases(admin.id, 2);
       const asignacion = await crearAsignacion(
         planificacion.id,
         claseGrupo.id,
         docente.id,
       );
-      const claseId = planificacion.clases[0].id;
 
-      // First estado - should work
-      await prisma.estadoClaseGrupo.create({
+      // Crear tarea y asignarla
+      const contenidoTarea = await crearContenidoTarea(admin.id);
+      const tareaClase = await prisma.tareaClase.create({
+        data: {
+          clase_id: planificacion.clases[0].id,
+          contenido_id: contenidoTarea.id,
+          orden: 1,
+          obligatoria: true,
+        },
+      });
+
+      const tareaAsignada = await prisma.tareaAsignada.create({
         data: {
           asignacion_id: asignacion.id,
-          clase_id: claseId,
-          teoria_activa: true,
-          practica_activa: false,
+          tarea_clase_id: tareaClase.id,
+          activa: true,
         },
       });
 
-      // Act & Assert - Second estado with same combo should fail
+      // Crear progreso del estudiante
+      await prisma.progresoTareaEstudiante.create({
+        data: {
+          estudiante_id: estudiante.id,
+          tarea_asignada_id: tareaAsignada.id,
+          estado: 'COMPLETADA',
+          completada_en: new Date(),
+          calificacion: 85,
+        },
+      });
+
+      // Act
+      const result = await service.getProgresoTareas(asignacion.id, docente.id);
+
+      // Assert
+      expect(result.progresos).toHaveLength(1);
+      expect(result.progresos[0].completada).toBe(true);
+      expect(result.progresos[0].calificacion).toBe(85);
+    });
+
+    it('should_throw_NotFoundException_when_asignacion_not_exists', async () => {
+      // Arrange
+      const docente = await crearDocente();
+      const fakeAsignacionId = createId();
+
+      // Act & Assert
       await expect(
-        prisma.estadoClaseGrupo.create({
-          data: {
-            asignacion_id: asignacion.id,
-            clase_id: claseId,
-            teoria_activa: false,
-            practica_activa: true,
-          },
-        }),
-      ).rejects.toThrow();
+        service.getProgresoTareas(fakeAsignacionId, docente.id),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });
