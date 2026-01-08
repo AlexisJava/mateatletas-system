@@ -55,6 +55,8 @@ const ClassRoomWithChat: React.FC<ClassRoomWithChatProps> = ({ config, onEndClas
     <ClassRoom
       title={config.title}
       onEndClass={onEndClass}
+      claseGrupoId={config.claseGrupoId}
+      comisionId={config.comisionId}
       chat={{
         mensajes,
         connectionState,
