@@ -20,7 +20,7 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { AppModule } from '../../../src/app.module';
@@ -94,7 +94,18 @@ describe('[INTEGRATION] Mi Aula Virtual - Endpoints', () => {
       .set('X-Forwarded-For', generateUniqueIP())
       .send({ username, password });
 
-    return response.headers['set-cookie'] as string[];
+    if (response.status !== 200) {
+      throw new Error(
+        `Login failed for ${username}: ${response.status} - ${JSON.stringify(response.body)}`,
+      );
+    }
+
+    const cookies = response.headers['set-cookie'];
+    if (!cookies || !Array.isArray(cookies) || cookies.length === 0) {
+      throw new Error(`No cookies returned for ${username}`);
+    }
+
+    return cookies;
   }
 
   // ============================================================================
@@ -287,12 +298,12 @@ describe('[INTEGRATION] Mi Aula Virtual - Endpoints', () => {
         .set('X-Forwarded-For', generateUniqueIP())
         .send({ email: docente.email, password });
 
-      const cookies = loginResponse.headers['set-cookie'] as string[];
+      const cookies = loginResponse.headers['set-cookie'] ?? [];
 
       // ACT
       const response = await request(app.getHttpServer())
         .get('/api/estudiantes/mi-aula')
-        .set('Cookie', cookies || [])
+        .set('Cookie', cookies)
         .set('Origin', FRONTEND_ORIGIN);
 
       // ASSERT - Debería ser 403 Forbidden (rol incorrecto)

@@ -48,12 +48,21 @@ export interface TestDocenteWithPassword {
 export async function cleanGamificationTables(prisma: PrismaService) {
   // Primero tablas hijas, luego padres
   // NOTA: NO borrar prisma.logro - son datos de configuración/seed, no datos de test
+
   await prisma.transaccionRecurso.deleteMany({});
   await prisma.logroEstudiante.deleteMany({});
   await prisma.recursosEstudiante.deleteMany({});
   await prisma.rachaEstudiante.deleteMany({});
   await prisma.progresoContenido.deleteMany({});
   await prisma.nodoContenido.deleteMany({});
+
+  // Planificaciones (tienen FK a contenido vía teoria_id/practica_id)
+  await prisma.estadoClaseGrupo.deleteMany({});
+  await prisma.asignacionPlanificacion.deleteMany({});
+  await prisma.clasePlanificacion.deleteMany({});
+  await prisma.planificacion.deleteMany({});
+
+  // Ahora sí se puede borrar contenido
   await prisma.contenido.deleteMany({});
 }
 

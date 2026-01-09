@@ -643,62 +643,88 @@ export class EstudianteAulaService {
       select: { titulo: true, numero: true },
     });
 
-    // 3. Actualizar o crear progreso
-    const updateData =
-      tipo === 'teoria'
-        ? {
-            teoria_completada: true,
-            teoria_completada_en: new Date(),
-            tiempo_teoria_segundos: { increment: tiempoSegundos },
-          }
-        : {
-            practica_completada: true,
-            practica_completada_en: new Date(),
-            tiempo_practica_segundos: { increment: tiempoSegundos },
-          };
+    // 3. Calcular XP (valores fijos)
+    const xpBase = tipo === 'teoria' ? 50 : 75; // Práctica da más XP
+    const xpBonusTiempo = Math.min(Math.floor(tiempoSegundos / 60) * 2, 20); // Hasta 20 XP bonus por tiempo
 
-    const progreso = await this.prisma.progresoClaseEstudiante.upsert({
+    // 4. UPSERT ATÓMICO con INSERT ON CONFLICT para garantizar idempotencia
+    // Solo hacemos UPDATE si el campo completado es FALSE (WHERE condition en DO UPDATE)
+    // Esto garantiza que solo UNA request puede "ganar" y marcar como completado
+    let esPrimeraCompletacion = false;
+
+    if (tipo === 'teoria') {
+      // UPSERT atómico para teoría con DO UPDATE condicionado
+      const result = await this.prisma.$queryRawUnsafe<
+        Array<{ was_insert: boolean }>
+      >(
+        `INSERT INTO progresos_clase_estudiante
+           (id, estudiante_id, clase_id, teoria_completada, teoria_completada_en, tiempo_teoria_segundos)
+         VALUES (gen_random_uuid()::text, $1, $2, true, NOW(), $3)
+         ON CONFLICT (estudiante_id, clase_id) DO UPDATE SET
+           teoria_completada = true,
+           teoria_completada_en = COALESCE(progresos_clase_estudiante.teoria_completada_en, NOW()),
+           tiempo_teoria_segundos = progresos_clase_estudiante.tiempo_teoria_segundos + EXCLUDED.tiempo_teoria_segundos
+         WHERE progresos_clase_estudiante.teoria_completada = false
+         RETURNING (xmax = 0) as was_insert`,
+        estudianteId,
+        claseId,
+        tiempoSegundos,
+      );
+      // Si hay resultado: fue INSERT (was_insert=true) o UPDATE exitoso (was_insert=false pero el WHERE pasó)
+      // Si no hay resultado: ya estaba completado (el WHERE falló)
+      esPrimeraCompletacion = result.length > 0;
+    } else {
+      // UPSERT atómico para práctica
+      const result = await this.prisma.$queryRawUnsafe<
+        Array<{ was_insert: boolean }>
+      >(
+        `INSERT INTO progresos_clase_estudiante
+           (id, estudiante_id, clase_id, practica_completada, practica_completada_en, tiempo_practica_segundos)
+         VALUES (gen_random_uuid()::text, $1, $2, true, NOW(), $3)
+         ON CONFLICT (estudiante_id, clase_id) DO UPDATE SET
+           practica_completada = true,
+           practica_completada_en = COALESCE(progresos_clase_estudiante.practica_completada_en, NOW()),
+           tiempo_practica_segundos = progresos_clase_estudiante.tiempo_practica_segundos + EXCLUDED.tiempo_practica_segundos
+         WHERE progresos_clase_estudiante.practica_completada = false
+         RETURNING (xmax = 0) as was_insert`,
+        estudianteId,
+        claseId,
+        tiempoSegundos,
+      );
+      esPrimeraCompletacion = result.length > 0;
+    }
+
+    // 4b. Obtener el progreso actualizado
+    const progreso = await this.prisma.progresoClaseEstudiante.findUnique({
       where: {
         estudiante_id_clase_id: {
           estudiante_id: estudianteId,
           clase_id: claseId,
         },
       },
-      create: {
-        estudiante_id: estudianteId,
-        clase_id: claseId,
-        ...(tipo === 'teoria'
-          ? {
-              teoria_completada: true,
-              teoria_completada_en: new Date(),
-              tiempo_teoria_segundos: tiempoSegundos,
-            }
-          : {
-              practica_completada: true,
-              practica_completada_en: new Date(),
-              tiempo_practica_segundos: tiempoSegundos,
-            }),
-      },
-      update: updateData,
     });
 
-    // 4. Calcular XP
-    const xpBase = tipo === 'teoria' ? 50 : 75; // Práctica da más XP
-    const xpBonusTiempo = Math.min(Math.floor(tiempoSegundos / 60) * 2, 20); // Hasta 20 XP bonus por tiempo
+    // Validar que el progreso existe (debería existir después del INSERT/UPDATE)
+    if (!progreso) {
+      throw new Error('Error interno: progreso no encontrado después de crear');
+    }
 
-    // 5. Emitir evento de gamificación
-    this.eventEmitter.emit('leccion.completada', {
-      estudianteId,
-      tipo,
-      claseId,
-      claseTitulo: clase?.titulo,
-      claseNumero: clase?.numero,
-      planificacionTitulo: asignacion.planificacion.titulo,
-      tiempoSegundos,
-      xpBase,
-      xpBonus: xpBonusTiempo,
-      xpTotal: xpBase + xpBonusTiempo,
-    });
+    // 5. Emitir evento de gamificación SOLO si es la primera vez que completa
+    // Esto garantiza idempotencia: doble-click NO otorga XP duplicado
+    if (esPrimeraCompletacion) {
+      this.eventEmitter.emit('leccion.completada', {
+        estudianteId,
+        tipo,
+        claseId,
+        claseTitulo: clase?.titulo,
+        claseNumero: clase?.numero,
+        planificacionTitulo: asignacion.planificacion.titulo,
+        tiempoSegundos,
+        xpBase,
+        xpBonus: xpBonusTiempo,
+        xpTotal: xpBase + xpBonusTiempo,
+      });
+    }
 
     return {
       success: true,
