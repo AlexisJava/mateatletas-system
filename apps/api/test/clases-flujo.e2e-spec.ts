@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
+import cookieParser from 'cookie-parser';
+import * as express from 'express';
 import { AppModule } from '../src/app.module';
 import {
   loginUser,
@@ -28,6 +30,23 @@ describe('Clases - Flujos principales (API)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
+    app.use(cookieParser());
+
+    // Configurar trust proxy para que respete X-Forwarded-For
+    const expressApp = app
+      .getHttpAdapter()
+      .getInstance() as express.Application;
+    expressApp.set('trust proxy', true);
+
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
+
     await app.init();
 
     adminAuth = await loginUser(app, {
@@ -52,7 +71,9 @@ describe('Clases - Flujos principales (API)', () => {
 
   it('admin puede obtener metadata de rutas curriculares', async () => {
     const response = await withAuthHeaders(
-      request(app.getHttpServer()).get('/clases/metadata/rutas-curriculares'),
+      request(app.getHttpServer()).get(
+        '/api/clases/metadata/rutas-curriculares',
+      ),
       adminAuth,
     ).expect(200);
 
@@ -65,7 +86,9 @@ describe('Clases - Flujos principales (API)', () => {
 
   it('admin puede programar y cancelar una clase', async () => {
     const rutasResponse = await withAuthHeaders(
-      request(app.getHttpServer()).get('/clases/metadata/rutas-curriculares'),
+      request(app.getHttpServer()).get(
+        '/api/clases/metadata/rutas-curriculares',
+      ),
       adminAuth,
     ).expect(200);
 
@@ -74,7 +97,10 @@ describe('Clases - Flujos principales (API)', () => {
     fecha.setUTCHours(15, 0, 0, 0);
 
     const programarResponse = await withOriginHeader(
-      withAuthHeaders(request(app.getHttpServer()).post('/clases'), adminAuth),
+      withAuthHeaders(
+        request(app.getHttpServer()).post('/api/clases'),
+        adminAuth,
+      ),
     )
       .send({
         nombre: 'Clase de prueba automatizada',
@@ -91,7 +117,7 @@ describe('Clases - Flujos principales (API)', () => {
     expect(programarResponse.body.nombre).toBe('Clase de prueba automatizada');
 
     const detalle = await withAuthHeaders(
-      request(app.getHttpServer()).get(`/clases/${claseProgramadaId}`),
+      request(app.getHttpServer()).get(`/api/clases/${claseProgramadaId}`),
       adminAuth,
     ).expect(200);
 
@@ -101,7 +127,7 @@ describe('Clases - Flujos principales (API)', () => {
     const cancelarResponse = await withOriginHeader(
       withAuthHeaders(
         request(app.getHttpServer()).patch(
-          `/clases/${claseProgramadaId}/cancelar`,
+          `/api/clases/${claseProgramadaId}/cancelar`,
         ),
         adminAuth,
       ),
@@ -112,7 +138,7 @@ describe('Clases - Flujos principales (API)', () => {
 
   it('admin puede listar clases con paginación', async () => {
     const response = await withAuthHeaders(
-      request(app.getHttpServer()).get('/clases/admin/todas?limit=5'),
+      request(app.getHttpServer()).get('/api/clases/admin/todas?limit=5'),
       adminAuth,
     ).expect(200);
 
@@ -123,7 +149,7 @@ describe('Clases - Flujos principales (API)', () => {
 
   it('docente puede obtener sus clases', async () => {
     const response = await withAuthHeaders(
-      request(app.getHttpServer()).get('/clases/docente/mis-clases'),
+      request(app.getHttpServer()).get('/api/clases/docente/mis-clases'),
       docenteAuth,
     ).expect(200);
 
@@ -132,14 +158,14 @@ describe('Clases - Flujos principales (API)', () => {
 
   it('tutor puede listar clases disponibles y calendario', async () => {
     const clasesDisponibles = await withAuthHeaders(
-      request(app.getHttpServer()).get('/clases'),
+      request(app.getHttpServer()).get('/api/clases'),
       tutorAuth,
     ).expect(200);
 
     expect(Array.isArray(clasesDisponibles.body)).toBe(true);
 
     const calendario = await withAuthHeaders(
-      request(app.getHttpServer()).get('/clases/calendario'),
+      request(app.getHttpServer()).get('/api/clases/calendario'),
       tutorAuth,
     ).expect(200);
 

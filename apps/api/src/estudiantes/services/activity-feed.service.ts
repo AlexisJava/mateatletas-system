@@ -1,6 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { TipoActividadFeed, Prisma } from '@prisma/client';
+
+/** Límite de reacciones por día por estudiante */
+const LIMITE_REACCIONES_DIARIAS = 5;
+
+/** Emojis permitidos para reacciones */
+const EMOJIS_PERMITIDOS = ['👏', '🔥', '💪', '🚀'];
 
 /**
  * DTO para crear actividad en el feed
@@ -145,12 +156,46 @@ export class ActivityFeedService {
 
   /**
    * Agrega una reacción a un item del feed
+   * Valida:
+   * - Emoji permitido
+   * - Límite de 5 reacciones diarias por estudiante
+   * - No puede reaccionar a sus propias actividades
    */
   async addReaction(actividadId: string, estudianteId: string, emoji: string) {
     // Verificar que el emoji es válido
-    const emojisPermitidos = ['👏', '🎉', '🔥', '💪', '❤️', '⭐'];
-    if (!emojisPermitidos.includes(emoji)) {
-      throw new Error(`Emoji no permitido: ${emoji}`);
+    if (!EMOJIS_PERMITIDOS.includes(emoji)) {
+      throw new BadRequestException(
+        `Emoji no permitido: ${emoji}. Usa: ${EMOJIS_PERMITIDOS.join(', ')}`,
+      );
+    }
+
+    // Verificar que no está reaccionando a su propia actividad
+    const actividad = await this.prisma.actividadFeed.findUnique({
+      where: { id: actividadId },
+      select: { estudiante_id: true },
+    });
+
+    if (!actividad) {
+      throw new BadRequestException('Actividad no encontrada');
+    }
+
+    if (actividad.estudiante_id === estudianteId) {
+      throw new BadRequestException(
+        'No puedes reaccionar a tus propias actividades',
+      );
+    }
+
+    // Verificar límite diario de reacciones
+    const reaccionesHoy = await this.contarReaccionesHoy(estudianteId);
+    if (reaccionesHoy >= LIMITE_REACCIONES_DIARIAS) {
+      throw new HttpException(
+        {
+          message: 'Límite de felicitaciones diarias alcanzado',
+          usadas: reaccionesHoy,
+          limite: LIMITE_REACCIONES_DIARIAS,
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
 
     return this.prisma.reaccionFeed.upsert({
@@ -168,6 +213,37 @@ export class ActivityFeedService {
       },
       update: {}, // No hacer nada si ya existe
     });
+  }
+
+  /**
+   * Cuenta cuántas reacciones ha dado el estudiante HOY
+   * (desde las 00:00:00 del día actual)
+   */
+  private async contarReaccionesHoy(estudianteId: string): Promise<number> {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    return this.prisma.reaccionFeed.count({
+      where: {
+        estudiante_id: estudianteId,
+        creado_en: {
+          gte: hoy,
+        },
+      },
+    });
+  }
+
+  /**
+   * Obtiene información de reacciones del día del estudiante
+   * @returns { usadas: number, limite: number, restantes: number }
+   */
+  async getReaccionesHoy(estudianteId: string) {
+    const usadas = await this.contarReaccionesHoy(estudianteId);
+    return {
+      usadas,
+      limite: LIMITE_REACCIONES_DIARIAS,
+      restantes: Math.max(0, LIMITE_REACCIONES_DIARIAS - usadas),
+    };
   }
 
   /**

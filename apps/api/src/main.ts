@@ -31,6 +31,12 @@ async function bootstrap() {
   const logger = app.get(LoggerService);
   logger.log('🚀 Iniciando aplicación Mateatletas API...');
 
+  // Confiar en proxies para obtener IP real del cliente
+  // Necesario para rate limiting correcto detrás de Railway/load balancers
+  // X-Forwarded-For header será usado para identificar clientes
+  const expressApp = app.getHttpAdapter().getInstance() as express.Application;
+  expressApp.set('trust proxy', true);
+
   // Raw body middleware for webhook signature validation
   // Captura raw body ANTES de parsear JSON
   app.use(

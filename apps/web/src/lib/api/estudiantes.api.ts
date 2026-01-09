@@ -587,9 +587,23 @@ export const estudiantesApi = {
       params: { emoji },
     });
   },
+
+  /**
+   * Obtener contador de reacciones del día del estudiante
+   * @returns { usadas: number, limite: number, restantes: number }
+   */
+  getReaccionesHoy: async (): Promise<ReaccionesHoyResponse> => {
+    return apiClient.get<ReaccionesHoyResponse>('/estudiantes/feed/mis-reacciones-hoy');
+  },
 };
 
 // ==================== TYPES PARA ACTIVITY FEED ====================
+
+export interface ReaccionesHoyResponse {
+  usadas: number;
+  limite: number;
+  restantes: number;
+}
 
 export interface FeedItem {
   id: string;

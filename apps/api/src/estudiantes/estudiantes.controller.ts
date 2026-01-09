@@ -471,6 +471,7 @@ export class EstudiantesController {
   /**
    * GET /estudiantes/feed/mi-comision - Obtener feed de compañeros de comisión (ClaseGrupo)
    * Muestra actividades de estudiantes inscriptos en las mismas clases grupales
+   * EXCLUYE las actividades propias del estudiante (solo ve compañeros)
    * @param req - Request con usuario autenticado
    * @param limit - Items a mostrar (default: 10)
    * @returns Feed de actividades de compañeros de comisión
@@ -488,13 +489,27 @@ export class EstudiantesController {
     const companeros =
       await this.estudiantesService.obtenerCompanerosDeClase(estudianteId);
 
-    // Incluir al propio estudiante + compañeros
-    const estudianteIds = [estudianteId, ...companeros.map((c) => c.id)];
+    // Solo compañeros (EXCLUIR al propio estudiante)
+    const estudianteIds = companeros.map((c) => c.id);
 
     return this.feedService.getFeedByEstudiantes(
       estudianteIds,
       limit ? parseInt(limit, 10) : 10,
     );
+  }
+
+  /**
+   * GET /estudiantes/feed/mis-reacciones-hoy - Obtener contador de reacciones del día
+   * Retorna cuántas reacciones ha dado hoy y cuántas le quedan
+   * @param req - Request con usuario autenticado
+   * @returns { usadas: number, limite: number, restantes: number }
+   */
+  @Get('feed/mis-reacciones-hoy')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async getMisReaccionesHoy(@Request() req: RequestWithAuthUser) {
+    const estudianteId = req.user.id;
+    return this.feedService.getReaccionesHoy(estudianteId);
   }
 
   /**

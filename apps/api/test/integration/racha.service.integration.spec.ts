@@ -26,7 +26,7 @@ import { RachaService } from '../../src/gamificacion/services/racha.service';
 import { PrismaService } from '../../src/core/database/prisma.service';
 import { AppModule } from '../../src/app.module';
 import {
-  cleanGamificationTables,
+  cleanAllTestTables,
   createTestEstudiante,
   createTestTutor,
 } from '../utils/db-cleanup.helper';
@@ -63,14 +63,12 @@ describe('[INTEGRATION] RachaService - Eventos de Gamificación', () => {
   beforeEach(async () => {
     eventEmitter.removeAllListeners('racha.actualizada');
 
-    await cleanGamificationTables(prisma);
-    await prisma.estudiante.deleteMany({});
-    await prisma.tutor.deleteMany({});
+    await cleanAllTestTables(prisma);
 
     // Crear tutor y estudiante de prueba
-    const tutor = await createTestTutor(prisma);
+    const { tutor } = await createTestTutor(prisma);
     tutorId = tutor.id;
-    const estudiante = await createTestEstudiante(prisma, { tutorId });
+    const { estudiante } = await createTestEstudiante(prisma, { tutorId });
     estudianteId = estudiante.id;
   });
 

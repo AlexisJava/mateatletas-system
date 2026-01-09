@@ -75,11 +75,13 @@ describe('ActivityFeedService', () => {
       actividadFeed: {
         create: jest.fn(),
         findMany: jest.fn(),
+        findUnique: jest.fn(),
         count: jest.fn(),
       },
       reaccionFeed: {
         upsert: jest.fn(),
         deleteMany: jest.fn(),
+        count: jest.fn(),
       },
     };
 
@@ -365,7 +367,18 @@ describe('ActivityFeedService', () => {
   // TESTS: addReaction()
   // ============================================================================
   describe('addReaction', () => {
-    const validEmojis = ['👏', '🎉', '🔥', '💪', '❤️', '⭐'];
+    // Emojis permitidos actualizados
+    const validEmojis = ['👏', '🔥', '💪', '🚀'];
+    const otroEstudianteId = 'est-otro-999';
+
+    beforeEach(() => {
+      // Por defecto: actividad pertenece a OTRO estudiante (no al que reacciona)
+      (prisma.actividadFeed.findUnique as jest.Mock).mockResolvedValue({
+        estudiante_id: otroEstudianteId,
+      });
+      // Por defecto: 0 reacciones hoy
+      (prisma.reaccionFeed.count as jest.Mock).mockResolvedValue(0);
+    });
 
     it('should_add_reaction_with_valid_emoji', async () => {
       // Arrange
@@ -416,7 +429,22 @@ describe('ActivityFeedService', () => {
       // Act & Assert
       await expect(
         service.addReaction(mockActividadId, mockEstudianteId, '😀'),
-      ).rejects.toThrow('Emoji no permitido: 😀');
+      ).rejects.toThrow(/Emoji no permitido/);
+    });
+
+    it('should_throw_error_for_old_emojis_no_longer_allowed', async () => {
+      // Los emojis antiguos ya no son válidos
+      await expect(
+        service.addReaction(mockActividadId, mockEstudianteId, '🎉'),
+      ).rejects.toThrow(/Emoji no permitido/);
+
+      await expect(
+        service.addReaction(mockActividadId, mockEstudianteId, '❤️'),
+      ).rejects.toThrow(/Emoji no permitido/);
+
+      await expect(
+        service.addReaction(mockActividadId, mockEstudianteId, '⭐'),
+      ).rejects.toThrow(/Emoji no permitido/);
     });
 
     it('should_throw_error_for_text_emoji', async () => {
@@ -435,6 +463,170 @@ describe('ActivityFeedService', () => {
 
       // Assert - upsert should be called, not create
       expect(prisma.reaccionFeed.upsert).toHaveBeenCalled();
+    });
+
+    // ========== TESTS DE LÍMITE DIARIO ==========
+
+    it('should_throw_429_when_daily_limit_reached', async () => {
+      // Arrange - Ya tiene 5 reacciones hoy
+      (prisma.reaccionFeed.count as jest.Mock).mockResolvedValue(5);
+
+      // Act & Assert
+      await expect(
+        service.addReaction(mockActividadId, mockEstudianteId, '👏'),
+      ).rejects.toThrow('Límite de felicitaciones diarias alcanzado');
+    });
+
+    it('should_allow_reaction_when_under_daily_limit', async () => {
+      // Arrange - Tiene 4 reacciones, puede hacer 1 más
+      (prisma.reaccionFeed.count as jest.Mock).mockResolvedValue(4);
+      (prisma.reaccionFeed.upsert as jest.Mock).mockResolvedValue({});
+
+      // Act & Assert
+      await expect(
+        service.addReaction(mockActividadId, mockEstudianteId, '👏'),
+      ).resolves.not.toThrow();
+    });
+
+    it('should_count_only_todays_reactions_for_limit', async () => {
+      // Arrange
+      (prisma.reaccionFeed.upsert as jest.Mock).mockResolvedValue({});
+
+      // Act
+      await service.addReaction(mockActividadId, mockEstudianteId, '👏');
+
+      // Assert - debe filtrar por fecha >= hoy
+      expect(prisma.reaccionFeed.count).toHaveBeenCalledWith({
+        where: {
+          estudiante_id: mockEstudianteId,
+          creado_en: {
+            gte: expect.any(Date),
+          },
+        },
+      });
+    });
+
+    // ========== TESTS DE NO REACCIONAR A PROPIAS ACTIVIDADES ==========
+
+    it('should_throw_error_when_reacting_to_own_activity', async () => {
+      // Arrange - La actividad pertenece al mismo estudiante que quiere reaccionar
+      (prisma.actividadFeed.findUnique as jest.Mock).mockResolvedValue({
+        estudiante_id: mockEstudianteId, // mismo estudiante
+      });
+
+      // Act & Assert
+      await expect(
+        service.addReaction(mockActividadId, mockEstudianteId, '👏'),
+      ).rejects.toThrow('No puedes reaccionar a tus propias actividades');
+    });
+
+    it('should_allow_reaction_to_other_students_activity', async () => {
+      // Arrange - La actividad pertenece a otro estudiante
+      (prisma.actividadFeed.findUnique as jest.Mock).mockResolvedValue({
+        estudiante_id: 'otro-estudiante-id',
+      });
+      (prisma.reaccionFeed.upsert as jest.Mock).mockResolvedValue({});
+
+      // Act & Assert
+      await expect(
+        service.addReaction(mockActividadId, mockEstudianteId, '👏'),
+      ).resolves.not.toThrow();
+    });
+
+    it('should_throw_error_when_activity_not_found', async () => {
+      // Arrange
+      (prisma.actividadFeed.findUnique as jest.Mock).mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.addReaction(mockActividadId, mockEstudianteId, '👏'),
+      ).rejects.toThrow('Actividad no encontrada');
+    });
+  });
+
+  // ============================================================================
+  // TESTS: getReaccionesHoy()
+  // ============================================================================
+  describe('getReaccionesHoy', () => {
+    it('should_return_zero_reactions_when_none_today', async () => {
+      // Arrange
+      (prisma.reaccionFeed.count as jest.Mock).mockResolvedValue(0);
+
+      // Act
+      const result = await service.getReaccionesHoy(mockEstudianteId);
+
+      // Assert
+      expect(result).toEqual({
+        usadas: 0,
+        limite: 5,
+        restantes: 5,
+      });
+    });
+
+    it('should_return_correct_count_when_some_reactions_used', async () => {
+      // Arrange
+      (prisma.reaccionFeed.count as jest.Mock).mockResolvedValue(3);
+
+      // Act
+      const result = await service.getReaccionesHoy(mockEstudianteId);
+
+      // Assert
+      expect(result).toEqual({
+        usadas: 3,
+        limite: 5,
+        restantes: 2,
+      });
+    });
+
+    it('should_return_zero_remaining_when_limit_reached', async () => {
+      // Arrange
+      (prisma.reaccionFeed.count as jest.Mock).mockResolvedValue(5);
+
+      // Act
+      const result = await service.getReaccionesHoy(mockEstudianteId);
+
+      // Assert
+      expect(result).toEqual({
+        usadas: 5,
+        limite: 5,
+        restantes: 0,
+      });
+    });
+
+    it('should_not_return_negative_remaining_if_over_limit', async () => {
+      // Arrange - Edge case: si por alguna razón hay más de 5
+      (prisma.reaccionFeed.count as jest.Mock).mockResolvedValue(7);
+
+      // Act
+      const result = await service.getReaccionesHoy(mockEstudianteId);
+
+      // Assert
+      expect(result.restantes).toBe(0); // No negativo
+    });
+
+    it('should_filter_by_today_date', async () => {
+      // Arrange
+      (prisma.reaccionFeed.count as jest.Mock).mockResolvedValue(0);
+
+      // Act
+      await service.getReaccionesHoy(mockEstudianteId);
+
+      // Assert
+      expect(prisma.reaccionFeed.count).toHaveBeenCalledWith({
+        where: {
+          estudiante_id: mockEstudianteId,
+          creado_en: {
+            gte: expect.any(Date),
+          },
+        },
+      });
+
+      // Verificar que la fecha es de hoy a las 00:00:00
+      const callArg = (prisma.reaccionFeed.count as jest.Mock).mock.calls[0][0];
+      const fechaFiltro = callArg.where.creado_en.gte as Date;
+      expect(fechaFiltro.getHours()).toBe(0);
+      expect(fechaFiltro.getMinutes()).toBe(0);
+      expect(fechaFiltro.getSeconds()).toBe(0);
     });
   });
 

@@ -8479,7 +8479,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"canvas-confetti@npm:^1.9.3":
+"canvas-confetti@npm:^1.9.4":
   version: 1.9.4
   resolution: "canvas-confetti@npm:1.9.4"
   checksum: 10c0/08f11b5fa20b365922108828d7488f9b3eac2afdf39bc478339268c1250b5215df82682d7074520a3f0f72f4728f9703bbc937dcfe793f196b44e6e8ac0b1f7b
@@ -19947,7 +19947,7 @@ __metadata:
     animejs: "npm:^4.2.2"
     axe-core: "npm:^4.11.0"
     axios: "npm:^1.12.2"
-    canvas-confetti: "npm:^1.9.3"
+    canvas-confetti: "npm:^1.9.4"
     clsx: "npm:^2.1.1"
     date-fns: "npm:^4.1.0"
     eslint: "npm:^8.57.0"

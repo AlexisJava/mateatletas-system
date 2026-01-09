@@ -250,3 +250,269 @@ apps/web/src/components/admin/
 - **Plan de estudiante**: Visible en tabla con badge de color según tier
 - **Menú contextual**: Usa createPortal para evitar overflow clipping
 - **Credenciales**: Auto-generadas al crear estudiante/docente, copiadas a clipboard
+
+## TESTS DE INTEGRACIÓN - MEJORES PRÁCTICAS
+
+### PRINCIPIOS FUNDAMENTALES
+
+1. **Sin mocks para la base de datos**
+   - Usar base de datos REAL de test (PostgreSQL en Docker)
+   - Los mocks ocultan bugs de integración
+   - "Si tus tests no tocan la base de datos, no son tests de integración"
+
+2. **Aislamiento total entre tests**
+   - Cada test empieza con estado limpio
+   - Usar transacciones con rollback O truncate entre tests
+   - Nunca depender del orden de ejecución
+
+3. **Fixtures y Factories**
+   - Crear factories para generar datos de test consistentes
+   - Definir variantes de entidades (EstudianteNuevo, EstudianteSuspendido, etc.)
+   - Evitar datos hardcodeados dispersos
+
+### ESTRUCTURA DE ARCHIVOS
+
+```
+apps/api/
+├── test/
+│   ├── setup/
+│   │   ├── test-database.ts      # Conexión DB test
+│   │   ├── reset-db.ts           # Limpiar entre tests
+│   │   └── global-setup.ts       # Setup inicial
+│   ├── factories/
+│   │   ├── estudiante.factory.ts
+│   │   ├── contenido.factory.ts
+│   │   └── index.ts
+│   ├── fixtures/
+│   │   └── estudiantes.fixture.ts
+│   └── integration/
+│       ├── auth/
+│       ├── estudiantes/
+│       └── gamificacion/
+```
+
+### CONFIGURACIÓN BASE
+
+```typescript
+// test/setup/test-database.ts
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: { url: process.env.DATABASE_TEST_URL },
+  },
+});
+
+export { prisma };
+```
+
+```typescript
+// test/setup/reset-db.ts
+import { prisma } from './test-database';
+
+export async function resetDatabase() {
+  // Orden inverso a las relaciones FK
+  await prisma.$transaction([
+    prisma.reaccionFeed.deleteMany(),
+    prisma.actividadFeed.deleteMany(),
+    prisma.progresoContenido.deleteMany(),
+    prisma.inscripcionClaseGrupo.deleteMany(),
+    prisma.estudiante.deleteMany(),
+    // ... resto de tablas
+  ]);
+}
+```
+
+```typescript
+// test/setup/global-setup.ts (Jest)
+import { resetDatabase } from './reset-db';
+
+beforeEach(async () => {
+  await resetDatabase();
+});
+```
+
+### FACTORY PATTERN
+
+```typescript
+// test/factories/estudiante.factory.ts
+import { prisma } from '../setup/test-database';
+import { faker } from '@faker-js/faker';
+
+interface CreateEstudianteOptions {
+  conPlan?: 'LIBROS' | 'SINCRONICO' | 'ASINCRONICO';
+  conComision?: boolean;
+  conProgreso?: boolean;
+  suspendido?: boolean;
+}
+
+export async function crearEstudiante(options: CreateEstudianteOptions = {}) {
+  const estudiante = await prisma.estudiante.create({
+    data: {
+      nombre: faker.person.firstName(),
+      apellido: faker.person.lastName(),
+      edad: faker.number.int({ min: 6, max: 17 }),
+      estado_acceso: options.suspendido ? 'SUSPENDIDO' : 'ACTIVO',
+      // ... más campos
+    },
+  });
+
+  if (options.conPlan) {
+    await crearSuscripcion(estudiante.id, options.conPlan);
+  }
+
+  if (options.conComision) {
+    await inscribirEnComision(estudiante.id);
+  }
+
+  return estudiante;
+}
+```
+
+### ESTRUCTURA DE UN TEST
+
+```typescript
+// test/integration/estudiantes/completar-leccion.spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from '../../../src/app.module';
+import { crearEstudiante } from '../../factories/estudiante.factory';
+import { crearContenido } from '../../factories/contenido.factory';
+import { prisma } from '../../setup/test-database';
+
+describe('Completar Lección (Integration)', () => {
+  let app: INestApplication;
+  let token: string;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  describe('POST /contenidos/:id/completar', () => {
+    it('debe registrar progreso y otorgar XP', async () => {
+      // ARRANGE - Crear datos reales
+      const estudiante = await crearEstudiante({ conPlan: 'SINCRONICO' });
+      const contenido = await crearContenido();
+      token = await generarToken(estudiante);
+
+      // ACT - Ejecutar acción real
+      const response = await request(app.getHttpServer())
+        .post(`/contenidos/${contenido.id}/completar`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ tiempoSegundos: 300 });
+
+      // ASSERT - Verificar en base de datos real
+      expect(response.status).toBe(200);
+
+      const progreso = await prisma.progresoContenido.findFirst({
+        where: { estudianteId: estudiante.id, contenidoId: contenido.id },
+      });
+      expect(progreso.completado).toBe(true);
+
+      const recursos = await prisma.recursosEstudiante.findUnique({
+        where: { estudiante_id: estudiante.id },
+      });
+      expect(recursos.xp_total).toBeGreaterThan(0);
+    });
+
+    it('debe fallar si el estudiante está suspendido', async () => {
+      const estudiante = await crearEstudiante({ suspendido: true });
+      const contenido = await crearContenido();
+      token = await generarToken(estudiante);
+
+      const response = await request(app.getHttpServer())
+        .post(`/contenidos/${contenido.id}/completar`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('debe manejar completar dos veces (idempotencia)', async () => {
+      const estudiante = await crearEstudiante({ conPlan: 'SINCRONICO' });
+      const contenido = await crearContenido();
+      token = await generarToken(estudiante);
+
+      // Primera vez
+      await request(app.getHttpServer())
+        .post(`/contenidos/${contenido.id}/completar`)
+        .set('Authorization', `Bearer ${token}`);
+
+      // Segunda vez
+      const response = await request(app.getHttpServer())
+        .post(`/contenidos/${contenido.id}/completar`)
+        .set('Authorization', `Bearer ${token}`);
+
+      // No debe duplicar XP
+      const recursos = await prisma.recursosEstudiante.findUnique({
+        where: { estudiante_id: estudiante.id },
+      });
+      expect(recursos.xp_total).toBe(50); // Solo una vez
+    });
+  });
+});
+```
+
+### DOCKER COMPOSE PARA TESTS
+
+```yaml
+# docker-compose.test.yml
+version: '3.8'
+services:
+  postgres-test:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: mateatletas_test
+    ports:
+      - '5433:5432'
+    tmpfs:
+      - /var/lib/postgresql/data # En memoria = más rápido
+```
+
+### SCRIPTS EN PACKAGE.JSON
+
+```json
+{
+  "scripts": {
+    "test:integration": "docker-compose -f docker-compose.test.yml up -d && DATABASE_TEST_URL=postgresql://test:test@localhost:5433/mateatletas_test jest --config jest.integration.config.js --runInBand",
+    "test:integration:watch": "npm run test:integration -- --watch",
+    "pretest:integration": "npx prisma db push --schema=./prisma/schema.prisma"
+  }
+}
+```
+
+### REGLAS DE ORO
+
+1. **Un test = un escenario** - No testear múltiples cosas en un test
+2. **Nombres descriptivos** - `debe fallar si el estudiante no tiene plan activo`
+3. **AAA Pattern** - Arrange, Act, Assert claramente separados
+4. **No compartir estado** - Cada test crea sus propios datos
+5. **Testear edge cases** - Datos nulos, vacíos, duplicados, concurrencia
+6. **Verificar en DB** - No confiar solo en el response, verificar estado real
+7. **Correr en serie** - `--runInBand` para evitar race conditions entre tests
+
+### FIXTURES RECOMENDADAS PARA MATEATLETAS
+
+```typescript
+// Variantes de estudiante para cubrir casos
+export const FIXTURES_ESTUDIANTE = {
+  nuevo: { conPlan: null, conComision: false, conProgreso: false },
+  planLibros: { conPlan: 'LIBROS', conComision: false },
+  planSincronico: { conPlan: 'SINCRONICO', conComision: true },
+  suspendido: { suspendido: true },
+  sinComision: { conPlan: 'SINCRONICO', conComision: false },
+  todoCompletado: { conPlan: 'SINCRONICO', progreso100: true },
+  conOverride: { override: { acceso_clases_vivo: true } },
+};
+```

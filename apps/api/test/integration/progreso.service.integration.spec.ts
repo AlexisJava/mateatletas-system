@@ -26,7 +26,7 @@ import { ProgresoService } from '../../src/contenidos/services/progreso.service'
 import { PrismaService } from '../../src/core/database/prisma.service';
 import { AppModule } from '../../src/app.module';
 import {
-  cleanGamificationTables,
+  cleanAllTestTables,
   createTestEstudiante,
   createTestContenido,
   createTestTutor,
@@ -64,15 +64,12 @@ describe('[INTEGRATION] ProgresoService - Eventos de Gamificación', () => {
   beforeEach(async () => {
     eventEmitter.removeAllListeners('leccion.completada');
 
-    await cleanGamificationTables(prisma);
-    await prisma.contenido.deleteMany({});
-    await prisma.estudiante.deleteMany({});
-    await prisma.tutor.deleteMany({});
+    await cleanAllTestTables(prisma);
 
     // Crear tutor y estudiante de prueba
-    const tutor = await createTestTutor(prisma);
+    const { tutor } = await createTestTutor(prisma);
     tutorId = tutor.id;
-    const estudiante = await createTestEstudiante(prisma, { tutorId });
+    const { estudiante } = await createTestEstudiante(prisma, { tutorId });
     estudianteId = estudiante.id;
   });
 

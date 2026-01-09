@@ -5,6 +5,7 @@ import { X, Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import type { FeedItem } from '@/lib/api/estudiantes.api';
 import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 
 /**
  * Emojis disponibles para felicitaciones
@@ -14,17 +15,65 @@ import { motion, AnimatePresence } from 'framer-motion';
  * 🚀 COHETE - Excelente logro
  */
 const EMOJIS_FELICITACION = [
-  { emoji: '👏', label: 'Aplausos', description: '¡Bien hecho!' },
-  { emoji: '🔥', label: 'Fuego', description: '¡Increíble!' },
-  { emoji: '💪', label: 'Fuerza', description: '¡Gran esfuerzo!' },
-  { emoji: '🚀', label: 'Cohete', description: '¡Excelente!' },
+  { emoji: '👏', label: 'Aplausos' },
+  { emoji: '🔥', label: 'Fuego' },
+  { emoji: '💪', label: 'Fuerza' },
+  { emoji: '🚀', label: 'Cohete' },
 ];
+
+/**
+ * Genera un mensaje amigable según el tipo de actividad
+ */
+function getMensajeLogro(actividad: FeedItem): string {
+  const metadata = actividad.metadata as Record<string, unknown>;
+
+  switch (actividad.tipo) {
+    case 'NIVEL_SUBIDO': {
+      const nivel = metadata?.nivelNuevo ?? '?';
+      return `🎮 ¡Subió al Nivel ${nivel}!`;
+    }
+    case 'RACHA_EXTENDIDA': {
+      const dias = metadata?.rachaActual ?? '?';
+      return `🔥 ¡Racha de ${dias} días!`;
+    }
+    case 'LOGRO_DESBLOQUEADO': {
+      const nombre = metadata?.logroNombre ?? 'un logro';
+      return `🏆 ¡Desbloqueó: ${nombre}!`;
+    }
+    case 'TAREA_COMPLETADA':
+      return '✅ ¡Completó una tarea!';
+    case 'TAREA_PERFECTA':
+      return '💯 ¡Tarea perfecta!';
+    case 'CLASE_COMPLETADA':
+      return '📚 ¡Completó una clase!';
+    case 'LECCION_COMPLETADA':
+      return '📖 ¡Terminó una lección!';
+    case 'PLANIFICACION_COMPLETADA':
+      return '🎯 ¡Completó toda la planificación!';
+    default:
+      return actividad.mensaje;
+  }
+}
+
+/**
+ * Lanza confeti con los colores de Mateatletas
+ */
+function lanzarConfeti() {
+  // Confeti desde el centro
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6, x: 0.5 },
+    colors: ['#10B981', '#FBBF24', '#FFFFFF', '#06B6D4', '#8B5CF6'],
+  });
+}
 
 interface ModalFelicitacionProps {
   actividad: FeedItem | null;
   isOpen: boolean;
   onClose: () => void;
   onReaction: (actividadId: string, emoji: string) => Promise<void>;
+  reaccionesRestantes: number;
 }
 
 export function ModalFelicitacion({
@@ -32,11 +81,20 @@ export function ModalFelicitacion({
   isOpen,
   onClose,
   onReaction,
+  reaccionesRestantes,
 }: ModalFelicitacionProps) {
   const { user } = useAuthStore();
   const [loadingEmoji, setLoadingEmoji] = useState<string | null>(null);
   const [animatingEmoji, setAnimatingEmoji] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  // Limpiar error al abrir modal
+  useEffect(() => {
+    if (isOpen) {
+      setError(null);
+    }
+  }, [isOpen]);
 
   // Cerrar con Escape
   useEffect(() => {
@@ -65,14 +123,33 @@ export function ModalFelicitacion({
   const handleReaction = async (emoji: string) => {
     if (!actividad || loadingEmoji) return;
 
+    // Verificar si ya no tiene reacciones disponibles
+    if (reaccionesRestantes <= 0 && !userHasReacted(emoji)) {
+      setError('Ya usaste tus 5 felicitaciones de hoy');
+      return;
+    }
+
     setLoadingEmoji(emoji);
     setAnimatingEmoji(emoji);
+    setError(null);
 
     try {
+      const wasReacted = userHasReacted(emoji);
       await onReaction(actividad.id, emoji);
+
+      // Si es una nueva reacción (no quitar), lanzar confeti
+      if (!wasReacted) {
+        lanzarConfeti();
+      }
+    } catch (err) {
+      // Manejar error 429 (límite alcanzado)
+      if (err instanceof Error && err.message.includes('429')) {
+        setError('Ya usaste tus 5 felicitaciones de hoy');
+      } else {
+        setError('Error al enviar felicitación');
+      }
     } finally {
       setLoadingEmoji(null);
-      // Mantener la animación un poco más
       setTimeout(() => setAnimatingEmoji(null), 300);
     }
   };
@@ -90,6 +167,9 @@ export function ModalFelicitacion({
   };
 
   if (!actividad) return null;
+
+  const mensajeLogro = getMensajeLogro(actividad);
+  const sinReacciones = reaccionesRestantes <= 0;
 
   return (
     <AnimatePresence>
@@ -127,10 +207,10 @@ export function ModalFelicitacion({
             {/* Contenido */}
             <div className="relative p-6 space-y-6">
               {/* Info del estudiante y logro */}
-              <div className="flex items-center gap-4">
-                {/* Avatar grande */}
+              <div className="text-center space-y-4">
+                {/* Avatar grande centrado */}
                 <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shrink-0 shadow-lg"
+                  className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg"
                   style={{
                     background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%)',
                   }}
@@ -138,19 +218,24 @@ export function ModalFelicitacion({
                   {actividad.estudiante.nombre.charAt(0).toUpperCase()}
                 </div>
 
-                {/* Nombre y mensaje */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-white font-bold text-lg truncate">
-                    {actividad.estudiante.nombre} {actividad.estudiante.apellido}
-                  </p>
-                  <p className="text-white/60 text-sm mt-1 line-clamp-2">{actividad.mensaje}</p>
+                {/* Nombre */}
+                <p className="text-white font-bold text-xl">
+                  {actividad.estudiante.nombre} {actividad.estudiante.apellido}
+                </p>
+
+                {/* Mensaje del logro destacado */}
+                <div className="py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-white/10">
+                  <p className="text-white font-semibold text-lg">{mensajeLogro}</p>
                 </div>
               </div>
+
+              {/* Separador */}
+              <div className="border-t border-white/10" />
 
               {/* Botones de emojis */}
               <div className="space-y-3">
                 <p className="text-white/50 text-xs font-medium uppercase tracking-wider text-center">
-                  Elige una felicitación
+                  ¡Felicitalo!
                 </p>
 
                 <div className="grid grid-cols-4 gap-3">
@@ -159,12 +244,13 @@ export function ModalFelicitacion({
                     const count = getReactionCount(emoji);
                     const isLoading = loadingEmoji === emoji;
                     const isAnimating = animatingEmoji === emoji;
+                    const isDisabled = sinReacciones && !hasReacted;
 
                     return (
                       <motion.button
                         key={emoji}
                         onClick={() => handleReaction(emoji)}
-                        disabled={isLoading}
+                        disabled={isLoading || isDisabled}
                         whileTap={{ scale: 0.9 }}
                         animate={
                           isAnimating
@@ -177,7 +263,9 @@ export function ModalFelicitacion({
                         className={`relative flex flex-col items-center gap-1 p-3 rounded-xl transition-all ${
                           hasReacted
                             ? 'bg-gradient-to-br from-cyan-500/30 to-purple-500/30 border-2 border-cyan-400/50 shadow-lg shadow-cyan-500/20'
-                            : 'bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20'
+                            : isDisabled
+                              ? 'bg-white/5 border border-white/5 opacity-50 cursor-not-allowed'
+                              : 'bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20'
                         }`}
                       >
                         {isLoading ? (
@@ -201,15 +289,35 @@ export function ModalFelicitacion({
                 </div>
               </div>
 
-              {/* Total de reacciones */}
-              {actividad.totalReacciones > 0 && (
-                <div className="text-center">
-                  <p className="text-white/40 text-xs">
-                    {actividad.totalReacciones}{' '}
-                    {actividad.totalReacciones === 1 ? 'felicitación' : 'felicitaciones'}
-                  </p>
-                </div>
+              {/* Error message */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center py-2 px-3 rounded-lg bg-red-500/20 border border-red-500/30"
+                >
+                  <p className="text-red-400 text-sm">{error}</p>
+                </motion.div>
               )}
+
+              {/* Contador de reacciones restantes */}
+              <div className="text-center space-y-1">
+                <p
+                  className={`text-sm font-medium ${sinReacciones ? 'text-orange-400' : 'text-white/60'}`}
+                >
+                  {sinReacciones
+                    ? 'Sin felicitaciones disponibles hoy'
+                    : `Te quedan ${reaccionesRestantes} felicitaciones hoy`}
+                </p>
+
+                {/* Total de reacciones recibidas */}
+                {actividad.totalReacciones > 0 && (
+                  <p className="text-white/40 text-xs">
+                    Ya reaccionaron: {actividad.totalReacciones}{' '}
+                    {actividad.totalReacciones === 1 ? 'compañero' : 'compañeros'}
+                  </p>
+                )}
+              </div>
             </div>
           </motion.div>
         </motion.div>

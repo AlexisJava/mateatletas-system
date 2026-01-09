@@ -52,7 +52,7 @@
     "@vercel/blob": "^2.0.0",
     "animejs": "^4.2.2",
     "axios": "^1.12.2",
-    "canvas-confetti": "^1.9.3",
+    "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "fengari-web": "^0.1.4",

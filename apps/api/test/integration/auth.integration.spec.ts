@@ -25,6 +25,7 @@ import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import { PrismaService } from '../../src/core/database/prisma.service';
 import { AppModule } from '../../src/app.module';
+import { cleanAllTestTables } from '../utils/db-cleanup.helper';
 
 describe('[INTEGRATION] Auth Module', () => {
   let app: INestApplication;
@@ -55,13 +56,7 @@ describe('[INTEGRATION] Auth Module', () => {
   // Cleanup: Limpiar DB antes de cada test
   // ============================================================================
   beforeEach(async () => {
-    // Limpiar tablas en orden correcto (primero hijos, después padres)
-    // para respetar foreign keys
-    await prisma.contenido.deleteMany({}); // Hijo de Admin
-    await prisma.estudiante.deleteMany({}); // Hijo de Tutor
-    await prisma.tutor.deleteMany({});
-    await prisma.docente.deleteMany({});
-    await prisma.admin.deleteMany({});
+    await cleanAllTestTables(prisma);
   });
 
   // ============================================================================

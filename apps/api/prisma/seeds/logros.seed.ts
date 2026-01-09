@@ -1,9 +1,41 @@
 import { PrismaClient } from '@prisma/client';
 
 export async function seedLogros(prisma: PrismaClient) {
-  console.log('🎮 Seeding sistema completo de gamificación: 73 logros...');
+  console.log('🎮 Seeding sistema completo de gamificación: 75 logros...');
 
   const logros = [
+    // ========== CATEGORÍA 0: BIENVENIDA (2 logros) ==========
+    {
+      codigo: 'PRIMER_INGRESO',
+      nombre: '¡Bienvenido!',
+      descripcion: 'Has iniciado sesión por primera vez en Mateatletas',
+      categoria: 'INICIO',
+      xp_recompensa: 25,
+      criterio_tipo: 'primer_login',
+      criterio_valor: JSON.stringify({ requiere_primer_login: true }),
+      icono: '🎉',
+      rareza: 'COMUN',
+      secreto: false,
+      mensaje_desbloqueo:
+        '¡Bienvenido a Mateatletas! Has dado tu primer paso en esta aventura.',
+      orden: 0,
+    },
+    {
+      codigo: 'AVATAR_CREADO',
+      nombre: '¡Mírame!',
+      descripcion: 'Has creado tu avatar personalizado',
+      categoria: 'PERSONALIZACION',
+      xp_recompensa: 50,
+      criterio_tipo: 'avatar_creado',
+      criterio_valor: JSON.stringify({ requiere_avatar: true }),
+      icono: '🎨',
+      rareza: 'COMUN',
+      secreto: false,
+      mensaje_desbloqueo:
+        '¡Tu avatar está listo! Ahora todos pueden ver tu estilo único.',
+      orden: 0,
+    },
+
     // ========== CATEGORÍA 1: CONSISTENCIA (10 logros) ==========
 
     // COMUNES (4)

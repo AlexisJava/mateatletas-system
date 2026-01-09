@@ -93,10 +93,21 @@ export function ActivityFeed({
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [actividadSeleccionada, setActividadSeleccionada] = useState<FeedItem | null>(null);
+  const [reaccionesRestantes, setReaccionesRestantes] = useState(5);
 
   useEffect(() => {
     loadFeed();
+    loadReaccionesRestantes();
   }, [mode, limit]);
+
+  const loadReaccionesRestantes = async () => {
+    try {
+      const response = await estudiantesApi.getReaccionesHoy();
+      setReaccionesRestantes(response.restantes);
+    } catch (error) {
+      console.error('Error cargando reacciones restantes:', error);
+    }
+  };
 
   const loadFeed = async () => {
     try {
@@ -219,14 +230,19 @@ export function ActivityFeed({
     try {
       if (userHasReacted) {
         await estudiantesApi.removeReaction(actividadId, emoji);
+        // Quitar reacción no recupera el cupo (las reacciones ya usadas cuentan)
       } else {
         await estudiantesApi.addReaction(actividadId, emoji);
+        // Decrementar contador local
+        setReaccionesRestantes((prev) => Math.max(0, prev - 1));
       }
     } catch (error) {
       console.error('Error con reacción:', error);
       // Revert on error
       loadFeed();
       setActividadSeleccionada(null);
+      // Recargar contador real desde el servidor
+      loadReaccionesRestantes();
     }
   };
 
@@ -312,6 +328,7 @@ export function ActivityFeed({
         isOpen={!!actividadSeleccionada}
         onClose={handleCloseModal}
         onReaction={handleReaction}
+        reaccionesRestantes={reaccionesRestantes}
       />
     </div>
   );

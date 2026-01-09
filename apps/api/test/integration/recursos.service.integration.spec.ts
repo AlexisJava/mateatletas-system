@@ -74,9 +74,9 @@ describe('[INTEGRATION] RecursosService - Eventos de Gamificación', () => {
     await prisma.tutor.deleteMany({});
 
     // Crear tutor y estudiante de prueba
-    const tutor = await createTestTutor(prisma);
+    const { tutor } = await createTestTutor(prisma);
     tutorId = tutor.id;
-    const estudiante = await createTestEstudiante(prisma, { tutorId });
+    const { estudiante } = await createTestEstudiante(prisma, { tutorId });
     estudianteId = estudiante.id;
   });
 

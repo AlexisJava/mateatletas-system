@@ -258,7 +258,13 @@ export class AuthController {
   @ApiBody({ type: LoginEstudianteDto })
   @Public()
   @Post('estudiante/login')
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Throttle({
+    default: {
+      // Configurable via env: LOGIN_THROTTLE_LIMIT (default 5), LOGIN_THROTTLE_TTL (default 60000ms)
+      limit: parseInt(process.env.LOGIN_THROTTLE_LIMIT || '5', 10),
+      ttl: parseInt(process.env.LOGIN_THROTTLE_TTL || '60000', 10),
+    },
+  })
   @HttpCode(HttpStatus.OK)
   async loginEstudiante(
     @Body() loginEstudianteDto: LoginEstudianteDto,

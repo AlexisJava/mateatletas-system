@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
+import cookieParser from 'cookie-parser';
+import * as express from 'express';
 import { AppModule } from '../src/app.module';
 import {
   loginUser,
@@ -28,6 +30,23 @@ describe('Pagos - Endpoints principales (API)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
+    app.use(cookieParser());
+
+    // Configurar trust proxy para que respete X-Forwarded-For
+    const expressApp = app
+      .getHttpAdapter()
+      .getInstance() as express.Application;
+    expressApp.set('trust proxy', true);
+
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
+
     await app.init();
 
     adminAuth = await loginUser(app, {
@@ -39,10 +58,10 @@ describe('Pagos - Endpoints principales (API)', () => {
       email: 'maria.garcia@tutor.com',
       password: 'Test123!',
     });
-    tutorId = tutorAuth.user?.id;
+    tutorId = tutorAuth.user?.id as string;
 
     const estudiantesResponse = await withAuthHeaders(
-      request(app.getHttpServer()).get('/estudiantes'),
+      request(app.getHttpServer()).get('/api/estudiantes'),
       tutorAuth,
     ).expect(200);
 
@@ -58,7 +77,7 @@ describe('Pagos - Endpoints principales (API)', () => {
 
   it('exponer configuración de precios vigente', async () => {
     const response = await request(app.getHttpServer())
-      .get('/pagos/configuracion')
+      .get('/api/pagos/configuracion')
       .expect(200);
 
     expect(response.body).toHaveProperty('precioClubMatematicas');
@@ -67,7 +86,7 @@ describe('Pagos - Endpoints principales (API)', () => {
 
   it('exponer historial de cambios de configuración', async () => {
     const response = await request(app.getHttpServer())
-      .get('/pagos/historial-cambios')
+      .get('/api/pagos/historial-cambios')
       .expect(200);
 
     expect(Array.isArray(response.body)).toBe(true);
@@ -75,7 +94,7 @@ describe('Pagos - Endpoints principales (API)', () => {
 
   it('exponer métricas del dashboard administrativo', async () => {
     const response = await request(app.getHttpServer())
-      .get('/pagos/dashboard/metricas')
+      .get('/api/pagos/dashboard/metricas')
       .expect(200);
 
     expect(response.body).toHaveProperty('metricasGenerales');
@@ -84,13 +103,13 @@ describe('Pagos - Endpoints principales (API)', () => {
 
   it('exponer inscripciones pendientes y estudiantes con descuentos', async () => {
     const pendientes = await request(app.getHttpServer())
-      .get('/pagos/inscripciones/pendientes')
+      .get('/api/pagos/inscripciones/pendientes')
       .expect(200);
 
     expect(Array.isArray(pendientes.body)).toBe(true);
 
     const descuentos = await request(app.getHttpServer())
-      .get('/pagos/estudiantes-descuentos')
+      .get('/api/pagos/estudiantes-descuentos')
       .expect(200);
 
     expect(Array.isArray(descuentos.body)).toBe(true);
@@ -108,7 +127,7 @@ describe('Pagos - Endpoints principales (API)', () => {
 
     const response = await withOriginHeader(
       withAuthHeaders(
-        request(app.getHttpServer()).post('/pagos/calcular-precio'),
+        request(app.getHttpServer()).post('/api/pagos/calcular-precio'),
         tutorAuth,
       ),
     )
@@ -131,7 +150,9 @@ describe('Pagos - Endpoints principales (API)', () => {
 
     const response = await withOriginHeader(
       withAuthHeaders(
-        request(app.getHttpServer()).post('/pagos/configuracion/actualizar'),
+        request(app.getHttpServer()).post(
+          '/api/pagos/configuracion/actualizar',
+        ),
         adminAuth,
       ),
     )

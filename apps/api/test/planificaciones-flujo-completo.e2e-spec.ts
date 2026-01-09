@@ -5,8 +5,10 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
+import cookieParser from 'cookie-parser';
+import * as express from 'express';
 import { AppModule } from '../src/app.module';
 import {
   loginEstudiante,
@@ -31,6 +33,23 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
+    app.use(cookieParser());
+
+    // Configurar trust proxy para que respete X-Forwarded-For
+    const expressApp = app
+      .getHttpAdapter()
+      .getInstance() as express.Application;
+    expressApp.set('trust proxy', true);
+
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
+
     await app.init();
 
     // Obtener tokens
@@ -43,10 +62,10 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
       email: 'docente.test@mateatletas.com',
       password: 'Docente123!',
     });
-    docenteId = docenteAuth.user?.id;
+    docenteId = docenteAuth.user?.id as string;
 
     const estudianteLogin = await loginEstudiante(app, {
-      email: 'estudiante.test@mateatletas.com',
+      username: 'estudiante.test@mateatletas.com',
       password: 'Estudiante123!',
     });
     estudianteAuth = estudianteLogin;
@@ -59,7 +78,7 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
   describe('1. Auto-detección', () => {
     it('debe listar planificaciones detectadas', async () => {
       const response = await withAuthHeaders(
-        request(app.getHttpServer()).get('/planificaciones'),
+        request(app.getHttpServer()).get('/api/planificaciones'),
         adminAuth,
       ).expect(200);
 
@@ -77,7 +96,7 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
     it('debe obtener detalle de planificación específica', async () => {
       const response = await withAuthHeaders(
         request(app.getHttpServer()).get(
-          '/planificaciones/ejemplo-minimo/detalle',
+          '/api/planificaciones/ejemplo-minimo/detalle',
         ),
         adminAuth,
       ).expect(200);
@@ -91,7 +110,7 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
     it('debe permitir a admin asignar planificación a docente', async () => {
       // Primero obtener un clase_grupo_id válido
       const grupos = await withAuthHeaders(
-        request(app.getHttpServer()).get('/clase-grupos'),
+        request(app.getHttpServer()).get('/api/clase-grupos'),
         adminAuth,
       ).expect(200);
 
@@ -105,7 +124,7 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
       const response = await withOriginHeader(
         withAuthHeaders(
           request(app.getHttpServer()).post(
-            '/planificaciones/ejemplo-minimo/asignar',
+            '/api/planificaciones/ejemplo-minimo/asignar',
           ),
           adminAuth,
         ),
@@ -126,7 +145,9 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
   describe('3. Gestión de Semanas (Docente)', () => {
     it('debe permitir al docente listar sus asignaciones', async () => {
       const response = await withAuthHeaders(
-        request(app.getHttpServer()).get('/planificaciones/mis-asignaciones'),
+        request(app.getHttpServer()).get(
+          '/api/planificaciones/mis-asignaciones',
+        ),
         docenteAuth,
       ).expect(200);
 
@@ -148,7 +169,7 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
       const response = await withOriginHeader(
         withAuthHeaders(
           request(app.getHttpServer()).post(
-            `/planificaciones/asignacion/${asignacionId}/semana/1/activar`,
+            `/api/planificaciones/asignacion/${asignacionId}/semana/1/activar`,
           ),
           docenteAuth,
         ),
@@ -167,7 +188,7 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
       const response = await withOriginHeader(
         withAuthHeaders(
           request(app.getHttpServer()).post(
-            `/planificaciones/asignacion/${asignacionId}/semana/2/activar`,
+            `/api/planificaciones/asignacion/${asignacionId}/semana/2/activar`,
           ),
           docenteAuth,
         ),
@@ -186,7 +207,7 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
       const response = await withOriginHeader(
         withAuthHeaders(
           request(app.getHttpServer()).post(
-            `/planificaciones/asignacion/${asignacionId}/semana/2/desactivar`,
+            `/api/planificaciones/asignacion/${asignacionId}/semana/2/desactivar`,
           ),
           docenteAuth,
         ),
@@ -200,7 +221,7 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
     it('debe permitir al estudiante obtener su progreso', async () => {
       const response = await withAuthHeaders(
         request(app.getHttpServer()).get(
-          '/planificaciones/ejemplo-minimo/progreso',
+          '/api/planificaciones/ejemplo-minimo/progreso',
         ),
         estudianteAuth,
       ).expect(200);
@@ -220,7 +241,7 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
       const response = await withOriginHeader(
         withAuthHeaders(
           request(app.getHttpServer()).put(
-            '/planificaciones/ejemplo-minimo/progreso',
+            '/api/planificaciones/ejemplo-minimo/progreso',
           ),
           estudianteAuth,
         ),
@@ -235,7 +256,7 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
       const response = await withOriginHeader(
         withAuthHeaders(
           request(app.getHttpServer()).post(
-            '/planificaciones/ejemplo-minimo/progreso/completar-semana',
+            '/api/planificaciones/ejemplo-minimo/progreso/completar-semana',
           ),
           estudianteAuth,
         ),
@@ -253,7 +274,7 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
       const response = await withOriginHeader(
         withAuthHeaders(
           request(app.getHttpServer()).post(
-            '/planificaciones/ejemplo-minimo/progreso/tiempo',
+            '/api/planificaciones/ejemplo-minimo/progreso/tiempo',
           ),
           estudianteAuth,
         ),
@@ -277,7 +298,7 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
 
       const response = await withAuthHeaders(
         request(app.getHttpServer()).get(
-          `/planificaciones/asignacion/${asignacionId}/progreso`,
+          `/api/planificaciones/asignacion/${asignacionId}/progreso`,
         ),
         docenteAuth,
       ).expect(200);
