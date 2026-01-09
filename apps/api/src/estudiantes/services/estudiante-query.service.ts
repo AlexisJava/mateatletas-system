@@ -454,54 +454,97 @@ export class EstudianteQueryService {
   }
 
   /**
-   * Obtener compañeros de ClaseGrupo del estudiante
-   * Retorna todos los estudiantes inscritos en el mismo ClaseGrupo que el estudiante actual
+   * Obtener compañeros del estudiante (de ClaseGrupo o Comisión)
+   * Busca primero en ClaseGrupo, si no encuentra busca en Comisión
    * @param estudianteId - ID del estudiante
    * @returns Lista de compañeros con sus puntos totales
    */
   async obtenerCompanerosDeClase(estudianteId: string) {
-    // Buscar el ClaseGrupo al que pertenece el estudiante
-    const inscripcion = await this.prisma.inscripcionClaseGrupo.findFirst({
-      where: {
-        estudiante_id: estudianteId,
-      },
-      include: {
-        claseGrupo: true,
-      },
-    });
+    // 1. Buscar primero en ClaseGrupo
+    const inscripcionClaseGrupo =
+      await this.prisma.inscripcionClaseGrupo.findFirst({
+        where: {
+          estudiante_id: estudianteId,
+          fecha_baja: null,
+        },
+      });
 
-    if (!inscripcion) {
-      return [];
-    }
-
-    // Obtener todos los estudiantes inscritos en el mismo ClaseGrupo
-    const companeros = await this.prisma.estudiante.findMany({
-      where: {
-        inscripciones_clase_grupo: {
-          some: {
-            clase_grupo_id: inscripcion.clase_grupo_id,
+    if (inscripcionClaseGrupo) {
+      // Obtener compañeros del mismo ClaseGrupo
+      const companeros = await this.prisma.estudiante.findMany({
+        where: {
+          id: { not: estudianteId }, // Excluir al estudiante actual
+          inscripciones_clase_grupo: {
+            some: {
+              clase_grupo_id: inscripcionClaseGrupo.clase_grupo_id,
+              fecha_baja: null,
+            },
           },
         },
-      },
-      select: {
-        id: true,
-        nombre: true,
-        apellido: true,
-        recursos: {
-          select: { xp_total: true },
+        select: {
+          id: true,
+          nombre: true,
+          apellido: true,
+          recursos: {
+            select: { xp_total: true },
+          },
+        },
+      });
+
+      return companeros
+        .map((c) => ({
+          id: c.id,
+          nombre: c.nombre,
+          apellido: c.apellido,
+          puntos: c.recursos?.xp_total ?? 0,
+        }))
+        .sort((a, b) => b.puntos - a.puntos);
+    }
+
+    // 2. Si no tiene ClaseGrupo, buscar en Comisión
+    const inscripcionComision = await this.prisma.inscripcionComision.findFirst(
+      {
+        where: {
+          estudiante_id: estudianteId,
+          estado: 'Confirmada',
         },
       },
-    });
+    );
 
-    // Ordenar por XP en memoria y mapear
-    return companeros
-      .map((c) => ({
-        id: c.id,
-        nombre: c.nombre,
-        apellido: c.apellido,
-        puntos: c.recursos?.xp_total ?? 0,
-      }))
-      .sort((a, b) => b.puntos - a.puntos);
+    if (inscripcionComision) {
+      // Obtener compañeros de la misma Comisión
+      const companeros = await this.prisma.estudiante.findMany({
+        where: {
+          id: { not: estudianteId }, // Excluir al estudiante actual
+          inscripcionesComision: {
+            some: {
+              comision_id: inscripcionComision.comision_id,
+              estado: 'Confirmada',
+            },
+          },
+        },
+        select: {
+          id: true,
+          nombre: true,
+          apellido: true,
+          recursos: {
+            select: { xp_total: true },
+          },
+        },
+      });
+
+      return companeros
+        .map((c) => ({
+          id: c.id,
+          nombre: c.nombre,
+          apellido: c.apellido,
+          puntos: c.recursos?.xp_total ?? 0,
+        }))
+        .sort((a, b) => b.puntos - a.puntos);
+    }
+
+    // No tiene inscripciones
+    return [];
   }
 
   /**

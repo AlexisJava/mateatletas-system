@@ -555,6 +555,172 @@ describe('ActivityFeedService', () => {
   });
 
   // ============================================================================
+  // TESTS: getFeedByEstudiantes()
+  // ============================================================================
+  describe('getFeedByEstudiantes', () => {
+    const mockEstudianteIds = ['est-1', 'est-2', 'est-3'];
+
+    beforeEach(() => {
+      (prisma.actividadFeed.findMany as jest.Mock).mockResolvedValue([
+        mockActividadFeed,
+      ]);
+      (prisma.actividadFeed.count as jest.Mock).mockResolvedValue(1);
+    });
+
+    it('should_return_empty_feed_when_no_estudiante_ids_provided', async () => {
+      // Act
+      const result = await service.getFeedByEstudiantes([]);
+
+      // Assert
+      expect(result.data).toEqual([]);
+      expect(result.meta).toMatchObject({
+        total: 0,
+        page: 1,
+        totalPages: 0,
+        hasMore: false,
+      });
+      expect(prisma.actividadFeed.findMany).not.toHaveBeenCalled();
+    });
+
+    it('should_filter_by_estudiante_ids_using_in_clause', async () => {
+      // Act
+      await service.getFeedByEstudiantes(mockEstudianteIds);
+
+      // Assert
+      expect(prisma.actividadFeed.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            estudiante_id: { in: mockEstudianteIds },
+          },
+        }),
+      );
+    });
+
+    it('should_use_default_limit_10', async () => {
+      // Act
+      await service.getFeedByEstudiantes(mockEstudianteIds);
+
+      // Assert
+      expect(prisma.actividadFeed.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          take: 10,
+        }),
+      );
+    });
+
+    it('should_respect_custom_limit', async () => {
+      // Act
+      await service.getFeedByEstudiantes(mockEstudianteIds, 25);
+
+      // Assert
+      expect(prisma.actividadFeed.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          take: 25,
+        }),
+      );
+    });
+
+    it('should_limit_max_items_to_50', async () => {
+      // Act
+      await service.getFeedByEstudiantes(mockEstudianteIds, 100);
+
+      // Assert
+      expect(prisma.actividadFeed.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          take: 50,
+        }),
+      );
+    });
+
+    it('should_paginate_correctly', async () => {
+      // Arrange
+      (prisma.actividadFeed.count as jest.Mock).mockResolvedValue(30);
+
+      // Act
+      const result = await service.getFeedByEstudiantes(
+        mockEstudianteIds,
+        10,
+        2,
+      );
+
+      // Assert
+      expect(prisma.actividadFeed.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 10,
+          take: 10,
+        }),
+      );
+      expect(result.meta).toMatchObject({
+        page: 2,
+        limit: 10,
+        total: 30,
+        totalPages: 3,
+        hasMore: true,
+      });
+    });
+
+    it('should_order_by_creado_en_desc', async () => {
+      // Act
+      await service.getFeedByEstudiantes(mockEstudianteIds);
+
+      // Assert
+      expect(prisma.actividadFeed.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { creado_en: 'desc' },
+        }),
+      );
+    });
+
+    it('should_include_estudiante_and_reacciones', async () => {
+      // Act
+      await service.getFeedByEstudiantes(mockEstudianteIds);
+
+      // Assert
+      expect(prisma.actividadFeed.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          include: expect.objectContaining({
+            estudiante: expect.any(Object),
+            reacciones: expect.any(Object),
+            _count: expect.any(Object),
+          }),
+        }),
+      );
+    });
+
+    it('should_transform_response_fields_correctly', async () => {
+      // Act
+      const result = await service.getFeedByEstudiantes(mockEstudianteIds);
+
+      // Assert
+      expect(result.data[0]).toMatchObject({
+        id: mockActividadId,
+        tipo: TipoActividadFeed.TAREA_COMPLETADA,
+        mensaje: 'completó una tarea',
+        xpGanado: 50,
+        creadoEn: expect.any(Date),
+        estudiante: mockEstudiante,
+      });
+    });
+
+    it('should_group_reactions_by_emoji', async () => {
+      // Arrange
+      (prisma.actividadFeed.findMany as jest.Mock).mockResolvedValue([
+        mockActividadConReacciones,
+      ]);
+
+      // Act
+      const result = await service.getFeedByEstudiantes(mockEstudianteIds);
+
+      // Assert
+      expect(result.data[0].reacciones).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ emoji: '👏', count: 2 }),
+        ]),
+      );
+    });
+  });
+
+  // ============================================================================
   // TESTS: agruparReacciones (método privado, testeado vía getFeed)
   // ============================================================================
   describe('agruparReacciones', () => {

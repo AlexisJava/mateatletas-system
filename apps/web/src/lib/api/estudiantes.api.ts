@@ -544,6 +544,19 @@ export const estudiantesApi = {
   },
 
   /**
+   * Obtener feed de compañeros de comisión (ClaseGrupo)
+   * Muestra actividades de estudiantes inscriptos en las mismas clases grupales
+   * @param limit - Cantidad de items (default: 10)
+   * @returns Feed de actividades de compañeros de comisión
+   */
+  getFeedMiComision: async (limit?: number): Promise<FeedResponse> => {
+    const response = await apiClient.get<FeedResponse>('/estudiantes/feed/mi-comision', {
+      params: { limit },
+    });
+    return response;
+  },
+
+  /**
    * Obtener actividades propias del estudiante
    * @param limit - Cantidad de items (default: 10)
    * @returns Feed de actividades propias

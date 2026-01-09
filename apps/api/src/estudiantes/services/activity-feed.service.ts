@@ -203,6 +203,89 @@ export class ActivityFeedService {
   }
 
   /**
+   * Obtiene el feed de múltiples estudiantes (para comisión/ClaseGrupo)
+   * Filtra actividades donde estudiante_id está en la lista
+   * @param estudianteIds - Lista de IDs de estudiantes
+   * @param limit - Cantidad máxima de items (default: 10, max: 50)
+   * @param page - Página para paginación (default: 1)
+   * @returns Feed con actividades de los estudiantes especificados
+   */
+  async getFeedByEstudiantes(estudianteIds: string[], limit = 10, page = 1) {
+    if (estudianteIds.length === 0) {
+      return {
+        data: [],
+        meta: { total: 0, page: 1, limit, totalPages: 0, hasMore: false },
+      };
+    }
+
+    const safeLimit = Math.min(limit, 50);
+    const skip = (page - 1) * safeLimit;
+
+    const where = {
+      estudiante_id: { in: estudianteIds },
+    };
+
+    const [items, total] = await Promise.all([
+      this.prisma.actividadFeed.findMany({
+        where,
+        include: {
+          estudiante: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+              avatarUrl: true,
+            },
+          },
+          reacciones: {
+            select: {
+              emoji: true,
+              estudiante_id: true,
+            },
+          },
+          _count: {
+            select: {
+              reacciones: true,
+            },
+          },
+        },
+        orderBy: {
+          creado_en: 'desc',
+        },
+        skip,
+        take: safeLimit,
+      }),
+      this.prisma.actividadFeed.count({ where }),
+    ]);
+
+    const itemsConReacciones = items.map((item) => {
+      const reaccionesAgrupadas = this.agruparReacciones(item.reacciones);
+      return {
+        id: item.id,
+        tipo: item.tipo,
+        mensaje: item.mensaje,
+        xpGanado: item.xp_ganado,
+        metadata: item.metadata,
+        creadoEn: item.creado_en,
+        estudiante: item.estudiante,
+        reacciones: reaccionesAgrupadas,
+        totalReacciones: item._count.reacciones,
+      };
+    });
+
+    return {
+      data: itemsConReacciones,
+      meta: {
+        total,
+        page,
+        limit: safeLimit,
+        totalPages: Math.ceil(total / safeLimit),
+        hasMore: page * safeLimit < total,
+      },
+    };
+  }
+
+  /**
    * Agrupa reacciones por emoji y cuenta cuántas hay de cada tipo
    */
   private agruparReacciones(

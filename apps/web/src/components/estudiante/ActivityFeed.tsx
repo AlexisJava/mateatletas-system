@@ -73,7 +73,7 @@ const TIPO_CONFIG: Record<
 };
 
 interface ActivityFeedProps {
-  mode?: 'casa' | 'personal' | 'general';
+  mode?: 'casa' | 'personal' | 'general' | 'comision';
   limit?: number;
   showTitle?: boolean;
   compact?: boolean;
@@ -107,6 +107,9 @@ export function ActivityFeed({
           break;
         case 'personal':
           response = await estudiantesApi.getMisActividades(limit);
+          break;
+        case 'comision':
+          response = await estudiantesApi.getFeedMiComision(limit);
           break;
         default:
           response = await estudiantesApi.getFeed({ limit });
@@ -215,9 +218,16 @@ export function ActivityFeed({
   }
 
   if (feed.length === 0) {
+    const emptyMessage =
+      mode === 'comision'
+        ? 'Aún no hay actividad de tu equipo. ¡Completa tareas para aparecer aquí!'
+        : mode === 'personal'
+          ? 'Aún no tienes actividades registradas'
+          : 'No hay actividad reciente';
+
     return (
       <div className="text-center py-8">
-        <p className="text-white/50 text-sm">No hay actividad reciente</p>
+        <p className="text-white/50 text-sm">{emptyMessage}</p>
       </div>
     );
   }
@@ -227,7 +237,13 @@ export function ActivityFeed({
       {showTitle && (
         <h3 className="text-white font-bold text-lg flex items-center gap-2">
           <Zap className="w-5 h-5 text-yellow-400" />
-          {mode === 'casa' ? 'Actividad de tu Casa' : mode === 'personal' ? 'Tu Actividad' : 'Feed'}
+          {mode === 'casa'
+            ? 'Actividad de tu Casa'
+            : mode === 'personal'
+              ? 'Tu Actividad'
+              : mode === 'comision'
+                ? 'Actividad de tu Equipo'
+                : 'Feed'}
         </h3>
       )}
 
@@ -270,8 +286,15 @@ interface FeedItemCardProps {
   onReaction: (actividadId: string, emoji: string) => void;
 }
 
+const DEFAULT_CONFIG = {
+  icon: <Star className="w-4 h-4" />,
+  color: 'text-gray-400',
+  bgColor: 'bg-gray-500/20',
+  label: 'Actividad',
+};
+
 function FeedItemCard({ item, compact, currentUserId, onReaction }: FeedItemCardProps) {
-  const config = TIPO_CONFIG[item.tipo] || TIPO_CONFIG.LOGRO_DESBLOQUEADO;
+  const config = TIPO_CONFIG[item.tipo] ?? DEFAULT_CONFIG;
   const timeAgo = formatDistanceToNow(new Date(item.creadoEn), { addSuffix: true, locale: es });
 
   return (

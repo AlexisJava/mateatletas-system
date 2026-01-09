@@ -469,6 +469,35 @@ export class EstudiantesController {
   }
 
   /**
+   * GET /estudiantes/feed/mi-comision - Obtener feed de compañeros de comisión (ClaseGrupo)
+   * Muestra actividades de estudiantes inscriptos en las mismas clases grupales
+   * @param req - Request con usuario autenticado
+   * @param limit - Items a mostrar (default: 10)
+   * @returns Feed de actividades de compañeros de comisión
+   */
+  @Get('feed/mi-comision')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ESTUDIANTE)
+  async getFeedMiComision(
+    @Request() req: RequestWithAuthUser,
+    @Query('limit') limit?: string,
+  ) {
+    const estudianteId = req.user.id;
+
+    // Obtener compañeros de las mismas clases grupales
+    const companeros =
+      await this.estudiantesService.obtenerCompanerosDeClase(estudianteId);
+
+    // Incluir al propio estudiante + compañeros
+    const estudianteIds = [estudianteId, ...companeros.map((c) => c.id)];
+
+    return this.feedService.getFeedByEstudiantes(
+      estudianteIds,
+      limit ? parseInt(limit, 10) : 10,
+    );
+  }
+
+  /**
    * GET /estudiantes/feed/mis-actividades - Obtener actividades del estudiante logueado
    * @param req - Request con usuario autenticado
    * @param limit - Items a mostrar (default: 10)
