@@ -277,36 +277,48 @@ export class AdminEstudiantesService {
       this.logger.log(`Tutor creado automáticamente: ${tutorEmail}`);
     }
 
-    // 2. Crear el estudiante
-    const estudiante = await this.prisma.estudiante.create({
-      data: {
-        nombre: data.nombre,
-        apellido: data.apellido,
-        username: await this.generarUsernameUnico(data.nombre, data.apellido),
-        edad: data.edad,
-        nivelEscolar: data.nivelEscolar,
-        tutor_id: tutor.id,
-        nivel_actual: 1,
-        // Plan de suscripción (opcional)
-        ...(data.plan_id && { plan_id: data.plan_id }),
-        ...(data.estado_acceso && { estado_acceso: data.estado_acceso }),
-      },
-      include: {
-        tutor: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            email: true,
+    // 2. Crear el estudiante con recursos iniciales en transacción
+    const estudiante = await this.prisma.$transaction(async (tx) => {
+      const est = await tx.estudiante.create({
+        data: {
+          nombre: data.nombre,
+          apellido: data.apellido,
+          username: await this.generarUsernameUnico(data.nombre, data.apellido),
+          edad: data.edad,
+          nivelEscolar: data.nivelEscolar,
+          tutor_id: tutor.id,
+          nivel_actual: 1,
+          // Plan de suscripción (opcional)
+          ...(data.plan_id && { plan_id: data.plan_id }),
+          ...(data.estado_acceso && { estado_acceso: data.estado_acceso }),
+        },
+        include: {
+          tutor: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+              email: true,
+            },
+          },
+          plan: {
+            select: {
+              id: true,
+              nombre: true,
+            },
           },
         },
-        plan: {
-          select: {
-            id: true,
-            nombre: true,
-          },
+      });
+
+      // Auto-crear RecursosEstudiante para evitar FK violations en queries de XP
+      await tx.recursosEstudiante.create({
+        data: {
+          estudiante_id: est.id,
+          xp_total: 0,
         },
-      },
+      });
+
+      return est;
     });
 
     return {
@@ -612,6 +624,14 @@ export class AdminEstudiantesService {
           nivel_actual: dto.nivelInicial ?? 1,
           avatar_gradient: 0,
           fotoUrl: null,
+        },
+      });
+
+      // Auto-crear RecursosEstudiante para evitar FK violations en queries de XP
+      await tx.recursosEstudiante.create({
+        data: {
+          estudiante_id: estudiante.id,
+          xp_total: 0,
         },
       });
 

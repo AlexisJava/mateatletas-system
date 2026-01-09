@@ -340,7 +340,7 @@ model Contenido {
   tipo TipoContenido @default(MICROLECCION)
 
   /// ID del admin que creó el contenido
-  creadorId String @map("creador_id")
+  creadorId String? @map("creador_id")
 
   /// Descripción o resumen (opcional)
   descripcion String?
@@ -367,7 +367,8 @@ model Contenido {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  creador   Admin               @relation(fields: [creadorId], references: [id])
+  /// onDelete: SetNull permite eliminar Admin sin perder contenidos (quedan huérfanos pero accesibles)
+  creador   Admin?              @relation(fields: [creadorId], references: [id], onDelete: SetNull)
   nodos     NodoContenido[]
   progresos ProgresoContenido[]
 

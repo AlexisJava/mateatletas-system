@@ -92,17 +92,29 @@ export class EstudianteCommandService {
     const passwordTemporal = generarPasswordEstudiante();
     const passwordHash = await hashPassword(passwordTemporal);
 
-    // Crear estudiante con credenciales
-    const estudiante = await this.prisma.estudiante.create({
-      data: {
-        ...createDto,
-        username,
-        password_hash: passwordHash,
-        tutor_id: tutorId,
-      },
-      include: {
-        casa: true,
-      },
+    // Crear estudiante con credenciales y recursos iniciales en transacción
+    const estudiante = await this.prisma.$transaction(async (tx) => {
+      const est = await tx.estudiante.create({
+        data: {
+          ...createDto,
+          username,
+          password_hash: passwordHash,
+          tutor_id: tutorId,
+        },
+        include: {
+          casa: true,
+        },
+      });
+
+      // Auto-crear RecursosEstudiante para evitar FK violations en queries de XP
+      await tx.recursosEstudiante.create({
+        data: {
+          estudiante_id: est.id,
+          xp_total: 0,
+        },
+      });
+
+      return est;
     });
 
     // Emitir evento en lugar de llamar a LogrosService directamente
@@ -377,6 +389,14 @@ export class EstudianteCommandService {
             include: {
               sector: true,
               tutor: true,
+            },
+          });
+
+          // Auto-crear RecursosEstudiante para evitar FK violations en queries de XP
+          await prisma.recursosEstudiante.create({
+            data: {
+              estudiante_id: estudiante.id,
+              xp_total: 0,
             },
           });
 
