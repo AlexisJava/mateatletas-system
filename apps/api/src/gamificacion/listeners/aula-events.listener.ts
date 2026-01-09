@@ -4,6 +4,11 @@ import { RecursosService } from '../services/recursos.service';
 import { LogrosService } from '../services/logros.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { TipoActividadFeed, Prisma } from '@prisma/client';
+import {
+  EstudianteNivelUpEvent,
+  RachaActualizadaEvent,
+  LogroDesbloqueadoEvent,
+} from '../../common/events/domain-events';
 
 /**
  * Eventos emitidos por EstudianteAulaService
@@ -420,6 +425,128 @@ export class AulaEventsListener {
     } catch (error) {
       this.logger.error(
         `Error al procesar planificacion.completada para estudiante ${event.estudianteId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // LISTENERS DE GAMIFICACIÓN (nivel-up, racha, logro)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Listener: Estudiante subió de nivel
+   *
+   * Se ejecuta cuando un estudiante acumula suficiente XP para subir de nivel.
+   *
+   * Acciones:
+   * - Crear entrada en el Activity Feed
+   */
+  @OnEvent('estudiante.nivel-up')
+  async handleNivelUp(event: EstudianteNivelUpEvent) {
+    this.logger.log(
+      `🚀 Nivel up: Estudiante ${event.estudianteId} subió de nivel ${event.nivelAnterior} → ${event.nivelNuevo}`,
+    );
+
+    try {
+      await this.crearEntradaFeed(
+        event.estudianteId,
+        TipoActividadFeed.NIVEL_SUBIDO,
+        `subió al nivel ${event.nivelNuevo}`,
+        0, // No otorga XP adicional, el XP ya fue dado
+        {
+          nivelAnterior: event.nivelAnterior,
+          nivelNuevo: event.nivelNuevo,
+        },
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error al procesar estudiante.nivel-up para ${event.estudianteId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+  }
+
+  /**
+   * Listener: Racha de estudiante actualizada
+   *
+   * Solo crea entrada en el feed para hitos importantes (3, 7, 14, 30, 60, 100 días)
+   * para evitar spam en el feed.
+   *
+   * Acciones:
+   * - Crear entrada en el Activity Feed (solo en hitos)
+   */
+  @OnEvent('racha.actualizada')
+  async handleRachaActualizada(event: RachaActualizadaEvent) {
+    // Solo procesar si es una racha nueva (no rota)
+    if (event.rompioRacha) {
+      this.logger.debug(
+        `Racha rota para estudiante ${event.estudianteId}, no se crea feed`,
+      );
+      return;
+    }
+
+    // Solo crear entrada en hitos importantes
+    const hitos = [3, 7, 14, 30, 60, 100];
+    if (!hitos.includes(event.rachaActual)) {
+      this.logger.debug(
+        `Racha ${event.rachaActual} no es hito, no se crea feed`,
+      );
+      return;
+    }
+
+    this.logger.log(
+      `🔥 Racha hito: Estudiante ${event.estudianteId} alcanzó ${event.rachaActual} días consecutivos`,
+    );
+
+    try {
+      await this.crearEntradaFeed(
+        event.estudianteId,
+        TipoActividadFeed.RACHA_EXTENDIDA,
+        `alcanzó una racha de ${event.rachaActual} días`,
+        0, // XP de racha se otorga en otro listener
+        {
+          rachaActual: event.rachaActual,
+          rachaMaxima: event.rachaMaxima,
+          esNuevaRacha: event.esNuevaRacha,
+        },
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error al procesar racha.actualizada para ${event.estudianteId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+  }
+
+  /**
+   * Listener: Logro desbloqueado
+   *
+   * Se ejecuta cuando un estudiante desbloquea un logro/badge.
+   *
+   * Acciones:
+   * - Crear entrada en el Activity Feed
+   */
+  @OnEvent('logro.desbloqueado')
+  async handleLogroDesbloqueado(event: LogroDesbloqueadoEvent) {
+    this.logger.log(
+      `🏆 Logro desbloqueado: Estudiante ${event.estudianteId} obtuvo "${event.logroNombre}"`,
+    );
+
+    try {
+      await this.crearEntradaFeed(
+        event.estudianteId,
+        TipoActividadFeed.LOGRO_DESBLOQUEADO,
+        `desbloqueó el logro "${event.logroNombre}"`,
+        event.recompensas.xp || 0,
+        {
+          logroCodigo: event.logroCodigo,
+          logroNombre: event.logroNombre,
+        },
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error al procesar logro.desbloqueado para ${event.estudianteId}`,
         error instanceof Error ? error.stack : String(error),
       );
     }

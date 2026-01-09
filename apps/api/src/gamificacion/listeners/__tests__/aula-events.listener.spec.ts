@@ -822,4 +822,316 @@ describe('AulaEventsListener', () => {
       ).resolves.not.toThrow();
     });
   });
+
+  // ============================================================================
+  // TESTS: handleNivelUp
+  // ============================================================================
+  describe('handleNivelUp', () => {
+    const mockNivelUpEvent = {
+      estudianteId: mockEstudianteId,
+      nivelAnterior: 5,
+      nivelNuevo: 6,
+      recompensas: { xp: 100 },
+    };
+
+    beforeEach(() => {
+      (prisma.estudiante.findUnique as jest.Mock).mockResolvedValue({
+        casaId: 'casa-123',
+        nombre: 'Juan',
+        apellido: 'Pérez',
+      });
+      (prisma.actividadFeed.create as jest.Mock).mockResolvedValue({});
+    });
+
+    it('should_crear_entrada_feed_nivel_subido', async () => {
+      // Act
+      await listener.handleNivelUp(mockNivelUpEvent);
+
+      // Assert
+      expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            estudiante_id: mockEstudianteId,
+            tipo: TipoActividadFeed.NIVEL_SUBIDO,
+            mensaje: expect.stringContaining('nivel 6'),
+            xp_ganado: 0, // XP ya fue dado antes
+          }),
+        }),
+      );
+    });
+
+    it('should_include_metadata_with_nivel_info', async () => {
+      // Act
+      await listener.handleNivelUp(mockNivelUpEvent);
+
+      // Assert
+      expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              nivelAnterior: 5,
+              nivelNuevo: 6,
+            }),
+          }),
+        }),
+      );
+    });
+
+    it('should_handle_error_gracefully', async () => {
+      // Arrange
+      (prisma.actividadFeed.create as jest.Mock).mockRejectedValue(
+        new Error('DB Error'),
+      );
+
+      // Act & Assert
+      await expect(
+        listener.handleNivelUp(mockNivelUpEvent),
+      ).resolves.not.toThrow();
+    });
+  });
+
+  // ============================================================================
+  // TESTS: handleRachaActualizada
+  // ============================================================================
+  describe('handleRachaActualizada', () => {
+    const mockRachaEvent = {
+      estudianteId: mockEstudianteId,
+      rachaActual: 7,
+      rachaMaxima: 10,
+      esNuevaRacha: false,
+      rompioRacha: false,
+    };
+
+    beforeEach(() => {
+      (prisma.estudiante.findUnique as jest.Mock).mockResolvedValue({
+        casaId: 'casa-123',
+        nombre: 'Juan',
+        apellido: 'Pérez',
+      });
+      (prisma.actividadFeed.create as jest.Mock).mockResolvedValue({});
+    });
+
+    it('should_crear_entrada_feed_when_racha_is_hito_3', async () => {
+      // Arrange
+      const eventHito3 = { ...mockRachaEvent, rachaActual: 3 };
+
+      // Act
+      await listener.handleRachaActualizada(eventHito3);
+
+      // Assert
+      expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            tipo: TipoActividadFeed.RACHA_EXTENDIDA,
+            mensaje: expect.stringContaining('3 días'),
+          }),
+        }),
+      );
+    });
+
+    it('should_crear_entrada_feed_when_racha_is_hito_7', async () => {
+      // Act
+      await listener.handleRachaActualizada(mockRachaEvent); // rachaActual: 7
+
+      // Assert
+      expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            tipo: TipoActividadFeed.RACHA_EXTENDIDA,
+            mensaje: expect.stringContaining('7 días'),
+          }),
+        }),
+      );
+    });
+
+    it('should_crear_entrada_feed_when_racha_is_hito_14', async () => {
+      // Arrange
+      const eventHito14 = { ...mockRachaEvent, rachaActual: 14 };
+
+      // Act
+      await listener.handleRachaActualizada(eventHito14);
+
+      // Assert
+      expect(prisma.actividadFeed.create).toHaveBeenCalled();
+    });
+
+    it('should_crear_entrada_feed_when_racha_is_hito_30', async () => {
+      // Arrange
+      const eventHito30 = { ...mockRachaEvent, rachaActual: 30 };
+
+      // Act
+      await listener.handleRachaActualizada(eventHito30);
+
+      // Assert
+      expect(prisma.actividadFeed.create).toHaveBeenCalled();
+    });
+
+    it('should_crear_entrada_feed_when_racha_is_hito_60', async () => {
+      // Arrange
+      const eventHito60 = { ...mockRachaEvent, rachaActual: 60 };
+
+      // Act
+      await listener.handleRachaActualizada(eventHito60);
+
+      // Assert
+      expect(prisma.actividadFeed.create).toHaveBeenCalled();
+    });
+
+    it('should_crear_entrada_feed_when_racha_is_hito_100', async () => {
+      // Arrange
+      const eventHito100 = { ...mockRachaEvent, rachaActual: 100 };
+
+      // Act
+      await listener.handleRachaActualizada(eventHito100);
+
+      // Assert
+      expect(prisma.actividadFeed.create).toHaveBeenCalled();
+    });
+
+    it('should_not_crear_feed_when_racha_is_not_hito', async () => {
+      // Arrange
+      const eventNoHito = { ...mockRachaEvent, rachaActual: 5 }; // 5 no es hito
+
+      // Act
+      await listener.handleRachaActualizada(eventNoHito);
+
+      // Assert
+      expect(prisma.actividadFeed.create).not.toHaveBeenCalled();
+    });
+
+    it('should_not_crear_feed_when_racha_is_1', async () => {
+      // Arrange
+      const eventRacha1 = { ...mockRachaEvent, rachaActual: 1 };
+
+      // Act
+      await listener.handleRachaActualizada(eventRacha1);
+
+      // Assert
+      expect(prisma.actividadFeed.create).not.toHaveBeenCalled();
+    });
+
+    it('should_not_crear_feed_when_racha_was_broken', async () => {
+      // Arrange
+      const eventRota = { ...mockRachaEvent, rompioRacha: true };
+
+      // Act
+      await listener.handleRachaActualizada(eventRota);
+
+      // Assert
+      expect(prisma.actividadFeed.create).not.toHaveBeenCalled();
+    });
+
+    it('should_include_metadata_with_racha_info', async () => {
+      // Act
+      await listener.handleRachaActualizada(mockRachaEvent);
+
+      // Assert
+      expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              rachaActual: 7,
+              rachaMaxima: 10,
+            }),
+          }),
+        }),
+      );
+    });
+
+    it('should_handle_error_gracefully', async () => {
+      // Arrange
+      (prisma.actividadFeed.create as jest.Mock).mockRejectedValue(
+        new Error('DB Error'),
+      );
+
+      // Act & Assert
+      await expect(
+        listener.handleRachaActualizada(mockRachaEvent),
+      ).resolves.not.toThrow();
+    });
+  });
+
+  // ============================================================================
+  // TESTS: handleLogroDesbloqueado
+  // ============================================================================
+  describe('handleLogroDesbloqueado', () => {
+    const mockLogroEvent = {
+      estudianteId: mockEstudianteId,
+      logroCodigo: 'PRIMERA_TAREA',
+      logroNombre: 'Primera Tarea',
+      recompensas: { xp: 50 },
+    };
+
+    beforeEach(() => {
+      (prisma.estudiante.findUnique as jest.Mock).mockResolvedValue({
+        casaId: 'casa-123',
+        nombre: 'Juan',
+        apellido: 'Pérez',
+      });
+      (prisma.actividadFeed.create as jest.Mock).mockResolvedValue({});
+    });
+
+    it('should_crear_entrada_feed_logro_desbloqueado', async () => {
+      // Act
+      await listener.handleLogroDesbloqueado(mockLogroEvent);
+
+      // Assert
+      expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            estudiante_id: mockEstudianteId,
+            tipo: TipoActividadFeed.LOGRO_DESBLOQUEADO,
+            mensaje: expect.stringContaining('Primera Tarea'),
+            xp_ganado: 50,
+          }),
+        }),
+      );
+    });
+
+    it('should_include_metadata_with_logro_info', async () => {
+      // Act
+      await listener.handleLogroDesbloqueado(mockLogroEvent);
+
+      // Assert
+      expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            metadata: expect.objectContaining({
+              logroCodigo: 'PRIMERA_TAREA',
+              logroNombre: 'Primera Tarea',
+            }),
+          }),
+        }),
+      );
+    });
+
+    it('should_use_zero_xp_when_recompensas_xp_undefined', async () => {
+      // Arrange
+      const eventSinXp = { ...mockLogroEvent, recompensas: {} };
+
+      // Act
+      await listener.handleLogroDesbloqueado(eventSinXp);
+
+      // Assert
+      expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            xp_ganado: 0,
+          }),
+        }),
+      );
+    });
+
+    it('should_handle_error_gracefully', async () => {
+      // Arrange
+      (prisma.actividadFeed.create as jest.Mock).mockRejectedValue(
+        new Error('DB Error'),
+      );
+
+      // Act & Assert
+      await expect(
+        listener.handleLogroDesbloqueado(mockLogroEvent),
+      ).resolves.not.toThrow();
+    });
+  });
 });
