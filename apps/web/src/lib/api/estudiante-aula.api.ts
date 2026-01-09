@@ -293,8 +293,7 @@ export interface LeaderboardResponse {
  * Incluye planificaciones activas de todos sus grupos con progreso
  */
 export async function getMiAula(): Promise<MiAulaResponse> {
-  const response = await apiClient.get<MiAulaResponse>('/estudiantes/mi-aula');
-  return response.data;
+  return apiClient.get<MiAulaResponse>('/estudiantes/mi-aula');
 }
 
 /**
@@ -304,10 +303,9 @@ export async function getMiAula(): Promise<MiAulaResponse> {
 export async function getPlanificacionDetalle(
   asignacionId: string,
 ): Promise<PlanificacionDetalleResponse> {
-  const response = await apiClient.get<PlanificacionDetalleResponse>(
+  return apiClient.get<PlanificacionDetalleResponse>(
     `/estudiantes/aula/planificacion/${asignacionId}`,
   );
-  return response.data;
 }
 
 /**
@@ -318,10 +316,9 @@ export async function getContenidoClase(
   claseId: string,
   tipo: 'teoria' | 'practica',
 ): Promise<ContenidoClaseResponse> {
-  const response = await apiClient.get<ContenidoClaseResponse>(
+  return apiClient.get<ContenidoClaseResponse>(
     `/estudiantes/aula/contenido/${asignacionId}/${claseId}/${tipo}`,
   );
-  return response.data;
 }
 
 /**
@@ -330,11 +327,7 @@ export async function getContenidoClase(
 export async function completarLeccion(
   data: CompletarLeccionRequest,
 ): Promise<CompletarLeccionResponse> {
-  const response = await apiClient.post<CompletarLeccionResponse>(
-    '/estudiantes/aula/completar-leccion',
-    data,
-  );
-  return response.data;
+  return apiClient.post<CompletarLeccionResponse>('/estudiantes/aula/completar-leccion', data);
 }
 
 /**
@@ -344,20 +337,16 @@ export async function completarLeccion(
 export async function getMisTareas(
   filtro: 'todas' | 'pendientes' | 'completadas' = 'todas',
 ): Promise<MisTareasResponse> {
-  const response = await apiClient.get<MisTareasResponse>(`/estudiantes/mis-tareas`, {
+  return apiClient.get<MisTareasResponse>(`/estudiantes/mis-tareas`, {
     params: { filtro },
   });
-  return response.data;
 }
 
 /**
  * Iniciar una tarea (marca como EN_PROGRESO)
  */
 export async function iniciarTarea(tareaAsignadaId: string): Promise<IniciarTareaResponse> {
-  const response = await apiClient.post<IniciarTareaResponse>(
-    `/estudiantes/tareas/${tareaAsignadaId}/iniciar`,
-  );
-  return response.data;
+  return apiClient.post<IniciarTareaResponse>(`/estudiantes/tareas/${tareaAsignadaId}/iniciar`);
 }
 
 /**
@@ -367,11 +356,10 @@ export async function completarTarea(
   tareaAsignadaId: string,
   data: CompletarTareaRequest,
 ): Promise<CompletarTareaResponse> {
-  const response = await apiClient.post<CompletarTareaResponse>(
+  return apiClient.post<CompletarTareaResponse>(
     `/estudiantes/tareas/${tareaAsignadaId}/completar`,
     data,
   );
-  return response.data;
 }
 
 /**
