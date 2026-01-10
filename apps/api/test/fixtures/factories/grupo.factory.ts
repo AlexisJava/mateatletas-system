@@ -152,3 +152,42 @@ export async function createTestInscripcionClaseGrupo(
     },
   });
 }
+
+// ============================================================================
+// FACTORY: CLASE (individual con reservas)
+// ============================================================================
+
+export interface CreateTestClaseOptions {
+  docenteId: string;
+  nombre?: string;
+  descripcion?: string;
+  fechaHoraInicio?: Date;
+  duracionMinutos?: number;
+  cuposMaximo?: number;
+  sectorId?: string;
+}
+
+/**
+ * Crea una Clase individual (para sistema de reservas/cupos)
+ * Diferente de ClaseGrupo que es para comisiones recurrentes
+ */
+export async function createTestClase(
+  prisma: PrismaService,
+  options: CreateTestClaseOptions,
+) {
+  const uniqueSuffix = generateUniqueSuffix();
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  return prisma.clase.create({
+    data: {
+      nombre: options.nombre ?? `Clase_${uniqueSuffix}`,
+      descripcion: options.descripcion ?? 'Clase de test',
+      docente_id: options.docenteId,
+      fecha_hora_inicio: options.fechaHoraInicio ?? tomorrow,
+      duracion_minutos: options.duracionMinutos ?? 60,
+      cupos_maximo: options.cuposMaximo ?? 10,
+      sector_id: options.sectorId,
+    },
+  });
+}

@@ -22,6 +22,7 @@ export async function cleanGamificationTables(prisma: PrismaService) {
   // NOTA: NO borrar prisma.logro - son datos de configuración/seed, no datos de test
 
   await prisma.transaccionRecurso.deleteMany({});
+  await prisma.puntoObtenido.deleteMany({});
   await prisma.logroEstudiante.deleteMany({});
   await prisma.recursosEstudiante.deleteMany({});
   await prisma.rachaEstudiante.deleteMany({});
@@ -90,6 +91,10 @@ export async function cleanAllTestTables(prisma: PrismaService) {
   // Comisiones y ClaseGrupos
   await prisma.comision.deleteMany({});
   await prisma.claseGrupo.deleteMany({});
+
+  // Clases individuales (necesita borrar inscripciones primero)
+  await prisma.inscripcionClase.deleteMany({});
+  await prisma.clase.deleteMany({});
 
   // Grupos y Sectores
   await prisma.grupo.deleteMany({});

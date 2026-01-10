@@ -5,6 +5,7 @@ import { PuntosService, TipoAccionPuntos } from './puntos.service';
 import { LogrosService } from './logros.service';
 import { RankingService } from './ranking.service';
 import { RecursosService } from './services/recursos.service';
+import { AsignarInsigniaDto } from './dto/asignar-insignia.dto';
 
 /**
  * Servicio de Gamificación (Coordinador)
@@ -376,5 +377,25 @@ export class GamificacionService {
    */
   async getRankingEstudiante(estudianteId: string) {
     return this.rankingService.getRankingEstudiante(estudianteId);
+  }
+
+  /**
+   * Asignar una insignia predefinida a un estudiante durante clase en vivo
+   * Registra los puntos con contexto de la insignia
+   *
+   * @param docenteId - ID del docente que asigna
+   * @param dto - Datos de la insignia a asignar
+   */
+  async asignarInsignia(docenteId: string, dto: AsignarInsigniaDto) {
+    const contexto = `Insignia: ${dto.nombre} - ${dto.descripcion} (ID: ${dto.insigniaId})`;
+
+    return this.puntosService.otorgarPuntos(
+      docenteId,
+      dto.estudianteId,
+      'LOGRO',
+      dto.claseId,
+      contexto,
+      dto.puntos,
+    );
   }
 }

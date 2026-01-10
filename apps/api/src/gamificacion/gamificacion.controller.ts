@@ -12,10 +12,11 @@ import { ParseIdPipe } from '../common/pipes';
 import { IsString, IsOptional, IsNotEmpty, IsIn } from 'class-validator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles, Role } from '../auth/decorators/roles.decorator';
+import { Roles, ExactRoles, Role } from '../auth/decorators/roles.decorator';
 import { GamificacionService } from './gamificacion.service';
 import { RequestWithAuthUser } from '../auth/interfaces';
 import { TipoAccionPuntos } from './puntos.service';
+import { AsignarInsigniaDto } from './dto/asignar-insignia.dto';
 
 /**
  * Tipos de acciones válidas para otorgar puntos
@@ -173,5 +174,19 @@ export class GamificacionController {
     @Request() req: RequestWithAuthUser,
   ) {
     return this.gamificacionService.desbloquearLogro(req.user.id, logroId);
+  }
+
+  /**
+   * POST /gamificacion/asignar-insignia
+   * Asignar una insignia predefinida a un estudiante durante clase en vivo
+   * Registra los puntos y guarda contexto de la insignia
+   */
+  @Post('asignar-insignia')
+  @ExactRoles(Role.DOCENTE)
+  async asignarInsignia(
+    @Body() dto: AsignarInsigniaDto,
+    @Request() req: RequestWithAuthUser,
+  ) {
+    return this.gamificacionService.asignarInsignia(req.user.id, dto);
   }
 }

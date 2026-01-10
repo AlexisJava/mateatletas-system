@@ -41,9 +41,11 @@ export {
   createTestGrupo,
   createTestClaseGrupo,
   createTestInscripcionClaseGrupo,
+  createTestClase,
   type CreateTestSectorOptions,
   type CreateTestGrupoOptions,
   type CreateClaseGrupoOptions,
+  type CreateTestClaseOptions,
 } from './grupo.factory';
 
 // Productos y Comisiones
