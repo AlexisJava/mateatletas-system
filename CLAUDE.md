@@ -100,6 +100,7 @@ echo "Listo. Backup guardado en /backups"
 - TDD: Test primero, código después
 - Coverage mínimo 80% en código nuevo
 - Nombres: `should_[action]_when_[condition]`
+- **Para escribir tests de integración, SIEMPRE leer primero: `apps/api/test/TESTING.md`**
 
 ### Commits
 
