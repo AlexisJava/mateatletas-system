@@ -252,6 +252,56 @@ export type AccesoEstudiante = z.infer<typeof accesoEstudianteSchema>;
 export type PuedeEntrarClase = z.infer<typeof puedeEntrarClaseSchema>;
 
 /**
+ * Schema para respuesta de mi-progreso (endpoint consolidado)
+ */
+const logroRecienteSchema = z.object({
+  nombre: z.string(),
+  icono: z.string(),
+  rareza: z.string(),
+  fecha_desbloqueo: z.coerce.date(),
+});
+
+const actividadRecienteSchema = z.object({
+  tipo: z.string(),
+  mensaje: z.string(),
+  xp_ganado: z.number(),
+  creado_en: z.coerce.date(),
+});
+
+const miProgresoSchema = z.object({
+  estudiante: z.object({
+    id: z.string(),
+    nombre: z.string(),
+    apellido: z.string(),
+    avatarUrl: z.string().nullable(),
+    casa: z.string().nullable(),
+  }),
+  gamificacion: z.object({
+    xp_total: z.number(),
+    nivel: z.number(),
+    xp_progreso: z.number(),
+    xp_necesario: z.number(),
+    porcentaje_nivel: z.number(),
+  }),
+  racha: z.object({
+    racha_actual: z.number(),
+    racha_maxima: z.number(),
+    total_dias_activos: z.number(),
+    ultima_actividad: z.coerce.date().nullable(),
+  }),
+  logros: z.object({
+    desbloqueados: z.number(),
+    totales: z.number(),
+    recientes: z.array(logroRecienteSchema),
+  }),
+  actividad_reciente: z.array(actividadRecienteSchema),
+});
+
+export type MiProgreso = z.infer<typeof miProgresoSchema>;
+export type LogroReciente = z.infer<typeof logroRecienteSchema>;
+export type ActividadReciente = z.infer<typeof actividadRecienteSchema>;
+
+/**
  * API Client para operaciones de estudiantes
  * Todas las peticiones requieren autenticación JWT
  */
@@ -594,6 +644,23 @@ export const estudiantesApi = {
    */
   getReaccionesHoy: async (): Promise<ReaccionesHoyResponse> => {
     return apiClient.get<ReaccionesHoyResponse>('/estudiantes/feed/mis-reacciones-hoy');
+  },
+
+  // ==================== MI PROGRESO ====================
+
+  /**
+   * Obtener datos consolidados de progreso del estudiante
+   * Endpoint facade que agrega: XP, nivel, racha, logros, actividades
+   * @returns Datos completos de gamificación del estudiante
+   */
+  getMiProgreso: async (): Promise<MiProgreso> => {
+    try {
+      const response = await apiClient.get<MiProgreso>('/estudiantes/mi-progreso');
+      return miProgresoSchema.parse(response);
+    } catch (error) {
+      console.error('Error al obtener mi progreso:', error);
+      throw error;
+    }
   },
 };
 

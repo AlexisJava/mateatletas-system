@@ -16,6 +16,7 @@ import { EstudiantesFacadeService } from './estudiantes-facade.service';
 import { AccesoEstudianteService } from './services/acceso-estudiante.service';
 import { EstudianteAulaService } from './services/estudiante-aula.service';
 import { ActivityFeedService } from './services/activity-feed.service';
+import { MiProgresoService } from './services/mi-progreso.service';
 import { TipoActividadFeed } from '@prisma/client';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
@@ -28,7 +29,7 @@ import {
 } from './dto/asignar-clases.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles, Role } from '../auth/decorators/roles.decorator';
+import { Roles, ExactRoles, Role } from '../auth/decorators/roles.decorator';
 import { EstudianteOwnershipGuard } from './guards/estudiante-ownership.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { AuthUser, RequestWithAuthUser } from '../auth/interfaces';
@@ -46,6 +47,7 @@ export class EstudiantesController {
     private readonly accesoService: AccesoEstudianteService,
     private readonly aulaService: EstudianteAulaService,
     private readonly feedService: ActivityFeedService,
+    private readonly miProgresoService: MiProgresoService,
   ) {}
 
   /**
@@ -115,7 +117,7 @@ export class EstudiantesController {
    */
   @Get('mi-proxima-clase')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async obtenerMiProximaClase(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
 
@@ -132,7 +134,7 @@ export class EstudiantesController {
    */
   @Get('mis-companeros')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async obtenerMisCompaneros(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.estudiantesService.obtenerCompanerosDeClase(estudianteId);
@@ -147,7 +149,7 @@ export class EstudiantesController {
    */
   @Get('mis-sectores')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async obtenerMisSectores(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.estudiantesService.obtenerMisSectores(estudianteId);
@@ -162,7 +164,7 @@ export class EstudiantesController {
    */
   @Get('mis-clases')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async obtenerMisClases(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.estudiantesService.obtenerMisClases(estudianteId);
@@ -176,10 +178,29 @@ export class EstudiantesController {
    */
   @Get('mi-plan')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async obtenerMiPlan(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.estudiantesService.obtenerMiPlan(estudianteId);
+  }
+
+  /**
+   * GET /estudiantes/mi-progreso - Obtener datos consolidados de progreso del estudiante
+   * Endpoint facade que agrega datos de múltiples fuentes en una sola respuesta:
+   * - Datos del estudiante (nombre, casa)
+   * - XP, nivel, progreso hacia siguiente nivel
+   * - Racha actual y máxima
+   * - Últimos 5 logros desbloqueados
+   * - Últimas 10 actividades recientes
+   * @param req - Request con usuario autenticado
+   * @returns MiProgresoResponseDto con todos los datos de gamificación
+   */
+  @Get('mi-progreso')
+  @UseGuards(RolesGuard)
+  @ExactRoles(Role.ESTUDIANTE)
+  async getMiProgreso(@Request() req: RequestWithAuthUser) {
+    const estudianteId = req.user.id;
+    return this.miProgresoService.getMiProgreso(estudianteId);
   }
 
   /**
@@ -191,7 +212,7 @@ export class EstudiantesController {
    */
   @Get('verificar-acceso')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async verificarAcceso(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.accesoService.verificarAccesoEstudiante(estudianteId);
@@ -207,7 +228,7 @@ export class EstudiantesController {
    */
   @Get('puede-entrar-clase')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async puedeEntrarClase(
     @Request() req: RequestWithAuthUser,
     @Query('claseGrupoId') claseGrupoId?: string,
@@ -244,7 +265,7 @@ export class EstudiantesController {
    */
   @Get('mi-aula')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async obtenerMiAula(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.aulaService.getMiAula(estudianteId);
@@ -259,7 +280,7 @@ export class EstudiantesController {
    */
   @Get('aula/planificacion/:asignacionId')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async obtenerPlanificacionDetalle(
     @Request() req: RequestWithAuthUser,
     @Param('asignacionId', ParseIdPipe) asignacionId: string,
@@ -278,7 +299,7 @@ export class EstudiantesController {
    */
   @Get('aula/contenido/:asignacionId/:claseId/:tipo')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async obtenerContenidoClase(
     @Request() req: RequestWithAuthUser,
     @Param('asignacionId', ParseIdPipe) asignacionId: string,
@@ -307,7 +328,7 @@ export class EstudiantesController {
    */
   @Post('aula/completar-leccion')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async completarLeccion(
     @Request() req: RequestWithAuthUser,
     @Body()
@@ -341,7 +362,7 @@ export class EstudiantesController {
    */
   @Get('mis-tareas')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async obtenerMisTareas(
     @Request() req: RequestWithAuthUser,
     @Query('filtro') filtro?: 'todas' | 'pendientes' | 'completadas',
@@ -358,7 +379,7 @@ export class EstudiantesController {
    */
   @Post('tareas/:tareaAsignadaId/iniciar')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async iniciarTarea(
     @Request() req: RequestWithAuthUser,
     @Param('tareaAsignadaId', ParseIdPipe) tareaAsignadaId: string,
@@ -376,7 +397,7 @@ export class EstudiantesController {
    */
   @Post('tareas/:tareaAsignadaId/completar')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async completarTarea(
     @Request() req: RequestWithAuthUser,
     @Param('tareaAsignadaId', ParseIdPipe) tareaAsignadaId: string,
@@ -400,7 +421,7 @@ export class EstudiantesController {
    */
   @Get('aula/leaderboard/:asignacionId')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async obtenerLeaderboard(
     @Request() req: RequestWithAuthUser,
     @Param('asignacionId', ParseIdPipe) asignacionId: string,
@@ -424,7 +445,7 @@ export class EstudiantesController {
    */
   @Get('feed')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async getFeed(
     @Query('casaId') casaId?: string,
     @Query('tipo') tipo?: TipoActividadFeed,
@@ -448,7 +469,7 @@ export class EstudiantesController {
    */
   @Get('feed/mi-casa')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async getFeedMiCasa(
     @Request() req: RequestWithAuthUser,
     @Query('limit') limit?: string,
@@ -478,7 +499,7 @@ export class EstudiantesController {
    */
   @Get('feed/mi-comision')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async getFeedMiComision(
     @Request() req: RequestWithAuthUser,
     @Query('limit') limit?: string,
@@ -506,7 +527,7 @@ export class EstudiantesController {
    */
   @Get('feed/mis-reacciones-hoy')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async getMisReaccionesHoy(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.feedService.getReaccionesHoy(estudianteId);
@@ -520,7 +541,7 @@ export class EstudiantesController {
    */
   @Get('feed/mis-actividades')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async getMisActividades(
     @Request() req: RequestWithAuthUser,
     @Query('limit') limit?: string,
@@ -541,7 +562,7 @@ export class EstudiantesController {
    */
   @Post('feed/:actividadId/reaccion')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async addReaction(
     @Request() req: RequestWithAuthUser,
     @Param('actividadId', ParseIdPipe) actividadId: string,
@@ -560,7 +581,7 @@ export class EstudiantesController {
    */
   @Delete('feed/:actividadId/reaccion')
   @UseGuards(RolesGuard)
-  @Roles(Role.ESTUDIANTE)
+  @ExactRoles(Role.ESTUDIANTE)
   async removeReaction(
     @Request() req: RequestWithAuthUser,
     @Param('actividadId', ParseIdPipe) actividadId: string,

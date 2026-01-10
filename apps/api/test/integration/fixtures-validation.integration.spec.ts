@@ -19,8 +19,8 @@ import { INestApplication } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { PrismaService } from '../../src/core/database/prisma.service';
 import { AppModule } from '../../src/app.module';
+import { cleanAllTestTables } from '../helpers/db-cleanup';
 import {
-  cleanAllTestTables,
   createTestEstudiante,
   createTestTutor,
   createTestDocente,
@@ -29,11 +29,11 @@ import {
   createTestClaseGrupo,
   createTestSector,
   createTestInscripcionClaseGrupo,
-} from '../utils/db-cleanup.helper';
+} from '../fixtures/factories';
 import {
   ESTUDIANTE_FIXTURES,
   createClaseConEstudiantes,
-} from '../utils/estudiante-fixtures';
+} from '../fixtures/presets';
 import {
   assertEstudianteExists,
   assertTutorExists,
@@ -42,8 +42,8 @@ import {
   assertInscritoEnClaseGrupo,
   assertEstudianteState,
   getXPActual,
-} from '../utils/db-assertions';
-import { loginEstudiante, loginUser } from '../utils/auth.helpers';
+} from '../helpers/assertions';
+import { loginEstudiante, loginUser } from '../helpers/auth.helpers';
 import { EstadoAccesoEstudiante } from '@prisma/client';
 
 describe('[INTEGRATION] Fixtures Validation', () => {

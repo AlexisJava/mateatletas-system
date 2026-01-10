@@ -23,8 +23,8 @@ import cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { PrismaService } from '../../src/core/database/prisma.service';
 import { AppModule } from '../../src/app.module';
-import { cleanAllTestTables } from '../utils/db-cleanup.helper';
-import { generateUniqueIP } from '../utils/auth.helpers';
+import { cleanAllTestTables } from '../helpers/db-cleanup';
+import { generateUniqueIP } from '../helpers/auth.helpers';
 import * as bcrypt from 'bcrypt';
 
 describe('[INTEGRATION] Docentes - Próxima Clase', () => {

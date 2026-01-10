@@ -25,20 +25,20 @@ import cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { PrismaService } from '../../../src/core/database/prisma.service';
 import { AppModule } from '../../../src/app.module';
+import { cleanAllTestTables } from '../../helpers/db-cleanup';
 import {
-  cleanAllTestTables,
   createTestEstudiante,
   createTestTutor,
   createTestPlan,
   createTestSuscripcion,
-} from '../../utils/db-cleanup.helper';
-import { ESTUDIANTE_FIXTURES } from '../../utils/estudiante-fixtures';
+} from '../../fixtures/factories';
+import { ESTUDIANTE_FIXTURES } from '../../fixtures/presets';
 import {
   loginEstudiante,
   loginUser,
   withAuthHeaders,
   FRONTEND_ORIGIN,
-} from '../../utils/auth.helpers';
+} from '../../helpers/auth.helpers';
 import { EstadoSuscripcion } from '@prisma/client';
 
 describe('[INTEGRATION] Verificar Acceso Estudiante', () => {

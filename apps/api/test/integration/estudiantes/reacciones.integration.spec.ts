@@ -27,17 +27,19 @@ import cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { AppModule } from '../../../src/app.module';
 import { PrismaService } from '../../../src/core/database/prisma.service';
+import { cleanAllTestTables } from '../../helpers/db-cleanup';
 import {
-  cleanAllTestTables,
   createEstudianteConClaseGrupo,
   createTestTutor,
   createTestEstudiante,
   createTestDocente,
   createTestActividadFeed,
-} from '../../utils/db-cleanup.helper';
-import { generateUniqueIP } from '../../utils/auth.helpers';
-
-const FRONTEND_ORIGIN = 'http://localhost:3000';
+} from '../../fixtures/factories';
+import {
+  generateUniqueIP,
+  loginEstudianteRaw,
+  FRONTEND_ORIGIN,
+} from '../../helpers/auth.helpers';
 const EMOJIS_PERMITIDOS = ['👏', '🔥', '💪', '🚀'];
 const LIMITE_REACCIONES_DIARIAS = 5;
 
@@ -81,19 +83,12 @@ describe('[INTEGRATION] Reacciones - Endpoints', () => {
   });
 
   // ============================================================================
-  // HELPER: Login estudiante
-  // ============================================================================
+  // Helper wrapper para usar el helper centralizado con la app actual
   async function loginEstudiante(
     username: string,
     password: string,
   ): Promise<string[]> {
-    const response = await request(app.getHttpServer())
-      .post('/api/auth/estudiante/login')
-      .set('Origin', FRONTEND_ORIGIN)
-      .set('X-Forwarded-For', generateUniqueIP())
-      .send({ username, password });
-
-    return response.headers['set-cookie'] as string[];
+    return loginEstudianteRaw(app, { username, password });
   }
 
   // ============================================================================

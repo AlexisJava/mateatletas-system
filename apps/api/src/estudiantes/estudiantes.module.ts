@@ -10,6 +10,7 @@ import { EstudianteStatsService } from './services/estudiante-stats.service';
 import { AccesoEstudianteService } from './services/acceso-estudiante.service';
 import { EstudianteAulaService } from './services/estudiante-aula.service';
 import { ActivityFeedService } from './services/activity-feed.service';
+import { MiProgresoService } from './services/mi-progreso.service';
 import { InscripcionesListener } from './listeners/inscripciones.listener';
 
 /**
@@ -42,6 +43,7 @@ import { InscripcionesListener } from './listeners/inscripciones.listener';
     AccesoEstudianteService,
     EstudianteAulaService,
     ActivityFeedService,
+    MiProgresoService,
     // Event Listeners
     InscripcionesListener,
     // Facade (API pública) - Usado por EstudiantesController

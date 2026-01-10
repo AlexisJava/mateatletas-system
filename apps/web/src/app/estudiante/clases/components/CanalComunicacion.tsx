@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MessageSquare, CheckCircle, AlertCircle, Plus } from 'lucide-react';
+import { MessageSquare, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 
 interface ForumThread {
   id: string;
@@ -53,9 +53,14 @@ export function CanalComunicacion() {
           </div>
           Canal de Comunicación
         </h3>
-        <button className="flex items-center gap-1.5 text-[10px] font-medium px-3 py-1.5 rounded-lg bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 transition">
-          <Plus className="w-3 h-3" />
-          Nueva Consulta
+        {/* TODO: Post-lanzamiento: Habilitar cuando exista sistema de forum */}
+        <button
+          disabled
+          className="flex items-center gap-1.5 text-[10px] font-medium px-3 py-1.5 rounded-lg bg-white/5 text-white/40 cursor-not-allowed"
+          title="Próximamente"
+        >
+          <Clock className="w-3 h-3" />
+          Próximamente
         </button>
       </div>
 

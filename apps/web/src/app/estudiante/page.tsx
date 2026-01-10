@@ -86,8 +86,7 @@ export default function EstudianteDashboard() {
     fetchData();
   }, [user?.id, user?.nivel_actual, user?.puntos_totales]);
 
-  // TODO: En producción, usar data?.plan?.acceso_clases_vivo
-  const tieneAccesoClases = true; // Habilitado para testing
+  const tieneAccesoClases = data?.plan?.acceso_clases_vivo ?? false;
 
   if (isLoading) {
     return (

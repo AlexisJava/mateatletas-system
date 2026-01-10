@@ -36,16 +36,18 @@ import cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { AppModule } from '../../../src/app.module';
 import { PrismaService } from '../../../src/core/database/prisma.service';
+import { cleanAllTestTables } from '../../helpers/db-cleanup';
 import {
-  cleanAllTestTables,
   createEstudianteConClaseGrupo,
   createTestTutor,
   createTestEstudiante,
   createTestDocente,
-} from '../../utils/db-cleanup.helper';
-import { generateUniqueIP } from '../../utils/auth.helpers';
-
-const FRONTEND_ORIGIN = 'http://localhost:3000';
+} from '../../fixtures/factories';
+import {
+  generateUniqueIP,
+  loginEstudianteRaw,
+  FRONTEND_ORIGIN,
+} from '../../helpers/auth.helpers';
 
 describe('[INTEGRATION] LiveKit Token - Endpoints', () => {
   let app: INestApplication;
@@ -86,31 +88,12 @@ describe('[INTEGRATION] LiveKit Token - Endpoints', () => {
     await cleanAllTestTables(prisma);
   });
 
-  // ============================================================================
-  // HELPER: Login estudiante
-  // ============================================================================
+  // Helper wrapper para usar el helper centralizado con la app actual
   async function loginEstudiante(
     username: string,
     password: string,
   ): Promise<string[]> {
-    const response = await request(app.getHttpServer())
-      .post('/api/auth/estudiante/login')
-      .set('Origin', FRONTEND_ORIGIN)
-      .set('X-Forwarded-For', generateUniqueIP())
-      .send({ username, password });
-
-    if (response.status !== 200) {
-      throw new Error(
-        `Login failed for ${username}: ${response.status} - ${JSON.stringify(response.body)}`,
-      );
-    }
-
-    const cookies = response.headers['set-cookie'];
-    if (!cookies || !Array.isArray(cookies) || cookies.length === 0) {
-      throw new Error(`No cookies returned for ${username}`);
-    }
-
-    return cookies;
+    return loginEstudianteRaw(app, { username, password });
   }
 
   // ============================================================================

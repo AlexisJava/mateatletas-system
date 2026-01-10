@@ -1,37 +1,44 @@
 /**
  * ============================================================================
- * ESTUDIANTE FIXTURES - Variantes Predefinidas para Tests de Integración
+ * ESTUDIANTE PRESETS - Variantes Predefinidas para Tests de Integración
  * ============================================================================
  *
- * Fixtures listos para usar que representan escenarios comunes del estudiante.
- * Cada fixture crea un escenario completo con todos los datos necesarios.
+ * Presets listos para usar que representan escenarios comunes del estudiante.
+ * Cada preset crea un escenario completo con todos los datos necesarios.
  *
  * Uso:
- *   const { estudiante, password, tutor, plan } = await ESTUDIANTE_FIXTURES.planSincronico(prisma);
- *   await loginEstudiante(app, estudiante.username, password);
+ *   const { estudiante, password, tutor, plan } = await ESTUDIANTE_PRESETS.planSincronico(prisma);
+ *   await loginEstudiante(app, { username: estudiante.username, password });
  */
 
-import { PrismaService } from '../../src/core/database/prisma.service';
+import { PrismaService } from '../../../src/core/database/prisma.service';
 import {
   createTestEstudiante,
   createTestTutor,
-  createTestPlan,
-  createTestSuscripcion,
   createTestDocente,
-  createTestProducto,
-  createTestComision,
-  createTestInscripcionComision,
-  createTestClaseGrupo,
-  createTestInscripcionClaseGrupo,
-  createTestSector,
-  createTestActividadFeed,
-  createTestLogro,
-  createTestContenido,
   TestEstudianteWithPassword,
   TestTutorWithPassword,
   TestDocenteWithPassword,
+} from '../factories/usuario.factory';
+import {
+  createTestPlan,
+  createTestSuscripcion,
   PlanTipo,
-} from './db-cleanup.helper';
+} from '../factories/plan.factory';
+import {
+  createTestSector,
+  createTestClaseGrupo,
+  createTestInscripcionClaseGrupo,
+} from '../factories/grupo.factory';
+import {
+  createTestProducto,
+  createTestComision,
+  createTestInscripcionComision,
+} from '../factories/comision.factory';
+import {
+  createTestActividadFeed,
+  createTestLogro,
+} from '../factories/gamificacion.factory';
 import {
   EstadoSuscripcion,
   TipoProducto,
@@ -42,17 +49,17 @@ import {
 // TIPOS COMUNES DE RETORNO
 // ============================================================================
 
-export interface FixtureNuevo extends TestEstudianteWithPassword {
+export interface PresetNuevo extends TestEstudianteWithPassword {
   tutor: TestTutorWithPassword['tutor'];
   tutorPassword: string;
 }
 
-export interface FixtureConPlan extends FixtureNuevo {
+export interface PresetConPlan extends PresetNuevo {
   plan: Awaited<ReturnType<typeof createTestPlan>>;
   suscripcion: Awaited<ReturnType<typeof createTestSuscripcion>>;
 }
 
-export interface FixtureConClaseGrupo extends FixtureConPlan {
+export interface PresetConClaseGrupo extends PresetConPlan {
   docente: TestDocenteWithPassword['docente'];
   docentePassword: string;
   sector: Awaited<ReturnType<typeof createTestSector>>;
@@ -60,7 +67,7 @@ export interface FixtureConClaseGrupo extends FixtureConPlan {
   inscripcion: Awaited<ReturnType<typeof createTestInscripcionClaseGrupo>>;
 }
 
-export interface FixtureConComision extends FixtureConPlan {
+export interface PresetConComision extends PresetConPlan {
   docente: TestDocenteWithPassword['docente'];
   docentePassword: string;
   producto: Awaited<ReturnType<typeof createTestProducto>>;
@@ -68,7 +75,7 @@ export interface FixtureConComision extends FixtureConPlan {
   inscripcion: Awaited<ReturnType<typeof createTestInscripcionComision>>;
 }
 
-export interface FixtureConProgreso extends FixtureConPlan {
+export interface PresetConProgreso extends PresetConPlan {
   recursos: { xpTotal: number };
   racha: { actual: number; maxima: number };
   actividades: Awaited<ReturnType<typeof createTestActividadFeed>>[];
@@ -76,15 +83,15 @@ export interface FixtureConProgreso extends FixtureConPlan {
 }
 
 // ============================================================================
-// FIXTURES PREDEFINIDOS
+// PRESETS PREDEFINIDOS
 // ============================================================================
 
-export const ESTUDIANTE_FIXTURES = {
+export const ESTUDIANTE_PRESETS = {
   /**
    * Estudiante nuevo sin plan ni comisión
    * Caso: Usuario recién registrado, solo puede ver contenido gratuito
    */
-  nuevo: async (prisma: PrismaService): Promise<FixtureNuevo> => {
+  nuevo: async (prisma: PrismaService): Promise<PresetNuevo> => {
     const { tutor, password: tutorPassword } = await createTestTutor(prisma);
 
     const { estudiante, password } = await createTestEstudiante(prisma, {
@@ -102,14 +109,12 @@ export const ESTUDIANTE_FIXTURES = {
   /**
    * Estudiante con acceso heredado del tutor (STEAM_LIBROS)
    * Caso: Tutor paga suscripción → hijo hereda acceso a libros, SIN clases en vivo
-   * El estudiante NO tiene plan_id, hereda de tutor.suscripcion
    */
-  planLibros: async (prisma: PrismaService): Promise<FixtureConPlan> => {
+  planLibros: async (prisma: PrismaService): Promise<PresetConPlan> => {
     const plan = await createTestPlan(prisma, 'STEAM_LIBROS');
     const { tutor, password: tutorPassword } = await createTestTutor(prisma);
     const suscripcion = await createTestSuscripcion(prisma, tutor.id, plan.id);
 
-    // NO asignar planId - el estudiante hereda acceso de la suscripción del tutor
     const { estudiante, password } = await createTestEstudiante(prisma, {
       tutorId: tutor.id,
     });
@@ -127,14 +132,12 @@ export const ESTUDIANTE_FIXTURES = {
   /**
    * Estudiante con acceso heredado del tutor (STEAM_ASINCRONICO)
    * Caso: Tutor paga suscripción → hijo hereda acceso asincrónico, SIN clases en vivo
-   * El estudiante NO tiene plan_id, hereda de tutor.suscripcion
    */
-  planAsincronico: async (prisma: PrismaService): Promise<FixtureConPlan> => {
+  planAsincronico: async (prisma: PrismaService): Promise<PresetConPlan> => {
     const plan = await createTestPlan(prisma, 'STEAM_ASINCRONICO');
     const { tutor, password: tutorPassword } = await createTestTutor(prisma);
     const suscripcion = await createTestSuscripcion(prisma, tutor.id, plan.id);
 
-    // NO asignar planId - el estudiante hereda acceso de la suscripción del tutor
     const { estudiante, password } = await createTestEstudiante(prisma, {
       tutorId: tutor.id,
     });
@@ -152,11 +155,10 @@ export const ESTUDIANTE_FIXTURES = {
   /**
    * Estudiante con acceso heredado del tutor (STEAM_SINCRONICO)
    * Caso: Tutor paga suscripción → hijo hereda acceso completo CON clases en vivo
-   * El estudiante NO tiene plan_id, hereda de tutor.suscripcion
    */
   planSincronico: async (
     prisma: PrismaService,
-  ): Promise<FixtureConClaseGrupo> => {
+  ): Promise<PresetConClaseGrupo> => {
     const plan = await createTestPlan(prisma, 'STEAM_SINCRONICO');
     const { tutor, password: tutorPassword } = await createTestTutor(prisma);
     const suscripcion = await createTestSuscripcion(prisma, tutor.id, plan.id);
@@ -169,7 +171,6 @@ export const ESTUDIANTE_FIXTURES = {
       sectorId: sector.id,
     });
 
-    // NO asignar planId - el estudiante hereda acceso de la suscripción del tutor
     const { estudiante, password } = await createTestEstudiante(prisma, {
       tutorId: tutor.id,
     });
@@ -200,7 +201,7 @@ export const ESTUDIANTE_FIXTURES = {
    * Estudiante inscrito en comisión de producto (Colonia, Taller)
    * Caso: Acceso a clase en vivo por inscripción a comisión
    */
-  conComision: async (prisma: PrismaService): Promise<FixtureConComision> => {
+  conComision: async (prisma: PrismaService): Promise<PresetConComision> => {
     const plan = await createTestPlan(prisma, 'STEAM_SINCRONICO');
     const { tutor, password: tutorPassword } = await createTestTutor(prisma);
     const suscripcion = await createTestSuscripcion(prisma, tutor.id, plan.id);
@@ -210,7 +211,7 @@ export const ESTUDIANTE_FIXTURES = {
     const producto = await createTestProducto(prisma, {
       tipo: TipoProducto.Curso,
       fechaInicio: new Date(),
-      fechaFin: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 días
+      fechaFin: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     });
     const comision = await createTestComision(prisma, {
       productoId: producto.id,
@@ -248,7 +249,7 @@ export const ESTUDIANTE_FIXTURES = {
    * Estudiante con cuenta suspendida
    * Caso: No puede acceder a ningún contenido hasta que se reactive
    */
-  suspendido: async (prisma: PrismaService): Promise<FixtureConPlan> => {
+  suspendido: async (prisma: PrismaService): Promise<PresetConPlan> => {
     const plan = await createTestPlan(prisma, 'STEAM_SINCRONICO');
     const { tutor, password: tutorPassword } = await createTestTutor(prisma);
     const suscripcion = await createTestSuscripcion(prisma, tutor.id, plan.id);
@@ -273,18 +274,13 @@ export const ESTUDIANTE_FIXTURES = {
    * Estudiante con suscripción vencida (tutor no pagó)
    * Caso: Acceso limitado o bloqueado hasta renovar
    */
-  suscripcionVencida: async (
-    prisma: PrismaService,
-  ): Promise<FixtureConPlan> => {
+  suscripcionVencida: async (prisma: PrismaService): Promise<PresetConPlan> => {
     const plan = await createTestPlan(prisma, 'STEAM_SINCRONICO');
     const { tutor, password: tutorPassword } = await createTestTutor(prisma);
-    // Usar CANCELADA porque el servicio solo da acceso con ACTIVA o EN_GRACIA
     const suscripcion = await createTestSuscripcion(prisma, tutor.id, plan.id, {
       estado: EstadoSuscripcion.CANCELADA,
     });
 
-    // NO asignar planId al estudiante - solo tiene suscripción cancelada del tutor
-    // Esto permite probar que suscripción CANCELADA no da acceso
     const { estudiante, password } = await createTestEstudiante(prisma, {
       tutorId: tutor.id,
     });
@@ -303,10 +299,9 @@ export const ESTUDIANTE_FIXTURES = {
    * Estudiante con acceso override temporal
    * Caso: Admin le dio acceso especial a clases en vivo sin plan
    */
-  conOverride: async (prisma: PrismaService): Promise<FixtureNuevo> => {
+  conOverride: async (prisma: PrismaService): Promise<PresetNuevo> => {
     const { tutor, password: tutorPassword } = await createTestTutor(prisma);
 
-    // 30 días de override
     const overrideHasta = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     const { estudiante, password } = await createTestEstudiante(prisma, {
@@ -332,14 +327,14 @@ export const ESTUDIANTE_FIXTURES = {
    */
   conOverridePermanente: async (
     prisma: PrismaService,
-  ): Promise<FixtureNuevo> => {
+  ): Promise<PresetNuevo> => {
     const { tutor, password: tutorPassword } = await createTestTutor(prisma);
 
     const { estudiante, password } = await createTestEstudiante(prisma, {
       tutorId: tutor.id,
       override: {
         acceso_clases_vivo: true,
-        hasta: null, // Sin límite
+        hasta: null,
         motivo: 'Estudiante becado',
       },
     });
@@ -356,7 +351,7 @@ export const ESTUDIANTE_FIXTURES = {
    * Estudiante con progreso avanzado (XP, racha, actividades)
    * Caso: Usuario activo con historial de uso
    */
-  conProgreso: async (prisma: PrismaService): Promise<FixtureConProgreso> => {
+  conProgreso: async (prisma: PrismaService): Promise<PresetConProgreso> => {
     const plan = await createTestPlan(prisma, 'STEAM_SINCRONICO');
     const { tutor, password: tutorPassword } = await createTestTutor(prisma);
     const suscripcion = await createTestSuscripcion(prisma, tutor.id, plan.id);
@@ -368,7 +363,6 @@ export const ESTUDIANTE_FIXTURES = {
       rachaInicial: 7,
     });
 
-    // Crear actividades en el feed
     const actividades = await Promise.all([
       createTestActividadFeed(prisma, estudiante.id, {
         tipo: 'LECCION_COMPLETADA',
@@ -387,7 +381,6 @@ export const ESTUDIANTE_FIXTURES = {
       }),
     ]);
 
-    // Crear logros
     const logros = await Promise.all([
       createTestLogro(prisma, {
         codigo: 'primera_leccion',
@@ -403,7 +396,6 @@ export const ESTUDIANTE_FIXTURES = {
       }),
     ]);
 
-    // Asignar logros al estudiante
     await Promise.all(
       logros.map((logro) =>
         prisma.logroEstudiante.create({
@@ -433,9 +425,7 @@ export const ESTUDIANTE_FIXTURES = {
    * Estudiante "completado" - todo el progreso posible
    * Caso: Para testing de edge cases cuando ya no hay más contenido
    */
-  todoCompletado: async (
-    prisma: PrismaService,
-  ): Promise<FixtureConProgreso> => {
+  todoCompletado: async (prisma: PrismaService): Promise<PresetConProgreso> => {
     const plan = await createTestPlan(prisma, 'STEAM_SINCRONICO');
     const { tutor, password: tutorPassword } = await createTestTutor(prisma);
     const suscripcion = await createTestSuscripcion(prisma, tutor.id, plan.id);
@@ -447,7 +437,6 @@ export const ESTUDIANTE_FIXTURES = {
       rachaInicial: 100,
     });
 
-    // Crear muchas actividades
     const actividades = await Promise.all(
       Array.from({ length: 10 }, (_, i) =>
         createTestActividadFeed(prisma, estudiante.id, {
@@ -458,7 +447,6 @@ export const ESTUDIANTE_FIXTURES = {
       ),
     );
 
-    // Crear todos los tipos de logros
     const logros = await Promise.all([
       createTestLogro(prisma, {
         codigo: 'maestro_matematicas',
@@ -502,6 +490,9 @@ export const ESTUDIANTE_FIXTURES = {
   },
 };
 
+// Alias para compatibilidad con código existente que usa ESTUDIANTE_FIXTURES
+export const ESTUDIANTE_FIXTURES = ESTUDIANTE_PRESETS;
+
 // ============================================================================
 // HELPERS ADICIONALES
 // ============================================================================
@@ -512,20 +503,20 @@ export const ESTUDIANTE_FIXTURES = {
 export async function createMultipleEstudiantes(
   prisma: PrismaService,
   count: number,
-  fixtureType: keyof typeof ESTUDIANTE_FIXTURES = 'nuevo',
+  presetType: keyof typeof ESTUDIANTE_PRESETS = 'nuevo',
 ): Promise<
-  Array<Awaited<ReturnType<(typeof ESTUDIANTE_FIXTURES)[typeof fixtureType]>>>
+  Array<Awaited<ReturnType<(typeof ESTUDIANTE_PRESETS)[typeof presetType]>>>
 > {
-  const fixtures: Array<
-    Awaited<ReturnType<(typeof ESTUDIANTE_FIXTURES)[typeof fixtureType]>>
+  const presets: Array<
+    Awaited<ReturnType<(typeof ESTUDIANTE_PRESETS)[typeof presetType]>>
   > = [];
 
   for (let i = 0; i < count; i++) {
-    const fixture = await ESTUDIANTE_FIXTURES[fixtureType](prisma);
-    fixtures.push(fixture);
+    const preset = await ESTUDIANTE_PRESETS[presetType](prisma);
+    presets.push(preset);
   }
 
-  return fixtures;
+  return presets;
 }
 
 /**

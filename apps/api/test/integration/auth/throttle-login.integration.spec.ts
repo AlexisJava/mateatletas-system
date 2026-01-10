@@ -6,6 +6,9 @@
  * Tests que verifican que el rate limiting funciona correctamente.
  * Estos tests usan IPs fijas para probar los límites del throttle.
  *
+ * NOTA: Este archivo configura LOGIN_THROTTLE_LIMIT=5 explícitamente
+ * para testear el comportamiento real del throttle.
+ *
  * Setup:
  *   docker-compose -f docker-compose.test.yml up -d
  *   DATABASE_URL="postgresql://test:test_password_123@localhost:5433/mateatletas_test" npx prisma migrate deploy
@@ -14,6 +17,11 @@
  *   npm run test:integration -- throttle-login
  */
 
+// IMPORTANTE: Configurar límite de throttle ANTES de importar AppModule
+// El límite se lee al cargar el módulo, no al inicializar la app
+process.env.LOGIN_THROTTLE_LIMIT = '5';
+process.env.LOGIN_THROTTLE_TTL = '60000';
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
@@ -21,9 +29,9 @@ import cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { PrismaService } from '../../../src/core/database/prisma.service';
 import { AppModule } from '../../../src/app.module';
-import { cleanAllTestTables } from '../../utils/db-cleanup.helper';
-import { ESTUDIANTE_FIXTURES } from '../../utils/estudiante-fixtures';
-import { FRONTEND_ORIGIN } from '../../utils/auth.helpers';
+import { cleanAllTestTables } from '../../helpers/db-cleanup';
+import { ESTUDIANTE_FIXTURES } from '../../fixtures/presets';
+import { FRONTEND_ORIGIN } from '../../helpers/auth.helpers';
 
 describe('[INTEGRATION] Throttle en Login Estudiante', () => {
   let app: INestApplication;

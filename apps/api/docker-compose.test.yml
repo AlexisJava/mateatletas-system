@@ -1,0 +1,69 @@
+# ============================================================================
+# DOCKER COMPOSE - TEST ENVIRONMENT
+# ============================================================================
+#
+# Levanta PostgreSQL y Redis para tests de integración.
+# Usa tmpfs para máxima velocidad (datos en memoria).
+#
+# Uso:
+#   docker-compose -f docker-compose.test.yml up -d
+#   npm run test:integration
+#   docker-compose -f docker-compose.test.yml down
+#
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # --------------------------------------------------------------------------
+  # PostgreSQL para tests
+  # --------------------------------------------------------------------------
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: mateatletas-postgres-test
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test_password_123
+      POSTGRES_DB: mateatletas_test
+    ports:
+      - '5433:5432'
+    # tmpfs: datos en memoria para máxima velocidad
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U test -d mateatletas_test']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --------------------------------------------------------------------------
+  # Redis para tests (cache y queues)
+  # --------------------------------------------------------------------------
+  redis-test:
+    image: redis:7-alpine
+    container_name: mateatletas-redis-test
+    ports:
+      - '6380:6379'
+    # tmpfs: datos en memoria
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+# ============================================================================
+# NOTAS
+# ============================================================================
+#
+# DATABASE_URL para tests:
+#   postgresql://test:test_password_123@localhost:5433/mateatletas_test
+#
+# REDIS_URL para tests:
+#   redis://localhost:6380
+#
+# Después de levantar, aplicar migraciones:
+#   DATABASE_URL="postgresql://test:test_password_123@localhost:5433/mateatletas_test" \
+#     npx prisma migrate deploy
+#
+# ============================================================================

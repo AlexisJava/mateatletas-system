@@ -25,12 +25,12 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { LogrosService } from '../../src/gamificacion/services/logros.service';
 import { PrismaService } from '../../src/core/database/prisma.service';
 import { AppModule } from '../../src/app.module';
+import { cleanAllTestTables } from '../helpers/db-cleanup';
 import {
-  cleanAllTestTables,
   createTestEstudiante,
   createTestLogro,
   createTestTutor,
-} from '../utils/db-cleanup.helper';
+} from '../fixtures/factories';
 
 describe('[INTEGRATION] LogrosService - Eventos de Gamificación', () => {
   let app: INestApplication;

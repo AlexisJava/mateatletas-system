@@ -25,12 +25,12 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ProgresoService } from '../../src/contenidos/services/progreso.service';
 import { PrismaService } from '../../src/core/database/prisma.service';
 import { AppModule } from '../../src/app.module';
+import { cleanAllTestTables } from '../helpers/db-cleanup';
 import {
-  cleanAllTestTables,
   createTestEstudiante,
   createTestContenido,
   createTestTutor,
-} from '../utils/db-cleanup.helper';
+} from '../fixtures/factories';
 
 describe('[INTEGRATION] ProgresoService - Eventos de Gamificación', () => {
   let app: INestApplication;

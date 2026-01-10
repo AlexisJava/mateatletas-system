@@ -26,11 +26,8 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RecursosService } from '../../src/gamificacion/services/recursos.service';
 import { PrismaService } from '../../src/core/database/prisma.service';
 import { AppModule } from '../../src/app.module';
-import {
-  cleanGamificationTables,
-  createTestEstudiante,
-  createTestTutor,
-} from '../utils/db-cleanup.helper';
+import { cleanGamificationTables } from '../helpers/db-cleanup';
+import { createTestEstudiante, createTestTutor } from '../fixtures/factories';
 
 describe('[INTEGRATION] RecursosService - Eventos de Gamificación', () => {
   let app: INestApplication;

@@ -10,7 +10,7 @@
   "moduleNameMapper": {
     "^src/(.*)$": "<rootDir>/../src/$1"
   },
-  "setupFilesAfterEnv": ["<rootDir>/test-env.ts"],
+  "setupFilesAfterEnv": ["<rootDir>/setup/test-env.ts"],
   "testTimeout": 30000,
   "maxWorkers": 1
 }

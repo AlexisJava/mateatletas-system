@@ -1,7 +1,15 @@
+/**
+ * ============================================================================
+ * AUTH HELPERS - Helpers de Autenticación para Tests
+ * ============================================================================
+ *
+ * Funciones para login y manejo de sesiones en tests de integración.
+ */
+
 import type { INestApplication } from '@nestjs/common';
 import request, { type Test } from 'supertest';
 
-import '../test-env';
+import '../setup/test-env';
 
 // ============================================================================
 // TIPOS
@@ -128,6 +136,36 @@ export async function loginEstudiante(
   credentials: { username: string; password: string },
 ): Promise<AuthSession> {
   return performLogin(app, '/api/auth/estudiante/login', credentials);
+}
+
+/**
+ * Login de estudiante que retorna cookies raw (array de strings).
+ * Útil para tests que necesitan pasar cookies directamente a .set('Cookie', cookies).
+ */
+export async function loginEstudianteRaw(
+  app: INestApplication,
+  credentials: { username: string; password: string },
+): Promise<string[]> {
+  const uniqueIP = generateUniqueIP();
+
+  const response = await request(app.getHttpServer())
+    .post('/api/auth/estudiante/login')
+    .set('Origin', FRONTEND_ORIGIN)
+    .set('X-Forwarded-For', uniqueIP)
+    .send(credentials);
+
+  if (response.status !== 200) {
+    throw new Error(
+      `Login failed for ${credentials.username}: ${response.status} - ${JSON.stringify(response.body)}`,
+    );
+  }
+
+  const cookies = response.headers['set-cookie'];
+  if (!cookies || !Array.isArray(cookies) || cookies.length === 0) {
+    throw new Error(`No cookies returned for ${credentials.username}`);
+  }
+
+  return cookies;
 }
 
 // ============================================================================

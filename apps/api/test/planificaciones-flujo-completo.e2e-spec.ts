@@ -16,7 +16,7 @@ import {
   type AuthSession,
   withAuthHeaders,
   withOriginHeader,
-} from './utils/auth.helpers';
+} from './helpers/auth.helpers';
 
 describe('Planificaciones - Flujo Completo E2E (API)', () => {
   let app: INestApplication;
