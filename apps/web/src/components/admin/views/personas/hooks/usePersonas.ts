@@ -4,6 +4,7 @@ import {
   getAllEstudiantes,
   getAllUsers,
   getDocentes,
+  listarDocentesFiltrados,
   deleteUser,
   deleteEstudiante,
   deleteDocente,
@@ -95,11 +96,12 @@ export function usePersonas(): UsePersonasReturn {
     setError(null);
 
     try {
-      // Fetch en paralelo estudiantes, usuarios y docentes
-      const [estudiantesRes, users, docentes] = await Promise.all([
+      // Fetch en paralelo estudiantes, usuarios y docentes (con asignaciones)
+      const [estudiantesRes, users, docentes, docentesConAsignaciones] = await Promise.all([
         getAllEstudiantes({ limit: 100 }),
         getAllUsers(),
         getDocentes(),
+        listarDocentesFiltrados({}).catch(() => []), // Fallback si falla
       ]);
 
       const personas: AdminPerson[] = [];
@@ -150,9 +152,36 @@ export function usePersonas(): UsePersonasReturn {
         });
       });
 
-      // Mapear docentes - con validación
+      // Mapear docentes - con validación y enriquecimiento Casa/Mundo
+      // Crear mapa de asignaciones por docente ID para lookup rápido
+      const asignacionesMap = new Map<
+        string,
+        {
+          casas: Array<'QUANTUM' | 'VERTEX' | 'PULSAR'>;
+          mundos: Array<'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS'>;
+          tipoAsignacion?: 'CLASE_GRUPOS' | 'COMISIONES' | 'AMBOS';
+        }
+      >();
+
+      // Poblar mapa con datos de docentesConAsignaciones
+      const asignacionesData = docentesConAsignaciones ?? [];
+      asignacionesData.forEach((docAsig) => {
+        asignacionesMap.set(docAsig.id, {
+          casas: (docAsig.casas ?? []).map((c) => c.casa_tipo as 'QUANTUM' | 'VERTEX' | 'PULSAR'),
+          mundos: (docAsig.mundos ?? []).map(
+            (m) => m.mundo_tipo as 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS',
+          ),
+          tipoAsignacion: docAsig.tipo_asignacion as
+            | 'CLASE_GRUPOS'
+            | 'COMISIONES'
+            | 'AMBOS'
+            | undefined,
+        });
+      });
+
       const docentesData = docentes ?? [];
       docentesData.forEach((doc) => {
+        const asignaciones = asignacionesMap.get(doc.id);
         personas.push({
           id: doc.id,
           nombre: doc.nombre,
@@ -164,6 +193,10 @@ export function usePersonas(): UsePersonasReturn {
           clasesAsignadas: 0, // TODO: Obtener desde endpoint específico
           titulo: doc.titulo ?? doc.titulo_profesional ?? undefined,
           telefono: doc.telefono ?? undefined,
+          // Enriquecimiento Casa/Mundo
+          casasAsignadas: asignaciones?.casas,
+          mundosAsignados: asignaciones?.mundos,
+          tipoAsignacion: asignaciones?.tipoAsignacion,
         });
       });
 

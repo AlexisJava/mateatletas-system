@@ -106,6 +106,12 @@ export interface AdminPerson {
   titulo?: string;
   /** Solo docentes: Teléfono */
   telefono?: string;
+  /** Solo docentes: Casas asignadas (QUANTUM, VERTEX, PULSAR) */
+  casasAsignadas?: Array<'QUANTUM' | 'VERTEX' | 'PULSAR'>;
+  /** Solo docentes: Mundos asignados (MATEMATICA, PROGRAMACION, CIENCIAS) */
+  mundosAsignados?: Array<'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS'>;
+  /** Solo docentes: Tipo de asignación */
+  tipoAsignacion?: 'CLASE_GRUPOS' | 'COMISIONES' | 'AMBOS';
   /** Solo tutores: Cantidad de estudiantes a cargo */
   estudiantesACargo?: number;
 }

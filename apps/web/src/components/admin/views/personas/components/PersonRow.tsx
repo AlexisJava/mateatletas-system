@@ -106,8 +106,49 @@ export function PersonRow({ person, onView, onEdit, onDelete, onCredenciales }: 
             </div>
           </div>
         )}
-        {person.role === 'docente' && person.clasesAsignadas !== undefined && (
-          <span className="text-sm text-[var(--admin-text)]">{person.clasesAsignadas} clases</span>
+        {person.role === 'docente' && (
+          <div className="flex flex-col gap-1">
+            {/* Casas asignadas */}
+            {person.casasAsignadas && person.casasAsignadas.length > 0 ? (
+              <div className="flex items-center gap-1 flex-wrap">
+                {person.casasAsignadas.map((casa) => (
+                  <span
+                    key={casa}
+                    className={`text-xs px-1.5 py-0.5 rounded ${
+                      casa === 'QUANTUM'
+                        ? 'bg-cyan-500/20 text-cyan-400'
+                        : casa === 'VERTEX'
+                          ? 'bg-orange-500/20 text-orange-400'
+                          : 'bg-purple-500/20 text-purple-400'
+                    }`}
+                  >
+                    {casa}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className="text-xs text-[var(--admin-text-muted)]">Sin casas</span>
+            )}
+            {/* Mundos asignados */}
+            {person.mundosAsignados && person.mundosAsignados.length > 0 && (
+              <div className="flex items-center gap-1 flex-wrap">
+                {person.mundosAsignados.map((mundo) => (
+                  <span
+                    key={mundo}
+                    className={`text-xs px-1.5 py-0.5 rounded ${
+                      mundo === 'MATEMATICA'
+                        ? 'bg-blue-500/20 text-blue-400'
+                        : mundo === 'PROGRAMACION'
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-amber-500/20 text-amber-400'
+                    }`}
+                  >
+                    {mundo.slice(0, 4)}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         )}
         {person.role === 'tutor' && person.estudiantesACargo !== undefined && (
           <span className="text-sm text-[var(--admin-text)]">
