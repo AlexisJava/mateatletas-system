@@ -15,6 +15,7 @@ export {
   PersonasView,
   ProductosView,
   DocenteAsignacionesView,
+  GruposPedagogicosView,
 } from './views';
 
 // Charts
