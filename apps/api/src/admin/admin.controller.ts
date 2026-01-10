@@ -52,6 +52,19 @@ import {
 } from './services/admin-tareas.service';
 import { AsignarPlanEstudianteDto } from './dto/asignar-plan-estudiante.dto';
 import { AdminEstudiantesService } from './services/admin-estudiantes.service';
+import {
+  DocenteAsignacionesService,
+  AsignarCasaDto,
+  AsignarMundoDto,
+  ActualizarTipoAsignacionDto,
+  FiltrosDocentesDto,
+} from './services/docente-asignaciones.service';
+import {
+  GrupoPedagogicoService,
+  FiltrosGrupoPedagogicoDto,
+  ActualizarGrupoPedagogicoDto,
+} from './services/grupo-pedagogico.service';
+import { CasaTipo, MundoTipo } from '@prisma/client';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -64,6 +77,8 @@ export class AdminController {
     private readonly comisionesService: ComisionesService,
     private readonly tareasService: AdminTareasService,
     private readonly estudiantesService: AdminEstudiantesService,
+    private readonly docenteAsignacionesService: DocenteAsignacionesService,
+    private readonly grupoPedagogicoService: GrupoPedagogicoService,
   ) {}
 
   /**
@@ -909,5 +924,248 @@ export class AdminController {
   @ApiOperation({ summary: 'Eliminar tarea' })
   async eliminarTarea(@Param('id', ParseIdPipe) id: string) {
     await this.tareasService.eliminarTarea(id);
+  }
+
+  // ============================================================================
+  // SISTEMA CASA/MUNDO 2026 - ASIGNACIONES DE DOCENTES
+  // ============================================================================
+
+  /**
+   * Asignar una Casa a un docente
+   * POST /api/admin/docentes/:docenteId/casas
+   * Rol: Admin
+   */
+  @Post('docentes/:docenteId/casas')
+  @ApiOperation({
+    summary: 'Asignar casa a docente',
+    description: 'Asigna una Casa (QUANTUM/VERTEX/PULSAR) a un docente',
+  })
+  async asignarCasaDocente(
+    @Param('docenteId', ParseIdPipe) docenteId: string,
+    @Body() dto: AsignarCasaDto,
+  ) {
+    return this.docenteAsignacionesService.asignarCasa(docenteId, dto);
+  }
+
+  /**
+   * Remover una Casa de un docente
+   * DELETE /api/admin/docentes/:docenteId/casas/:casaTipo
+   * Rol: Admin
+   */
+  @Delete('docentes/:docenteId/casas/:casaTipo')
+  @ApiOperation({ summary: 'Remover casa de docente' })
+  async removerCasaDocente(
+    @Param('docenteId', ParseIdPipe) docenteId: string,
+    @Param('casaTipo', new ParseEnumPipe(CasaTipo)) casaTipo: CasaTipo,
+  ) {
+    return this.docenteAsignacionesService.removerCasa(docenteId, casaTipo);
+  }
+
+  /**
+   * Obtener casas asignadas a un docente
+   * GET /api/admin/docentes/:docenteId/casas
+   * Rol: Admin
+   */
+  @Get('docentes/:docenteId/casas')
+  @ApiOperation({ summary: 'Obtener casas del docente' })
+  async obtenerCasasDocente(
+    @Param('docenteId', ParseIdPipe) docenteId: string,
+  ) {
+    return this.docenteAsignacionesService.obtenerCasasDocente(docenteId);
+  }
+
+  /**
+   * Listar docentes por Casa
+   * GET /api/admin/casas/:casaTipo/docentes
+   * Rol: Admin
+   */
+  @Get('casas/:casaTipo/docentes')
+  @ApiOperation({ summary: 'Listar docentes de una casa' })
+  async listarDocentesPorCasa(
+    @Param('casaTipo', new ParseEnumPipe(CasaTipo)) casaTipo: CasaTipo,
+  ) {
+    return this.docenteAsignacionesService.listarDocentesPorCasa(casaTipo);
+  }
+
+  /**
+   * Asignar un Mundo a un docente
+   * POST /api/admin/docentes/:docenteId/mundos
+   * Rol: Admin
+   */
+  @Post('docentes/:docenteId/mundos')
+  @ApiOperation({
+    summary: 'Asignar mundo a docente',
+    description:
+      'Asigna un Mundo (MATEMATICA/PROGRAMACION/CIENCIAS) a un docente',
+  })
+  async asignarMundoDocente(
+    @Param('docenteId', ParseIdPipe) docenteId: string,
+    @Body() dto: AsignarMundoDto,
+  ) {
+    return this.docenteAsignacionesService.asignarMundo(docenteId, dto);
+  }
+
+  /**
+   * Remover un Mundo de un docente
+   * DELETE /api/admin/docentes/:docenteId/mundos/:mundoTipo
+   * Rol: Admin
+   */
+  @Delete('docentes/:docenteId/mundos/:mundoTipo')
+  @ApiOperation({ summary: 'Remover mundo de docente' })
+  async removerMundoDocente(
+    @Param('docenteId', ParseIdPipe) docenteId: string,
+    @Param('mundoTipo', new ParseEnumPipe(MundoTipo)) mundoTipo: MundoTipo,
+  ) {
+    return this.docenteAsignacionesService.removerMundo(docenteId, mundoTipo);
+  }
+
+  /**
+   * Obtener mundos asignados a un docente
+   * GET /api/admin/docentes/:docenteId/mundos
+   * Rol: Admin
+   */
+  @Get('docentes/:docenteId/mundos')
+  @ApiOperation({ summary: 'Obtener mundos del docente' })
+  async obtenerMundosDocente(
+    @Param('docenteId', ParseIdPipe) docenteId: string,
+  ) {
+    return this.docenteAsignacionesService.obtenerMundosDocente(docenteId);
+  }
+
+  /**
+   * Listar docentes por Mundo
+   * GET /api/admin/mundos/:mundoTipo/docentes
+   * Rol: Admin
+   */
+  @Get('mundos/:mundoTipo/docentes')
+  @ApiOperation({ summary: 'Listar docentes de un mundo' })
+  async listarDocentesPorMundo(
+    @Param('mundoTipo', new ParseEnumPipe(MundoTipo)) mundoTipo: MundoTipo,
+  ) {
+    return this.docenteAsignacionesService.listarDocentesPorMundo(mundoTipo);
+  }
+
+  /**
+   * Actualizar tipo de asignación del docente
+   * PATCH /api/admin/docentes/:docenteId/tipo-asignacion
+   * Rol: Admin
+   */
+  @Patch('docentes/:docenteId/tipo-asignacion')
+  @ApiOperation({
+    summary: 'Actualizar tipo de asignación',
+    description: 'Cambia el tipo de asignación (CLASE_GRUPOS/COMISIONES/AMBOS)',
+  })
+  async actualizarTipoAsignacion(
+    @Param('docenteId', ParseIdPipe) docenteId: string,
+    @Body() dto: ActualizarTipoAsignacionDto,
+  ) {
+    return this.docenteAsignacionesService.actualizarTipoAsignacion(
+      docenteId,
+      dto,
+    );
+  }
+
+  /**
+   * Obtener perfil completo de asignaciones del docente
+   * GET /api/admin/docentes/:docenteId/asignaciones
+   * Rol: Admin
+   */
+  @Get('docentes/:docenteId/asignaciones')
+  @ApiOperation({
+    summary: 'Obtener perfil de asignaciones',
+    description: 'Retorna casas, mundos y tipo de asignación del docente',
+  })
+  async obtenerPerfilAsignaciones(
+    @Param('docenteId', ParseIdPipe) docenteId: string,
+  ) {
+    return this.docenteAsignacionesService.obtenerPerfilAsignaciones(docenteId);
+  }
+
+  /**
+   * Listar docentes con filtros de Casa/Mundo
+   * GET /api/admin/docentes/filtrados
+   * Rol: Admin
+   */
+  @Get('docentes/filtrados')
+  @ApiOperation({
+    summary: 'Listar docentes con filtros',
+    description: 'Filtra docentes por casa, mundo o tipo de asignación',
+  })
+  async listarDocentesFiltrados(@Query() filtros: FiltrosDocentesDto) {
+    return this.docenteAsignacionesService.listarDocentesConFiltros(filtros);
+  }
+
+  // ============================================================================
+  // SISTEMA CASA/MUNDO 2026 - GRUPOS PEDAGÓGICOS
+  // ============================================================================
+
+  /**
+   * Listar grupos pedagógicos con filtros
+   * GET /api/admin/grupos-pedagogicos
+   * Rol: Admin
+   */
+  @Get('grupos-pedagogicos')
+  @ApiOperation({
+    summary: 'Listar grupos pedagógicos',
+    description: 'Lista grupos con filtros por casa y mundo',
+  })
+  async listarGruposPedagogicos(@Query() filtros: FiltrosGrupoPedagogicoDto) {
+    return this.grupoPedagogicoService.listar(filtros);
+  }
+
+  /**
+   * Obtener un grupo pedagógico por ID
+   * GET /api/admin/grupos-pedagogicos/:id
+   * Rol: Admin
+   */
+  @Get('grupos-pedagogicos/:id')
+  @ApiOperation({ summary: 'Obtener grupo pedagógico' })
+  async obtenerGrupoPedagogico(@Param('id', ParseIdPipe) id: string) {
+    return this.grupoPedagogicoService.obtenerPorId(id);
+  }
+
+  /**
+   * Actualizar casa/mundo de un grupo pedagógico
+   * PATCH /api/admin/grupos-pedagogicos/:id
+   * Rol: Admin
+   */
+  @Patch('grupos-pedagogicos/:id')
+  @ApiOperation({
+    summary: 'Actualizar grupo pedagógico',
+    description: 'Actualiza casa_tipo y mundo_tipo del grupo',
+  })
+  async actualizarGrupoPedagogico(
+    @Param('id', ParseIdPipe) id: string,
+    @Body() dto: ActualizarGrupoPedagogicoDto,
+  ) {
+    return this.grupoPedagogicoService.actualizar(id, dto);
+  }
+
+  /**
+   * Migrar grupos legacy a Casa/Mundo
+   * POST /api/admin/grupos-pedagogicos/migrar-legacy
+   * Rol: Admin
+   */
+  @Post('grupos-pedagogicos/migrar-legacy')
+  @ApiOperation({
+    summary: 'Migrar grupos legacy',
+    description: 'Migra grupos con sector_id a casa_tipo/mundo_tipo',
+  })
+  async migrarGruposLegacy() {
+    return this.grupoPedagogicoService.migrarGruposLegacy();
+  }
+
+  /**
+   * Obtener estadísticas de grupos por Casa/Mundo
+   * GET /api/admin/grupos-pedagogicos/estadisticas
+   * Rol: Admin
+   */
+  @Get('grupos-pedagogicos/estadisticas')
+  @ApiOperation({
+    summary: 'Estadísticas de grupos',
+    description: 'Obtiene estadísticas de grupos por casa y mundo',
+  })
+  async obtenerEstadisticasGrupos() {
+    return this.grupoPedagogicoService.obtenerEstadisticas();
   }
 }
