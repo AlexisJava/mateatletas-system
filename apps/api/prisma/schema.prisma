@@ -577,7 +577,64 @@ model Docente {
   /// Observaciones creadas por este docente
   observaciones Observacion[]
 
+  /// Sistema Casa/Mundo 2026: Casas asignadas al docente
+  casas DocenteCasa[]
+
+  /// Sistema Casa/Mundo 2026: Mundos asignados al docente
+  mundos DocenteMundo[]
+
+  /// Sistema Casa/Mundo 2026: Tipo de asignación del docente
+  tipo_asignacion TipoAsignacionDocente @default(CLASE_GRUPOS)
+
   @@map("docentes")
+}
+
+/// Asignación de docente a una Casa (QUANTUM, VERTEX, PULSAR)
+/// Permite que admin asigne docentes a casas específicas
+model DocenteCasa {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID del docente
+  docente_id String
+
+  /// Tipo de casa asignada
+  casa_tipo CasaTipo
+
+  /// Fecha de asignación
+  asignado_en DateTime @default(now())
+
+  /// Relaciones
+  docente Docente @relation(fields: [docente_id], references: [id], onDelete: Cascade)
+
+  @@unique([docente_id, casa_tipo])
+  @@index([docente_id])
+  @@index([casa_tipo])
+  @@map("docentes_casas")
+}
+
+/// Asignación de docente a un Mundo (MATEMATICA, PROGRAMACION, CIENCIAS)
+/// Permite que admin asigne docentes a mundos específicos
+model DocenteMundo {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID del docente
+  docente_id String
+
+  /// Tipo de mundo asignado
+  mundo_tipo MundoTipo
+
+  /// Fecha de asignación
+  asignado_en DateTime @default(now())
+
+  /// Relaciones
+  docente Docente @relation(fields: [docente_id], references: [id], onDelete: Cascade)
+
+  @@unique([docente_id, mundo_tipo])
+  @@index([docente_id])
+  @@index([mundo_tipo])
+  @@map("docentes_mundos")
 }
 
 /// Modelo para administradores del sistema
@@ -788,10 +845,11 @@ model Clase {
   @@map("clases")
 }
 
-/// Modelo para Grupos Pedagógicos
+/// Modelo para Grupos Pedagógicos (Sistema Casa/Mundo 2026)
 /// Representa los niveles educativos o categorías pedagógicas (B1, B2, B3, A1, etc.)
 /// Los grupos son conceptos estables que agrupan contenido pedagógico del mismo nivel
-model Grupo {
+/// Cada grupo pertenece a una Casa (por edad) y un Mundo (por disciplina)
+model GrupoPedagogico {
   /// Identificador único del grupo
   id String @id @default(cuid())
 
@@ -808,7 +866,13 @@ model Grupo {
   edad_minima Int?
   edad_maxima Int?
 
-  /// Sector al que pertenece (Matemática o Programación)
+  /// Sistema Casa/Mundo 2026: Casa a la que pertenece (QUANTUM, VERTEX, PULSAR)
+  casa_tipo CasaTipo?
+
+  /// Sistema Casa/Mundo 2026: Mundo al que pertenece (MATEMATICA, PROGRAMACION, CIENCIAS)
+  mundo_tipo MundoTipo?
+
+  /// @deprecated Sector al que pertenece - LEGACY, usar casa_tipo y mundo_tipo
   sector_id String?
 
   /// Link de Google Meet para las clases de este grupo
@@ -824,13 +888,19 @@ model Grupo {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
+  /// @deprecated LEGACY - usar casa_tipo y mundo_tipo
   sector Sector? @relation(fields: [sector_id], references: [id])
 
-  /// Comisiones (instancias operativas) de este grupo
-  comisiones ClaseGrupo[]
+  /// ClaseGrupos (instancias de clases sincrónicas semanales)
+  claseGrupos ClaseGrupo[]
+
+  /// Comisiones de productos (Colonias, Talleres) vinculadas a este grupo
+  comisionesProducto Comision[]
 
   @@index([codigo])
   @@index([activo])
+  @@index([casa_tipo])
+  @@index([mundo_tipo])
   @@map("grupos")
 }
 
@@ -911,8 +981,8 @@ model ClaseGrupo {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  grupo   Grupo   @relation(fields: [grupo_id], references: [id])
-  docente Docente @relation(fields: [docente_id], references: [id])
+  grupo   GrupoPedagogico @relation(fields: [grupo_id], references: [id])
+  docente Docente         @relation(fields: [docente_id], references: [id])
   sector  Sector? @relation(fields: [sector_id], references: [id])
 
   /// Estudiantes inscritos en el grupo
@@ -961,6 +1031,10 @@ model InscripcionClaseGrupo {
   /// Observaciones
   observaciones String?
 
+  /// Sistema Casa/Mundo 2026: Tipo de acceso del estudiante
+  /// SINCRONICO = participa en vivo, ASINCRONICO = solo grabaciones
+  tipo_acceso TipoAccesoInscripcion @default(SINCRONICO)
+
   /// Timestamp de creación
   createdAt DateTime @default(now())
 
@@ -976,6 +1050,7 @@ model InscripcionClaseGrupo {
   @@index([estudiante_id])
   @@index([tutor_id])
   @@index([clase_grupo_id])
+  @@index([tipo_acceso])
   @@map("inscripciones_clase_grupo")
 }
 
@@ -1366,7 +1441,7 @@ model Sector {
   updatedAt   DateTime           @updatedAt
   clases      Clase[]
   claseGrupos ClaseGrupo[]
-  grupos      Grupo[]
+  grupos      GrupoPedagogico[]
   docentes    DocenteRuta[]
   /// Relación uno-a-muchos con estudiantes
   estudiantes Estudiante[]       @relation("EstudianteSectorLegacy")
@@ -1518,6 +1593,25 @@ enum EstadoAsistencia {
   Presente
   Ausente
   Justificado
+}
+
+/// Enum para tipo de asignación de docente (2026)
+/// Define qué tipo de grupos puede manejar el docente
+enum TipoAsignacionDocente {
+  CLASE_GRUPOS // Solo clases grupales regulares
+  COMISIONES   // Solo comisiones de productos (Colonia, Talleres)
+  AMBOS        // Puede manejar ambos tipos
+
+  @@map("tipo_asignacion_docente")
+}
+
+/// Enum para tipo de acceso en inscripción (2026)
+/// Define cómo el estudiante participa en el grupo
+enum TipoAccesoInscripcion {
+  SINCRONICO  // Participa en vivo en clases
+  ASINCRONICO // Solo accede a grabaciones
+
+  @@map("tipo_acceso_inscripcion")
 }
 
 // [ELIMINADO] TipoContenido - usado por modelo Leccion eliminado
@@ -2638,6 +2732,11 @@ model Comision {
   casa_id String?
   casa    Casa?   @relation(fields: [casa_id], references: [id])
 
+  /// Sistema Casa/Mundo 2026: Grupo pedagógico al que pertenece (opcional)
+  /// Permite vincular comisiones a grupos específicos del sistema educativo
+  grupo_id String?
+  grupo    GrupoPedagogico? @relation(fields: [grupo_id], references: [id])
+
   /// Docente a cargo (opcional)
   docente_id String?
   docente    Docente? @relation(fields: [docente_id], references: [id])
@@ -2692,6 +2791,7 @@ model Comision {
   @@index([producto_id])
   @@index([docente_id])
   @@index([casa_id])
+  @@index([grupo_id])
   @@index([activo])
   @@index([estado_clase])
   @@index([livekit_room_name])

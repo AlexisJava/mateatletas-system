@@ -16,7 +16,6 @@ import {
 } from '@nestjs/common';
 import { ParseIdPipe } from '../common/pipes';
 import { AdminService } from './admin.service';
-import { SectoresRutasService } from './services/sectores-rutas.service';
 import { ClaseGruposService } from './clase-grupos.service';
 import { AsistenciasService } from './asistencias.service';
 import { ApiOperation } from '@nestjs/swagger';
@@ -24,12 +23,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { CrearAlertaDto } from './dto/crear-alerta.dto';
-import { CreateSectorDto, UpdateSectorDto } from './dto/sector.dto';
-import {
-  CreateRutaEspecialidadDto,
-  UpdateRutaEspecialidadDto,
-  AsignarRutasDocenteDto,
-} from './dto/ruta-especialidad.dto';
 import { CrearEstudianteRapidoDto } from './dto/crear-estudiante-rapido.dto';
 import { CrearEstudianteDto } from './dto/crear-estudiante.dto';
 import { CrearClaseGrupoDto } from './dto/crear-clase-grupo.dto';
@@ -66,7 +59,6 @@ import { AdminEstudiantesService } from './services/admin-estudiantes.service';
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
-    private readonly sectoresRutasService: SectoresRutasService,
     private readonly claseGruposService: ClaseGruposService,
     private readonly asistenciasService: AsistenciasService,
     private readonly comisionesService: ComisionesService,
@@ -437,167 +429,6 @@ export class AdminController {
       dto.claseId,
       dto.descripcion,
     );
-  }
-
-  // ============================================================================
-  // SECTORES Y RUTAS DE ESPECIALIDAD
-  // ============================================================================
-
-  /**
-   * Listar todos los sectores con sus rutas
-   * GET /api/admin/sectores
-   * Rol: Admin
-   */
-  @Get('sectores')
-  async listarSectores() {
-    return this.sectoresRutasService.listarSectores();
-  }
-
-  /**
-   * Obtener un sector por ID
-   * GET /api/admin/sectores/:id
-   * Rol: Admin
-   */
-  @Get('sectores/:id')
-  async obtenerSector(@Param('id', ParseIdPipe) id: string) {
-    return this.sectoresRutasService.obtenerSector(id);
-  }
-
-  /**
-   * Crear un nuevo sector
-   * POST /api/admin/sectores
-   * Rol: Admin
-   */
-  @Post('sectores')
-  async crearSector(@Body() data: CreateSectorDto) {
-    return this.sectoresRutasService.crearSector(data);
-  }
-
-  /**
-   * Actualizar un sector
-   * PUT /api/admin/sectores/:id
-   * Rol: Admin
-   */
-  @Put('sectores/:id')
-  async actualizarSector(
-    @Param('id', ParseIdPipe) id: string,
-    @Body() data: UpdateSectorDto,
-  ) {
-    return this.sectoresRutasService.actualizarSector(id, data);
-  }
-
-  /**
-   * Eliminar un sector (soft delete)
-   * DELETE /api/admin/sectores/:id
-   * Rol: Admin
-   */
-  @Delete('sectores/:id')
-  async eliminarSector(@Param('id', ParseIdPipe) id: string) {
-    return this.sectoresRutasService.eliminarSector(id);
-  }
-
-  /**
-   * Listar todas las rutas de especialidad
-   * GET /api/admin/rutas-especialidad?sectorId=xxx (opcional)
-   * Rol: Admin
-   */
-  @Get('rutas-especialidad')
-  async listarRutasEspecialidad(@Query('sectorId') sectorId?: string) {
-    return this.sectoresRutasService.listarRutas(sectorId);
-  }
-
-  /**
-   * Obtener una ruta de especialidad por ID
-   * GET /api/admin/rutas-especialidad/:id
-   * Rol: Admin
-   */
-  @Get('rutas-especialidad/:id')
-  async obtenerRutaEspecialidad(@Param('id', ParseIdPipe) id: string) {
-    return this.sectoresRutasService.obtenerRuta(id);
-  }
-
-  /**
-   * Crear una nueva ruta de especialidad
-   * POST /api/admin/rutas-especialidad
-   * Rol: Admin
-   */
-  @Post('rutas-especialidad')
-  async crearRutaEspecialidad(@Body() data: CreateRutaEspecialidadDto) {
-    return this.sectoresRutasService.crearRuta(data);
-  }
-
-  /**
-   * Actualizar una ruta de especialidad
-   * PUT /api/admin/rutas-especialidad/:id
-   * Rol: Admin
-   */
-  @Put('rutas-especialidad/:id')
-  async actualizarRutaEspecialidad(
-    @Param('id', ParseIdPipe) id: string,
-    @Body() data: UpdateRutaEspecialidadDto,
-  ) {
-    return this.sectoresRutasService.actualizarRuta(id, data);
-  }
-
-  /**
-   * Eliminar una ruta de especialidad (soft delete)
-   * DELETE /api/admin/rutas-especialidad/:id
-   * Rol: Admin
-   */
-  @Delete('rutas-especialidad/:id')
-  async eliminarRutaEspecialidad(@Param('id', ParseIdPipe) id: string) {
-    return this.sectoresRutasService.eliminarRuta(id);
-  }
-
-  /**
-   * Obtener las rutas asignadas a un docente
-   * GET /api/admin/docentes/:docenteId/rutas
-   * Rol: Admin
-   */
-  @Get('docentes/:docenteId/rutas')
-  async obtenerRutasDocente(
-    @Param('docenteId', ParseIdPipe) docenteId: string,
-  ) {
-    return this.sectoresRutasService.obtenerRutasDocente(docenteId);
-  }
-
-  /**
-   * Asignar rutas a un docente (reemplaza las anteriores)
-   * PUT /api/admin/docentes/:docenteId/rutas
-   * Rol: Admin
-   */
-  @Put('docentes/:docenteId/rutas')
-  async asignarRutasDocente(
-    @Param('docenteId', ParseIdPipe) docenteId: string,
-    @Body() data: AsignarRutasDocenteDto,
-  ) {
-    return this.sectoresRutasService.asignarRutasDocente(docenteId, data);
-  }
-
-  /**
-   * Agregar una ruta a un docente
-   * POST /api/admin/docentes/:docenteId/rutas/:rutaId
-   * Rol: Admin
-   */
-  @Post('docentes/:docenteId/rutas/:rutaId')
-  async agregarRutaDocente(
-    @Param('docenteId', ParseIdPipe) docenteId: string,
-    @Param('rutaId', ParseIdPipe) rutaId: string,
-  ) {
-    return this.sectoresRutasService.agregarRutaDocente(docenteId, rutaId);
-  }
-
-  /**
-   * Eliminar una ruta de un docente
-   * DELETE /api/admin/docentes/:docenteId/rutas/:rutaId
-   * Rol: Admin
-   */
-  @Delete('docentes/:docenteId/rutas/:rutaId')
-  async eliminarRutaDocente(
-    @Param('docenteId', ParseIdPipe) docenteId: string,
-    @Param('rutaId', ParseIdPipe) rutaId: string,
-  ) {
-    return this.sectoresRutasService.eliminarRutaDocente(docenteId, rutaId);
   }
 
   /**

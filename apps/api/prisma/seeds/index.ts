@@ -10,7 +10,6 @@ import { seedPlanesSuscripcion } from './planes-suscripcion.seed';
 import { seedProductos } from './productos.seed';
 import { seedLogros } from './logros.seed';
 import { seedLogrosPlanificaciones } from './logros-planificaciones.seed';
-import { seedSectores } from './sectores.seed';
 import { seedConfiguracionPrecios } from './configuracion-precios.seed';
 import { seedInscripcionesMensuales } from './inscripciones-mensuales.seed';
 
@@ -27,7 +26,6 @@ export async function runAllSeeds(prisma: PrismaClient) {
     console.log('🏭 Modo PRODUCCIÓN: Creando solo datos esenciales\n');
     await seedAdmin(prisma);
     await seedConfiguracionPrecios(prisma); // ESENCIAL: Configuración de precios
-    await seedSectores(prisma); // Sectores base (Matemática y Programación)
     await seedCasas(prisma); // ESENCIAL: Casas 2026 (Quantum, Vertex, Pulsar)
     await seedMundos(prisma); // ESENCIAL: Mundos STEAM 2026 (Mat, Prog, Ciencias)
     await seedTiers(prisma); // ESENCIAL: Tiers STEAM 2026
@@ -40,7 +38,6 @@ export async function runAllSeeds(prisma: PrismaClient) {
     console.log('🧪 Modo DESARROLLO: Creando datos de prueba completos\n');
     await seedAdmin(prisma);
     await seedConfiguracionPrecios(prisma); // ESENCIAL: Configuración de precios
-    await seedSectores(prisma); // Sectores base (Matemática y Programación)
     await seedDocente(prisma);
     await seedDocentes(prisma); // Docentes reales: Gimena y Ayelen
     await seedTutor(prisma);
@@ -61,7 +58,6 @@ export async function runAllSeeds(prisma: PrismaClient) {
 export {
   seedAdmin,
   seedConfiguracionPrecios,
-  seedSectores,
   seedDocente,
   seedDocentes,
   seedTutor,

@@ -10,7 +10,6 @@ import { AdminEstudiantesService } from './services/admin-estudiantes.service';
 import { AdminCredencialesService } from './services/admin-credenciales.service';
 import { AdminTareasService } from './services/admin-tareas.service';
 import { AdminPlanificacionesService } from './services/admin-planificaciones.service';
-import { SectoresRutasService } from './services/sectores-rutas.service';
 import { ClaseGruposService } from './clase-grupos.service';
 import { AsistenciasService } from './asistencias.service';
 import { ComisionesService } from './comisiones.service';
@@ -39,7 +38,6 @@ import { DatabaseModule } from '../core/database/database.module';
     AdminCredencialesService,
     AdminTareasService,
     AdminPlanificacionesService,
-    SectoresRutasService,
     ClaseGruposService,
     AsistenciasService,
     ComisionesService,
@@ -52,7 +50,6 @@ import { DatabaseModule } from '../core/database/database.module';
     AdminRolesService,
     AdminEstudiantesService,
     AdminPlanificacionesService,
-    SectoresRutasService,
   ],
 })
 export class AdminModule {}
