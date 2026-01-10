@@ -9,3 +9,4 @@ export { FinanceView } from './FinanceView';
 export { AnalyticsView } from './AnalyticsView';
 export { PersonasView } from './PersonasView';
 export { ProductosView } from './ProductosView';
+export { DocenteAsignacionesView } from './docentes-asignaciones';

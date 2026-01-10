@@ -42,6 +42,7 @@ export function PersonasView() {
     handleUpdate,
     handleDelete,
     handleCredenciales,
+    handleRegenerarPin,
     credencialesModal,
     closeCredencialesModal,
     refetch,
@@ -142,6 +143,8 @@ export function PersonasView() {
         username={credencialesModal.username}
         pin={credencialesModal.pin}
         isNewStudent={credencialesModal.isNewStudent}
+        estudianteId={credencialesModal.estudianteId}
+        onRegenerarPin={handleRegenerarPin}
       />
     </div>
   );

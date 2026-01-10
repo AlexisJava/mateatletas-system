@@ -8,7 +8,14 @@ export { Header } from './Header';
 export { TabNavigation } from './TabNavigation';
 
 // Views
-export { DashboardView, FinanceView, AnalyticsView, PersonasView, ProductosView } from './views';
+export {
+  DashboardView,
+  FinanceView,
+  AnalyticsView,
+  PersonasView,
+  ProductosView,
+  DocenteAsignacionesView,
+} from './views';
 
 // Charts
 export {

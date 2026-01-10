@@ -1306,16 +1306,6 @@ export const crearEstudianteEInscribir = async (
 // ============================================================================
 
 /**
- * Sector del sistema (Matemática, Programación, etc.)
- */
-export interface Sector {
-  id: string;
-  nombre: string;
-  descripcion?: string;
-  activo: boolean;
-}
-
-/**
  * Casa/Equipo del sistema (Quantum, Vertex, Pulsar)
  */
 export interface Casa {
@@ -1326,19 +1316,6 @@ export interface Casa {
 }
 
 /**
- * Obtener todos los sectores
- * GET /admin/sectores
- */
-export const getSectores = async (): Promise<Sector[]> => {
-  try {
-    return await axios.get('/admin/sectores');
-  } catch (error) {
-    console.error('Error al obtener sectores:', error);
-    throw error;
-  }
-};
-
-/**
  * Obtener todas las casas/equipos
  * GET /casas
  */
@@ -1347,6 +1324,373 @@ export const getCasas = async (): Promise<Casa[]> => {
     return await axios.get('/casas');
   } catch (error) {
     console.error('Error al obtener casas:', error);
+    throw error;
+  }
+};
+
+// ============================================================================
+// SISTEMA CASA/MUNDO 2026 - ASIGNACIONES DE DOCENTES
+// ============================================================================
+
+/** Tipos de Casa del sistema 2026 */
+export type CasaTipo = 'QUANTUM' | 'VERTEX' | 'PULSAR';
+
+/** Tipos de Mundo del sistema 2026 */
+export type MundoTipo = 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
+
+/** Tipos de asignación de docente */
+export type TipoAsignacionDocente = 'CLASE_GRUPOS' | 'COMISIONES' | 'AMBOS';
+
+/** Asignación de docente a casa */
+export interface DocenteCasa {
+  id: string;
+  docente_id: string;
+  casa_tipo: CasaTipo;
+  asignado_en: string;
+  docente?: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+    tipo_asignacion: TipoAsignacionDocente;
+  };
+}
+
+/** Asignación de docente a mundo */
+export interface DocenteMundo {
+  id: string;
+  docente_id: string;
+  mundo_tipo: MundoTipo;
+  asignado_en: string;
+  docente?: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+    tipo_asignacion: TipoAsignacionDocente;
+  };
+}
+
+/** Perfil completo de asignaciones de docente */
+export interface DocenteAsignacionesPerfil {
+  id: string;
+  nombre: string;
+  apellido: string;
+  tipo_asignacion: TipoAsignacionDocente;
+  casas: DocenteCasa[];
+  mundos: DocenteMundo[];
+}
+
+/** Filtros para listar docentes */
+export interface FiltrosDocentes {
+  casa_tipo?: CasaTipo;
+  mundo_tipo?: MundoTipo;
+  tipo_asignacion?: TipoAsignacionDocente;
+}
+
+/**
+ * Asignar una casa a un docente
+ * POST /admin/docentes/:docenteId/casas
+ */
+export const asignarCasaDocente = async (
+  docenteId: string,
+  casaTipo: CasaTipo,
+): Promise<DocenteCasa> => {
+  try {
+    return await axios.post(`/admin/docentes/${docenteId}/casas`, { casa_tipo: casaTipo });
+  } catch (error) {
+    console.error('Error al asignar casa a docente:', error);
+    throw error;
+  }
+};
+
+/**
+ * Remover una casa de un docente
+ * DELETE /admin/docentes/:docenteId/casas/:casaTipo
+ */
+export const removerCasaDocente = async (
+  docenteId: string,
+  casaTipo: CasaTipo,
+): Promise<{ mensaje: string }> => {
+  try {
+    return await axios.delete(`/admin/docentes/${docenteId}/casas/${casaTipo}`);
+  } catch (error) {
+    console.error('Error al remover casa de docente:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener casas asignadas a un docente
+ * GET /admin/docentes/:docenteId/casas
+ */
+export const obtenerCasasDocente = async (docenteId: string): Promise<DocenteCasa[]> => {
+  try {
+    return await axios.get(`/admin/docentes/${docenteId}/casas`);
+  } catch (error) {
+    console.error('Error al obtener casas del docente:', error);
+    throw error;
+  }
+};
+
+/**
+ * Listar docentes de una casa
+ * GET /admin/casas/:casaTipo/docentes
+ */
+export const listarDocentesPorCasa = async (casaTipo: CasaTipo): Promise<DocenteCasa[]> => {
+  try {
+    return await axios.get(`/admin/casas/${casaTipo}/docentes`);
+  } catch (error) {
+    console.error('Error al listar docentes por casa:', error);
+    throw error;
+  }
+};
+
+/**
+ * Asignar un mundo a un docente
+ * POST /admin/docentes/:docenteId/mundos
+ */
+export const asignarMundoDocente = async (
+  docenteId: string,
+  mundoTipo: MundoTipo,
+): Promise<DocenteMundo> => {
+  try {
+    return await axios.post(`/admin/docentes/${docenteId}/mundos`, { mundo_tipo: mundoTipo });
+  } catch (error) {
+    console.error('Error al asignar mundo a docente:', error);
+    throw error;
+  }
+};
+
+/**
+ * Remover un mundo de un docente
+ * DELETE /admin/docentes/:docenteId/mundos/:mundoTipo
+ */
+export const removerMundoDocente = async (
+  docenteId: string,
+  mundoTipo: MundoTipo,
+): Promise<{ mensaje: string }> => {
+  try {
+    return await axios.delete(`/admin/docentes/${docenteId}/mundos/${mundoTipo}`);
+  } catch (error) {
+    console.error('Error al remover mundo de docente:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener mundos asignados a un docente
+ * GET /admin/docentes/:docenteId/mundos
+ */
+export const obtenerMundosDocente = async (docenteId: string): Promise<DocenteMundo[]> => {
+  try {
+    return await axios.get(`/admin/docentes/${docenteId}/mundos`);
+  } catch (error) {
+    console.error('Error al obtener mundos del docente:', error);
+    throw error;
+  }
+};
+
+/**
+ * Listar docentes de un mundo
+ * GET /admin/mundos/:mundoTipo/docentes
+ */
+export const listarDocentesPorMundo = async (mundoTipo: MundoTipo): Promise<DocenteMundo[]> => {
+  try {
+    return await axios.get(`/admin/mundos/${mundoTipo}/docentes`);
+  } catch (error) {
+    console.error('Error al listar docentes por mundo:', error);
+    throw error;
+  }
+};
+
+/**
+ * Actualizar tipo de asignación del docente
+ * PATCH /admin/docentes/:docenteId/tipo-asignacion
+ */
+export const actualizarTipoAsignacionDocente = async (
+  docenteId: string,
+  tipoAsignacion: TipoAsignacionDocente,
+): Promise<{
+  id: string;
+  nombre: string;
+  apellido: string;
+  tipo_asignacion: TipoAsignacionDocente;
+}> => {
+  try {
+    return await axios.patch(`/admin/docentes/${docenteId}/tipo-asignacion`, {
+      tipo_asignacion: tipoAsignacion,
+    });
+  } catch (error) {
+    console.error('Error al actualizar tipo de asignación:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener perfil completo de asignaciones del docente
+ * GET /admin/docentes/:docenteId/asignaciones
+ */
+export const obtenerPerfilAsignacionesDocente = async (
+  docenteId: string,
+): Promise<DocenteAsignacionesPerfil> => {
+  try {
+    return await axios.get(`/admin/docentes/${docenteId}/asignaciones`);
+  } catch (error) {
+    console.error('Error al obtener perfil de asignaciones:', error);
+    throw error;
+  }
+};
+
+/**
+ * Listar docentes con filtros de Casa/Mundo
+ * GET /admin/docentes/filtrados
+ */
+export const listarDocentesFiltrados = async (
+  filtros: FiltrosDocentes,
+): Promise<DocenteAsignacionesPerfil[]> => {
+  try {
+    const params = new URLSearchParams();
+    if (filtros.casa_tipo) params.append('casa_tipo', filtros.casa_tipo);
+    if (filtros.mundo_tipo) params.append('mundo_tipo', filtros.mundo_tipo);
+    if (filtros.tipo_asignacion) params.append('tipo_asignacion', filtros.tipo_asignacion);
+
+    const url = params.toString()
+      ? `/admin/docentes/filtrados?${params}`
+      : '/admin/docentes/filtrados';
+    return await axios.get(url);
+  } catch (error) {
+    console.error('Error al listar docentes filtrados:', error);
+    throw error;
+  }
+};
+
+// ============================================================================
+// SISTEMA CASA/MUNDO 2026 - GRUPOS PEDAGÓGICOS
+// ============================================================================
+
+/** Grupo pedagógico con estadísticas */
+export interface GrupoPedagogico {
+  id: string;
+  codigo: string;
+  nombre: string | null;
+  descripcion: string | null;
+  casa_tipo: CasaTipo | null;
+  mundo_tipo: MundoTipo | null;
+  activo: boolean;
+  edad_minima: number | null;
+  edad_maxima: number | null;
+  _count?: {
+    claseGrupos: number;
+    comisionesProducto: number;
+  };
+}
+
+/** Filtros para grupos pedagógicos */
+export interface FiltrosGrupoPedagogico {
+  casa_tipo?: CasaTipo;
+  mundo_tipo?: MundoTipo;
+  activo?: boolean;
+}
+
+/** DTO para actualizar grupo pedagógico */
+export interface ActualizarGrupoPedagogicoDto {
+  casa_tipo?: CasaTipo;
+  mundo_tipo?: MundoTipo;
+  nombre?: string;
+  descripcion?: string;
+}
+
+/** Estadísticas de grupos */
+export interface EstadisticasGrupos {
+  total_grupos: number;
+  por_casa: Array<{ casa: string; cantidad: number }>;
+  por_mundo: Array<{ mundo: string; cantidad: number }>;
+}
+
+/**
+ * Listar grupos pedagógicos
+ * GET /admin/grupos-pedagogicos
+ */
+export const listarGruposPedagogicos = async (
+  filtros?: FiltrosGrupoPedagogico,
+): Promise<GrupoPedagogico[]> => {
+  try {
+    const params = new URLSearchParams();
+    if (filtros?.casa_tipo) params.append('casa_tipo', filtros.casa_tipo);
+    if (filtros?.mundo_tipo) params.append('mundo_tipo', filtros.mundo_tipo);
+    if (filtros?.activo !== undefined) params.append('activo', String(filtros.activo));
+
+    const url = params.toString()
+      ? `/admin/grupos-pedagogicos?${params}`
+      : '/admin/grupos-pedagogicos';
+    return await axios.get(url);
+  } catch (error) {
+    console.error('Error al listar grupos pedagógicos:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener grupo pedagógico por ID
+ * GET /admin/grupos-pedagogicos/:id
+ */
+export const obtenerGrupoPedagogico = async (id: string): Promise<GrupoPedagogico> => {
+  try {
+    return await axios.get(`/admin/grupos-pedagogicos/${id}`);
+  } catch (error) {
+    console.error('Error al obtener grupo pedagógico:', error);
+    throw error;
+  }
+};
+
+/**
+ * Actualizar grupo pedagógico
+ * PATCH /admin/grupos-pedagogicos/:id
+ */
+export const actualizarGrupoPedagogico = async (
+  id: string,
+  dto: ActualizarGrupoPedagogicoDto,
+): Promise<GrupoPedagogico> => {
+  try {
+    return await axios.patch(`/admin/grupos-pedagogicos/${id}`, dto);
+  } catch (error) {
+    console.error('Error al actualizar grupo pedagógico:', error);
+    throw error;
+  }
+};
+
+/**
+ * Migrar grupos legacy a Casa/Mundo
+ * POST /admin/grupos-pedagogicos/migrar-legacy
+ */
+export const migrarGruposLegacy = async (): Promise<{
+  mensaje: string;
+  migrados: number;
+  detalles?: Array<{
+    id: string;
+    codigo: string;
+    casa_tipo: CasaTipo | null;
+    mundo_tipo: MundoTipo | null;
+  }>;
+}> => {
+  try {
+    return await axios.post('/admin/grupos-pedagogicos/migrar-legacy');
+  } catch (error) {
+    console.error('Error al migrar grupos legacy:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener estadísticas de grupos
+ * GET /admin/grupos-pedagogicos/estadisticas
+ */
+export const obtenerEstadisticasGrupos = async (): Promise<EstadisticasGrupos> => {
+  try {
+    return await axios.get('/admin/grupos-pedagogicos/estadisticas');
+  } catch (error) {
+    console.error('Error al obtener estadísticas de grupos:', error);
     throw error;
   }
 };
@@ -1364,7 +1708,8 @@ export interface CrearEstudianteConCredencialesDto {
   apellidoEstudiante: string;
   edadEstudiante: number;
   nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
-  sectorId: string;
+  /** @deprecated Sistema Sectores eliminado en Casa/Mundo 2026 */
+  sectorId?: string;
   casaId?: string;
   puntosIniciales?: number;
   nivelInicial?: number;

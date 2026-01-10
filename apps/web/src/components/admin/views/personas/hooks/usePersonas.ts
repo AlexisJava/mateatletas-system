@@ -24,8 +24,9 @@ export interface CredencialesModalState {
   nombre: string;
   apellido: string;
   username: string;
-  pin: string;
+  pin: string | null; // null cuando solo se está viendo sin regenerar
   isNewStudent: boolean;
+  estudianteId: string | null; // Para poder regenerar desde el modal
 }
 
 interface UsePersonasReturn {
@@ -48,7 +49,8 @@ interface UsePersonasReturn {
   handleEdit: (person: AdminPerson) => void;
   handleUpdate: (personId: string, data: PersonaEditData) => Promise<void>;
   handleDelete: (person: AdminPerson) => Promise<void>;
-  handleCredenciales: (person: AdminPerson) => Promise<void>;
+  handleCredenciales: (person: AdminPerson) => void;
+  handleRegenerarPin: (estudianteId: string) => Promise<void>;
   credencialesModal: CredencialesModalState;
   closeCredencialesModal: () => void;
   refetch: () => Promise<void>;
@@ -67,8 +69,9 @@ const initialCredencialesState: CredencialesModalState = {
   nombre: '',
   apellido: '',
   username: '',
-  pin: '',
+  pin: null,
   isNewStudent: false,
+  estudianteId: null,
 };
 
 export function usePersonas(): UsePersonasReturn {
@@ -240,6 +243,7 @@ export function usePersonas(): UsePersonasReturn {
               username: username ?? credResult.usuario?.username ?? 'N/A',
               pin: credResult.nuevaPassword,
               isNewStudent: true,
+              estudianteId,
             });
           } catch {
             toast.success('Estudiante creado (sin PIN generado)');
@@ -373,30 +377,42 @@ export function usePersonas(): UsePersonasReturn {
   );
 
   /**
-   * Ver/regenerar credenciales de un estudiante
-   * Muestra username actual y genera nuevo PIN
+   * Ver credenciales de un estudiante (solo username, sin regenerar PIN)
    */
-  const handleCredenciales = useCallback(async (person: AdminPerson) => {
+  const handleCredenciales = useCallback((person: AdminPerson) => {
     if (person.role !== 'estudiante') {
       toast.error('Solo se pueden ver credenciales de estudiantes');
       return;
     }
 
+    // Mostrar modal con username actual, sin PIN (no regeneramos)
+    setCredencialesModal({
+      isOpen: true,
+      nombre: person.nombre,
+      apellido: person.apellido,
+      username: person.username ?? 'N/A',
+      pin: null, // No mostramos PIN, solo username
+      isNewStudent: false,
+      estudianteId: person.id,
+    });
+  }, []);
+
+  /**
+   * Regenerar PIN de un estudiante (acción destructiva)
+   */
+  const handleRegenerarPin = useCallback(async (estudianteId: string) => {
     try {
-      // Regenerar PIN (el username ya lo tenemos)
-      const credResult = await resetCredenciales(person.id, 'estudiante');
-      // Mostrar modal de credenciales
-      setCredencialesModal({
-        isOpen: true,
-        nombre: person.nombre,
-        apellido: person.apellido,
-        username: person.username ?? credResult.usuario?.username ?? 'N/A',
+      const credResult = await resetCredenciales(estudianteId, 'estudiante');
+      // Actualizar el modal con el nuevo PIN
+      setCredencialesModal((prev) => ({
+        ...prev,
         pin: credResult.nuevaPassword,
-        isNewStudent: false,
-      });
+        username: credResult.usuario?.username ?? prev.username,
+      }));
+      toast.success('PIN regenerado exitosamente');
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al obtener credenciales';
-      console.error('Error al obtener credenciales:', message);
+      const message = err instanceof Error ? err.message : 'Error al regenerar PIN';
+      console.error('Error al regenerar PIN:', message);
       toast.error(`Error: ${message}`);
     }
   }, []);
@@ -422,6 +438,7 @@ export function usePersonas(): UsePersonasReturn {
     handleUpdate,
     handleDelete,
     handleCredenciales,
+    handleRegenerarPin,
     credencialesModal,
     closeCredencialesModal,
     refetch: fetchPeople,

@@ -5,11 +5,9 @@ import { X, UserPlus, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import {
   crearEstudianteConCredenciales,
-  getSectores,
   getCasas,
   type CrearEstudianteConCredencialesDto,
   type CrearEstudianteConCredencialesResponse,
-  type Sector,
   type Casa,
 } from '@/lib/api/admin.api';
 
@@ -21,7 +19,6 @@ interface EstudianteFormData {
   apellidoEstudiante: string;
   edadEstudiante: string;
   nivelEscolar: NivelEscolar | '';
-  sectorId: string;
   casaId: string;
   // Tutor
   nombreTutor: string;
@@ -36,7 +33,6 @@ interface FormErrors {
   apellidoEstudiante?: string;
   edadEstudiante?: string;
   nivelEscolar?: string;
-  sectorId?: string;
   nombreTutor?: string;
   apellidoTutor?: string;
   emailTutor?: string;
@@ -49,7 +45,8 @@ interface EstudianteFormModalProps {
   onSuccess?: (response: CrearEstudianteConCredencialesResponse) => void;
   /** Callback con el DTO para que el padre maneje la API (modo delegado) */
   onSubmitDto?: (dto: CrearEstudianteConCredencialesDto) => Promise<void>;
-  preselectedSectorId?: string;
+  /** Casa preseleccionada (opcional) */
+  preselectedCasaId?: string;
 }
 
 const INITIAL_FORM_DATA: EstudianteFormData = {
@@ -57,7 +54,6 @@ const INITIAL_FORM_DATA: EstudianteFormData = {
   apellidoEstudiante: '',
   edadEstudiante: '',
   nivelEscolar: '',
-  sectorId: '',
   casaId: '',
   nombreTutor: '',
   apellidoTutor: '',
@@ -74,25 +70,25 @@ const NIVELES_ESCOLARES: { value: NivelEscolar; label: string }[] = [
 
 /**
  * EstudianteFormModal - Modal para crear estudiantes con credenciales
+ * Sistema Casa/Mundo 2026 - Ya no usa Sectores
  */
 export function EstudianteFormModal({
   isOpen,
   onClose,
   onSuccess,
   onSubmitDto,
-  preselectedSectorId,
+  preselectedCasaId,
 }: EstudianteFormModalProps) {
   const [formData, setFormData] = useState<EstudianteFormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [sectores, setSectores] = useState<Sector[]>([]);
   const [casas, setCasas] = useState<Casa[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
   // Ref para controlar si el request sigue siendo válido
   const currentRequestRef = useRef<string | null>(null);
 
-  // Cargar sectores y casas
+  // Cargar casas
   useEffect(() => {
     if (!isOpen) return;
 
@@ -102,21 +98,17 @@ export function EstudianteFormModal({
 
     setIsLoadingData(true);
 
-    Promise.all([getSectores(), getCasas()])
-      .then(([sectoresData, casasData]) => {
+    getCasas()
+      .then((casasData) => {
         // Verificar que este request siga siendo el actual
         if (currentRequestRef.current !== requestId) return;
-
-        setSectores(sectoresData.filter((s) => s.activo));
-        // Casa no tiene campo 'activo', mostrar todas
         setCasas(casasData);
       })
       .catch((error) => {
         // Solo mostrar error si el request sigue siendo actual
         if (currentRequestRef.current !== requestId) return;
-
-        console.error('Error cargando datos:', error);
-        toast.error('Error al cargar sectores y casas');
+        console.error('Error cargando casas:', error);
+        toast.error('Error al cargar casas');
       })
       .finally(() => {
         // Solo actualizar loading si el request sigue siendo actual
@@ -136,11 +128,11 @@ export function EstudianteFormModal({
     if (isOpen) {
       setFormData({
         ...INITIAL_FORM_DATA,
-        sectorId: preselectedSectorId || '',
+        casaId: preselectedCasaId || '',
       });
       setErrors({});
     }
-  }, [isOpen, preselectedSectorId]);
+  }, [isOpen, preselectedCasaId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -178,10 +170,6 @@ export function EstudianteFormModal({
       newErrors.nivelEscolar = 'El nivel escolar es requerido';
     }
 
-    if (!formData.sectorId) {
-      newErrors.sectorId = 'El sector es requerido';
-    }
-
     // Tutor
     if (!formData.nombreTutor.trim()) {
       newErrors.nombreTutor = 'El nombre del tutor es requerido';
@@ -217,7 +205,6 @@ export function EstudianteFormModal({
         apellidoEstudiante: formData.apellidoEstudiante.trim(),
         edadEstudiante: parseInt(formData.edadEstudiante, 10),
         nivelEscolar: formData.nivelEscolar as NivelEscolar,
-        sectorId: formData.sectorId,
         casaId: formData.casaId || undefined,
         nombreTutor: formData.nombreTutor.trim(),
         apellidoTutor: formData.apellidoTutor.trim(),
@@ -374,33 +361,8 @@ export function EstudianteFormModal({
                     )}
                   </div>
 
-                  {/* Sector */}
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--admin-text)] mb-1">
-                      Sector *
-                    </label>
-                    <select
-                      name="sectorId"
-                      value={formData.sectorId}
-                      onChange={handleChange}
-                      className={`w-full px-3 py-2 rounded-lg bg-[var(--admin-surface-2)] border ${
-                        errors.sectorId ? 'border-red-500' : 'border-[var(--admin-border)]'
-                      } text-[var(--admin-text)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)]`}
-                    >
-                      <option value="">Seleccionar sector</option>
-                      {sectores.map((sector) => (
-                        <option key={sector.id} value={sector.id}>
-                          {sector.nombre}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.sectorId && (
-                      <p className="text-red-500 text-xs mt-1">{errors.sectorId}</p>
-                    )}
-                  </div>
-
-                  {/* Casa (opcional) */}
-                  <div>
+                  {/* Casa */}
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-[var(--admin-text)] mb-1">
                       Casa (opcional)
                     </label>
@@ -417,6 +379,9 @@ export function EstudianteFormModal({
                         </option>
                       ))}
                     </select>
+                    <p className="text-xs text-[var(--admin-text-muted)] mt-1">
+                      La Casa agrupa a estudiantes por rango de edad
+                    </p>
                   </div>
                 </div>
               </div>
