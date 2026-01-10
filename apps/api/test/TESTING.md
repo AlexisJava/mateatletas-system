@@ -2,6 +2,45 @@
 
 Guía para escribir tests de integración consistentes en Mateatletas API.
 
+## Filosofía: Black Box Testing (Anti-Sesgo)
+
+**IMPORTANTE:** Los tests de integración deben ser "jueces, no cómplices".
+
+### El Problema del Sesgo
+
+Si la IA lee el código y luego escribe el test, tiende a testear "lo que el código hace" en vez de "lo que el código **debería** hacer". Esto es un riesgo real llamado **sesgo de confirmación**.
+
+### La Solución: Black Box Testing
+
+1. **No mires el código interno**: Al crear el test, no pienses en cómo está escrita la función en el backend.
+
+2. **Céntrate en el contrato**: Piensa: "Si yo envío X al endpoint, debo recibir Y como respuesta".
+
+3. **El test es el juez, no el cómplice**: El test debe basarse en los **requisitos del negocio**, no en las líneas de código.
+
+### Proceso Recomendado
+
+1. **Antes de escribir tests**, definir qué DEBERÍA hacer el endpoint:
+   - ¿Qué roles pueden acceder?
+   - ¿Qué validaciones debe hacer?
+   - ¿Qué debe retornar en cada caso?
+   - ¿Qué side-effects debe tener en la DB?
+
+2. **Escribir tests basados en esos requisitos** (sin leer la implementación).
+
+3. **Si el test falla**, puede ser:
+   - El código tiene un bug (lo ideal - encontramos un problema)
+   - El requisito estaba mal definido (hay que ajustar)
+
+### Qué Tests Siempre Aportan Valor
+
+Incluso leyendo el código primero, estos tests son "universales" y valiosos:
+
+- **Seguridad (401/403)**: Siempre testear que los roles incorrectos no pueden acceder
+- **Aislamiento de datos**: Usuario A no puede ver/modificar datos de Usuario B
+- **Idempotencia**: Operaciones repetidas no rompen nada
+- **Edge cases**: Datos vacíos, nulos, duplicados, estudiantes dados de baja, etc.
+
 ## Estructura de Carpetas
 
 ```
