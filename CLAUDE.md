@@ -503,6 +503,54 @@ services:
 6. **Verificar en DB** - No confiar solo en el response, verificar estado real
 7. **Correr en serie** - `--runInBand` para evitar race conditions entre tests
 
+### BLACK BOX TESTING - TÉCNICAS OBLIGATORIAS
+
+**IMPORTANTE:** Antes de escribir cualquier test, aplicar estas técnicas formales.
+Ver documentación completa en: `apps/api/test/TESTING.md`
+
+#### 1. Equivalence Partitioning
+
+Dividir inputs en clases equivalentes. Testear UN representante por clase.
+
+```typescript
+// Clases: [válido-con-datos, válido-sin-datos, inválido-auth, inválido-rol]
+it('Clase VÁLIDO-CON-DATOS: docente con asignaciones');
+it('Clase VÁLIDO-SIN-DATOS: docente sin asignaciones');
+it('Clase INVÁLIDO-AUTH: token expirado → 401');
+it('Clase INVÁLIDO-ROL: estudiante → 403');
+```
+
+#### 2. Boundary Value Analysis
+
+Los bugs viven en los límites. Testear: 0, 1, MAX-1, MAX, MAX+1
+
+```typescript
+it('limit=0 → error o default');
+it('limit=1 → exactamente 1 resultado');
+it('limit=50 → máximo permitido');
+it('limit=51 → error o truncar');
+```
+
+#### 3. State Transition Testing
+
+Para endpoints que cambian estado, documentar transiciones:
+
+```
+DESACTIVADA → activar → ACTIVA
+ACTIVA → activar → ACTIVA (idempotente)
+ACTIVA → desactivar → DESACTIVADA
+```
+
+#### 4. Error Guessing
+
+Testear casos típicos de fallo:
+
+- Caracteres especiales: `áéíóú`, `中文`, `🎮`, `<script>`
+- IDs válidos pero inexistentes
+- IDs con formato inválido
+- Requests duplicados rápidos (race conditions)
+- Body vacío, campos faltantes, campos extra
+
 ### FIXTURES RECOMENDADAS PARA MATEATLETAS
 
 ```typescript

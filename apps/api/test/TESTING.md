@@ -41,6 +41,106 @@ Incluso leyendo el código primero, estos tests son "universales" y valiosos:
 - **Idempotencia**: Operaciones repetidas no rompen nada
 - **Edge cases**: Datos vacíos, nulos, duplicados, estudiantes dados de baja, etc.
 
+## Técnicas Black Box Testing
+
+Todos los tests de integración DEBEN aplicar estas técnicas formales de testing.
+
+### 1. Equivalence Partitioning (Partición de Equivalencia)
+
+Dividir los inputs en "clases" que el sistema trata de forma equivalente.
+Testear UN representante de cada clase, no todos los valores posibles.
+
+**Ejemplo para GET /docentes/me/asignaciones:**
+
+| Clase             | Descripción              | Representante a testear       |
+| ----------------- | ------------------------ | ----------------------------- |
+| Válido con datos  | Docente con asignaciones | Docente con 2 asignaciones    |
+| Válido sin datos  | Docente sin asignaciones | Docente recién creado         |
+| Inválido por auth | Token incorrecto         | Token expirado                |
+| Inválido por rol  | Rol no autorizado        | Estudiante intentando acceder |
+
+**NO testear:** docente con 1 asignación, con 3, con 5... son la misma clase.
+
+### 2. Boundary Value Analysis (Análisis de Valores Límite)
+
+Los bugs se esconden en los límites. Testear explícitamente:
+
+- Valor mínimo (0, 1, string vacío)
+- Valor máximo (MAX, límite de paginación)
+- Justo antes/después del límite (MAX-1, MAX+1)
+
+**Ejemplo para endpoint con paginación (limit=50 máximo):**
+
+```typescript
+it('limit=0 → debería retornar error o comportamiento por defecto');
+it('limit=1 → debería retornar exactamente 1 resultado');
+it('limit=50 → debería retornar hasta 50 resultados (máximo)');
+it('limit=51 → debería retornar error o truncar a 50');
+it('sin limit → debería usar valor por defecto');
+```
+
+**Ejemplo para strings:**
+
+```typescript
+it('nombre vacío "" → debería retornar 400');
+it('nombre con 1 caracter → debería aceptar');
+it('nombre con 255 caracteres → debería aceptar (límite)');
+it('nombre con 256 caracteres → debería retornar 400');
+```
+
+### 3. Decision Table Testing (Tabla de Decisiones)
+
+Para endpoints con múltiples condiciones que afectan el resultado.
+Crear tabla con todas las combinaciones relevantes.
+
+**Ejemplo para activar clase:**
+
+| Condición                    | Caso 1 | Caso 2 | Caso 3 | Caso 4 |
+| ---------------------------- | ------ | ------ | ------ | ------ |
+| Es dueño de asignación       | ✅     | ✅     | ❌     | ✅     |
+| Clase existe                 | ✅     | ❌     | ✅     | ✅     |
+| Clase pertenece a asignación | ✅     | -      | ✅     | ❌     |
+| **Resultado esperado**       | 201 OK | 404    | 403    | 400    |
+
+Cada columna = un test case.
+
+### 4. State Transition Testing (Transición de Estados)
+
+Para endpoints que cambian estados. Documentar:
+
+- Estados posibles
+- Transiciones válidas
+- Transiciones inválidas
+
+**Ejemplo para activar/desactivar clase:**
+
+```
+Estados: DESACTIVADA, TEORIA_ACTIVA, PRACTICA_ACTIVA, AMBAS_ACTIVAS
+
+Diagrama:
+DESACTIVADA ──activar──► AMBAS_ACTIVAS
+AMBAS_ACTIVAS ──desactivar──► DESACTIVADA
+AMBAS_ACTIVAS ──desactivar_teoria──► PRACTICA_ACTIVA
+PRACTICA_ACTIVA ──activar_teoria──► AMBAS_ACTIVAS
+
+Tests de transición:
+it('DESACTIVADA + activar → AMBAS_ACTIVAS')
+it('AMBAS_ACTIVAS + activar → AMBAS_ACTIVAS (idempotente)')
+it('AMBAS_ACTIVAS + desactivar → DESACTIVADA')
+```
+
+### 5. Error Guessing (Adivinación de Errores)
+
+Basado en experiencia, testear casos que típicamente fallan:
+
+- Caracteres especiales: `áéíóú`, `中文`, `🎮`, `<script>`, `'; DROP TABLE`
+- Valores nulos/undefined donde no deberían estar
+- IDs que no existen (formato válido pero no en DB)
+- IDs con formato inválido (no UUID)
+- Requests duplicados rápidos (race conditions)
+- Campos opcionales ausentes
+- Campos extra no esperados en el body
+
 ## Estructura de Carpetas
 
 ```
@@ -270,15 +370,31 @@ await assertEstudianteState(prisma, estudianteId, {
 });
 ```
 
-## Patrón de Test
+## Patrón de Test con Black Box Testing
+
+El header del archivo DEBE documentar las técnicas BBT aplicadas:
 
 ```typescript
 /**
  * ============================================================================
- * INTEGRATION TESTS - [Nombre del Feature]
+ * BLACK BOX INTEGRATION TEST
  * ============================================================================
  *
- * Endpoint: POST /api/...
+ * ENDPOINT: POST /docentes/asignaciones/:id/clases/:claseId/activar
+ *
+ * EQUIVALENCE CLASSES:
+ * - Auth: [válido-docente-dueño, válido-docente-otro, válido-estudiante, inválido]
+ * - Asignación: [existe-propia, existe-ajena, no-existe]
+ * - Clase: [existe-en-asignación, existe-otra-asignación, no-existe]
+ * - Estado inicial: [desactivada, ya-activa]
+ *
+ * BOUNDARIES:
+ * - N/A para este endpoint (no tiene parámetros numéricos)
+ *
+ * STATE TRANSITIONS:
+ * - DESACTIVADA → activar → ACTIVA
+ * - ACTIVA → activar → ACTIVA (idempotente)
+ *
  * Setup: docker-compose -f docker-compose.test.yml up -d
  * Run: yarn workspace api test --testPathPattern="nombre.integration" --runInBand
  */
@@ -375,6 +491,36 @@ describe('[INTEGRATION] Feature Name', () => {
 ```
 
 ## Convenciones
+
+### Reglas Obligatorias BBT
+
+1. **Header documentado**: Cada archivo DEBE incluir en el header un comentario documentando:
+   - Equivalence Classes identificadas
+   - Boundaries relevantes (si aplica)
+   - State Transitions (si aplica)
+
+2. **Agrupación por técnica**: Los `describe` DEBEN agruparse por técnica BBT:
+
+```typescript
+describe('Equivalence Partitioning: Autenticación', () => { ... });
+describe('Equivalence Partitioning: Recursos', () => { ... });
+describe('State Transitions', () => { ... });
+describe('Error Guessing', () => { ... });
+```
+
+3. **Nombres descriptivos**: El nombre del test DEBE indicar la clase/boundary/transición:
+
+```typescript
+// Bueno - indica la clase de equivalencia
+it('Clase VÁLIDO-DOCENTE-DUEÑO: debe activar correctamente', async () => {});
+it('Clase INVÁLIDO (sin token): debe retornar 401', async () => {});
+
+// Bueno - indica el boundary
+it('limit=50 (máximo): debe retornar hasta 50 resultados', async () => {});
+
+// Bueno - indica la transición
+it('Transición DESACTIVADA → activar → ACTIVA', async () => {});
+```
 
 ### Naming de Archivos
 

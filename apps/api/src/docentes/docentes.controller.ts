@@ -15,6 +15,7 @@ import { DocentePlanificacionesService } from './services/docente-planificacione
 import { CreateDocenteDto } from './dto/create-docente.dto';
 import { UpdateDocenteDto } from './dto/update-docente.dto';
 import { ReasignarClasesDto } from './dto/reasignar-clases.dto';
+import { AsignarTareaDto } from './dto/asignar-tarea.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -428,7 +429,7 @@ export class DocentesController {
    * POST /docentes/asignaciones/:id/tareas/:tareaClaseId/asignar - Asignar tarea al grupo
    * @param id - ID de la asignación
    * @param tareaClaseId - ID de la tarea de clase
-   * @param body - Fecha límite opcional
+   * @param dto - Fecha límite opcional (body puede estar vacío)
    * @param user - Usuario autenticado (del JWT)
    */
   @Post('asignaciones/:id/tareas/:tareaClaseId/asignar')
@@ -436,11 +437,11 @@ export class DocentesController {
   async asignarTarea(
     @Param('id', ParseIdPipe) id: string,
     @Param('tareaClaseId', ParseIdPipe) tareaClaseId: string,
-    @Body() body: { fecha_limite?: string },
+    @Body() dto: AsignarTareaDto = {},
     @GetUser() user: AuthUser,
   ) {
-    const fechaLimite = body.fecha_limite
-      ? new Date(body.fecha_limite)
+    const fechaLimite = dto.fecha_limite
+      ? new Date(dto.fecha_limite)
       : undefined;
     return this.planificacionesService.asignarTarea(
       id,

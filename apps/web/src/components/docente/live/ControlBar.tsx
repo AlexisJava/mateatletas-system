@@ -51,7 +51,6 @@ export const ControlBar: React.FC<ControlBarProps> = ({ onEndClass, variant = 't
     let timer: NodeJS.Timeout | undefined;
 
     if (isStudent && canPublish && !prevCanPublishRef.current && !isMicEnabled) {
-      console.log('[ControlBar] Auto-activando micrófono...');
       // Pequeño delay para asegurar que LiveKit esté listo
       timer = setTimeout(() => {
         toggleMic();
@@ -69,18 +68,11 @@ export const ControlBar: React.FC<ControlBarProps> = ({ onEndClass, variant = 't
   const updatePermissions = useCallback(() => {
     // Solo procesar si el participante local está disponible
     if (!room.localParticipant?.identity) {
-      console.log('[ControlBar] LocalParticipant not ready yet');
       return;
     }
 
     const permissions = room.localParticipant.permissions;
     const newCanPublish = permissions?.canPublish ?? false;
-
-    console.log('[ControlBar] Permissions updated:', {
-      canPublish: newCanPublish,
-      permissions,
-      identity: room.localParticipant.identity,
-    });
 
     setCanPublish(newCanPublish);
 

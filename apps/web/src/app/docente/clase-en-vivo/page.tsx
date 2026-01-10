@@ -33,8 +33,6 @@ function ClaseEnVivoContent() {
     searchParams.get('comisionId') ||
     (roomName?.startsWith('comision-') ? roomName.replace('comision-', '') : undefined);
 
-  console.log('[ClaseEnVivo Docente] IDs:', { claseGrupoId, comisionId, roomName });
-
   // Validar parámetros requeridos
   if (!token || !wsUrl || !roomName) {
     return (
