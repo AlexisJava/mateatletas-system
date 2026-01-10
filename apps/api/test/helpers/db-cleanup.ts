@@ -104,6 +104,10 @@ export async function cleanAllTestTables(prisma: PrismaService) {
   await prisma.producto.deleteMany({});
   await prisma.planSuscripcion.deleteMany({});
 
+  // Sistema Casa/Mundo 2026 - Asignaciones docente
+  await prisma.docenteCasa.deleteMany({});
+  await prisma.docenteMundo.deleteMany({});
+
   // Usuarios
   await prisma.estudiante.deleteMany({});
   await prisma.tutor.deleteMany({});
