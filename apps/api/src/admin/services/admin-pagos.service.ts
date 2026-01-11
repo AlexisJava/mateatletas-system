@@ -60,25 +60,35 @@ export class AdminPagosService {
       );
     }
 
-    const precioFinal = Number(inscripcion.precio_final);
+    // Validaciones de entrada
+    if (!dto.metodoPago || dto.metodoPago.trim() === '') {
+      throw new BadRequestException('El método de pago es requerido');
+    }
 
-    // Determinar el nuevo estado según el monto pagado
-    let nuevoEstado: EstadoPago;
-    if (dto.monto >= precioFinal) {
-      nuevoEstado = 'Pagado';
-    } else if (dto.monto > 0) {
-      nuevoEstado = 'Parcial';
-    } else {
+    if (dto.monto <= 0) {
       throw new BadRequestException('El monto debe ser mayor a 0');
+    }
+
+    const precioFinal = Number(inscripcion.precio_final);
+    const montoYaPagado = Number(inscripcion.monto_pagado ?? 0);
+    const montoAcumulado = montoYaPagado + dto.monto;
+
+    // Determinar el nuevo estado según el monto ACUMULADO (no solo el pago actual)
+    let nuevoEstado: EstadoPago;
+    if (montoAcumulado >= precioFinal) {
+      nuevoEstado = 'Pagado';
+    } else {
+      nuevoEstado = 'Parcial';
     }
 
     const estadoAnterior = inscripcion.estado_pago;
 
-    // Actualizar la inscripción con el pago
+    // Actualizar la inscripción con el pago acumulado
     await this.prisma.inscripcionMensual.update({
       where: { id: dto.inscripcionId },
       data: {
         estado_pago: nuevoEstado,
+        monto_pagado: montoAcumulado,
         fecha_pago: new Date(),
         metodo_pago: dto.metodoPago,
         comprobante_url: dto.comprobante || null,
@@ -93,7 +103,7 @@ export class AdminPagosService {
         periodo: inscripcion.periodo,
         estudiante: `${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido}`,
         montoOriginal: precioFinal,
-        montoPagado: dto.monto,
+        montoPagado: montoAcumulado,
         estadoAnterior,
         estadoNuevo: nuevoEstado,
       },

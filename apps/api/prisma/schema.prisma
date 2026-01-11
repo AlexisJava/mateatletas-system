@@ -1748,6 +1748,7 @@ model InscripcionMensual {
 
   /// Estado de pago
   estado_pago       EstadoPago @default(Pendiente)
+  monto_pagado      Decimal    @default(0) @db.Decimal(10, 2) // Monto acumulado de pagos
   fecha_vencimiento DateTime? // Fecha límite de pago
   fecha_pago        DateTime?
   metodo_pago       String? // "Efectivo", "Transferencia", "MercadoPago"

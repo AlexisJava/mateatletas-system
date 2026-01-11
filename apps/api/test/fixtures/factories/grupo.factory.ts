@@ -92,6 +92,7 @@ export interface CreateClaseGrupoOptions {
   fechaInicio?: Date;
   fechaFin?: Date;
   cupoMaximo?: number;
+  activo?: boolean;
 }
 
 /**
@@ -127,7 +128,7 @@ export async function createTestClaseGrupo(
       grupo_id: grupoId,
       docente_id: options.docenteId,
       sector_id: options.sectorId,
-      activo: true,
+      activo: options.activo ?? true,
     },
   });
 }

@@ -65,6 +65,7 @@ export interface CreateComisionOptions {
   fechaInicio?: Date;
   fechaFin?: Date;
   cupoMaximo?: number;
+  activo?: boolean;
 }
 
 /**
@@ -86,7 +87,7 @@ export async function createTestComision(
       fecha_inicio: options.fechaInicio,
       fecha_fin: options.fechaFin,
       cupo_maximo: options.cupoMaximo,
-      activo: true,
+      activo: options.activo ?? true,
     },
   });
 }
