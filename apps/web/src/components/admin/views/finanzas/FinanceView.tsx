@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { DollarSign, Clock, Users, TrendingUp } from 'lucide-react';
+import { DollarSign, Clock, Users, TrendingUp, CreditCard } from 'lucide-react';
 import { formatCompactCurrency } from '@/lib/constants/admin-mock-data';
 import type { FinanceStatCardProps } from './types/finance.types';
 import {
@@ -13,6 +13,7 @@ import {
   PaymentStatusChart,
   ReportsPanel,
   NotificationsPanel,
+  PagoManualModal,
 } from './components';
 import { useFinanceStats } from './hooks';
 
@@ -25,6 +26,7 @@ import { useFinanceStats } from './hooks';
 export function FinanceView() {
   const { stats, config, isLoading, error, refetch, saveConfig } = useFinanceStats();
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const [showPagoManualModal, setShowPagoManualModal] = useState(false);
 
   const handleSaveConfig = async (newConfig: typeof config) => {
     if (!newConfig) return;
@@ -111,6 +113,17 @@ export function FinanceView() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Action Button */}
+      <div className="flex justify-end">
+        <button
+          onClick={() => setShowPagoManualModal(true)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl font-semibold hover:from-emerald-700 hover:to-green-700 transition-all shadow-lg shadow-emerald-500/20"
+        >
+          <CreditCard className="w-5 h-5" />
+          Registrar Pago Manual
+        </button>
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {mainStats.map((stat, index) => (
@@ -141,6 +154,14 @@ export function FinanceView() {
         onClose={() => setShowConfigModal(false)}
         config={config}
         onSave={handleSaveConfig}
+      />
+
+      <PagoManualModal
+        isOpen={showPagoManualModal}
+        onClose={() => setShowPagoManualModal(false)}
+        onSuccess={() => {
+          refetch();
+        }}
       />
     </div>
   );

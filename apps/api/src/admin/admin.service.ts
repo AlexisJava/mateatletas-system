@@ -7,6 +7,10 @@ import { AdminUsuariosService } from './services/admin-usuarios.service';
 import { AdminRolesService } from './services/admin-roles.service';
 import { AdminEstudiantesService } from './services/admin-estudiantes.service';
 import { AdminCredencialesService } from './services/admin-credenciales.service';
+import {
+  AdminPagosService,
+  RegistrarPagoManualDto,
+} from './services/admin-pagos.service';
 import { CircuitBreaker } from '../common/circuit-breaker';
 
 type CrearEstudianteRapidoData = Parameters<
@@ -157,6 +161,7 @@ export class AdminService {
     private rolesService: AdminRolesService,
     private estudiantesService: AdminEstudiantesService,
     private credencialesService: AdminCredencialesService,
+    private pagosService: AdminPagosService,
   ) {
     this.logger.log('AdminService initialized with circuit breakers');
   }
@@ -381,6 +386,72 @@ export class AdminService {
    */
   async getHistoricoMensual(meses?: number) {
     return this.statsService.getHistoricoMensual(meses);
+  }
+
+  /**
+   * Obtener estadísticas de contenidos leídos/completados
+   * DELEGACIÓN: AdminStatsService
+   */
+  async getLibrosLeidos() {
+    return this.statsService.getLibrosLeidos();
+  }
+
+  /**
+   * Exportar inscripciones como CSV
+   * DELEGACIÓN: AdminStatsService
+   */
+  async exportInscripcionesCSV(filters?: {
+    periodo?: string;
+    estado?: string;
+  }) {
+    return this.statsService.exportInscripcionesCSV(filters);
+  }
+
+  /**
+   * Exportar métricas financieras como CSV
+   * DELEGACIÓN: AdminStatsService
+   */
+  async exportMetricasCSV(meses?: number) {
+    return this.statsService.exportMetricasCSV(meses);
+  }
+
+  /**
+   * Exportar inscripciones como PDF
+   * DELEGACIÓN: AdminStatsService
+   */
+  async exportInscripcionesPDF(filters?: {
+    periodo?: string;
+    estado?: string;
+  }) {
+    return this.statsService.exportInscripcionesPDF(filters);
+  }
+
+  /**
+   * Exportar métricas financieras como PDF
+   * DELEGACIÓN: AdminStatsService
+   */
+  async exportMetricasPDF(meses?: number) {
+    return this.statsService.exportMetricasPDF(meses);
+  }
+
+  /**
+   * Registrar pago manual para una inscripción
+   * DELEGACIÓN: AdminPagosService
+   */
+  async registrarPagoManual(dto: RegistrarPagoManualDto) {
+    return this.pagosService.registrarPagoManual(dto);
+  }
+
+  /**
+   * Listar inscripciones pendientes de pago
+   * DELEGACIÓN: AdminPagosService
+   */
+  async listarInscripcionesPendientes(options?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) {
+    return this.pagosService.listarInscripcionesPendientes(options);
   }
 
   /**

@@ -533,6 +533,45 @@ export const getDocentes = async () => {
   }
 };
 
+/**
+ * Obtener conteo de clases asignadas a un docente
+ * GET /api/docentes/:id/clases-count
+ */
+export interface DocenteClasesCount {
+  claseGrupos: number;
+  comisiones: number;
+  total: number;
+}
+
+export const getDocenteClasesCount = async (docenteId: string): Promise<DocenteClasesCount> => {
+  try {
+    return await axios.get<DocenteClasesCount>(`/docentes/${docenteId}/clases-count`);
+  } catch (error) {
+    console.error('Error al obtener conteo de clases del docente:', error);
+    throw error;
+  }
+};
+
+/**
+ * Estadísticas de contenidos leídos/completados
+ * GET /api/admin/analytics/libros-leidos
+ */
+export interface LibrosLeidosStats {
+  total: number;
+  porEstudiante: number;
+  completadosEsteMes: number;
+  tendencia: Array<{ month: string; completados: number }>;
+}
+
+export const getLibrosLeidos = async (): Promise<LibrosLeidosStats> => {
+  try {
+    return await axios.get<LibrosLeidosStats>('/admin/analytics/libros-leidos');
+  } catch (error) {
+    console.error('Error al obtener estadísticas de libros leídos:', error);
+    throw error;
+  }
+};
+
 // Products Management
 export const getAllProducts = async (includeInactive = true): Promise<Producto[]> => {
   try {
@@ -1871,6 +1910,226 @@ export const deleteTarea = async (id: string): Promise<void> => {
     await axios.delete(`/admin/tareas/${id}`);
   } catch (error) {
     console.error('Error al eliminar tarea:', error);
+    throw error;
+  }
+};
+
+// ============================================================================
+// EXPORTACIÓN DE REPORTES CSV
+// ============================================================================
+
+/** Response de exportación CSV */
+export interface ExportCSVResponse {
+  filename: string;
+  content: string;
+  contentType: string;
+}
+
+/**
+ * Exportar inscripciones como CSV
+ * GET /admin/export/inscripciones
+ */
+export const exportInscripcionesCSV = async (filters?: {
+  periodo?: string;
+  estado?: string;
+}): Promise<ExportCSVResponse> => {
+  try {
+    const params = new URLSearchParams();
+    if (filters?.periodo) params.append('periodo', filters.periodo);
+    if (filters?.estado) params.append('estado', filters.estado);
+
+    const url = params.toString()
+      ? `/admin/export/inscripciones?${params}`
+      : '/admin/export/inscripciones';
+    return await axios.get<ExportCSVResponse>(url);
+  } catch (error) {
+    console.error('Error al exportar inscripciones CSV:', error);
+    throw error;
+  }
+};
+
+/**
+ * Exportar métricas financieras como CSV
+ * GET /admin/export/metricas
+ */
+export const exportMetricasCSV = async (meses = 12): Promise<ExportCSVResponse> => {
+  try {
+    return await axios.get<ExportCSVResponse>(`/admin/export/metricas?meses=${meses}`);
+  } catch (error) {
+    console.error('Error al exportar métricas CSV:', error);
+    throw error;
+  }
+};
+
+/**
+ * Descarga un archivo CSV en el navegador
+ * Helper function para usar después de obtener el contenido
+ */
+export const downloadCSV = (response: ExportCSVResponse): void => {
+  const blob = new Blob([response.content], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = response.filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
+
+// ============================================================================
+// EXPORTACIÓN DE REPORTES PDF
+// ============================================================================
+
+/** Response de exportación PDF (base64) */
+export interface ExportPDFResponse {
+  filename: string;
+  content: string; // base64 encoded
+  contentType: string;
+}
+
+/**
+ * Exportar inscripciones como PDF
+ * GET /admin/export/inscripciones/pdf
+ */
+export const exportInscripcionesPDF = async (filters?: {
+  periodo?: string;
+  estado?: string;
+}): Promise<ExportPDFResponse> => {
+  try {
+    const params = new URLSearchParams();
+    if (filters?.periodo) params.append('periodo', filters.periodo);
+    if (filters?.estado) params.append('estado', filters.estado);
+
+    const url = params.toString()
+      ? `/admin/export/inscripciones/pdf?${params}`
+      : '/admin/export/inscripciones/pdf';
+    return await axios.get<ExportPDFResponse>(url);
+  } catch (error) {
+    console.error('Error al exportar inscripciones PDF:', error);
+    throw error;
+  }
+};
+
+/**
+ * Exportar métricas financieras como PDF
+ * GET /admin/export/metricas/pdf
+ */
+export const exportMetricasPDF = async (meses = 12): Promise<ExportPDFResponse> => {
+  try {
+    return await axios.get<ExportPDFResponse>(`/admin/export/metricas/pdf?meses=${meses}`);
+  } catch (error) {
+    console.error('Error al exportar métricas PDF:', error);
+    throw error;
+  }
+};
+
+/**
+ * Descarga un archivo PDF en el navegador
+ * Helper function para usar después de obtener el contenido base64
+ */
+export const downloadPDF = (response: ExportPDFResponse): void => {
+  // Decode base64 to binary
+  const binaryString = atob(response.content);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = response.filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
+
+// ============================================================================
+// PAGOS MANUALES
+// ============================================================================
+
+/** Inscripción pendiente de pago */
+export interface InscripcionPendiente {
+  id: string;
+  periodo: string;
+  estudiante: {
+    id: string;
+    nombre: string;
+  };
+  tutor: {
+    id: string;
+    nombre: string;
+    email: string | null;
+  };
+  producto: string;
+  precioFinal: number;
+  estadoPago: string;
+  fechaVencimiento: string | null;
+}
+
+/** Response paginada de inscripciones pendientes */
+export interface InscripcionesPendientesResponse {
+  data: InscripcionPendiente[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+/** DTO para registrar pago manual */
+export interface RegistrarPagoManualDto {
+  inscripcionId: string;
+  monto: number;
+  metodoPago: string;
+  observaciones?: string;
+  comprobante?: string;
+}
+
+/** Resultado de pago manual */
+export interface PagoManualResult {
+  success: boolean;
+  inscripcion: {
+    id: string;
+    periodo: string;
+    estudiante: string;
+    montoOriginal: number;
+    montoPagado: number;
+    estadoAnterior: string;
+    estadoNuevo: string;
+  };
+}
+
+/**
+ * Obtener inscripciones pendientes de pago
+ * GET /admin/pagos/pendientes
+ */
+export const getInscripcionesPendientes = async (options?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}): Promise<InscripcionesPendientesResponse> => {
+  try {
+    const params = new URLSearchParams();
+    if (options?.page) params.append('page', options.page.toString());
+    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.search) params.append('search', options.search);
+    const url = params.toString() ? `/admin/pagos/pendientes?${params}` : '/admin/pagos/pendientes';
+    return await axios.get<InscripcionesPendientesResponse>(url);
+  } catch (error) {
+    console.error('Error al obtener inscripciones pendientes:', error);
+    throw error;
+  }
+};
+
+/**
+ * Registrar pago manual
+ * POST /admin/pagos/registrar
+ */
+export const registrarPagoManual = async (
+  dto: RegistrarPagoManualDto,
+): Promise<PagoManualResult> => {
+  try {
+    return await axios.post<PagoManualResult>('/admin/pagos/registrar', dto);
+  } catch (error) {
+    console.error('Error al registrar pago manual:', error);
     throw error;
   }
 };

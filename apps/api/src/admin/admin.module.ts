@@ -8,6 +8,7 @@ import { AdminUsuariosService } from './services/admin-usuarios.service';
 import { AdminRolesService } from './services/admin-roles.service';
 import { AdminEstudiantesService } from './services/admin-estudiantes.service';
 import { AdminCredencialesService } from './services/admin-credenciales.service';
+import { AdminPagosService } from './services/admin-pagos.service';
 import { AdminTareasService } from './services/admin-tareas.service';
 import { AdminPlanificacionesService } from './services/admin-planificaciones.service';
 import { DocenteAsignacionesService } from './services/docente-asignaciones.service';
@@ -38,6 +39,7 @@ import { DatabaseModule } from '../core/database/database.module';
     AdminRolesService,
     AdminEstudiantesService,
     AdminCredencialesService,
+    AdminPagosService,
     AdminTareasService,
     AdminPlanificacionesService,
     DocenteAsignacionesService,

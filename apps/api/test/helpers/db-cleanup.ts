@@ -99,6 +99,9 @@ export async function cleanAllTestTables(prisma: PrismaService) {
   // Grupos Pedagógicos (Sistema Casa/Mundo 2026 - renombrado de Grupo)
   await prisma.grupoPedagogico.deleteMany({});
 
+  // Inscripciones Mensuales (tienen FK a producto, tutor, estudiante)
+  await prisma.inscripcionMensual.deleteMany({});
+
   // Productos y Planes
   await prisma.producto.deleteMany({});
   await prisma.planSuscripcion.deleteMany({});

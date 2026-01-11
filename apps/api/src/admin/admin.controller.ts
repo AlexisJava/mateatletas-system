@@ -145,6 +145,101 @@ export class AdminController {
   }
 
   /**
+   * Obtener estadísticas de contenidos leídos/completados
+   * GET /api/admin/analytics/libros-leidos
+   * Rol: Admin
+   */
+  @Get('analytics/libros-leidos')
+  @ApiOperation({ summary: 'Obtener estadísticas de contenidos completados' })
+  async getLibrosLeidos() {
+    return this.adminService.getLibrosLeidos();
+  }
+
+  // ============================================================================
+  // EXPORTACIÓN DE REPORTES
+  // ============================================================================
+
+  /**
+   * Exportar inscripciones como CSV
+   * GET /api/admin/export/inscripciones
+   * Rol: Admin
+   * Query params: periodo (YYYY-MM), estado (Pagado|Pendiente|Vencido)
+   */
+  @Get('export/inscripciones')
+  @ApiOperation({ summary: 'Exportar inscripciones como CSV' })
+  async exportInscripcionesCSV(
+    @Query('periodo') periodo?: string,
+    @Query('estado') estado?: string,
+  ) {
+    const csvContent = await this.adminService.exportInscripcionesCSV({
+      periodo,
+      estado,
+    });
+    return {
+      filename: `inscripciones_${periodo || 'todas'}_${new Date().toISOString().split('T')[0]}.csv`,
+      content: csvContent,
+      contentType: 'text/csv',
+    };
+  }
+
+  /**
+   * Exportar métricas financieras como CSV
+   * GET /api/admin/export/metricas
+   * Rol: Admin
+   * Query params: meses (default 12)
+   */
+  @Get('export/metricas')
+  @ApiOperation({ summary: 'Exportar métricas financieras como CSV' })
+  async exportMetricasCSV(@Query('meses') meses?: string) {
+    const numMeses = meses ? parseInt(meses, 10) : 12;
+    const csvContent = await this.adminService.exportMetricasCSV(numMeses);
+    return {
+      filename: `metricas_${numMeses}meses_${new Date().toISOString().split('T')[0]}.csv`,
+      content: csvContent,
+      contentType: 'text/csv',
+    };
+  }
+
+  /**
+   * Exportar inscripciones como PDF
+   * GET /api/admin/export/inscripciones/pdf
+   * Rol: Admin
+   */
+  @Get('export/inscripciones/pdf')
+  @ApiOperation({ summary: 'Exportar inscripciones como PDF' })
+  async exportInscripcionesPDF(
+    @Query('periodo') periodo?: string,
+    @Query('estado') estado?: string,
+  ) {
+    const pdfBuffer = await this.adminService.exportInscripcionesPDF({
+      periodo,
+      estado,
+    });
+    return {
+      filename: `inscripciones_${periodo || 'todas'}_${new Date().toISOString().split('T')[0]}.pdf`,
+      content: pdfBuffer.toString('base64'),
+      contentType: 'application/pdf',
+    };
+  }
+
+  /**
+   * Exportar métricas financieras como PDF
+   * GET /api/admin/export/metricas/pdf
+   * Rol: Admin
+   */
+  @Get('export/metricas/pdf')
+  @ApiOperation({ summary: 'Exportar métricas financieras como PDF' })
+  async exportMetricasPDF(@Query('meses') meses?: string) {
+    const numMeses = meses ? parseInt(meses, 10) : 12;
+    const pdfBuffer = await this.adminService.exportMetricasPDF(numMeses);
+    return {
+      filename: `metricas_${numMeses}meses_${new Date().toISOString().split('T')[0]}.pdf`,
+      content: pdfBuffer.toString('base64'),
+      contentType: 'application/pdf',
+    };
+  }
+
+  /**
    * Listar alertas pendientes
    * GET /api/admin/alertas
    * Rol: Admin
@@ -1167,5 +1262,64 @@ export class AdminController {
   })
   async obtenerEstadisticasGrupos() {
     return this.grupoPedagogicoService.obtenerEstadisticas();
+  }
+
+  // =========================================================================
+  // PAGOS MANUALES
+  // =========================================================================
+
+  /**
+   * Listar inscripciones pendientes de pago
+   * GET /api/admin/pagos/pendientes
+   * Rol: Admin
+   */
+  @Get('pagos/pendientes')
+  @ApiOperation({
+    summary: 'Listar inscripciones pendientes',
+    description:
+      'Obtiene inscripciones con estado Pendiente, Vencido o Parcial',
+  })
+  async listarInscripcionesPendientes(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.listarInscripcionesPendientes({
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+      search,
+    });
+  }
+
+  /**
+   * Registrar pago manual para una inscripción
+   * POST /api/admin/pagos/registrar
+   * Rol: Admin
+   *
+   * Permite registrar un pago en efectivo o transferencia
+   */
+  @Post('pagos/registrar')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Registrar pago manual',
+    description:
+      'Registra un pago en efectivo o transferencia para una inscripción',
+  })
+  async registrarPagoManual(
+    @Body()
+    dto: {
+      inscripcionId: string;
+      monto: number;
+      metodoPago: string;
+      observaciones?: string;
+      comprobante?: string;
+    },
+  ) {
+    if (!dto.inscripcionId || !dto.monto || !dto.metodoPago) {
+      throw new BadRequestException(
+        'inscripcionId, monto y metodoPago son requeridos',
+      );
+    }
+    return this.adminService.registrarPagoManual(dto);
   }
 }

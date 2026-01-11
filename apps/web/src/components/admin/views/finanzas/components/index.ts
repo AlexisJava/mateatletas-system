@@ -11,3 +11,4 @@ export { RevenueEvolutionChart } from './RevenueEvolutionChart';
 export { PaymentStatusChart } from './PaymentStatusChart';
 export { ReportsPanel } from './ReportsPanel';
 export { NotificationsPanel } from './NotificationsPanel';
+export { PagoManualModal } from './PagoManualModal';
