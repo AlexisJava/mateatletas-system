@@ -196,7 +196,7 @@ describe('[INTEGRATION] Mi Aula Virtual - Endpoints', () => {
       // ARRANGE - Estudiante inscrito pero sin planificación
       const { docente } = await createTestDocente(prisma);
       const sector = await createTestSector(prisma);
-      const grupo = await prisma.grupo.create({
+      const grupo = await prisma.grupoPedagogico.create({
         data: {
           codigo: `GP-${Date.now()}`,
           nombre: 'Grupo Sin Plan',

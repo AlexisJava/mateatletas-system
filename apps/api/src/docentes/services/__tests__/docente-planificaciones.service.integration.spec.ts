@@ -110,7 +110,7 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
     }
 
     if (createdIds.grupos.length > 0) {
-      await prisma.grupo.deleteMany({
+      await prisma.grupoPedagogico.deleteMany({
         where: { id: { in: createdIds.grupos } },
       });
       createdIds.grupos = [];
@@ -176,7 +176,7 @@ describe('[INTEGRATION] DocentePlanificacionesService', () => {
     const uniqueId = createId();
 
     // Primero crear el Grupo
-    const grupo = await prisma.grupo.create({
+    const grupo = await prisma.grupoPedagogico.create({
       data: {
         codigo: `GP-${uniqueId}`,
         nombre: `Grupo Padre ${uniqueId}${suffix}`,

@@ -123,7 +123,7 @@ describe('[INTEGRATION] EstudianteAulaService', () => {
     await prisma.claseGrupo.deleteMany({
       where: { id: { in: createdIds.claseGrupos } },
     });
-    await prisma.grupo.deleteMany({
+    await prisma.grupoPedagogico.deleteMany({
       where: { id: { in: createdIds.grupos } },
     });
     await prisma.recursosEstudiante.deleteMany({
@@ -185,7 +185,7 @@ describe('[INTEGRATION] EstudianteAulaService', () => {
 
   async function crearGrupoConClase(docenteId: string, suffix = '') {
     const uniqueId = createId();
-    const grupo = await prisma.grupo.create({
+    const grupo = await prisma.grupoPedagogico.create({
       data: {
         codigo: `GP-${uniqueId}`,
         nombre: `Grupo Test ${suffix}`,

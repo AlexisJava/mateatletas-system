@@ -6,17 +6,17 @@ async function verificarTodasRelaciones() {
   try {
     console.log('=== VERIFICANDO TODAS LAS TABLAS Y RELACIONES ===\n');
 
-    // Verificar tabla Grupo (la vieja)
+    // Verificar tabla GrupoPedagogico (Sistema Casa/Mundo 2026)
     try {
-      const totalGruposViejos = await prisma.grupo.count();
-      console.log(`Total Grupos (modelo viejo): ${totalGruposViejos}`);
-      if (totalGruposViejos > 0) {
-        const muestraGrupos = await prisma.grupo.findMany({ take: 3 });
-        console.log('Muestra de Grupos viejos:');
+      const totalGruposPedagogicos = await prisma.grupoPedagogico.count();
+      console.log(`Total GruposPedagogicos: ${totalGruposPedagogicos}`);
+      if (totalGruposPedagogicos > 0) {
+        const muestraGrupos = await prisma.grupoPedagogico.findMany({ take: 3 });
+        console.log('Muestra de GruposPedagogicos:');
         muestraGrupos.forEach((g) => console.log(`  - ${g.codigo}: ${g.nombre}`));
       }
     } catch (e) {
-      console.log('No existe tabla Grupo o error:', e.message);
+      console.log('No existe tabla GrupoPedagogico o error:', e.message);
     }
 
     console.log();

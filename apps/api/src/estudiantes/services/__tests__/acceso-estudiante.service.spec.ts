@@ -48,7 +48,7 @@ describe('AccesoEstudianteService', () => {
     await prisma.docente.deleteMany({});
     await prisma.planSuscripcion.deleteMany({});
     await prisma.producto.deleteMany({});
-    await prisma.grupo.deleteMany({});
+    await prisma.grupoPedagogico.deleteMany({});
     await prisma.sector.deleteMany({});
 
     // Crear planes de suscripción
@@ -125,7 +125,7 @@ describe('AccesoEstudianteService', () => {
     });
 
     // Crear grupo
-    const grupo = await prisma.grupo.create({
+    const grupo = await prisma.grupoPedagogico.create({
       data: {
         codigo: 'B1',
         nombre: 'Grupo B1 Test',
@@ -192,7 +192,7 @@ describe('AccesoEstudianteService', () => {
     await prisma.docente.deleteMany({});
     await prisma.planSuscripcion.deleteMany({});
     await prisma.producto.deleteMany({});
-    await prisma.grupo.deleteMany({});
+    await prisma.grupoPedagogico.deleteMany({});
     await prisma.sector.deleteMany({});
     await prisma.$disconnect();
   });

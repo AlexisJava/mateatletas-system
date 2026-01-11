@@ -200,8 +200,8 @@ export async function createFullAulaSetup(
   // Crear sector
   const sector = await createTestSector(prisma);
 
-  // Crear grupo
-  const grupo = await prisma.grupo.create({
+  // Crear grupo (GrupoPedagogico desde refactor Casa/Mundo 2026)
+  const grupo = await prisma.grupoPedagogico.create({
     data: {
       codigo: `GP-${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
       nombre: 'Grupo Test Aula',

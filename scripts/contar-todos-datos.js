@@ -10,7 +10,7 @@ async function contarTodosDatos() {
       estudiantes: await prisma.estudiante.count(),
       tutores: await prisma.tutor.count(),
       docentes: await prisma.docente.count(),
-      grupos: await prisma.grupo.count(),
+      gruposPedagogicos: await prisma.grupoPedagogico.count(),
       claseGrupos: await prisma.claseGrupo.count(),
       inscripcionesClaseGrupo: await prisma.inscripcionClaseGrupo.count(),
       clases: await prisma.clase.count(),

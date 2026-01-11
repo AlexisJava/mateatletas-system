@@ -58,6 +58,7 @@ export interface CreateTestGrupoOptions {
 
 /**
  * Crea un grupo pedagógico (B1, B2, etc.)
+ * Nota: El modelo se llama GrupoPedagogico desde el refactor Casa/Mundo 2026
  */
 export async function createTestGrupo(
   prisma: PrismaService,
@@ -65,7 +66,7 @@ export async function createTestGrupo(
 ) {
   const uniqueSuffix = generateUniqueSuffix();
 
-  return prisma.grupo.create({
+  return prisma.grupoPedagogico.create({
     data: {
       codigo: options?.codigo ?? `GP_${uniqueSuffix}`,
       nombre: options?.nombre ?? `Grupo Test ${uniqueSuffix}`,

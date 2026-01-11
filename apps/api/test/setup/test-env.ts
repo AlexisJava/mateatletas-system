@@ -11,6 +11,8 @@ import 'reflect-metadata';
 
 process.env.NODE_ENV = process.env.NODE_ENV ?? 'test';
 process.env.JWT_SECRET = process.env.JWT_SECRET ?? 'test-secret';
+process.env.MERCADOPAGO_WEBHOOK_SECRET =
+  process.env.MERCADOPAGO_WEBHOOK_SECRET ?? 'test-webhook-secret';
 process.env.FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000';
 
 // Redis de test (docker-compose.test.yml usa puerto 6380)
