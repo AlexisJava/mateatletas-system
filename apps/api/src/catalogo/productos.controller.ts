@@ -69,6 +69,18 @@ export class ProductosController {
   }
 
   /**
+   * GET /productos/:id/ventas-count
+   * Obtiene conteo de ventas (inscripciones) de un producto
+   * Requiere autenticación y rol Admin
+   */
+  @Get(':id/ventas-count')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async getVentasCount(@Param('id', ParseIdPipe) id: string) {
+    return this.productosService.getVentasCount(id);
+  }
+
+  /**
    * GET /productos/:id
    * Obtiene detalles de un producto específico
    * Endpoint público

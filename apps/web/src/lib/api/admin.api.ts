@@ -573,6 +573,21 @@ export const getLibrosLeidos = async (): Promise<LibrosLeidosStats> => {
 };
 
 // Products Management
+export interface ProductoVentasCount {
+  total: number;
+  pagadas: number;
+  pendientes: number;
+}
+
+export const getProductoVentasCount = async (productoId: string): Promise<ProductoVentasCount> => {
+  try {
+    return await axios.get<ProductoVentasCount>(`/productos/${productoId}/ventas-count`);
+  } catch (error) {
+    console.error('Error al obtener ventas del producto:', error);
+    throw error;
+  }
+};
+
 export const getAllProducts = async (includeInactive = true): Promise<Producto[]> => {
   try {
     // El interceptor ya retorna response.data directamente

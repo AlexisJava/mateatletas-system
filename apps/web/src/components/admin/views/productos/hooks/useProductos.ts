@@ -1,6 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
-import { getAllProducts, deleteProduct, type Producto } from '@/lib/api/admin.api';
+import {
+  getAllProducts,
+  deleteProduct,
+  getProductoVentasCount,
+  type Producto,
+} from '@/lib/api/admin.api';
 import type {
   TipoFilter,
   StatusFilter,
@@ -58,10 +63,23 @@ export function useProductos(): UseProductosReturn {
       // Obtener todos los productos (incluye inactivos para admin)
       const data = await getAllProducts(true);
 
-      // Adaptar al tipo AdminProducto
+      // Obtener ventas de cada producto en paralelo
+      const ventasPromises = data.map(async (p: Producto) => {
+        try {
+          const ventas = await getProductoVentasCount(p.id);
+          return { id: p.id, total: ventas.total };
+        } catch {
+          return { id: p.id, total: 0 };
+        }
+      });
+
+      const ventasResults = await Promise.all(ventasPromises);
+      const ventasMap = new Map(ventasResults.map((v) => [v.id, v.total]));
+
+      // Adaptar al tipo AdminProducto con ventas reales
       const productosUnicos: AdminProducto[] = data.map((p: Producto) => ({
         ...p,
-        ventas: 0, // Backend no tiene endpoint de ventas agregadas por producto
+        ventas: ventasMap.get(p.id) ?? 0,
       }));
 
       setProducts(productosUnicos);

@@ -278,6 +278,33 @@ export class ProductosService {
   }
 
   /**
+   * Obtiene el conteo de ventas (inscripciones) de un producto
+   * @param id - ID del producto
+   * @returns { total, pagadas, pendientes }
+   */
+  async getVentasCount(id: string) {
+    await this.findById(id);
+
+    const [total, pagadas] = await Promise.all([
+      this.prisma.inscripcionMensual.count({
+        where: { producto_id: id },
+      }),
+      this.prisma.inscripcionMensual.count({
+        where: {
+          producto_id: id,
+          estado_pago: 'Pagado',
+        },
+      }),
+    ]);
+
+    return {
+      total,
+      pagadas,
+      pendientes: total - pagadas,
+    };
+  }
+
+  /**
    * Valida que los campos requeridos estén presentes según el tipo de producto
    * @param dto - DTO del producto
    * @throws BadRequestException si faltan campos requeridos o hay validaciones inválidas
