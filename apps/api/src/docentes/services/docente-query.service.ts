@@ -129,4 +129,33 @@ export class DocenteQueryService {
       ({ password_hash: _password_hash, ...docente }) => docente,
     );
   }
+
+  /**
+   * Obtiene el conteo de clases asignadas a un docente
+   * Cuenta ClaseGrupos (grupos recurrentes) y Comisiones (cursos)
+   * @param id - ID del docente
+   * @returns { claseGrupos, comisiones, total }
+   */
+  async getClasesCount(id: string) {
+    const [claseGrupos, comisiones] = await Promise.all([
+      this.prisma.claseGrupo.count({
+        where: {
+          docente_id: id,
+          activo: true,
+        },
+      }),
+      this.prisma.comision.count({
+        where: {
+          docente_id: id,
+          activo: true,
+        },
+      }),
+    ]);
+
+    return {
+      claseGrupos,
+      comisiones,
+      total: claseGrupos + comisiones,
+    };
+  }
 }

@@ -99,6 +99,15 @@ export class DocentesFacade {
     return this.queryService.findById(id);
   }
 
+  /**
+   * Obtiene el conteo de clases asignadas a un docente
+   * @param id - ID del docente
+   * @returns { claseGrupos, comisiones, total }
+   */
+  async getClasesCount(id: string) {
+    return this.queryService.getClasesCount(id);
+  }
+
   // ============================================================================
   // STATISTICS (Estadísticas) - Delegación a StatsService
   // ============================================================================

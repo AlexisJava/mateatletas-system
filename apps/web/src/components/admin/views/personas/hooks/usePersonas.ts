@@ -13,6 +13,7 @@ import {
   updateEstudiante,
   updateDocente,
   resetCredenciales,
+  getDocenteClasesCount,
 } from '@/lib/api/admin.api';
 import type { AdminPerson, UserRole } from '@/types/admin-dashboard.types';
 import type { RoleFilter, StatusFilter, PersonasStats } from '../types/personas.types';
@@ -180,6 +181,25 @@ export function usePersonas(): UsePersonasReturn {
       });
 
       const docentesData = docentes ?? [];
+
+      // Obtener conteo de clases para cada docente en paralelo
+      const clasesCountMap = new Map<string, number>();
+      if (docentesData.length > 0) {
+        const clasesCountPromises = docentesData.map(async (doc) => {
+          try {
+            const count = await getDocenteClasesCount(doc.id);
+            return { id: doc.id, total: count.total };
+          } catch {
+            // Si falla, retornar 0
+            return { id: doc.id, total: 0 };
+          }
+        });
+        const clasesCountResults = await Promise.all(clasesCountPromises);
+        clasesCountResults.forEach((result) => {
+          clasesCountMap.set(result.id, result.total);
+        });
+      }
+
       docentesData.forEach((doc) => {
         const asignaciones = asignacionesMap.get(doc.id);
         personas.push({
@@ -190,7 +210,7 @@ export function usePersonas(): UsePersonasReturn {
           role: 'docente' as UserRole,
           status: 'active',
           createdAt: doc.createdAt ?? new Date().toISOString(),
-          clasesAsignadas: 0, // TODO: Obtener desde endpoint específico
+          clasesAsignadas: clasesCountMap.get(doc.id) ?? 0,
           titulo: doc.titulo ?? doc.titulo_profesional ?? undefined,
           telefono: doc.telefono ?? undefined,
           // Enriquecimiento Casa/Mundo

@@ -3,6 +3,7 @@ import {
   getCombinedDashboardStats,
   getCasasEstadisticas,
   getRetentionStats,
+  getLibrosLeidos,
   type RetentionDataPoint as ApiRetentionDataPoint,
 } from '@/lib/api/admin.api';
 
@@ -71,11 +72,17 @@ export function useAnalytics(): UseAnalyticsReturn {
     setError(null);
 
     try {
-      // Fetch en paralelo: dashboard, casas y retención
-      const [dashboardStats, casasStats, retentionData] = await Promise.all([
+      // Fetch en paralelo: dashboard, casas, retención y libros leídos
+      const [dashboardStats, casasStats, retentionData, librosLeidosStats] = await Promise.all([
         getCombinedDashboardStats(),
         getCasasEstadisticas(),
         getRetentionStats(6),
+        getLibrosLeidos().catch(() => ({
+          total: 0,
+          porEstudiante: 0,
+          completadosEsteMes: 0,
+          tendencia: [],
+        })),
       ]);
 
       // Mapear distribución de casas desde el ranking
@@ -108,7 +115,7 @@ export function useAnalytics(): UseAnalyticsReturn {
           estudiantesActivos: dashboardStats.estudiantesActivos,
           crecimientoMensual: dashboardStats.crecimientoMensual,
           tasaRetencion,
-          librosLeidos: 0, // TODO: Endpoint de biblioteca cuando exista
+          librosLeidos: librosLeidosStats.total,
         },
         casaDistribution,
         retentionData: mappedRetentionData,

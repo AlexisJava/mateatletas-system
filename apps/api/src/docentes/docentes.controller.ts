@@ -491,6 +491,17 @@ export class DocentesController {
   // ============================================================================
 
   /**
+   * GET /docentes/:id/clases-count - Obtener conteo de clases asignadas (Admin only)
+   * @param id - ID del docente
+   * @returns { claseGrupos, comisiones, total }
+   */
+  @Get(':id/clases-count')
+  @Roles(Role.ADMIN)
+  async getClasesCount(@Param('id', ParseIdPipe) id: string) {
+    return this.docentesService.getClasesCount(id);
+  }
+
+  /**
    * GET /docentes/:id - Obtener un docente específico (Admin only)
    * @param id - ID del docente
    * @returns Docente encontrado

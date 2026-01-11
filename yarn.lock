@@ -6131,12 +6131,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/pdfkit@npm:^0.17.3":
-  version: 0.17.3
-  resolution: "@types/pdfkit@npm:0.17.3"
+"@types/pdfkit@npm:^0.17.4":
+  version: 0.17.4
+  resolution: "@types/pdfkit@npm:0.17.4"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10c0/59e501871d503edf2f7ec64233de382a34a9d7296417fa63e14f26468fcf1a76c95d4ff8714805b89ab9b06114bd96117e33d3f7544d0ad9a41c1fe194183b86
+  checksum: 10c0/d2e5c8b951627bf725c7b29592011ec69df44447f334a9dc5a30b0cc1c7c32381d9b3de0d8c3cfc51114f497586bb2538d07bd937be5d8a73a09aa383f5a34ee
   languageName: node
   linkType: hard
 
@@ -7470,7 +7470,7 @@ __metadata:
     "@types/multer": "npm:^2.0.0"
     "@types/node": "npm:^22.10.7"
     "@types/nodemailer": "npm:^7.0.4"
-    "@types/pdfkit": "npm:^0.17.3"
+    "@types/pdfkit": "npm:^0.17.4"
     "@types/qrcode": "npm:^1.5.6"
     "@types/supertest": "npm:^6.0.3"
     bcrypt: "npm:^6.0.0"
