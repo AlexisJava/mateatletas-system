@@ -7,6 +7,7 @@
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { FlatCompat } from '@eslint/eslintrc';
+import sonarjs from 'eslint-plugin-sonarjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -20,6 +21,11 @@ const eslintConfig = [
   // NEXT.JS CONFIG BASE
   // ============================================================================
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
+
+  // ============================================================================
+  // SONARJS
+  // ============================================================================
+  sonarjs.configs.recommended,
 
   // ============================================================================
   // IGNORES

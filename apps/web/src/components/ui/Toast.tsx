@@ -38,7 +38,7 @@ export function ToastProvider() {
         // Error
         error: {
           iconTheme: {
-            primary: '#ef4444',
+            primary: 'var(--color-incorrect)',
             secondary: 'white',
           },
           style: {

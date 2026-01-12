@@ -106,7 +106,7 @@ export default function ContenidoLeccionPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#030014] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--estudiante-bg)] flex items-center justify-center">
         <div className="text-center">
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -137,7 +137,7 @@ export default function ContenidoLeccionPage({ params }: PageProps) {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#030014] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[var(--estudiante-bg)] flex items-center justify-center p-4">
         <div className="text-center max-w-md">
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -172,7 +172,7 @@ export default function ContenidoLeccionPage({ params }: PageProps) {
       : { primary: '#a855f7', secondary: '#7c3aed', glow: 'rgba(168,85,247,0.4)' };
 
   return (
-    <div className="min-h-screen bg-[#030014] relative">
+    <div className="min-h-screen bg-[var(--estudiante-bg)] relative">
       <FloatingLines />
 
       {/* Header fijo */}

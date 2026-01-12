@@ -20,7 +20,7 @@ export default function FAQSection() {
             transition={{ duration: 0.6 }}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 mb-6"
           >
-            <HelpCircle className="w-5 h-5 text-[#fbbf24]" />
+            <HelpCircle className="w-5 h-5 text-[var(--color-xp)]" />
             <span className="text-sm font-black text-white uppercase tracking-widest">
               Preguntas Frecuentes
             </span>
@@ -63,7 +63,7 @@ export default function FAQSection() {
                 transition={{ duration: 0.4, delay: index * 0.05 }}
                 className={`card-glass rounded-2xl border-2 transition-all ${
                   isOpen
-                    ? 'border-[#fbbf24] shadow-2xl shadow-[#fbbf24]/10'
+                    ? 'border-[var(--color-xp)] shadow-2xl shadow-[var(--color-xp)]/10'
                     : 'border-white/10 hover:border-white/20'
                 }`}
               >
@@ -79,7 +79,7 @@ export default function FAQSection() {
                   >
                     <ChevronDown
                       className={`w-6 h-6 transition-colors ${
-                        isOpen ? 'text-[#fbbf24]' : 'text-white/60'
+                        isOpen ? 'text-[var(--color-xp)]' : 'text-white/60'
                       }`}
                     />
                   </motion.div>

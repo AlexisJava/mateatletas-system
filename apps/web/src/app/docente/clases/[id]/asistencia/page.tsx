@@ -1,5 +1,5 @@
 'use client';
-import { Button } from '@/components/ui';
+// Button fue eliminado (obsoleto Crash Bandicoot style). Usando clases docente directamente.
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -87,18 +87,18 @@ export default function AsistenciaPage() {
       <div className="flex items-center gap-2 text-sm text-gray-600">
         <button
           onClick={() => router.push('/docente/mis-clases')}
-          className="hover:text-[#ff6b35] transition-colors"
+          className="hover:text-[var(--docente-accent)] transition-colors"
         >
           Mis Clases
         </button>
         <span>/</span>
-        <span className="text-[#2a1a5e] font-semibold">Registro de Asistencia</span>
+        <span className="text-[var(--docente-text)] font-semibold">Registro de Asistencia</span>
       </div>
 
       {/* Header con información de la clase */}
       {isLoading ? (
         <div className="bg-white rounded-lg shadow-md p-8 text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#ff6b35]"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--docente-accent)]"></div>
           <p className="text-gray-600 mt-4">Cargando información...</p>
         </div>
       ) : claseActual ? (
@@ -114,12 +114,14 @@ export default function AsistenciaPage() {
             <div
               className="bg-white rounded-lg shadow-md p-6 border-l-4"
               style={{
-                borderLeftColor: rutaCurricular?.color || '#ff6b35',
+                borderLeftColor: rutaCurricular?.color || 'var(--docente-accent)',
               }}
             >
               <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-[#2a1a5e]">{claseActual.nombre}</h1>
+                  <h1 className="text-3xl font-bold text-[var(--docente-text)]">
+                    {claseActual.nombre}
+                  </h1>
                   {claseActual.descripcion && (
                     <p className="text-gray-600 mt-2">{claseActual.descripcion}</p>
                   )}
@@ -151,13 +153,12 @@ export default function AsistenciaPage() {
                   </div>
                 </div>
 
-                <Button
-                  variant="outline"
-                  size="sm"
+                <button
                   onClick={() => router.push('/docente/mis-clases')}
+                  className="px-4 py-2 text-sm font-medium border border-[var(--docente-border)] text-[var(--docente-text-secondary)] rounded-lg hover:bg-[var(--docente-surface-hover)] transition-colors"
                 >
-                  ← Volver a Mis Clases
-                </Button>
+                  &larr; Volver a Mis Clases
+                </button>
               </div>
             </div>
           );
@@ -195,7 +196,7 @@ export default function AsistenciaPage() {
       {/* Lista de estudiantes */}
       {isLoading ? (
         <div className="bg-white rounded-lg shadow-md p-12 text-center">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-[#ff6b35]"></div>
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-[var(--docente-accent)]"></div>
           <p className="text-gray-600 mt-4">Cargando lista de estudiantes...</p>
         </div>
       ) : listaAsistencia ? (
@@ -210,50 +211,55 @@ export default function AsistenciaPage() {
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div>
-            <h3 className="text-lg font-bold text-[#2a1a5e]">¿Terminaste de registrar?</h3>
+            <h3 className="text-lg font-bold text-[var(--docente-text)]">
+              ¿Terminaste de registrar?
+            </h3>
             <p className="text-sm text-gray-600 mt-1">
               Puedes volver a editar la asistencia en cualquier momento
             </p>
           </div>
-          <Button variant="primary" onClick={() => router.push('/docente/mis-clases')}>
+          <button
+            onClick={() => router.push('/docente/mis-clases')}
+            className="px-6 py-3 font-semibold bg-[var(--docente-accent)] text-white rounded-lg hover:bg-[var(--docente-accent-hover)] transition-colors"
+          >
             Finalizar y Volver
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Ayuda rápida */}
       <div className="bg-[#fff9e6] border-2 border-[#f7b801] rounded-lg p-6">
-        <h3 className="text-lg font-bold text-[#2a1a5e] mb-3 flex items-center gap-2">
+        <h3 className="text-lg font-bold text-[var(--docente-text)] mb-3 flex items-center gap-2">
           <span>💡</span>
           Ayuda Rápida
         </h3>
         <ul className="space-y-2 text-sm text-gray-700">
           <li className="flex items-start gap-2">
-            <span className="text-[#ff6b35] font-bold">•</span>
+            <span className="text-[var(--docente-accent)] font-bold">•</span>
             <span>
               <strong>Presente (✅):</strong> Estudiante asistió puntualmente - 10 puntos
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#ff6b35] font-bold">•</span>
+            <span className="text-[var(--docente-accent)] font-bold">•</span>
             <span>
               <strong>Tardanza (⏰):</strong> Estudiante llegó tarde - 5 puntos
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#ff6b35] font-bold">•</span>
+            <span className="text-[var(--docente-accent)] font-bold">•</span>
             <span>
               <strong>Justificado (📝):</strong> Ausencia con justificación - 7 puntos
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#ff6b35] font-bold">•</span>
+            <span className="text-[var(--docente-accent)] font-bold">•</span>
             <span>
               <strong>Ausente (❌):</strong> No asistió sin justificar - 0 puntos
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#ff6b35] font-bold">•</span>
+            <span className="text-[var(--docente-accent)] font-bold">•</span>
             <span>
               Haz clic en el botón <strong>▼</strong> para agregar observaciones y ajustar puntos
             </span>

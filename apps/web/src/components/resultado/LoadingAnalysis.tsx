@@ -244,7 +244,7 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
         >
           <div className="h-3 bg-slate-800/50 rounded-full overflow-hidden border border-slate-700/50">
             <motion.div
-              className="h-full bg-gradient-to-r from-[#0ea5e9] via-[#10b981] to-[#fbbf24]"
+              className="h-full bg-gradient-to-r from-[#0ea5e9] via-[#10b981] to-[var(--color-xp)]"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{

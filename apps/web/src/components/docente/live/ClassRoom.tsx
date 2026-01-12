@@ -99,7 +99,7 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({
             icon: '🙋',
             style: {
               background: '#1e293b',
-              color: '#fbbf24',
+              color: 'var(--color-xp)',
               border: '1px solid #f59e0b',
             },
           });

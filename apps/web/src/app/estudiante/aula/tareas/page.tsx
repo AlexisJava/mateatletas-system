@@ -52,7 +52,7 @@ export default function MisTareasPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#030014] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--estudiante-bg)] flex items-center justify-center">
         <div className="text-center">
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -71,7 +71,7 @@ export default function MisTareasPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#030014] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[var(--estudiante-bg)] flex items-center justify-center p-4">
         <div className="text-center max-w-md">
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -100,7 +100,7 @@ export default function MisTareasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030014] relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--estudiante-bg)] relative overflow-hidden">
       <FloatingLines />
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-8">
@@ -159,7 +159,7 @@ export default function MisTareasPage() {
             <StatPill
               label="Vencidas"
               value={data.resumen.vencidas}
-              color="#ef4444"
+              color="var(--color-incorrect)"
               active={false}
               onClick={() => {}}
             />
@@ -295,7 +295,7 @@ function TareaCard({ tarea }: TareaCardProps) {
             background: completada
               ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
               : tarea.vencida
-                ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                ? 'linear-gradient(135deg, var(--color-incorrect) 0%, #dc2626 100%)'
                 : enProgreso
                   ? 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)'
                   : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',

@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { toast } from '@/components/ui/Toast';
-import { LoadingSpinner } from '@/components/effects';
+import { LoadingSpinner } from '@/components/ui';
 import apiClient from '@/lib/axios';
 import { livekitApi, type EstadoClase } from '@/lib/api/livekit.api';
 

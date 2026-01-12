@@ -13,7 +13,7 @@ export default function HeroSection({ onInscribe: _onInscribe }: HeroSectionProp
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
       {/* Cosmos Background */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-[#fbbf24]/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute top-20 left-20 w-96 h-96 bg-[var(--color-xp)]/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#f43f5e]/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#0ea5e9]/10 rounded-full blur-[120px]" />
 
@@ -63,10 +63,10 @@ export default function HeroSection({ onInscribe: _onInscribe }: HeroSectionProp
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#fbbf24]/20 to-[#f97316]/20 border border-[#fbbf24]/30 mb-8"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[var(--color-xp)]/20 to-[#f97316]/20 border border-[var(--color-xp)]/30 mb-8"
           >
-            <Sparkles className="w-5 h-5 text-[#fbbf24] animate-pulse" />
-            <span className="text-sm font-black text-[#fbbf24] uppercase tracking-widest">
+            <Sparkles className="w-5 h-5 text-[var(--color-xp)] animate-pulse" />
+            <span className="text-sm font-black text-[var(--color-xp)] uppercase tracking-widest">
               Verano 2026
             </span>
           </motion.div>
@@ -100,7 +100,7 @@ export default function HeroSection({ onInscribe: _onInscribe }: HeroSectionProp
             transition={{ duration: 0.6, delay: 0.3 }}
             className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm mb-12"
           >
-            <Calendar className="w-6 h-6 text-[#fbbf24]" />
+            <Calendar className="w-6 h-6 text-[var(--color-xp)]" />
             <span className="text-xl md:text-2xl font-bold text-white">5 Enero - 3 Marzo 2026</span>
           </motion.div>
 
@@ -123,7 +123,7 @@ export default function HeroSection({ onInscribe: _onInscribe }: HeroSectionProp
                 transition={{ duration: 0.4, delay: 0.5 + i * 0.1 }}
                 className="card-glass p-6 rounded-2xl border border-white/10"
               >
-                <stat.icon className="w-10 h-10 text-[#fbbf24] mx-auto mb-3" />
+                <stat.icon className="w-10 h-10 text-[var(--color-xp)] mx-auto mb-3" />
                 <div className="text-2xl font-black text-white mb-1">{stat.label}</div>
                 <div className="text-sm text-white/60">{stat.sublabel}</div>
               </motion.div>
@@ -139,7 +139,7 @@ export default function HeroSection({ onInscribe: _onInscribe }: HeroSectionProp
           >
             <Link
               href="#cursos"
-              className="px-10 py-5 bg-gradient-to-r from-[#fbbf24] to-[#f97316] rounded-2xl text-black font-black text-lg transition-all hover:scale-105 hover:shadow-2xl shadow-[#fbbf24]/50"
+              className="px-10 py-5 bg-gradient-to-r from-[var(--color-xp)] to-[#f97316] rounded-2xl text-black font-black text-lg transition-all hover:scale-105 hover:shadow-2xl shadow-[var(--color-xp)]/50"
             >
               VER CURSOS DISPONIBLES
             </Link>

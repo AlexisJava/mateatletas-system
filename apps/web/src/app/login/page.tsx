@@ -149,7 +149,7 @@ export default function LoginPage() {
   const isDocente = activeTab === 'docente';
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#030014]">
+    <div className="relative min-h-screen overflow-hidden bg-[var(--estudiante-bg)]">
       {/* Animated Background */}
       <div className="absolute inset-0 z-0">
         {/* Gradientes según tab activo */}

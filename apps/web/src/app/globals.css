@@ -129,15 +129,42 @@ main {
   --docente-shadow-glow: 0 0 24px rgba(139, 92, 246, 0.15);
 
   /* ─────────────────────────────────────────────
-     PORTAL ESTUDIANTE - Teal Friendly
+     PORTAL ESTUDIANTE - Dark Space Candy
+     Fuente de verdad: PORTAL_ESTUDIANTE_DESIGN_SYSTEM.md
      ───────────────────────────────────────────── */
-  --estudiante-bg: #0a1210;
-  --estudiante-surface: #0f1a17;
-  --estudiante-accent: #14b8a6;
-  --estudiante-accent-hover: #0d9488;
-  --estudiante-text: #fafafa;
-  --estudiante-text-muted: #5eead4;
-  --estudiante-border: #1c2b27;
+
+  /* Base - NUNCA CAMBIAN */
+  --estudiante-bg: #030014;
+  --estudiante-bg-card: rgba(15, 7, 32, 0.6);
+  --estudiante-bg-surface: rgba(30, 27, 75, 0.5);
+  --estudiante-border: rgba(255, 255, 255, 0.05);
+  --estudiante-border-accent: rgba(255, 255, 255, 0.1);
+
+  /* Texto */
+  --estudiante-text-primary: #f1f5f9; /* slate-100 */
+  --estudiante-text-secondary: #e2e8f0; /* slate-200 */
+  --estudiante-text-tertiary: #cbd5e1; /* slate-300 */
+  --estudiante-text-muted: #94a3b8; /* slate-400 */
+  --estudiante-text-subtle: #64748b; /* slate-500 */
+
+  /* House Colors - Se inyectan dinámicamente via JS */
+  /* Default: Quantum (Pink) */
+  --house-primary: #f472b6;
+  --house-secondary: #ec4899;
+  --house-accent: #fbcfe8;
+  --house-primary-alpha: rgba(244, 114, 182, 0.4);
+
+  /* BIT Mascota - NUNCA CAMBIA */
+  --bit-eyes: #06b6d4; /* Cyan */
+
+  /* Gamificación */
+  --color-xp: #fbbf24; /* Amber */
+  --color-streak: #f97316; /* Orange */
+  --color-achievement: #a855f7; /* Purple */
+
+  /* Feedback */
+  --color-correct: #22c55e; /* Green */
+  --color-incorrect: #ef4444; /* Red */
 }
 
 /* ════════════════════════════════════════════════════════════════════════════

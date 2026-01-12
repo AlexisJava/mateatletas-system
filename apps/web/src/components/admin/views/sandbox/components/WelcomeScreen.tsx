@@ -101,7 +101,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   // ─── STEP 1: Select Content Type ───
   if (step === 'type') {
     return (
-      <div className="relative flex flex-col items-center justify-center min-h-screen bg-[#030014] text-slate-200 p-6 overflow-hidden font-sans">
+      <div className="relative flex flex-col items-center justify-center min-h-screen bg-[var(--estudiante-bg)] text-slate-200 p-6 overflow-hidden font-sans">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_#2e1065_0%,_transparent_40%)] opacity-40" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-[#a855f7]/10 blur-[150px] rounded-full pointer-events-none" />
@@ -208,7 +208,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
 
   // ─── STEP 2: Configure Content ───
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen bg-[#030014] text-slate-200 p-6 overflow-hidden font-sans">
+    <div className="relative flex flex-col items-center justify-center min-h-screen bg-[var(--estudiante-bg)] text-slate-200 p-6 overflow-hidden font-sans">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_#2e1065_0%,_transparent_40%)] opacity-40" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-[#a855f7]/10 blur-[150px] rounded-full pointer-events-none" />

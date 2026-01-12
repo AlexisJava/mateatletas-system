@@ -6,19 +6,30 @@
  */
 
 import { useMemo } from 'react';
-import { houseTokens, areaTokens, type House, type Area } from '../tokens/colors';
+import { houseTokens, areaTokens, houseToCSS, type HouseType, type Area } from '../tokens/colors';
 import { motionTokens } from '../tokens/motion';
 
 export interface UseThemeOptions {
   /** Casa del estudiante (quantum, vertex, pulsar) */
-  house: House;
+  house: HouseType;
   /** Área temática (math, code, science) */
   area: Area;
 }
 
 export interface UseThemeReturn {
-  /** Colores combinados de casa + área */
-  colors: (typeof houseTokens)[House] & { areaAccent: string };
+  /** Colores de la casa */
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    areaAccent: string;
+  };
+  /** Metadatos de la casa */
+  houseMeta: {
+    id: string;
+    name: string;
+    ageRange: string;
+  };
   /** Patrón de fondo del área */
   pattern: string;
   /** Tokens de motion */
@@ -34,18 +45,20 @@ export function useTheme(options: UseThemeOptions): UseThemeReturn {
 
     return {
       colors: {
-        ...house,
+        primary: house.colors.primary,
+        secondary: house.colors.secondary,
+        accent: house.colors.accent,
         areaAccent: area.accent,
+      },
+      houseMeta: {
+        id: house.id,
+        name: house.name,
+        ageRange: house.ageRange,
       },
       pattern: area.pattern,
       motion: motionTokens,
       cssVars: {
-        '--color-primary': house.primary,
-        '--color-secondary': house.secondary,
-        '--color-accent': house.accent,
-        '--color-background': house.background,
-        '--color-surface': house.surface,
-        '--color-text': house.text,
+        ...houseToCSS(options.house),
         '--color-area-accent': area.accent,
       },
     };

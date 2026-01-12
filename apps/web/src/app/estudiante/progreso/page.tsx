@@ -133,7 +133,7 @@ export default function ProgresoPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#030014] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--estudiante-bg)] flex items-center justify-center">
         <div className="text-center">
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -152,7 +152,7 @@ export default function ProgresoPage() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#030014] text-white relative overflow-hidden">
+      <div className="min-h-screen bg-[var(--estudiante-bg)] text-white relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <FloatingLines
             linesGradient={['#10b981', '#059669', '#34d399']}
@@ -192,7 +192,7 @@ export default function ProgresoPage() {
   const { gamificacion, racha, logros, actividad_reciente } = data;
 
   return (
-    <div className="min-h-screen bg-[#030014] text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--estudiante-bg)] text-white relative overflow-hidden">
       {/* Fondo FloatingLines - Verde/Esmeralda para Progreso */}
       <div className="absolute inset-0 pointer-events-none">
         <FloatingLines
@@ -249,7 +249,7 @@ export default function ProgresoPage() {
                 icon={<Trophy className="w-4 h-4" />}
                 value={logros.desbloqueados}
                 label="Logros"
-                colors={['#fbbf24', '#f59e0b', '#d97706']}
+                colors={['var(--color-xp)', '#f59e0b', '#d97706']}
               />
               <StatPill
                 icon={<Crown className="w-4 h-4" />}
@@ -273,7 +273,7 @@ export default function ProgresoPage() {
                   className="h-full rounded-full transition-all duration-1000"
                   style={{
                     width: `${gamificacion.porcentaje_nivel}%`,
-                    background: 'linear-gradient(90deg, #10b981, #22c55e, #84cc16)',
+                    background: 'linear-gradient(90deg, #10b981, var(--color-correct), #84cc16)',
                     boxShadow: '0 0 20px rgba(16,185,129,0.5)',
                   }}
                 />
@@ -354,7 +354,7 @@ function LogrosCard({ logros }: { logros: MiProgreso['logros'] }) {
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center"
           style={{
-            background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+            background: 'linear-gradient(135deg, var(--color-xp) 0%, #f59e0b 100%)',
             boxShadow: '0 4px 12px rgba(251,191,36,0.4)',
           }}
         >
@@ -403,7 +403,7 @@ function LogrosCard({ logros }: { logros: MiProgreso['logros'] }) {
             className="h-full rounded-full"
             style={{
               width: `${(logros.desbloqueados / Math.max(logros.totales, 1)) * 100}%`,
-              background: 'linear-gradient(90deg, #fbbf24, #f59e0b)',
+              background: 'linear-gradient(90deg, var(--color-xp), #f59e0b)',
             }}
           />
         </div>

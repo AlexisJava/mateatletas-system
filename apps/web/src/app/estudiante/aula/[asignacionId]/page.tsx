@@ -52,7 +52,7 @@ export default function PlanificacionDetallePage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#030014] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--estudiante-bg)] flex items-center justify-center">
         <div className="text-center">
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -71,7 +71,7 @@ export default function PlanificacionDetallePage({ params }: PageProps) {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#030014] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[var(--estudiante-bg)] flex items-center justify-center p-4">
         <div className="text-center max-w-md">
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -108,7 +108,7 @@ export default function PlanificacionDetallePage({ params }: PageProps) {
     data.clases.length > 0 ? Math.round((clasesCompletadas / data.clases.length) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-[#030014] relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--estudiante-bg)] relative overflow-hidden">
       <FloatingLines />
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-8">

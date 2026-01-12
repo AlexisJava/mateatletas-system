@@ -69,7 +69,7 @@ export function AnalyticsView() {
           value={`${stats.tasaRetencion}%`}
           change={2.1}
           icon={Target}
-          color="#22c55e"
+          color="var(--color-correct)"
         />
         <AnalyticsStatCard
           label="Libros Leidos"

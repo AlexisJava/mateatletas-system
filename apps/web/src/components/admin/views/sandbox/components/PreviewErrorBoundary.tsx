@@ -42,7 +42,7 @@ export class PreviewErrorBoundary extends Component<Props, State> {
   override render() {
     if (this.state.hasError) {
       return (
-        <div className="h-full w-full flex items-center justify-center bg-[#030014] p-8">
+        <div className="h-full w-full flex items-center justify-center bg-[var(--estudiante-bg)] p-8">
           <div className="max-w-md w-full bg-[#0f0720]/80 border border-red-500/20 rounded-2xl p-6 backdrop-blur-xl">
             {/* Icon */}
             <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
@@ -71,7 +71,7 @@ export class PreviewErrorBoundary extends Component<Props, State> {
             </p>
 
             {/* Error details */}
-            <div className="bg-[#030014]/50 border border-white/5 rounded-lg p-3 mb-4">
+            <div className="bg-[var(--estudiante-bg)]/50 border border-white/5 rounded-lg p-3 mb-4">
               <code className="text-xs text-red-300 font-mono break-all">
                 {this.state.error?.message || 'Error desconocido'}
               </code>

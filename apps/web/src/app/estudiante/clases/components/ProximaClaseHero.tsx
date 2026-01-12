@@ -183,7 +183,7 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
       return {
         texto: '🔴 UNIRSE EN VIVO',
         disabled: false,
-        gradiente: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+        gradiente: 'linear-gradient(135deg, var(--color-incorrect) 0%, #dc2626 100%)',
         showPulse: true,
       };
     }
@@ -236,7 +236,7 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
               <span
                 className="flex items-center gap-1.5 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase animate-pulse"
                 style={{
-                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                  background: 'linear-gradient(135deg, var(--color-incorrect) 0%, #dc2626 100%)',
                   boxShadow: '0 4px 16px rgba(239,68,68,0.5)',
                 }}
               >
@@ -284,7 +284,7 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
               style={{
-                background: 'linear-gradient(135deg, #fbbf24 0%, #f97316 100%)',
+                background: 'linear-gradient(135deg, var(--color-xp) 0%, #f97316 100%)',
               }}
             >
               {clase.docente.nombre.charAt(0)}
@@ -320,8 +320,8 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
             className="font-bold text-sm uppercase tracking-widest mb-2"
             style={{
               background: esEnVivo
-                ? 'linear-gradient(135deg, #ef4444 0%, #f97316 100%)'
-                : 'linear-gradient(135deg, #fbbf24 0%, #f97316 100%)',
+                ? 'linear-gradient(135deg, var(--color-incorrect) 0%, #f97316 100%)'
+                : 'linear-gradient(135deg, var(--color-xp) 0%, #f97316 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}

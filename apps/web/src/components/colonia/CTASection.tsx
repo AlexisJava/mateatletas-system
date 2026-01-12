@@ -13,7 +13,7 @@ export default function CTASection({ onInscribe }: CTASectionProps) {
     <section className="relative py-32 bg-gradient-to-b from-black to-[#1a1a2e] overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-[#fbbf24]/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute top-20 left-20 w-96 h-96 bg-[var(--color-xp)]/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#f43f5e]/20 rounded-full blur-[120px] animate-pulse" />
         <motion.div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#0ea5e9]/20 rounded-full blur-[120px]"
@@ -82,7 +82,7 @@ export default function CTASection({ onInscribe }: CTASectionProps) {
           >
             <button
               onClick={onInscribe}
-              className="group relative px-12 py-6 bg-gradient-to-r from-[#fbbf24] to-[#f97316] rounded-2xl text-black font-black text-xl transition-all hover:scale-110 hover:shadow-2xl shadow-[#fbbf24]/50 overflow-hidden"
+              className="group relative px-12 py-6 bg-gradient-to-r from-[var(--color-xp)] to-[#f97316] rounded-2xl text-black font-black text-xl transition-all hover:scale-110 hover:shadow-2xl shadow-[var(--color-xp)]/50 overflow-hidden"
             >
               <span className="relative z-10 flex items-center justify-center gap-3">
                 <Rocket className="w-7 h-7" />
@@ -164,7 +164,7 @@ export default function CTASection({ onInscribe }: CTASectionProps) {
             ¿Dudas? Escribinos a{' '}
             <a
               href="mailto:info@mateatletas.com"
-              className="text-[#0ea5e9] hover:text-[#fbbf24] transition-colors font-bold"
+              className="text-[#0ea5e9] hover:text-[var(--color-xp)] transition-colors font-bold"
             >
               info@mateatletas.com
             </a>

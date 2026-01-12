@@ -16,7 +16,7 @@ import {
   UserCheck,
   Trophy,
 } from 'lucide-react';
-import { LoadingSpinner } from '@/components/effects';
+import { LoadingSpinner } from '@/components/ui';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { toast } from '@/components/ui/Toast';
 import {

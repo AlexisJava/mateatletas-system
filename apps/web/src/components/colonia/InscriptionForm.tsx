@@ -287,7 +287,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                 key={s}
                 className={`flex items-center justify-center w-10 h-10 rounded-full font-black transition-all ${
                   s <= step
-                    ? 'bg-gradient-to-r from-[#fbbf24] to-[#f97316] text-black'
+                    ? 'bg-gradient-to-r from-[var(--color-xp)] to-[#f97316] text-black'
                     : 'bg-white/10 text-white/40'
                 }`}
               >
@@ -297,7 +297,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
           </div>
           <div className="h-2 bg-white/10 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-[#fbbf24] to-[#f97316]"
+              className="h-full bg-gradient-to-r from-[var(--color-xp)] to-[#f97316]"
               initial={{ width: '0%' }}
               animate={{ width: `${(step / 4) * 100}%` }}
               transition={{ duration: 0.3 }}
@@ -330,7 +330,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                     type="text"
                     value={tutorData.nombre}
                     onChange={(e) => setTutorData({ ...tutorData, nombre: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[var(--color-xp)] focus:outline-none transition-colors"
                     placeholder="Juan Pérez"
                   />
                   {errors.nombre && (
@@ -347,7 +347,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                     type="email"
                     value={tutorData.email}
                     onChange={(e) => setTutorData({ ...tutorData, email: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[var(--color-xp)] focus:outline-none transition-colors"
                     placeholder="juan@example.com"
                   />
                   {errors.email && (
@@ -364,7 +364,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                     type="tel"
                     value={tutorData.telefono}
                     onChange={(e) => setTutorData({ ...tutorData, telefono: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[var(--color-xp)] focus:outline-none transition-colors"
                     placeholder="+54 9 11 1234-5678"
                   />
                   {errors.telefono && (
@@ -381,7 +381,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                     type="text"
                     value={tutorData.dni}
                     onChange={(e) => setTutorData({ ...tutorData, dni: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[var(--color-xp)] focus:outline-none transition-colors"
                     placeholder="12345678"
                   />
                 </div>
@@ -394,7 +394,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                       type={showPassword ? 'text' : 'password'}
                       value={tutorData.password}
                       onChange={(e) => setTutorData({ ...tutorData, password: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors pr-12"
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[var(--color-xp)] focus:outline-none transition-colors pr-12"
                       placeholder="Mínimo 8 caracteres"
                     />
                     <button
@@ -427,7 +427,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                       onChange={(e) =>
                         setTutorData({ ...tutorData, confirmPassword: e.target.value })
                       }
-                      className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors pr-12"
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[var(--color-xp)] focus:outline-none transition-colors pr-12"
                       placeholder="Repite tu contraseña"
                     />
                     <button
@@ -453,7 +453,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
               <div className="flex justify-end mt-8">
                 <button
                   onClick={handleNext}
-                  className="px-8 py-4 bg-gradient-to-r from-[#fbbf24] to-[#f97316] rounded-xl text-black font-black uppercase tracking-wider transition-all hover:scale-105 flex items-center gap-2"
+                  className="px-8 py-4 bg-gradient-to-r from-[var(--color-xp)] to-[#f97316] rounded-xl text-black font-black uppercase tracking-wider transition-all hover:scale-105 flex items-center gap-2"
                 >
                   Continuar
                   <ArrowRight className="w-5 h-5" />
@@ -524,7 +524,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                                 ),
                               );
                             }}
-                            className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors"
+                            className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[var(--color-xp)] focus:outline-none transition-colors"
                             placeholder="María Pérez"
                           />
                           {errors[`estudiante_${index}_nombre`] && (
@@ -552,7 +552,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                                 ),
                               );
                             }}
-                            className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors"
+                            className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[var(--color-xp)] focus:outline-none transition-colors"
                             placeholder="8"
                           />
                           {errors[`estudiante_${index}_edad`] && (
@@ -577,7 +577,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                                 ),
                               );
                             }}
-                            className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors"
+                            className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[var(--color-xp)] focus:outline-none transition-colors"
                             placeholder="12345678"
                           />
                         </div>
@@ -611,7 +611,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                                   disabled={isDisabled}
                                   className={`p-4 rounded-xl border-2 text-left transition-all ${
                                     isSelected
-                                      ? 'border-[#fbbf24] bg-[#fbbf24]/10'
+                                      ? 'border-[var(--color-xp)] bg-[var(--color-xp)]/10'
                                       : isDisabled
                                         ? 'border-white/5 bg-white/5 opacity-50 cursor-not-allowed'
                                         : 'border-white/10 bg-white/5 hover:border-white/30'
@@ -621,7 +621,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                                     <div
                                       className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 ${
                                         isSelected
-                                          ? 'border-[#fbbf24] bg-[#fbbf24]'
+                                          ? 'border-[var(--color-xp)] bg-[var(--color-xp)]'
                                           : 'border-white/30'
                                       }`}
                                     >
@@ -674,7 +674,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                 {/* Add Student Button */}
                 <button
                   onClick={addEstudiante}
-                  className="w-full py-4 rounded-xl border-2 border-dashed border-white/20 hover:border-[#fbbf24] hover:bg-white/5 text-white font-bold transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-xl border-2 border-dashed border-white/20 hover:border-[var(--color-xp)] hover:bg-white/5 text-white font-bold transition-all flex items-center justify-center gap-2"
                 >
                   <Plus className="w-5 h-5" />
                   Agregar otro hijo
@@ -691,7 +691,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                 </button>
                 <button
                   onClick={handleNext}
-                  className="px-8 py-4 bg-gradient-to-r from-[#fbbf24] to-[#f97316] rounded-xl text-black font-black uppercase tracking-wider transition-all hover:scale-105 flex items-center gap-2"
+                  className="px-8 py-4 bg-gradient-to-r from-[var(--color-xp)] to-[#f97316] rounded-xl text-black font-black uppercase tracking-wider transition-all hover:scale-105 flex items-center gap-2"
                 >
                   Continuar
                   <ArrowRight className="w-5 h-5" />
@@ -721,7 +721,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                   <h3 className="text-xl font-black text-white">Tutor Responsable</h3>
                   <button
                     onClick={() => setStep(1)}
-                    className="text-sm text-[#fbbf24] hover:text-[#f97316] font-bold"
+                    className="text-sm text-[var(--color-xp)] hover:text-[#f97316] font-bold"
                   >
                     Editar
                   </button>
@@ -750,7 +750,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                   <h3 className="text-xl font-black text-white">Estudiantes Inscritos</h3>
                   <button
                     onClick={() => setStep(2)}
-                    className="text-sm text-[#fbbf24] hover:text-[#f97316] font-bold"
+                    className="text-sm text-[var(--color-xp)] hover:text-[#f97316] font-bold"
                   >
                     Editar
                   </button>
@@ -802,7 +802,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
               </div>
 
               {/* Price Summary */}
-              <div className="mb-6 p-8 rounded-2xl bg-gradient-to-br from-[#fbbf24]/10 to-[#f97316]/10 border-2 border-[#fbbf24]/30">
+              <div className="mb-6 p-8 rounded-2xl bg-gradient-to-br from-[var(--color-xp)]/10 to-[#f97316]/10 border-2 border-[var(--color-xp)]/30">
                 <h3 className="text-2xl font-black text-white mb-6">Resumen de Pago</h3>
 
                 <div className="space-y-3 mb-4">
@@ -880,7 +880,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                   <div
                     className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
                       acceptedTerms
-                        ? 'border-[#fbbf24] bg-[#fbbf24]'
+                        ? 'border-[var(--color-xp)] bg-[var(--color-xp)]'
                         : 'border-white/30 group-hover:border-white/50'
                     }`}
                     onClick={() => setAcceptedTerms(!acceptedTerms)}
@@ -892,7 +892,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                     <a
                       href="/legal/terminos"
                       target="_blank"
-                      className="text-[#fbbf24] hover:text-[#f97316] font-bold"
+                      className="text-[var(--color-xp)] hover:text-[#f97316] font-bold"
                     >
                       Términos y Condiciones
                     </a>{' '}
@@ -900,7 +900,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                     <a
                       href="/legal/privacidad"
                       target="_blank"
-                      className="text-[#fbbf24] hover:text-[#f97316] font-bold"
+                      className="text-[var(--color-xp)] hover:text-[#f97316] font-bold"
                     >
                       Política de Privacidad
                     </a>
@@ -921,7 +921,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                   disabled={!acceptedTerms}
                   className={`px-8 py-4 rounded-xl text-black font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
                     acceptedTerms
-                      ? 'bg-gradient-to-r from-[#fbbf24] to-[#f97316] hover:scale-105 cursor-pointer'
+                      ? 'bg-gradient-to-r from-[var(--color-xp)] to-[#f97316] hover:scale-105 cursor-pointer'
                       : 'bg-white/20 cursor-not-allowed opacity-50'
                   }`}
                 >
@@ -940,7 +940,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
               animate={{ opacity: 1 }}
               className="text-center py-12"
             >
-              <div className="w-20 h-20 border-4 border-[#fbbf24] border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+              <div className="w-20 h-20 border-4 border-[var(--color-xp)] border-t-transparent rounded-full animate-spin mx-auto mb-6" />
               <h2 className="text-4xl font-black text-white mb-4">
                 Procesando tu inscripción... ⏳
               </h2>

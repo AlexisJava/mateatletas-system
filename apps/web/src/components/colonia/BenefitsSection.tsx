@@ -17,7 +17,7 @@ export default function BenefitsSection() {
       title: 'Certificados Digitales',
       description:
         'Cada estudiante recibe un certificado digital verificable al completar el curso.',
-      color: '#fbbf24',
+      color: 'var(--color-xp)',
     },
     {
       icon: Target,
@@ -69,7 +69,7 @@ export default function BenefitsSection() {
             transition={{ duration: 0.6 }}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 mb-6"
           >
-            <Trophy className="w-5 h-5 text-[#fbbf24]" />
+            <Trophy className="w-5 h-5 text-[var(--color-xp)]" />
             <span className="text-sm font-black text-white uppercase tracking-widest">
               Beneficios
             </span>

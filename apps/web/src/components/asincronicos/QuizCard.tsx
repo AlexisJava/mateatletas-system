@@ -22,7 +22,7 @@ export default function QuizCard({ onOpenQuiz }: QuizCardProps) {
           <div className="relative group">
             {/* Glow animado */}
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-[#8b5cf6]/30 via-[#f43f5e]/30 to-[#fbbf24]/30 rounded-3xl blur-2xl"
+              className="absolute inset-0 bg-gradient-to-r from-[#8b5cf6]/30 via-[#f43f5e]/30 to-[var(--color-xp)]/30 rounded-3xl blur-2xl"
               animate={{
                 opacity: [0.5, 0.8, 0.5],
               }}
@@ -73,7 +73,7 @@ export default function QuizCard({ onOpenQuiz }: QuizCardProps) {
               {/* Features del quiz */}
               <div className="grid md:grid-cols-3 gap-4 mb-8">
                 <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-4">
-                  <Sparkles className="w-6 h-6 text-[#fbbf24]" />
+                  <Sparkles className="w-6 h-6 text-[var(--color-xp)]" />
                   <div>
                     <p className="text-sm font-bold text-white">Solo 2 minutos</p>
                     <p className="text-xs text-white/60">Súper rápido</p>
@@ -98,10 +98,10 @@ export default function QuizCard({ onOpenQuiz }: QuizCardProps) {
               {/* CTA */}
               <button
                 onClick={onOpenQuiz}
-                className="group relative w-full px-8 py-5 bg-gradient-to-r from-[#8b5cf6] via-[#f43f5e] to-[#fbbf24] rounded-2xl font-black text-xl text-white shadow-2xl hover:shadow-[#8b5cf6]/50 transition-all hover:scale-[1.02] active:scale-100"
+                className="group relative w-full px-8 py-5 bg-gradient-to-r from-[#8b5cf6] via-[#f43f5e] to-[var(--color-xp)] rounded-2xl font-black text-xl text-white shadow-2xl hover:shadow-[#8b5cf6]/50 transition-all hover:scale-[1.02] active:scale-100"
               >
                 <motion.div
-                  className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#8b5cf6] via-[#f43f5e] to-[#fbbf24] blur-xl opacity-0 group-hover:opacity-60"
+                  className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#8b5cf6] via-[#f43f5e] to-[var(--color-xp)] blur-xl opacity-0 group-hover:opacity-60"
                   animate={{
                     opacity: [0.4, 0.6, 0.4],
                   }}

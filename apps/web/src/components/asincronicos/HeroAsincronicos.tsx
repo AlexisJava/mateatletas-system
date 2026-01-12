@@ -18,7 +18,7 @@ export default function HeroAsincronicos({ onExplorarCursos }: HeroAsincronicosP
 
         {/* Floating orbs */}
         <motion.div
-          className="absolute top-40 right-1/4 w-96 h-96 bg-[#fbbf24]/30 rounded-full blur-[120px]"
+          className="absolute top-40 right-1/4 w-96 h-96 bg-[var(--color-xp)]/30 rounded-full blur-[120px]"
           animate={{
             y: [0, -40, 0],
             x: [0, 30, 0],
@@ -92,7 +92,7 @@ export default function HeroAsincronicos({ onExplorarCursos }: HeroAsincronicosP
           >
             Tu hijo aprende <strong className="text-[#0ea5e9]">cuando quiere</strong>,
             <strong className="text-[#10b981]"> donde quiere</strong>, y
-            <strong className="text-[#fbbf24]"> a su propio ritmo</strong>
+            <strong className="text-[var(--color-xp)]"> a su propio ritmo</strong>
           </motion.p>
 
           {/* 3 Beneficios Clave - Grid */}
@@ -128,9 +128,9 @@ export default function HeroAsincronicos({ onExplorarCursos }: HeroAsincronicosP
 
             {/* Beneficio 3 */}
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#fbbf24]/20 to-[#fbbf24]/5 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
-              <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:border-[#fbbf24]/50 transition-all">
-                <Star className="w-12 h-12 text-[#fbbf24] mb-4 mx-auto" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-xp)]/20 to-[var(--color-xp)]/5 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
+              <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:border-[var(--color-xp)]/50 transition-all">
+                <Star className="w-12 h-12 text-[var(--color-xp)] mb-4 mx-auto" />
                 <h3 className="text-xl font-black text-white mb-2">A su ritmo</h3>
                 <p className="text-white/70 text-sm">
                   Avanza más rápido o tómate tu tiempo según necesites
@@ -185,7 +185,7 @@ export default function HeroAsincronicos({ onExplorarCursos }: HeroAsincronicosP
             className="mt-12 flex flex-wrap items-center justify-center gap-6 text-white/50 text-sm"
           >
             <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-[#fbbf24] fill-[#fbbf24]" />
+              <Star className="w-5 h-5 text-[var(--color-xp)] fill-[var(--color-xp)]" />
               <span className="font-bold text-white">4.9/5</span>
               <span>(+50 familias)</span>
             </div>

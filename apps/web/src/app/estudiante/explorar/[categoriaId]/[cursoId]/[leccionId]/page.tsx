@@ -218,7 +218,7 @@ export default function LeccionPage({
   // Estado de carga
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#030014] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--estudiante-bg)] text-white flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-violet-400 mx-auto mb-4" />
           <p className="text-slate-400">Cargando lección...</p>
@@ -230,7 +230,7 @@ export default function LeccionPage({
   // Estado de error
   if (error) {
     return (
-      <div className="min-h-screen bg-[#030014] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--estudiante-bg)] text-white flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-4" />
           <p className="text-slate-400 mb-4">{error}</p>
@@ -248,7 +248,7 @@ export default function LeccionPage({
   // Lección no encontrada
   if (!leccionActual) {
     return (
-      <div className="min-h-screen bg-[#030014] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--estudiante-bg)] text-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-slate-400 mb-4">Lección no encontrada</p>
           <Link
@@ -266,7 +266,7 @@ export default function LeccionPage({
   const leccionNumero = currentIndex + 1;
 
   return (
-    <div className="min-h-screen bg-[#030014] text-white relative flex">
+    <div className="min-h-screen bg-[var(--estudiante-bg)] text-white relative flex">
       {/* Flechas de navegación flotantes - FUERA del overflow */}
       {anteriorLeccion && (
         <Link

@@ -157,7 +157,8 @@ export default function EstudianteDashboard() {
               <div
                 className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
                 style={{
-                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
+                  background:
+                    'linear-gradient(135deg, var(--color-xp) 0%, #f59e0b 50%, #d97706 100%)',
                   boxShadow:
                     '0 2px 10px rgba(251,191,36,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.1)',
                 }}
@@ -182,7 +183,7 @@ export default function EstudianteDashboard() {
                   <div
                     className="absolute -bottom-1 -right-1 w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black text-white"
                     style={{
-                      background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                      background: 'linear-gradient(135deg, var(--color-xp) 0%, #f59e0b 100%)',
                       boxShadow: '0 2px 8px rgba(251,191,36,0.5)',
                     }}
                   >
@@ -205,7 +206,7 @@ export default function EstudianteDashboard() {
                 icon={<Crown className="w-4 h-4" />}
                 value={data?.nivel ?? 1}
                 label="Nivel"
-                colors={['#fbbf24', '#f59e0b', '#d97706']}
+                colors={['var(--color-xp)', '#f59e0b', '#d97706']}
               />
               <CandyPill
                 icon={<Zap className="w-4 h-4" />}
@@ -274,7 +275,7 @@ export default function EstudianteDashboard() {
                   title="Mi Progreso"
                   subtitle="Tu viaje épico"
                   icon={<Rocket className="w-8 h-8 text-white" />}
-                  colors={['#10b981', '#22c55e', '#84cc16']}
+                  colors={['#10b981', 'var(--color-correct)', '#84cc16']}
                   extraContent={
                     <div className="mt-2">
                       <div className="flex items-center justify-between text-xs mb-1">
@@ -288,7 +289,8 @@ export default function EstudianteDashboard() {
                           className="h-full rounded-full"
                           style={{
                             width: `${Math.min(((data?.xp ?? 0) / (data?.xpSiguienteNivel ?? 100)) * 100, 100)}%`,
-                            background: 'linear-gradient(90deg, #10b981, #22c55e, #84cc16)',
+                            background:
+                              'linear-gradient(90deg, #10b981, var(--color-correct), #84cc16)',
                           }}
                         />
                       </div>
@@ -354,7 +356,8 @@ function LiveBanner({
     <div
       className="relative overflow-hidden rounded-2xl p-5"
       style={{
-        background: 'linear-gradient(135deg, #ef4444 0%, #f97316 50%, #fbbf24 100%)',
+        background:
+          'linear-gradient(135deg, var(--color-incorrect) 0%, #f97316 50%, var(--color-xp) 100%)',
         boxShadow:
           '0 8px 32px rgba(239,68,68,0.4), inset 0 2px 0 rgba(255,255,255,0.2), inset 0 -2px 0 rgba(0,0,0,0.15)',
       }}
@@ -517,7 +520,7 @@ function ClasesCard({
           <div
             className="text-center px-6 py-4 rounded-2xl"
             style={{
-              background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
+              background: 'linear-gradient(135deg, var(--color-xp) 0%, #f59e0b 50%, #d97706 100%)',
               boxShadow:
                 '0 8px 32px rgba(251,191,36,0.4), inset 0 2px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.15)',
             }}
@@ -539,7 +542,7 @@ function ClasesCard({
       href={href}
       className="group relative overflow-hidden rounded-3xl p-6 h-[240px] transition-transform hover:scale-[1.02] active:scale-[0.98] flex flex-col"
       style={{
-        background: 'linear-gradient(145deg, #fbbf24 0%, #f59e0b 50%, #ea580c 100%)',
+        background: 'linear-gradient(145deg, var(--color-xp) 0%, #f59e0b 50%, #ea580c 100%)',
         boxShadow:
           '0 8px 32px rgba(251,146,60,0.4), inset 0 2px 0 rgba(255,255,255,0.25), inset 0 -3px 0 rgba(0,0,0,0.15)',
       }}

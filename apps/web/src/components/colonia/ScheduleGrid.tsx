@@ -61,7 +61,7 @@ export default function ScheduleGrid() {
         {/* Section Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 mb-6">
-            <Calendar className="w-5 h-5 text-[#fbbf24]" />
+            <Calendar className="w-5 h-5 text-[var(--color-xp)]" />
             <span className="text-sm font-black text-white uppercase tracking-widest">
               Horarios
             </span>
@@ -82,7 +82,7 @@ export default function ScheduleGrid() {
         <div className="max-w-4xl mx-auto mb-12">
           {/* Current Day Indicator */}
           <div className="text-center mb-8">
-            <div className="inline-block card-glass rounded-2xl border-2 border-[#fbbf24]/30 px-8 py-4">
+            <div className="inline-block card-glass rounded-2xl border-2 border-[var(--color-xp)]/30 px-8 py-4">
               <h3 className="text-3xl md:text-4xl font-black text-white">{days[activeDay]}</h3>
             </div>
           </div>
@@ -247,7 +247,7 @@ export default function ScheduleGrid() {
                   <div
                     className={`w-3 h-3 rounded-full transition-all ${
                       index === activeDay
-                        ? 'bg-[#fbbf24] scale-125'
+                        ? 'bg-[var(--color-xp)] scale-125'
                         : 'bg-white/30 hover:bg-white/50'
                     }`}
                   />

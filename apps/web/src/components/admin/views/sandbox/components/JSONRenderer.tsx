@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import * as DesignSystem from './DesignSystem';
+import * as DesignSystem from '@/components/lesson-renderer/DesignSystem';
 import type { ContentBlock } from '../types';
 
 // ─────────────────────────────────────────────────────────────────────────────

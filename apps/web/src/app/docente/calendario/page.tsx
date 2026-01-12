@@ -27,7 +27,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
-import { LoadingSpinner } from '@/components/effects';
+import { LoadingSpinner } from '@/components/ui';
 import { docentesApi, ClaseCalendario, ClasesDelMesResponse } from '@/lib/api/docentes.api';
 import { useAuthStore } from '@/store/auth.store';
 

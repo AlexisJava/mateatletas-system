@@ -69,7 +69,7 @@ export default function CourseCatalog({ onInscribe }: CourseCatalogProps) {
             transition={{ duration: 0.6 }}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 mb-6"
           >
-            <Filter className="w-5 h-5 text-[#fbbf24]" />
+            <Filter className="w-5 h-5 text-[var(--color-xp)]" />
             <span className="text-sm font-black text-white uppercase tracking-widest">
               Catálogo de Cursos
             </span>

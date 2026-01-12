@@ -25,8 +25,8 @@ const beneficios = [
     titulo: 'Repite cuantas veces quieras',
     descripcion:
       'Acceso permanente a TODO el contenido. No hay vencimientos. Puede volver a ver las clases cuando necesite.',
-    color: '#fbbf24',
-    gradient: 'from-[#fbbf24]/20 to-[#fbbf24]/5',
+    color: 'var(--color-xp)',
+    gradient: 'from-[var(--color-xp)]/20 to-[var(--color-xp)]/5',
   },
   {
     icon: Shield,
@@ -129,7 +129,7 @@ export default function BeneficiosSection() {
           className="mt-20 max-w-4xl mx-auto"
         >
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0ea5e9]/20 via-[#10b981]/20 to-[#fbbf24]/20 rounded-3xl blur-2xl" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0ea5e9]/20 via-[#10b981]/20 to-[var(--color-xp)]/20 rounded-3xl blur-2xl" />
             <div className="relative bg-black/60 backdrop-blur-xl border border-white/20 rounded-3xl p-10 text-center">
               <p className="text-2xl md:text-3xl text-white font-bold leading-relaxed mb-4">
                 "Los cursos asincrónicos no son <em className="text-[#0ea5e9]">menos</em> que los
@@ -137,7 +137,7 @@ export default function BeneficiosSection() {
               </p>
               <p className="text-xl text-white/70 leading-relaxed">
                 Son <strong className="text-[#10b981]">DIFERENTES</strong>. Diseñados para familias
-                que valoran la <strong className="text-[#fbbf24]">flexibilidad</strong> sin
+                que valoran la <strong className="text-[var(--color-xp)]">flexibilidad</strong> sin
                 sacrificar la <strong className="text-[#f43f5e]">calidad</strong>.
               </p>
             </div>

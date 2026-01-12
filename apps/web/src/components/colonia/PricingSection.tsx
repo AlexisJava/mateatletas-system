@@ -14,7 +14,7 @@ export default function PricingSection({ onInscribe }: PricingSectionProps) {
       className="relative py-32 bg-gradient-to-b from-black via-[#0f0f1a] to-black overflow-hidden"
     >
       {/* Background Effects */}
-      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#fbbf24]/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[var(--color-xp)]/10 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#0ea5e9]/10 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="container mx-auto px-6 relative z-10">
@@ -24,9 +24,9 @@ export default function PricingSection({ onInscribe }: PricingSectionProps) {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#fbbf24]/20 to-[#f97316]/20 border border-[#fbbf24]/30 mb-6"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[var(--color-xp)]/20 to-[#f97316]/20 border border-[var(--color-xp)]/30 mb-6"
           >
-            <Sparkles className="w-5 h-5 text-[#fbbf24]" />
+            <Sparkles className="w-5 h-5 text-[var(--color-xp)]" />
             <span className="text-sm font-black text-white uppercase tracking-widest">Precios</span>
           </motion.div>
 
@@ -60,7 +60,7 @@ export default function PricingSection({ onInscribe }: PricingSectionProps) {
           viewport={{ once: true }}
           className="max-w-5xl mx-auto"
         >
-          <div className="card-glass rounded-3xl border-2 border-[#fbbf24]/30 p-12 shadow-2xl shadow-[#fbbf24]/20">
+          <div className="card-glass rounded-3xl border-2 border-[var(--color-xp)]/30 p-12 shadow-2xl shadow-[var(--color-xp)]/20">
             {/* Inscription Section */}
             <div className="mb-12 pb-12 border-b border-white/10">
               <div className="flex items-center gap-4 mb-6">
@@ -79,8 +79,8 @@ export default function PricingSection({ onInscribe }: PricingSectionProps) {
                   <span className="text-2xl text-white/50">por hijo</span>
                 </div>
                 <p className="text-white/70 text-lg">
-                  <strong className="text-[#fbbf24]">Precio fijo por hijo.</strong> Sin descuentos.
-                  Pagás una sola vez por cada hijo que inscribís.
+                  <strong className="text-[var(--color-xp)]">Precio fijo por hijo.</strong> Sin
+                  descuentos. Pagás una sola vez por cada hijo que inscribís.
                 </p>
               </div>
 
@@ -160,11 +160,11 @@ export default function PricingSection({ onInscribe }: PricingSectionProps) {
                 </div>
 
                 {/* 20% OFF */}
-                <div className="bg-gradient-to-br from-[#fbbf24]/10 to-[#f97316]/10 rounded-2xl p-6 border-2 border-[#fbbf24] relative">
-                  <div className="absolute -top-3 -right-3 px-4 py-1 rounded-full bg-gradient-to-r from-[#fbbf24] to-[#f97316] text-black font-black text-xs uppercase">
+                <div className="bg-gradient-to-br from-[var(--color-xp)]/10 to-[#f97316]/10 rounded-2xl p-6 border-2 border-[var(--color-xp)] relative">
+                  <div className="absolute -top-3 -right-3 px-4 py-1 rounded-full bg-gradient-to-r from-[var(--color-xp)] to-[#f97316] text-black font-black text-xs uppercase">
                     20% OFF
                   </div>
-                  <div className="text-sm font-black text-[#fbbf24] uppercase tracking-wider mb-2">
+                  <div className="text-sm font-black text-[var(--color-xp)] uppercase tracking-wider mb-2">
                     Descuento Máximo
                   </div>
                   <div className="flex items-baseline gap-2 mb-1">
@@ -212,9 +212,11 @@ export default function PricingSection({ onInscribe }: PricingSectionProps) {
                 </div>
 
                 {/* Example 2: 2 hermanos, 2 cursos c/u (20% OFF) */}
-                <div className="bg-gradient-to-br from-[#fbbf24]/10 to-[#f97316]/10 rounded-xl p-6 border-2 border-[#fbbf24]">
+                <div className="bg-gradient-to-br from-[var(--color-xp)]/10 to-[#f97316]/10 rounded-xl p-6 border-2 border-[var(--color-xp)]">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="text-sm font-bold text-[#fbbf24] uppercase">20% OFF</div>
+                    <div className="text-sm font-bold text-[var(--color-xp)] uppercase">
+                      20% OFF
+                    </div>
                     <div className="text-sm text-white/60">2 hermanos • 2 cursos c/u</div>
                   </div>
                   <div className="space-y-2 text-sm mb-4">
@@ -229,7 +231,7 @@ export default function PricingSection({ onInscribe }: PricingSectionProps) {
                     <div className="h-px bg-white/20 my-2" />
                     <div className="flex justify-between">
                       <span className="text-white/70">Total mes 1:</span>
-                      <span className="text-[#fbbf24] font-black text-xl">$226.000</span>
+                      <span className="text-[var(--color-xp)] font-black text-xl">$226.000</span>
                     </div>
                   </div>
                   <div className="text-xs text-green-400">
@@ -257,7 +259,7 @@ export default function PricingSection({ onInscribe }: PricingSectionProps) {
         >
           <button
             onClick={onInscribe}
-            className="px-12 py-6 bg-gradient-to-r from-[#fbbf24] via-[#f97316] to-[#ef4444] rounded-2xl text-white font-black text-2xl uppercase tracking-wider transition-all hover:scale-110 hover:shadow-2xl shadow-[#fbbf24]/50"
+            className="px-12 py-6 bg-gradient-to-r from-[var(--color-xp)] via-[#f97316] to-[var(--color-incorrect)] rounded-2xl text-white font-black text-2xl uppercase tracking-wider transition-all hover:scale-110 hover:shadow-2xl shadow-[var(--color-xp)]/50"
           >
             INSCRIBIR AHORA →
           </button>

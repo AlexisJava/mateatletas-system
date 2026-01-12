@@ -419,7 +419,7 @@ export default function ContenidosPage() {
             </div>
 
             {/* Contenido del preview */}
-            <div className="flex-1 overflow-auto bg-[#030014]">
+            <div className="flex-1 overflow-auto bg-[var(--estudiante-bg)]">
               {loadingPreview ? (
                 <div className="flex items-center justify-center h-64">
                   <Loader2 className="w-8 h-8 animate-spin text-violet-400" />

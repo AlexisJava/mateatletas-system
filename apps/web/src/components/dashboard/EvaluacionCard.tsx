@@ -32,7 +32,7 @@ interface EvaluacionCardProps {
 const dificultadConfig = {
   facil: { label: 'Fácil', color: '#10b981', icon: '⭐' },
   medio: { label: 'Medio', color: '#f59e0b', icon: '⭐⭐' },
-  dificil: { label: 'Difícil', color: '#ef4444', icon: '⭐⭐⭐' },
+  dificil: { label: 'Difícil', color: 'var(--color-incorrect)', icon: '⭐⭐⭐' },
 };
 
 export function EvaluacionCard({ evaluacion, onComenzar, delay = 0 }: EvaluacionCardProps) {

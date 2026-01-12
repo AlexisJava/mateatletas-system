@@ -46,10 +46,10 @@ export default function ScrollToTop() {
           {/* Main Button */}
           <div className="relative">
             {/* Glow Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#fbbf24] to-[#f97316] rounded-2xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-xp)] to-[#f97316] rounded-2xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity" />
 
             {/* Button Container */}
-            <div className="relative w-16 h-16 bg-gradient-to-r from-[#fbbf24] to-[#f97316] rounded-2xl flex items-center justify-center shadow-2xl hover:scale-110 transition-transform">
+            <div className="relative w-16 h-16 bg-gradient-to-r from-[var(--color-xp)] to-[#f97316] rounded-2xl flex items-center justify-center shadow-2xl hover:scale-110 transition-transform">
               {/* Icon Container with Animation */}
               <motion.div
                 animate={{

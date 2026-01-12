@@ -186,7 +186,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
           <div
             className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6"
             style={{
-              background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
+              background: 'linear-gradient(135deg, var(--color-xp) 0%, #f59e0b 50%, #d97706 100%)',
               boxShadow: '0 8px 32px rgba(251,191,36,0.5)',
             }}
           >
@@ -230,7 +230,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
               rel="noopener noreferrer"
               className="px-6 py-3 rounded-xl font-bold text-white transition-all hover:scale-105"
               style={{
-                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                background: 'linear-gradient(135deg, var(--color-correct) 0%, #16a34a 100%)',
                 boxShadow: '0 4px 16px rgba(34,197,94,0.4)',
               }}
             >
@@ -293,7 +293,8 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                 <div
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
                   style={{
-                    background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
+                    background:
+                      'linear-gradient(135deg, var(--color-xp) 0%, #f59e0b 50%, #d97706 100%)',
                     boxShadow:
                       '0 2px 10px rgba(251,191,36,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.1)',
                   }}
@@ -319,7 +320,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                     <div
                       className="absolute -bottom-1 -right-1 w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black text-white"
                       style={{
-                        background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                        background: 'linear-gradient(135deg, var(--color-xp) 0%, #f59e0b 100%)',
                         boxShadow: '0 2px 8px rgba(251,191,36,0.5)',
                       }}
                     >
@@ -341,7 +342,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                 <CandyPill
                   icon={<Crown className="w-4 h-4" />}
                   value={stats.nivel}
-                  colors={['#fbbf24', '#f59e0b', '#d97706']}
+                  colors={['var(--color-xp)', '#f59e0b', '#d97706']}
                 />
                 <CandyPill
                   icon={<Zap className="w-4 h-4" />}

@@ -102,11 +102,13 @@ export default function AttendanceStatsCard({
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#ff6b35]">
+    <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[var(--docente-accent)]">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold text-[#2a1a5e]">Estadísticas de Asistencia</h3>
+          <h3 className="text-xl font-bold text-[var(--docente-text)]">
+            Estadísticas de Asistencia
+          </h3>
           <p className="text-sm text-gray-600 mt-1">Total de estudiantes: {total}</p>
         </div>
 

@@ -82,7 +82,7 @@ export function Stage({ children, pattern = 'dots', background }: StageProps) {
   return (
     <div className="w-full h-full min-h-full flex flex-col animate-in fade-in duration-700 relative text-slate-100 font-sans overflow-y-auto custom-scrollbar scroll-smooth">
       {/* Base Background */}
-      <div className="fixed inset-0 bg-[#030014] z-0 pointer-events-none" />
+      <div className="fixed inset-0 bg-[var(--estudiante-bg)] z-0 pointer-events-none" />
 
       {/* Pattern Layer */}
       <div
@@ -249,7 +249,7 @@ export function STEAMChallenge({ question, options, correctIndex }: STEAMChallen
           >
             <div className="flex items-center gap-4">
               <span
-                className={`flex items-center justify-center w-6 h-6 rounded text-[10px] font-black ${selected === idx ? 'bg-[var(--house-primary)] text-black' : 'bg-[#030014] text-[#64748b]'}`}
+                className={`flex items-center justify-center w-6 h-6 rounded text-[10px] font-black ${selected === idx ? 'bg-[var(--house-primary)] text-black' : 'bg-[var(--estudiante-bg)] text-[#64748b]'}`}
               >
                 {String.fromCharCode(65 + idx)}
               </span>
@@ -293,7 +293,7 @@ export function MathHero({ character, quote }: MathHeroProps) {
   return (
     <div className="flex flex-col md:flex-row gap-5 items-center p-6 rounded-3xl bg-[#0f0720]/60 border border-white/5 w-full h-full relative overflow-hidden group hover:border-[#06b6d4]/30 transition-colors">
       <div className="absolute inset-0 bg-gradient-to-br from-[#1e1b4b]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-      <div className="w-16 h-16 rounded-full bg-[#030014] flex items-center justify-center text-3xl shrink-0 shadow-lg border border-white/10 relative z-10 group-hover:scale-110 transition-transform duration-500">
+      <div className="w-16 h-16 rounded-full bg-[var(--estudiante-bg)] flex items-center justify-center text-3xl shrink-0 shadow-lg border border-white/10 relative z-10 group-hover:scale-110 transition-transform duration-500">
         👤
       </div>
       <div className="text-center md:text-left relative z-10">
@@ -360,7 +360,7 @@ interface FormulaProps {
 
 export function Formula({ tex, label }: FormulaProps) {
   return (
-    <div className="my-2 py-8 px-6 bg-[#030014]/60 rounded-2xl border border-white/5 text-center flex flex-col items-center justify-center w-full relative overflow-hidden">
+    <div className="my-2 py-8 px-6 bg-[var(--estudiante-bg)]/60 rounded-2xl border border-white/5 text-center flex flex-col items-center justify-center w-full relative overflow-hidden">
       <div className="absolute inset-0 bg-[var(--house-accent)] opacity-[0.03]" />
       <span
         className="font-serif text-3xl md:text-4xl text-[var(--house-accent)] italic tracking-wide relative z-10 drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]"
@@ -391,7 +391,7 @@ export function Timeline({ steps }: TimelineProps) {
     <div className="relative pl-6 border-l-2 border-[#1e1b4b] space-y-8 my-6 w-full ml-3">
       {steps.map((step, idx) => (
         <div key={idx} className="relative group">
-          <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-[#030014] border-4 border-[#1e1b4b] group-hover:border-[var(--house-primary)] transition-colors" />
+          <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-[var(--estudiante-bg)] border-4 border-[#1e1b4b] group-hover:border-[var(--house-primary)] transition-colors" />
           <h5 className="text-sm font-bold text-white mb-1 group-hover:text-[var(--house-primary)] transition-colors">
             {step.title}
           </h5>

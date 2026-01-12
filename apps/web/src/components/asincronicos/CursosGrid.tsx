@@ -156,10 +156,10 @@ const areaColors = {
     badge: 'bg-[#0ea5e9]/20 border-[#0ea5e9]/30',
   },
   matematica: {
-    bg: 'from-[#fbbf24]/20 to-[#fbbf24]/5',
-    border: 'border-[#fbbf24]/30',
-    text: 'text-[#fbbf24]',
-    badge: 'bg-[#fbbf24]/20 border-[#fbbf24]/30',
+    bg: 'from-[var(--color-xp)]/20 to-[var(--color-xp)]/5',
+    border: 'border-[var(--color-xp)]/30',
+    text: 'text-[var(--color-xp)]',
+    badge: 'bg-[var(--color-xp)]/20 border-[var(--color-xp)]/30',
   },
   ciencias: {
     bg: 'from-[#10b981]/20 to-[#10b981]/5',
@@ -197,7 +197,7 @@ export default function CursosGrid() {
             {[
               { id: 'todos', label: '✨ Todos', color: 'white' },
               { id: 'programacion', label: '💻 Programación', color: '#0ea5e9' },
-              { id: 'matematica', label: '🧮 Matemática', color: '#fbbf24' },
+              { id: 'matematica', label: '🧮 Matemática', color: 'var(--color-xp)' },
               { id: 'ciencias', label: '🔬 Ciencias', color: '#10b981' },
             ].map((filtro) => (
               <button
@@ -242,7 +242,7 @@ export default function CursosGrid() {
                   <div className="flex items-start justify-between mb-4">
                     <div className="text-5xl">{curso.emoji}</div>
                     {curso.popularidad >= 4 && (
-                      <span className="px-3 py-1 bg-[#fbbf24]/20 border border-[#fbbf24]/30 rounded-full text-[#fbbf24] text-xs font-bold">
+                      <span className="px-3 py-1 bg-[var(--color-xp)]/20 border border-[var(--color-xp)]/30 rounded-full text-[var(--color-xp)] text-xs font-bold">
                         🔥 POPULAR
                       </span>
                     )}

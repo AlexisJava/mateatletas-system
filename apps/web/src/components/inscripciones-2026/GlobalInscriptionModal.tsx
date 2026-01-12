@@ -240,7 +240,7 @@ export default function GlobalInscriptionModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="relative w-full max-w-4xl max-h-[90vh] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-[#fbbf24] to-[#f97316] px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-[var(--color-xp)] to-[#f97316] px-6 py-4 flex items-center justify-between">
           <h2 className="text-2xl font-black text-white">{getTitleByType()}</h2>
           <button
             onClick={onClose}
@@ -272,7 +272,7 @@ export default function GlobalInscriptionModal({
                     isCompleted
                       ? 'bg-green-500'
                       : isActive
-                        ? 'bg-[#fbbf24]'
+                        ? 'bg-[var(--color-xp)]'
                         : 'bg-gray-300 dark:bg-gray-600'
                   }`}
                 />
@@ -307,7 +307,7 @@ export default function GlobalInscriptionModal({
           <button
             onClick={handleNext}
             disabled={!canGoNext() || loading}
-            className="px-8 py-2 rounded-lg font-bold text-white bg-gradient-to-r from-[#fbbf24] to-[#f97316] hover:from-[#f59e0b] hover:to-[#ea580c] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="px-8 py-2 rounded-lg font-bold text-white bg-gradient-to-r from-[var(--color-xp)] to-[#f97316] hover:from-[#f59e0b] hover:to-[#ea580c] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {loading ? 'Procesando...' : currentStep === 5 ? 'Confirmar y Pagar' : 'Siguiente'}
           </button>
@@ -370,7 +370,7 @@ function StepTutorData({
             type="text"
             value={tutorData.nombre}
             onChange={(e) => onChange({ ...tutorData, nombre: e.target.value })}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
+            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--color-xp)] focus:border-transparent"
             placeholder="Juan Pérez"
           />
         </div>
@@ -383,7 +383,7 @@ function StepTutorData({
             type="email"
             value={tutorData.email}
             onChange={(e) => onChange({ ...tutorData, email: e.target.value })}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
+            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--color-xp)] focus:border-transparent"
             placeholder="juan@email.com"
           />
         </div>
@@ -396,7 +396,7 @@ function StepTutorData({
             type="tel"
             value={tutorData.telefono}
             onChange={(e) => onChange({ ...tutorData, telefono: e.target.value })}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
+            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--color-xp)] focus:border-transparent"
             placeholder="+54 9 11 1234-5678"
           />
         </div>
@@ -419,7 +419,7 @@ function StepTutorData({
               }
             }}
             onBlur={() => setCuilDisplay('')}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
+            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--color-xp)] focus:border-transparent"
             placeholder="20-12345678-9"
             maxLength={13}
           />
@@ -436,7 +436,7 @@ function StepTutorData({
             type="text"
             value={tutorData.dni || ''}
             onChange={(e) => onChange({ ...tutorData, dni: e.target.value })}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
+            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--color-xp)] focus:border-transparent"
             placeholder="12345678"
           />
         </div>
@@ -450,7 +450,7 @@ function StepTutorData({
               type={showPassword ? 'text' : 'password'}
               value={tutorData.password}
               onChange={(e) => onChange({ ...tutorData, password: e.target.value })}
-              className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
+              className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--color-xp)] focus:border-transparent"
               placeholder="Mínimo 8 caracteres"
             />
             <button
@@ -475,7 +475,7 @@ function StepTutorData({
               type={showConfirmPassword ? 'text' : 'password'}
               value={tutorData.confirmPassword || ''}
               onChange={(e) => onChange({ ...tutorData, confirmPassword: e.target.value })}
-              className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
+              className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--color-xp)] focus:border-transparent"
               placeholder="Repetir contraseña"
             />
             <button
@@ -503,7 +503,7 @@ function StepTutorData({
           type="text"
           value={ciudad}
           onChange={(e) => onCiudadChange(e.target.value)}
-          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
+          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--color-xp)] focus:border-transparent"
           placeholder="Ciudad o localidad"
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -519,7 +519,7 @@ function StepTutorData({
         <select
           value={origenInscripcion}
           onChange={(e) => onOrigenChange(e.target.value)}
-          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
+          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--color-xp)] focus:border-transparent"
         >
           <option value="">Seleccionar...</option>
           <option value="Instagram">Instagram</option>
@@ -591,7 +591,7 @@ function StepEstudiantes({
                   updated[index] = { ...estudiante, nombre: e.target.value };
                   onChange(updated);
                 }}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--color-xp)] focus:border-transparent"
                 placeholder="María Pérez"
               />
             </div>
@@ -615,7 +615,7 @@ function StepEstudiantes({
                   };
                   onChange(updated);
                 }}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--color-xp)] focus:border-transparent"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Entre 5 y 17 años</p>
             </div>
@@ -632,7 +632,7 @@ function StepEstudiantes({
                   updated[index] = { ...estudiante, dni: e.target.value };
                   onChange(updated);
                 }}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[var(--color-xp)] focus:border-transparent"
                 placeholder="12345678"
               />
             </div>
@@ -642,7 +642,7 @@ function StepEstudiantes({
 
       <button
         onClick={onAdd}
-        className="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:border-[#fbbf24] hover:text-[#fbbf24] font-semibold transition-colors"
+        className="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:border-[var(--color-xp)] hover:text-[var(--color-xp)] font-semibold transition-colors"
       >
         + Agregar otro estudiante
       </button>
@@ -758,9 +758,9 @@ function StepCourseSelection({
                       disabled={!canSelect && !isSelected}
                       className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
                         isSelected
-                          ? 'border-[#fbbf24] bg-[#fbbf24]/10'
+                          ? 'border-[var(--color-xp)] bg-[var(--color-xp)]/10'
                           : canSelect
-                            ? 'border-gray-300 dark:border-gray-600 hover:border-[#fbbf24]'
+                            ? 'border-gray-300 dark:border-gray-600 hover:border-[var(--color-xp)]'
                             : 'border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed'
                       }`}
                     >
@@ -781,7 +781,9 @@ function StepCourseSelection({
                             </p>
                           )}
                         </div>
-                        {isSelected && <span className="text-[#fbbf24] font-bold text-xl">✓</span>}
+                        {isSelected && (
+                          <span className="text-[var(--color-xp)] font-bold text-xl">✓</span>
+                        )}
                       </div>
                     </button>
 
@@ -850,8 +852,8 @@ function StepCourseSelection({
                             disabled={!canSelect && !isSelected}
                             className={`w-full p-3 rounded border text-left text-sm transition-all ${
                               selectedScheduleId === schedule.id
-                                ? 'border-[#fbbf24] bg-[#fbbf24]/5'
-                                : 'border-gray-300 dark:border-gray-600 hover:border-[#fbbf24]/50'
+                                ? 'border-[var(--color-xp)] bg-[var(--color-xp)]/5'
+                                : 'border-gray-300 dark:border-gray-600 hover:border-[var(--color-xp)]/50'
                             } ${!canSelect && !isSelected ? 'opacity-50 cursor-not-allowed' : ''}`}
                           >
                             <span className="font-semibold text-gray-900 dark:text-white">
@@ -937,8 +939,8 @@ function StepMundoSelection({
                 }}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   estudiante.mundo_seleccionado === mundo.value
-                    ? 'border-[#fbbf24] bg-[#fbbf24]/10'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-[#fbbf24]'
+                    ? 'border-[var(--color-xp)] bg-[var(--color-xp)]/10'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-[var(--color-xp)]'
                 }`}
               >
                 <p className="text-2xl mb-2">{mundo.label}</p>
@@ -1011,7 +1013,7 @@ function StepResumen({
       </div>
 
       {/* Precios */}
-      <div className="p-6 bg-gradient-to-br from-[#fbbf24]/10 to-[#f97316]/10 rounded-xl border-2 border-[#fbbf24]/30">
+      <div className="p-6 bg-gradient-to-br from-[var(--color-xp)]/10 to-[#f97316]/10 rounded-xl border-2 border-[var(--color-xp)]/30">
         <h4 className="font-bold text-gray-900 dark:text-white mb-4">Desglose de Precios</h4>
 
         <div className="space-y-2">

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import apiClient from '@/lib/axios';
-import { LoadingSpinner } from '@/components/effects';
+import { LoadingSpinner } from '@/components/ui';
 import { ArrowLeft, Users, Clock, Video, CheckCircle, Calendar } from 'lucide-react';
 
 /**

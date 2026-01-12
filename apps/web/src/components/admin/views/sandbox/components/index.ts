@@ -1,6 +1,6 @@
 // Layout & Preview
-export { ViewportContext } from './DesignSystem';
-export * from './DesignSystem';
+export { ViewportContext } from '@/components/lesson-renderer/DesignSystem';
+export * from '@/components/lesson-renderer/DesignSystem';
 export { JSONRenderer } from './JSONRenderer';
 export { CodePreview } from './CodePreview';
 export { LessonPlayer } from './LessonPlayer';

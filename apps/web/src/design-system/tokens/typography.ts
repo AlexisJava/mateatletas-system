@@ -1,18 +1,25 @@
 /**
  * Mateatletas Design System - Typography Tokens
  *
- * Fuentes:
- * - Títulos: Space Grotesk (moderna, geométrica)
- * - Cuerpo: Plus Jakarta Sans (legible, amigable)
- * - Código: JetBrains Mono (monoespaciada, clara)
- * - Notas: Caveat (handwriting, casual)
+ * Fuentes REALES en uso (alineadas con globals.css):
+ * - General/Estudiante: Nunito (amigable, redondeada)
+ * - Admin/Docente: Inter (profesional, legible)
+ * - Código: JetBrains Mono / IBM Plex Mono (monoespaciada)
+ * - Títulos especiales: Outfit (moderno, geométrico)
+ *
+ * NOTA: Space Grotesk, Plus Jakarta Sans y Caveat NO se usan actualmente.
  */
 
 export const fontFamily = {
-  heading: '"Space Grotesk", ui-sans-serif, system-ui, sans-serif',
-  body: '"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif',
-  mono: '"JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-  handwriting: '"Caveat", cursive',
+  // Fonts realmente en uso
+  heading: '"Outfit", "Nunito", ui-sans-serif, system-ui, sans-serif',
+  body: '"Nunito", ui-sans-serif, system-ui, sans-serif',
+  mono: '"JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace',
+
+  // Variantes por portal
+  admin: '"Inter", ui-sans-serif, system-ui, sans-serif',
+  docente: '"Inter", ui-sans-serif, system-ui, sans-serif',
+  estudiante: '"Nunito", ui-sans-serif, system-ui, sans-serif',
 } as const;
 
 export const fontSize = {
@@ -73,10 +80,6 @@ export const typographyClasses = {
   code: 'font-mono text-sm',
   codeBlock: 'font-mono text-sm leading-relaxed',
 
-  // Handwriting
-  handwriting: 'font-handwriting text-xl',
-  handwritingLarge: 'font-handwriting text-2xl',
-
   // Labels & Captions
   label: 'font-body text-sm font-medium',
   caption: 'font-body text-xs text-dim',
@@ -88,16 +91,16 @@ export const typographyClasses = {
 
 // Configuración para next/font (importar en layout)
 export const fontImportConfig = {
-  spaceGrotesk: {
+  nunito: {
     subsets: ['latin'],
     display: 'swap',
-    variable: '--font-heading',
-    weight: ['400', '500', '600', '700'],
+    variable: '--font-nunito',
+    weight: ['400', '500', '600', '700', '800'],
   },
-  plusJakartaSans: {
+  inter: {
     subsets: ['latin'],
     display: 'swap',
-    variable: '--font-body',
+    variable: '--font-inter',
     weight: ['400', '500', '600', '700'],
   },
   jetbrainsMono: {
@@ -106,11 +109,11 @@ export const fontImportConfig = {
     variable: '--font-mono',
     weight: ['400', '500', '700'],
   },
-  caveat: {
+  outfit: {
     subsets: ['latin'],
     display: 'swap',
-    variable: '--font-handwriting',
-    weight: ['400', '500', '600', '700'],
+    variable: '--font-heading',
+    weight: ['400', '500', '600', '700', '800'],
   },
 } as const;
 

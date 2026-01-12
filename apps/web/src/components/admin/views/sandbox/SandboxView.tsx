@@ -13,10 +13,9 @@ import { PreviewErrorBoundary } from './components/PreviewErrorBoundary';
 import { PublishModal, SuccessToast } from './components/PublishModal';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { PlanificacionSidebar, type ContentSection } from './components/PlanificacionSidebar';
-import { ViewportContext } from './components/DesignSystem';
+import { ViewportContext } from '@/components/lesson-renderer/DesignSystem';
 import { SandboxIcons } from './components/SandboxIcons';
 import { SaveStatusIndicator } from './components/SaveStatusIndicator';
-import { Modal } from '@/components/ui/Modal';
 
 // Types & Constants
 import {
@@ -787,38 +786,40 @@ export function SandboxView() {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmation && (
-        <Modal
-          isOpen={true}
-          onClose={() => setDeleteConfirmation(null)}
-          title="Confirmar eliminación"
-          size="sm"
-        >
-          <div className="space-y-4">
-            <p className="text-gray-700">
-              ¿Estás seguro de que deseas eliminar{' '}
-              <strong>&quot;{deleteConfirmation.titulo}&quot;</strong>?
-            </p>
-            <p className="text-red-600 font-medium">
-              ⚠️ Esta acción eliminará también {deleteConfirmation.descendantCount}{' '}
-              {deleteConfirmation.descendantCount === 1 ? 'subnodo' : 'subnodos'} que dependen de
-              este nodo.
-            </p>
-            <div className="flex justify-end gap-3 pt-4">
-              <button
-                onClick={() => setDeleteConfirmation(null)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => handleDeleteNodo(deleteConfirmation.nodoId, true)}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors"
-              >
-                Eliminar todo
-              </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setDeleteConfirmation(null)}
+          />
+          <div className="relative bg-[#1e1b4b] border border-white/10 rounded-xl shadow-xl max-w-md w-full p-6">
+            <h2 className="text-lg font-semibold text-white mb-4">Confirmar eliminación</h2>
+            <div className="space-y-4">
+              <p className="text-gray-300">
+                ¿Estás seguro de que deseas eliminar{' '}
+                <strong className="text-white">&quot;{deleteConfirmation.titulo}&quot;</strong>?
+              </p>
+              <p className="text-red-400 font-medium">
+                ⚠️ Esta acción eliminará también {deleteConfirmation.descendantCount}{' '}
+                {deleteConfirmation.descendantCount === 1 ? 'subnodo' : 'subnodos'} que dependen de
+                este nodo.
+              </p>
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  onClick={() => setDeleteConfirmation(null)}
+                  className="px-4 py-2 text-gray-400 hover:text-white font-medium transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleDeleteNodo(deleteConfirmation.nodoId, true)}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors"
+                >
+                  Eliminar todo
+                </button>
+              </div>
             </div>
           </div>
-        </Modal>
+        </div>
       )}
 
       {/* Studio Sidebar (Components & Backgrounds) */}

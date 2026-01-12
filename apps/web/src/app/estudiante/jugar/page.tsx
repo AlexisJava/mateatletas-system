@@ -58,7 +58,7 @@ export default function JugarPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#030014] text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--estudiante-bg)] text-white relative overflow-hidden">
       {/* Fondo FloatingLines - Cyan/Azul para Arcade */}
       <div className="absolute inset-0 pointer-events-none">
         <FloatingLines

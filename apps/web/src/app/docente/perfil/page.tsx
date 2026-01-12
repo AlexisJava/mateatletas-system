@@ -5,7 +5,7 @@ import { getErrorMessage } from '@/lib/utils/error-handler';
 import { motion } from 'framer-motion';
 import { docentesApi, Docente, UpdateDocenteData } from '@/lib/api/docentes.api';
 import { useAuthStore } from '@/store/auth.store';
-import { LoadingSpinner } from '@/components/effects';
+import { LoadingSpinner } from '@/components/ui';
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -143,7 +143,7 @@ export default function DocentePerfilPage() {
                   value={formData.nombre}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--docente-accent)] focus:border-transparent"
                 />
               </div>
 
@@ -156,7 +156,7 @@ export default function DocentePerfilPage() {
                   value={formData.apellido}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--docente-accent)] focus:border-transparent"
                 />
               </div>
 
@@ -180,7 +180,7 @@ export default function DocentePerfilPage() {
                   value={formData.telefono}
                   onChange={handleChange}
                   placeholder="+54 9 11 1234-5678"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--docente-accent)] focus:border-transparent"
                 />
               </div>
             </div>
@@ -201,7 +201,7 @@ export default function DocentePerfilPage() {
                 value={formData.titulo}
                 onChange={handleChange}
                 placeholder="Ej: Licenciado en Matemática, Profesor de Matemática"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--docente-accent)] focus:border-transparent"
               />
             </div>
 
@@ -214,7 +214,7 @@ export default function DocentePerfilPage() {
                 onChange={handleChange}
                 rows={6}
                 placeholder="Cuéntanos sobre tu experiencia, especialidades y enfoque pedagógico..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent resize-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--docente-accent)] focus:border-transparent resize-none"
               />
               <p className="text-sm text-gray-500 mt-1">
                 {formData.bio?.length || 0} / 500 caracteres
@@ -247,7 +247,7 @@ export default function DocentePerfilPage() {
             <button
               type="submit"
               disabled={isSaving}
-              className="px-6 py-2 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff5722] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-2 bg-[var(--docente-accent)] text-white rounded-lg hover:bg-[#ff5722] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSaving ? (
                 <>

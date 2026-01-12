@@ -10,7 +10,7 @@ import {
   type EstudianteSinTareas,
   type GrupoRanking,
 } from '@/lib/api/docentes.api';
-import { LoadingSpinner } from '@/components/effects';
+import { LoadingSpinner } from '@/components/ui';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {

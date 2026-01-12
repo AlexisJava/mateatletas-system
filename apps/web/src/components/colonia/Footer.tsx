@@ -33,7 +33,7 @@ export default function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mt-10 pt-10 border-t border-[#0ea5e9]/30">
             {/* Colonia */}
             <div>
-              <h4 className="text-[#fbbf24] text-lg font-black uppercase tracking-widest mb-6">
+              <h4 className="text-[var(--color-xp)] text-lg font-black uppercase tracking-widest mb-6">
                 // COLONIA
               </h4>
               <ul className="space-y-4">

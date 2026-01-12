@@ -29,7 +29,7 @@ const COLORES_PREDEFINIDOS = [
   { nombre: 'Azul', hex: '#3b82f6', from: 'from-blue-500', to: 'to-blue-600' },
   { nombre: 'Morado', hex: '#8b5cf6', from: 'from-purple-500', to: 'to-purple-600' },
   { nombre: 'Rosa', hex: '#ec4899', from: 'from-pink-500', to: 'to-pink-600' },
-  { nombre: 'Rojo', hex: '#ef4444', from: 'from-red-500', to: 'to-red-600' },
+  { nombre: 'Rojo', hex: 'var(--color-incorrect)', from: 'from-red-500', to: 'to-red-600' },
   { nombre: 'Naranja', hex: '#f97316', from: 'from-orange-500', to: 'to-orange-600' },
   { nombre: 'Verde', hex: '#10b981', from: 'from-green-500', to: 'to-green-600' },
   { nombre: 'Celeste', hex: '#06b6d4', from: 'from-cyan-500', to: 'to-cyan-600' },

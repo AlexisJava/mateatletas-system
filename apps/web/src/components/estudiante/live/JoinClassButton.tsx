@@ -9,7 +9,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Video, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui';
 import { livekitApi } from '@/lib/api/livekit.api';
 import { estudiantesApi, type MiPlan } from '@/lib/api/estudiantes.api';
 
@@ -153,16 +152,18 @@ export function JoinClassButton({
   if (variant === 'compact') {
     return (
       <div className="relative inline-flex flex-col items-center">
-        <Button
-          size="sm"
-          variant={puedeUnirse ? 'primary' : 'secondary'}
+        <button
           disabled={!puedeUnirse}
           onClick={handleClick}
           aria-label={nombreClase}
-          className="p-2"
+          className={`p-2 rounded-lg font-semibold transition-colors ${
+            puedeUnirse
+              ? 'bg-[var(--house-primary)] hover:bg-[var(--house-secondary)] text-white'
+              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+          }`}
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
-        </Button>
+        </button>
         {esEnVivo && planPermite && (
           <span
             data-testid="live-indicator"
@@ -177,15 +178,18 @@ export function JoinClassButton({
   return (
     <div className="flex flex-col">
       <div className="relative inline-flex items-center gap-2">
-        <Button
-          variant={puedeUnirse ? 'primary' : 'secondary'}
+        <button
           disabled={!puedeUnirse}
           onClick={handleClick}
-          className="flex items-center gap-2"
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors ${
+            puedeUnirse
+              ? 'bg-[var(--house-primary)] hover:bg-[var(--house-secondary)] text-white'
+              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+          }`}
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
           {getTextoEstado()}
-        </Button>
+        </button>
 
         {esEnVivo && planPermite && (
           <span

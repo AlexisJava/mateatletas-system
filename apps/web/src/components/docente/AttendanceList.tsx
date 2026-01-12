@@ -188,7 +188,9 @@ export default function AttendanceList({
     return (
       <div className="bg-white rounded-lg shadow-md p-12 text-center">
         <span className="text-6xl">👥</span>
-        <h3 className="text-xl font-bold text-[#2a1a5e] mt-4">No hay estudiantes inscritos</h3>
+        <h3 className="text-xl font-bold text-[var(--docente-text)] mt-4">
+          No hay estudiantes inscritos
+        </h3>
         <p className="text-gray-600 mt-2">Esta clase no tiene estudiantes inscritos aún.</p>
       </div>
     );
@@ -214,7 +216,7 @@ export default function AttendanceList({
       )}
 
       {/* Header de la tabla */}
-      <div className="bg-gradient-to-r from-[#ff6b35] to-[#f7b801] px-6 py-4">
+      <div className="bg-gradient-to-r from-[var(--docente-accent)] to-[var(--docente-accent-hover)] px-6 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
             <h3 className="text-lg font-bold text-white">
@@ -230,7 +232,7 @@ export default function AttendanceList({
             <button
               onClick={marcarTodosPresentes}
               disabled={isMarkingAll || isLoading}
-              className="bg-white text-[#ff6b35] font-semibold px-4 py-2 rounded-lg hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="bg-white text-[var(--docente-accent)] font-semibold px-4 py-2 rounded-lg hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isMarkingAll ? (
                 <>
@@ -293,7 +295,7 @@ export default function AttendanceList({
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 {/* Número, foto y nombre */}
                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff6b35] to-[#f7b801] flex items-center justify-center text-white font-bold flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--docente-accent)] to-[var(--docente-accent-hover)] flex items-center justify-center text-white font-bold flex-shrink-0">
                     {index + 1}
                   </div>
 
@@ -304,7 +306,7 @@ export default function AttendanceList({
                       alt={estudiante.nombre}
                       width={48}
                       height={48}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-[#ff6b35] flex-shrink-0"
+                      className="w-12 h-12 rounded-full object-cover border-2 border-[var(--docente-accent)] flex-shrink-0"
                       sizes="48px"
                     />
                   ) : (
@@ -314,7 +316,7 @@ export default function AttendanceList({
                   )}
 
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-lg font-semibold text-[#2a1a5e] truncate">
+                    <h4 className="text-lg font-semibold text-[var(--docente-text)] truncate">
                       {estudiante.nombre}
                     </h4>
                     <p className="text-sm text-gray-600">
@@ -335,7 +337,7 @@ export default function AttendanceList({
                 {/* Botón de expandir */}
                 <button
                   onClick={() => toggleExpand(estudiante.id)}
-                  className="flex-shrink-0 p-2 text-[#ff6b35] hover:bg-[#ff6b35]/10 rounded-lg transition-colors"
+                  className="flex-shrink-0 p-2 text-[var(--docente-accent)] hover:bg-[var(--docente-accent)]/10 rounded-lg transition-colors"
                   aria-label={isExpanded ? 'Contraer' : 'Expandir'}
                 >
                   <svg
@@ -374,7 +376,7 @@ export default function AttendanceList({
                           [estudiante.id]: parseInt(e.target.value) || 0,
                         })
                       }
-                      className="w-full md:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
+                      className="w-full md:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--docente-accent)] focus:border-transparent"
                       placeholder="Ej: 10"
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -395,7 +397,7 @@ export default function AttendanceList({
                           [estudiante.id]: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent resize-none"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--docente-accent)] focus:border-transparent resize-none"
                       rows={3}
                       placeholder="Ej: Participó activamente en la clase..."
                     />

@@ -49,7 +49,7 @@ const CATEGORIAS_BASE: Categoria[] = [
     gradiente: 'from-green-500 to-emerald-600',
     bgSidebar: 'bg-green-600',
     descripcion: 'Lógica, Scratch, Python y más',
-    colorPrimario: '#22c55e',
+    colorPrimario: 'var(--color-correct)',
     mundoNombre: 'MUNDO PROGRAMACIÓN',
   },
   {
@@ -335,7 +335,7 @@ export default function ExplorarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030014] text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--estudiante-bg)] text-white relative overflow-hidden">
       {/* Overlay de transición con el nombre del mundo */}
       <div
         ref={transitionOverlayRef}

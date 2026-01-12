@@ -30,7 +30,7 @@ export default function HowToEnrollSection({ onInscribe }: HowToEnrollSectionPro
       title: 'Seleccioná Cursos',
       description:
         'Para cada hijo, elegí todos los cursos que quieras. Sin límites, sin restricciones.',
-      color: '#fbbf24',
+      color: 'var(--color-xp)',
     },
     {
       number: 4,
@@ -177,7 +177,7 @@ export default function HowToEnrollSection({ onInscribe }: HowToEnrollSectionPro
                   <span>Pago 100% seguro</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#fbbf24]" />
+                  <div className="w-2 h-2 rounded-full bg-[var(--color-xp)]" />
                   <span>Confirmación automática</span>
                 </div>
               </div>

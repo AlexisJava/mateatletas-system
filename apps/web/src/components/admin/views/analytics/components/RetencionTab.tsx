@@ -36,7 +36,11 @@ export function RetencionTab({ retentionData }: RetencionTabProps) {
 
   return (
     <div className="space-y-6">
-      <SectionHeader icon={Activity} title="Metricas de Retencion" iconColor="#22c55e" />
+      <SectionHeader
+        icon={Activity}
+        title="Metricas de Retencion"
+        iconColor="var(--color-correct)"
+      />
 
       {/* Retention Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

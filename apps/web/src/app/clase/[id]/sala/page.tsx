@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import apiClient from '@/lib/axios';
-import { LoadingSpinner } from '@/components/effects';
+import { LoadingSpinner } from '@/components/ui';
 import { ModalResumenClase, type ResumenClase } from '@/components/estudiantes/ModalResumenClase';
 import { ArrowLeft, Users, Clock, Video } from 'lucide-react';
 

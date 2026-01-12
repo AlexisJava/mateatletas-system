@@ -53,7 +53,7 @@ export function LessonPlayer({ lesson, houseStyles, onClose }: LessonPlayerProps
   // Handle empty content
   if (leafNodes.length === 0) {
     return (
-      <div className="fixed inset-0 z-[100] bg-[#030014] flex flex-col items-center justify-center font-sans text-slate-200">
+      <div className="fixed inset-0 z-[100] bg-[var(--estudiante-bg)] flex flex-col items-center justify-center font-sans text-slate-200">
         <div className="text-center p-8">
           <div className="w-20 h-20 rounded-2xl bg-[#131b2e] flex items-center justify-center mb-6 mx-auto">
             <svg
@@ -97,7 +97,7 @@ export function LessonPlayer({ lesson, houseStyles, onClose }: LessonPlayerProps
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-[#030014] flex flex-col font-sans text-slate-200"
+      className="fixed inset-0 z-[100] bg-[var(--estudiante-bg)] flex flex-col font-sans text-slate-200"
       style={playerStyle}
     >
       {/* LAYER 0: CONTENT (Full Screen) */}

@@ -231,7 +231,7 @@ const TreeNode = React.memo(function TreeNode({
       return { text: '#3bf6ff', bg: '#0d3b4b', accent: '#3bf6ff' };
     }
     if (normalized.includes('práctica') || normalized.includes('practica')) {
-      return { text: '#fbbf24', bg: '#4b3b0d', accent: '#fbbf24' };
+      return { text: 'var(--color-xp)', bg: '#4b3b0d', accent: 'var(--color-xp)' };
     }
     if (normalized.includes('evaluación') || normalized.includes('evaluacion')) {
       return { text: '#4ade80', bg: '#0d4b2b', accent: '#4ade80' };

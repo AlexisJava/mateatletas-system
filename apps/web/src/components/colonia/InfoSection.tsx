@@ -125,10 +125,10 @@ export default function InfoSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="relative card-glass rounded-3xl border-2 border-[#fbbf24]/30 p-12 overflow-hidden"
+            className="relative card-glass rounded-3xl border-2 border-[var(--color-xp)]/30 p-12 overflow-hidden"
           >
             {/* Background Glow */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-[#fbbf24]/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--color-xp)]/10 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0ea5e9]/10 rounded-full blur-[120px] pointer-events-none" />
 
             <div className="relative z-10 text-center">
@@ -142,7 +142,7 @@ export default function InfoSection() {
 
               <p className="text-2xl md:text-3xl text-white/80 font-bold max-w-2xl mx-auto leading-relaxed mb-8">
                 8 semanas intensivas de aprendizaje que pueden{' '}
-                <span className="text-[#fbbf24]">cambiar su año escolar</span>
+                <span className="text-[var(--color-xp)]">cambiar su año escolar</span>
               </p>
 
               <div className="flex flex-wrap justify-center gap-4 text-sm text-white/60">
@@ -155,7 +155,7 @@ export default function InfoSection() {
                   <span>En vivo</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#fbbf24]" />
+                  <div className="w-2 h-2 rounded-full bg-[var(--color-xp)]" />
                   <span>Grupos reducidos</span>
                 </div>
                 <div className="flex items-center gap-2">

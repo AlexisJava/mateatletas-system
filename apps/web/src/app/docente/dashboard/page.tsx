@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { docentesApi, ComisionResumen, EstudianteConFalta } from '@/lib/api/docentes.api';
 import { toast } from '@/components/ui/Toast';
-import { LoadingSpinner } from '@/components/effects';
+import { LoadingSpinner } from '@/components/ui';
 
 // New Components
 import { Sidebar } from '@/components/docente/Sidebar';

@@ -23,7 +23,7 @@ export function PublishModal({
   slideCount,
 }: PublishModalProps) {
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#030014]/90 backdrop-blur-xl animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[var(--estudiante-bg)]/90 backdrop-blur-xl animate-in fade-in duration-300">
       <div className="w-full max-w-sm bg-[#0f0720] rounded-[2rem] border border-[#8b5cf6]/20 shadow-2xl relative overflow-hidden transform transition-all scale-100 p-0 ring-1 ring-white/5">
         <div className="absolute -top-32 -inset-x-32 h-64 bg-[#a855f7]/20 blur-[80px] rounded-full pointer-events-none" />
 
