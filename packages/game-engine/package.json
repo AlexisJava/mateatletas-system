@@ -1,0 +1,43 @@
+{
+  "name": "@mateatletas/game-engine",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "default": "./dist/core/index.js"
+    },
+    "./systems": {
+      "types": "./dist/systems/index.d.ts",
+      "default": "./dist/systems/index.js"
+    },
+    "./templates": {
+      "types": "./dist/templates/index.d.ts",
+      "default": "./dist/templates/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "@mateatletas/contracts": "workspace:*",
+    "@mateatletas/ui": "workspace:*",
+    "phaser": "^3.80.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "typescript": "^5.7.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

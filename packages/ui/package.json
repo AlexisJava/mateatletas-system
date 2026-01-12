@@ -1,0 +1,58 @@
+{
+  "name": "@mateatletas/ui",
+  "version": "1.0.0",
+  "description": "Design System components for Mateatletas educational platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./tokens": {
+      "types": "./dist/tokens/index.d.ts",
+      "default": "./dist/tokens/index.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "default": "./dist/hooks/index.js"
+    },
+    "./primitives": {
+      "types": "./dist/primitives/index.d.ts",
+      "default": "./dist/primitives/index.js"
+    },
+    "./compositions": {
+      "types": "./dist/compositions/index.d.ts",
+      "default": "./dist/compositions/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.{ts,tsx}\"",
+    "test": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "react": "^18.x || ^19.x",
+    "react-dom": "^18.x || ^19.x",
+    "tailwindcss": "^4.x"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@mateatletas/contracts": "workspace:*",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.15.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.24",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "react": "^19.1.4",
+    "react-dom": "^19.1.4",
+    "typescript": "^5.6.3",
+    "vitest": "^1.0.4"
+  }
+}
