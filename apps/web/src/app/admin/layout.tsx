@@ -3,14 +3,14 @@
 import { ProtectedLayout } from '@/components/shared/ProtectedLayout';
 import { LoadingScreen } from '@/components/shared/LoadingScreen';
 import { Header } from '@/components/admin/Header';
-import { TabNavigation } from '@/components/admin/TabNavigation';
+import { AdminSidebar } from '@/components/admin/AdminSidebar';
 
 /**
- * Admin Layout v3.0 - Horizontal Tabs Design
+ * Admin Layout v4.0 - Sidebar Design
  *
  * Estructura:
+ * - Sidebar vertical colapsable (toggle para ocultar/mostrar)
  * - Header con saludo, reloj y acciones de usuario
- * - TabNavigation horizontal (reemplaza sidebar vertical)
  * - Contenido principal
  *
  * Autenticación manejada por ProtectedLayout.
@@ -25,21 +25,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[var(--admin-bg)] flex flex-col" data-admin="true">
-      {/* Main Container */}
-      <div className="relative z-10 flex flex-col flex-1 max-w-[1920px] mx-auto w-full p-4 lg:p-6">
-        {/* Header - Saludo, reloj, notificaciones, avatar */}
-        <Header />
+    <div className="h-screen bg-[var(--admin-bg)] flex overflow-hidden" data-admin="true">
+      {/* Sidebar - Navegación vertical colapsable */}
+      <AdminSidebar />
 
-        {/* Tab Navigation - Horizontal tabs */}
-        <TabNavigation />
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Header */}
+        <div className="shrink-0 p-4 lg:p-6 pb-0 lg:pb-0">
+          <Header />
+        </div>
 
-        {/* Main Content Area */}
-        <main className="flex-1 relative min-h-0">
-          <div className="absolute inset-0 overflow-y-auto pr-2 pb-2 custom-scrollbar">
-            {children}
-          </div>
-        </main>
+        {/* Content */}
+        <main className="flex-1 p-4 lg:p-6 overflow-hidden flex flex-col">{children}</main>
       </div>
     </div>
   );

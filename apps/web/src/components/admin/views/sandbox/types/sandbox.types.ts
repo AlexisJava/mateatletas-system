@@ -30,6 +30,9 @@ export interface HouseConfig {
   bgColor: string;
 }
 
+/** Alias para usar en componentes de preview */
+export type HouseStyles = HouseConfig;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CONTENT STRUCTURE (JSON Schema)
 // ─────────────────────────────────────────────────────────────────────────────
