@@ -28,7 +28,7 @@ function mapNodoBackendToFrontend(nodo: NodoBackend): NodoContenido {
     parentId: nodo.parentId,
     orden: nodo.orden,
     contenidoJson: nodo.contenidoJson,
-    hijos: nodo.hijos.map(mapNodoBackendToFrontend),
+    hijos: (nodo.hijos ?? []).map(mapNodoBackendToFrontend),
   };
 }
 
@@ -49,7 +49,7 @@ function mapContenidoBackendToFrontend(backend: ContenidoBackend): Contenido {
     titulo: backend.titulo,
     house: houseMap[backend.casaTipo] || 'QUANTUM',
     subject: subjectMap[backend.mundoTipo] || 'MATH',
-    nodos: backend.nodos.map(mapNodoBackendToFrontend),
+    nodos: (backend.nodos ?? []).map(mapNodoBackendToFrontend),
   };
 }
 
