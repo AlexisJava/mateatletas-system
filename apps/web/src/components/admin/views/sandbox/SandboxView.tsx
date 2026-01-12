@@ -1,10 +1,11 @@
 'use client';
 
 import { Suspense, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels';
 import { SandboxProvider, useSandboxState, useSandboxDispatch } from './context/SandboxContext';
-import { useLoadFromUrl } from './hooks';
-import { TreePanel, EditorPanel, PreviewPanel } from './components';
+import { useLoadFromUrl, type ContentType } from './hooks';
+import { TreePanel, EditorPanel, PreviewPanel, StartModal } from './components';
 import { findNodoById } from './utils/tree.utils';
 
 /**
@@ -52,8 +53,12 @@ function SandboxLoading() {
 
 function SandboxLayout() {
   useLoadFromUrl();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const state = useSandboxState();
   const dispatch = useSandboxDispatch();
+
+  const hasIdInUrl = !!searchParams.get('id');
 
   // Find selected nodo and get its content
   const selectedNodo =
@@ -73,8 +78,20 @@ function SandboxLayout() {
     [dispatch, state.selectedNodoId],
   );
 
+  const handleContentCreated = useCallback(
+    (id: string, _type: ContentType) => {
+      router.push(`/admin/sandbox?id=${id}`);
+    },
+    [router],
+  );
+
   if (state.isLoading) {
     return <SandboxLoading />;
+  }
+
+  // Show StartModal if no ID in URL and no content loaded
+  if (!hasIdInUrl && !state.contenido) {
+    return <StartModal onCreated={handleContentCreated} />;
   }
 
   return (
