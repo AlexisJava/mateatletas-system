@@ -4,7 +4,7 @@ import { Suspense, useCallback } from 'react';
 import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels';
 import { SandboxProvider, useSandboxState, useSandboxDispatch } from './context/SandboxContext';
 import { useLoadFromUrl } from './hooks';
-import { TreePanel, EditorPanel } from './components';
+import { TreePanel, EditorPanel, PreviewPanel } from './components';
 import { findNodoById } from './utils/tree.utils';
 
 /**
@@ -118,7 +118,10 @@ function SandboxLayout() {
         <div className="sandbox-panel">
           <div className="sandbox-panel-header">Preview</div>
           <div className="sandbox-panel-content">
-            <p className="sandbox-empty">Preview del contenido</p>
+            <PreviewPanel
+              content={selectedNodo?.contenidoJson || ''}
+              nodoId={state.selectedNodoId}
+            />
           </div>
         </div>
       </Panel>
