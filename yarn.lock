@@ -14622,6 +14622,7 @@ __metadata:
     eslint-plugin-sonarjs: "npm:^3.0.5"
     husky: "npm:^9.1.7"
     prettier: "npm:^3.6.2"
+    react-resizable-panels: "npm:^4.4.0"
     react-use: "npm:^17.6.0"
     reflect-metadata: "npm:^0.2.2"
     socket.io: "npm:^4.8.3"
@@ -16753,6 +16754,16 @@ __metadata:
   version: 0.18.0
   resolution: "react-refresh@npm:0.18.0"
   checksum: 10c0/34a262f7fd803433a534f50deb27a148112a81adcae440c7d1cbae7ef14d21ea8f2b3d783e858cb7698968183b77755a38b4d4b5b1d79b4f4689c2f6d358fff2
+  languageName: node
+  linkType: hard
+
+"react-resizable-panels@npm:^4.4.0":
+  version: 4.4.0
+  resolution: "react-resizable-panels@npm:4.4.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  checksum: 10c0/82e3f920e6e8ebfd65e5970caf944c00de0ac7f51ee11ed3392621b990740510d87ba7eeaaea4d3e783154119f0ceb0ea36b6a093fd35aa981c4461239f6d4b0
   languageName: node
   linkType: hard
 

@@ -120,6 +120,7 @@
   "dependencies": {
     "@nestjs/platform-socket.io": "^11.1.11",
     "@nestjs/websockets": "^11.1.11",
+    "react-resizable-panels": "^4.4.0",
     "react-use": "^17.6.0",
     "reflect-metadata": "^0.2.2",
     "socket.io": "^4.8.3"

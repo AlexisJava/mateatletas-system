@@ -1,9 +1,10 @@
 'use client';
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState, useRef, useEffect } from 'react';
 import type { NodoContenido } from '../types/sandbox.types';
 import { useSandboxState, useSandboxDispatch } from '../context/SandboxContext';
 import { useSandboxApi } from '../hooks';
+import styles from './TreePanel.module.css';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONNECTED TREE NODE (recursive)
@@ -69,8 +70,6 @@ const ConnectedTreeNode = memo(function ConnectedTreeNode({ nodo, depth }: Conne
 // TREE NODE VIEW (presentational)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useRef, useEffect } from 'react';
-
 interface TreeNodeViewProps {
   nodo: NodoContenido;
   depth: number;
@@ -96,6 +95,7 @@ const TreeNodeView = memo(function TreeNodeView({
 }: TreeNodeViewProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [editValue, setEditValue] = useState(nodo.titulo);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -108,27 +108,30 @@ const TreeNodeView = memo(function TreeNodeView({
     setIsEditing(false);
   };
 
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (hasChildren) {
+      setIsExpanded(!isExpanded);
+    }
+  };
+
   return (
-    <div className="tree-node-wrapper">
+    <div>
       <div
-        className={`tree-node ${isSelected ? 'selected' : ''}`}
+        className={`${styles.node} ${isSelected ? styles.selected : ''}`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
         onClick={onSelect}
         onDoubleClick={() => !nodo.bloqueado && setIsEditing(true)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        <span
-          className="tree-chevron"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsExpanded(!isExpanded);
-          }}
-        >
+        <button type="button" className={styles.chevron} onClick={handleToggle}>
           {hasChildren ? (isExpanded ? '▼' : '▶') : isLeaf ? '○' : '◇'}
-        </span>
+        </button>
         {isEditing ? (
           <input
             ref={inputRef}
-            className="tree-input"
+            className={styles.input}
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={(e) => {
@@ -139,11 +142,13 @@ const TreeNodeView = memo(function TreeNodeView({
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span className="tree-label">{nodo.titulo}</span>
+          <span className={styles.label}>{nodo.titulo}</span>
         )}
         {!nodo.bloqueado && (
-          <span className="tree-actions">
+          <span className={`${styles.actions} ${isHovered ? styles.actionsVisible : ''}`}>
             <button
+              type="button"
+              className={styles.actionBtn}
               onClick={(e) => {
                 e.stopPropagation();
                 onAdd();
@@ -152,6 +157,8 @@ const TreeNodeView = memo(function TreeNodeView({
               +
             </button>
             <button
+              type="button"
+              className={styles.actionBtn}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
@@ -175,10 +182,10 @@ const TreeNodeView = memo(function TreeNodeView({
 
 export function TreePanel() {
   const state = useSandboxState();
-  if (!state.contenido) return <p className="tree-empty">Sin contenido</p>;
+  if (!state.contenido) return <p className={styles.empty}>Sin contenido</p>;
 
   return (
-    <div className="tree-panel">
+    <div className={styles.panel}>
       {state.contenido.nodos.map((nodo) => (
         <ConnectedTreeNode key={nodo.id} nodo={nodo} depth={0} />
       ))}

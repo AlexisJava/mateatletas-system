@@ -1,20 +1,32 @@
 'use client';
 
-import { Suspense } from 'react';
-import { SandboxProvider, useSandboxState } from './context/SandboxContext';
+import { Suspense, useCallback } from 'react';
+import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from 'react-resizable-panels';
+import { SandboxProvider, useSandboxState, useSandboxDispatch } from './context/SandboxContext';
 import { useLoadFromUrl } from './hooks';
-import { TreePanel } from './components';
+import { TreePanel, EditorPanel } from './components';
+import { findNodoById } from './utils/tree.utils';
 
 /**
- * SandboxView - 3-panel IDE layout
+ * SandboxView - 3-panel IDE layout with resizable panels
  * TreePanel | EditorPanel | PreviewPanel
  */
 export function SandboxView() {
   return (
     <SandboxProvider>
-      <Suspense fallback={<SandboxLoading />}>
-        <SandboxLayout />
-      </Suspense>
+      <div className="sandbox-wrapper">
+        <Suspense fallback={<SandboxLoading />}>
+          <SandboxLayout />
+        </Suspense>
+        <style jsx>{`
+          .sandbox-wrapper {
+            flex: 1 1 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+          }
+        `}</style>
+      </div>
     </SandboxProvider>
   );
 }
@@ -29,6 +41,7 @@ function SandboxLoading() {
           align-items: center;
           justify-content: center;
           height: 100%;
+          flex: 1;
           background: var(--admin-bg);
           color: var(--admin-text-muted);
         }
@@ -40,60 +53,87 @@ function SandboxLoading() {
 function SandboxLayout() {
   useLoadFromUrl();
   const state = useSandboxState();
+  const dispatch = useSandboxDispatch();
+
+  // Find selected nodo and get its content
+  const selectedNodo =
+    state.contenido && state.selectedNodoId
+      ? findNodoById(state.contenido.nodos, state.selectedNodoId)
+      : null;
+
+  const handleEditorChange = useCallback(
+    (value: string) => {
+      if (state.selectedNodoId) {
+        dispatch({
+          type: 'UPDATE_NODO_JSON',
+          payload: { nodoId: state.selectedNodoId, json: value },
+        });
+      }
+    },
+    [dispatch, state.selectedNodoId],
+  );
 
   if (state.isLoading) {
     return <SandboxLoading />;
   }
 
   return (
-    <div className="sandbox-container">
+    <PanelGroup
+      orientation="horizontal"
+      className="sandbox-container"
+      style={{ flex: '1 1 0', minHeight: 0 }}
+    >
       {/* Tree Panel */}
-      <aside className="sandbox-tree">
-        <div className="sandbox-panel-header">
-          {state.contenido ? state.contenido.titulo : 'Árbol'}
+      <Panel defaultSize="20%" minSize="15%" maxSize="35%" style={{ height: '100%' }}>
+        <div className="sandbox-panel">
+          <div className="sandbox-panel-header">
+            {state.contenido ? state.contenido.titulo : 'Árbol'}
+          </div>
+          <div className="sandbox-panel-content">
+            <TreePanel />
+          </div>
         </div>
-        <div className="sandbox-panel-content">
-          <TreePanel />
-        </div>
-      </aside>
+      </Panel>
+
+      <PanelResizeHandle className="resize-handle" />
 
       {/* Editor Panel */}
-      <main className="sandbox-editor">
-        <div className="sandbox-panel-header">Editor</div>
-        <div className="sandbox-panel-content">
-          {state.selectedNodoId ? (
-            <p>TODO: Monaco Editor (nodo: {state.selectedNodoId.slice(0, 8)}...)</p>
-          ) : (
-            <p className="sandbox-empty">Selecciona un nodo</p>
-          )}
+      <Panel defaultSize="50%" minSize="30%" style={{ height: '100%' }}>
+        <div className="sandbox-panel">
+          <div className="sandbox-panel-header">Editor</div>
+          <div className="sandbox-panel-content">
+            <EditorPanel
+              content={selectedNodo?.contenidoJson || ''}
+              onChange={handleEditorChange}
+              nodoId={state.selectedNodoId}
+            />
+          </div>
         </div>
-      </main>
+      </Panel>
+
+      <PanelResizeHandle className="resize-handle" />
 
       {/* Preview Panel */}
-      <aside className="sandbox-preview">
-        <div className="sandbox-panel-header">Preview</div>
-        <div className="sandbox-panel-content">
-          <p className="sandbox-empty">Preview del contenido</p>
+      <Panel defaultSize="30%" minSize="15%" style={{ height: '100%' }}>
+        <div className="sandbox-panel">
+          <div className="sandbox-panel-header">Preview</div>
+          <div className="sandbox-panel-content">
+            <p className="sandbox-empty">Preview del contenido</p>
+          </div>
         </div>
-      </aside>
+      </Panel>
 
-      <style jsx>{`
+      <style jsx global>{`
         .sandbox-container {
-          display: grid;
-          grid-template-columns: 240px 1fr 320px;
-          height: 100%;
+          flex: 1;
+          min-height: 0;
           background: var(--admin-bg);
           color: var(--admin-text);
         }
-        .sandbox-tree,
-        .sandbox-editor,
-        .sandbox-preview {
+        .sandbox-panel {
           display: flex;
           flex-direction: column;
-          border-right: 1px solid var(--admin-border);
-        }
-        .sandbox-preview {
-          border-right: none;
+          height: 100%;
         }
         .sandbox-panel-header {
           padding: 0.75rem 1rem;
@@ -104,10 +144,11 @@ function SandboxLayout() {
           color: var(--admin-text-muted);
           background: var(--admin-surface-1);
           border-bottom: 1px solid var(--admin-border);
+          flex-shrink: 0;
         }
         .sandbox-panel-content {
           flex: 1;
-          padding: 0;
+          min-height: 0;
           overflow: auto;
           background: var(--admin-surface-1);
         }
@@ -116,72 +157,18 @@ function SandboxLayout() {
           font-size: 0.875rem;
           padding: 1rem;
         }
-      `}</style>
-
-      <style jsx global>{`
-        .tree-panel {
-          padding: 0.5rem 0;
+        .resize-handle {
+          width: 4px;
+          background: var(--admin-border);
+          transition: background 0.15s ease;
         }
-        .tree-empty {
-          color: var(--admin-text-muted);
-          font-size: 0.875rem;
-          padding: 1rem;
+        .resize-handle:hover {
+          background: var(--admin-accent);
         }
-        .tree-node {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.25rem 0.5rem;
-          cursor: pointer;
-          font-size: 0.875rem;
-          color: var(--admin-text);
-        }
-        .tree-node:hover {
-          background: var(--admin-surface-2);
-        }
-        .tree-node.selected {
-          background: color-mix(in srgb, var(--admin-accent) 20%, transparent);
-        }
-        .tree-chevron {
-          width: 1rem;
-          font-size: 0.625rem;
-          color: var(--admin-text-muted);
-          cursor: pointer;
-        }
-        .tree-label {
-          flex: 1;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        .tree-input {
-          flex: 1;
-          background: var(--admin-bg);
-          border: 1px solid var(--admin-accent);
-          color: var(--admin-text);
-          padding: 0.125rem 0.25rem;
-          font-size: 0.875rem;
-          outline: none;
-        }
-        .tree-actions {
-          display: none;
-          gap: 0.25rem;
-        }
-        .tree-node:hover .tree-actions {
-          display: flex;
-        }
-        .tree-actions button {
-          background: transparent;
-          border: none;
-          color: var(--admin-text-muted);
-          cursor: pointer;
-          padding: 0 0.25rem;
-          font-size: 0.875rem;
-        }
-        .tree-actions button:hover {
-          color: var(--admin-accent);
+        .resize-handle[data-resize-handle-active] {
+          background: var(--admin-accent);
         }
       `}</style>
-    </div>
+    </PanelGroup>
   );
 }
