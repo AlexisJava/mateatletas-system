@@ -76,12 +76,13 @@ PROHIBIDO: Decir "listo" sin verificar funcionamiento real
 
 ## STACK TECNOLÓGICO
 
-- **Backend**: NestJS 11 + Prisma 6 + PostgreSQL 15
-- **Frontend**: Next.js 15 + React 19 + Tailwind 4
+- **Backend**: NestJS 11.0 + Prisma 6.18 + PostgreSQL 15
+- **Frontend**: Next.js 15.5 + React 19.1 + Tailwind 4
 - **Testing Backend**: Jest 30 con DB real (docker-compose.test.yml)
-- **Testing Frontend**: Vitest 4 + Playwright (E2E)
+- **Testing Frontend**: Vitest 4 + Playwright 1.56 (E2E)
 - **State Management**: Zustand 5 + React Query 5
-- **Forms**: React Hook Form + Zod
+- **Forms**: React Hook Form 7 + Zod 3
+- **Animations**: Framer Motion 12
 - **Cache**: Redis (Keyv) + In-Memory fallback
 - **Queues**: BullMQ
 - **Deploy**: Railway (API) + Vercel (Web)
@@ -111,10 +112,10 @@ mateatletas-ecosystem/
 │           ├── store/    # Zustand stores
 │           └── lib/      # Utilidades
 ├── packages/
-│   ├── contracts/        # @mateatletas/contracts - DTOs + Zod schemas
-│   ├── ui/               # @mateatletas/ui - Design System
-│   ├── game-engine/      # @mateatletas/game-engine - Phaser
-│   └── lesson-engine/    # @mateatletas/lesson-engine - Content rendering
+│   ├── contracts/        # @mateatletas/contracts - DTOs + Zod schemas compartidos
+│   ├── ui/               # @mateatletas/ui - Design System (tokens, hooks)
+│   ├── game-engine/      # @mateatletas/game-engine - Phaser minigames
+│   └── lesson-engine/    # @mateatletas/lesson-engine - Motor de microlecciones
 ├── docs/                 # Documentación técnica
 └── scripts/              # Utilidades
 ```
@@ -185,6 +186,48 @@ Inspiración: PS5 UI, Apple Liquid Glass, Microsoft Fluent Design
 - Cards con efecto glass y bordes sutiles luminosos
 - Jerarquía visual con capas de translucidez
 - Glow en elementos interactivos
+
+---
+
+## LESSON ENGINE (Sistema de Contenido)
+
+El package `@mateatletas/lesson-engine` es el motor de microlecciones educativas.
+
+### Arquitectura Intent-Based
+
+Las lecciones se componen de **slides**, y cada slide tiene un **intent** que define su propósito:
+
+```
+packages/lesson-engine/src/
+├── intents/
+│   ├── presentation/   # hero, define, explain, showcase
+│   ├── interaction/    # quiz, match, sort
+│   ├── gamification/   # achievement, progress, levelUp
+│   ├── narrative/      # mascot, conversation
+│   ├── layout/         # split, bento
+│   └── closure/        # summary, nextSteps
+├── renderer/
+│   ├── LessonRenderer.tsx    # Renderiza lección completa
+│   ├── SlideContainer.tsx    # Container 100vh sin scroll
+│   └── IntentRegistry.ts     # Registro de componentes
+└── context/
+    └── LessonContext.tsx     # Estado, XP, navegación
+```
+
+### Reglas del Sistema de Contenido
+
+- **NO SCROLL**: Cada slide ocupa 100vh exacto
+- **Responsive**: Funciona en mobile, tablet y desktop
+- **Intent-based**: El sistema infiere el layout según el intent
+
+### Documentación Completa
+
+Ver `docs/ARQUITECTURA_SISTEMA_CONTENIDO_MATEATLETAS.md` para:
+
+- Catálogo completo de 45 intents
+- Schemas Zod de cada intent
+- Sistema de juegos (game-engine)
+- Design tokens por Casa (Quantum, Vertex, Pulsar)
 
 ---
 
@@ -272,10 +315,13 @@ yarn dev:stop             # Detener servidores y liberar puertos
 
 ```bash
 yarn build                # Compilar todo
+yarn build:contracts      # Solo compilar contracts (necesario antes de build)
 yarn lint                 # ESLint todos los packages
 yarn lint:strict          # ESLint sin warnings
 yarn typecheck            # TypeScript check
 yarn quality              # typecheck + lint:strict
+yarn quality:full         # quality + test:api
+yarn validate             # Script de validación completa
 ```
 
 ### Testing
@@ -295,6 +341,19 @@ yarn test:integration
 # E2E tests
 yarn test:e2e             # Playwright completo
 yarn test:e2e:ui          # Con UI interactivo
+yarn test:e2e:headed      # Con browser visible
+```
+
+### Comandos de Workspace
+
+```bash
+# Ejecutar comando en un package específico
+yarn workspace api test              # Tests del API
+yarn workspace web dev               # Dev server del frontend
+yarn workspace @mateatletas/ui build # Build del UI package
+
+# Ejecutar en todos los workspaces
+yarn workspaces foreach run build    # Build en todos
 ```
 
 ### Database
@@ -381,7 +440,9 @@ Para tareas específicas, leer:
 
 - **Testing**: `apps/api/test/TESTING.md`
 - **Arquitectura contenido**: `docs/ARQUITECTURA_SISTEMA_CONTENIDO_MATEATLETAS.md`
-- **Design System**: `packages/ui/README.md`
+- **Design System tokens**: `packages/ui/src/tokens/`
+- **Intents implementados**: `packages/lesson-engine/src/intents/`
+- **Schemas Zod**: `packages/contracts/src/schemas/`
 
 ---
 
