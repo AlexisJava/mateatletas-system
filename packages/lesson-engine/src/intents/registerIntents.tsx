@@ -26,6 +26,13 @@ import { RewardIntent } from './gamification/RewardIntent';
 import { AchievementIntent } from './gamification/AchievementIntent';
 import { ChallengeIntent } from './gamification/ChallengeIntent';
 import { LeaderboardIntent } from './gamification/LeaderboardIntent';
+import { SplitIntent } from './layout/SplitIntent';
+import { BentoIntent } from './layout/BentoIntent';
+import { TabsIntent } from './layout/TabsIntent';
+import { CarouselIntent } from './layout/CarouselIntent';
+import { SummaryIntent } from './closure/SummaryIntent';
+import { NextStepsIntent } from './closure/NextStepsIntent';
+import { CertificateIntent } from './closure/CertificateIntent';
 
 /**
  * Creates an adapter that wraps an intent component to match IntentProps interface
@@ -73,6 +80,17 @@ export function registerAllIntents(): void {
   IntentRegistry.register('gamification:achievement', createAdapter(AchievementIntent));
   IntentRegistry.register('gamification:challenge', createAdapter(ChallengeIntent));
   IntentRegistry.register('gamification:leaderboard', createAdapter(LeaderboardIntent));
+
+  // Layout intents
+  IntentRegistry.register('layout:split', createAdapter(SplitIntent));
+  IntentRegistry.register('layout:bento', createAdapter(BentoIntent));
+  IntentRegistry.register('layout:tabs', createAdapter(TabsIntent));
+  IntentRegistry.register('layout:carousel', createAdapter(CarouselIntent));
+
+  // Closure intents
+  IntentRegistry.register('closure:summary', createAdapter(SummaryIntent));
+  IntentRegistry.register('closure:next-steps', createAdapter(NextStepsIntent));
+  IntentRegistry.register('closure:certificate', createAdapter(CertificateIntent));
 }
 
 /**

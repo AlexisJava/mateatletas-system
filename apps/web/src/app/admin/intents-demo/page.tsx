@@ -714,6 +714,257 @@ function LeaderboardIntentDemo() {
   );
 }
 
+function SplitIntentDemo() {
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+          <LayoutGrid className="w-4 h-4 text-blue-400" />
+        </div>
+        <span className="text-xs font-medium text-blue-400 uppercase">Split View</span>
+      </div>
+      <div className="grid grid-cols-2 gap-3 h-56">
+        <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4 flex flex-col">
+          <h4 className="text-sm font-medium text-cyan-400 mb-2">Numerador</h4>
+          <div className="flex-1 flex items-center justify-center">
+            <span className="text-4xl font-bold text-white">3</span>
+          </div>
+          <p className="text-xs text-white/50 text-center">Partes tomadas</p>
+        </div>
+        <div className="bg-white/[0.05] border border-white/10 rounded-xl p-4 flex flex-col">
+          <h4 className="text-sm font-medium text-white/60 mb-2">Denominador</h4>
+          <div className="flex-1 flex items-center justify-center">
+            <span className="text-4xl font-bold text-white/70">4</span>
+          </div>
+          <p className="text-xs text-white/50 text-center">Total de partes</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BentoIntentDemo() {
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+          <LayoutGrid className="w-4 h-4 text-purple-400" />
+        </div>
+        <span className="text-xs font-medium text-purple-400 uppercase">Bento Grid</span>
+      </div>
+      <div className="grid grid-cols-3 grid-rows-2 gap-2 h-56">
+        <div className="col-span-2 row-span-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 flex items-center justify-center">
+          <span className="text-5xl">🍕</span>
+        </div>
+        <div className="bg-white/[0.05] border border-white/10 rounded-xl p-3 flex flex-col items-center justify-center">
+          <span className="text-xl font-bold text-white">1/2</span>
+          <span className="text-xs text-white/50">Mitad</span>
+        </div>
+        <div className="bg-white/[0.05] border border-white/10 rounded-xl p-3 flex flex-col items-center justify-center">
+          <span className="text-xl font-bold text-white">1/4</span>
+          <span className="text-xs text-white/50">Cuarto</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TabsIntentDemo() {
+  const [activeTab, setActiveTab] = useState('sum');
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center">
+          <LayoutGrid className="w-4 h-4 text-teal-400" />
+        </div>
+        <span className="text-xs font-medium text-teal-400 uppercase">Tabs</span>
+      </div>
+      <div className="flex gap-2 mb-3">
+        {['sum', 'sub', 'mul'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              activeTab === tab
+                ? 'bg-teal-500/20 text-teal-400 border border-teal-500/30'
+                : 'text-white/50 hover:text-white'
+            }`}
+          >
+            {tab === 'sum' ? 'Suma' : tab === 'sub' ? 'Resta' : 'Multiplicación'}
+          </button>
+        ))}
+      </div>
+      <div className="bg-white/[0.05] border border-white/10 rounded-xl p-4 h-40">
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <p className="text-3xl font-bold text-white mb-2">
+              {activeTab === 'sum'
+                ? '1/2 + 1/4 = 3/4'
+                : activeTab === 'sub'
+                  ? '3/4 - 1/4 = 2/4'
+                  : '1/2 × 2 = 1'}
+            </p>
+            <p className="text-sm text-white/50">
+              {activeTab === 'sum'
+                ? 'Sumar fracciones'
+                : activeTab === 'sub'
+                  ? 'Restar fracciones'
+                  : 'Multiplicar fracción por entero'}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CarouselIntentDemo() {
+  const [current, setCurrent] = useState(0);
+  const slides = ['🍕 Pizza', '🍰 Pastel', '🍫 Chocolate'];
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center">
+            <LayoutGrid className="w-4 h-4 text-orange-400" />
+          </div>
+          <span className="text-xs font-medium text-orange-400 uppercase">Carousel</span>
+        </div>
+        <span className="text-xs text-white/40">
+          {current + 1} / {slides.length}
+        </span>
+      </div>
+      <div className="relative h-48 flex items-center">
+        <button
+          onClick={() => setCurrent((p) => Math.max(0, p - 1))}
+          className="absolute left-0 z-10 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20"
+        >
+          ←
+        </button>
+        <div className="flex-1 mx-10 h-full bg-gradient-to-br from-orange-500/10 to-amber-500/10 border border-orange-500/30 rounded-xl flex items-center justify-center">
+          <span className="text-4xl">{slides[current]}</span>
+        </div>
+        <button
+          onClick={() => setCurrent((p) => Math.min(slides.length - 1, p + 1))}
+          className="absolute right-0 z-10 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20"
+        >
+          →
+        </button>
+      </div>
+      <div className="flex justify-center gap-2 mt-3">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`h-2 rounded-full transition-all ${
+              i === current ? 'w-6 bg-orange-400' : 'w-2 bg-white/20'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SummaryIntentDemo() {
+  const points = [
+    'El numerador es el número de arriba',
+    'El denominador indica el total de partes',
+    'Las fracciones representan partes de un todo',
+  ];
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+          <BookOpen className="w-4 h-4 text-green-400" />
+        </div>
+        <span className="text-xs font-medium text-green-400 uppercase">Resumen</span>
+      </div>
+      <h3 className="text-lg font-bold text-white mb-4">¡Lo que aprendiste!</h3>
+      <div className="space-y-2">
+        {points.map((point, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/10"
+          >
+            <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+              <span className="text-xs text-white">✓</span>
+            </div>
+            <p className="text-sm text-white/80">{point}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function NextStepsIntentDemo() {
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+          <ChevronRight className="w-4 h-4 text-blue-400" />
+        </div>
+        <span className="text-xs font-medium text-blue-400 uppercase">Siguiente</span>
+      </div>
+      <h3 className="text-lg font-bold text-white mb-4">¿Qué sigue?</h3>
+      <div className="space-y-2">
+        <div className="relative p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-2 border-amber-500/50">
+          <div className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-amber-500 text-white text-xs font-bold">
+            ⭐ Recomendado
+          </div>
+          <h4 className="font-semibold text-white">Suma de fracciones</h4>
+          <p className="text-xs text-white/50">Aprende a sumar</p>
+        </div>
+        <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+          <h4 className="font-semibold text-white">Resta de fracciones</h4>
+          <p className="text-xs text-white/50">Aprende a restar</p>
+        </div>
+        <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 opacity-50">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-semibold text-white">Multiplicación</h4>
+              <p className="text-xs text-white/50">Próximamente</p>
+            </div>
+            <span className="text-white/30">🔒</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CertificateIntentDemo() {
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-amber-500/5 via-yellow-500/5 to-orange-500/5 border border-amber-500/20 p-5 flex flex-col items-center justify-center text-center">
+      <div className="flex gap-2 mb-3">
+        {['⭐', '⭐', '⭐'].map((star, i) => (
+          <span key={i} className={`text-2xl ${i === 1 ? 'text-3xl' : 'opacity-60'}`}>
+            {star}
+          </span>
+        ))}
+      </div>
+      <div className="p-5 rounded-2xl bg-white/[0.05] border border-white/10 w-full max-w-xs">
+        <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Certificado</p>
+        <h3 className="text-lg font-bold text-white mb-2">Maestro de Fracciones</h3>
+        <div className="w-12 h-0.5 bg-white/20 mx-auto mb-2" />
+        <p className="text-xs text-white/50 mb-1">Otorgado a</p>
+        <p className="text-white font-semibold mb-3">María García</p>
+        <div className="flex justify-center gap-4">
+          <div>
+            <p className="text-lg font-bold text-amber-400">+500</p>
+            <p className="text-xs text-white/40">XP</p>
+          </div>
+          <div>
+            <p className="text-lg font-bold text-green-400">95%</p>
+            <p className="text-xs text-white/40">Score</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // =============================================================================
 // CATEGORIES DATA
 // =============================================================================
@@ -887,25 +1138,29 @@ const INTENT_CATEGORIES: IntentCategory[] = [
         id: 'split',
         name: 'Split View',
         description: 'Dividir pantalla en 2 columnas',
-        status: 'pending',
+        status: 'implemented',
+        component: SplitIntentDemo,
       },
       {
         id: 'bento',
         name: 'Bento Grid',
         description: 'Grid estilo Apple/bento',
-        status: 'pending',
+        status: 'implemented',
+        component: BentoIntentDemo,
       },
       {
         id: 'tabs',
         name: 'Tabs',
         description: 'Contenido en pestañas',
-        status: 'pending',
+        status: 'implemented',
+        component: TabsIntentDemo,
       },
       {
         id: 'carousel',
         name: 'Carousel',
         description: 'Carrusel de slides',
-        status: 'pending',
+        status: 'implemented',
+        component: CarouselIntentDemo,
       },
     ],
   },
@@ -919,19 +1174,22 @@ const INTENT_CATEGORIES: IntentCategory[] = [
         id: 'summary',
         name: 'Summary',
         description: 'Resumen de lo aprendido',
-        status: 'pending',
+        status: 'implemented',
+        component: SummaryIntentDemo,
       },
       {
         id: 'next-steps',
         name: 'Next Steps',
         description: 'Qué sigue después',
-        status: 'pending',
+        status: 'implemented',
+        component: NextStepsIntentDemo,
       },
       {
         id: 'certificate',
         name: 'Certificate',
         description: 'Certificado de completitud',
-        status: 'pending',
+        status: 'implemented',
+        component: CertificateIntentDemo,
       },
     ],
   },
