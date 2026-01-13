@@ -1,8 +1,11 @@
 'use client';
 
 import { createContext, useContext, useReducer, type ReactNode, type Dispatch } from 'react';
-import type { SandboxState, SandboxAction } from '../types/sandbox.types';
+import type { SandboxState, SandboxAction, SaveStatus } from '../types/sandbox.types';
 import { updateNodoInTree, addNodoToParent, removeNodoFromTree } from '../utils/tree.utils';
+
+// Re-export SaveStatus for components that import from context
+export type { SaveStatus };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INITIAL STATE
