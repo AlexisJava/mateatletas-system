@@ -7,11 +7,14 @@
  * @packageDocumentation
  */
 
+// Player - Main entry point for playing lessons
+export * from './player';
+
 // Context - Estado global de la lección
 export * from './context';
 
 // Renderer - Sistema de renderizado
 export * from './renderer';
 
-// Intents - Componentes de slide (implementados en FASE 3)
+// Intents - Componentes de slide
 export * from './intents';

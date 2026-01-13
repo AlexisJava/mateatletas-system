@@ -100,7 +100,7 @@ function getCellBackground(bg: BentoCell['background'] = 'default'): React.CSSPr
     case 'visual':
       return {
         background: backgrounds.surface,
-        border: `1px solid ${borders.medium}`,
+        border: `1px solid ${borders.accent}`,
       };
     default:
       return {

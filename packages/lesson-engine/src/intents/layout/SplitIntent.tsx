@@ -106,7 +106,7 @@ function getPanelBackground(bg: 'default' | 'accent' | 'visual' = 'default'): Re
     case 'visual':
       return {
         background: backgrounds.surface,
-        border: `1px solid ${borders.medium}`,
+        border: `1px solid ${borders.accent}`,
       };
     default:
       return {

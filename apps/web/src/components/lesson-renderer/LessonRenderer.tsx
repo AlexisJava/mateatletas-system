@@ -10,6 +10,15 @@ import { DEFAULT_HOUSE_COLORS } from './types';
 // LESSON RENDERER
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * @deprecated Use `LessonPlayer` from `@mateatletas/lesson-engine` instead.
+ * This ContentBlock-based renderer is being phased out in favor of the
+ * Intent-based system which provides better state management, XP tracking,
+ * and slide transitions.
+ *
+ * Migration: Convert ContentBlock JSON to Intent-based SlideDefinition format.
+ * See: packages/lesson-engine/src/player/LessonPlayer.tsx
+ */
 interface LessonRendererProps {
   /** JSON string del contenido a renderizar */
   contenidoJson: string;
