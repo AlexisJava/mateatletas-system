@@ -3085,7 +3085,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@mateatletas/lesson-engine@workspace:packages/lesson-engine":
+"@mateatletas/lesson-engine@workspace:^, @mateatletas/lesson-engine@workspace:packages/lesson-engine":
   version: 0.0.0-use.local
   resolution: "@mateatletas/lesson-engine@workspace:packages/lesson-engine"
   dependencies:
@@ -20453,6 +20453,7 @@ __metadata:
     "@livekit/components-react": "npm:^2.9.17"
     "@lottiefiles/dotlottie-react": "npm:^0.17.5"
     "@mateatletas/contracts": "workspace:^"
+    "@mateatletas/lesson-engine": "workspace:^"
     "@mateatletas/ui": "workspace:^"
     "@monaco-editor/react": "npm:^4.7.0"
     "@mui/icons-material": "npm:^7.3.4"
