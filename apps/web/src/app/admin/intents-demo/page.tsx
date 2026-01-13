@@ -494,6 +494,226 @@ function DragDropIntentDemo() {
   );
 }
 
+function DialogueIntentDemo() {
+  const [step, setStep] = useState(0);
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-6">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
+          <MessageCircle className="w-4 h-4 text-violet-400" />
+        </div>
+        <span className="text-xs font-medium text-violet-400 uppercase">Diálogo</span>
+      </div>
+      <div className="flex gap-3 mb-4">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xl">
+          🤖
+        </div>
+        <div className="flex-1 p-3 rounded-xl rounded-tl-none bg-white/[0.05]">
+          <p className="text-white/90">¿Qué fracción representa la mitad de una pizza?</p>
+        </div>
+      </div>
+      {step === 0 ? (
+        <div className="space-y-2">
+          {['1/2', '1/4', '2/3'].map((opt) => (
+            <button
+              key={opt}
+              onClick={() => setStep(1)}
+              className="w-full p-3 rounded-xl bg-violet-500/10 border border-violet-500/30 text-violet-300 text-left hover:bg-violet-500/20 transition-colors"
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <div className="p-3 rounded-xl rounded-tr-none bg-green-500/20 border border-green-500/50">
+              <p className="text-green-400">1/2</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xl">
+              🎉
+            </div>
+            <div className="flex-1 p-3 rounded-xl rounded-tl-none bg-white/[0.05]">
+              <p className="text-green-400">¡Exacto! 1/2 es la mitad perfecta</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MascotSpeechIntentDemo() {
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-rose-500/10 border border-amber-500/20 p-6 flex flex-col items-center justify-center text-center">
+      <div className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium mb-4">
+        ⚡ Motivación
+      </div>
+      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-4xl mb-4 animate-bounce">
+        🤖
+      </div>
+      <h3 className="text-2xl font-bold text-white mb-2">¡Tú puedes!</h3>
+      <div className="p-4 rounded-2xl bg-white/[0.05] border border-white/10 max-w-sm">
+        <p className="text-white/80">
+          Cada problema que resuelves te hace más fuerte. ¡Sigue adelante, eres increíble!
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function AchievementIntentDemo() {
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-purple-500/10 via-violet-500/10 to-indigo-500/10 border border-purple-500/20 p-6 flex flex-col items-center justify-center text-center relative">
+      {/* Sparkles effect */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-purple-400 rounded-full animate-ping"
+            style={{
+              top: `${20 + Math.random() * 60}%`,
+              left: `${20 + Math.random() * 60}%`,
+              animationDelay: `${i * 0.3}s`,
+            }}
+          />
+        ))}
+      </div>
+      <div className="px-3 py-1 rounded-full bg-gradient-to-r from-purple-500 to-violet-500 text-white text-xs font-medium mb-4">
+        🏆 Logro Desbloqueado
+      </div>
+      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 via-violet-500 to-indigo-500 flex items-center justify-center text-4xl mb-4 shadow-[0_0_40px_rgba(168,85,247,0.5)]">
+        ⭐
+      </div>
+      <h3 className="text-2xl font-bold text-white mb-2">Maestro de Fracciones</h3>
+      <p className="text-white/60 text-sm mb-4">Completaste 10 lecciones de fracciones</p>
+      <div className="flex items-center gap-2">
+        <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-sm font-medium">
+          +100 XP
+        </span>
+        <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 text-sm font-medium">
+          Épico
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function ChallengeIntentDemo() {
+  const [timeLeft] = useState(45);
+  const [currentQ] = useState(1);
+  const totalQ = 5;
+
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+            <span className="text-amber-400">⚡</span>
+          </div>
+          <span className="text-xs font-medium text-amber-400 uppercase">
+            Pregunta {currentQ}/{totalQ}
+          </span>
+        </div>
+        <div
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${timeLeft <= 10 ? 'bg-red-500/20 text-red-400' : 'bg-white/10 text-white'}`}
+        >
+          <span>⏱️</span>
+          <span className="font-mono font-bold">0:{timeLeft.toString().padStart(2, '0')}</span>
+        </div>
+      </div>
+      {/* Progress bar */}
+      <div className="h-2 bg-white/10 rounded-full overflow-hidden mb-6">
+        <div
+          className="h-full bg-gradient-to-r from-amber-500 to-orange-500"
+          style={{ width: `${(currentQ / totalQ) * 100}%` }}
+        />
+      </div>
+      {/* Question */}
+      <div className="p-4 rounded-xl bg-white/[0.05] border border-white/10 mb-4">
+        <p className="text-lg text-white text-center">¿Cuánto es 2/4 simplificado?</p>
+      </div>
+      {/* Options */}
+      <div className="grid grid-cols-2 gap-2">
+        {['1/2', '1/4', '2/2', '4/8'].map((opt, i) => (
+          <button
+            key={opt}
+            className="p-3 rounded-xl bg-white/[0.05] border border-white/10 text-white hover:bg-white/[0.08] hover:border-white/20 transition-all flex items-center gap-2"
+          >
+            <span className="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center text-xs font-bold text-white/70">
+              {String.fromCharCode(65 + i)}
+            </span>
+            <span>{opt}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LeaderboardIntentDemo() {
+  const leaders = [
+    { rank: 1, name: 'María G.', xp: 2450, trend: 'up' },
+    { rank: 2, name: 'Carlos R.', xp: 2380, trend: 'up' },
+    { rank: 3, name: 'Ana L.', xp: 2250, trend: 'down' },
+    { rank: 4, name: 'Tú', xp: 2100, trend: 'up', isCurrentUser: true },
+    { rank: 5, name: 'Pedro M.', xp: 1980, trend: 'same' },
+  ];
+
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-6">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+          <Trophy className="w-4 h-4 text-amber-400" />
+        </div>
+        <span className="text-xs font-medium text-amber-400 uppercase">Top 5 Semanal</span>
+      </div>
+      <div className="space-y-2">
+        {leaders.map((leader) => (
+          <div
+            key={leader.rank}
+            className={`flex items-center gap-3 p-2.5 rounded-xl transition-colors ${
+              leader.isCurrentUser
+                ? 'bg-amber-500/10 border border-amber-500/30'
+                : 'bg-white/[0.03] hover:bg-white/[0.05]'
+            }`}
+          >
+            <div
+              className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
+                leader.rank === 1
+                  ? 'bg-amber-500 text-white'
+                  : leader.rank === 2
+                    ? 'bg-gray-400 text-white'
+                    : leader.rank === 3
+                      ? 'bg-amber-700 text-white'
+                      : 'bg-white/10 text-white/60'
+              }`}
+            >
+              {leader.rank <= 3 ? ['👑', '🥈', '🥉'][leader.rank - 1] : leader.rank}
+            </div>
+            <div className="flex-1">
+              <p
+                className={`font-medium ${leader.isCurrentUser ? 'text-amber-400' : 'text-white'}`}
+              >
+                {leader.name}
+              </p>
+            </div>
+            <span
+              className={`text-xs ${leader.trend === 'up' ? 'text-green-400' : leader.trend === 'down' ? 'text-red-400' : 'text-white/40'}`}
+            >
+              {leader.trend === 'up' ? '↑' : leader.trend === 'down' ? '↓' : '–'}
+            </span>
+            <span className="text-white/60 font-mono text-sm">{leader.xp.toLocaleString()} XP</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // =============================================================================
 // CATEGORIES DATA
 // =============================================================================
@@ -586,8 +806,9 @@ const INTENT_CATEGORIES: IntentCategory[] = [
       {
         id: 'sorting',
         name: 'Sorting',
-        description: 'Ordenar elementos',
-        status: 'pending',
+        description: 'Ordenar por criterio (menor/mayor)',
+        status: 'implemented',
+        component: DragDropIntentDemo,
       },
     ],
   },
@@ -608,13 +829,15 @@ const INTENT_CATEGORIES: IntentCategory[] = [
         id: 'dialogue',
         name: 'Dialogue',
         description: 'Conversación interactiva',
-        status: 'pending',
+        status: 'implemented',
+        component: DialogueIntentDemo,
       },
       {
         id: 'mascot-speech',
         name: 'Mascot Speech',
         description: 'Bit da un mensaje motivacional',
-        status: 'pending',
+        status: 'implemented',
+        component: MascotSpeechIntentDemo,
       },
     ],
   },
@@ -635,19 +858,22 @@ const INTENT_CATEGORIES: IntentCategory[] = [
         id: 'achievement',
         name: 'Achievement',
         description: 'Desbloquear un logro',
-        status: 'pending',
+        status: 'implemented',
+        component: AchievementIntentDemo,
       },
       {
         id: 'challenge',
         name: 'Challenge',
         description: 'Reto con tiempo límite',
-        status: 'pending',
+        status: 'implemented',
+        component: ChallengeIntentDemo,
       },
       {
         id: 'leaderboard',
         name: 'Leaderboard',
         description: 'Tabla de posiciones',
-        status: 'pending',
+        status: 'implemented',
+        component: LeaderboardIntentDemo,
       },
     ],
   },
