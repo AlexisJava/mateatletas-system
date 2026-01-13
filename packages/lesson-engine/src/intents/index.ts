@@ -2,23 +2,35 @@
  * Intents - Index
  *
  * Barrel file para todos los intents del lesson engine.
- * Los intents reales se implementan en FASE 3.
+ *
+ * Implemented intents:
+ * - presentation: HeroIntent, DefineIntent, ExplainIntent
+ * - interaction: QuizMCIntent, DragDropIntent
+ * - narrative: StoryIntent
+ * - gamification: RewardIntent
  */
 
-// Presentation intents (hero, define, explain, showcase, etc.)
+// Presentation intents
 export * from './presentation';
 
-// Interaction intents (quiz, drag-drop, fill-blank, etc.)
+// Interaction intents
 export * from './interaction';
 
-// Gamification intents (reward, challenge, leaderboard, etc.)
+// Gamification intents
 export * from './gamification';
 
-// Narrative intents (story, dialogue, mascot, etc.)
+// Narrative intents
 export * from './narrative';
 
-// Layout intents (split, bento, tabs, etc.)
+// Layout intents (TODO)
 export * from './layout';
 
-// Closure intents (summary, nextSteps, certificate, etc.)
+// Closure intents (TODO)
 export * from './closure';
+
+// Registration utilities
+export {
+  registerAllIntents,
+  areIntentsRegistered,
+  getRegisteredIntents,
+} from './registerIntents.js';
