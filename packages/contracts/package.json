@@ -7,15 +7,18 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.{ts,tsx}\"",
+    "lint": "eslint src",
     "test": "vitest"
   },
   "dependencies": {
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
     "@types/node": "^20.19.24",
+    "eslint": "^9.0.0",
     "typescript": "^5.3.3",
+    "typescript-eslint": "^8.0.0",
     "vitest": "^1.0.4"
   }
 }

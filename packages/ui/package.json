@@ -30,7 +30,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.{ts,tsx}\"",
+    "lint": "eslint src",
     "test": "vitest",
     "clean": "rm -rf dist"
   },
@@ -47,12 +47,15 @@
     "framer-motion": "^11.15.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
     "@types/node": "^20.19.24",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "eslint": "^9.0.0",
     "react": "^19.1.4",
     "react-dom": "^19.1.4",
     "typescript": "^5.6.3",
+    "typescript-eslint": "^8.0.0",
     "vitest": "^1.0.4"
   }
 }
