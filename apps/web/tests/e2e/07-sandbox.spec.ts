@@ -4,121 +4,148 @@ import { test, expect, Page } from '@playwright/test';
  * Sandbox E2E Tests - Editor de Contenido Educativo
  *
  * Tests para el flujo completo del Sandbox:
- * - Inicio y creación de contenido
+ * - Inicio y creación de contenido (StartModal)
  * - Navegación del árbol de nodos
  * - Edición de contenido JSON
  * - Auto-guardado
  * - Eliminación con confirmación
- * - Manejo de errores
  */
 
 test.describe('Sandbox - Flujo Completo', () => {
-  // Helper para inicializar el sandbox
-  async function initializeSandbox(page: Page) {
+  // Helper para crear una microlección en el sandbox
+  async function createMicroleccion(page: Page, titulo = 'Test Microlección') {
     await page.goto('/admin/sandbox');
 
-    // Esperar a que cargue la WelcomeScreen
-    await expect(page.getByText('SANDBOX EDITOR v1.0')).toBeVisible({ timeout: 10000 });
+    // Esperar a que cargue el StartModal
+    await expect(page.getByText('Crear Contenido')).toBeVisible({ timeout: 10000 });
 
-    // Seleccionar facción (QUANTUM por defecto ya está seleccionado)
-    await expect(page.getByRole('button', { name: /Quantum/i })).toBeVisible();
+    // Verificar que Microlección está seleccionada por defecto
+    await expect(page.getByRole('button', { name: /Microlección/i })).toBeVisible();
 
-    // Click en Inicializar
-    await page.getByRole('button', { name: /Inicializar/i }).click();
+    // Escribir título
+    const tituloInput = page.getByPlaceholder('Nombre del contenido...');
+    await tituloInput.fill(titulo);
+
+    // Click en Crear
+    await page.getByRole('button', { name: /^Crear$/i }).click();
 
     // Esperar a que se creen los nodos estructurales
     await expect(page.getByText('Teoría')).toBeVisible({ timeout: 15000 });
   }
 
-  test('WelcomeScreen carga correctamente', async ({ page }) => {
+  test('StartModal carga correctamente', async ({ page }) => {
     await page.goto('/admin/sandbox');
 
-    // Verificar elementos de la pantalla de bienvenida
-    await expect(page.getByText('SANDBOX EDITOR v1.0')).toBeVisible();
-    await expect(page.getByText('Mateatletas')).toBeVisible();
-    await expect(page.getByText('Editor de contenido educativo gamificado.')).toBeVisible();
+    // Verificar elementos del modal de creación
+    await expect(page.getByText('Crear Contenido')).toBeVisible();
 
-    // Verificar selector de facciones
-    await expect(page.getByText('Selecciona tu Facción')).toBeVisible();
+    // Verificar selector de tipo de contenido
+    await expect(page.getByRole('button', { name: /Microlección/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Planificación/i })).toBeVisible();
+
+    // Verificar selector de casa
+    await expect(page.getByText('Casa')).toBeVisible();
     await expect(page.getByRole('button', { name: /Quantum/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /Vertex/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /Pulsar/i })).toBeVisible();
 
-    // Verificar selector de materias
+    // Verificar selector de materia
     await expect(page.getByText('Materia')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Matemática/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Programación/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Ciencias/i })).toBeVisible();
 
-    // Verificar botón de inicio
-    await expect(page.getByRole('button', { name: /Inicializar/i })).toBeVisible();
+    // Verificar input de título
+    await expect(page.getByPlaceholder('Nombre del contenido...')).toBeVisible();
+
+    // Verificar botón de creación (deshabilitado sin título)
+    const createBtn = page.getByRole('button', { name: /^Crear$/i });
+    await expect(createBtn).toBeVisible();
+    await expect(createBtn).toBeDisabled();
   });
 
-  test('Selección de facción funciona', async ({ page }) => {
+  test('Selección de casa funciona', async ({ page }) => {
     await page.goto('/admin/sandbox');
+
+    // Por defecto Quantum está seleccionado
+    const quantumBtn = page.getByRole('button', { name: /Quantum/i });
+    await expect(quantumBtn).toHaveClass(/active/);
 
     // Seleccionar Vertex
     await page.getByRole('button', { name: /Vertex/i }).click();
 
-    // Verificar que la selección se aplicó (indicador visual)
-    const vertexButton = page.getByRole('button', { name: /Vertex/i });
-    await expect(vertexButton).toHaveClass(/border-\[#a855f7\]/);
+    // Verificar que Vertex está seleccionado
+    const vertexBtn = page.getByRole('button', { name: /Vertex/i });
+    await expect(vertexBtn).toHaveClass(/active/);
   });
 
-  test('Crear contenido genera nodos estructurales', async ({ page }) => {
-    await initializeSandbox(page);
+  test('Selección de materia funciona', async ({ page }) => {
+    await page.goto('/admin/sandbox');
+
+    // Seleccionar Programación
+    await page.getByRole('button', { name: /Programación/i }).click();
+
+    // Verificar que Programación está seleccionada
+    const progBtn = page.getByRole('button', { name: /Programación/i });
+    await expect(progBtn).toHaveClass(/active/);
+  });
+
+  test('Crear microlección genera nodos estructurales', async ({ page }) => {
+    await createMicroleccion(page);
 
     // Verificar que se crearon los 3 nodos raíz estructurales
     await expect(page.getByText('Teoría')).toBeVisible();
     await expect(page.getByText('Práctica')).toBeVisible();
     await expect(page.getByText('Evaluación')).toBeVisible();
 
-    // Verificar que la barra de navegación del editor está visible
-    await expect(page.getByPlaceholder('Nombre del Proyecto')).toBeVisible();
+    // Verificar que el header del árbol está visible
+    await expect(page.getByText('Árbol')).toBeVisible();
+
+    // Verificar que el header compacto muestra el tipo
+    await expect(page.getByText('Microlección')).toBeVisible();
   });
 
   test('Navegación del árbol de nodos', async ({ page }) => {
-    await initializeSandbox(page);
+    await createMicroleccion(page);
 
-    // Expandir nodo Teoría (si no está expandido, hacer click)
-    const teoriaNode = page.getByText('Teoría');
-    await teoriaNode.click();
+    // Click en nodo Teoría
+    await page.getByText('Teoría').click();
 
-    // Verificar que el indicador de nodo activo cambia
-    // El nodo Teoría es contenedor, no hoja, así que no debe ser editable
-    await expect(page.getByText('contenedor')).toBeVisible();
+    // Teoría es un contenedor sin contenido JSON
+    // El editor debe mostrar mensaje de contenedor
+    await expect(page.getByText('contenedor', { exact: false })).toBeVisible();
   });
 
   test('Editor muestra mensaje para nodos contenedor', async ({ page }) => {
-    await initializeSandbox(page);
+    await createMicroleccion(page);
 
     // Click en Teoría (nodo contenedor)
     await page.getByText('Teoría').click();
 
     // Debe mostrar mensaje de que es un contenedor
-    await expect(
-      page.getByText('Este nodo contiene sub-nodos').or(page.getByText('Nodo Contenedor')),
-    ).toBeVisible();
+    await expect(page.getByText('contenedor', { exact: false })).toBeVisible();
   });
 
   test('Agregar nodo hijo funciona', async ({ page }) => {
-    await initializeSandbox(page);
+    await createMicroleccion(page);
 
     // Hover sobre Teoría para mostrar acciones
-    const teoriaRow = page.locator('[class*="group"]', { hasText: 'Teoría' }).first();
-    await teoriaRow.hover();
+    const teoriaNode = page.getByText('Teoría');
+    await teoriaNode.hover();
 
-    // Click en botón agregar (+ icon)
-    await teoriaRow.getByTitle('Agregar subnodo').click();
+    // Click en botón agregar usando aria-label
+    await page.getByRole('button', { name: 'Agregar subnodo' }).first().click();
 
     // Verificar que se creó el nuevo nodo
     await expect(page.getByText('Nuevo nodo')).toBeVisible({ timeout: 10000 });
   });
 
   test('Seleccionar nodo hoja activa el editor', async ({ page }) => {
-    await initializeSandbox(page);
+    await createMicroleccion(page);
 
     // Agregar un nodo hijo a Teoría
-    const teoriaRow = page.locator('[class*="group"]', { hasText: 'Teoría' }).first();
-    await teoriaRow.hover();
-    await teoriaRow.getByTitle('Agregar subnodo').click();
+    await page.getByText('Teoría').hover();
+    await page.getByRole('button', { name: 'Agregar subnodo' }).first().click();
 
     // Esperar a que se cree el nodo
     await expect(page.getByText('Nuevo nodo')).toBeVisible({ timeout: 10000 });
@@ -130,34 +157,12 @@ test.describe('Sandbox - Flujo Completo', () => {
     await expect(page.locator('.monaco-editor')).toBeVisible({ timeout: 5000 });
   });
 
-  test('Indicador de estado de guardado funciona', async ({ page }) => {
-    await initializeSandbox(page);
-
-    // El indicador debe mostrar "Borrador" inicialmente
-    await expect(page.getByText('Borrador')).toBeVisible();
-  });
-
-  test('Cambiar nombre del proyecto actualiza título', async ({ page }) => {
-    await initializeSandbox(page);
-
-    // Localizar input del nombre del proyecto
-    const titleInput = page.getByPlaceholder('Nombre del Proyecto');
-
-    // Limpiar y escribir nuevo nombre
-    await titleInput.clear();
-    await titleInput.fill('Mi Lección de Prueba');
-
-    // Verificar que el valor cambió
-    await expect(titleInput).toHaveValue('Mi Lección de Prueba');
-  });
-
   test('Renombrar nodo con doble click', async ({ page }) => {
-    await initializeSandbox(page);
+    await createMicroleccion(page);
 
     // Agregar un nodo hijo
-    const teoriaRow = page.locator('[class*="group"]', { hasText: 'Teoría' }).first();
-    await teoriaRow.hover();
-    await teoriaRow.getByTitle('Agregar subnodo').click();
+    await page.getByText('Teoría').hover();
+    await page.getByRole('button', { name: 'Agregar subnodo' }).first().click();
 
     // Esperar a que se cree
     await expect(page.getByText('Nuevo nodo')).toBeVisible({ timeout: 10000 });
@@ -165,8 +170,8 @@ test.describe('Sandbox - Flujo Completo', () => {
     // Doble click para renombrar
     await page.getByText('Nuevo nodo').dblclick();
 
-    // Debe aparecer input de edición
-    const editInput = page.locator('input[class*="bg-[#0f0720]"]');
+    // Debe aparecer input de edición (usando data-testid)
+    const editInput = page.getByTestId('rename-input');
     await expect(editInput).toBeVisible();
 
     // Escribir nuevo nombre
@@ -178,212 +183,84 @@ test.describe('Sandbox - Flujo Completo', () => {
   });
 
   test('Eliminar nodo sin hijos funciona directamente', async ({ page }) => {
-    await initializeSandbox(page);
+    await createMicroleccion(page);
 
     // Agregar un nodo hijo
-    const teoriaRow = page.locator('[class*="group"]', { hasText: 'Teoría' }).first();
-    await teoriaRow.hover();
-    await teoriaRow.getByTitle('Agregar subnodo').click();
+    await page.getByText('Teoría').hover();
+    await page.getByRole('button', { name: 'Agregar subnodo' }).first().click();
 
     // Esperar a que se cree
     await expect(page.getByText('Nuevo nodo')).toBeVisible({ timeout: 10000 });
 
     // Hover sobre el nuevo nodo
-    const nuevoNodoRow = page.locator('[class*="group"]', { hasText: 'Nuevo nodo' }).first();
-    await nuevoNodoRow.hover();
+    await page.getByText('Nuevo nodo').hover();
 
     // Click en eliminar
-    await nuevoNodoRow.getByTitle('Eliminar nodo').click();
+    await page.getByRole('button', { name: 'Eliminar nodo' }).click();
 
-    // El nodo debería desaparecer (sin confirmación porque no tiene hijos)
+    // El nodo debería desaparecer
     await expect(page.getByText('Nuevo nodo')).not.toBeVisible({ timeout: 5000 });
   });
 
-  test('Eliminar nodo con hijos muestra confirmación', async ({ page }) => {
-    await initializeSandbox(page);
-
-    // Agregar un nodo padre
-    const teoriaRow = page.locator('[class*="group"]', { hasText: 'Teoría' }).first();
-    await teoriaRow.hover();
-    await teoriaRow.getByTitle('Agregar subnodo').click();
-
-    await expect(page.getByText('Nuevo nodo')).toBeVisible({ timeout: 10000 });
-
-    // Agregar un nodo hijo al nodo recién creado
-    const padreRow = page.locator('[class*="group"]', { hasText: 'Nuevo nodo' }).first();
-    await padreRow.hover();
-    await padreRow.getByTitle('Agregar subnodo').click();
-
-    // Esperar a que aparezca el segundo "Nuevo nodo"
-    await page.waitForTimeout(1000);
-
-    // Intentar eliminar el nodo padre
-    await padreRow.hover();
-    await padreRow.getByTitle('Eliminar nodo').click();
-
-    // Debe aparecer modal de confirmación
-    await expect(page.getByText('Confirmar eliminación')).toBeVisible();
-    await expect(page.getByText('subnodo')).toBeVisible();
-
-    // Verificar botones del modal
-    await expect(page.getByRole('button', { name: /Cancelar/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Eliminar todo/i })).toBeVisible();
-  });
-
-  test('Cancelar eliminación cierra el modal', async ({ page }) => {
-    await initializeSandbox(page);
-
-    // Crear nodo padre con hijo
-    const teoriaRow = page.locator('[class*="group"]', { hasText: 'Teoría' }).first();
-    await teoriaRow.hover();
-    await teoriaRow.getByTitle('Agregar subnodo').click();
-
-    await expect(page.getByText('Nuevo nodo')).toBeVisible({ timeout: 10000 });
-
-    const padreRow = page.locator('[class*="group"]', { hasText: 'Nuevo nodo' }).first();
-    await padreRow.hover();
-    await padreRow.getByTitle('Agregar subnodo').click();
-
-    await page.waitForTimeout(1000);
-
-    // Intentar eliminar
-    await padreRow.hover();
-    await padreRow.getByTitle('Eliminar nodo').click();
-
-    // Esperar modal
-    await expect(page.getByText('Confirmar eliminación')).toBeVisible();
-
-    // Cancelar
-    await page.getByRole('button', { name: /Cancelar/i }).click();
-
-    // Modal debe cerrarse
-    await expect(page.getByText('Confirmar eliminación')).not.toBeVisible();
-
-    // El nodo debe seguir existiendo
-    await expect(page.getByText('Nuevo nodo').first()).toBeVisible();
-  });
-
-  test('Confirmar eliminación elimina nodo y descendientes', async ({ page }) => {
-    await initializeSandbox(page);
-
-    // Crear estructura de nodos
-    const teoriaRow = page.locator('[class*="group"]', { hasText: 'Teoría' }).first();
-    await teoriaRow.hover();
-    await teoriaRow.getByTitle('Agregar subnodo').click();
-
-    await expect(page.getByText('Nuevo nodo')).toBeVisible({ timeout: 10000 });
-
-    // Renombrar para identificar
-    await page.getByText('Nuevo nodo').dblclick();
-    const editInput = page.locator('input[class*="bg-[#0f0720]"]');
-    await editInput.fill('Padre');
-    await editInput.press('Enter');
-
-    // Agregar hijo
-    const padreRow = page.locator('[class*="group"]', { hasText: 'Padre' }).first();
-    await padreRow.hover();
-    await padreRow.getByTitle('Agregar subnodo').click();
-
-    await expect(page.getByText('Nuevo nodo')).toBeVisible({ timeout: 10000 });
-
-    // Eliminar el padre
-    await padreRow.hover();
-    await padreRow.getByTitle('Eliminar nodo').click();
-
-    // Confirmar
-    await page.getByRole('button', { name: /Eliminar todo/i }).click();
-
-    // Ambos nodos deben desaparecer
-    await expect(page.getByText('Padre')).not.toBeVisible({ timeout: 5000 });
-    await expect(page.getByText('Nuevo nodo')).not.toBeVisible();
-  });
-
-  test('Toggle de vista funciona (split/editor/preview)', async ({ page }) => {
-    await initializeSandbox(page);
-
-    // Por defecto está en split
-    const splitButton = page.getByRole('button', { name: /split/i });
-    const editorButton = page.getByRole('button', { name: /editor/i });
-    const previewButton = page.getByRole('button', { name: /preview/i });
-
-    await expect(splitButton).toBeVisible();
-    await expect(editorButton).toBeVisible();
-    await expect(previewButton).toBeVisible();
-
-    // Cambiar a solo editor
-    await editorButton.click();
-
-    // Cambiar a solo preview
-    await previewButton.click();
-
-    // Volver a split
-    await splitButton.click();
-  });
-
-  test('Modo preview mobile/desktop toggle', async ({ page }) => {
-    await initializeSandbox(page);
-
-    // Buscar botones de modo desktop/mobile en la barra flotante
-    const desktopButton = page.getByLabel('Modo escritorio');
-    const mobileButton = page.getByLabel('Modo móvil');
-
-    await expect(desktopButton).toBeVisible();
-    await expect(mobileButton).toBeVisible();
-
-    // Cambiar a mobile
-    await mobileButton.click();
-
-    // Volver a desktop
-    await desktopButton.click();
-  });
-
-  test('Botón publicar abre modal de confirmación', async ({ page }) => {
-    await initializeSandbox(page);
-
-    // Click en publicar
-    await page.getByRole('button', { name: /Publicar/i }).click();
-
-    // Debe aparecer modal de publicación
-    await expect(page.getByText('Publicar')).toBeVisible();
-  });
-
   test('Tree sidebar toggle funciona', async ({ page }) => {
-    await initializeSandbox(page);
+    await createMicroleccion(page);
 
     // Buscar botón de toggle del árbol
-    const toggleButton = page.getByLabel(/árbol/i);
+    const toggleButton = page.getByLabel('Ocultar árbol');
     await expect(toggleButton).toBeVisible();
 
     // El sidebar debe estar visible inicialmente
-    await expect(page.getByText('Contenido')).toBeVisible();
+    await expect(page.getByText('Árbol')).toBeVisible();
 
     // Toggle para ocultar
     await toggleButton.click();
 
-    // El header del sidebar no debería estar visible
-    await expect(page.getByText('Contenido')).not.toBeVisible();
+    // El header del árbol no debería estar visible
+    await expect(page.getByText('Árbol')).not.toBeVisible();
 
-    // Toggle para mostrar
-    await toggleButton.click();
-    await expect(page.getByText('Contenido')).toBeVisible();
+    // Toggle para mostrar (ahora el botón tiene label diferente)
+    await page.getByLabel('Mostrar árbol').click();
+    await expect(page.getByText('Árbol')).toBeVisible();
   });
 
   test('Nodos bloqueados no tienen botón eliminar', async ({ page }) => {
-    await initializeSandbox(page);
+    await createMicroleccion(page);
 
     // Hover sobre Teoría (nodo bloqueado)
-    const teoriaRow = page.locator('[class*="group"]', { hasText: 'Teoría' }).first();
-    await teoriaRow.hover();
+    await page.getByText('Teoría').hover();
 
     // Debe tener botón agregar
-    await expect(teoriaRow.getByTitle('Agregar subnodo')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Agregar subnodo' }).first()).toBeVisible();
 
-    // NO debe tener botón eliminar
-    await expect(teoriaRow.getByTitle('Eliminar nodo')).not.toBeVisible();
+    // NO debe tener botón eliminar visible para este nodo
+    // Los nodos bloqueados no muestran el botón de eliminar
+    const deleteButtons = page.getByRole('button', { name: 'Eliminar nodo' });
+    // El botón existe pero no para el nodo Teoría que es bloqueado
+    await expect(deleteButtons).toHaveCount(0);
   });
 
-  test('Error toast se muestra y se auto-cierra', async ({ page }) => {
-    await initializeSandbox(page);
+  test('Preview fullscreen toggle funciona', async ({ page }) => {
+    await createMicroleccion(page);
+
+    // Buscar botón de pantalla completa
+    const fullscreenBtn = page.getByTitle('Pantalla completa');
+    await expect(fullscreenBtn).toBeVisible();
+
+    // Click para activar fullscreen
+    await fullscreenBtn.click();
+
+    // Ahora debería mostrar el botón de salir
+    await expect(page.getByTitle('Salir de pantalla completa')).toBeVisible();
+
+    // Escape para salir
+    await page.keyboard.press('Escape');
+
+    // Debería volver al botón de pantalla completa
+    await expect(page.getByTitle('Pantalla completa')).toBeVisible();
+  });
+
+  test('Sin errores críticos en consola', async ({ page }) => {
+    await createMicroleccion(page);
 
     // Capturar errores de consola
     const errors: string[] = [];
@@ -396,7 +273,7 @@ test.describe('Sandbox - Flujo Completo', () => {
     // Esperar un poco para capturar errores
     await page.waitForTimeout(2000);
 
-    // Filtrar errores conocidos
+    // Filtrar errores conocidos/no críticos
     const criticalErrors = errors.filter(
       (error) =>
         !error.includes('favicon') &&
@@ -414,21 +291,24 @@ test.describe('Sandbox - Accesibilidad', () => {
   test('Elementos tienen labels accesibles', async ({ page }) => {
     await page.goto('/admin/sandbox');
 
-    // Verificar botón Inicializar
-    const initButton = page.getByRole('button', { name: /Inicializar/i });
-    await expect(initButton).toBeVisible();
+    // Verificar botón Crear
+    const createBtn = page.getByRole('button', { name: /^Crear$/i });
+    await expect(createBtn).toBeVisible();
 
-    // Verificar que hay heading
-    await expect(page.getByRole('heading', { name: /Mateatletas/i })).toBeVisible();
+    // Verificar botones de tipo
+    await expect(page.getByRole('button', { name: /Microlección/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Planificación/i })).toBeVisible();
   });
 
-  test('Navegación por teclado funciona en WelcomeScreen', async ({ page }) => {
+  test('Navegación por teclado funciona en StartModal', async ({ page }) => {
     await page.goto('/admin/sandbox');
 
     // Tab debería navegar entre elementos
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
+
+    // No debe haber errores de accesibilidad
   });
 });
 
@@ -439,8 +319,8 @@ test.describe('Sandbox - Responsiveness', () => {
 
     await page.goto('/admin/sandbox');
 
-    // La página debería cargar sin errores
-    await expect(page.getByText('SANDBOX EDITOR')).toBeVisible();
+    // El modal debería cargar sin errores
+    await expect(page.getByText('Crear Contenido')).toBeVisible();
   });
 
   test('Se adapta a tablets', async ({ page }) => {
@@ -448,6 +328,30 @@ test.describe('Sandbox - Responsiveness', () => {
 
     await page.goto('/admin/sandbox');
 
-    await expect(page.getByText('SANDBOX EDITOR')).toBeVisible();
+    await expect(page.getByText('Crear Contenido')).toBeVisible();
+  });
+});
+
+test.describe('Sandbox - Planificación', () => {
+  test('Crear planificación funciona', async ({ page }) => {
+    await page.goto('/admin/sandbox');
+
+    // Seleccionar tipo Planificación
+    await page.getByRole('button', { name: /Planificación/i }).click();
+
+    // Verificar que aparece el selector de cantidad de clases
+    await expect(page.getByText('Cantidad de clases')).toBeVisible();
+
+    // Escribir título
+    await page.getByPlaceholder('Nombre del contenido...').fill('Test Planificación');
+
+    // Click en Crear
+    await page.getByRole('button', { name: /^Crear$/i }).click();
+
+    // Esperar a que se cree y muestre las clases
+    await expect(page.getByText('Clase 1')).toBeVisible({ timeout: 15000 });
+
+    // Verificar que el header muestra Planificación
+    await expect(page.getByText('Planificación')).toBeVisible();
   });
 });

@@ -22,15 +22,18 @@ setup('authenticate as admin', async ({ page }) => {
   // Ir a la página de login
   await page.goto('/login');
 
-  // Esperar a que cargue el formulario
-  await expect(page.getByRole('heading', { name: /Iniciar/i })).toBeVisible({ timeout: 10000 });
+  // Esperar a que cargue el formulario (heading "Mateatletas")
+  await expect(page.getByRole('heading', { name: /Mateatletas/i })).toBeVisible({ timeout: 10000 });
+
+  // Asegurar que estamos en el tab de Docentes (tiene label "Email")
+  await expect(page.getByText('Email')).toBeVisible();
 
   // Llenar credenciales
-  await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel(/contraseña/i).fill(password);
+  await page.getByPlaceholder('tu@email.com').fill(email);
+  await page.getByPlaceholder('Tu contraseña').fill(password);
 
   // Submit
-  await page.getByRole('button', { name: /Ingresar|Iniciar/i }).click();
+  await page.getByRole('button', { name: /INGRESAR/i }).click();
 
   // Esperar redirección al dashboard (o a selección de rol si tiene múltiples)
   await page.waitForURL(/\/(admin|docente|estudiante|seleccionar-rol)/, { timeout: 15000 });

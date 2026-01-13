@@ -389,6 +389,7 @@ function SandboxLayout() {
                 className="toggle-btn"
                 onClick={() => setIsTreeVisible(false)}
                 title="Ocultar árbol"
+                aria-label="Ocultar árbol"
               >
                 <PanelLeftClose size={14} />
               </button>
@@ -408,6 +409,7 @@ function SandboxLayout() {
                 className="toggle-btn"
                 onClick={() => setIsTreeVisible(true)}
                 title="Mostrar árbol"
+                aria-label="Mostrar árbol"
               >
                 <PanelLeft size={14} />
               </button>

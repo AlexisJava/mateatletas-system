@@ -132,6 +132,7 @@ const TreeNodeView = memo(function TreeNodeView({
           <input
             ref={inputRef}
             className={styles.input}
+            data-testid="rename-input"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={(e) => {
@@ -149,6 +150,8 @@ const TreeNodeView = memo(function TreeNodeView({
           <button
             type="button"
             className={styles.actionBtn}
+            title="Agregar subnodo"
+            aria-label="Agregar subnodo"
             onClick={(e) => {
               e.stopPropagation();
               onAdd();
@@ -161,6 +164,8 @@ const TreeNodeView = memo(function TreeNodeView({
             <button
               type="button"
               className={styles.actionBtn}
+              title="Eliminar nodo"
+              aria-label="Eliminar nodo"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();

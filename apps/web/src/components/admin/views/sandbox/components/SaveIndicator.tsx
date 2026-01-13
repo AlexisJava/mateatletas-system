@@ -12,9 +12,9 @@ export function SaveIndicator({ status }: SaveIndicatorProps) {
 
   const statusConfig: Record<SaveStatus, { text: string; className: string }> = {
     idle: { text: '', className: '' },
-    saving: { text: 'Guardando...', className: styles.saving },
-    saved: { text: 'Guardado', className: styles.saved },
-    error: { text: 'Error al guardar', className: styles.error },
+    saving: { text: 'Guardando...', className: styles.saving ?? '' },
+    saved: { text: 'Guardado', className: styles.saved ?? '' },
+    error: { text: 'Error al guardar', className: styles.error ?? '' },
   };
 
   const config = statusConfig[status];
