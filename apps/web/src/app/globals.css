@@ -1,6 +1,13 @@
 @import 'tailwindcss';
 
 /* ════════════════════════════════════════════════════════════════════════════
+   TAILWIND SOURCE SCANNING - Include external packages
+   Without this, Tailwind 4 won't generate CSS for classes in these packages
+   ════════════════════════════════════════════════════════════════════════════ */
+@source "../../packages/lesson-engine/src/**/*.tsx";
+@source "../../packages/ui/src/**/*.tsx";
+
+/* ════════════════════════════════════════════════════════════════════════════
    MATEATLETAS DESIGN SYSTEM v2.0
    Mission Control Aesthetic - Professional Admin Dashboard
    ════════════════════════════════════════════════════════════════════════════ */

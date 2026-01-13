@@ -4,9 +4,8 @@ import { type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
 import { BookOpen, Volume2 } from 'lucide-react';
-import { Card, Button } from '@mateatletas/ui/primitives';
-import { Badge } from '@mateatletas/ui/primitives';
-import { backgrounds, borders, blur, lessonSprings, shadows, radius } from '@mateatletas/ui/tokens';
+import { Button, Badge } from '@mateatletas/ui/primitives';
+import { backgrounds, borders, blur, lessonSprings, shadows } from '@mateatletas/ui/tokens';
 
 // =============================================================================
 // TYPES
@@ -139,10 +138,10 @@ export function DefineIntent({
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative z-10 w-full max-w-5xl flex items-stretch gap-8"
+        className="relative z-10 w-full max-w-4xl flex flex-col items-center gap-6"
       >
-        {/* Left side - Definition */}
-        <div className="flex-1 flex flex-col">
+        {/* Content wrapper - centered */}
+        <div className="w-full flex flex-col items-start">
           {/* Category badge */}
           <motion.div variants={slideIn} className="mb-4">
             <Badge variant="level" className="inline-flex items-center gap-2">
@@ -208,34 +207,30 @@ export function DefineIntent({
               <p className="text-white/90">{example}</p>
             </motion.div>
           )}
-
-          {/* Continue button */}
-          <motion.div variants={fadeUp} className="mt-auto pt-6">
-            <Button variant="primary" size="lg" onClick={onContinue}>
-              Continuar
-            </Button>
-          </motion.div>
         </div>
 
-        {/* Right side - Visual */}
+        {/* Visual (if provided) */}
         {visual && (
           <motion.div
             variants={scaleIn}
-            className="flex-1 max-w-md flex items-center justify-center"
+            className="w-full max-w-md rounded-3xl flex items-center justify-center p-8"
+            style={{
+              background: backgrounds.card,
+              backdropFilter: `blur(${blur.md})`,
+              border: `1px solid ${borders.subtle}`,
+              boxShadow: shadows.card,
+            }}
           >
-            <div
-              className="w-full aspect-square rounded-3xl flex items-center justify-center p-8"
-              style={{
-                background: backgrounds.card,
-                backdropFilter: `blur(${blur.md})`,
-                border: `1px solid ${borders.subtle}`,
-                boxShadow: shadows.card,
-              }}
-            >
-              {visual}
-            </div>
+            {visual}
           </motion.div>
         )}
+
+        {/* Continue button */}
+        <motion.div variants={fadeUp} className="pt-4">
+          <Button variant="primary" size="lg" onClick={onContinue}>
+            Continuar
+          </Button>
+        </motion.div>
       </motion.div>
     </div>
   );

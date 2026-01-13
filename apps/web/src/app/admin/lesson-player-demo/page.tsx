@@ -54,24 +54,21 @@ const DEMO_LESSON: LessonDefinition = {
       intent: 'presentation:explain',
       props: {
         title: 'Partes de una Fracción',
-        points: [
+        steps: [
           {
-            id: 'numerador',
             title: 'Numerador',
-            description: 'El número de arriba. Indica cuántas partes tomamos.',
-            icon: '⬆️',
+            content: 'El número de arriba. Indica cuántas partes tomamos del total.',
+            tip: 'Piensa: ¿cuántos pedazos de pizza me como?',
           },
           {
-            id: 'denominador',
             title: 'Denominador',
-            description: 'El número de abajo. Indica en cuántas partes se divide el todo.',
-            icon: '⬇️',
+            content: 'El número de abajo. Indica en cuántas partes iguales se divide el todo.',
+            tip: 'Piensa: ¿en cuántos pedazos se cortó la pizza?',
           },
           {
-            id: 'linea',
             title: 'Línea de Fracción',
-            description: 'Separa el numerador del denominador. Significa "dividido entre".',
-            icon: '➖',
+            content: 'Separa el numerador del denominador. Significa "dividido entre".',
+            tip: 'Es como decir "3 de 4" o "3 entre 4"',
           },
         ],
       },

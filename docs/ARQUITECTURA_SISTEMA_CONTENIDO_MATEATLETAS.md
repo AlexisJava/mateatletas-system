@@ -6,6 +6,74 @@
 
 ---
 
+## ESTADO DE IMPLEMENTACIÓN (Actualizado: 2026-01-13)
+
+### Commits Clave de Referencia
+
+| Commit     | Descripción                                                       |
+| ---------- | ----------------------------------------------------------------- |
+| `8221d1f4` | FASE 0: Infraestructura packages (ui, lesson-engine, game-engine) |
+| `98c0b536` | FASE 1: Schemas Zod para content system (contracts)               |
+| `b25d9383` | Sandbox v2 rebuild (phases 1-4)                                   |
+| `d27c3ed9` | FASE 5: Monaco Editor + panels resizables                         |
+| `c2b7901c` | FASE 6: PreviewPanel con LessonRenderer                           |
+| `59a8384d` | FASE 7: StartModal para crear contenido                           |
+| `5eb8b3c1` | Rediseño UI con CSS Grid + tests integración                      |
+| `01239602` | Normalización Design System (eliminó 14k+ líneas legacy)          |
+| `6c502117` | Refactor SandboxView (extrajo componentes, CSS modules)           |
+
+### Estado por Componente
+
+| Componente                               | Estado         | Detalles                                                                                     |
+| ---------------------------------------- | -------------- | -------------------------------------------------------------------------------------------- |
+| **packages/contracts - schemas base**    | ✅ HECHO       | base.schema.ts, slide.schema.ts, lesson.schema.ts, game-config.schema.ts                     |
+| **packages/contracts - intents schemas** | ✅ HECHO       | 6 categorías: presentation, interaction, gamification, narrative, layout, closure            |
+| **packages/ui - tokens**                 | ✅ HECHO       | colors.ts (houseTokens, areaTokens), motion.ts, typography.ts                                |
+| **packages/ui - hooks**                  | ✅ HECHO       | 7 hooks: useQuiz, useDragDrop, useTimer, useProgress, useGamification, useEntrance, useTheme |
+| **packages/ui - primitives**             | ⚠️ PLACEHOLDER | `export {}` - Button, Card, Badge, Progress pendientes                                       |
+| **packages/ui - compositions**           | ⚠️ PLACEHOLDER | `export {}` - QuizBlock, MascotGuide, Timeline pendientes                                    |
+| **packages/lesson-engine - renderer**    | ✅ HECHO       | LessonRenderer.tsx, SlideContainer.tsx, IntentRegistry.ts funcionales                        |
+| **packages/lesson-engine - context**     | ✅ HECHO       | LessonContext.tsx con estado, XP, navegación                                                 |
+| **packages/lesson-engine - intents**     | ⚠️ PLACEHOLDER | 6 carpetas creadas pero `export {}`                                                          |
+| **packages/game-engine - core**          | ⚠️ PLACEHOLDER | `export {}` - PhaserGame wrapper pendiente                                                   |
+| **packages/game-engine - systems**       | ⚠️ PLACEHOLDER | Physics, Particles, Audio, Score pendientes                                                  |
+| **packages/game-engine - templates**     | ⚠️ PLACEHOLDER | arcade, puzzle, memory, strategy creados pero vacíos                                         |
+| **Sandbox - SandboxView**                | ✅ HECHO       | CSS Grid, dark theme, 245 líneas                                                             |
+| **Sandbox - TreePanel**                  | ✅ HECHO       | Árbol de nodos con CRUD completo                                                             |
+| **Sandbox - EditorPanel**                | ✅ HECHO       | Monaco Editor integrado                                                                      |
+| **Sandbox - PreviewPanel**               | ✅ HECHO       | LessonRenderer integrado                                                                     |
+| **Sandbox - StartModal**                 | ✅ HECHO       | Reemplazó WelcomeScreen legacy                                                               |
+| **Sandbox - Tests integración**          | ✅ HECHO       | contenidos, nodos, planificaciones, seguridad                                                |
+| **Admin UI - Legacy cleanup**            | ✅ HECHO       | Eliminadas 14,333 líneas obsoletas                                                           |
+| **Migración colores Admin**              | ⚠️ PARCIAL     | CSS vars existen, algunos hardcoded                                                          |
+
+### Intents Schemas (contracts) - Detalle
+
+| Categoría        | ✅ Implementados                | ⚠️ Pendientes                                                                                            |
+| ---------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Presentation** | hero, define, explain, showcase | narrate, compare, sequence, formula, quote, reveal, callout, code, image, video, animation               |
+| **Interaction**  | quiz, match, sort               | trueFalse, fillBlank, classify, label, hotspot, slider, playground, simulation, drawing, flashcard, poll |
+| **Gamification** | achievement, progress, levelUp  | challenge, streak                                                                                        |
+| **Narrative**    | mascot, conversation            | scenario, story                                                                                          |
+| **Layout**       | split, bento                    | tabs, accordion                                                                                          |
+| **Closure**      | summary, nextSteps              | certificate                                                                                              |
+
+### Resumen Ejecutivo
+
+| Área                                  | Progreso | Notas                      |
+| ------------------------------------- | -------- | -------------------------- |
+| Infraestructura packages              | 100%     | Estructura completa        |
+| Schemas (contracts)                   | ~60%     | Faltan intents secundarios |
+| Design System tokens/hooks            | 100%     | Totalmente funcional       |
+| Design System primitives/compositions | 0%       | Placeholders               |
+| Lesson Engine renderer                | 100%     | Funcional                  |
+| Lesson Engine intents (componentes)   | 0%       | Placeholders               |
+| Game Engine                           | 0%       | Solo estructura            |
+| Sandbox Editor                        | ~90%     | UI completa                |
+| Admin UI normalización                | 80%      | Legacy eliminado           |
+
+---
+
 ## TABLA DE CONTENIDOS
 
 1. [Visión General](#1-visión-general)
@@ -145,18 +213,20 @@ MÉTODO: DEFINIR → AUDITAR → TEST (falla) → IMPLEMENTAR → VERIFICAR (pas
 
 ## 3. ARQUITECTURA DE PACKAGES
 
+<!-- ✅ ESTADO: Estructura de packages creada. Falta implementar contenido interno -->
+
 ### 3.1 Estructura Propuesta
 
 ```
 packages/
-├── contracts/                 ← YA EXISTE (schemas Zod)
+├── contracts/                 ← ✅ EXISTE Y FUNCIONA (schemas Zod)
 │   └── src/schemas/
-│       ├── content-block.schema.ts    ← NUEVO
-│       ├── intent.schema.ts           ← NUEVO
-│       ├── game-config.schema.ts      ← NUEVO
+│       ├── content-block.schema.ts    ← ✅ IMPLEMENTADO (base.schema.ts)
+│       ├── intent.schema.ts           ← ✅ IMPLEMENTADO (slide.schema.ts)
+│       ├── game-config.schema.ts      ← ✅ IMPLEMENTADO
 │       └── ... (existentes)
 │
-├── ui/                        ← NUEVO: Design System Unificado
+├── ui/                        ← ✅ EXISTE (tokens y hooks completos, primitives/compositions pendientes)
 │   ├── package.json
 │   ├── src/
 │   │   ├── tokens/
@@ -1168,60 +1238,62 @@ grep -r "#030014\|#0f0720\|#a855f7\|#1e1b4b" apps/web/src/components/admin/views
 
 ## 9. PLAN DE IMPLEMENTACIÓN
 
-### 9.1 Fase 0: Preparación (1-2 días)
+<!-- ESTADO: Fases 0-1 completadas, Fase 2 parcial, Fases 3-7 pendientes -->
 
-- [ ] Instalar Phaser.js: `yarn add phaser`
-- [ ] Crear estructura de `packages/ui`
-- [ ] Crear estructura de `packages/lesson-engine`
-- [ ] Crear estructura de `packages/game-engine`
-- [ ] Configurar exports en cada package.json
-- [ ] Agregar workspace references en tsconfig
+### 9.1 Fase 0: Preparación ✅ COMPLETADA (commit `8221d1f4`)
 
-### 9.2 Fase 1: packages/contracts - Schemas (2-3 días)
+- [x] Instalar Phaser.js: `yarn add phaser`
+- [x] Crear estructura de `packages/ui`
+- [x] Crear estructura de `packages/lesson-engine`
+- [x] Crear estructura de `packages/game-engine`
+- [x] Configurar exports en cada package.json
+- [x] Agregar workspace references en tsconfig
 
-- [ ] Crear `content-block.schema.ts`
-- [ ] Crear `slide-intent.schema.ts`
-- [ ] Crear schemas para cada intent (presentation/)
-- [ ] Crear schemas para cada intent (interaction/)
-- [ ] Crear schemas para cada intent (gamification/)
-- [ ] Crear schemas para cada intent (narrative/)
-- [ ] Crear schemas para cada intent (layout/)
-- [ ] Crear schemas para cada intent (closure/)
-- [ ] Crear `game-config.schema.ts`
-- [ ] Tests para todos los schemas
+### 9.2 Fase 1: packages/contracts - Schemas ✅ COMPLETADA (commit `98c0b536`)
 
-### 9.3 Fase 2: packages/ui - Design System (4-5 días)
+- [x] Crear `content-block.schema.ts` → implementado como `base.schema.ts`
+- [x] Crear `slide-intent.schema.ts` → implementado como `slide.schema.ts`
+- [x] Crear schemas para cada intent (presentation/) → 4 implementados
+- [x] Crear schemas para cada intent (interaction/) → 3 implementados
+- [x] Crear schemas para cada intent (gamification/) → 3 implementados
+- [x] Crear schemas para cada intent (narrative/) → 2 implementados
+- [x] Crear schemas para cada intent (layout/) → 2 implementados
+- [x] Crear schemas para cada intent (closure/) → 2 implementados
+- [x] Crear `game-config.schema.ts`
+- [ ] Tests para todos los schemas → PENDIENTE
 
-- [ ] Implementar tokens (colors, motion, typography)
-- [ ] Implementar hooks headless (useQuiz, useDragDrop, etc.)
-- [ ] Implementar primitives con Framer Motion
+### 9.3 Fase 2: packages/ui - Design System ⚠️ PARCIAL (commit `8221d1f4`)
+
+- [x] Implementar tokens (colors, motion, typography) ✅
+- [x] Implementar hooks headless (useQuiz, useDragDrop, etc.) ✅ 7 hooks
+- [ ] Implementar primitives con Framer Motion → PENDIENTE
   - [ ] Stage
   - [ ] Card
   - [ ] Button
   - [ ] Badge
   - [ ] Progress
   - [ ] Alert
-- [ ] Implementar compositions
+- [ ] Implementar compositions → PENDIENTE
   - [ ] QuizBlock
   - [ ] MascotGuide
   - [ ] Timeline
   - [ ] StatShowcase
-- [ ] Tests para todos los componentes
+- [ ] Tests para todos los componentes → PENDIENTE
 
-### 9.4 Fase 3: packages/lesson-engine - Intents (5-7 días)
+### 9.4 Fase 3: packages/lesson-engine - Intents ⚠️ PARCIAL (commit `8221d1f4`)
 
-- [ ] Implementar LessonRenderer
-- [ ] Implementar SlideContainer (100vh, no scroll)
-- [ ] Implementar IntentRegistry
-- [ ] Implementar intents de presentación (15)
-- [ ] Implementar intents de interacción (14)
-- [ ] Implementar intents de gamificación (5)
-- [ ] Implementar intents de narrativa (4)
-- [ ] Implementar intents de layout (4)
-- [ ] Implementar intents de cierre (3)
-- [ ] Tests para todos los intents
+- [x] Implementar LessonRenderer ✅
+- [x] Implementar SlideContainer (100vh, no scroll) ✅
+- [x] Implementar IntentRegistry ✅
+- [ ] Implementar intents de presentación (15) → 0/15 componentes
+- [ ] Implementar intents de interacción (14) → 0/14 componentes
+- [ ] Implementar intents de gamificación (5) → 0/5 componentes
+- [ ] Implementar intents de narrativa (4) → 0/4 componentes
+- [ ] Implementar intents de layout (4) → 0/4 componentes
+- [ ] Implementar intents de cierre (3) → 0/3 componentes
+- [ ] Tests para todos los intents → PENDIENTE
 
-### 9.5 Fase 4: packages/game-engine - Juegos (7-10 días)
+### 9.5 Fase 4: packages/game-engine - Juegos ❌ PENDIENTE
 
 - [ ] Implementar PhaserGame wrapper
 - [ ] Implementar GameRegistry
@@ -1233,7 +1305,7 @@ grep -r "#030014\|#0f0720\|#a855f7\|#1e1b4b" apps/web/src/components/admin/views
 - [ ] Otros templates según prioridad
 - [ ] Tests para templates críticos
 
-### 9.6 Fase 5: Integración (3-4 días)
+### 9.6 Fase 5: Integración ❌ PENDIENTE
 
 - [ ] Integrar minigame como intent
 - [ ] Integrar PhaserGame en PlanificacionWrapper
@@ -1241,24 +1313,29 @@ grep -r "#030014\|#0f0720\|#a855f7\|#1e1b4b" apps/web/src/components/admin/views
 - [ ] Migrar imports a @mateatletas/ui
 - [ ] Eliminar DesignSystem duplicados
 
-### 9.7 Fase 6: Migración Admin UI (2-3 días)
+### 9.7 Fase 6: Migración Admin UI ⚠️ PARCIAL (commits `01239602`, `b25d9383`)
 
-- [ ] Crear componentes AdminButton, AdminModal, etc.
-- [ ] Migrar SandboxView.tsx
-- [ ] Migrar WelcomeScreen.tsx
-- [ ] Migrar PublishModal.tsx
-- [ ] Migrar LessonPlayer.tsx
-- [ ] Verificar consistencia visual
+- [x] Crear componentes AdminButton, AdminModal, etc. → parcial (LoadingSpinner)
+- [x] Migrar SandboxView.tsx ✅ (refactorizado, CSS modules)
+- [x] Migrar WelcomeScreen.tsx → ELIMINADO, reemplazado por StartModal ✅
+- [x] Migrar PublishModal.tsx → ELIMINADO en rebuild
+- [x] Migrar LessonPlayer.tsx → ELIMINADO en rebuild
+- [ ] Verificar consistencia visual → colores hardcoded pendientes
 
-### 9.8 Fase 7: Testing & Polish (3-4 días)
+### 9.8 Fase 7: Testing & Polish ⚠️ PARCIAL (commit `5eb8b3c1`)
 
-- [ ] Tests E2E de flujo completo
-- [ ] Performance audit (Lighthouse)
-- [ ] Accessibility audit (axe)
-- [ ] Mobile testing real
-- [ ] Fix bugs encontrados
+- [x] Tests E2E de flujo completo → Tests integración backend ✅
+- [ ] Performance audit (Lighthouse) → PENDIENTE
+- [ ] Accessibility audit (axe) → PENDIENTE
+- [ ] Mobile testing real → PENDIENTE
+- [ ] Fix bugs encontrados → Continuo
 
-**Total estimado: 27-38 días**
+**Progreso Total: ~50% completado**
+
+- Fases 0-1: ✅ 100%
+- Fases 2-3: ⚠️ ~40% (infraestructura hecha, componentes pendientes)
+- Fases 4-5: ❌ 0%
+- Fases 6-7: ⚠️ ~60% (legacy eliminado, polish pendiente)
 
 ---
 

@@ -27,6 +27,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isSandbox = pathname === '/admin/sandbox';
+  const isLessonPlayerDemo = pathname === '/admin/lesson-player-demo';
+
+  // Fullscreen mode for lesson player demo - no sidebar, no header
+  if (isLessonPlayerDemo) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="h-screen bg-[var(--admin-bg)] flex overflow-hidden" data-admin="true">
