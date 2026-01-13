@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Nunito, Lilita_One, Orbitron, Rajdhani, IBM_Plex_Mono } from 'next/font/google';
-import './globals.css';
+import '../../globals.css';
 import './animations.css';
 import { QueryProvider } from '@/lib/providers/QueryProvider';
 import { Toaster } from 'sonner';
