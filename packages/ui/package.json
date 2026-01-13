@@ -22,6 +22,14 @@
       "types": "./dist/primitives/index.d.ts",
       "default": "./dist/primitives/index.js"
     },
+    "./molecules": {
+      "types": "./dist/molecules/index.d.ts",
+      "default": "./dist/molecules/index.js"
+    },
+    "./organisms": {
+      "types": "./dist/organisms/index.d.ts",
+      "default": "./dist/organisms/index.js"
+    },
     "./compositions": {
       "types": "./dist/compositions/index.d.ts",
       "default": "./dist/compositions/index.js"
@@ -44,7 +52,8 @@
     "@mateatletas/contracts": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "framer-motion": "^11.15.0"
+    "framer-motion": "^11.15.0",
+    "lucide-react": "^0.562.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
