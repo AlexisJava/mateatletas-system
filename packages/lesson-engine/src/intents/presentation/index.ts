@@ -5,6 +5,8 @@
  * - HeroIntent: Welcome/introduction slides
  * - DefineIntent: Vocabulary/concept definitions
  * - ExplainIntent: Step-by-step explanations
+ * - ShowcaseIntent: Gallery of visual examples
+ * - HighlightIntent: Emphasize key concepts
  *
  * All intents follow the NO SCROLL rule - 100dvh viewport.
  * Navigation is horizontal when needed.
@@ -13,3 +15,5 @@
 export { HeroIntent, type HeroIntentProps } from './HeroIntent';
 export { DefineIntent, type DefineIntentProps } from './DefineIntent';
 export { ExplainIntent, type ExplainIntentProps, type ExplainStep } from './ExplainIntent';
+export { ShowcaseIntent, type ShowcaseIntentProps, type ShowcaseItem } from './ShowcaseIntent';
+export { HighlightIntent, type HighlightIntentProps } from './HighlightIntent';

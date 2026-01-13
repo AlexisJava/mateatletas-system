@@ -254,6 +254,246 @@ function StoryIntentDemo() {
   );
 }
 
+function ShowcaseIntentDemo() {
+  const [current, setCurrent] = useState(0);
+  const items = [
+    { title: 'Pizza dividida', desc: '1/4 de pizza' },
+    { title: 'Pastel cortado', desc: '1/2 de pastel' },
+    { title: 'Chocolate partido', desc: '3/4 de barra' },
+  ];
+
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-6">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+          <LayoutGrid className="w-4 h-4 text-emerald-400" />
+        </div>
+        <span className="text-xs font-medium text-emerald-400 uppercase">Galería</span>
+        <span className="text-xs text-white/40 ml-auto">
+          {current + 1} / {items.length}
+        </span>
+      </div>
+      <div className="h-36 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20 mb-4">
+        <div className="text-6xl">🍕</div>
+      </div>
+      <h4 className="text-lg font-semibold text-white">{items[current].title}</h4>
+      <p className="text-white/60 text-sm">{items[current].desc}</p>
+      <div className="flex items-center justify-center gap-2 mt-4">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`w-2 h-2 rounded-full transition-all ${
+              i === current ? 'w-6 bg-emerald-400' : 'bg-white/20'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HighlightIntentDemo() {
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-rose-500/10 border border-purple-500/20 p-6 flex flex-col items-center justify-center">
+      <div className="w-16 h-16 rounded-2xl bg-purple-500/20 border-2 border-purple-500 flex items-center justify-center mb-4">
+        <Lightbulb className="w-8 h-8 text-purple-400" />
+      </div>
+      <span className="text-xs font-medium text-purple-400 uppercase mb-3">Fórmula</span>
+      <div className="p-6 rounded-2xl bg-white/[0.05] border-2 border-purple-500/50 text-center">
+        <p className="text-3xl font-mono font-bold text-white">A = π × r²</p>
+      </div>
+      <p className="text-white/60 text-sm mt-4 text-center max-w-xs">
+        Donde r es el radio del círculo
+      </p>
+      <div className="mt-4 p-3 rounded-xl bg-white/[0.03] border border-white/10">
+        <p className="text-xs text-white/40">Ejemplo:</p>
+        <p className="text-white/70 text-sm">Si r = 5cm, entonces A = 78.54 cm²</p>
+      </div>
+    </div>
+  );
+}
+
+function QuizTFIntentDemo() {
+  const [selected, setSelected] = useState<boolean | null>(null);
+  const correctAnswer = false;
+
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-6">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+          <HelpCircle className="w-4 h-4 text-indigo-400" />
+        </div>
+        <span className="text-xs font-medium text-indigo-400 uppercase">Verdadero o Falso</span>
+      </div>
+      <div className="p-4 rounded-xl bg-white/[0.03] mb-6">
+        <p className="text-lg text-white font-medium text-center">
+          El número π es exactamente igual a 3.14
+        </p>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <button
+          onClick={() => setSelected(true)}
+          className={`p-4 rounded-xl flex flex-col items-center gap-2 transition-all ${
+            selected === true
+              ? correctAnswer === true
+                ? 'border-2 border-green-500 bg-green-500/20'
+                : 'border-2 border-red-500 bg-red-500/20'
+              : 'border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]'
+          }`}
+        >
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center ${
+              selected === true
+                ? correctAnswer
+                  ? 'bg-green-500'
+                  : 'bg-red-500'
+                : 'bg-green-500/20'
+            }`}
+          >
+            <span className="text-xl">✓</span>
+          </div>
+          <span className="font-semibold text-white">Verdadero</span>
+        </button>
+        <button
+          onClick={() => setSelected(false)}
+          className={`p-4 rounded-xl flex flex-col items-center gap-2 transition-all ${
+            selected === false
+              ? correctAnswer === false
+                ? 'border-2 border-green-500 bg-green-500/20'
+                : 'border-2 border-red-500 bg-red-500/20'
+              : 'border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]'
+          }`}
+        >
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center ${
+              selected === false
+                ? correctAnswer === false
+                  ? 'bg-green-500'
+                  : 'bg-red-500'
+                : 'bg-red-500/20'
+            }`}
+          >
+            <span className="text-xl">✗</span>
+          </div>
+          <span className="font-semibold text-white">Falso</span>
+        </button>
+      </div>
+      {selected !== null && (
+        <p
+          className={`mt-4 text-center text-sm ${selected === correctAnswer ? 'text-green-400' : 'text-red-400'}`}
+        >
+          {selected === correctAnswer ? '¡Correcto! π es un número irracional' : 'Intenta de nuevo'}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function MatchingIntentDemo() {
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-6">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center">
+          <Target className="w-4 h-4 text-teal-400" />
+        </div>
+        <span className="text-xs font-medium text-teal-400 uppercase">Conectar Pares</span>
+      </div>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="space-y-2">
+          {['1/2', '1/4', '3/4'].map((item, i) => (
+            <div
+              key={item}
+              className="p-3 rounded-xl bg-white/[0.05] border border-teal-500/30 text-white font-medium flex items-center justify-between"
+            >
+              {item}
+              <span className="w-3 h-3 rounded-full bg-teal-500" />
+            </div>
+          ))}
+        </div>
+        <div className="space-y-2">
+          {['Tres cuartos', 'Mitad', 'Cuarto'].map((item) => (
+            <div
+              key={item}
+              className="p-3 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 flex items-center gap-2"
+            >
+              <span className="w-3 h-3 rounded-full bg-white/20" />
+              {item}
+            </div>
+          ))}
+        </div>
+      </div>
+      <p className="text-center text-white/40 text-sm mt-4">
+        Selecciona un elemento de cada columna para conectarlos
+      </p>
+    </div>
+  );
+}
+
+function FillBlankIntentDemo() {
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-6">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center">
+          <BookOpen className="w-4 h-4 text-orange-400" />
+        </div>
+        <span className="text-xs font-medium text-orange-400 uppercase">Completar</span>
+      </div>
+      <div className="p-6 rounded-xl bg-white/[0.03] border border-white/10">
+        <p className="text-lg text-white leading-loose">
+          La fracción{' '}
+          <input
+            type="text"
+            placeholder="?"
+            className="w-12 px-2 py-1 rounded-lg bg-orange-500/20 border-2 border-orange-500/50 text-center text-orange-400 font-bold focus:outline-none focus:border-orange-500"
+          />
+          /
+          <input
+            type="text"
+            placeholder="?"
+            className="w-12 px-2 py-1 rounded-lg bg-orange-500/20 border-2 border-orange-500/50 text-center text-orange-400 font-bold focus:outline-none focus:border-orange-500"
+          />{' '}
+          se lee como{' '}
+          <span className="text-orange-400 font-semibold">&quot;tres cuartos&quot;</span>
+        </p>
+      </div>
+      <div className="flex justify-center mt-6">
+        <button className="px-6 py-2 bg-orange-500/20 border border-orange-500/50 rounded-xl text-orange-400 font-medium hover:bg-orange-500/30 transition-colors">
+          Verificar
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DragDropIntentDemo() {
+  return (
+    <div className="h-80 rounded-2xl overflow-hidden bg-white/[0.03] border border-white/10 p-6">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center">
+          <Target className="w-4 h-4 text-rose-400" />
+        </div>
+        <span className="text-xs font-medium text-rose-400 uppercase">Ordenar</span>
+      </div>
+      <p className="text-white/60 mb-4">Ordena las fracciones de menor a mayor:</p>
+      <div className="space-y-2">
+        {['3/4', '1/2', '1/4'].map((item, i) => (
+          <div
+            key={item}
+            className="p-4 rounded-xl bg-white/[0.05] border border-white/10 flex items-center gap-3 cursor-move hover:bg-white/[0.08] transition-colors"
+          >
+            <div className="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm font-bold">
+              {i + 1}
+            </div>
+            <span className="text-xl font-bold text-white">{item}</span>
+            <span className="ml-auto text-white/30">⋮⋮</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // =============================================================================
 // CATEGORIES DATA
 // =============================================================================
@@ -290,13 +530,15 @@ const INTENT_CATEGORIES: IntentCategory[] = [
         id: 'showcase',
         name: 'Showcase',
         description: 'Galería de ejemplos visuales',
-        status: 'pending',
+        status: 'implemented',
+        component: ShowcaseIntentDemo,
       },
       {
         id: 'highlight',
         name: 'Highlight',
         description: 'Resaltar concepto importante',
-        status: 'pending',
+        status: 'implemented',
+        component: HighlightIntentDemo,
       },
     ],
   },
@@ -317,25 +559,29 @@ const INTENT_CATEGORIES: IntentCategory[] = [
         id: 'quiz-tf',
         name: 'Quiz True/False',
         description: 'Pregunta verdadero/falso',
-        status: 'pending',
+        status: 'implemented',
+        component: QuizTFIntentDemo,
       },
       {
         id: 'drag-drop',
         name: 'Drag & Drop',
         description: 'Arrastrar y ordenar elementos',
         status: 'implemented',
+        component: DragDropIntentDemo,
       },
       {
         id: 'matching',
         name: 'Matching',
         description: 'Conectar pares relacionados',
-        status: 'pending',
+        status: 'implemented',
+        component: MatchingIntentDemo,
       },
       {
         id: 'fill-blank',
         name: 'Fill in the Blank',
         description: 'Completar espacios en blanco',
-        status: 'pending',
+        status: 'implemented',
+        component: FillBlankIntentDemo,
       },
       {
         id: 'sorting',
