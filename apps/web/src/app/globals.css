@@ -731,3 +731,12 @@ pre,
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--docente-text-muted);
 }
+
+/* Ocultar scrollbar completamente */
+.scrollbar-none {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}

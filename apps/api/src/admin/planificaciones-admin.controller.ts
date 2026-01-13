@@ -8,8 +8,8 @@ import {
   Post,
   Query,
   UseGuards,
-  ParseUUIDPipe,
 } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes/parse-id.pipe';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -88,7 +88,7 @@ export class PlanificacionesAdminController {
   @ApiOperation({
     summary: 'Obtener planificación por ID con todas sus clases',
   })
-  async obtener(@Param('id', ParseUUIDPipe) id: string) {
+  async obtener(@Param('id', ParseIdPipe) id: string) {
     return this.planificacionesService.obtenerPorId(id);
   }
 
@@ -99,7 +99,7 @@ export class PlanificacionesAdminController {
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar metadata de planificación' })
   async actualizar(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIdPipe) id: string,
     @Body() dto: ActualizarPlanificacionDto,
   ) {
     return this.planificacionesService.actualizar(id, dto);
@@ -111,7 +111,7 @@ export class PlanificacionesAdminController {
    */
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar planificación en borrador' })
-  async eliminar(@Param('id', ParseUUIDPipe) id: string) {
+  async eliminar(@Param('id', ParseIdPipe) id: string) {
     return this.planificacionesService.eliminar(id);
   }
 
@@ -122,7 +122,7 @@ export class PlanificacionesAdminController {
   @Patch('clases/:claseId')
   @ApiOperation({ summary: 'Actualizar clase (título, contenidos)' })
   async actualizarClase(
-    @Param('claseId', ParseUUIDPipe) claseId: string,
+    @Param('claseId', ParseIdPipe) claseId: string,
     @Body() dto: ActualizarClasePlanificacionDto,
   ) {
     return this.planificacionesService.actualizarClase(claseId, dto);
@@ -135,7 +135,7 @@ export class PlanificacionesAdminController {
   @Post('clases/:claseId/tareas')
   @ApiOperation({ summary: 'Agregar contenido como tarea a una clase' })
   async agregarTarea(
-    @Param('claseId', ParseUUIDPipe) claseId: string,
+    @Param('claseId', ParseIdPipe) claseId: string,
     @Body() dto: AgregarTareaDto,
   ) {
     return this.planificacionesService.agregarTarea(claseId, dto);
@@ -148,8 +148,8 @@ export class PlanificacionesAdminController {
   @Delete('clases/:claseId/tareas/:tareaId')
   @ApiOperation({ summary: 'Eliminar tarea de una clase' })
   async eliminarTarea(
-    @Param('claseId', ParseUUIDPipe) claseId: string,
-    @Param('tareaId', ParseUUIDPipe) tareaId: string,
+    @Param('claseId', ParseIdPipe) claseId: string,
+    @Param('tareaId', ParseIdPipe) tareaId: string,
   ) {
     return this.planificacionesService.eliminarTarea(claseId, tareaId);
   }
@@ -162,7 +162,7 @@ export class PlanificacionesAdminController {
   @ApiOperation({
     summary: 'Publicar planificación (valida que todo esté completo)',
   })
-  async publicar(@Param('id', ParseUUIDPipe) id: string) {
+  async publicar(@Param('id', ParseIdPipe) id: string) {
     return this.planificacionesService.publicar(id);
   }
 }

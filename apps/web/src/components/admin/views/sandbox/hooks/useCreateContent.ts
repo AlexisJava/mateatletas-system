@@ -7,7 +7,11 @@ import {
   type MundoTipo,
   type ContenidoBackend,
 } from '@/lib/api/contenidos.api';
-import { crearPlanificacion, type Planificacion } from '@/lib/api/planificaciones-admin.api';
+import {
+  crearPlanificacion,
+  type Planificacion,
+  type CrearPlanificacionDto,
+} from '@/lib/api/planificaciones-admin.api';
 
 export type ContentType = 'microleccion' | 'planificacion';
 
@@ -52,13 +56,16 @@ export function useCreateContent() {
       setIsCreating(true);
       setError(null);
       try {
-        const result = await crearPlanificacion({
+        const dto: CrearPlanificacionDto = {
           titulo: params.titulo,
           casa_tipo: params.casaTipo,
           mundo_tipo: params.mundoTipo,
           cantidad_clases: params.cantidadClases,
-          descripcion: params.descripcion,
-        });
+        };
+        if (params.descripcion) {
+          dto.descripcion = params.descripcion;
+        }
+        const result = await crearPlanificacion(dto);
         return result;
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error al crear planificación');

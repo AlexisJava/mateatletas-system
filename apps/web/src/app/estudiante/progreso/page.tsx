@@ -15,7 +15,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import FloatingLines from '@/components/ui/FloatingLines';
-import { animate } from 'animejs';
+import { animate, stagger } from 'animejs';
 import {
   estudiantesApi,
   type MiProgreso,
@@ -24,12 +24,16 @@ import {
 } from '@/lib/api/estudiantes.api';
 
 // Colores por rareza de logro
-const RAREZA_COLORS: Record<string, { bg: string; border: string; glow: string }> = {
-  comun: {
-    bg: 'from-slate-500 to-slate-600',
-    border: 'border-slate-400/30',
-    glow: 'rgba(148,163,184,0.3)',
-  },
+type RarezaColors = { bg: string; border: string; glow: string };
+
+const DEFAULT_RAREZA_COLORS: RarezaColors = {
+  bg: 'from-slate-500 to-slate-600',
+  border: 'border-slate-400/30',
+  glow: 'rgba(148,163,184,0.3)',
+};
+
+const RAREZA_COLORS: Record<string, RarezaColors> = {
+  comun: DEFAULT_RAREZA_COLORS,
   raro: {
     bg: 'from-blue-500 to-blue-600',
     border: 'border-blue-400/30',
@@ -46,6 +50,10 @@ const RAREZA_COLORS: Record<string, { bg: string; border: string; glow: string }
     glow: 'rgba(251,191,36,0.5)',
   },
 };
+
+function getRarezaColors(rareza: string): RarezaColors {
+  return RAREZA_COLORS[rareza] ?? DEFAULT_RAREZA_COLORS;
+}
 
 function formatFechaRelativa(fecha: Date): string {
   const ahora = new Date();
@@ -117,7 +125,7 @@ export default function ProgresoPage() {
         scale: [0.9, 1],
         translateY: [20, 0],
         duration: 500,
-        delay: (_el: Element, i: number) => 100 + i * 80,
+        delay: stagger(80, { start: 100 }),
         ease: 'outBack',
       });
 
@@ -125,7 +133,7 @@ export default function ProgresoPage() {
       animate('.card-animate', {
         translateY: [30, 0],
         duration: 600,
-        delay: (_el: Element, i: number) => 300 + i * 100,
+        delay: stagger(100, { start: 300 }),
         ease: 'outQuad',
       });
     });
@@ -413,12 +421,12 @@ function LogrosCard({ logros }: { logros: MiProgreso['logros'] }) {
 }
 
 function LogroItem({ logro }: { logro: LogroReciente }) {
-  const colors = RAREZA_COLORS[logro.rareza] || RAREZA_COLORS.comun;
+  const { bg, border, glow } = getRarezaColors(logro.rareza);
 
   return (
     <div
-      className={`aspect-square rounded-xl bg-gradient-to-br ${colors.bg} ${colors.border} border flex items-center justify-center relative group cursor-pointer transition-transform hover:scale-105`}
-      style={{ boxShadow: `0 4px 16px ${colors.glow}` }}
+      className={`aspect-square rounded-xl bg-gradient-to-br ${bg} ${border} border flex items-center justify-center relative group cursor-pointer transition-transform hover:scale-105`}
+      style={{ boxShadow: `0 4px 16px ${glow}` }}
       title={logro.nombre}
     >
       <span className="text-2xl">{logro.icono}</span>

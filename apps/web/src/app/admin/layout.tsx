@@ -1,16 +1,17 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { ProtectedLayout } from '@/components/shared/ProtectedLayout';
 import { LoadingScreen } from '@/components/shared/LoadingScreen';
 import { Header } from '@/components/admin/Header';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 
 /**
- * Admin Layout v4.0 - Sidebar Design
+ * Admin Layout v4.1 - Sidebar Design
  *
  * Estructura:
  * - Sidebar vertical colapsable (toggle para ocultar/mostrar)
- * - Header con saludo, reloj y acciones de usuario
+ * - Header con saludo, reloj y acciones de usuario (oculto en Sandbox)
  * - Contenido principal
  *
  * Autenticación manejada por ProtectedLayout.
@@ -24,6 +25,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 }
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isSandbox = pathname === '/admin/sandbox';
+
   return (
     <div className="h-screen bg-[var(--admin-bg)] flex overflow-hidden" data-admin="true">
       {/* Sidebar - Navegación vertical colapsable */}
@@ -31,13 +35,19 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Header */}
-        <div className="shrink-0 p-4 lg:p-6 pb-0 lg:pb-0">
-          <Header />
-        </div>
+        {/* Header - Oculto en Sandbox (tiene su propio header compacto) */}
+        {!isSandbox && (
+          <div className="shrink-0 p-4 lg:p-6 pb-0 lg:pb-0">
+            <Header />
+          </div>
+        )}
 
-        {/* Content */}
-        <main className="flex-1 p-4 lg:p-6 overflow-hidden flex flex-col">{children}</main>
+        {/* Content - Sin padding en Sandbox para que los paneles ocupen todo el espacio */}
+        <main
+          className={`flex-1 overflow-hidden flex flex-col ${isSandbox ? 'p-0' : 'p-4 lg:p-6'}`}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

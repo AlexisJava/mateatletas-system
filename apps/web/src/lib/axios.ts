@@ -85,6 +85,21 @@ apiClient.interceptors.response.use(
     return axiosData;
   },
   (error: AxiosError<{ message?: string; errors?: Record<string, string[]> }>) => {
+    // DEBUG: Log completo del error para investigar 400s
+    if (error.response?.status === 400) {
+      console.error('[DEBUG 400] Full response:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        headers: error.response.headers,
+        data: error.response.data,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          data: error.config?.data,
+        },
+      });
+    }
+
     // Verificar si estamos en el navegador
     if (typeof window !== 'undefined') {
       const status = error.response?.status ?? 0;

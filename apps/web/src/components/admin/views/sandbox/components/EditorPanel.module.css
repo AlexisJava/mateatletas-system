@@ -1,8 +1,10 @@
-/* EditorPanel.module.css */
+/* EditorPanel.module.css - Editor Monaco con estilo elegante */
 
 .editor {
   height: 100%;
   width: 100%;
+  border-radius: 0 0 12px 0;
+  overflow: hidden;
 }
 
 .empty {
@@ -11,5 +13,98 @@
   justify-content: center;
   height: 100%;
   color: var(--admin-text-muted);
+  font-size: 0.8125rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   EDITOR DE CLASE (Planificaciones)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.claseEditor {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.claseHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.claseHeader h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--admin-text);
+  background: linear-gradient(135deg, var(--admin-text) 0%, var(--admin-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.claseDescripcion {
+  margin: 0;
   font-size: 0.875rem;
+  color: var(--admin-text-muted);
+  line-height: 1.5;
+}
+
+.claseActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, var(--admin-surface-2) 0%, var(--admin-surface-3) 100%);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  color: var(--admin-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.actionBtn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(16, 185, 129, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.actionBtn:hover:not(:disabled) {
+  border-color: var(--admin-accent);
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 16px rgba(16, 185, 129, 0.15),
+    inset 0 0 0 1px rgba(16, 185, 129, 0.1);
+}
+
+.actionBtn:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.actionBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.actionIcon {
+  font-size: 1.25rem;
+  filter: saturate(1.2);
 }

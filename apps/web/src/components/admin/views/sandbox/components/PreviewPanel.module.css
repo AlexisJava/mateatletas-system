@@ -4,7 +4,14 @@
   width: 100%;
   height: 100%;
   overflow: auto;
-  background: var(--admin-bg);
+  background: var(--estudiante-bg, #030014);
+  position: relative;
+  isolation: isolate;
+}
+
+/* Override fixed positioning from Stage to work within container */
+.container :global(.fixed) {
+  position: absolute !important;
 }
 
 .empty {
@@ -16,4 +23,82 @@
   font-size: 0.875rem;
   padding: 1rem;
   text-align: center;
+}
+
+/* Fullscreen button */
+.fullscreenBtn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 100;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  backdrop-filter: blur(8px);
+}
+
+.fullscreenBtn:hover {
+  background: rgba(168, 85, 247, 0.3);
+  border-color: rgba(168, 85, 247, 0.5);
+  color: white;
+}
+
+/* Fullscreen overlay */
+.fullscreenOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--estudiante-bg, #030014);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fullscreenContent {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+/* Close button */
+.closeBtn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10000;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  backdrop-filter: blur(8px);
+}
+
+.closeBtn:hover {
+  background: rgba(239, 68, 68, 0.5);
+  border-color: rgba(239, 68, 68, 0.7);
+  transform: scale(1.1);
 }

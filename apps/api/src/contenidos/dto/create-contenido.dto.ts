@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsOptional,
   MaxLength,
+  Matches,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CasaTipo, MundoTipo } from '@prisma/client';
@@ -26,6 +27,9 @@ export class CreateContenidoDto {
   @IsString({ message: 'El título debe ser un texto' })
   @IsNotEmpty({ message: 'El título es requerido' })
   @MaxLength(200, { message: 'El título no puede superar los 200 caracteres' })
+  @Matches(/^[^<>]*$/, {
+    message: 'El título no puede contener caracteres HTML (< o >)',
+  })
   @Trim()
   titulo!: string;
 

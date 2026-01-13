@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useCallback, useState, useRef, useEffect } from 'react';
-import type { NodoContenido } from '../types/sandbox.types';
+import type { NodoContenido, ClasePlanificacion } from '../types/sandbox.types';
 import { useSandboxState, useSandboxDispatch } from '../context/SandboxContext';
 import { useSandboxApi } from '../hooks';
 import styles from './TreePanel.module.css';
@@ -20,12 +20,12 @@ const ConnectedTreeNode = memo(function ConnectedTreeNode({ nodo, depth }: Conne
   const dispatch = useSandboxDispatch();
   const { addNodo, removeNodo, renameNodo } = useSandboxApi();
 
-  const isSelected = state.selectedNodoId === nodo.id;
+  const isSelected = state.selectedItemId === nodo.id;
   const hasChildren = nodo.hijos.length > 0;
   const isLeaf = !hasChildren && nodo.contenidoJson !== null;
 
   const handleSelect = useCallback(() => {
-    dispatch({ type: 'SELECT_NODO', payload: nodo.id });
+    dispatch({ type: 'SELECT_ITEM', payload: nodo.id });
   }, [dispatch, nodo.id]);
 
   const handleAdd = useCallback(async () => {
@@ -35,7 +35,7 @@ const ConnectedTreeNode = memo(function ConnectedTreeNode({ nodo, depth }: Conne
       parentId: nodo.id,
     });
     if (newNodo) {
-      dispatch({ type: 'SELECT_NODO', payload: newNodo.id });
+      dispatch({ type: 'SELECT_ITEM', payload: newNodo.id });
     }
   }, [addNodo, dispatch, nodo.id, state.contenido]);
 
@@ -144,18 +144,20 @@ const TreeNodeView = memo(function TreeNodeView({
         ) : (
           <span className={styles.label}>{nodo.titulo}</span>
         )}
-        {!nodo.bloqueado && (
-          <span className={`${styles.actions} ${isHovered ? styles.actionsVisible : ''}`}>
-            <button
-              type="button"
-              className={styles.actionBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                onAdd();
-              }}
-            >
-              +
-            </button>
+        <span className={`${styles.actions} ${isHovered ? styles.actionsVisible : ''}`}>
+          {/* Siempre permitir agregar hijos, incluso a nodos bloqueados */}
+          <button
+            type="button"
+            className={styles.actionBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAdd();
+            }}
+          >
+            +
+          </button>
+          {/* Solo permitir eliminar nodos no bloqueados */}
+          {!nodo.bloqueado && (
             <button
               type="button"
               className={styles.actionBtn}
@@ -166,8 +168,8 @@ const TreeNodeView = memo(function TreeNodeView({
             >
               ×
             </button>
-          </span>
-        )}
+          )}
+        </span>
       </div>
       {hasChildren &&
         isExpanded &&
@@ -177,18 +179,98 @@ const TreeNodeView = memo(function TreeNodeView({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// CLASE ITEM (for planificaciones)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ClaseItemProps {
+  clase: ClasePlanificacion;
+}
+
+const ClaseItem = memo(function ClaseItem({ clase }: ClaseItemProps) {
+  const state = useSandboxState();
+  const dispatch = useSandboxDispatch();
+
+  const isSelected = state.selectedItemId === clase.id;
+
+  const handleSelect = useCallback(() => {
+    dispatch({ type: 'SELECT_ITEM', payload: clase.id });
+  }, [dispatch, clase.id]);
+
+  return (
+    <div
+      className={`${styles.node} ${isSelected ? styles.selected : ''}`}
+      style={{ paddingLeft: '8px' }}
+      onClick={handleSelect}
+    >
+      <span className={styles.chevron}>📚</span>
+      <span className={styles.label}>
+        Clase {clase.numero}: {clase.titulo}
+      </span>
+    </div>
+  );
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADD ROOT NODE BUTTON
+// ─────────────────────────────────────────────────────────────────────────────
+
+function AddRootNodeButton() {
+  const state = useSandboxState();
+  const dispatch = useSandboxDispatch();
+  const { addNodo } = useSandboxApi();
+
+  const handleAddRootNode = async () => {
+    if (!state.contenido) return;
+    const newNodo = await addNodo(state.contenido.id, { titulo: 'Nuevo nodo' });
+    if (newNodo) {
+      dispatch({ type: 'SELECT_ITEM', payload: newNodo.id });
+    }
+  };
+
+  return (
+    <button type="button" className={styles.addRootBtn} onClick={handleAddRootNode}>
+      + Agregar nodo
+    </button>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // TREE PANEL
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function TreePanel() {
   const state = useSandboxState();
+
+  // Planificación view
+  if (state.contentType === 'planificacion') {
+    if (!state.planificacion) return <p className={styles.empty}>Sin planificación</p>;
+
+    return (
+      <div className={styles.panel}>
+        {state.planificacion.clases.map((clase) => (
+          <ClaseItem key={clase.id} clase={clase} />
+        ))}
+      </div>
+    );
+  }
+
+  // Microlección view (default)
   if (!state.contenido) return <p className={styles.empty}>Sin contenido</p>;
+
+  const hasNodos = state.contenido.nodos.length > 0;
 
   return (
     <div className={styles.panel}>
-      {state.contenido.nodos.map((nodo) => (
-        <ConnectedTreeNode key={nodo.id} nodo={nodo} depth={0} />
-      ))}
+      {hasNodos ? (
+        state.contenido.nodos.map((nodo) => (
+          <ConnectedTreeNode key={nodo.id} nodo={nodo} depth={0} />
+        ))
+      ) : (
+        <div className={styles.emptyState}>
+          <p>Sin nodos</p>
+          <AddRootNodeButton />
+        </div>
+      )}
     </div>
   );
 }

@@ -2,11 +2,18 @@
 
 import { useState } from 'react';
 import { useCreateContent, type ContentType } from '../hooks';
-import type { CasaTipo, MundoTipo } from '@/lib/api/contenidos.api';
+import type { CasaTipo, MundoTipo, ContenidoBackend } from '@/lib/api/contenidos.api';
+import type { Planificacion as PlanificacionBackend } from '@/lib/api/planificaciones-admin.api';
 import styles from './StartModal.module.css';
 
+export interface CreatedContentResult {
+  id: string;
+  type: ContentType;
+  data: ContenidoBackend | PlanificacionBackend;
+}
+
 interface StartModalProps {
-  onCreated: (id: string, type: ContentType) => void;
+  onCreated: (result: CreatedContentResult) => void;
 }
 
 const CASAS: { value: CasaTipo; label: string; color: string }[] = [
@@ -39,7 +46,9 @@ export function StartModal({ onCreated }: StartModalProps) {
         casaTipo: casa,
         mundoTipo: mundo,
       });
-      if (result) onCreated(result.id, 'microleccion');
+      if (result) {
+        onCreated({ id: result.id, type: 'microleccion', data: result });
+      }
     } else {
       const result = await createPlanificacion({
         titulo: titulo.trim(),
@@ -47,7 +56,9 @@ export function StartModal({ onCreated }: StartModalProps) {
         mundoTipo: mundo,
         cantidadClases,
       });
-      if (result) onCreated(result.id, 'planificacion');
+      if (result) {
+        onCreated({ id: result.id, type: 'planificacion', data: result });
+      }
     }
   };
 

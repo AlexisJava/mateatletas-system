@@ -1,6 +1,6 @@
 /**
  * useSandboxApi - Hook for API interactions
- * Uses existing contenidos.api functions
+ * Uses existing contenidos.api and planificaciones-admin.api
  */
 
 import { useCallback } from 'react';
@@ -14,7 +14,21 @@ import {
   type NodoBackend,
   type CreateNodoDto,
 } from '@/lib/api/contenidos.api';
-import type { Contenido, NodoContenido, House, Subject } from '../types/sandbox.types';
+import {
+  obtenerPlanificacion,
+  actualizarClase,
+  type Planificacion as PlanificacionBackend,
+  type ClasePlanificacion as ClaseBackend,
+  type ActualizarClaseDto,
+} from '@/lib/api/planificaciones-admin.api';
+import type {
+  Contenido,
+  NodoContenido,
+  Planificacion,
+  ClasePlanificacion,
+  House,
+  Subject,
+} from '../types/sandbox.types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MAPPERS: Backend → Frontend
@@ -53,6 +67,43 @@ function mapContenidoBackendToFrontend(backend: ContenidoBackend): Contenido {
   };
 }
 
+function mapClaseBackendToFrontend(clase: ClaseBackend): ClasePlanificacion {
+  return {
+    id: clase.id,
+    numero: clase.numero,
+    titulo: clase.titulo,
+    descripcion: clase.descripcion,
+    teoriaId: clase.teoria_id,
+    practicaId: clase.practica_id,
+  };
+}
+
+function mapPlanificacionBackendToFrontend(backend: PlanificacionBackend): Planificacion {
+  const houseMap: Record<string, House> = {
+    QUANTUM: 'QUANTUM',
+    VERTEX: 'VERTEX',
+    PULSAR: 'PULSAR',
+  };
+  const subjectMap: Record<string, Subject> = {
+    MATEMATICA: 'MATH',
+    PROGRAMACION: 'CODE',
+    CIENCIAS: 'SCIENCE',
+  };
+
+  return {
+    id: backend.id,
+    titulo: backend.titulo,
+    descripcion: backend.descripcion,
+    cantidadClases: backend.cantidad_clases,
+    house: houseMap[backend.casa_tipo] || 'QUANTUM',
+    subject: subjectMap[backend.mundo_tipo] || 'MATH',
+    clases: (backend.clases ?? []).map(mapClaseBackendToFrontend),
+  };
+}
+
+// Exportar mappers para uso directo (evita GET después de crear)
+export { mapContenidoBackendToFrontend, mapPlanificacionBackendToFrontend };
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HOOK
 // ─────────────────────────────────────────────────────────────────────────────
@@ -61,15 +112,17 @@ export function useSandboxApi() {
   const dispatch = useSandboxDispatch();
 
   const loadContenido = useCallback(
-    async (id: string) => {
+    async (id: string): Promise<boolean> => {
       dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_CONTENT_TYPE', payload: 'microleccion' });
       try {
         const backend = await getContenidoById(id);
         const contenido = mapContenidoBackendToFrontend(backend);
         dispatch({ type: 'SET_CONTENIDO', payload: contenido });
-      } catch (error) {
-        console.error('Error loading contenido:', error);
-        dispatch({ type: 'SET_SAVE_STATUS', payload: 'error' });
+        return true;
+      } catch {
+        dispatch({ type: 'SET_CONTENIDO', payload: null });
+        return false;
       } finally {
         dispatch({ type: 'SET_LOADING', payload: false });
       }
@@ -99,6 +152,9 @@ export function useSandboxApi() {
         const nodo = mapNodoBackendToFrontend(nodoBackend);
         if (dto.parentId) {
           dispatch({ type: 'ADD_NODO', payload: { parentId: dto.parentId, nodo } });
+        } else {
+          // Root level nodo
+          dispatch({ type: 'ADD_ROOT_NODO', payload: nodo });
         }
         return nodo;
       } catch (error) {
@@ -133,5 +189,64 @@ export function useSandboxApi() {
     [dispatch],
   );
 
-  return { loadContenido, saveNodoJson, addNodo, removeNodo, renameNodo };
+  // ─────────────────────────────────────────────────────────────────────────────
+  // PLANIFICACIÓN
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const loadPlanificacion = useCallback(
+    async (id: string): Promise<boolean> => {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_CONTENT_TYPE', payload: 'planificacion' });
+      try {
+        const backend = await obtenerPlanificacion(id);
+        const planificacion = mapPlanificacionBackendToFrontend(backend);
+        dispatch({ type: 'SET_PLANIFICACION', payload: planificacion });
+        return true;
+      } catch {
+        dispatch({ type: 'SET_PLANIFICACION', payload: null });
+        return false;
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }
+    },
+    [dispatch],
+  );
+
+  const updateClase = useCallback(
+    async (claseId: string, data: ActualizarClaseDto) => {
+      dispatch({ type: 'SET_SAVE_STATUS', payload: 'saving' });
+      try {
+        await actualizarClase(claseId, data);
+        dispatch({
+          type: 'UPDATE_CLASE',
+          payload: {
+            claseId,
+            data: {
+              titulo: data.titulo,
+              descripcion: data.descripcion,
+              teoriaId: data.teoria_id,
+              practicaId: data.practica_id,
+            },
+          },
+        });
+        dispatch({ type: 'SET_SAVE_STATUS', payload: 'saved' });
+      } catch (error) {
+        console.error('Error updating clase:', error);
+        dispatch({ type: 'SET_SAVE_STATUS', payload: 'error' });
+      }
+    },
+    [dispatch],
+  );
+
+  return {
+    // Microlección
+    loadContenido,
+    saveNodoJson,
+    addNodo,
+    removeNodo,
+    renameNodo,
+    // Planificación
+    loadPlanificacion,
+    updateClase,
+  };
 }

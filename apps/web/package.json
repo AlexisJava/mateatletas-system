@@ -110,6 +110,7 @@
     "eslint-config-next": "15.5.4",
     "happy-dom": "^20.0.8",
     "jsdom": "^27.0.1",
+    "monaco-editor": "^0.55.1",
     "vitest": "^4.0.3"
   }
 }

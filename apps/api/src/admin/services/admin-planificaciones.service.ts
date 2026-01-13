@@ -13,6 +13,20 @@ import {
   PlanificacionResponse,
 } from '../dto/planificacion.dto';
 
+/** Tipos de estado de planificación */
+type EstadoPlanificacion = 'BORRADOR' | 'PUBLICADO' | 'ARCHIVADO';
+type CasaTipo = 'QUANTUM' | 'VERTEX' | 'PULSAR';
+type MundoTipo = 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
+
+/** Opciones de filtrado para listar planificaciones */
+type ListarPlanificacionesOptions = {
+  page?: number;
+  limit?: number;
+  estado?: EstadoPlanificacion;
+  casa_tipo?: CasaTipo;
+  mundo_tipo?: MundoTipo;
+};
+
 /**
  * Servicio de Planificaciones para Admin
  *
@@ -209,13 +223,7 @@ export class AdminPlanificacionesService {
   /**
    * Listar planificaciones con paginación y filtros
    */
-  async listar(options?: {
-    page?: number;
-    limit?: number;
-    estado?: 'BORRADOR' | 'PUBLICADO' | 'ARCHIVADO';
-    casa_tipo?: 'QUANTUM' | 'VERTEX' | 'PULSAR';
-    mundo_tipo?: 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
-  }) {
+  async listar(options?: ListarPlanificacionesOptions) {
     const page = options?.page ?? 1;
     const limit = Math.min(options?.limit ?? 20, 100);
     const skip = (page - 1) * limit;
@@ -497,25 +505,35 @@ export class AdminPlanificacionesService {
         );
       }
 
-      // Verificar que los contenidos estén publicados o tengan nodos
-      const [teoriaNodes, practicaNodes] = await Promise.all([
-        this.prisma.nodoContenido.count({
-          where: { contenidoId: clase.teoria_id },
-        }),
-        this.prisma.nodoContenido.count({
-          where: { contenidoId: clase.practica_id },
-        }),
-      ]);
+      // Verificar que los contenidos tengan nodos con contenido real
+      // (no solo los 3 nodos estructurales bloqueados: Teoría, Práctica, Evaluación)
+      const [teoriaNodesWithContent, practicaNodesWithContent] =
+        await Promise.all([
+          this.prisma.nodoContenido.count({
+            where: {
+              contenidoId: clase.teoria_id,
+              bloqueado: false, // Excluir nodos estructurales
+              contenidoJson: { not: null }, // Debe tener contenido
+            },
+          }),
+          this.prisma.nodoContenido.count({
+            where: {
+              contenidoId: clase.practica_id,
+              bloqueado: false,
+              contenidoJson: { not: null },
+            },
+          }),
+        ]);
 
-      if (teoriaNodes < 3) {
+      if (teoriaNodesWithContent === 0) {
         throw new BadRequestException(
-          `La teoría de la clase ${clase.numero} no tiene contenido`,
+          `La teoría de la clase ${clase.numero} no tiene contenido (agregue al menos un nodo con contenido)`,
         );
       }
 
-      if (practicaNodes < 3) {
+      if (practicaNodesWithContent === 0) {
         throw new BadRequestException(
-          `La práctica de la clase ${clase.numero} no tiene contenido`,
+          `La práctica de la clase ${clase.numero} no tiene contenido (agregue al menos un nodo con contenido)`,
         );
       }
     }
@@ -544,12 +562,15 @@ export class AdminPlanificacionesService {
 
   /**
    * Eliminar planificación (solo borradores)
+   * También elimina los contenidos asociados (teoría/práctica) para evitar huérfanos
    */
   async eliminar(id: string): Promise<{ success: boolean; mensaje: string }> {
     const planificacion = await this.prisma.planificacion.findUnique({
       where: { id },
       include: {
-        clases: true,
+        clases: {
+          select: { teoria_id: true, practica_id: true },
+        },
         asignaciones: true,
       },
     });
@@ -570,10 +591,34 @@ export class AdminPlanificacionesService {
       );
     }
 
-    // Eliminar planificación (cascade eliminará clases y tareas)
-    await this.prisma.planificacion.delete({
-      where: { id },
+    // Recolectar IDs de contenidos a eliminar (teoría y práctica de cada clase)
+    const contenidoIds = planificacion.clases.flatMap((c) =>
+      [c.teoria_id, c.practica_id].filter((id): id is string => Boolean(id)),
+    );
+
+    // Eliminar en transacción: nodos, planificación y contenidos
+    await this.prisma.$transaction(async (tx) => {
+      // 1. Eliminar nodos de los contenidos (evitar FK constraint)
+      if (contenidoIds.length > 0) {
+        await tx.nodoContenido.deleteMany({
+          where: { contenidoId: { in: contenidoIds } },
+        });
+      }
+
+      // 2. Eliminar planificación (cascade elimina clases y tareas)
+      await tx.planificacion.delete({ where: { id } });
+
+      // 3. Eliminar contenidos huérfanos
+      if (contenidoIds.length > 0) {
+        await tx.contenido.deleteMany({
+          where: { id: { in: contenidoIds } },
+        });
+      }
     });
+
+    this.logger.log(
+      `Planificación ${id} eliminada con ${contenidoIds.length} contenidos asociados`,
+    );
 
     return {
       success: true,
@@ -617,12 +662,9 @@ export class AdminPlanificacionesService {
       titulo: planificacion.titulo,
       descripcion: planificacion.descripcion,
       cantidad_clases: planificacion.cantidad_clases,
-      casa_tipo: planificacion.casa_tipo as 'QUANTUM' | 'VERTEX' | 'PULSAR',
-      mundo_tipo: planificacion.mundo_tipo as
-        | 'MATEMATICA'
-        | 'PROGRAMACION'
-        | 'CIENCIAS',
-      estado: planificacion.estado as 'BORRADOR' | 'PUBLICADO' | 'ARCHIVADO',
+      casa_tipo: planificacion.casa_tipo as CasaTipo,
+      mundo_tipo: planificacion.mundo_tipo as MundoTipo,
+      estado: planificacion.estado as EstadoPlanificacion,
       created_at: planificacion.created_at,
       updated_at: planificacion.updated_at,
       clases: planificacion.clases.map((c) => ({
@@ -636,17 +678,14 @@ export class AdminPlanificacionesService {
           ? {
               id: c.teoria.id,
               titulo: c.teoria.titulo,
-              estado: c.teoria.estado as 'BORRADOR' | 'PUBLICADO' | 'ARCHIVADO',
+              estado: c.teoria.estado as EstadoPlanificacion,
             }
           : undefined,
         practica: c.practica
           ? {
               id: c.practica.id,
               titulo: c.practica.titulo,
-              estado: c.practica.estado as
-                | 'BORRADOR'
-                | 'PUBLICADO'
-                | 'ARCHIVADO',
+              estado: c.practica.estado as EstadoPlanificacion,
             }
           : undefined,
         tareas: c.tareas?.map((t) => ({

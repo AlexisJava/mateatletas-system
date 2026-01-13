@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsInt, Min, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  Min,
+  MinLength,
+  IsJSON,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -41,7 +48,7 @@ export class CreateNodoDto {
     example: '{"type":"doc","content":[]}',
   })
   @IsOptional()
-  @IsString({ message: 'El contenidoJson debe ser un string' })
+  @IsJSON({ message: 'contenidoJson debe ser un JSON válido' })
   contenidoJson?: string;
 
   /**

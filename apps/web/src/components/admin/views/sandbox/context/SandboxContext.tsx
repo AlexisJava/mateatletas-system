@@ -9,8 +9,10 @@ import { updateNodoInTree, addNodoToParent, removeNodoFromTree } from '../utils/
 // ─────────────────────────────────────────────────────────────────────────────
 
 const initialState: SandboxState = {
+  contentType: 'microleccion',
   contenido: null,
-  selectedNodoId: null,
+  planificacion: null,
+  selectedItemId: null,
   saveStatus: 'idle',
   isLoading: false,
 };
@@ -21,10 +23,16 @@ const initialState: SandboxState = {
 
 function sandboxReducer(state: SandboxState, action: SandboxAction): SandboxState {
   switch (action.type) {
+    // Content type - clear opposite state to avoid stale data
+    case 'SET_CONTENT_TYPE':
+      if (action.payload === 'microleccion') {
+        return { ...state, contentType: action.payload, planificacion: null, selectedItemId: null };
+      }
+      return { ...state, contentType: action.payload, contenido: null, selectedItemId: null };
+
+    // Microlección
     case 'SET_CONTENIDO':
-      return { ...state, contenido: action.payload, selectedNodoId: null };
-    case 'SELECT_NODO':
-      return { ...state, selectedNodoId: action.payload };
+      return { ...state, contenido: action.payload, selectedItemId: null };
     case 'UPDATE_NODO_JSON':
       if (!state.contenido) return state;
       return {
@@ -36,10 +44,6 @@ function sandboxReducer(state: SandboxState, action: SandboxAction): SandboxStat
           }),
         },
       };
-    case 'SET_SAVE_STATUS':
-      return { ...state, saveStatus: action.payload };
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
     case 'ADD_NODO':
       if (!state.contenido) return state;
       return {
@@ -53,6 +57,15 @@ function sandboxReducer(state: SandboxState, action: SandboxAction): SandboxStat
           ),
         },
       };
+    case 'ADD_ROOT_NODO':
+      if (!state.contenido) return state;
+      return {
+        ...state,
+        contenido: {
+          ...state.contenido,
+          nodos: [...state.contenido.nodos, action.payload],
+        },
+      };
     case 'DELETE_NODO':
       if (!state.contenido) return state;
       return {
@@ -61,7 +74,7 @@ function sandboxReducer(state: SandboxState, action: SandboxAction): SandboxStat
           ...state.contenido,
           nodos: removeNodoFromTree(state.contenido.nodos, action.payload),
         },
-        selectedNodoId: state.selectedNodoId === action.payload ? null : state.selectedNodoId,
+        selectedItemId: state.selectedItemId === action.payload ? null : state.selectedItemId,
       };
     case 'RENAME_NODO':
       if (!state.contenido) return state;
@@ -74,6 +87,30 @@ function sandboxReducer(state: SandboxState, action: SandboxAction): SandboxStat
           }),
         },
       };
+
+    // Planificación
+    case 'SET_PLANIFICACION':
+      return { ...state, planificacion: action.payload, selectedItemId: null };
+    case 'UPDATE_CLASE':
+      if (!state.planificacion) return state;
+      return {
+        ...state,
+        planificacion: {
+          ...state.planificacion,
+          clases: state.planificacion.clases.map((c) =>
+            c.id === action.payload.claseId ? { ...c, ...action.payload.data } : c,
+          ),
+        },
+      };
+
+    // Shared
+    case 'SELECT_ITEM':
+      return { ...state, selectedItemId: action.payload };
+    case 'SET_SAVE_STATUS':
+      return { ...state, saveStatus: action.payload };
+    case 'SET_LOADING':
+      return { ...state, isLoading: action.payload };
+
     default:
       return state;
   }
