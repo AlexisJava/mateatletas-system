@@ -238,7 +238,7 @@ describe('[INTEGRATION] Sandbox - Flujos E2E Completos', () => {
         .set('Cookie', auth.cookie)
         .set('Origin', FRONTEND_ORIGIN);
 
-      expect(publicarRes.status).toBe(200);
+      expect(publicarRes.status).toBe(201);
 
       // ==================== PASO 8: Verificar estado PUBLICADO ====================
       const contenidoFinal = await prisma.contenido.findUnique({
@@ -304,9 +304,9 @@ describe('[INTEGRATION] Sandbox - Flujos E2E Completos', () => {
         .send({
           titulo: 'Planificación E2E: Álgebra Básica',
           descripcion: 'Curso completo de álgebra para principiantes',
-          casaTipo: 'VERTEX',
-          mundoTipo: 'MATEMATICA',
-          cantidadClases: 3,
+          casa_tipo: 'VERTEX',
+          mundo_tipo: 'MATEMATICA',
+          cantidad_clases: 3,
         });
 
       expect(createRes.status).toBe(201);
@@ -326,56 +326,58 @@ describe('[INTEGRATION] Sandbox - Flujos E2E Completos', () => {
 
       // ==================== PASO 3: Verificar contenidos asociados ====================
       for (const clase of clases) {
-        // Cada clase debería tener teoriaId y practicaId
-        expect(clase).toHaveProperty('teoriaId');
-        expect(clase).toHaveProperty('practicaId');
+        // Cada clase debería tener teoria_id y practica_id
+        expect(clase).toHaveProperty('teoria_id');
+        expect(clase).toHaveProperty('practica_id');
 
         // Verificar que los contenidos existen
-        if (clase.teoriaId) {
+        if (clase.teoria_id) {
           const teoriaContenido = await prisma.contenido.findUnique({
-            where: { id: clase.teoriaId },
+            where: { id: clase.teoria_id },
           });
           expect(teoriaContenido).not.toBeNull();
           expect(teoriaContenido!.estado).toBe('BORRADOR');
         }
 
-        if (clase.practicaId) {
+        if (clase.practica_id) {
           const practicaContenido = await prisma.contenido.findUnique({
-            where: { id: clase.practicaId },
+            where: { id: clase.practica_id },
           });
           expect(practicaContenido).not.toBeNull();
           expect(practicaContenido!.estado).toBe('BORRADOR');
         }
       }
 
-      // ==================== PASO 4: Editar contenido clase 1 (Teoría) ====================
-      const clase1 = clases[0];
-      if (clase1.teoriaId) {
-        // Obtener árbol del contenido
+      // ==================== PASO 4: Agregar contenido a TODAS las clases ====================
+      // Para publicar una planificación, cada clase necesita contenido en teoría Y práctica
+      // Helper para agregar contenido a un contenido (teoría o práctica)
+      const agregarContenidoANodo = async (
+        contenidoId: string,
+        tipoNodo: string,
+        titulo: string,
+      ) => {
         const arbolRes = await request(app.getHttpServer())
-          .get(`/api/contenidos/${clase1.teoriaId}/arbol`)
+          .get(`/api/contenidos/${contenidoId}/arbol`)
           .set('Cookie', auth.cookie)
           .set('Origin', FRONTEND_ORIGIN);
 
         expect(arbolRes.status).toBe(200);
-        const nodosTeoria = arbolRes.body;
-        const teoriaNodo = nodosTeoria.find(
-          (n: { titulo: string }) => n.titulo === 'Teoría',
+        const nodos = arbolRes.body;
+        const parentNodo = nodos.find(
+          (n: { titulo: string }) => n.titulo === tipoNodo,
         );
 
-        // Agregar nodo de contenido
         const addNodoRes = await request(app.getHttpServer())
-          .post(`/api/contenidos/${clase1.teoriaId}/nodos`)
+          .post(`/api/contenidos/${contenidoId}/nodos`)
           .set('Cookie', auth.cookie)
           .set('Origin', FRONTEND_ORIGIN)
           .send({
-            titulo: 'Variables y Expresiones',
-            parentId: teoriaNodo.id,
+            titulo,
+            parentId: parentNodo.id,
           });
 
         expect(addNodoRes.status).toBe(201);
 
-        // Guardar contenido
         const saveRes = await request(app.getHttpServer())
           .patch(`/api/contenidos/nodos/${addNodoRes.body.id}`)
           .set('Cookie', auth.cookie)
@@ -384,63 +386,41 @@ describe('[INTEGRATION] Sandbox - Flujos E2E Completos', () => {
             contenidoJson: JSON.stringify({
               type: 'Stage',
               props: { pattern: 'aurora' },
-              children: [
-                { type: 'LessonHeader', props: { title: 'Variables' } },
-              ],
+              children: [{ type: 'LessonHeader', props: { title: titulo } }],
             }),
           });
 
         expect(saveRes.status).toBe(200);
+      };
+
+      // Agregar contenido a todas las clases (teoría y práctica)
+      for (let i = 0; i < clases.length; i++) {
+        const clase = clases[i];
+        if (clase.teoria_id) {
+          await agregarContenidoANodo(
+            clase.teoria_id,
+            'Teoría',
+            `Contenido Teoría Clase ${i + 1}`,
+          );
+        }
+        if (clase.practica_id) {
+          await agregarContenidoANodo(
+            clase.practica_id,
+            'Práctica',
+            `Ejercicios Clase ${i + 1}`,
+          );
+        }
       }
 
-      // ==================== PASO 5: Editar contenido clase 2 (Práctica) ====================
-      const clase2 = clases[1];
-      if (clase2.practicaId) {
-        const arbolRes = await request(app.getHttpServer())
-          .get(`/api/contenidos/${clase2.practicaId}/arbol`)
-          .set('Cookie', auth.cookie)
-          .set('Origin', FRONTEND_ORIGIN);
-
-        const nodosPractica = arbolRes.body;
-        const practicaNodo = nodosPractica.find(
-          (n: { titulo: string }) => n.titulo === 'Práctica',
-        );
-
-        const addNodoRes = await request(app.getHttpServer())
-          .post(`/api/contenidos/${clase2.practicaId}/nodos`)
-          .set('Cookie', auth.cookie)
-          .set('Origin', FRONTEND_ORIGIN)
-          .send({
-            titulo: 'Ejercicios de Ecuaciones',
-            parentId: practicaNodo.id,
-          });
-
-        expect(addNodoRes.status).toBe(201);
-
-        const saveRes = await request(app.getHttpServer())
-          .patch(`/api/contenidos/nodos/${addNodoRes.body.id}`)
-          .set('Cookie', auth.cookie)
-          .set('Origin', FRONTEND_ORIGIN)
-          .send({
-            contenidoJson: JSON.stringify({
-              type: 'Stage',
-              props: { pattern: 'matrix' },
-              children: [{ type: 'Quiz', props: { question: 'x + 5 = 10' } }],
-            }),
-          });
-
-        expect(saveRes.status).toBe(200);
-      }
-
-      // ==================== PASO 6: Publicar planificación ====================
+      // ==================== PASO 5: Publicar planificación ====================
       const publicarRes = await request(app.getHttpServer())
         .post(`/api/admin/planificaciones/${planificacionId}/publicar`)
         .set('Cookie', auth.cookie)
         .set('Origin', FRONTEND_ORIGIN);
 
-      expect(publicarRes.status).toBe(200);
+      expect(publicarRes.status).toBe(201);
 
-      // ==================== PASO 7: Verificar estado final ====================
+      // ==================== PASO 6: Verificar estado final ====================
       const planFinal = await prisma.planificacion.findUnique({
         where: { id: planificacionId },
         include: { clases: true },
@@ -451,15 +431,15 @@ describe('[INTEGRATION] Sandbox - Flujos E2E Completos', () => {
 
       // Verificar que los contenidos asociados están publicados
       for (const clase of planFinal!.clases) {
-        if (clase.teoriaId) {
+        if (clase.teoria_id) {
           const teoriaContenido = await prisma.contenido.findUnique({
-            where: { id: clase.teoriaId },
+            where: { id: clase.teoria_id },
           });
           expect(teoriaContenido!.estado).toBe('PUBLICADO');
         }
-        if (clase.practicaId) {
+        if (clase.practica_id) {
           const practicaContenido = await prisma.contenido.findUnique({
-            where: { id: clase.practicaId },
+            where: { id: clase.practica_id },
           });
           expect(practicaContenido!.estado).toBe('PUBLICADO');
         }
