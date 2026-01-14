@@ -140,8 +140,13 @@ function getDemoConfigForTemplate(template: string): {
     },
     breakout: {
       title: 'Rompe Bloques',
-      instruction: 'Destruye los bloques con la pelota',
-      templateConfig: {},
+      instruction: 'Destruye bloques con resultados de 2x (verdes)',
+      templateConfig: {
+        correct: ['2', '4', '6', '8', '10', '12', '14', '16'],
+        wrong: ['1', '3', '5', '7', '9', '11', '13', '15'],
+        cols: 8,
+        rows: 4,
+      },
     },
     pong: {
       title: 'Pong Matemático',

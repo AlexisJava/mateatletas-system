@@ -137,3 +137,21 @@ export const runnerConfigSchema = z.object({
 });
 
 export type RunnerConfig = z.infer<typeof runnerConfigSchema>;
+
+// ============================================================================
+// Breakout Template Config
+// ============================================================================
+
+/** Schema completo para BreakoutScene */
+export const breakoutConfigSchema = z.object({
+  /** Valores correctos (bloques a destruir) */
+  correct: z.array(z.string()).min(1),
+  /** Valores incorrectos (bloques a evitar) */
+  wrong: z.array(z.string()).min(1),
+  /** Columnas de bloques */
+  cols: z.number().int().min(4).max(12).default(8),
+  /** Filas de bloques */
+  rows: z.number().int().min(2).max(6).default(4),
+});
+
+export type BreakoutConfig = z.infer<typeof breakoutConfigSchema>;

@@ -28,7 +28,7 @@ const TEMPLATE_CATALOG = {
       { id: 'shooter', name: 'Shooter', description: 'Disparar a targets', status: 'ready' },
       { id: 'dodger', name: 'Dodger', description: 'Esquivar obstáculos', status: 'ready' },
       { id: 'runner', name: 'Runner', description: 'Endless runner', status: 'ready' },
-      { id: 'breakout', name: 'Breakout', description: 'Romper bloques', status: 'pending' },
+      { id: 'breakout', name: 'Breakout', description: 'Romper bloques', status: 'ready' },
       { id: 'pong', name: 'Pong', description: 'Rebote de pelota', status: 'pending' },
       { id: 'snake', name: 'Snake', description: 'Serpiente', status: 'pending' },
       { id: 'whackamole', name: 'Whack-a-Mole', description: 'Golpear targets', status: 'ready' },
