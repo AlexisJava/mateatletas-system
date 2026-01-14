@@ -231,6 +231,82 @@ Ver `docs/ARQUITECTURA_SISTEMA_CONTENIDO_MATEATLETAS.md` para:
 
 ---
 
+## GAME ENGINE (Sistema de Juegos)
+
+El package `@mateatletas/game-engine` es el motor de minijuegos basado en Phaser.js.
+
+### Arquitectura
+
+```
+packages/game-engine/src/
+├── core/
+│   ├── BaseScene.ts      # Clase base para todas las escenas
+│   ├── EventBus.ts       # Comunicación React ↔ Phaser
+│   ├── GameRegistry.ts   # Registro de templates disponibles
+│   └── types.ts          # GameResult, GameConfig, callbacks
+├── systems/
+│   ├── InputSystem.ts    # Manejo de input (touch/keyboard)
+│   ├── AudioSystem.ts    # Sonidos y música
+│   └── ParticleSystem.ts # Efectos visuales
+└── templates/
+    ├── arcade/           # CatcherScene, ShooterScene, RunnerScene, etc.
+    ├── puzzle/           # Rompecabezas, matching
+    ├── memory/           # Juegos de memoria
+    └── strategy/         # Juegos de estrategia
+```
+
+### Crear un Nuevo Template
+
+Todos los templates extienden `BaseScene`:
+
+```typescript
+class MiJuego extends BaseScene<MiConfig> {
+  create() {
+    super.create(); // OBLIGATORIO - setup de timers y eventos
+    // Setup específico del juego...
+  }
+
+  update(time: number, delta: number) {
+    super.update(time, delta); // OBLIGATORIO - maneja pausa y tiempo límite
+    // Lógica del juego...
+  }
+
+  // Usar métodos heredados:
+  // this.onCorrectAnswer(points) - incrementa score y combo
+  // this.onWrongAnswer(penalty)  - resetea combo
+  // this.loseLife()              - resta vida, retorna true si game over
+  // this.endGame(success)        - termina y llama callback
+}
+```
+
+### Comunicación React ↔ Phaser
+
+El `EventBus` permite comunicación bidireccional:
+
+```typescript
+// Desde React: pausar juego
+EventBus.emitGamePause();
+
+// Desde Phaser: notificar resultado
+EventBus.emitGameComplete(result);
+
+// React escucha:
+EventBus.onGameComplete((result) => guardarXP(result.xp));
+```
+
+### Templates Disponibles (Arcade)
+
+| Template          | Descripción               | Mecánica                      |
+| ----------------- | ------------------------- | ----------------------------- |
+| `CatcherScene`    | Atrapar objetos que caen  | Mover canasta horizontalmente |
+| `ShooterScene`    | Disparar a objetivos      | Apuntar y disparar            |
+| `RunnerScene`     | Correr y esquivar         | Saltar obstáculos             |
+| `DodgerScene`     | Esquivar proyectiles      | Movimiento en 4 direcciones   |
+| `WhackAMoleScene` | Golpear topos             | Tap en objetivos emergentes   |
+| `BreakoutScene`   | Romper bloques con pelota | Paddle y rebote               |
+
+---
+
 ## ARQUITECTURA BACKEND (NestJS)
 
 ### Patrón de Módulos

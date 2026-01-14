@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
-import { EstadoContenido } from '@prisma/client';
+import { Prisma, EstadoContenido } from '@prisma/client';
 import { CreateNodoDto, UpdateNodoDto, ReordenarNodosDto } from '../dto';
 
 /**
@@ -167,16 +167,34 @@ export class NodoService {
       orden = (lastSibling?.orden ?? -1) + 1;
     }
 
-    return this.prisma.nodoContenido.create({
-      data: {
-        contenidoId,
-        parentId: dto.parentId,
-        titulo: dto.titulo,
-        contenidoJson: dto.contenidoJson,
-        orden,
-        bloqueado: false,
-      },
-    });
+    try {
+      return await this.prisma.nodoContenido.create({
+        data: {
+          contenidoId,
+          parentId: dto.parentId,
+          titulo: dto.titulo,
+          contenidoJson: dto.contenidoJson,
+          orden,
+          bloqueado: false,
+        },
+      });
+    } catch (error) {
+      // Race condition: contenido o padre fue eliminado entre validación y create
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          // FK constraint violation - contenido o padre ya no existe
+          throw new NotFoundException(
+            `Contenido con ID ${contenidoId} no encontrado`,
+          );
+        }
+        if (error.code === 'P2025') {
+          throw new NotFoundException(
+            `Contenido con ID ${contenidoId} no encontrado`,
+          );
+        }
+      }
+      throw error;
+    }
   }
 
   /**
@@ -203,10 +221,21 @@ export class NodoService {
       );
     }
 
-    return this.prisma.nodoContenido.update({
-      where: { id: nodoId },
-      data: dto,
-    });
+    try {
+      return await this.prisma.nodoContenido.update({
+        where: { id: nodoId },
+        data: dto,
+      });
+    } catch (error) {
+      // Race condition: nodo fue eliminado entre findUnique y update
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(`Nodo con ID ${nodoId} no encontrado`);
+      }
+      throw error;
+    }
   }
 
   /**
