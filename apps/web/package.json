@@ -39,6 +39,7 @@
     "@livekit/components-react": "^2.9.17",
     "@lottiefiles/dotlottie-react": "^0.17.5",
     "@mateatletas/contracts": "workspace:^",
+    "@mateatletas/game-engine": "workspace:^",
     "@mateatletas/lesson-engine": "workspace:^",
     "@mateatletas/ui": "workspace:^",
     "@monaco-editor/react": "^4.7.0",

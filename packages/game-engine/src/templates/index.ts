@@ -16,3 +16,6 @@ export * from './memory';
 
 // Strategy games (planning, resources)
 export * from './strategy';
+
+// Test template (dev only)
+export * from './test';
