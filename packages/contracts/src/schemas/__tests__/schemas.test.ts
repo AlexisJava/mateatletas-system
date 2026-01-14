@@ -106,7 +106,7 @@ describe('Contracts Schemas', () => {
       const valid = {
         id: 'notif123',
         usuario_id: 'user123',
-        tipo: 'CLASE_PROGRAMADA',
+        tipo: 'ClaseProxima',
         titulo: 'Nueva clase programada',
         mensaje: 'Se programó una clase para mañana',
         leida: false,

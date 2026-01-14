@@ -158,7 +158,13 @@ export class AuthController {
   @ApiBody({ type: LoginDto })
   @Public()
   @Post('login')
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Throttle({
+    default: {
+      // Configurable via env: LOGIN_THROTTLE_LIMIT (default 5), LOGIN_THROTTLE_TTL (default 60000ms)
+      limit: parseInt(process.env.LOGIN_THROTTLE_LIMIT || '5', 10),
+      ttl: parseInt(process.env.LOGIN_THROTTLE_TTL || '60000', 10),
+    },
+  })
   @RequireCsrf() // ✅ Proteger login de CSRF (solo formularios web)
   @HttpCode(HttpStatus.OK)
   async login(
@@ -835,7 +841,7 @@ export class AuthController {
             id: 'jti-uuid',
             device: 'Windows',
             browser: 'Chrome',
-            ipAddress: '192.168.1.1',
+            ipAddress: 'client-ip-address',
             createdAt: '2025-01-15T10:00:00.000Z',
             lastUsedAt: '2025-01-15T12:30:00.000Z',
             isCurrent: true,
