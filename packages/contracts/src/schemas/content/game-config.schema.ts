@@ -103,3 +103,21 @@ export const shooterConfigSchema = z.object({
 });
 
 export type ShooterConfig = z.infer<typeof shooterConfigSchema>;
+
+// ============================================================================
+// Dodger Template Config
+// ============================================================================
+
+/** Schema completo para DodgerScene */
+export const dodgerConfigSchema = z.object({
+  /** Valores correctos (items a recolectar) */
+  correct: z.array(z.string()).min(1),
+  /** Valores incorrectos (obstáculos a esquivar) */
+  wrong: z.array(z.string()).min(1),
+  /** Velocidad de caída base */
+  fallSpeed: z.number().positive().default(200),
+  /** Tiempo entre spawns en ms */
+  spawnInterval: z.number().positive().default(800),
+});
+
+export type DodgerConfig = z.infer<typeof dodgerConfigSchema>;

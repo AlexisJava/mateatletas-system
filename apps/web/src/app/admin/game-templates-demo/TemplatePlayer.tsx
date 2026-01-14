@@ -120,9 +120,14 @@ function getDemoConfigForTemplate(template: string): {
     },
     dodger: {
       title: 'Esquiva Errores',
-      instruction: 'Esquiva los errores de sintaxis',
-      duration: 30,
-      templateConfig: {},
+      instruction: 'Esquiva errores de sintaxis, recolecta código válido',
+      duration: 45,
+      templateConfig: {
+        correct: ['const', 'let', 'function', 'return', 'if'],
+        wrong: ['cnost', 'lt', 'funcion', 'retrun', 'fi'],
+        fallSpeed: 180,
+        spawnInterval: 700,
+      },
     },
     runner: {
       title: 'Corre y Salta',

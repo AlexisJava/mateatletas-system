@@ -26,7 +26,7 @@ const TEMPLATE_CATALOG = {
         status: 'ready',
       },
       { id: 'shooter', name: 'Shooter', description: 'Disparar a targets', status: 'ready' },
-      { id: 'dodger', name: 'Dodger', description: 'Esquivar obstáculos', status: 'pending' },
+      { id: 'dodger', name: 'Dodger', description: 'Esquivar obstáculos', status: 'ready' },
       { id: 'runner', name: 'Runner', description: 'Endless runner', status: 'pending' },
       { id: 'breakout', name: 'Breakout', description: 'Romper bloques', status: 'pending' },
       { id: 'pong', name: 'Pong', description: 'Rebote de pelota', status: 'pending' },
