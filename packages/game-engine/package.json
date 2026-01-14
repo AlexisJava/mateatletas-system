@@ -25,7 +25,9 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@mateatletas/contracts": "workspace:*",
@@ -38,7 +40,8 @@
     "eslint": "^9.0.0",
     "react": "^19.0.0",
     "typescript": "^5.7.0",
-    "typescript-eslint": "^8.0.0"
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^2.0.0"
   },
   "peerDependencies": {
     "react": "^19.0.0"
