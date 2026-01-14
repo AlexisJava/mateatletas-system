@@ -121,3 +121,19 @@ export const dodgerConfigSchema = z.object({
 });
 
 export type DodgerConfig = z.infer<typeof dodgerConfigSchema>;
+
+// ============================================================================
+// Runner Template Config
+// ============================================================================
+
+/** Schema completo para RunnerScene */
+export const runnerConfigSchema = z.object({
+  /** Valores correctos (saltar sobre estos) */
+  correct: z.array(z.string()).min(1),
+  /** Valores incorrectos (evitar chocar) */
+  wrong: z.array(z.string()).min(1),
+  /** Tiempo entre spawns en ms */
+  spawnInterval: z.number().positive().default(2000),
+});
+
+export type RunnerConfig = z.infer<typeof runnerConfigSchema>;

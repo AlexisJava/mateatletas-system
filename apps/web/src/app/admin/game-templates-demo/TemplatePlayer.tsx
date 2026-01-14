@@ -131,8 +131,12 @@ function getDemoConfigForTemplate(template: string): {
     },
     runner: {
       title: 'Corre y Salta',
-      instruction: 'Salta solo en los múltiplos de 3',
-      templateConfig: {},
+      instruction: 'Salta sobre múltiplos de 3, evita los demás',
+      templateConfig: {
+        correct: ['3', '6', '9', '12', '15', '18'],
+        wrong: ['2', '4', '5', '7', '8', '10'],
+        spawnInterval: 1800,
+      },
     },
     breakout: {
       title: 'Rompe Bloques',
