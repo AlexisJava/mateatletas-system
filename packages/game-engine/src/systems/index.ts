@@ -1,3 +1,5 @@
 // Game Systems (input, audio, particles, scoring, etc.)
-// Implemented in FASE 4
-export {};
+
+export { InputSystem, type Direction } from './InputSystem';
+export { AudioSystem } from './AudioSystem';
+export { ParticleSystem } from './ParticleSystem';
