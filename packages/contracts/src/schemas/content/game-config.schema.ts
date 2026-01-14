@@ -85,3 +85,21 @@ export const whackAMoleConfigSchema = z.object({
 });
 
 export type WhackAMoleConfig = z.infer<typeof whackAMoleConfigSchema>;
+
+// ============================================================================
+// Shooter Template Config
+// ============================================================================
+
+/** Schema completo para ShooterScene */
+export const shooterConfigSchema = z.object({
+  /** Valores correctos que suman puntos */
+  correct: z.array(z.string()).min(1),
+  /** Valores incorrectos que restan vida */
+  wrong: z.array(z.string()).min(1),
+  /** Velocidad de los targets */
+  targetSpeed: z.number().positive().default(80),
+  /** Tiempo entre spawns en ms */
+  spawnInterval: z.number().positive().default(2000),
+});
+
+export type ShooterConfig = z.infer<typeof shooterConfigSchema>;

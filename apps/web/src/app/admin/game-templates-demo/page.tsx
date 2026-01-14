@@ -25,7 +25,7 @@ const TEMPLATE_CATALOG = {
         description: 'Atrapar objetos que caen',
         status: 'ready',
       },
-      { id: 'shooter', name: 'Shooter', description: 'Disparar a targets', status: 'pending' },
+      { id: 'shooter', name: 'Shooter', description: 'Disparar a targets', status: 'ready' },
       { id: 'dodger', name: 'Dodger', description: 'Esquivar obstáculos', status: 'pending' },
       { id: 'runner', name: 'Runner', description: 'Endless runner', status: 'pending' },
       { id: 'breakout', name: 'Breakout', description: 'Romper bloques', status: 'pending' },

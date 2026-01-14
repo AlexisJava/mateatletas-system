@@ -110,12 +110,12 @@ function getDemoConfigForTemplate(template: string): {
     shooter: {
       title: 'Dispara Primos',
       instruction: 'Dispara solo a los números primos',
-      duration: 45,
+      duration: 60,
       templateConfig: {
-        targets: {
-          correct: [2, 3, 5, 7, 11, 13],
-          wrong: [4, 6, 8, 9, 10, 12],
-        },
+        correct: ['2', '3', '5', '7', '11', '13'],
+        wrong: ['4', '6', '8', '9', '10', '12'],
+        targetSpeed: 100,
+        spawnInterval: 1800,
       },
     },
     dodger: {
