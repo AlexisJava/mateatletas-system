@@ -14,5 +14,40 @@ export const baseGameConfigSchema = z.object({
 
 export type BaseGameConfig = z.infer<typeof baseGameConfigSchema>;
 
-// Los schemas específicos de cada template (catcher, match3, etc.)
-// se implementan en FASE 4 cuando se construya game-engine
+// ============================================================================
+// Catcher Template Config
+// ============================================================================
+
+/** Configuración de velocidad de caída */
+const fallSpeedSchema = z.object({
+  min: z.number().positive().default(100),
+  max: z.number().positive().default(200),
+});
+
+/** Configuración de targets (objetos que caen) */
+const catcherTargetsSchema = z.object({
+  /** Valores correctos que suman puntos */
+  correct: z.array(z.string()).min(1),
+  /** Valores incorrectos que restan vida */
+  wrong: z.array(z.string()).min(1),
+  /** Velocidad de caída en pixels/segundo */
+  fallSpeed: fallSpeedSchema.default({}),
+  /** Tiempo entre spawns en milisegundos */
+  spawnRate: z.number().positive().default(1500),
+});
+
+/** Configuración del jugador (catcher) */
+const catcherPlayerSchema = z.object({
+  /** Velocidad de movimiento horizontal */
+  speed: z.number().positive().default(400),
+  /** Ancho del catcher en pixels */
+  width: z.number().positive().default(100),
+});
+
+/** Schema completo para CatcherScene */
+export const catcherConfigSchema = z.object({
+  targets: catcherTargetsSchema,
+  player: catcherPlayerSchema.default({}),
+});
+
+export type CatcherConfig = z.infer<typeof catcherConfigSchema>;
