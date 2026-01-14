@@ -166,6 +166,9 @@ import { MercadoPagoService } from './mercadopago.service';
     // Export new facade as main interface
     PagosManagementFacadeService,
 
+    // Export expiration service for admin module
+    PaymentExpirationService,
+
     // Export legacy services for backwards compatibility
     PagosService,
     MercadoPagoService,

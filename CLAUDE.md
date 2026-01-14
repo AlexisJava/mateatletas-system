@@ -27,6 +27,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - PROHIBIDO: Mocks de base de datos en tests de integración
 - PROHIBIDO: Modificar test para que pase (modificar el CÓDIGO, no el test)
+- PROHIBIDO: Ejecutar tests - EL USUARIO LOS EJECUTA (Claude tarda demasiado)
 - OBLIGATORIO: TDD - test primero, código después
 - OBLIGATORIO: Verificar funcionamiento real en browser/Postman
 - OBLIGATORIO: Leer `apps/api/test/TESTING.md` antes de escribir tests

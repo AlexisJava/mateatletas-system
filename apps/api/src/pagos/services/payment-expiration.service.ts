@@ -1,191 +1,260 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../../core/database/prisma.service';
 import { EstadoPago } from '@prisma/client';
+import {
+  FECHA_VENCIMIENTO_CON_RECARGO,
+  calcularEstadoPago,
+} from './helpers/calcular-fecha-vencimiento.helper';
 
 /**
- * Servicio de Expiración de Pagos Pendientes
+ * Servicio de Anulación Automática de Pagos
  *
- * PROPÓSITO:
- * Expirar automáticamente inscripciones que llevan más de 30 días
- * en estado PENDIENTE sin recibir pago.
- *
- * PROBLEMA QUE RESUELVE:
- * - Inscripciones "fantasma" que nunca se pagan pero ocupan cupo
- * - Usuarios que abandonan el checkout sin completar el pago
- * - Datos inconsistentes donde el estudiante aparece "inscrito" pero nunca pagó
- *
- * REGLA DE NEGOCIO:
- * - Inscripciones con estado_pago = PENDIENTE
- * - Creadas hace más de 30 días
- * - Se cambian a estado_pago = VENCIDO
+ * REGLA DE NEGOCIO (Club):
+ * - Día 1-9: Pago normal
+ * - Día 10-12: Pago con 15% de recargo
+ * - Día 13+: Se ANULA la inscripción (sin acceso)
  *
  * EJECUCIÓN:
- * - Cron job diario a las 3:00 AM (horario de baja actividad)
+ * - Cron job diario a las 00:05 del día 13 de cada mes
+ * - También se ejecuta diariamente para capturar periodos atrasados
  */
 @Injectable()
 export class PaymentExpirationService {
   private readonly logger = new Logger(PaymentExpirationService.name);
 
-  /**
-   * Días después de los cuales una inscripción pendiente expira
-   */
-  private readonly EXPIRATION_DAYS = 30;
-
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Cron job que se ejecuta diariamente a las 3:00 AM
-   * Busca y expira inscripciones pendientes antiguas
+   * Cron job que se ejecuta diariamente a las 00:05
+   * Busca inscripciones pendientes que pasaron el día 12 y las anula
    */
-  @Cron(CronExpression.EVERY_DAY_AT_3AM)
-  async expirePendingPayments(): Promise<void> {
+  @Cron('5 0 * * *') // Todos los días a las 00:05
+  async anularInscripcionesVencidas(): Promise<void> {
     this.logger.log(
-      '🕐 Iniciando proceso de expiración de pagos pendientes...',
+      '🕐 Iniciando proceso de anulación de inscripciones vencidas...',
     );
 
     const startTime = Date.now();
-    let totalExpired = 0;
 
     try {
-      // Calcular fecha límite (30 días atrás)
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - this.EXPIRATION_DAYS);
-
-      // Expirar InscripcionMensual pendientes
-      const inscripcionesMensualesExpired =
-        await this.expireInscripcionesMensuales(cutoffDate);
-      totalExpired += inscripcionesMensualesExpired;
+      const resultado = await this.procesarAnulaciones();
 
       const duration = Date.now() - startTime;
 
       this.logger.log(
-        `✅ Proceso de expiración completado en ${duration}ms. Total expirados: ${totalExpired}`,
+        `✅ Proceso completado en ${duration}ms. Anuladas: ${resultado.anuladas}`,
       );
 
-      // Log detallado si hubo expiraciones
-      if (totalExpired > 0) {
+      if (resultado.anuladas > 0) {
         this.logger.warn(
-          `⚠️ Se expiraron ${totalExpired} registros pendientes (>30 días sin pago)`,
+          `⚠️ Se anularon ${resultado.anuladas} inscripciones por falta de pago`,
         );
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`❌ Error en proceso de expiración: ${message}`);
+      this.logger.error(`❌ Error en proceso de anulación: ${message}`);
       throw error;
     }
   }
 
   /**
-   * Expira inscripciones mensuales pendientes
-   *
-   * @param cutoffDate - Fecha límite (inscripciones creadas antes de esta fecha expiran)
-   * @returns Número de registros actualizados
+   * Procesa las anulaciones de inscripciones que pasaron el día 12
    */
-  private async expireInscripcionesMensuales(
-    cutoffDate: Date,
-  ): Promise<number> {
+  private async procesarAnulaciones(): Promise<{ anuladas: number }> {
+    const hoy = new Date();
+    const diaActual = hoy.getDate();
+
+    // Solo procesar si estamos después del día 12
+    if (diaActual <= FECHA_VENCIMIENTO_CON_RECARGO) {
+      this.logger.log(
+        `📅 Día ${diaActual}: aún no es fecha de anulación (día 13+)`,
+      );
+      return { anuladas: 0 };
+    }
+
+    // Buscar inscripciones pendientes del periodo actual y anteriores
+    const periodoActual = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
+
+    const inscripcionesPendientes =
+      await this.prisma.inscripcionMensual.findMany({
+        where: {
+          estado_pago: {
+            in: [EstadoPago.Pendiente, EstadoPago.Parcial],
+          },
+          periodo: {
+            lte: periodoActual,
+          },
+        },
+        select: {
+          id: true,
+          periodo: true,
+          precio_final: true,
+        },
+      });
+
+    // Filtrar las que ya pasaron el día 12
+    const inscripcionesAAnular = inscripcionesPendientes.filter(
+      (inscripcion) => {
+        const estadoPago = calcularEstadoPago(
+          inscripcion.periodo,
+          Number(inscripcion.precio_final),
+          hoy,
+        );
+        return estadoPago.estado === 'ANULABLE';
+      },
+    );
+
+    if (inscripcionesAAnular.length === 0) {
+      return { anuladas: 0 };
+    }
+
+    // Anular las inscripciones
+    const idsAAnular = inscripcionesAAnular.map((i) => i.id);
+
     const result = await this.prisma.inscripcionMensual.updateMany({
       where: {
-        estado_pago: EstadoPago.Pendiente,
-        createdAt: {
-          lt: cutoffDate,
-        },
+        id: { in: idsAAnular },
       },
       data: {
-        estado_pago: EstadoPago.Vencido,
+        estado_pago: EstadoPago.Anulado,
       },
     });
 
-    if (result.count > 0) {
-      this.logger.log(`📋 InscripcionesMensuales expiradas: ${result.count}`);
-    }
+    this.logger.log(
+      `📋 Inscripciones anuladas: ${result.count} (periodos: ${inscripcionesAAnular.map((i) => i.periodo).join(', ')})`,
+    );
 
-    return result.count;
+    return { anuladas: result.count };
   }
 
   /**
-   * Método para ejecución manual (útil para testing o triggers manuales)
-   *
-   * @returns Estadísticas del proceso
+   * Método para ejecución manual (útil para testing y admin)
+   * Procesa TODOS los periodos (actual y anteriores) que tengan vencimientos
    */
   async runManually(): Promise<{
-    inscripcionesMensuales: number;
-    total: number;
+    anuladas: number;
+    conRecargo: number;
+    vigentes: number;
   }> {
-    this.logger.log('🔧 Ejecutando expiración manual...');
+    this.logger.log('🔧 Ejecutando anulación manual...');
 
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - this.EXPIRATION_DAYS);
+    const hoy = new Date();
+    const periodoActual = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
 
-    const inscripcionesMensuales =
-      await this.expireInscripcionesMensuales(cutoffDate);
+    // Obtener TODAS las pendientes del periodo actual Y anteriores
+    const inscripcionesPendientes =
+      await this.prisma.inscripcionMensual.findMany({
+        where: {
+          estado_pago: {
+            in: [EstadoPago.Pendiente, EstadoPago.Parcial],
+          },
+          periodo: {
+            lte: periodoActual, // Incluye periodos anteriores
+          },
+        },
+        select: {
+          id: true,
+          periodo: true,
+          precio_final: true,
+        },
+      });
+
+    let vigentes = 0;
+    let conRecargo = 0;
+    const idsAAnular: string[] = [];
+
+    for (const inscripcion of inscripcionesPendientes) {
+      const estadoPago = calcularEstadoPago(
+        inscripcion.periodo,
+        Number(inscripcion.precio_final),
+        hoy,
+      );
+
+      switch (estadoPago.estado) {
+        case 'VIGENTE':
+          vigentes++;
+          break;
+        case 'CON_RECARGO':
+          conRecargo++;
+          break;
+        case 'ANULABLE':
+          idsAAnular.push(inscripcion.id);
+          break;
+      }
+    }
+
+    // Anular las que correspondan
+    if (idsAAnular.length > 0) {
+      await this.prisma.inscripcionMensual.updateMany({
+        where: { id: { in: idsAAnular } },
+        data: { estado_pago: EstadoPago.Anulado },
+      });
+    }
 
     return {
-      inscripcionesMensuales,
-      total: inscripcionesMensuales,
+      anuladas: idsAAnular.length,
+      conRecargo,
+      vigentes,
     };
   }
 
   /**
-   * Obtiene estadísticas de inscripciones pendientes próximas a expirar
-   *
-   * Útil para dashboards de administración
-   *
-   * @returns Conteo de inscripciones por días restantes
+   * Obtiene estadísticas de inscripciones pendientes del periodo actual
    */
   async getPendingStats(): Promise<{
-    expireIn7Days: number;
-    expireIn14Days: number;
-    expireIn30Days: number;
-    alreadyExpirable: number;
+    vigentes: number;
+    conRecargo: number;
+    anulables: number;
+    total: number;
   }> {
-    const now = new Date();
-    const cutoff30 = new Date(now);
-    cutoff30.setDate(cutoff30.getDate() - this.EXPIRATION_DAYS);
+    const hoy = new Date();
+    const periodoActual = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
 
-    const cutoff23 = new Date(now);
-    cutoff23.setDate(cutoff23.getDate() - (this.EXPIRATION_DAYS - 7));
+    const inscripcionesPendientes =
+      await this.prisma.inscripcionMensual.findMany({
+        where: {
+          estado_pago: {
+            in: [EstadoPago.Pendiente, EstadoPago.Parcial],
+          },
+          periodo: periodoActual,
+        },
+        select: {
+          id: true,
+          periodo: true,
+          precio_final: true,
+        },
+      });
 
-    const cutoff16 = new Date(now);
-    cutoff16.setDate(cutoff16.getDate() - (this.EXPIRATION_DAYS - 14));
+    let vigentes = 0;
+    let conRecargo = 0;
+    let anulables = 0;
 
-    const [alreadyExpirable, expireIn7Days, expireIn14Days, total] =
-      await Promise.all([
-        // Ya expirables (>30 días)
-        this.prisma.inscripcionMensual.count({
-          where: {
-            estado_pago: EstadoPago.Pendiente,
-            createdAt: { lt: cutoff30 },
-          },
-        }),
-        // Expiran en 7 días (23-30 días)
-        this.prisma.inscripcionMensual.count({
-          where: {
-            estado_pago: EstadoPago.Pendiente,
-            createdAt: { gte: cutoff30, lt: cutoff23 },
-          },
-        }),
-        // Expiran en 14 días (16-23 días)
-        this.prisma.inscripcionMensual.count({
-          where: {
-            estado_pago: EstadoPago.Pendiente,
-            createdAt: { gte: cutoff23, lt: cutoff16 },
-          },
-        }),
-        // Total pendientes
-        this.prisma.inscripcionMensual.count({
-          where: {
-            estado_pago: EstadoPago.Pendiente,
-          },
-        }),
-      ]);
+    for (const inscripcion of inscripcionesPendientes) {
+      const estadoPago = calcularEstadoPago(
+        inscripcion.periodo,
+        Number(inscripcion.precio_final),
+        hoy,
+      );
+
+      switch (estadoPago.estado) {
+        case 'VIGENTE':
+          vigentes++;
+          break;
+        case 'CON_RECARGO':
+          conRecargo++;
+          break;
+        case 'ANULABLE':
+          anulables++;
+          break;
+      }
+    }
 
     return {
-      expireIn7Days,
-      expireIn14Days,
-      expireIn30Days: total - alreadyExpirable - expireIn7Days - expireIn14Days,
-      alreadyExpirable,
+      vigentes,
+      conRecargo,
+      anulables,
+      total: inscripcionesPendientes.length,
     };
   }
 }

@@ -65,6 +65,7 @@ import {
   ActualizarGrupoPedagogicoDto,
 } from './services/grupo-pedagogico.service';
 import { CasaTipo, MundoTipo } from '@prisma/client';
+import { PaymentExpirationService } from '../pagos/services/payment-expiration.service';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -79,6 +80,7 @@ export class AdminController {
     private readonly estudiantesService: AdminEstudiantesService,
     private readonly docenteAsignacionesService: DocenteAsignacionesService,
     private readonly grupoPedagogicoService: GrupoPedagogicoService,
+    private readonly paymentExpirationService: PaymentExpirationService,
   ) {}
 
   /**
@@ -1321,5 +1323,46 @@ export class AdminController {
       );
     }
     return this.adminService.registrarPagoManual(dto);
+  }
+
+  /**
+   * Ejecutar proceso de anulación de inscripciones vencidas
+   * POST /api/admin/pagos/anular-vencidas
+   * Rol: Admin
+   *
+   * Ejecuta manualmente el proceso de anulación de inscripciones
+   * que superaron el día 12 del mes sin pagar.
+   *
+   * REGLA DE NEGOCIO:
+   * - Día 1-9: Pago normal
+   * - Día 10-12: Pago con 15% recargo
+   * - Día 13+: Se anula inscripción
+   */
+  @Post('pagos/anular-vencidas')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Anular inscripciones vencidas',
+    description:
+      'Ejecuta manualmente el proceso de anulación de inscripciones vencidas (día 13+)',
+  })
+  async anularInscripcionesVencidas() {
+    return this.paymentExpirationService.runManually();
+  }
+
+  /**
+   * Obtener estadísticas de inscripciones pendientes
+   * GET /api/admin/pagos/stats-pendientes
+   * Rol: Admin
+   *
+   * Retorna cantidad de inscripciones por estado de vencimiento
+   */
+  @Get('pagos/stats-pendientes')
+  @ApiOperation({
+    summary: 'Estadísticas de pendientes por estado',
+    description:
+      'Retorna cantidad de inscripciones vigentes, con recargo y anulables',
+  })
+  async getStatsPendientes() {
+    return this.paymentExpirationService.getPendingStats();
   }
 }
