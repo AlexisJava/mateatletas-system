@@ -451,17 +451,24 @@ export class AccesoEstudianteService {
         nombre: string;
         fecha_inicio: Date | null;
         fecha_fin: Date | null;
+        modalidad: 'SINCRONICO' | 'ASINCRONICO';
       };
     }>,
   ): ResultadoAccesoEstudiante {
     const primeraComision = comisionesActivas[0];
+
+    // Verificar si alguna comisión es SINCRONICO para dar acceso a clases en vivo
+    const tieneComisionSincronica = comisionesActivas.some(
+      (ic) => ic.comision.modalidad === 'SINCRONICO',
+    );
+
     return {
       puedeAcceder: true,
       motivo: 'COMISION_ACTIVA',
       permisos: {
         accesoLibros: true,
-        accesoPlanificaciones: true, // Comisiones dan acceso a planificaciones
-        accesoClasesVivo: true, // Comisiones dan acceso a clases en vivo
+        accesoPlanificaciones: true, // Comisiones siempre dan acceso a planificaciones
+        accesoClasesVivo: tieneComisionSincronica, // Solo si tiene comisión SINCRONICO
       },
       detalles: {
         comisionesActivas: comisionesActivas.map((ic) => ({
@@ -469,6 +476,7 @@ export class AccesoEstudianteService {
           nombre: ic.comision.nombre,
           fechaInicio: ic.comision.fecha_inicio,
           fechaFin: ic.comision.fecha_fin,
+          modalidad: ic.comision.modalidad,
         })),
       },
       mensaje: `Acceso por comisión activa: ${primeraComision?.comision.nombre ?? 'Sin nombre'}`,

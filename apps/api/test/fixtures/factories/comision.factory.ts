@@ -7,7 +7,11 @@
  */
 
 import { PrismaService } from '../../../src/core/database/prisma.service';
-import { TipoProducto, EstadoInscripcionComision } from '@prisma/client';
+import {
+  TipoProducto,
+  EstadoInscripcionComision,
+  TipoAccesoInscripcion,
+} from '@prisma/client';
 
 // ============================================================================
 // HELPERS
@@ -66,6 +70,7 @@ export interface CreateComisionOptions {
   fechaFin?: Date;
   cupoMaximo?: number;
   activo?: boolean;
+  modalidad?: TipoAccesoInscripcion;
 }
 
 /**
@@ -88,6 +93,7 @@ export async function createTestComision(
       fecha_fin: options.fechaFin,
       cupo_maximo: options.cupoMaximo,
       activo: options.activo ?? true,
+      modalidad: options.modalidad ?? TipoAccesoInscripcion.SINCRONICO,
     },
   });
 }
