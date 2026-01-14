@@ -145,10 +145,15 @@ function getDemoConfigForTemplate(template: string): {
       templateConfig: {},
     },
     whackamole: {
-      title: 'Golpea Respuestas',
-      instruction: 'Golpea la respuesta correcta',
-      duration: 30,
-      templateConfig: {},
+      title: 'Golpea Múltiplos',
+      instruction: 'Golpea solo los múltiplos de 5',
+      duration: 45,
+      templateConfig: {
+        correct: ['5', '10', '15', '20', '25', '30'],
+        wrong: ['3', '7', '11', '13', '17', '23'],
+        grid: { cols: 3, rows: 3 },
+        timing: { spawnInterval: 1200, showTime: 2000 },
+      },
     },
 
     // Puzzle

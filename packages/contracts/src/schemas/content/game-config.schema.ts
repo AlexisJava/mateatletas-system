@@ -51,3 +51,37 @@ export const catcherConfigSchema = z.object({
 });
 
 export type CatcherConfig = z.infer<typeof catcherConfigSchema>;
+
+// ============================================================================
+// WhackAMole Template Config
+// ============================================================================
+
+/** Configuración del grid de agujeros */
+const whackGridSchema = z.object({
+  /** Número de columnas */
+  cols: z.number().int().min(2).max(5).default(3),
+  /** Número de filas */
+  rows: z.number().int().min(2).max(4).default(3),
+});
+
+/** Configuración de timing */
+const whackTimingSchema = z.object({
+  /** Tiempo que el mole está visible en ms */
+  showTime: z.number().positive().default(1500),
+  /** Tiempo entre apariciones en ms */
+  spawnInterval: z.number().positive().default(1000),
+});
+
+/** Schema completo para WhackAMoleScene */
+export const whackAMoleConfigSchema = z.object({
+  /** Valores correctos que suman puntos */
+  correct: z.array(z.string()).min(1),
+  /** Valores incorrectos que restan vida */
+  wrong: z.array(z.string()).min(1),
+  /** Configuración del grid */
+  grid: whackGridSchema.default({}),
+  /** Configuración de timing */
+  timing: whackTimingSchema.default({}),
+});
+
+export type WhackAMoleConfig = z.infer<typeof whackAMoleConfigSchema>;

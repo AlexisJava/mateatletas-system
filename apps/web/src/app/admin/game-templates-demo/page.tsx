@@ -31,7 +31,7 @@ const TEMPLATE_CATALOG = {
       { id: 'breakout', name: 'Breakout', description: 'Romper bloques', status: 'pending' },
       { id: 'pong', name: 'Pong', description: 'Rebote de pelota', status: 'pending' },
       { id: 'snake', name: 'Snake', description: 'Serpiente', status: 'pending' },
-      { id: 'whackamole', name: 'Whack-a-Mole', description: 'Golpear targets', status: 'pending' },
+      { id: 'whackamole', name: 'Whack-a-Mole', description: 'Golpear targets', status: 'ready' },
     ],
   },
   puzzle: {
