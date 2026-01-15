@@ -35,6 +35,7 @@ import {
 } from './dto/password-reset.dto';
 import { CompleteMfaLoginDto } from './mfa/dto/complete-mfa-login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { TokenService } from './services/token.service';
@@ -350,7 +351,7 @@ export class AuthController {
   })
   @ApiBearerAuth('JWT-auth')
   @Get('profile')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, TokenBlacklistGuard)
   @HttpCode(HttpStatus.OK)
   async getProfile(@GetUser() user: AuthUser) {
     // Usar roles[0] como fallback si role está undefined (multi-role scenario)

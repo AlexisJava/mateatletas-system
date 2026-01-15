@@ -107,26 +107,34 @@ export class TokenBlacklistGuard implements CanActivate {
   }
 
   /**
-   * Extrae el token JWT del header Authorization
+   * Extrae el token JWT del header Authorization o de las cookies
    *
-   * Formato esperado: "Bearer <token>"
+   * Formato esperado header: "Bearer <token>"
+   * Formato esperado cookie: "auth-token=<token>"
    *
    * @param request - Request de Express
-   * @returns El token JWT sin el prefijo "Bearer ", o null si no existe
+   * @returns El token JWT, o null si no existe
    */
   private extractTokenFromHeader(request: Request): string | null {
+    // 1. Intentar extraer del header Authorization
     const authHeader = request.headers.authorization;
 
-    if (!authHeader) {
-      return null;
+    if (authHeader) {
+      const [type, token] = authHeader.split(' ');
+
+      if (type === 'Bearer' && token) {
+        return token;
+      }
     }
 
-    const [type, token] = authHeader.split(' ');
+    // 2. Intentar extraer de las cookies
+    const cookies = request.cookies as Record<string, string | undefined>;
+    const cookieToken = cookies?.['auth-token'];
 
-    if (type !== 'Bearer' || !token) {
-      return null;
+    if (cookieToken) {
+      return cookieToken;
     }
 
-    return token;
+    return null;
   }
 }

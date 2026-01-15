@@ -137,8 +137,8 @@ export async function createEstudianteConClaseGrupo(
   const { docente, password: docentePassword } =
     await createTestDocente(prisma);
 
-  // Crear sector y ClaseGrupo
-  const sector = await createTestSector(prisma, { nombre: 'Matemática' });
+  // Crear sector y ClaseGrupo (sin nombre fijo para evitar unique constraint)
+  const sector = await createTestSector(prisma);
   const claseGrupo = await createTestClaseGrupo(prisma, {
     docenteId: docente.id,
     sectorId: sector.id,

@@ -7,6 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
 import { PrismaService } from '../../core/database/prisma.service';
+import { EstadoInscripcionComision } from '@prisma/client';
 
 interface TokenRequest {
   claseGrupoId?: string;
@@ -236,7 +237,7 @@ export class LivekitTokenService {
       where: {
         comision_id: comisionId,
         estudiante_id: estudianteId,
-        estado: 'Confirmada',
+        estado: EstadoInscripcionComision.Confirmada,
       },
     });
 

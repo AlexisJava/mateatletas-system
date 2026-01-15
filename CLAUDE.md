@@ -41,6 +41,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - OBLIGATORIO: Seguir instrucciones AL PIE DE LA LETRA
 - OBLIGATORIO: Si hay ambigüedad, PREGUNTAR antes de asumir
 
+### Cambios en Lógica de Negocio
+
+- PROHIBIDO: Modificar lógica de negocio sin autorización explícita del usuario
+- OBLIGATORIO: Antes de tocar código que afecta comportamiento del sistema:
+  1. Explicar en español criollo qué se quiere hacer y por qué
+  2. Esperar el OK del usuario antes de hacer cualquier cambio
+- Esto aplica a: validaciones, permisos, flujos de autenticación, reglas de negocio, etc.
+
 ### Prisma / Base de Datos
 
 - PROHIBIDO: `prisma db push` (causa drift y desincronización)
