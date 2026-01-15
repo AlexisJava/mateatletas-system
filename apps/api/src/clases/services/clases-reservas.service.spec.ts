@@ -6,10 +6,18 @@ import {
 } from '@nestjs/common';
 import { ClasesReservasService } from './clases-reservas.service';
 import { PrismaService } from '../../core/database/prisma.service';
-import { LogrosService } from '../../gamificacion/services/logros.service';
 
-// SKIP: Tests pendientes de actualización - necesita mock de LogrosService actualizado
-describe.skip('ClasesReservasService', () => {
+/**
+ * ClasesReservasService - Tests TDD
+ *
+ * Gestión de reservas de clases por tutores para sus estudiantes.
+ * Reglas de negocio:
+ * - Tutor solo puede reservar para sus propios estudiantes
+ * - No se puede reservar clase cancelada, pasada o llena
+ * - No se puede reservar si ya está inscrito
+ * - Cancelación solo permitida antes del inicio de la clase
+ */
+describe('ClasesReservasService', () => {
   let service: ClasesReservasService;
   let prisma: PrismaService;
 

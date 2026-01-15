@@ -18,8 +18,7 @@ import { CasaTipo } from '@prisma/client';
  * - PULSAR solo puede bajar a VERTEX (nunca a QUANTUM)
  * - Competencia es INTERNA por casa
  */
-// SKIP: Tests pendientes de actualización - RecursosEstudiante refactor
-describe.skip('CasasService', () => {
+describe('CasasService', () => {
   let service: CasasService;
   let prisma: PrismaService;
 
@@ -249,12 +248,25 @@ describe.skip('CasasService', () => {
 
   describe('findOne', () => {
     it('should_return_casa_by_id', async () => {
-      const casaQuantum = mockCasas[0];
-      mockPrismaService.casa.findUnique.mockResolvedValue(casaQuantum);
+      const casaQuantumConEstudiantes = {
+        ...mockCasas[0],
+        estudiantes: [
+          {
+            id: 'est-1',
+            nombre: 'Juan',
+            apellido: 'Pérez',
+            recursos: { xp_total: 100, nivel: 2 },
+          },
+        ],
+      };
+      mockPrismaService.casa.findUnique.mockResolvedValue(
+        casaQuantumConEstudiantes,
+      );
 
       const resultado = await service.findOne('casa-quantum-id');
 
-      expect(resultado).toEqual(casaQuantum);
+      expect(resultado.id).toBe('casa-quantum-id');
+      expect(resultado.estudiantes).toHaveLength(1);
       expect(mockPrismaService.casa.findUnique).toHaveBeenCalledWith({
         where: { id: 'casa-quantum-id' },
         include: expect.any(Object),

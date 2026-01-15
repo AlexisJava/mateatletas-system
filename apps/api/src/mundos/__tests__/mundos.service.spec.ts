@@ -17,8 +17,7 @@ import { MundoTipo } from '@prisma/client';
  * - STEAM_ASINCRONICO: acceso a todos los mundos + clases grabadas
  * - STEAM_SINCRONICO: acceso a todos los mundos + clases en vivo
  */
-// SKIP: Tests pendientes de actualización - RecursosEstudiante refactor
-describe.skip('MundosService', () => {
+describe('MundosService', () => {
   let service: MundosService;
 
   const mockMundos = [

@@ -25,7 +25,7 @@ import { EstadoAsistencia } from '@prisma/client';
  * - Service orchestration (multiple service calls)
  * - Nivel calculations (progress percentage, points to next level)
  */
-// SKIP: Tests pendientes de actualización - RecursosService.obtenerRecursosConNivel necesita mock
+// SKIP: Tests requieren reescritura - getNivelInfo, getAccionesPuntuables ya no existen, nivelConfig removido de Prisma
 describe.skip('GamificacionService', () => {
   let service: GamificacionService;
   let prisma: PrismaService;
@@ -213,6 +213,20 @@ describe.skip('GamificacionService', () => {
             getRecursosEstudiante: jest.fn(),
             crearRecursosEstudiante: jest.fn(),
             actualizarXP: jest.fn(),
+            obtenerRecursosConNivel: jest.fn().mockResolvedValue({
+              xp_total: 350,
+              nivel_actual: 2,
+              monedas: 100,
+              gemas: 10,
+              vidas: 5,
+              nivelInfo: {
+                nivel: 2,
+                nombre: 'Aprendiz',
+                xpActual: 350,
+                xpSiguienteNivel: 500,
+                progresoPorcentaje: 70,
+              },
+            }),
             xpParaNivel: jest.fn().mockImplementation((nivel: number) => {
               // Simulación de XP por nivel: nivel 1 = 0, nivel 2 = 500, nivel 3 = 1000, etc.
               return (nivel - 1) * 500;
