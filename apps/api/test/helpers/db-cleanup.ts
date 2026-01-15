@@ -102,6 +102,10 @@ export async function cleanAllTestTables(prisma: PrismaService) {
   // Inscripciones Mensuales (tienen FK a producto, tutor, estudiante)
   await prisma.inscripcionMensual.deleteMany({});
 
+  // Webhooks (DLQ y procesados)
+  await prisma.webhookFailed.deleteMany({});
+  await prisma.webhookProcessed.deleteMany({});
+
   // Productos y Planes
   await prisma.producto.deleteMany({});
   await prisma.planSuscripcion.deleteMany({});
