@@ -12,11 +12,11 @@ Análisis de cobertura de tests de integración para lanzamiento a producción.
 | Categoría                       | Tests | Estado                      |
 | ------------------------------- | ----- | --------------------------- |
 | `/integration/flows/`           | 6     | FUNCIONAN                   |
-| `/integration/pagos/`           | 4     | FUNCIONAN                   |
+| `/integration/pagos/`           | 7     | FUNCIONAN                   |
 | `/integration/portal-specific/` | 53    | FUNCIONAN                   |
 | `/integration/services/`        | 7     | REPARADOS (commit 8b17f366) |
 
-**Total:** ~120 tests de integración operativos (morosidad 26, suscripciones 28, estados 18 + existentes).
+**Total:** ~170 tests de integración operativos (morosidad 26, suscripciones 28, estados 18, descuentos 22, multiples-hijos 15, concurrencia 15 + existentes).
 
 ---
 
