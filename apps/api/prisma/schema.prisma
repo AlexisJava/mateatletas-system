@@ -3321,3 +3321,66 @@ model SeguimientoObservacion {
   @@index([autor_id])
   @@map("seguimientos_observacion")
 }
+
+// =============================================================================
+// DEAD LETTER QUEUE - WEBHOOKS FALLIDOS
+// Sprint 1: DLQ + Async Processing (Enero 2026)
+// =============================================================================
+
+/// Estado de webhooks en Dead Letter Queue
+enum DLQStatus {
+  PENDING    /// Esperando ser procesado manualmente
+  PROCESSING /// En proceso de reprocesamiento
+  RESOLVED   /// Resuelto exitosamente
+  ABANDONED  /// Marcado como abandonado (no se puede procesar)
+
+  @@map("dlq_status")
+}
+
+/// Dead Letter Queue para webhooks de pago que fallaron múltiples veces
+/// Permite a administradores ver, debuggear y reprocesar webhooks fallidos
+model WebhookFailed {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID del pago de MercadoPago
+  payment_id String
+
+  /// Tipo de webhook (payment, subscription, etc.)
+  webhook_type String
+
+  /// Payload completo del webhook (para reprocesamiento)
+  payload Json
+
+  /// Mensaje de error del último intento
+  error_message String
+
+  /// Stack trace del error (debugging)
+  error_stack String?
+
+  /// Número de reintentos realizados antes de ir a DLQ
+  retries Int @default(0)
+
+  /// Estado en la DLQ
+  status DLQStatus @default(PENDING)
+
+  /// Fecha del último reintento
+  last_retry_at DateTime?
+
+  /// Fecha de resolución (si fue resuelto)
+  resolved_at DateTime?
+
+  /// Admin que resolvió (ID)
+  resolved_by String?
+
+  /// Notas de resolución
+  resolution_notes String?
+
+  /// Timestamps
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([status, created_at])
+  @@index([payment_id])
+  @@map("webhook_failed")
+}

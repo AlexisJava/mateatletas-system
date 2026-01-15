@@ -10,12 +10,16 @@ import {
   UseGuards,
   NotFoundException,
   Headers,
+  Req,
+  Logger,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { ParseIdPipe } from '../../../common/pipes';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PagosService } from '../services/pagos.service';
 import { VerificacionMorosidadService } from '../../services/verificacion-morosidad.service';
 import { PagosManagementFacadeService } from '../../services/pagos-management-facade.service';
+import { WebhookPaymentQueueService } from '../../services/webhook-payment-queue.service';
 import { CalcularPrecioRequestDto } from '../dtos/calcular-precio-request.dto';
 import { ActualizarConfiguracionPreciosRequestDto } from '../dtos/actualizar-configuracion-precios-request.dto';
 import { CrearInscripcionMensualRequestDto } from '../dtos/crear-inscripcion-mensual-request.dto';
@@ -44,10 +48,13 @@ import { Public } from '../../../auth/decorators/public.decorator';
 @ApiTags('Pagos')
 @Controller('pagos')
 export class PagosController {
+  private readonly logger = new Logger(PagosController.name);
+
   constructor(
     private readonly pagosService: PagosService,
     private readonly verificacionMorosidadService: VerificacionMorosidadService,
     private readonly pagosFacade: PagosManagementFacadeService,
+    private readonly webhookQueueService: WebhookPaymentQueueService,
   ) {}
 
   /**
@@ -282,28 +289,35 @@ export class PagosController {
 
   /**
    * POST /pagos/webhook
-   * Webhook de MercadoPago para notificaciones de pago
+   * Webhook de MercadoPago para notificaciones de pago (ASYNC)
    *
    * IMPORTANTE:
    * - Este endpoint es llamado automáticamente por MercadoPago cuando hay cambios en pagos
    * - Está protegido con MercadoPagoWebhookGuard que valida la firma HMAC
-   * - Procesa automáticamente membresías y cursos pagados
+   * - Encola el webhook para procesamiento async (respuesta rápida <100ms)
    * - NO requiere autenticación JWT (es un webhook externo)
+   *
+   * SPRINT 1 - MEJORAS:
+   * - Async Processing: Encola en BullMQ, responde 200 OK inmediatamente
+   * - Dead Letter Queue: Webhooks fallidos se guardan para reprocesamiento
+   * - Secret Rotation: Soporta múltiples secrets durante rotación
    */
   @Public()
   @Post('webhook')
   @UseGuards(MercadoPagoWebhookGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Webhook de MercadoPago',
+    summary: 'Webhook de MercadoPago (Async)',
     description: `
       Recibe notificaciones de MercadoPago sobre cambios en pagos.
 
-      Flujo:
+      Flujo ASYNC (Sprint 1):
       1. MercadoPago envía notificación cuando hay un cambio (pago aprobado, rechazado, etc.)
-      2. Guard valida firma HMAC para seguridad
-      3. Service consulta detalles del pago a MercadoPago
-      4. Se actualiza el estado de membresía o inscripción en la DB
+      2. Guard valida firma HMAC (soporta rotación de secrets)
+      3. Webhook se encola en BullMQ para procesamiento en background
+      4. Responde 200 OK inmediatamente (<100ms)
+      5. Worker procesa el webhook async con reintentos automáticos
+      6. Si falla 5 veces, se mueve a Dead Letter Queue para revisión manual
 
       Casos manejados:
       - payment.created, payment.updated → Procesa pago
@@ -313,12 +327,14 @@ export class PagosController {
 
       Security:
       - Validación de firma HMAC con secret de MercadoPago
-      - Solo acepta notificaciones auténticas de MercadoPago
+      - Soporta múltiples secrets para rotación segura
+      - IP Whitelisting de MercadoPago
+      - Solo acepta notificaciones auténticas
     `,
   })
   @ApiResponse({
     status: 200,
-    description: 'Webhook procesado exitosamente',
+    description: 'Webhook encolado exitosamente',
   })
   @ApiResponse({
     status: 401,
@@ -332,8 +348,38 @@ export class PagosController {
     @Body() webhookData: MercadoPagoWebhookDto,
     @Headers('x-signature') _signature: string,
     @Headers('x-request-id') _requestId: string,
+    @Req() req: Request,
   ) {
-    return await this.pagosFacade.procesarWebhookMercadoPago(webhookData);
+    // Extraer IP del cliente para logging/debugging
+    const clientIp =
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      req.socket.remoteAddress ||
+      'unknown';
+
+    // Encolar webhook para procesamiento async
+    const result = await this.webhookQueueService.enqueueWebhook(
+      webhookData,
+      clientIp,
+    );
+
+    if (!result.success) {
+      // Si falla el encolado, intentar procesar sincrónicamente como fallback
+      this.logger.warn(`⚠️ Fallback a procesamiento síncrono: ${result.error}`);
+      return await this.pagosFacade.procesarWebhookMercadoPago(webhookData);
+    }
+
+    // Responder inmediatamente (MercadoPago no reintentará)
+    this.logger.log(
+      `✅ Webhook encolado: correlationId=${result.correlationId}, ` +
+        `jobId=${result.jobId}, paymentId=${webhookData.data.id}`,
+    );
+
+    return {
+      received: true,
+      action: 'queued',
+      correlationId: result.correlationId,
+      jobId: result.jobId,
+    };
   }
 
   /**

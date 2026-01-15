@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { BullModule } from '@nestjs/bullmq';
 import { DatabaseModule } from '../core/database/database.module';
 import { CatalogoModule } from '../catalogo/catalogo.module';
 import { PagosController } from './presentation/controllers/pagos.controller';
@@ -19,6 +21,12 @@ import { WebhookIdempotencyService } from './services/webhook-idempotency.servic
 import { PaymentAmountValidatorService } from './services/payment-amount-validator.service';
 import { MercadoPagoIpWhitelistService } from './services/mercadopago-ip-whitelist.service';
 import { MercadoPagoWebhookGuard } from './guards/mercadopago-webhook.guard';
+
+// Async Webhook Processing (Sprint 1 - DLQ + BullMQ)
+import { WebhookDLQService } from './services/webhook-dlq.service';
+import { WebhookPaymentQueueService } from './services/webhook-payment-queue.service';
+import { WebhookPaymentProcessor } from './jobs/webhook-payment.processor';
+import { WEBHOOK_PAYMENT_QUEUE } from './jobs/webhook-payment.queue';
 
 // Use Cases
 import { CalcularPrecioUseCase } from './application/use-cases/calcular-precio.use-case';
@@ -57,7 +65,29 @@ import { MercadoPagoService } from './mercadopago.service';
  *  - Interfaces: Contratos para repositorios
  */
 @Module({
-  imports: [DatabaseModule, CatalogoModule],
+  imports: [
+    DatabaseModule,
+    CatalogoModule,
+    ConfigModule,
+
+    // === BullMQ Configuration (Async Webhook Processing) ===
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('REDIS_HOST', 'localhost'),
+          port: configService.get<number>('REDIS_PORT', 6379),
+          password: configService.get<string>('REDIS_PASSWORD'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
+
+    // Registrar cola de webhooks de pago
+    BullModule.registerQueue({
+      name: WEBHOOK_PAYMENT_QUEUE,
+    }),
+  ],
   controllers: [PagosController],
   providers: [
     // === SECURITY SERVICES (CRITICAL) ===
@@ -72,6 +102,16 @@ import { MercadoPagoService } from './mercadopago.service';
 
     // Guard de seguridad para validar firmas de webhooks
     MercadoPagoWebhookGuard,
+
+    // === ASYNC WEBHOOK PROCESSING (Sprint 1 - DLQ + BullMQ) ===
+    // Dead Letter Queue - Webhooks fallidos para reprocesamiento manual
+    WebhookDLQService,
+
+    // Queue Service - Encolar webhooks para procesamiento async
+    WebhookPaymentQueueService,
+
+    // Processor - Worker que procesa webhooks de la cola
+    WebhookPaymentProcessor,
 
     // === CQRS Services (NEW) ===
     // Facade - Punto de entrada único
@@ -162,6 +202,10 @@ import { MercadoPagoService } from './mercadopago.service';
     PaymentAmountValidatorService,
     MercadoPagoIpWhitelistService,
     MercadoPagoWebhookGuard,
+
+    // Export async webhook processing services (Sprint 1)
+    WebhookDLQService,
+    WebhookPaymentQueueService,
 
     // Export new facade as main interface
     PagosManagementFacadeService,

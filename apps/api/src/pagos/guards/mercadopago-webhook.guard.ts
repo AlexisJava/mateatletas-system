@@ -59,7 +59,7 @@ interface SignatureValidationResult {
  * 2. Extraer timestamp (ts) y firma (v1) del header x-signature
  * 3. Validar que timestamp no esté expirado (max 5 minutos)
  * 4. Construir payload: `${timestamp}.${JSON.stringify(body)}`
- * 5. Calcular HMAC-SHA256 con secret
+ * 5. Calcular HMAC-SHA256 con secret (soporta múltiples secrets durante rotación)
  * 6. Comparación timing-safe con v1
  * 7. Validar campos obligatorios: type, user_id, live_mode
  *
@@ -69,11 +69,16 @@ interface SignatureValidationResult {
  * - ✅ Comparación timing-safe para prevenir timing attacks
  * - ✅ Validación de estructura de body
  * - ✅ Modo estricto en producción
+ * - ✅ Secret Rotation: Soporta CURRENT y PREVIOUS secrets durante rotación
  */
 @Injectable()
 export class MercadoPagoWebhookGuard implements CanActivate {
   private readonly logger = new Logger(MercadoPagoWebhookGuard.name);
-  private readonly webhookSecret: string | null;
+  /**
+   * Lista de secrets para validación (soporta rotación)
+   * Orden: [current, previous] - intenta current primero
+   */
+  private readonly webhookSecrets: string[];
   private readonly strictMode: boolean;
   private readonly maxTimestampDiffSeconds = 300; // 5 minutos
 
@@ -81,33 +86,70 @@ export class MercadoPagoWebhookGuard implements CanActivate {
     private configService: ConfigService,
     private ipWhitelistService: MercadoPagoIpWhitelistService,
   ) {
-    this.webhookSecret =
-      this.configService.get<string>('MERCADOPAGO_WEBHOOK_SECRET') || null;
+    // Cargar secrets para rotación
+    // MERCADOPAGO_WEBHOOK_SECRET_CURRENT: Secret actual (prioridad 1)
+    // MERCADOPAGO_WEBHOOK_SECRET_PREVIOUS: Secret anterior (prioridad 2, para rotación)
+    // MERCADOPAGO_WEBHOOK_SECRET: Legacy fallback (backwards compatibility)
+    const currentSecret = this.configService.get<string>(
+      'MERCADOPAGO_WEBHOOK_SECRET_CURRENT',
+    );
+    const previousSecret = this.configService.get<string>(
+      'MERCADOPAGO_WEBHOOK_SECRET_PREVIOUS',
+    );
+    const legacySecret = this.configService.get<string>(
+      'MERCADOPAGO_WEBHOOK_SECRET',
+    );
+
+    // Construir lista de secrets (filtrar nulls/undefined/empty)
+    this.webhookSecrets = [currentSecret, previousSecret, legacySecret].filter(
+      (s): s is string => Boolean(s && s.length > 0),
+    );
 
     // En modo estricto, rechazar si no hay secret configurado
     // En modo permisivo (desarrollo), permitir webhooks sin validación
     this.strictMode =
       this.configService.get<string>('NODE_ENV') === 'production';
 
-    if (!this.webhookSecret) {
+    if (this.webhookSecrets.length === 0) {
       if (this.strictMode) {
         this.logger.error(
-          '🚨 PRODUCCIÓN SIN WEBHOOK SECRET: Configure MERCADOPAGO_WEBHOOK_SECRET',
+          '🚨 PRODUCCIÓN SIN WEBHOOK SECRET: Configure MERCADOPAGO_WEBHOOK_SECRET_CURRENT',
         );
       } else {
         this.logger.warn(
-          '⚠️  DESARROLLO: Webhooks sin validación de firma (configure MERCADOPAGO_WEBHOOK_SECRET)',
+          '⚠️  DESARROLLO: Webhooks sin validación de firma (configure MERCADOPAGO_WEBHOOK_SECRET_CURRENT)',
         );
       }
     } else {
+      const secretCount = this.webhookSecrets.length;
       this.logger.log(
-        '✅ Validación de firma de webhook habilitada (formato 2025)',
+        `✅ Validación de firma habilitada (${secretCount} secret${secretCount > 1 ? 's - rotation mode' : ''})`,
       );
     }
   }
 
   canActivate(context: ExecutionContext): boolean {
-    // Verificar si estamos en contexto de test (supertest no tiene switchToHttp)
+    // Early exit para entorno de test
+    if (this.isTestEnvironment(context)) {
+      return true;
+    }
+
+    const request = context.switchToHttp().getRequest<RequestWithRawBody>();
+    const clientIp = this.extractAndValidateClientIp(request);
+
+    // Early exit si se puede omitir validación
+    const skipResult = this.shouldSkipSignatureValidation(clientIp);
+    if (skipResult.skip) {
+      return true;
+    }
+
+    return this.performFullValidation(request, clientIp);
+  }
+
+  /**
+   * Verifica si estamos en contexto de test (supertest no tiene switchToHttp)
+   */
+  private isTestEnvironment(context: ExecutionContext): boolean {
     try {
       if (typeof context.switchToHttp !== 'function') {
         this.logger.debug(
@@ -115,6 +157,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
         );
         return true;
       }
+      return false;
     } catch (error) {
       if (error instanceof TypeError) {
         this.logger.debug(
@@ -124,10 +167,13 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       }
       throw error;
     }
+  }
 
-    const request = context.switchToHttp().getRequest<RequestWithRawBody>();
-
-    // 0. Validar IP del cliente (primera línea de defensa)
+  /**
+   * Extrae y valida la IP del cliente
+   * @throws ForbiddenException si la IP no está en whitelist
+   */
+  private extractAndValidateClientIp(request: RequestWithRawBody): string {
     const clientIp = this.ipWhitelistService.extractRealIp(
       request.headers as Record<string, string | string[] | undefined>,
       request.socket.remoteAddress,
@@ -148,41 +194,49 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       );
     }
 
-    // Si no hay secret configurado
-    if (!this.webhookSecret) {
+    return clientIp;
+  }
+
+  /**
+   * Determina si se puede omitir la validación de firma
+   */
+  private shouldSkipSignatureValidation(clientIp: string): { skip: boolean } {
+    // Sin secrets configurados
+    if (this.webhookSecrets.length === 0) {
       if (this.strictMode) {
-        // En producción, rechazar
         throw new UnauthorizedException('Webhook secret not configured');
-      } else {
-        // En desarrollo, permitir sin validación
-        this.logger.warn('⚠️  Webhook sin validar (modo desarrollo)');
-        return true;
       }
+      this.logger.warn('⚠️  Webhook sin validar (modo desarrollo)');
+      return { skip: true };
     }
 
-    // Si está habilitado DISABLE_WEBHOOK_SIGNATURE_VALIDATION (solo para tests)
+    // Validación deshabilitada para tests
     const disableValidation =
       this.configService.get<string>('DISABLE_WEBHOOK_SIGNATURE_VALIDATION') ===
       'true';
-    if (disableValidation && isDevelopment) {
+    if (disableValidation && !this.strictMode) {
       this.logger.warn(
         `⚠️ Webhook signature validation DISABLED (test mode): IP=${clientIp}`,
       );
-      return true;
+      return { skip: true };
     }
 
-    try {
-      // 1. Validar estructura del body
-      this.validateWebhookBody(request.body as MercadoPagoWebhookBody);
+    return { skip: false };
+  }
 
-      // Cast explícito después de validación
+  /**
+   * Ejecuta la validación completa del webhook
+   */
+  private performFullValidation(
+    request: RequestWithRawBody,
+    clientIp: string,
+  ): boolean {
+    try {
+      this.validateWebhookBody(request.body as MercadoPagoWebhookBody);
       const webhookBody = request.body as MercadoPagoWebhookBody;
 
-      // 2. Validar live_mode (prevenir webhooks de prueba en producción)
-      // IMPORTANTE: Validar ANTES de firma para fail-fast (performance + seguridad)
       this.validateLiveMode(webhookBody.live_mode);
 
-      // 3. Validar firma (formato 2025) usando raw body
       const validationResult = this.validateSignature(
         request.headers['x-signature'] as string,
         webhookBody,
@@ -194,7 +248,6 @@ export class MercadoPagoWebhookGuard implements CanActivate {
         throw new UnauthorizedException('Invalid webhook signature');
       }
 
-      // 4. Validar timestamp (prevenir replay attacks)
       this.validateTimestamp(validationResult.timestamp);
 
       this.logger.log(
@@ -318,6 +371,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
 
   /**
    * Valida la firma del webhook (formato 2025: ts=...,v1=...)
+   * Soporta múltiples secrets para rotación segura
    *
    * @param signatureHeader - Header x-signature con formato "ts=1234567890,v1=abcdef..."
    * @param body - Body del webhook (parseado)
@@ -399,18 +453,59 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       `  - Body string (first 200 chars): ${bodyString.substring(0, 200)}...`,
     );
     this.logger.debug(`  - Payload: ${payload.substring(0, 200)}...`);
-    this.logger.debug(
-      `  - Secret (primeros 10 chars): ${(this.webhookSecret as string).substring(0, 10)}...`,
-    );
     this.logger.debug(`  - Received signature: ${receivedSignature}`);
+    this.logger.debug(`  - Secrets to try: ${this.webhookSecrets.length}`);
 
+    // Intentar validar con cada secret (soporta rotación)
+    for (let i = 0; i < this.webhookSecrets.length; i++) {
+      const secret = this.webhookSecrets[i] as string;
+      const result = this.validateWithSecret(
+        payload,
+        receivedSignature,
+        secret,
+        timestamp,
+      );
+
+      if (result.isValid) {
+        // Log si se usó un secret que no es el primero (rotación activa)
+        if (i > 0) {
+          this.logger.warn(
+            `⚠️ Webhook validado con secret #${i + 1} (previous) - considera completar la rotación`,
+          );
+        }
+        return result;
+      }
+    }
+
+    // Ningún secret funcionó
+    return {
+      isValid: false,
+      timestamp,
+      signature: receivedSignature,
+      reason: 'Signature mismatch with all configured secrets',
+    };
+  }
+
+  /**
+   * Valida firma con un secret específico
+   *
+   * @param payload - Payload construido (timestamp.body)
+   * @param receivedSignature - Firma recibida en el header
+   * @param secret - Secret a usar para validación
+   * @param timestamp - Timestamp extraído del header
+   * @returns Resultado de validación
+   */
+  private validateWithSecret(
+    payload: string,
+    receivedSignature: string,
+    secret: string,
+    timestamp: number,
+  ): SignatureValidationResult {
     // Calcular HMAC-SHA256
     const expectedSignature = crypto
-      .createHmac('sha256', this.webhookSecret as string)
+      .createHmac('sha256', secret)
       .update(payload)
       .digest('hex');
-
-    this.logger.debug(`  - Expected signature: ${expectedSignature}`);
 
     // Comparación timing-safe
     try {
