@@ -19,7 +19,7 @@ import { INestApplication } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { PrismaService } from '../../../src/core/database/prisma.service';
 import { AppModule } from '../../../src/app.module';
-import { cleanAllTestTables } from '../helpers/db-cleanup';
+import { cleanAllTestTables } from '../../helpers/db-cleanup';
 import {
   createTestEstudiante,
   createTestTutor,

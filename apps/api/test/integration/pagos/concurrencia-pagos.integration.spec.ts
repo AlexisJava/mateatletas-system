@@ -45,7 +45,7 @@ import { AppModule } from '../../../src/app.module';
 import { PrismaService } from '../../../src/core/database/prisma.service';
 import { createTestTutor, createTestAdmin } from '../../fixtures/factories';
 import { cleanAllTestTables } from '../../helpers/db-cleanup';
-import { loginUser, generateUniqueIP } from '../../helpers/test-utils';
+import { loginUser, generateUniqueIP } from '../../helpers/auth.helpers';
 
 const FRONTEND_ORIGIN = 'http://localhost:3000';
 const DEFAULT_PASSWORD = 'Test123!@#';

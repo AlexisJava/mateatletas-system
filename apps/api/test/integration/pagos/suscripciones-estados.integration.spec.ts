@@ -83,7 +83,7 @@ import {
   createTestAdmin,
 } from '../../fixtures/factories';
 import { cleanAllTestTables } from '../../helpers/db-cleanup';
-import { loginUser, generateUniqueIP } from '../../helpers/test-utils';
+import { loginUser, generateUniqueIP } from '../../helpers/auth.helpers';
 
 // Constante del sistema (replicada para test BBT - no importar de src)
 const GRACE_PERIOD_DIAS = 3;

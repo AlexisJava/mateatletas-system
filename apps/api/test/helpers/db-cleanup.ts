@@ -29,11 +29,8 @@ export async function cleanGamificationTables(prisma: PrismaService) {
   await prisma.progresoContenido.deleteMany({});
   await prisma.nodoContenido.deleteMany({});
 
-  // Planificaciones (tienen FK a contenido vía teoria_id/practica_id)
-  await prisma.estadoClaseGrupo.deleteMany({});
-  await prisma.asignacionPlanificacion.deleteMany({});
-  await prisma.clasePlanificacion.deleteMany({});
-  await prisma.planificacion.deleteMany({});
+  // NOTA: Planificaciones se limpian en cleanAllTestTables() para evitar
+  // conflictos de orden con ClaseGrupo y sus dependencias
 
   // Ahora sí se puede borrar contenido
   await prisma.contenido.deleteMany({});
@@ -58,7 +55,10 @@ export async function cleanEstudiantes(prisma: PrismaService) {
 
 /**
  * Limpieza completa de todas las tablas relevantes para tests
- * Orden: hijos primero, padres después
+ * Orden: hijos primero, padres después (respetando FKs)
+ *
+ * IMPORTANTE: El orden de borrado debe respetar las foreign keys.
+ * Actualizado para Sistema Casa/Mundo 2026 (commit 98b1ed2b)
  */
 export async function cleanAllTestTables(prisma: PrismaService) {
   // Seguridad - Limpiar intentos de login para evitar bloqueos entre tests
@@ -68,27 +68,67 @@ export async function cleanAllTestTables(prisma: PrismaService) {
   await prisma.reaccionFeed.deleteMany({});
   await prisma.actividadFeed.deleteMany({});
 
-  // Progreso y tareas
+  // ============================================================================
+  // SISTEMA DE PLANIFICACIONES (orden crítico por FKs)
+  // TareaAsignada → AsignacionPlanificacion → ClaseGrupo
+  // EstadoClaseGrupo → AsignacionPlanificacion → ClaseGrupo
+  // ============================================================================
+
+  // 1. Progreso de tareas (FK → TareaAsignada)
   await prisma.progresoTareaEstudiante.deleteMany({});
+
+  // 2. Tareas asignadas (FK → AsignacionPlanificacion)
+  await prisma.tareaAsignada.deleteMany({});
+
+  // 3. Estados de clase grupo (FK → AsignacionPlanificacion)
+  await prisma.estadoClaseGrupo.deleteMany({});
+
+  // 4. Progreso de clases estudiante
   await prisma.progresoClaseEstudiante.deleteMany({});
 
-  // Inscripciones
-  await prisma.inscripcionComision.deleteMany({});
-  await prisma.inscripcionClaseGrupo.deleteMany({});
+  // 5. Asignaciones de planificación (FK → ClaseGrupo, Planificacion, Docente)
+  await prisma.asignacionPlanificacion.deleteMany({});
 
-  // Asistencias
+  // 6. Clases de planificación (FK → Planificacion)
+  await prisma.clasePlanificacion.deleteMany({});
+
+  // 7. Planificaciones
+  await prisma.planificacion.deleteMany({});
+
+  // ============================================================================
+  // SISTEMA DE OBSERVACIONES (orden crítico por FKs)
+  // SeguimientoObservacion → Observacion
+  // ObservacionEstudiante → Observacion, Estudiante
+  // ============================================================================
+  await prisma.seguimientoObservacion.deleteMany({});
+  await prisma.observacionEstudiante.deleteMany({});
+  await prisma.observacion.deleteMany({});
+
+  // ============================================================================
+  // INSCRIPCIONES Y ASISTENCIAS (FK → ClaseGrupo)
+  // Deben borrarse ANTES de ClaseGrupo
+  // ============================================================================
+  await prisma.inscripcionComision.deleteMany({});
+  await prisma.asistenciaComision.deleteMany({});
+  await prisma.inscripcionClaseGrupo.deleteMany({});
   await prisma.asistenciaClaseGrupo.deleteMany({});
   await prisma.asistenciaLive.deleteMany({});
 
-  // Gamificación
+  // ============================================================================
+  // GAMIFICACIÓN (sin dependencias a ClaseGrupo)
+  // ============================================================================
   await cleanGamificationTables(prisma);
 
-  // Suscripciones
+  // ============================================================================
+  // SUSCRIPCIONES
+  // ============================================================================
   await prisma.pagoSuscripcion.deleteMany({});
   await prisma.historialEstadoSuscripcion.deleteMany({});
   await prisma.suscripcion.deleteMany({});
 
-  // Comisiones y ClaseGrupos
+  // ============================================================================
+  // COMISIONES Y CLASE GRUPOS (ahora sin hijos)
+  // ============================================================================
   await prisma.comision.deleteMany({});
   await prisma.claseGrupo.deleteMany({});
 
@@ -113,6 +153,13 @@ export async function cleanAllTestTables(prisma: PrismaService) {
   // Sistema Casa/Mundo 2026 - Asignaciones docente
   await prisma.docenteCasa.deleteMany({});
   await prisma.docenteMundo.deleteMany({});
+
+  // ============================================================================
+  // USUARIOS (al final, después de todas sus dependencias)
+  // ============================================================================
+
+  // Historial de acceso (FK → Estudiante) - DEBE ir antes de estudiante
+  await prisma.historialAccesoEstudiante.deleteMany({});
 
   // Usuarios
   await prisma.estudiante.deleteMany({});

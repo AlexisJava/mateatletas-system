@@ -64,7 +64,7 @@ import {
   createTestAdmin,
 } from '../../fixtures/factories';
 import { cleanAllTestTables } from '../../helpers/db-cleanup';
-import { loginUser, generateUniqueIP } from '../../helpers/test-utils';
+import { loginUser, generateUniqueIP } from '../../helpers/auth.helpers';
 
 // Constantes del sistema (BBT - replicadas para tests)
 const DESCUENTO_POR_HIJO_ADICIONAL = 10;
