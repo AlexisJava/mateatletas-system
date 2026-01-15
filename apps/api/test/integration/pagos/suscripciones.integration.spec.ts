@@ -1,0 +1,838 @@
+/**
+ * ============================================================================
+ * SUSCRIPCIONES INTEGRATION TESTS - Tests de Integración BBT
+ * ============================================================================
+ *
+ * Tests Black Box para endpoints de suscripciones.
+ * Estos tests validan el comportamiento desde la perspectiva del usuario,
+ * sin conocimiento de la implementación interna.
+ *
+ * METODOLOGÍA: Black Box Testing (tests como jueces, no cómplices)
+ *
+ * ============================================================================
+ * CLASES DE EQUIVALENCIA
+ * ============================================================================
+ *
+ * GET /suscripciones/planes (Público)
+ * ------------------------------------
+ * CE1: Debe retornar lista de planes activos
+ * CE2: Los planes deben incluir nombre, precio, características
+ *
+ * POST /suscripciones (Solo TUTOR)
+ * ---------------------------------
+ * CE3: Tutor puede crear suscripción con datos válidos
+ * CE4: Falla si estudiantes no pertenecen al tutor
+ * CE5: Falla si plan no existe o está inactivo
+ * CE6: Falla si plan requiere clase_grupo_id y no se provee
+ * CE7: Falla si clase_grupo no tiene cupo disponible
+ *
+ * GET /suscripciones/mis-suscripciones (Solo TUTOR)
+ * -------------------------------------------------
+ * CE8: Tutor ve solo sus suscripciones
+ * CE9: Tutor sin suscripciones recibe array vacío
+ * CE10: Datos correctos por suscripción (estado, plan, fechas)
+ *
+ * GET /suscripciones/:id (Solo TUTOR)
+ * ------------------------------------
+ * CE11: Tutor puede ver detalle de su suscripción
+ * CE12: Tutor NO puede ver suscripción de otro tutor
+ *
+ * POST /suscripciones/:id/cancelar (Solo TUTOR)
+ * ----------------------------------------------
+ * CE13: Tutor puede cancelar suscripción ACTIVA
+ * CE14: No se puede cancelar suscripción ya CANCELADA
+ * CE15: No se puede cancelar suscripción MOROSA (debe contactar soporte)
+ * CE16: Tutor NO puede cancelar suscripción de otro tutor
+ *
+ * GET /suscripciones/admin (Solo ADMIN)
+ * --------------------------------------
+ * CE17: Admin ve todas las suscripciones
+ * CE18: Filtro por estado funciona
+ * CE19: Paginación funciona
+ *
+ * GET /suscripciones/admin/morosas (Solo ADMIN)
+ * ----------------------------------------------
+ * CE20: Admin ve suscripciones morosas y en gracia
+ *
+ * ============================================================================
+ * ESTADOS DE SUSCRIPCIÓN
+ * ============================================================================
+ *
+ * PENDIENTE → ACTIVA (primer pago exitoso)
+ * ACTIVA → EN_GRACIA (falla cobro)
+ * EN_GRACIA → MOROSA (pasaron 3 días sin pago)
+ * EN_GRACIA → ACTIVA (pago exitoso dentro de gracia)
+ * ACTIVA → CANCELADA (tutor cancela)
+ * ACTIVA → PAUSADA (tutor pausa, máx 30 días)
+ * PAUSADA → ACTIVA (reanuda)
+ *
+ * ============================================================================
+ * DESCUENTOS FAMILIARES
+ * ============================================================================
+ *
+ * 1 hijo: 0%
+ * 2 hijos: 10%
+ * 3+ hijos: 20%
+ */
+
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import request from 'supertest';
+import cookieParser from 'cookie-parser';
+import * as express from 'express';
+import { AppModule } from '../../../src/app.module';
+import { PrismaService } from '../../../src/core/database/prisma.service';
+import { cleanAllTestTables } from '../../helpers/db-cleanup';
+import {
+  loginUser,
+  FRONTEND_ORIGIN,
+  generateUniqueIP,
+} from '../../helpers/auth.helpers';
+import {
+  createTestTutor,
+  createTestAdmin,
+  createTestEstudiante,
+  createTestDocente,
+} from '../../fixtures/factories';
+import { EstadoSuscripcion } from '@prisma/client';
+
+describe('Suscripciones Integration Tests (BBT)', () => {
+  let app: INestApplication;
+  let prisma: PrismaService;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
+    app.use(cookieParser());
+
+    const expressApp = app
+      .getHttpAdapter()
+      .getInstance() as express.Application;
+    expressApp.set('trust proxy', true);
+
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
+    await app.init();
+
+    prisma = moduleFixture.get<PrismaService>(PrismaService);
+  }, 60000);
+
+  afterAll(async () => {
+    await cleanAllTestTables(prisma);
+    await app.close();
+  });
+
+  afterEach(async () => {
+    await cleanAllTestTables(prisma);
+  });
+
+  // ============================================================================
+  // HELPERS
+  // ============================================================================
+
+  async function crearPlanSuscripcion(
+    nombre: string = 'STEAM_ASINCRONICO',
+    precioBase: number = 25000,
+    activo: boolean = true,
+  ) {
+    return prisma.planSuscripcion.create({
+      data: {
+        nombre,
+        descripcion: `Plan ${nombre} para tests`,
+        precio_base: precioBase,
+        moneda: 'ARS',
+        intervalo: 'mes',
+        intervalo_frecuencia: 1,
+        activo,
+        features: ['Acceso completo', 'Soporte prioritario'],
+      },
+    });
+  }
+
+  async function crearSuscripcion(
+    tutorId: string,
+    planId: string,
+    estado: EstadoSuscripcion = EstadoSuscripcion.ACTIVA,
+    extraData: Record<string, unknown> = {},
+  ) {
+    return prisma.suscripcion.create({
+      data: {
+        tutor_id: tutorId,
+        plan_id: planId,
+        estado,
+        precio_final: 25000,
+        numero_hijo: 1,
+        descuento_porcentaje: 0,
+        fecha_inicio:
+          estado !== EstadoSuscripcion.PENDIENTE ? new Date() : null,
+        fecha_proximo_cobro:
+          estado === EstadoSuscripcion.ACTIVA
+            ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+            : null,
+        ...extraData,
+      },
+    });
+  }
+
+  // ============================================================================
+  // GET /suscripciones/planes (Público)
+  // ============================================================================
+
+  describe('GET /suscripciones/planes', () => {
+    describe('CE1: Lista de planes activos', () => {
+      it('should return list of active plans without authentication', async () => {
+        // Crear planes
+        await crearPlanSuscripcion('STEAM_ASINCRONICO', 25000, true);
+        await crearPlanSuscripcion('STEAM_SINCRONICO', 35000, true);
+        await crearPlanSuscripcion('PLAN_INACTIVO', 10000, false);
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/planes')
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('planes');
+        expect(Array.isArray(response.body.planes)).toBe(true);
+
+        // Solo planes activos
+        const planesActivos = response.body.planes.filter(
+          (p: { activo: boolean }) => p.activo,
+        );
+        expect(planesActivos.length).toBeGreaterThanOrEqual(2);
+
+        // No debe incluir planes inactivos
+        const planInactivo = response.body.planes.find(
+          (p: { nombre: string }) => p.nombre === 'PLAN_INACTIVO',
+        );
+        expect(planInactivo).toBeUndefined();
+      });
+    });
+
+    describe('CE2: Estructura de planes', () => {
+      it('should return plans with correct structure', async () => {
+        await crearPlanSuscripcion('STEAM_ASINCRONICO', 25000);
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/planes')
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        expect(response.body.planes.length).toBeGreaterThan(0);
+
+        const plan = response.body.planes[0];
+        expect(plan).toHaveProperty('id');
+        expect(plan).toHaveProperty('nombre');
+        expect(plan).toHaveProperty('descripcion');
+        expect(plan).toHaveProperty('precio_base');
+        expect(plan).toHaveProperty('moneda');
+        expect(plan).toHaveProperty('features');
+      });
+    });
+  });
+
+  // ============================================================================
+  // GET /suscripciones/mis-suscripciones (Solo TUTOR)
+  // ============================================================================
+
+  describe('GET /suscripciones/mis-suscripciones', () => {
+    describe('Autenticación y Autorización', () => {
+      it('should return 401 when no token provided', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/mis-suscripciones')
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(401);
+      });
+
+      it('should return 403 when docente tries to access', async () => {
+        const { docente, password } = await createTestDocente(prisma);
+        const auth = await loginUser(app, { email: docente.email, password });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/mis-suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(403);
+      });
+
+      it('should return 403 when admin tries to access', async () => {
+        const admin = await createTestAdmin(prisma);
+        const auth = await loginUser(app, {
+          email: admin.email,
+          password: 'Test123!',
+        });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/mis-suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(403);
+      });
+    });
+
+    describe('CE8: Tutor ve solo sus suscripciones', () => {
+      it('should return only suscriptions belonging to authenticated tutor', async () => {
+        const { tutor: tutor1, password: password1 } =
+          await createTestTutor(prisma);
+        const { tutor: tutor2 } = await createTestTutor(prisma);
+        const plan = await crearPlanSuscripcion();
+
+        // Suscripción de tutor1
+        await crearSuscripcion(tutor1.id, plan.id, EstadoSuscripcion.ACTIVA);
+
+        // Suscripción de tutor2
+        await crearSuscripcion(tutor2.id, plan.id, EstadoSuscripcion.ACTIVA);
+
+        const auth = await loginUser(app, {
+          email: tutor1.email,
+          password: password1,
+        });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/mis-suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('suscripciones');
+        expect(response.body.suscripciones.length).toBe(1);
+
+        // Verificar que es la suscripción correcta
+        const suscripcion = response.body.suscripciones[0];
+        expect(suscripcion.tutor_id).toBe(tutor1.id);
+      });
+    });
+
+    describe('CE9: Tutor sin suscripciones', () => {
+      it('should return empty array when tutor has no suscriptions', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const auth = await loginUser(app, { email: tutor.email, password });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/mis-suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        expect(response.body.suscripciones).toEqual([]);
+      });
+    });
+
+    describe('CE10: Datos correctos por suscripción', () => {
+      it('should return correct data structure for suscription', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const plan = await crearPlanSuscripcion('MI_PLAN', 30000);
+        await crearSuscripcion(tutor.id, plan.id, EstadoSuscripcion.ACTIVA);
+
+        const auth = await loginUser(app, { email: tutor.email, password });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/mis-suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        expect(response.body.suscripciones.length).toBe(1);
+
+        const suscripcion = response.body.suscripciones[0];
+        expect(suscripcion).toHaveProperty('id');
+        expect(suscripcion).toHaveProperty('estado', 'ACTIVA');
+        expect(suscripcion).toHaveProperty('precio_final');
+        expect(suscripcion).toHaveProperty('plan');
+      });
+    });
+  });
+
+  // ============================================================================
+  // POST /suscripciones/:id/cancelar (Solo TUTOR)
+  // ============================================================================
+
+  describe('POST /suscripciones/:id/cancelar', () => {
+    describe('Autenticación', () => {
+      it('should return 401 when no token provided', async () => {
+        const response = await request(app.getHttpServer())
+          .post('/api/suscripciones/some-id/cancelar')
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(401);
+      });
+    });
+
+    describe('CE14: No se puede cancelar suscripción ya CANCELADA', () => {
+      it('should return 400 when trying to cancel already cancelled suscription', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const plan = await crearPlanSuscripcion();
+        const suscripcion = await crearSuscripcion(
+          tutor.id,
+          plan.id,
+          EstadoSuscripcion.CANCELADA,
+        );
+
+        const auth = await loginUser(app, { email: tutor.email, password });
+
+        const response = await request(app.getHttpServer())
+          .post(`/api/suscripciones/${suscripcion.id}/cancelar`)
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain('ya está cancelada');
+      });
+    });
+
+    describe('CE15: No se puede cancelar suscripción MOROSA', () => {
+      it('should return 400 when trying to cancel morosa suscription', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const plan = await crearPlanSuscripcion();
+        const suscripcion = await crearSuscripcion(
+          tutor.id,
+          plan.id,
+          EstadoSuscripcion.MOROSA,
+        );
+
+        const auth = await loginUser(app, { email: tutor.email, password });
+
+        const response = await request(app.getHttpServer())
+          .post(`/api/suscripciones/${suscripcion.id}/cancelar`)
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain('morosa');
+      });
+    });
+
+    describe('CE16: Tutor NO puede cancelar suscripción de otro tutor', () => {
+      it('should return 400 when trying to cancel another tutor suscription', async () => {
+        const { tutor: tutor1, password: password1 } =
+          await createTestTutor(prisma);
+        const { tutor: tutor2 } = await createTestTutor(prisma);
+        const plan = await crearPlanSuscripcion();
+
+        // Suscripción de tutor2
+        const suscripcion = await crearSuscripcion(
+          tutor2.id,
+          plan.id,
+          EstadoSuscripcion.ACTIVA,
+        );
+
+        // Tutor1 intenta cancelar
+        const auth = await loginUser(app, {
+          email: tutor1.email,
+          password: password1,
+        });
+
+        const response = await request(app.getHttpServer())
+          .post(`/api/suscripciones/${suscripcion.id}/cancelar`)
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain('No autorizado');
+      });
+    });
+  });
+
+  // ============================================================================
+  // GET /suscripciones/admin (Solo ADMIN)
+  // ============================================================================
+
+  describe('GET /suscripciones/admin', () => {
+    describe('Autenticación y Autorización', () => {
+      it('should return 401 when no token provided', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin')
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(401);
+      });
+
+      it('should return 403 when tutor tries to access', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const auth = await loginUser(app, { email: tutor.email, password });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(403);
+      });
+    });
+
+    describe('CE17: Admin ve todas las suscripciones', () => {
+      it('should return all suscriptions for admin', async () => {
+        const admin = await createTestAdmin(prisma);
+        const { tutor: tutor1 } = await createTestTutor(prisma);
+        const { tutor: tutor2 } = await createTestTutor(prisma);
+        const plan = await crearPlanSuscripcion();
+
+        await crearSuscripcion(tutor1.id, plan.id, EstadoSuscripcion.ACTIVA);
+        await crearSuscripcion(tutor2.id, plan.id, EstadoSuscripcion.PENDIENTE);
+
+        const auth = await loginUser(app, {
+          email: admin.email,
+          password: 'Test123!',
+        });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('suscripciones');
+        expect(response.body.suscripciones.length).toBe(2);
+      });
+    });
+
+    describe('CE18: Filtro por estado funciona', () => {
+      it('should filter suscriptions by estado', async () => {
+        const admin = await createTestAdmin(prisma);
+        const { tutor: tutor1 } = await createTestTutor(prisma);
+        const { tutor: tutor2 } = await createTestTutor(prisma);
+        const plan = await crearPlanSuscripcion();
+
+        await crearSuscripcion(tutor1.id, plan.id, EstadoSuscripcion.ACTIVA);
+        await crearSuscripcion(tutor2.id, plan.id, EstadoSuscripcion.MOROSA);
+
+        const auth = await loginUser(app, {
+          email: admin.email,
+          password: 'Test123!',
+        });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin?estado=ACTIVA')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        expect(response.body.suscripciones.length).toBe(1);
+        expect(response.body.suscripciones[0].estado).toBe('ACTIVA');
+      });
+    });
+
+    describe('CE19: Paginación funciona', () => {
+      it('should paginate suscriptions correctly', async () => {
+        const admin = await createTestAdmin(prisma);
+        const plan = await crearPlanSuscripcion();
+
+        // Crear 5 suscripciones
+        for (let i = 0; i < 5; i++) {
+          const { tutor } = await createTestTutor(prisma);
+          await crearSuscripcion(tutor.id, plan.id, EstadoSuscripcion.ACTIVA);
+        }
+
+        const auth = await loginUser(app, {
+          email: admin.email,
+          password: 'Test123!',
+        });
+
+        // Pedir página 1 con limit 2
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin?page=1&limit=2')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        expect(response.body.suscripciones.length).toBe(2);
+        expect(response.body).toHaveProperty('total');
+        expect(response.body.total).toBe(5);
+      });
+    });
+  });
+
+  // ============================================================================
+  // GET /suscripciones/admin/morosas (Solo ADMIN)
+  // ============================================================================
+
+  describe('GET /suscripciones/admin/morosas', () => {
+    describe('Autenticación', () => {
+      it('should return 401 when no token provided', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin/morosas')
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(401);
+      });
+
+      it('should return 403 when tutor tries to access', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const auth = await loginUser(app, { email: tutor.email, password });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin/morosas')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(403);
+      });
+    });
+
+    describe('CE20: Admin ve suscripciones morosas y en gracia', () => {
+      it('should return morosas and en_gracia suscriptions', async () => {
+        const admin = await createTestAdmin(prisma);
+        const { tutor: tutor1 } = await createTestTutor(prisma);
+        const { tutor: tutor2 } = await createTestTutor(prisma);
+        const { tutor: tutor3 } = await createTestTutor(prisma);
+        const plan = await crearPlanSuscripcion();
+
+        await crearSuscripcion(tutor1.id, plan.id, EstadoSuscripcion.MOROSA);
+        await crearSuscripcion(tutor2.id, plan.id, EstadoSuscripcion.EN_GRACIA);
+        await crearSuscripcion(tutor3.id, plan.id, EstadoSuscripcion.ACTIVA); // No debe aparecer
+
+        const auth = await loginUser(app, {
+          email: admin.email,
+          password: 'Test123!',
+        });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin/morosas')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('morosas');
+        expect(response.body).toHaveProperty('en_gracia');
+
+        // Verificar conteo
+        expect(response.body.morosas.length).toBe(1);
+        expect(response.body.en_gracia.length).toBe(1);
+      });
+
+      it('should return empty arrays when no morosas or en_gracia', async () => {
+        const admin = await createTestAdmin(prisma);
+        const auth = await loginUser(app, {
+          email: admin.email,
+          password: 'Test123!',
+        });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin/morosas')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        expect(response.body.morosas).toEqual([]);
+        expect(response.body.en_gracia).toEqual([]);
+      });
+    });
+  });
+
+  // ============================================================================
+  // GET /suscripciones/admin/metricas (Solo ADMIN)
+  // ============================================================================
+
+  describe('GET /suscripciones/admin/metricas', () => {
+    describe('Autenticación', () => {
+      it('should return 401 when no token provided', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin/metricas')
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(401);
+      });
+    });
+
+    it('should return metrics for admin', async () => {
+      const admin = await createTestAdmin(prisma);
+      const { tutor } = await createTestTutor(prisma);
+      const plan = await crearPlanSuscripcion();
+
+      await crearSuscripcion(tutor.id, plan.id, EstadoSuscripcion.ACTIVA);
+
+      const auth = await loginUser(app, {
+        email: admin.email,
+        password: 'Test123!',
+      });
+
+      const response = await request(app.getHttpServer())
+        .get('/api/suscripciones/admin/metricas')
+        .set('Authorization', `Bearer ${auth.token}`)
+        .set('Cookie', auth.cookie)
+        .set('Origin', FRONTEND_ORIGIN)
+        .set('X-Forwarded-For', generateUniqueIP());
+
+      expect(response.status).toBe(200);
+      // Verificar estructura de métricas
+      expect(response.body).toHaveProperty('total_activas');
+      expect(response.body).toHaveProperty('total_morosas');
+      expect(response.body).toHaveProperty('mrr'); // Monthly Recurring Revenue
+    });
+  });
+
+  // ============================================================================
+  // POST /suscripciones - Creación (Casos de error)
+  // ============================================================================
+
+  describe('POST /suscripciones', () => {
+    describe('Autenticación', () => {
+      it('should return 401 when no token provided', async () => {
+        const response = await request(app.getHttpServer())
+          .post('/api/suscripciones')
+          .send({})
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(401);
+      });
+    });
+
+    describe('CE4: Falla si estudiantes no pertenecen al tutor', () => {
+      it('should return 400 when estudiantes do not belong to tutor', async () => {
+        const { tutor: tutor1, password: password1 } =
+          await createTestTutor(prisma);
+        const { tutor: tutor2 } = await createTestTutor(prisma);
+        const { estudiante } = await createTestEstudiante(prisma, {
+          tutorId: tutor2.id,
+        });
+        const plan = await crearPlanSuscripcion('STEAM_ASINCRONICO', 25000);
+
+        const auth = await loginUser(app, {
+          email: tutor1.email,
+          password: password1,
+        });
+
+        const response = await request(app.getHttpServer())
+          .post('/api/suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP())
+          .send({
+            plan_id: plan.id,
+            estudiante_ids: [estudiante.id],
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain('no pertenecen');
+      });
+    });
+
+    describe('CE5: Falla si plan no existe o está inactivo', () => {
+      it('should return 400 when plan does not exist', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const { estudiante } = await createTestEstudiante(prisma, {
+          tutorId: tutor.id,
+        });
+
+        const auth = await loginUser(app, { email: tutor.email, password });
+
+        const response = await request(app.getHttpServer())
+          .post('/api/suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP())
+          .send({
+            plan_id: 'plan-inexistente',
+            estudiante_ids: [estudiante.id],
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain('no está disponible');
+      });
+
+      it('should return 400 when plan is inactive', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const { estudiante } = await createTestEstudiante(prisma, {
+          tutorId: tutor.id,
+        });
+        const plan = await crearPlanSuscripcion('PLAN_INACTIVO', 10000, false);
+
+        const auth = await loginUser(app, { email: tutor.email, password });
+
+        const response = await request(app.getHttpServer())
+          .post('/api/suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP())
+          .send({
+            plan_id: plan.id,
+            estudiante_ids: [estudiante.id],
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain('no está disponible');
+      });
+    });
+
+    describe('CE6: Falla si plan requiere clase_grupo_id y no se provee', () => {
+      it('should return 400 when STEAM_SINCRONICO plan without clase_grupo_id', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const { estudiante } = await createTestEstudiante(prisma, {
+          tutorId: tutor.id,
+        });
+        const plan = await crearPlanSuscripcion('STEAM_SINCRONICO', 35000);
+
+        const auth = await loginUser(app, { email: tutor.email, password });
+
+        const response = await request(app.getHttpServer())
+          .post('/api/suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP())
+          .send({
+            plan_id: plan.id,
+            estudiante_ids: [estudiante.id],
+            // NO clase_grupo_id
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain(
+          'requiere seleccionar una clase',
+        );
+      });
+    });
+  });
+});
