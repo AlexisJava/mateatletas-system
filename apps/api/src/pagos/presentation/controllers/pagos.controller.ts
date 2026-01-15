@@ -13,6 +13,7 @@ import {
   Req,
   Logger,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
 import { ParseIdPipe } from '../../../common/pipes';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -305,6 +306,7 @@ export class PagosController {
   @Public()
   @Post('webhook')
   @UseGuards(MercadoPagoWebhookGuard)
+  @Throttle({ default: { limit: 300, ttl: 60000 } }) // 300 req/min por IP (más permisivo para MercadoPago)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Webhook de MercadoPago (Async)',

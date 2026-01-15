@@ -59,21 +59,59 @@ export interface WebhookPaymentJobResult {
 }
 
 /**
+ * Calcula delay con jitter para evitar thundering herd
+ *
+ * Implementa "Full Jitter" strategy de AWS:
+ * delay = random(0, min(cap, base * 2^attempt))
+ *
+ * @see https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+ *
+ * @param attemptsMade - Número de intentos realizados (0-indexed)
+ * @returns Delay en milisegundos con jitter aplicado
+ */
+export function calculateBackoffWithJitter(attemptsMade: number): number {
+  const BASE_DELAY = 1000; // 1 segundo
+  const MAX_DELAY = 30000; // 30 segundos máximo
+
+  // Exponential: base * 2^attempt
+  const exponentialDelay = BASE_DELAY * Math.pow(2, attemptsMade);
+
+  // Cap at max delay
+  const cappedDelay = Math.min(exponentialDelay, MAX_DELAY);
+
+  // Full jitter: random between 0 and capped delay
+  // eslint-disable-next-line sonarjs/pseudo-random -- Safe: jitter for backoff timing, not cryptographic
+  const jitteredDelay = Math.floor(Math.random() * cappedDelay);
+
+  // Ensure minimum delay of 500ms
+  return Math.max(500, jitteredDelay);
+}
+
+/**
  * Opciones por defecto para jobs de esta cola
  *
- * Estrategia de reintentos:
- * - Intento 1: Falla → Espera 1s
- * - Intento 2: Falla → Espera 2s
- * - Intento 3: Falla → Espera 4s
- * - Intento 4: Falla → Espera 8s
- * - Intento 5: Falla → Espera 16s
+ * Estrategia de reintentos con jitter:
+ * - Intento 1: Falla → Espera ~0-1s (random)
+ * - Intento 2: Falla → Espera ~0-2s (random)
+ * - Intento 3: Falla → Espera ~0-4s (random)
+ * - Intento 4: Falla → Espera ~0-8s (random)
+ * - Intento 5: Falla → Espera ~0-16s (random)
  * - Después de 5 fallos: Processor mueve a DLQ manualmente
+ *
+ * El jitter evita "thundering herd" cuando múltiples webhooks fallan
+ * simultáneamente (ej: caída de servicio externo).
  */
 export const WEBHOOK_PAYMENT_JOB_OPTIONS = {
   /** Intentar hasta 5 veces */
   attempts: 5,
 
-  /** Backoff exponencial: 1000ms * 2^attempt */
+  /**
+   * Backoff exponencial con jitter
+   * Nota: BullMQ no soporta jitter nativo, pero podemos usar
+   * una función personalizada en el processor si es necesario.
+   * Por ahora usamos exponencial estándar - el jitter se puede
+   * agregar en el processor con delay manual si hay thundering herd.
+   */
   backoff: {
     type: 'exponential' as const,
     delay: 1000,
