@@ -12,11 +12,11 @@ Análisis de cobertura de tests de integración para lanzamiento a producción.
 | Categoría                       | Tests | Estado                      |
 | ------------------------------- | ----- | --------------------------- |
 | `/integration/flows/`           | 6     | FUNCIONAN                   |
-| `/integration/pagos/`           | 2     | FUNCIONAN                   |
+| `/integration/pagos/`           | 4     | FUNCIONAN                   |
 | `/integration/portal-specific/` | 53    | FUNCIONAN                   |
 | `/integration/services/`        | 7     | REPARADOS (commit 8b17f366) |
 
-**Total:** 68 tests de integración operativos.
+**Total:** ~120 tests de integración operativos (morosidad 26, suscripciones 28, estados 18 + existentes).
 
 ---
 
@@ -73,14 +73,15 @@ Análisis de cobertura de tests de integración para lanzamiento a producción.
 
 ### Pagos
 
-| Test                                      | Cobertura                                    |
-| ----------------------------------------- | -------------------------------------------- |
-| `webhook-async-flow.integration.spec.ts`  | Webhooks MercadoPago, async, idempotencia    |
-| `dlq-reprocesamiento.integration.spec.ts` | Dead Letter Queue                            |
-| `flujo-pago-acceso.integration.spec.ts`   | Pago → Acceso estudiante                     |
-| `vencimiento-pagos.integration.spec.ts`   | Vencimientos, recargos 15%, anulación día 12 |
-| `morosidad.integration.spec.ts`           | Morosidad tutor/estudiante, lista morosos    |
-| `suscripciones.integration.spec.ts`       | Planes, mis-suscripciones, cancelar, admin   |
+| Test                                        | Cobertura                                               |
+| ------------------------------------------- | ------------------------------------------------------- |
+| `webhook-async-flow.integration.spec.ts`    | Webhooks MercadoPago, async, idempotencia               |
+| `dlq-reprocesamiento.integration.spec.ts`   | Dead Letter Queue                                       |
+| `flujo-pago-acceso.integration.spec.ts`     | Pago → Acceso estudiante                                |
+| `vencimiento-pagos.integration.spec.ts`     | Vencimientos, recargos 15%, anulación día 12            |
+| `morosidad.integration.spec.ts`             | Morosidad tutor/estudiante, lista morosos (26 tests)    |
+| `suscripciones.integration.spec.ts`         | Planes, mis-suscripciones, cancelar, admin (28 tests)   |
+| `suscripciones-estados.integration.spec.ts` | Transiciones de estado, grace period, acceso (18 tests) |
 
 ### Gamificación
 
@@ -172,12 +173,15 @@ Análisis de cobertura de tests de integración para lanzamiento a producción.
 
 3. ✅ `suscripciones.integration.spec.ts` (~30 tests - CREADO)
 
-### Fase 3: Edge Cases (Prioridad MEDIA) - PENDIENTE
+### ~~Fase 3: Edge Cases (Prioridad MEDIA)~~ ✅ PARCIALMENTE COMPLETADA
 
-4. `suscripciones-estados.integration.spec.ts`
+4. ✅ `suscripciones-estados.integration.spec.ts` (18 tests - CREADO)
    - Transiciones de estado
    - Grace period 3 días
    - Bloqueo por MOROSA
+   - Acceso por estado (ACTIVA, EN_GRACIA, MOROSA, CANCELADA)
+
+**Pendientes (Prioridad BAJA):**
 
 5. Descuentos familiares
 6. Múltiples hijos con diferentes estados
