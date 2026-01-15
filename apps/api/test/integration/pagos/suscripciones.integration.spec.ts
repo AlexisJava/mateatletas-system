@@ -475,35 +475,124 @@ describe('Suscripciones Integration Tests (BBT)', () => {
   // ============================================================================
 
   /**
-   * GET /suscripciones/admin - TESTS SKIPPED
+   * GET /suscripciones/admin - Lista todas las suscripciones (Solo ADMIN)
    *
-   * BUG DE ROUTING: La ruta @Get('admin') está definida DESPUÉS de @Get(':id')
-   * en el controller. NestJS procesa las rutas en orden, por lo que 'admin'
-   * es interpretado como un :id y la request va al handler equivocado.
-   *
-   * Las rutas 'admin/morosas' y 'admin/metricas' funcionan porque son más específicas.
-   *
-   * TODO: Reordenar las rutas en suscripciones.controller.ts o usar un prefijo diferente.
+   * NOTA: Bug de routing corregido - las rutas admin ahora están antes de :id
    */
-  describe('GET /suscripciones/admin (SKIPPED - routing bug)', () => {
-    it.skip('should return 401 when no token provided (routing bug - :id matches first)', () => {
-      // Bug: @Get('admin') después de @Get(':id') causa que 'admin' sea tratado como ID
+  describe('GET /suscripciones/admin', () => {
+    describe('Autenticación', () => {
+      it('should return 401 when no token provided', async () => {
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin')
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(401);
+      });
+
+      it('should return 403 when tutor tries to access', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const auth = await loginUser(app, { email: tutor.email, password });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(403);
+      });
     });
 
-    it.skip('should return 403 when tutor tries to access (routing bug)', () => {
-      // Bug: La ruta matchea con :id primero
+    describe('CE17: Admin ve todas las suscripciones', () => {
+      it('should return all suscriptions for admin', async () => {
+        const admin = await createTestAdmin(prisma);
+        const { tutor: tutor1 } = await createTestTutor(prisma);
+        const { tutor: tutor2 } = await createTestTutor(prisma);
+        const plan = await crearPlanSuscripcion();
+
+        await crearSuscripcion(tutor1.id, plan.id, EstadoSuscripcion.ACTIVA);
+        await crearSuscripcion(tutor2.id, plan.id, EstadoSuscripcion.PENDIENTE);
+
+        const auth = await loginUser(app, {
+          email: admin.email,
+          password: DEFAULT_PASSWORD,
+        });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        // La API retorna 'data' para la lista paginada, no 'suscripciones'
+        expect(response.body).toHaveProperty('data');
+        expect(response.body.data.length).toBe(2);
+      });
     });
 
-    it.skip('CE17: should return all suscriptions for admin (routing bug)', () => {
-      // Bug: La ruta matchea con :id primero
+    describe('CE18: Filtro por estado funciona', () => {
+      it('should filter suscriptions by estado', async () => {
+        const admin = await createTestAdmin(prisma);
+        const { tutor: tutor1 } = await createTestTutor(prisma);
+        const { tutor: tutor2 } = await createTestTutor(prisma);
+        const plan = await crearPlanSuscripcion();
+
+        await crearSuscripcion(tutor1.id, plan.id, EstadoSuscripcion.ACTIVA);
+        await crearSuscripcion(tutor2.id, plan.id, EstadoSuscripcion.CANCELADA);
+
+        const auth = await loginUser(app, {
+          email: admin.email,
+          password: DEFAULT_PASSWORD,
+        });
+
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin?estado=ACTIVA')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        // La API retorna 'data' para la lista paginada
+        expect(response.body.data.length).toBe(1);
+        expect(response.body.data[0].estado).toBe('ACTIVA');
+      });
     });
 
-    it.skip('CE18: should filter suscriptions by estado (routing bug)', () => {
-      // Bug: La ruta matchea con :id primero
-    });
+    describe('CE19: Paginación funciona', () => {
+      it('should paginate suscriptions correctly', async () => {
+        const admin = await createTestAdmin(prisma);
+        const plan = await crearPlanSuscripcion();
 
-    it.skip('CE19: should paginate suscriptions correctly (routing bug)', () => {
-      // Bug: La ruta matchea con :id primero
+        // Crear 3 tutores con suscripciones
+        for (let i = 0; i < 3; i++) {
+          const { tutor } = await createTestTutor(prisma);
+          await crearSuscripcion(tutor.id, plan.id, EstadoSuscripcion.ACTIVA);
+        }
+
+        const auth = await loginUser(app, {
+          email: admin.email,
+          password: DEFAULT_PASSWORD,
+        });
+
+        // Primera página con limit 2
+        const response = await request(app.getHttpServer())
+          .get('/api/suscripciones/admin?page=1&limit=2')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP());
+
+        expect(response.status).toBe(200);
+        // La API retorna 'data' para la lista paginada
+        expect(response.body.data.length).toBe(2);
+        expect(response.body).toHaveProperty('total');
+        expect(response.body.total).toBe(3);
+      });
     });
   });
 
@@ -657,35 +746,115 @@ describe('Suscripciones Integration Tests (BBT)', () => {
       });
     });
 
-    /**
-     * NOTA: Los tests CE4, CE5 y CE6 de creación de suscripciones están deshabilitados
-     * porque hay una incompatibilidad entre el DTO (@IsUUID) y el schema (CUID).
-     *
-     * El DTO valida plan_id y estudiante_ids como UUIDs, pero Prisma genera CUIDs.
-     * Esto causa que todas las requests fallen en validación antes de llegar a la lógica.
-     *
-     * TODO: Corregir el DTO para aceptar CUIDs en lugar de UUIDs, o migrar a UUIDs.
-     *
-     * Tests afectados:
-     * - CE4: Falla si estudiantes no pertenecen al tutor
-     * - CE5: Falla si plan no existe o está inactivo
-     * - CE6: Falla si plan requiere clase_grupo_id y no se provee
-     */
-    describe('CE4-CE6: Tests de creación (SKIPPED - UUID/CUID mismatch)', () => {
-      it.skip('should return 400 when estudiantes do not belong to tutor (CUID vs UUID issue)', () => {
-        // El DTO valida @IsUUID pero Prisma genera CUIDs
+    describe('CE4: Falla si estudiantes no pertenecen al tutor', () => {
+      it('should return 400 when estudiantes do not belong to tutor', async () => {
+        const { tutor: tutor1, password: password1 } =
+          await createTestTutor(prisma);
+        const { tutor: tutor2 } = await createTestTutor(prisma);
+        const { estudiante: estudianteTutor2 } = await createTestEstudiante(
+          prisma,
+          { tutorId: tutor2.id },
+        );
+        const plan = await crearPlanSuscripcion('PLAN_SIMPLE', 25000);
+
+        const auth = await loginUser(app, {
+          email: tutor1.email,
+          password: password1,
+        });
+
+        // Tutor1 intenta crear suscripción con estudiante de tutor2
+        const response = await request(app.getHttpServer())
+          .post('/api/suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP())
+          .send({
+            plan_id: plan.id,
+            estudiante_ids: [estudianteTutor2.id],
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain('no pertenecen');
+      });
+    });
+
+    describe('CE5: Falla si plan no existe o está inactivo', () => {
+      it('should return 400 when plan does not exist', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const { estudiante } = await createTestEstudiante(prisma, {
+          tutorId: tutor.id,
+        });
+        const auth = await loginUser(app, { email: tutor.email, password });
+
+        const response = await request(app.getHttpServer())
+          .post('/api/suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP())
+          .send({
+            // CUID válido en formato (c + 24 chars) pero inexistente en DB
+            plan_id: 'c000000000000000000000000',
+            estudiante_ids: [estudiante.id],
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain('no está disponible');
       });
 
-      it.skip('should return 400 when plan does not exist (CUID vs UUID issue)', () => {
-        // El DTO valida @IsUUID pero el ID enviado no pasa validación
-      });
+      it('should return 400 when plan is inactive', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const { estudiante } = await createTestEstudiante(prisma, {
+          tutorId: tutor.id,
+        });
+        const planInactivo = await crearPlanSuscripcion(
+          'PLAN_INACTIVO',
+          25000,
+          false,
+        );
+        const auth = await loginUser(app, { email: tutor.email, password });
 
-      it.skip('should return 400 when plan is inactive (CUID vs UUID issue)', () => {
-        // El DTO valida @IsUUID pero Prisma genera CUIDs
-      });
+        const response = await request(app.getHttpServer())
+          .post('/api/suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP())
+          .send({
+            plan_id: planInactivo.id,
+            estudiante_ids: [estudiante.id],
+          });
 
-      it.skip('should return 400 when STEAM_SINCRONICO plan without clase_grupo_id (CUID vs UUID issue)', () => {
-        // El DTO valida @IsUUID pero Prisma genera CUIDs
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain('no está disponible');
+      });
+    });
+
+    describe('CE6: Falla si plan STEAM requiere clase_grupo_id', () => {
+      it('should return 400 when STEAM_SINCRONICO plan without clase_grupo_id', async () => {
+        const { tutor, password } = await createTestTutor(prisma);
+        const { estudiante } = await createTestEstudiante(prisma, {
+          tutorId: tutor.id,
+        });
+        // El controller tiene: PLANES_CON_CLASE = ['STEAM_ASINCRONICO', 'STEAM_SINCRONICO']
+        const planSteam = await crearPlanSuscripcion('STEAM_SINCRONICO', 35000);
+        const auth = await loginUser(app, { email: tutor.email, password });
+
+        const response = await request(app.getHttpServer())
+          .post('/api/suscripciones')
+          .set('Authorization', `Bearer ${auth.token}`)
+          .set('Cookie', auth.cookie)
+          .set('Origin', FRONTEND_ORIGIN)
+          .set('X-Forwarded-For', generateUniqueIP())
+          .send({
+            plan_id: planSteam.id,
+            estudiante_ids: [estudiante.id],
+            // Sin clase_grupo_id
+          });
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain('requiere seleccionar');
       });
     });
   });

@@ -1,6 +1,5 @@
 import {
   IsString,
-  IsUUID,
   IsArray,
   ArrayMinSize,
   IsOptional,
@@ -8,14 +7,75 @@ import {
   Matches,
   Length,
   ValidateIf,
+  registerDecorator,
+  ValidationOptions,
+  ValidationArguments,
 } from 'class-validator';
+
+/**
+ * Regex para validar CUID (formato usado por Prisma)
+ * CUID v1: 25 caracteres alfanuméricos que empiezan con 'c'
+ */
+const CUID_REGEX = /^c[a-z0-9]{24}$/;
+
+/**
+ * Validador personalizado para CUIDs (inline para evitar dependencias circulares)
+ */
+function IsCuidLocal(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'isCuid',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: {
+        message: `${propertyName} debe ser un CUID válido`,
+        ...validationOptions,
+      },
+      validator: {
+        validate(value: unknown, _args: ValidationArguments) {
+          if (typeof value !== 'string') {
+            return false;
+          }
+          return CUID_REGEX.test(value);
+        },
+      },
+    });
+  };
+}
+
+/**
+ * Validador para arrays de CUIDs
+ */
+function IsCuidArray(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'isCuidArray',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: {
+        message: `${propertyName} debe contener CUIDs válidos`,
+        ...validationOptions,
+      },
+      validator: {
+        validate(value: unknown, _args: ValidationArguments) {
+          if (!Array.isArray(value)) {
+            return false;
+          }
+          return value.every(
+            (item) => typeof item === 'string' && CUID_REGEX.test(item),
+          );
+        },
+      },
+    });
+  };
+}
 
 /**
  * DTO para crear una nueva suscripción
  *
  * Validaciones:
- * - plan_id: UUID requerido del plan de suscripción
- * - estudiante_ids: Array de UUIDs, mínimo 1 estudiante
+ * - plan_id: CUID requerido del plan de suscripción (formato Prisma)
+ * - estudiante_ids: Array de CUIDs, mínimo 1 estudiante
  * - clase_grupo_id: Opcional, requerido solo si el plan es ASYNC o SYNC
  *
  * Campos opcionales para MercadoPago Bricks (cobro inmediato):
@@ -27,17 +87,17 @@ import {
  * 2. Con card_token_id + payer_email → Cobro inmediato con Bricks
  */
 export class CrearSuscripcionDto {
-  @IsUUID()
+  @IsCuidLocal({ message: 'plan_id debe ser un CUID válido' })
   @IsString()
   plan_id: string;
 
   @IsArray()
   @ArrayMinSize(1, { message: 'Debe seleccionar al menos un estudiante' })
-  @IsUUID('4', { each: true })
+  @IsCuidArray({ message: 'estudiante_ids debe contener CUIDs válidos' })
   estudiante_ids: string[];
 
   @IsOptional()
-  @IsUUID()
+  @IsCuidLocal({ message: 'clase_grupo_id debe ser un CUID válido' })
   clase_grupo_id?: string;
 
   /**

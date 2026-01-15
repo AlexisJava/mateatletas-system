@@ -191,6 +191,53 @@ export class SuscripcionesController {
     return this.queryService.getMisSuscripciones(user.id);
   }
 
+  // ============================================================================
+  // ADMIN
+  // ============================================================================
+  // IMPORTANTE: Rutas admin DEBEN estar ANTES de rutas con :id
+  // porque NestJS evalúa rutas en orden de definición
+
+  /**
+   * GET /suscripciones/admin
+   * Lista todas las suscripciones con filtros y paginación
+   */
+  @Get('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async adminListar(
+    @Query() filtros: AdminFiltrosSuscripcionDto,
+  ): Promise<AdminSuscripcionesResponseDto> {
+    const { estado, plan_id, page = 1, limit = 20 } = filtros;
+    return this.adminService.listarTodas({ estado, plan_id }, { page, limit });
+  }
+
+  /**
+   * GET /suscripciones/admin/morosas
+   * Lista suscripciones morosas y en período de gracia
+   */
+  @Get('admin/morosas')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async adminListarMorosas(): Promise<MorosasResponseDto> {
+    return this.adminService.listarMorosas();
+  }
+
+  /**
+   * GET /suscripciones/admin/metricas
+   * Dashboard de métricas de suscripciones
+   */
+  @Get('admin/metricas')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async adminGetMetricas(): Promise<MetricasSuscripcionesDto> {
+    return this.adminService.getMetricas();
+  }
+
+  // ============================================================================
+  // TUTOR - Rutas con parámetros dinámicos
+  // ============================================================================
+  // IMPORTANTE: Rutas con :id DEBEN estar DESPUÉS de rutas estáticas
+
   /**
    * GET /suscripciones/:id
    * Obtiene el detalle de una suscripción específica
@@ -270,45 +317,5 @@ export class SuscripcionesController {
     @GetUser() user: AuthUser,
   ): Promise<HistorialPagosResponseDto> {
     return this.queryService.getHistorialPagos(id, user.id);
-  }
-
-  // ============================================================================
-  // ADMIN
-  // ============================================================================
-
-  /**
-   * GET /suscripciones/admin
-   * Lista todas las suscripciones con filtros y paginación
-   */
-  @Get('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  async adminListar(
-    @Query() filtros: AdminFiltrosSuscripcionDto,
-  ): Promise<AdminSuscripcionesResponseDto> {
-    const { estado, plan_id, page = 1, limit = 20 } = filtros;
-    return this.adminService.listarTodas({ estado, plan_id }, { page, limit });
-  }
-
-  /**
-   * GET /suscripciones/admin/morosas
-   * Lista suscripciones morosas y en período de gracia
-   */
-  @Get('admin/morosas')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  async adminListarMorosas(): Promise<MorosasResponseDto> {
-    return this.adminService.listarMorosas();
-  }
-
-  /**
-   * GET /suscripciones/admin/metricas
-   * Dashboard de métricas de suscripciones
-   */
-  @Get('admin/metricas')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  async adminGetMetricas(): Promise<MetricasSuscripcionesDto> {
-    return this.adminService.getMetricas();
   }
 }
