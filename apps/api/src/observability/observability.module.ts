@@ -3,6 +3,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import { LoggerModule } from '../common/logger/logger.module';
 import { RequestContextMiddleware } from './context/request-context.middleware';
+import { PrometheusService, MetricsController } from './metrics';
 
 /**
  * ObservabilityModule
@@ -13,15 +14,24 @@ import { RequestContextMiddleware } from './context/request-context.middleware';
  * - Logging estructurado global
  * - Interceptores de peticiones HTTP
  * - Request Context propagation (AsyncLocalStorage)
- * - Métricas y trazabilidad
+ * - Métricas Prometheus (Sprint 3 - Observability)
+ *
+ * Métricas expuestas en /metrics:
+ * - mateatletas_* : Métricas por defecto de Node.js (CPU, memoria, event loop)
+ * - pagos_webhooks_* : Webhooks recibidos, procesados, fallidos
+ * - pagos_dlq_* : Dead Letter Queue size y operaciones
+ * - pagos_payments_* : Pagos por estado y montos
  *
  * Patrón: Observability Module
- * Beneficio: Centraliza todo el logging e instrumentación
+ * Beneficio: Centraliza logging, métricas e instrumentación
  */
 @Module({
   imports: [LoggerModule], // Logging estructurado global
+  controllers: [MetricsController], // Endpoint /metrics para Prometheus
   providers: [
     RequestContextMiddleware,
+    // Servicio de métricas Prometheus
+    PrometheusService,
     // Aplicar logging interceptor globalmente
     // Registra todas las peticiones HTTP con duración y metadata
     {
@@ -29,7 +39,7 @@ import { RequestContextMiddleware } from './context/request-context.middleware';
       useClass: LoggingInterceptor,
     },
   ],
-  exports: [RequestContextMiddleware],
+  exports: [RequestContextMiddleware, PrometheusService],
 })
 export class ObservabilityModule implements NestModule {
   /**

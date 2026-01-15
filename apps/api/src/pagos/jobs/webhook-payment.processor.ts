@@ -8,10 +8,11 @@
  */
 
 import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
-import { Logger } from '@nestjs/common';
+import { Logger, Optional } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { PaymentWebhookService } from '../services/payment-webhook.service';
 import { WebhookDLQService } from '../services/webhook-dlq.service';
+import { PrometheusService } from '../../observability/metrics';
 import {
   WEBHOOK_PAYMENT_QUEUE,
   WebhookPaymentJobData,
@@ -26,6 +27,7 @@ export class WebhookPaymentProcessor extends WorkerHost {
   constructor(
     private readonly webhookService: PaymentWebhookService,
     private readonly dlqService: WebhookDLQService,
+    @Optional() private readonly metricsService?: PrometheusService,
   ) {
     super();
   }
@@ -43,6 +45,10 @@ export class WebhookPaymentProcessor extends WorkerHost {
     const { payload, correlationId, clientIp } = job.data;
     const attemptNumber = job.attemptsMade + 1;
     const paymentId = payload.data.id;
+    const webhookType = payload.type;
+
+    // Iniciar timer de métricas
+    const startTime = Date.now();
 
     this.logger.log(
       `🔄 Procesando webhook job ${job.id} (intento ${attemptNumber}/${WEBHOOK_PAYMENT_JOB_OPTIONS.attempts}), ` +
@@ -61,9 +67,18 @@ export class WebhookPaymentProcessor extends WorkerHost {
       const resultInscripcionId = resultAny.inscripcionId as string | undefined;
       const resultEstadoPago = resultAny.estadoPago as string | undefined;
 
+      // Registrar métricas de éxito
+      const durationSeconds = (Date.now() - startTime) / 1000;
+      this.metricsService?.recordWebhookProcessed(webhookType, resultType);
+      this.metricsService?.observeWebhookDuration(
+        webhookType,
+        'success',
+        durationSeconds,
+      );
+
       this.logger.log(
         `✅ Webhook job ${job.id} completado: action=${resultType}, ` +
-          `correlationId=${correlationId}`,
+          `correlationId=${correlationId}, duration=${durationSeconds.toFixed(3)}s`,
       );
 
       return {
@@ -78,6 +93,16 @@ export class WebhookPaymentProcessor extends WorkerHost {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
+      const errorType = error instanceof Error ? error.name : 'UnknownError';
+
+      // Registrar métricas de fallo
+      const durationSeconds = (Date.now() - startTime) / 1000;
+      this.metricsService?.recordWebhookFailed(webhookType, errorType);
+      this.metricsService?.observeWebhookDuration(
+        webhookType,
+        'failure',
+        durationSeconds,
+      );
 
       this.logger.error(
         `❌ Webhook job ${job.id} falló (intento ${attemptNumber}): ${errorMessage}`,
@@ -141,6 +166,12 @@ export class WebhookPaymentProcessor extends WorkerHost {
           retries: attemptNumber,
         });
 
+        // Registrar métrica de webhook movido a DLQ
+        this.metricsService?.dlqEnqueued.inc({
+          type: payload.type,
+          reason: 'exhausted_retries',
+        });
+
         // Remover el job de la cola después de moverlo a DLQ
         await job.remove();
 
@@ -152,6 +183,9 @@ export class WebhookPaymentProcessor extends WorkerHost {
         this.logger.error(`❌ Error moviendo job a DLQ: ${dlqErrorMessage}`);
         // No lanzar error - el job ya falló, no queremos loops infinitos
       }
+    } else {
+      // Registrar métrica de reintento
+      this.metricsService?.jobRetries.inc({ queue: WEBHOOK_PAYMENT_QUEUE });
     }
   }
 

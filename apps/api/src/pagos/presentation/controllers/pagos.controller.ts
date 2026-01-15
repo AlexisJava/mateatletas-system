@@ -33,6 +33,7 @@ import { GetUser } from '../../../auth/decorators/get-user.decorator';
 import { AuthUser } from '../../../auth/interfaces';
 import { MercadoPagoWebhookGuard } from '../../guards/mercadopago-webhook.guard';
 import { Public } from '../../../auth/decorators/public.decorator';
+import { PrometheusService } from '../../../observability/metrics';
 
 /**
  * PagosController - Presentation Layer
@@ -56,6 +57,7 @@ export class PagosController {
     private readonly verificacionMorosidadService: VerificacionMorosidadService,
     private readonly pagosFacade: PagosManagementFacadeService,
     private readonly webhookQueueService: WebhookPaymentQueueService,
+    private readonly metricsService: PrometheusService,
   ) {}
 
   /**
@@ -352,6 +354,8 @@ export class PagosController {
     @Headers('x-request-id') _requestId: string,
     @Req() req: Request,
   ) {
+    const webhookType = webhookData.type;
+
     // Extraer IP del cliente para logging/debugging
     const clientIp =
       (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
@@ -365,10 +369,16 @@ export class PagosController {
     );
 
     if (!result.success) {
+      // Registrar métrica de webhook rechazado por error de encolado
+      this.metricsService.recordWebhookReceived(webhookType, 'rejected');
+
       // Si falla el encolado, intentar procesar sincrónicamente como fallback
       this.logger.warn(`⚠️ Fallback a procesamiento síncrono: ${result.error}`);
       return await this.pagosFacade.procesarWebhookMercadoPago(webhookData);
     }
+
+    // Registrar métrica de webhook encolado exitosamente
+    this.metricsService.recordWebhookReceived(webhookType, 'queued');
 
     // Responder inmediatamente (MercadoPago no reintentará)
     this.logger.log(

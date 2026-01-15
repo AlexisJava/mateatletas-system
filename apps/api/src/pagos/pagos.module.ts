@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { DatabaseModule } from '../core/database/database.module';
 import { CatalogoModule } from '../catalogo/catalogo.module';
+import { ObservabilityModule } from '../observability/observability.module';
 import { PagosController } from './presentation/controllers/pagos.controller';
 import { PagosService } from './presentation/services/pagos.service';
 import { VerificacionMorosidadService } from './services/verificacion-morosidad.service';
@@ -69,6 +70,7 @@ import { MercadoPagoService } from './mercadopago.service';
     DatabaseModule,
     CatalogoModule,
     ConfigModule,
+    ObservabilityModule, // Para PrometheusService (métricas)
 
     // === BullMQ Configuration (Async Webhook Processing) ===
     BullModule.forRootAsync({
