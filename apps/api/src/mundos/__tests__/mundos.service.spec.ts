@@ -12,10 +12,10 @@ import { MundoTipo } from '@prisma/client';
  * - PROGRAMACION: Codigo, algoritmos, logica
  * - CIENCIAS: Fisica, quimica, biologia
  *
- * Reglas de negocio:
- * - Tier ARCADE: acceso a 1 mundo
- * - Tier ARCADE+: acceso a 2 mundos
- * - Tier PRO: acceso a 3 mundos
+ * Reglas de negocio (Tiers STEAM):
+ * - STEAM_LIBROS: acceso a todos los mundos (solo libros)
+ * - STEAM_ASINCRONICO: acceso a todos los mundos + clases grabadas
+ * - STEAM_SINCRONICO: acceso a todos los mundos + clases en vivo
  */
 // SKIP: Tests pendientes de actualización - RecursosEstudiante refactor
 describe.skip('MundosService', () => {

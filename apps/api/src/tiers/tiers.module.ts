@@ -5,10 +5,10 @@ import { TiersController } from './tiers.controller';
 /**
  * Módulo de Tiers - Sistema Mateatletas 2026
  *
- * Gestiona los 3 tiers de suscripción:
- * - ARCADE: $30k - 1 mundo async, sin docente
- * - ARCADE_PLUS: $60k - 3 mundos async, sin docente
- * - PRO: $75k - 1 mundo async + 1 mundo sync, con docente
+ * Gestiona los 3 tiers de suscripción STEAM:
+ * - STEAM_LIBROS: $40k - Plataforma completa (todos los mundos)
+ * - STEAM_ASINCRONICO: $65k - Incluye clases grabadas
+ * - STEAM_SINCRONICO: $95k - Incluye clases en vivo con docente
  */
 @Module({
   controllers: [TiersController],

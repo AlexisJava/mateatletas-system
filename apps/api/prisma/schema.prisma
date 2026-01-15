@@ -785,6 +785,12 @@ model Producto {
   cupo_maximo             Int?
   /// Duración en meses de la suscripción (1=mensual, 12=anual, etc.)
   duracion_meses          Int?                 @default(1)
+  /// Precio con descuento por pago de contado (1 solo pago)
+  precio_contado          Decimal?             @db.Decimal(10, 2)
+  /// Indica si el producto permite pago en cuotas via MercadoPago
+  permite_cuotas          Boolean              @default(false)
+  /// Máximo de cuotas permitidas (3, 6, 12, etc.)
+  max_cuotas              Int?
   /// Timestamp de creación del registro
   createdAt               DateTime             @default(now())
   /// Timestamp de última actualización del registro
@@ -1792,6 +1798,7 @@ enum EstadoPago {
   Pagado
   Vencido
   Parcial
+  Anulado
 
   @@map("estado_pago")
 }

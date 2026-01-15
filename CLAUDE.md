@@ -25,11 +25,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Testing
 
-- PROHIBIDO: Mocks de base de datos en tests de integración
+- PROHIBIDO: Mocks de base de datos en tests de integración (usar DB real con docker-compose.test.yml)
 - PROHIBIDO: Modificar test para que pase (modificar el CÓDIGO, no el test)
 - PROHIBIDO: Ejecutar tests - EL USUARIO LOS EJECUTA (Claude tarda demasiado)
 - OBLIGATORIO: TDD - test primero, código después
 - OBLIGATORIO: Verificar funcionamiento real en browser/Postman
+- OBLIGATORIO: Black Box Testing - testear REQUISITOS, no implementación
 - OBLIGATORIO: Leer `apps/api/test/TESTING.md` antes de escribir tests
 
 ### Instrucciones del Usuario
@@ -413,12 +414,31 @@ yarn test:web             # Solo frontend
 cd apps/api && npm test -- --testPathPattern="nombre-archivo"
 
 # Integration tests (requiere docker-compose.test.yml)
+docker-compose -f apps/api/docker-compose.test.yml up -d
+DATABASE_URL="postgresql://test:test_password_123@localhost:5433/mateatletas_test" npx prisma migrate deploy
 yarn test:integration
 
 # E2E tests
 yarn test:e2e             # Playwright completo
 yarn test:e2e:ui          # Con UI interactivo
 yarn test:e2e:headed      # Con browser visible
+```
+
+### Factories para Tests
+
+Al escribir tests de integración, usar factories de `apps/api/test/fixtures/factories`:
+
+```typescript
+// Escenarios completos (recomendado)
+import { createFullAulaSetup, createEstudianteConComision } from '../../fixtures/factories';
+
+// Setup completo de aula virtual con planificación
+const setup = await createFullAulaSetup(prisma);
+// → { admin, docente, estudiante, planificacion, asignacion, passwords... }
+
+// Presets de estudiante (variantes comunes)
+import { ESTUDIANTE_PRESETS } from '../../fixtures/presets';
+const { estudiante, password } = await ESTUDIANTE_PRESETS.planSincronico(prisma);
 ```
 
 ### Comandos de Workspace
@@ -529,6 +549,37 @@ Para tareas específicas, leer:
 - Backend API: http://localhost:3001/api
 - Swagger Docs: http://localhost:3001/api/docs
 - Prisma Studio: http://localhost:5555
+
+---
+
+## TROUBLESHOOTING COMÚN
+
+### "Port already in use"
+
+```bash
+yarn dev:stop                          # Mata procesos en 3000/3001
+```
+
+### "Prisma Client out of sync"
+
+```bash
+cd apps/api && npx prisma generate     # Regenerar cliente
+```
+
+### Tests de integración fallan
+
+```bash
+# Verificar que docker-compose.test.yml está corriendo
+docker ps | grep postgres-test
+# Si no está, levantarlo:
+docker-compose -f apps/api/docker-compose.test.yml up -d
+```
+
+### Errores de tipos después de cambios en contracts
+
+```bash
+yarn build:contracts                   # Rebuild contracts primero
+```
 
 ---
 

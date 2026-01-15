@@ -26,7 +26,7 @@ export class TiersController {
 
   /**
    * GET /tiers/nombre/:nombre
-   * Obtiene un tier por su nombre (ARCADE, ARCADE_PLUS, PRO)
+   * Obtiene un tier por su nombre (STEAM_LIBROS, STEAM_ASINCRONICO, STEAM_SINCRONICO)
    */
   @Get('nombre/:nombre')
   async findByNombre(
