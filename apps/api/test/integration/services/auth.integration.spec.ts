@@ -23,8 +23,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import cookieParser from 'cookie-parser';
-import { PrismaService } from '../../src/core/database/prisma.service';
-import { AppModule } from '../../src/app.module';
+import { PrismaService } from '../../../src/core/database/prisma.service';
+import { AppModule } from '../../../src/app.module';
 import { cleanAllTestTables } from '../helpers/db-cleanup';
 
 describe('[INTEGRATION] Auth Module', () => {
