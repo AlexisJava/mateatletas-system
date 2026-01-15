@@ -30,7 +30,7 @@ import {
   createTestEstudiante,
   createTestLogro,
   createTestTutor,
-} from '../fixtures/factories';
+} from '../../fixtures/factories';
 
 describe('[INTEGRATION] LogrosService - Eventos de Gamificación', () => {
   let app: INestApplication;

@@ -44,9 +44,9 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
-import { AppModule } from '../../../src/app.module';
-import { PrismaService } from '../../../src/core/database/prisma.service';
-import { cleanAllTestTables } from '../../helpers/db-cleanup';
+import { AppModule } from '../../../../src/app.module';
+import { PrismaService } from '../../../../src/core/database/prisma.service';
+import { cleanAllTestTables } from '../../../helpers/db-cleanup';
 import {
   createTestTutor,
   createTestAdmin,
@@ -54,12 +54,12 @@ import {
   createTestEstudiante,
   createTestProducto,
   DEFAULT_PASSWORD,
-} from '../../fixtures/factories';
+} from '../../../fixtures/factories';
 import {
   loginUser,
   FRONTEND_ORIGIN,
   generateUniqueIP,
-} from '../../helpers/auth.helpers';
+} from '../../../helpers/auth.helpers';
 
 describe('[INTEGRATION] Admin - Pago Manual', () => {
   let app: INestApplication;

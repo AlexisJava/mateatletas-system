@@ -29,11 +29,11 @@ import {
   createTestClaseGrupo,
   createTestSector,
   createTestInscripcionClaseGrupo,
-} from '../fixtures/factories';
+} from '../../fixtures/factories';
 import {
   ESTUDIANTE_FIXTURES,
   createClaseConEstudiantes,
-} from '../fixtures/presets';
+} from '../../fixtures/presets';
 import {
   assertEstudianteExists,
   assertTutorExists,
@@ -42,8 +42,8 @@ import {
   assertInscritoEnClaseGrupo,
   assertEstudianteState,
   getXPActual,
-} from '../helpers/assertions';
-import { loginEstudiante, loginUser } from '../helpers/auth.helpers';
+} from '../../helpers/assertions';
+import { loginEstudiante, loginUser } from '../../helpers/auth.helpers';
 import { EstadoAccesoEstudiante } from '@prisma/client';
 
 describe('[INTEGRATION] Fixtures Validation', () => {

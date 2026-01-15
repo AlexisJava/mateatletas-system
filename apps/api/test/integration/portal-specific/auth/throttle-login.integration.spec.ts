@@ -27,11 +27,11 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
-import { PrismaService } from '../../../src/core/database/prisma.service';
-import { AppModule } from '../../../src/app.module';
-import { cleanAllTestTables } from '../../helpers/db-cleanup';
-import { ESTUDIANTE_FIXTURES } from '../../fixtures/presets';
-import { FRONTEND_ORIGIN } from '../../helpers/auth.helpers';
+import { PrismaService } from '../../../../src/core/database/prisma.service';
+import { AppModule } from '../../../../src/app.module';
+import { cleanAllTestTables } from '../../../helpers/db-cleanup';
+import { ESTUDIANTE_FIXTURES } from '../../../fixtures/presets';
+import { FRONTEND_ORIGIN } from '../../../helpers/auth.helpers';
 
 describe('[INTEGRATION] Throttle en Login Estudiante', () => {
   let app: INestApplication;

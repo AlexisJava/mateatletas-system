@@ -47,22 +47,22 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
-import { AppModule } from '../../../src/app.module';
-import { PrismaService } from '../../../src/core/database/prisma.service';
-import { cleanAllTestTables } from '../../helpers/db-cleanup';
+import { AppModule } from '../../../../src/app.module';
+import { PrismaService } from '../../../../src/core/database/prisma.service';
+import { cleanAllTestTables } from '../../../helpers/db-cleanup';
 import {
   createTestAdmin,
   createTestDocente,
   createTestGrupo,
   createTestClaseGrupo,
   createTestSector,
-} from '../../fixtures/factories';
+} from '../../../fixtures/factories';
 import {
   loginUser,
   FRONTEND_ORIGIN,
   generateUniqueIP,
-} from '../../helpers/auth.helpers';
-import { DEFAULT_PASSWORD } from '../../fixtures/factories/usuario.factory';
+} from '../../../helpers/auth.helpers';
+import { DEFAULT_PASSWORD } from '../../../fixtures/factories/usuario.factory';
 
 describe('[INTEGRATION] Sistema Casa/Mundo 2026 - Grupos Pedagógicos', () => {
   let app: INestApplication;

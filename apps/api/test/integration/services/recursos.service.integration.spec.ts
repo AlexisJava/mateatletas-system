@@ -27,7 +27,10 @@ import { RecursosService } from '../../../src/gamificacion/services/recursos.ser
 import { PrismaService } from '../../../src/core/database/prisma.service';
 import { AppModule } from '../../../src/app.module';
 import { cleanGamificationTables } from '../../helpers/db-cleanup';
-import { createTestEstudiante, createTestTutor } from '../fixtures/factories';
+import {
+  createTestEstudiante,
+  createTestTutor,
+} from '../../fixtures/factories';
 
 describe('[INTEGRATION] RecursosService - Eventos de Gamificación', () => {
   let app: INestApplication;

@@ -30,7 +30,7 @@ import {
   createTestEstudiante,
   createTestContenido,
   createTestTutor,
-} from '../fixtures/factories';
+} from '../../fixtures/factories';
 
 describe('[INTEGRATION] ProgresoService - Eventos de Gamificación', () => {
   let app: INestApplication;

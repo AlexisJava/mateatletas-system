@@ -1,0 +1,16 @@
+
+Oops! Something went wrong! :(
+
+ESLint: 9.39.0
+
+ConfigError: Config (unnamed): Key "plugins": Cannot redefine plugin "sonarjs".
+    at rethrowConfigError (/home/alexis/Documentos/Mateatletas-Ecosystem/node_modules/@eslint/config-array/dist/cjs/index.cjs:343:8)
+    at /home/alexis/Documentos/Mateatletas-Ecosystem/node_modules/@eslint/config-array/dist/cjs/index.cjs:1405:5
+    at Array.reduce (<anonymous>)
+    at FlatConfigArray.getConfigWithStatus (/home/alexis/Documentos/Mateatletas-Ecosystem/node_modules/@eslint/config-array/dist/cjs/index.cjs:1398:43)
+    at FlatConfigArray.getConfig (/home/alexis/Documentos/Mateatletas-Ecosystem/node_modules/@eslint/config-array/dist/cjs/index.cjs:1427:15)
+    at entryFilter (/home/alexis/Documentos/Mateatletas-Ecosystem/node_modules/eslint/lib/eslint/eslint-helpers.js:323:27)
+    at async NodeHfs.<anonymous> (file:///home/alexis/Documentos/Mateatletas-Ecosystem/node_modules/@humanfs/core/src/hfs.js:574:24)
+    at async NodeHfs.<anonymous> (file:///home/alexis/Documentos/Mateatletas-Ecosystem/node_modules/@humanfs/core/src/hfs.js:604:6)
+    at async NodeHfs.walk (file:///home/alexis/Documentos/Mateatletas-Ecosystem/node_modules/@humanfs/core/src/hfs.js:614:3)
+    at async globSearch (/home/alexis/Documentos/Mateatletas-Ecosystem/node_modules/eslint/lib/eslint/eslint-helpers.js:364:20)

@@ -23,22 +23,22 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
-import { PrismaService } from '../../../src/core/database/prisma.service';
-import { AppModule } from '../../../src/app.module';
-import { cleanAllTestTables } from '../../helpers/db-cleanup';
+import { PrismaService } from '../../../../src/core/database/prisma.service';
+import { AppModule } from '../../../../src/app.module';
+import { cleanAllTestTables } from '../../../helpers/db-cleanup';
 import {
   createTestEstudiante,
   createTestTutor,
   createTestPlan,
   createTestSuscripcion,
-} from '../../fixtures/factories';
-import { ESTUDIANTE_FIXTURES } from '../../fixtures/presets';
+} from '../../../fixtures/factories';
+import { ESTUDIANTE_FIXTURES } from '../../../fixtures/presets';
 import {
   loginEstudiante,
   loginUser,
   withAuthHeaders,
   FRONTEND_ORIGIN,
-} from '../../helpers/auth.helpers';
+} from '../../../helpers/auth.helpers';
 import { EstadoSuscripcion } from '@prisma/client';
 
 describe('[INTEGRATION] Verificar Acceso Estudiante', () => {

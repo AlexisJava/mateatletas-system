@@ -31,12 +31,12 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
-import { AppModule } from '../../../src/app.module';
-import { PrismaService } from '../../../src/core/database/prisma.service';
-import { cleanAllTestTables } from '../../helpers/db-cleanup';
-import { createTestAdmin } from '../../fixtures/factories';
-import { loginUser, FRONTEND_ORIGIN } from '../../helpers/auth.helpers';
-import { DEFAULT_PASSWORD } from '../../fixtures/factories/usuario.factory';
+import { AppModule } from '../../../../src/app.module';
+import { PrismaService } from '../../../../src/core/database/prisma.service';
+import { cleanAllTestTables } from '../../../helpers/db-cleanup';
+import { createTestAdmin } from '../../../fixtures/factories';
+import { loginUser, FRONTEND_ORIGIN } from '../../../helpers/auth.helpers';
+import { DEFAULT_PASSWORD } from '../../../fixtures/factories/usuario.factory';
 
 describe('[INTEGRATION] Sandbox - Flujos E2E Completos', () => {
   let app: INestApplication;

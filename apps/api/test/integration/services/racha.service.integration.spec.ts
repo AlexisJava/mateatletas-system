@@ -26,7 +26,10 @@ import { RachaService } from '../../../src/gamificacion/services/racha.service';
 import { PrismaService } from '../../../src/core/database/prisma.service';
 import { AppModule } from '../../../src/app.module';
 import { cleanAllTestTables } from '../../helpers/db-cleanup';
-import { createTestEstudiante, createTestTutor } from '../fixtures/factories';
+import {
+  createTestEstudiante,
+  createTestTutor,
+} from '../../fixtures/factories';
 
 describe('[INTEGRATION] RachaService - Eventos de Gamificación', () => {
   let app: INestApplication;

@@ -18,9 +18,9 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
-import { AppModule } from '../../../src/app.module';
-import { PrismaService } from '../../../src/core/database/prisma.service';
-import { cleanAllTestTables } from '../../helpers/db-cleanup';
+import { AppModule } from '../../../../src/app.module';
+import { PrismaService } from '../../../../src/core/database/prisma.service';
+import { cleanAllTestTables } from '../../../helpers/db-cleanup';
 import {
   createTestDocente,
   createTestTutor,
@@ -30,8 +30,11 @@ import {
   createTestClaseGrupo,
   createTestPlanificacion,
   createTestAsignacionPlanificacion,
-} from '../../fixtures/factories';
-import { generateUniqueIP, FRONTEND_ORIGIN } from '../../helpers/auth.helpers';
+} from '../../../fixtures/factories';
+import {
+  generateUniqueIP,
+  FRONTEND_ORIGIN,
+} from '../../../helpers/auth.helpers';
 
 describe('[INTEGRATION] Teoria y Practica - Endpoints 4-7', () => {
   let app: INestApplication;
