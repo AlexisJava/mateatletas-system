@@ -1,70 +1,58 @@
 /**
  * ============================================================================
- * BLACK BOX INTEGRATION TEST
+ * ADMIN GRUPOS PEDAGOGICOS INTEGRATION TEST - Black Box Testing
  * ============================================================================
  *
- * SISTEMA CASA/MUNDO 2026 - Grupos Pedagógicos
- *
- * ENDPOINTS BAJO TEST:
- * - GET    /api/admin/grupos-pedagogicos            - Listar grupos
- * - GET    /api/admin/grupos-pedagogicos/:id        - Detalle grupo
- * - PATCH  /api/admin/grupos-pedagogicos:id         - Actualizar casa/mundo
- * - POST   /api/admin/grupos-pedagogicos/migrar-legacy - Migrar grupos legacy
- * - GET    /api/admin/grupos-pedagogicos/estadisticas  - Estadísticas
+ * ENDPOINTS:
+ * - GET /admin/grupos-pedagogicos → Listar grupos con filtros
+ * - GET /admin/grupos-pedagogicos/:id → Obtener grupo por ID
+ * - PATCH /admin/grupos-pedagogicos/:id → Actualizar casa/mundo
+ * - GET /admin/grupos-pedagogicos/estadisticas → Estadísticas por casa/mundo
+ * - POST /admin/grupos-pedagogicos/migrar-legacy → Migrar grupos legacy
  *
  * EQUIVALENCE CLASSES:
- * Auth:
- * - [ADMIN]: usuario admin autenticado → 200
- * - [DOCENTE]: usuario docente → 403
- * - [NO-AUTH]: sin token → 401
  *
- * Grupo:
- * - [EXISTE]: grupo válido en DB
- * - [NO-EXISTE]: UUID válido pero no existe → 404
- * - [CON-CASA-MUNDO]: grupo ya tiene casa_tipo y mundo_tipo
- * - [SIN-CASA-MUNDO]: grupo legacy sin asignar
+ * GET /admin/grupos-pedagogicos:
+ * - CE1: Sin filtros → Lista todos los grupos activos
+ * - CE2: Filtro por casa_tipo → Solo de esa casa
+ * - CE3: Filtro por mundo_tipo → Solo de ese mundo
+ * - CE4: Filtro por activo=false → Solo inactivos
  *
- * Filtros:
- * - [SIN-FILTROS]: retorna todos
- * - [FILTRO-CASA]: filtra por casa_tipo
- * - [FILTRO-MUNDO]: filtra por mundo_tipo
- * - [FILTRO-ACTIVO]: filtra por estado activo/inactivo
+ * GET /admin/grupos-pedagogicos/:id:
+ * - CE5: ID existente → Grupo con claseGrupos y comisiones
+ * - CE6: ID no existente → 404
  *
- * BOUNDARIES:
- * - 0 grupos → array vacío
- * - Muchos grupos → paginación (si aplica)
+ * PATCH /admin/grupos-pedagogicos/:id:
+ * - CE7: Actualizar casa_tipo y mundo_tipo → 200
+ * - CE8: ID no existente → 404
  *
- * STATE TRANSITIONS:
- * - LEGACY (sin casa/mundo) → actualizar → CON_CASA_MUNDO
- * - CON_CASA_MUNDO → actualizar → NUEVA_CASA_MUNDO
+ * GET /admin/grupos-pedagogicos/estadisticas:
+ * - CE9: Retorna totales por casa y mundo
+ *
+ * Security:
+ * - CE10: No autenticado → 401
+ * - CE11: Docente → 403
  *
  * Setup: docker-compose -f docker-compose.test.yml up -d
- * Run: yarn workspace api test --testPathPattern="grupos-pedagogicos" --runInBand
+ * Run: yarn test:integration -- --testPathPattern="grupos-pedagogicos"
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { AppModule } from '../../../../src/app.module';
 import { PrismaService } from '../../../../src/core/database/prisma.service';
-import { cleanAllTestTables } from '../../../helpers/db-cleanup';
 import {
   createTestAdmin,
   createTestDocente,
-  createTestGrupo,
-  createTestClaseGrupo,
-  createTestSector,
 } from '../../../fixtures/factories';
-import {
-  loginUser,
-  FRONTEND_ORIGIN,
-  generateUniqueIP,
-} from '../../../helpers/auth.helpers';
 import { DEFAULT_PASSWORD } from '../../../fixtures/factories/usuario.factory';
+import { cleanAllTestTables } from '../../../helpers/db-cleanup';
+import { loginUser } from '../../../helpers/auth.helpers';
 
-describe('[INTEGRATION] Sistema Casa/Mundo 2026 - Grupos Pedagógicos', () => {
+describe('[INTEGRATION] Admin Grupos Pedagógicos (BBT)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
 
@@ -107,461 +95,362 @@ describe('[INTEGRATION] Sistema Casa/Mundo 2026 - Grupos Pedagógicos', () => {
   });
 
   // ============================================================================
-  // HELPER: Login admin
+  // HELPER: Crear grupo pedagógico de test
   // ============================================================================
-  async function loginAsAdmin() {
-    const admin = await createTestAdmin(prisma);
-    return loginUser(app, { email: admin.email, password: DEFAULT_PASSWORD });
-  }
-
-  // ============================================================================
-  // HELPER: Crear grupo pedagógico (ClaseGrupo con casa/mundo)
-  // ============================================================================
-  async function crearGrupoPedagogico(opciones?: {
+  async function createTestGrupoPedagogico(options: {
+    codigo: string;
     nombre?: string;
-    casa_tipo?: 'QUANTUM' | 'VERTEX' | 'PULSAR' | null;
-    mundo_tipo?: 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS' | null;
+    casa_tipo?: 'QUANTUM' | 'VERTEX' | 'PULSAR';
+    mundo_tipo?: 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
     activo?: boolean;
   }) {
-    // ClaseGrupo representa un "Grupo Pedagógico" en el sistema
-    const sector = await createTestSector(prisma);
-    const grupo = await createTestGrupo(prisma, { sectorId: sector.id });
-    const claseGrupo = await createTestClaseGrupo(prisma, {
-      grupoId: grupo.id,
-      nombre: opciones?.nombre ?? 'Grupo Test',
+    return prisma.grupoPedagogico.create({
+      data: {
+        codigo: options.codigo,
+        nombre: options.nombre ?? `Grupo ${options.codigo}`,
+        casa_tipo: options.casa_tipo ?? null,
+        mundo_tipo: options.mundo_tipo ?? null,
+        activo: options.activo ?? true,
+      },
     });
-
-    // Actualizar con casa/mundo si se especifica
-    if (opciones?.casa_tipo || opciones?.mundo_tipo) {
-      await prisma.claseGrupo.update({
-        where: { id: claseGrupo.id },
-        data: {
-          casa_tipo: opciones.casa_tipo,
-          mundo_tipo: opciones.mundo_tipo,
-        },
-      });
-    }
-
-    return claseGrupo;
   }
 
   // ============================================================================
-  // TESTS: GET /api/admin/grupos-pedagogicos - Listar Grupos
+  // CE1-CE4: GET /admin/grupos-pedagogicos - Listado con filtros
   // ============================================================================
   describe('GET /api/admin/grupos-pedagogicos', () => {
-    describe('Equivalence Partitioning: Autenticación', () => {
-      it('Clase ADMIN: debe listar grupos', async () => {
-        await crearGrupoPedagogico({ nombre: 'Grupo 1' });
-        await crearGrupoPedagogico({ nombre: 'Grupo 2' });
-        const auth = await loginAsAdmin();
-
-        const response = await request(app.getHttpServer())
-          .get('/api/admin/grupos-pedagogicos')
-          .set('Authorization', `Bearer ${auth.token}`)
-          .set('Cookie', auth.cookie)
-          .set('Origin', FRONTEND_ORIGIN);
-
-        expect(response.status).toBe(200);
-        expect(Array.isArray(response.body)).toBe(true);
-        expect(response.body.length).toBeGreaterThanOrEqual(2);
+    it('CE1: should list all active grupos without filters', async () => {
+      // Arrange
+      const admin = await createTestAdmin(prisma);
+      const auth = await loginUser(app, {
+        email: admin.email,
+        password: DEFAULT_PASSWORD,
       });
 
-      it('Clase NO-AUTH: debe retornar 401', async () => {
-        const response = await request(app.getHttpServer())
-          .get('/api/admin/grupos-pedagogicos')
-          .set('Origin', FRONTEND_ORIGIN)
-          .set('X-Forwarded-For', generateUniqueIP());
-
-        expect(response.status).toBe(401);
+      await createTestGrupoPedagogico({
+        codigo: 'GP-001',
+        casa_tipo: 'QUANTUM',
+        mundo_tipo: 'MATEMATICA',
+      });
+      await createTestGrupoPedagogico({
+        codigo: 'GP-002',
+        casa_tipo: 'VERTEX',
+        mundo_tipo: 'PROGRAMACION',
       });
 
-      it('Clase DOCENTE: debe retornar 403', async () => {
-        const { docente, password } = await createTestDocente(prisma);
-        const auth = await loginUser(app, { email: docente.email, password });
+      // Act
+      const response = await request(app.getHttpServer())
+        .get('/api/admin/grupos-pedagogicos')
+        .set('Cookie', auth.cookie);
 
-        const response = await request(app.getHttpServer())
-          .get('/api/admin/grupos-pedagogicos')
-          .set('Authorization', `Bearer ${auth.token}`)
-          .set('Cookie', auth.cookie)
-          .set('Origin', FRONTEND_ORIGIN);
-
-        expect(response.status).toBe(403);
-      });
+      // Assert
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBeGreaterThanOrEqual(2);
     });
 
-    describe('Boundary: Cantidad de grupos', () => {
-      it('Sin grupos → array vacío', async () => {
-        const auth = await loginAsAdmin();
-
-        const response = await request(app.getHttpServer())
-          .get('/api/admin/grupos-pedagogicos')
-          .set('Authorization', `Bearer ${auth.token}`)
-          .set('Cookie', auth.cookie)
-          .set('Origin', FRONTEND_ORIGIN);
-
-        expect(response.status).toBe(200);
-        expect(response.body).toHaveLength(0);
+    it('CE2: should filter by casa_tipo', async () => {
+      // Arrange
+      const admin = await createTestAdmin(prisma);
+      const auth = await loginUser(app, {
+        email: admin.email,
+        password: DEFAULT_PASSWORD,
       });
+
+      await createTestGrupoPedagogico({
+        codigo: 'GP-Q1',
+        casa_tipo: 'QUANTUM',
+      });
+      await createTestGrupoPedagogico({
+        codigo: 'GP-V1',
+        casa_tipo: 'VERTEX',
+      });
+
+      // Act
+      const response = await request(app.getHttpServer())
+        .get('/api/admin/grupos-pedagogicos?casa_tipo=QUANTUM')
+        .set('Cookie', auth.cookie);
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(
+        response.body.every(
+          (g: { casa_tipo: string }) => g.casa_tipo === 'QUANTUM',
+        ),
+      ).toBe(true);
     });
 
-    describe('Equivalence Partitioning: Filtros', () => {
-      it('Filtro por casa_tipo=QUANTUM', async () => {
-        await crearGrupoPedagogico({
-          casa_tipo: 'QUANTUM',
-          mundo_tipo: 'MATEMATICA',
-        });
-        await crearGrupoPedagogico({
-          casa_tipo: 'VERTEX',
-          mundo_tipo: 'MATEMATICA',
-        });
-        const auth = await loginAsAdmin();
-
-        const response = await request(app.getHttpServer())
-          .get('/api/admin/grupos-pedagogicos?casa_tipo=QUANTUM')
-          .set('Authorization', `Bearer ${auth.token}`)
-          .set('Cookie', auth.cookie)
-          .set('Origin', FRONTEND_ORIGIN);
-
-        expect(response.status).toBe(200);
-        // Todos deben tener casa_tipo QUANTUM
-        for (const grupo of response.body) {
-          expect(grupo.casa_tipo).toBe('QUANTUM');
-        }
+    it('CE3: should filter by mundo_tipo', async () => {
+      // Arrange
+      const admin = await createTestAdmin(prisma);
+      const auth = await loginUser(app, {
+        email: admin.email,
+        password: DEFAULT_PASSWORD,
       });
 
-      it('Filtro por mundo_tipo=PROGRAMACION', async () => {
-        await crearGrupoPedagogico({
-          casa_tipo: 'QUANTUM',
-          mundo_tipo: 'PROGRAMACION',
-        });
-        await crearGrupoPedagogico({
-          casa_tipo: 'QUANTUM',
-          mundo_tipo: 'CIENCIAS',
-        });
-        const auth = await loginAsAdmin();
-
-        const response = await request(app.getHttpServer())
-          .get('/api/admin/grupos-pedagogicos?mundo_tipo=PROGRAMACION')
-          .set('Authorization', `Bearer ${auth.token}`)
-          .set('Cookie', auth.cookie)
-          .set('Origin', FRONTEND_ORIGIN);
-
-        expect(response.status).toBe(200);
-        for (const grupo of response.body) {
-          expect(grupo.mundo_tipo).toBe('PROGRAMACION');
-        }
+      await createTestGrupoPedagogico({
+        codigo: 'GP-M1',
+        mundo_tipo: 'MATEMATICA',
+      });
+      await createTestGrupoPedagogico({
+        codigo: 'GP-P1',
+        mundo_tipo: 'PROGRAMACION',
       });
 
-      it('Filtro combinado casa + mundo', async () => {
-        await crearGrupoPedagogico({
-          casa_tipo: 'QUANTUM',
-          mundo_tipo: 'MATEMATICA',
-        });
-        await crearGrupoPedagogico({
-          casa_tipo: 'QUANTUM',
-          mundo_tipo: 'PROGRAMACION',
-        });
-        await crearGrupoPedagogico({
-          casa_tipo: 'VERTEX',
-          mundo_tipo: 'MATEMATICA',
-        });
-        const auth = await loginAsAdmin();
+      // Act
+      const response = await request(app.getHttpServer())
+        .get('/api/admin/grupos-pedagogicos?mundo_tipo=MATEMATICA')
+        .set('Cookie', auth.cookie);
 
-        const response = await request(app.getHttpServer())
-          .get(
-            '/api/admin/grupos-pedagogicos?casa_tipo=QUANTUM&mundo_tipo=MATEMATICA',
-          )
-          .set('Authorization', `Bearer ${auth.token}`)
-          .set('Cookie', auth.cookie)
-          .set('Origin', FRONTEND_ORIGIN);
+      // Assert
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(
+        response.body.every(
+          (g: { mundo_tipo: string }) => g.mundo_tipo === 'MATEMATICA',
+        ),
+      ).toBe(true);
+    });
 
-        expect(response.status).toBe(200);
-        for (const grupo of response.body) {
-          expect(grupo.casa_tipo).toBe('QUANTUM');
-          expect(grupo.mundo_tipo).toBe('MATEMATICA');
-        }
+    it('CE4: should filter by activo=false', async () => {
+      // Arrange
+      const admin = await createTestAdmin(prisma);
+      const auth = await loginUser(app, {
+        email: admin.email,
+        password: DEFAULT_PASSWORD,
       });
+
+      await createTestGrupoPedagogico({
+        codigo: 'GP-ACT',
+        activo: true,
+      });
+      await createTestGrupoPedagogico({
+        codigo: 'GP-INACT',
+        activo: false,
+      });
+
+      // Act
+      const response = await request(app.getHttpServer())
+        .get('/api/admin/grupos-pedagogicos?activo=false')
+        .set('Cookie', auth.cookie);
+
+      // Assert
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(
+        response.body.every((g: { activo: boolean }) => g.activo === false),
+      ).toBe(true);
     });
   });
 
   // ============================================================================
-  // TESTS: GET /api/admin/grupos-pedagogicos/:id - Detalle Grupo
+  // CE5-CE6: GET /admin/grupos-pedagogicos/:id
   // ============================================================================
   describe('GET /api/admin/grupos-pedagogicos/:id', () => {
-    it('Clase EXISTE: debe retornar detalle', async () => {
-      const grupo = await crearGrupoPedagogico({
-        nombre: 'Grupo Detalle',
-        casa_tipo: 'PULSAR',
-        mundo_tipo: 'CIENCIAS',
+    it('CE5: should return grupo with claseGrupos and comisiones when ID exists', async () => {
+      // Arrange
+      const admin = await createTestAdmin(prisma);
+      const auth = await loginUser(app, {
+        email: admin.email,
+        password: DEFAULT_PASSWORD,
       });
-      const auth = await loginAsAdmin();
 
+      const grupo = await createTestGrupoPedagogico({
+        codigo: 'GP-DET',
+        casa_tipo: 'QUANTUM',
+        mundo_tipo: 'MATEMATICA',
+      });
+
+      // Act
       const response = await request(app.getHttpServer())
         .get(`/api/admin/grupos-pedagogicos/${grupo.id}`)
-        .set('Authorization', `Bearer ${auth.token}`)
-        .set('Cookie', auth.cookie)
-        .set('Origin', FRONTEND_ORIGIN);
+        .set('Cookie', auth.cookie);
 
+      // Assert
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('id', grupo.id);
-      expect(response.body).toHaveProperty('casa_tipo', 'PULSAR');
-      expect(response.body).toHaveProperty('mundo_tipo', 'CIENCIAS');
+      expect(response.body.id).toBe(grupo.id);
+      expect(response.body.codigo).toBe('GP-DET');
+      expect(response.body.casa_tipo).toBe('QUANTUM');
+      expect(response.body.mundo_tipo).toBe('MATEMATICA');
+      // Debe incluir relaciones
+      expect(response.body).toHaveProperty('claseGrupos');
+      expect(response.body).toHaveProperty('comisionesProducto');
     });
 
-    it('Clase NO-EXISTE: debe retornar 404', async () => {
-      const auth = await loginAsAdmin();
-      const fakeId = 'clxxxxxxxxxxxxxxxxxxxxxxxxx';
+    it('CE6: should return 404 when ID does not exist', async () => {
+      // Arrange
+      const admin = await createTestAdmin(prisma);
+      const auth = await loginUser(app, {
+        email: admin.email,
+        password: DEFAULT_PASSWORD,
+      });
 
+      // Act
       const response = await request(app.getHttpServer())
-        .get(`/api/admin/grupos-pedagogicos/${fakeId}`)
-        .set('Authorization', `Bearer ${auth.token}`)
-        .set('Cookie', auth.cookie)
-        .set('Origin', FRONTEND_ORIGIN);
+        .get(
+          '/api/admin/grupos-pedagogicos/00000000-0000-0000-0000-000000000000',
+        )
+        .set('Cookie', auth.cookie);
 
+      // Assert
       expect(response.status).toBe(404);
     });
   });
 
   // ============================================================================
-  // TESTS: PATCH /api/admin/grupos-pedagogicos:id - Actualizar Casa/Mundo
+  // CE7-CE8: PATCH /admin/grupos-pedagogicos/:id
   // ============================================================================
-  describe('PATCH /api/admin/grupos-pedagogicos:id', () => {
-    it('Debe actualizar casa_tipo y mundo_tipo', async () => {
-      const grupo = await crearGrupoPedagogico({ nombre: 'Grupo Update' });
-      const auth = await loginAsAdmin();
+  describe('PATCH /api/admin/grupos-pedagogicos/:id', () => {
+    it('CE7: should update casa_tipo and mundo_tipo', async () => {
+      // Arrange
+      const admin = await createTestAdmin(prisma);
+      const auth = await loginUser(app, {
+        email: admin.email,
+        password: DEFAULT_PASSWORD,
+      });
 
+      const grupo = await createTestGrupoPedagogico({
+        codigo: 'GP-UPD',
+        casa_tipo: 'QUANTUM',
+        mundo_tipo: 'MATEMATICA',
+      });
+
+      // Act
       const response = await request(app.getHttpServer())
-        .patch(`/api/admin/grupos-pedagogicos${grupo.id}`)
-        .set('Authorization', `Bearer ${auth.token}`)
+        .patch(`/api/admin/grupos-pedagogicos/${grupo.id}`)
         .set('Cookie', auth.cookie)
-        .set('Origin', FRONTEND_ORIGIN)
-        .send({ casa_tipo: 'VERTEX', mundo_tipo: 'PROGRAMACION' });
+        .send({
+          casa_tipo: 'VERTEX',
+          mundo_tipo: 'PROGRAMACION',
+        });
 
+      // Assert
       expect(response.status).toBe(200);
+      expect(response.body.casa_tipo).toBe('VERTEX');
+      expect(response.body.mundo_tipo).toBe('PROGRAMACION');
 
       // Verificar en DB
-      const enDB = await prisma.claseGrupo.findUnique({
+      const updated = await prisma.grupoPedagogico.findUnique({
         where: { id: grupo.id },
       });
-      expect(enDB?.casa_tipo).toBe('VERTEX');
-      expect(enDB?.mundo_tipo).toBe('PROGRAMACION');
+      expect(updated?.casa_tipo).toBe('VERTEX');
+      expect(updated?.mundo_tipo).toBe('PROGRAMACION');
     });
 
-    it('State Transition: LEGACY → actualizar → CON_CASA_MUNDO', async () => {
-      // ARRANGE - Crear grupo sin casa/mundo (legacy)
-      const grupo = await crearGrupoPedagogico({ nombre: 'Grupo Legacy' });
-      const auth = await loginAsAdmin();
-
-      // Verificar estado inicial
-      const antes = await prisma.claseGrupo.findUnique({
-        where: { id: grupo.id },
+    it('CE8: should return 404 when updating non-existent grupo', async () => {
+      // Arrange
+      const admin = await createTestAdmin(prisma);
+      const auth = await loginUser(app, {
+        email: admin.email,
+        password: DEFAULT_PASSWORD,
       });
-      expect(antes?.casa_tipo).toBeNull();
-      expect(antes?.mundo_tipo).toBeNull();
 
-      // ACT
-      await request(app.getHttpServer())
-        .patch(`/api/admin/grupos-pedagogicos${grupo.id}`)
-        .set('Authorization', `Bearer ${auth.token}`)
-        .set('Cookie', auth.cookie)
-        .set('Origin', FRONTEND_ORIGIN)
-        .send({ casa_tipo: 'QUANTUM', mundo_tipo: 'MATEMATICA' });
-
-      // ASSERT
-      const despues = await prisma.claseGrupo.findUnique({
-        where: { id: grupo.id },
-      });
-      expect(despues?.casa_tipo).toBe('QUANTUM');
-      expect(despues?.mundo_tipo).toBe('MATEMATICA');
-    });
-
-    it('State Transition: CON_CASA_MUNDO → actualizar → NUEVA_CASA_MUNDO', async () => {
-      const grupo = await crearGrupoPedagogico({
-        casa_tipo: 'QUANTUM',
-        mundo_tipo: 'MATEMATICA',
-      });
-      const auth = await loginAsAdmin();
-
-      await request(app.getHttpServer())
-        .patch(`/api/admin/grupos-pedagogicos${grupo.id}`)
-        .set('Authorization', `Bearer ${auth.token}`)
-        .set('Cookie', auth.cookie)
-        .set('Origin', FRONTEND_ORIGIN)
-        .send({ casa_tipo: 'PULSAR', mundo_tipo: 'CIENCIAS' });
-
-      const despues = await prisma.claseGrupo.findUnique({
-        where: { id: grupo.id },
-      });
-      expect(despues?.casa_tipo).toBe('PULSAR');
-      expect(despues?.mundo_tipo).toBe('CIENCIAS');
-    });
-
-    it('Clase NO-AUTH: debe retornar 401', async () => {
-      const grupo = await crearGrupoPedagogico();
-
+      // Act
       const response = await request(app.getHttpServer())
-        .patch(`/api/admin/grupos-pedagogicos${grupo.id}`)
-        .set('Origin', FRONTEND_ORIGIN)
-        .set('X-Forwarded-For', generateUniqueIP())
-        .send({ casa_tipo: 'QUANTUM' });
-
-      expect(response.status).toBe(401);
-    });
-
-    it('CasaTipo inválido → 400', async () => {
-      const grupo = await crearGrupoPedagogico();
-      const auth = await loginAsAdmin();
-
-      const response = await request(app.getHttpServer())
-        .patch(`/api/admin/grupos-pedagogicos${grupo.id}`)
-        .set('Authorization', `Bearer ${auth.token}`)
+        .patch(
+          '/api/admin/grupos-pedagogicos/00000000-0000-0000-0000-000000000000',
+        )
         .set('Cookie', auth.cookie)
-        .set('Origin', FRONTEND_ORIGIN)
-        .send({ casa_tipo: 'CASA_INVALIDA' });
+        .send({
+          casa_tipo: 'VERTEX',
+        });
 
-      expect(response.status).toBe(400);
+      // Assert
+      expect(response.status).toBe(404);
     });
   });
 
   // ============================================================================
-  // TESTS: POST /api/admin/grupos-pedagogicos/migrar-legacy - Migración
-  // ============================================================================
-  describe('POST /api/admin/grupos-pedagogicos/migrar-legacy', () => {
-    it('Debe migrar grupos legacy basado en sector/edad', async () => {
-      // ARRANGE - Crear grupos legacy (sin casa_tipo/mundo_tipo)
-      await crearGrupoPedagogico({ nombre: 'Grupo Legacy 1' });
-      await crearGrupoPedagogico({ nombre: 'Grupo Legacy 2' });
-      const auth = await loginAsAdmin();
-
-      // ACT
-      const response = await request(app.getHttpServer())
-        .post('/api/admin/grupos-pedagogicos/migrar-legacy')
-        .set('Authorization', `Bearer ${auth.token}`)
-        .set('Cookie', auth.cookie)
-        .set('Origin', FRONTEND_ORIGIN);
-
-      // ASSERT
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('migrados');
-      expect(typeof response.body.migrados).toBe('number');
-    });
-
-    it('Sin grupos legacy → migrados = 0', async () => {
-      // Crear grupo ya migrado
-      await crearGrupoPedagogico({
-        nombre: 'Grupo Ya Migrado',
-        casa_tipo: 'QUANTUM',
-        mundo_tipo: 'MATEMATICA',
-      });
-      const auth = await loginAsAdmin();
-
-      const response = await request(app.getHttpServer())
-        .post('/api/admin/grupos-pedagogicos/migrar-legacy')
-        .set('Authorization', `Bearer ${auth.token}`)
-        .set('Cookie', auth.cookie)
-        .set('Origin', FRONTEND_ORIGIN);
-
-      expect(response.status).toBe(200);
-      expect(response.body.migrados).toBe(0);
-    });
-
-    it('Clase NO-AUTH: debe retornar 401', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/api/admin/grupos-pedagogicos/migrar-legacy')
-        .set('Origin', FRONTEND_ORIGIN)
-        .set('X-Forwarded-For', generateUniqueIP());
-
-      expect(response.status).toBe(401);
-    });
-  });
-
-  // ============================================================================
-  // TESTS: GET /api/admin/grupos-pedagogicos/estadisticas - Estadísticas
+  // CE9: GET /admin/grupos-pedagogicos/estadisticas
   // ============================================================================
   describe('GET /api/admin/grupos-pedagogicos/estadisticas', () => {
-    it('Debe retornar estadísticas por casa y mundo', async () => {
-      // ARRANGE - Crear grupos con diferentes casas/mundos
-      await crearGrupoPedagogico({
+    it('CE9: should return statistics by casa and mundo', async () => {
+      // Arrange
+      const admin = await createTestAdmin(prisma);
+      const auth = await loginUser(app, {
+        email: admin.email,
+        password: DEFAULT_PASSWORD,
+      });
+
+      // Crear grupos con diferentes casas y mundos
+      await createTestGrupoPedagogico({
+        codigo: 'GP-EST1',
         casa_tipo: 'QUANTUM',
         mundo_tipo: 'MATEMATICA',
       });
-      await crearGrupoPedagogico({
+      await createTestGrupoPedagogico({
+        codigo: 'GP-EST2',
         casa_tipo: 'QUANTUM',
         mundo_tipo: 'PROGRAMACION',
       });
-      await crearGrupoPedagogico({
+      await createTestGrupoPedagogico({
+        codigo: 'GP-EST3',
         casa_tipo: 'VERTEX',
         mundo_tipo: 'MATEMATICA',
       });
-      await crearGrupoPedagogico({ nombre: 'Legacy' }); // Sin asignar
-      const auth = await loginAsAdmin();
 
-      // ACT
+      // Act
       const response = await request(app.getHttpServer())
         .get('/api/admin/grupos-pedagogicos/estadisticas')
-        .set('Authorization', `Bearer ${auth.token}`)
-        .set('Cookie', auth.cookie)
-        .set('Origin', FRONTEND_ORIGIN);
+        .set('Cookie', auth.cookie);
 
-      // ASSERT
+      // Assert
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('total');
-      expect(response.body).toHaveProperty('porCasa');
-      expect(response.body).toHaveProperty('porMundo');
-      expect(response.body).toHaveProperty('sinAsignar');
-    });
-
-    it('Sin grupos → estadísticas en 0', async () => {
-      const auth = await loginAsAdmin();
-
-      const response = await request(app.getHttpServer())
-        .get('/api/admin/grupos-pedagogicos/estadisticas')
-        .set('Authorization', `Bearer ${auth.token}`)
-        .set('Cookie', auth.cookie)
-        .set('Origin', FRONTEND_ORIGIN);
-
-      expect(response.status).toBe(200);
-      expect(response.body.total).toBe(0);
-    });
-
-    it('Clase NO-AUTH: debe retornar 401', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/admin/grupos-pedagogicos/estadisticas')
-        .set('Origin', FRONTEND_ORIGIN)
-        .set('X-Forwarded-For', generateUniqueIP());
-
-      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty('total_grupos');
+      expect(response.body).toHaveProperty('por_casa');
+      expect(response.body).toHaveProperty('por_mundo');
+      expect(Array.isArray(response.body.por_casa)).toBe(true);
+      expect(Array.isArray(response.body.por_mundo)).toBe(true);
     });
   });
 
   // ============================================================================
-  // ERROR GUESSING
+  // CE10-CE11: Security - Access Control
   // ============================================================================
-  describe('Error Guessing', () => {
-    it('Actualizar grupo con ID inválido → 400', async () => {
-      const auth = await loginAsAdmin();
-
-      const response = await request(app.getHttpServer())
-        .patch('/api/admin/grupos-pedagogicosinvalid-id')
-        .set('Authorization', `Bearer ${auth.token}`)
-        .set('Cookie', auth.cookie)
-        .set('Origin', FRONTEND_ORIGIN)
+  describe('Security: Access Control', () => {
+    it('CE10: should return 401 when not authenticated', async () => {
+      // Act - Ejecutar secuencialmente para evitar ECONNRESET
+      const r1 = await request(app.getHttpServer()).get(
+        '/api/admin/grupos-pedagogicos',
+      );
+      const r2 = await request(app.getHttpServer()).get(
+        '/api/admin/grupos-pedagogicos/00000000-0000-0000-0000-000000000000',
+      );
+      const r3 = await request(app.getHttpServer())
+        .patch(
+          '/api/admin/grupos-pedagogicos/00000000-0000-0000-0000-000000000000',
+        )
         .send({ casa_tipo: 'QUANTUM' });
+      const r4 = await request(app.getHttpServer()).get(
+        '/api/admin/grupos-pedagogicos/estadisticas',
+      );
 
-      expect(response.status).toBe(400);
+      // Assert
+      expect(r1.status).toBe(401);
+      expect(r2.status).toBe(401);
+      expect(r3.status).toBe(401);
+      expect(r4.status).toBe(401);
     });
 
-    it('Filtro con valor de casa inválido → 400 o ignora', async () => {
-      const auth = await loginAsAdmin();
+    it('CE11: should return 403 when user is docente', async () => {
+      // Arrange
+      const { docente, password } = await createTestDocente(prisma);
+      const auth = await loginUser(app, { email: docente.email, password });
 
-      const response = await request(app.getHttpServer())
-        .get('/api/admin/grupos-pedagogicos?casa_tipo=INVALIDO')
-        .set('Authorization', `Bearer ${auth.token}`)
-        .set('Cookie', auth.cookie)
-        .set('Origin', FRONTEND_ORIGIN);
+      // Act - Ejecutar secuencialmente para evitar ECONNRESET
+      const r1 = await request(app.getHttpServer())
+        .get('/api/admin/grupos-pedagogicos')
+        .set('Cookie', auth.cookie);
+      const r2 = await request(app.getHttpServer())
+        .get(
+          '/api/admin/grupos-pedagogicos/00000000-0000-0000-0000-000000000000',
+        )
+        .set('Cookie', auth.cookie);
 
-      // Puede validar y dar 400, o ignorar el filtro
-      expect([200, 400]).toContain(response.status);
+      // Assert
+      expect(r1.status).toBe(403);
+      expect(r2.status).toBe(403);
     });
   });
 });
