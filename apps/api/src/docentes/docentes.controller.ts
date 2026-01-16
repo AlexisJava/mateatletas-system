@@ -491,6 +491,18 @@ export class DocentesController {
   // ============================================================================
 
   /**
+   * GET /docentes/clases-count-batch - Obtener conteo de clases de TODOS los docentes
+   * Evita N+1 cuando se necesita el conteo de múltiples docentes
+   * Requiere autenticación y rol Admin
+   * @returns Record<docenteId, { claseGrupos, comisiones, total }>
+   */
+  @Get('clases-count-batch')
+  @Roles(Role.ADMIN)
+  async getClasesCountBatch() {
+    return this.docentesService.getClasesCountBatch();
+  }
+
+  /**
    * GET /docentes/:id/clases-count - Obtener conteo de clases asignadas (Admin only)
    * @param id - ID del docente
    * @returns { claseGrupos, comisiones, total }

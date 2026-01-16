@@ -108,6 +108,14 @@ export class DocentesFacade {
     return this.queryService.getClasesCount(id);
   }
 
+  /**
+   * Obtiene el conteo de clases de TODOS los docentes en batch
+   * Evita el problema N+1
+   */
+  async getClasesCountBatch() {
+    return this.queryService.getClasesCountBatch();
+  }
+
   // ============================================================================
   // STATISTICS (Estadísticas) - Delegación a StatsService
   // ============================================================================

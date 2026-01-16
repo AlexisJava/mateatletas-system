@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import {
   listarGruposPedagogicos,
-  obtenerGrupoPedagogico,
   actualizarGrupoPedagogico,
-  obtenerEstadisticasGrupos,
   migrarGruposLegacy,
 } from '@/lib/api/admin.api';
 import type {
@@ -16,6 +15,9 @@ import type {
   MundoTipo,
   GruposStats,
 } from '../types/grupos.types';
+
+/** Query key para invalidación */
+export const GRUPOS_PEDAGOGICOS_KEY = ['admin', 'grupos-pedagogicos'] as const;
 
 interface UseGruposPedagogicosReturn {
   isLoading: boolean;
@@ -40,34 +42,81 @@ interface UseGruposPedagogicosReturn {
 /**
  * Hook para gestionar grupos pedagógicos con Casa/Mundo
  * Sistema Casa/Mundo 2026 - FASE 2 Frontend
+ *
+ * Usa React Query para:
+ * - Cachear datos
+ * - Navegación instantánea entre pestañas
+ * - Invalidación automática al actualizar
  */
 export function useGruposPedagogicos(): UseGruposPedagogicosReturn {
-  const [grupos, setGrupos] = useState<GrupoPedagogico[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  // Estado local para UI
   const [filtros, setFiltros] = useState<FiltrosGrupoPedagogico>({});
   const [selectedGrupo, setSelectedGrupo] = useState<GrupoPedagogico | null>(null);
-  const [isMigrating, setIsMigrating] = useState(false);
 
-  // Fetch grupos
-  const fetchGrupos = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await listarGruposPedagogicos(filtros);
-      setGrupos(data);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al cargar grupos';
-      setError(message);
-      console.error('useGruposPedagogicos: Error al cargar:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [filtros]);
+  // Query principal - incluye filtros en la key para refetch automático
+  const {
+    data: grupos = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: [...GRUPOS_PEDAGOGICOS_KEY, filtros],
+    queryFn: () => listarGruposPedagogicos(filtros),
+  });
 
-  useEffect(() => {
-    fetchGrupos();
-  }, [fetchGrupos]);
+  // Mutation para actualizar grupo
+  const updateMutation = useMutation({
+    mutationFn: async ({
+      grupoId,
+      casaTipo,
+      mundoTipo,
+    }: {
+      grupoId: string;
+      casaTipo: CasaTipo | null;
+      mundoTipo: MundoTipo | null;
+    }) => {
+      await actualizarGrupoPedagogico(grupoId, {
+        casa_tipo: casaTipo ?? undefined,
+        mundo_tipo: mundoTipo ?? undefined,
+      });
+      return { grupoId, casaTipo, mundoTipo };
+    },
+    onSuccess: ({ grupoId, casaTipo, mundoTipo }) => {
+      // Actualizar cache optimistamente
+      queryClient.setQueryData<GrupoPedagogico[]>(
+        [...GRUPOS_PEDAGOGICOS_KEY, filtros],
+        (old) =>
+          old?.map((g) =>
+            g.id === grupoId ? { ...g, casa_tipo: casaTipo, mundo_tipo: mundoTipo } : g,
+          ) ?? [],
+      );
+
+      // Actualizar grupo seleccionado si es el mismo
+      if (selectedGrupo?.id === grupoId) {
+        setSelectedGrupo((prev) =>
+          prev ? { ...prev, casa_tipo: casaTipo, mundo_tipo: mundoTipo } : null,
+        );
+      }
+
+      toast.success('Grupo actualizado');
+    },
+  });
+
+  // Mutation para migrar legacy
+  const migrateMutation = useMutation({
+    mutationFn: migrarGruposLegacy,
+    onSuccess: (result) => {
+      toast.success(result.mensaje);
+      // Invalidar cache para refetch
+      queryClient.invalidateQueries({ queryKey: GRUPOS_PEDAGOGICOS_KEY });
+    },
+    onError: (err) => {
+      const message = err instanceof Error ? err.message : 'Error al migrar grupos';
+      toast.error(message);
+    },
+  });
 
   // Calcular stats desde los datos locales
   const stats = useMemo<GruposStats>(() => {
@@ -125,66 +174,24 @@ export function useGruposPedagogicos(): UseGruposPedagogicosReturn {
   const handleActualizarGrupo = useCallback(
     async (grupoId: string, casaTipo: CasaTipo | null, mundoTipo: MundoTipo | null) => {
       try {
-        await actualizarGrupoPedagogico(grupoId, {
-          casa_tipo: casaTipo ?? undefined,
-          mundo_tipo: mundoTipo ?? undefined,
-        });
-
-        // Actualizar estado local
-        setGrupos((prev) =>
-          prev.map((g) =>
-            g.id === grupoId
-              ? {
-                  ...g,
-                  casa_tipo: casaTipo,
-                  mundo_tipo: mundoTipo,
-                }
-              : g,
-          ),
-        );
-
-        // Si hay un grupo seleccionado, actualizarlo
-        if (selectedGrupo?.id === grupoId) {
-          setSelectedGrupo((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  casa_tipo: casaTipo,
-                  mundo_tipo: mundoTipo,
-                }
-              : null,
-          );
-        }
-
-        toast.success('Grupo actualizado');
+        await updateMutation.mutateAsync({ grupoId, casaTipo, mundoTipo });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Error al actualizar grupo';
         toast.error(message);
         throw err;
       }
     },
-    [selectedGrupo],
+    [updateMutation],
   );
 
   // Migrar grupos legacy
   const handleMigrarLegacy = useCallback(async () => {
-    setIsMigrating(true);
-    try {
-      const result = await migrarGruposLegacy();
-      toast.success(result.mensaje);
-      // Refetch para ver los cambios
-      await fetchGrupos();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al migrar grupos';
-      toast.error(message);
-    } finally {
-      setIsMigrating(false);
-    }
-  }, [fetchGrupos]);
+    await migrateMutation.mutateAsync();
+  }, [migrateMutation]);
 
   return {
     isLoading,
-    error,
+    error: error ? (error instanceof Error ? error.message : 'Error al cargar grupos') : null,
     grupos,
     filtros,
     setFiltros,
@@ -194,7 +201,9 @@ export function useGruposPedagogicos(): UseGruposPedagogicosReturn {
     setSelectedGrupo,
     handleActualizarGrupo,
     handleMigrarLegacy,
-    isMigrating,
-    refetch: fetchGrupos,
+    isMigrating: migrateMutation.isPending,
+    refetch: async () => {
+      await refetch();
+    },
   };
 }

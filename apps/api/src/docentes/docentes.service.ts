@@ -107,6 +107,14 @@ export class DocentesService {
     return this.facade.getClasesCount(id);
   }
 
+  /**
+   * Obtiene el conteo de clases de TODOS los docentes en batch
+   * Evita el problema N+1
+   */
+  async getClasesCountBatch() {
+    return this.facade.getClasesCountBatch();
+  }
+
   // ============================================================================
   // STATISTICS (Estadísticas) - Delegación a Facade → StatsService
   // ============================================================================

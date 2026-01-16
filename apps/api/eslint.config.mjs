@@ -103,6 +103,10 @@ export default tseslint.config(
       'prefer-const': 'error',
       eqeqeq: ['error', 'always'],
 
+      // ===== SONARJS: Desactivar regla duplicada =====
+      // Usamos @typescript-eslint/no-unused-vars que tiene ignoreRestSiblings
+      'sonarjs/no-unused-vars': 'off',
+
       // ===== PRETTIER =====
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },

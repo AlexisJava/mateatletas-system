@@ -91,7 +91,8 @@ export class DocenteQueryService {
       throw new NotFoundException('Docente no encontrado');
     }
 
-    const { password_hash: _password_hash, ...docenteSinPassword } = docente;
+    // Excluir password_hash del resultado (ignoreRestSiblings en eslint config)
+    const { password_hash, ...docenteSinPassword } = docente;
 
     // Extraer sectores únicos de las rutas de especialidad
     const sectoresMap = new Map();
@@ -157,5 +158,71 @@ export class DocenteQueryService {
       comisiones,
       total: claseGrupos + comisiones,
     };
+  }
+
+  /**
+   * Obtiene el conteo de clases de TODOS los docentes en una sola operación
+   * Evita el problema N+1 cuando se necesita el conteo de múltiples docentes
+   * @returns Record<docenteId, { claseGrupos, comisiones, total }>
+   */
+  async getClasesCountBatch(): Promise<
+    Record<string, { claseGrupos: number; comisiones: number; total: number }>
+  > {
+    // Usar groupBy para obtener todos los conteos en 2 queries (en paralelo)
+    const [claseGruposPorDocente, comisionesPorDocente] = await Promise.all([
+      this.prisma.claseGrupo.groupBy({
+        by: ['docente_id'],
+        where: { activo: true },
+        _count: { id: true },
+      }),
+      this.prisma.comision.groupBy({
+        by: ['docente_id'],
+        where: { activo: true },
+        _count: { id: true },
+      }),
+    ]);
+
+    // Crear mapas para lookup rápido (filtrando nulls en runtime)
+    const claseGruposMap = new Map<string, number>();
+    for (const item of claseGruposPorDocente) {
+      if (item.docente_id) {
+        claseGruposMap.set(item.docente_id, item._count.id);
+      }
+    }
+
+    const comisionesMap = new Map<string, number>();
+    for (const item of comisionesPorDocente) {
+      if (item.docente_id) {
+        comisionesMap.set(item.docente_id, item._count.id);
+      }
+    }
+
+    // Obtener todos los IDs de docentes únicos
+    const docenteIds = new Set<string>();
+    for (const item of claseGruposPorDocente) {
+      if (item.docente_id) docenteIds.add(item.docente_id);
+    }
+    for (const item of comisionesPorDocente) {
+      if (item.docente_id) docenteIds.add(item.docente_id);
+    }
+
+    // Construir resultado
+    const result: Record<
+      string,
+      { claseGrupos: number; comisiones: number; total: number }
+    > = {};
+
+    for (const docenteId of docenteIds) {
+      const claseGrupos = claseGruposMap.get(docenteId) ?? 0;
+      const comisiones = comisionesMap.get(docenteId) ?? 0;
+
+      result[docenteId] = {
+        claseGrupos,
+        comisiones,
+        total: claseGrupos + comisiones,
+      };
+    }
+
+    return result;
   }
 }

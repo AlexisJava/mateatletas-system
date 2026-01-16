@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import {
   getAllProducts,
   deleteProduct,
-  getProductoVentasCount,
+  getProductosVentasCountBatch,
   type Producto,
 } from '@/lib/api/admin.api';
 import type {
@@ -12,6 +13,9 @@ import type {
   ProductosStats,
   AdminProducto,
 } from '../types/productos.types';
+
+/** Query key para invalidación */
+export const PRODUCTOS_KEY = ['admin', 'productos'] as const;
 
 interface UseProductosReturn {
   isLoading: boolean;
@@ -30,7 +34,6 @@ interface UseProductosReturn {
   handleEdit: (product: AdminProducto) => void;
   handleDelete: (product: AdminProducto) => Promise<void>;
   refetch: () => Promise<void>;
-  // Modal de formulario
   isFormModalOpen: boolean;
   editingProduct: AdminProducto | null;
   openCreateModal: () => void;
@@ -39,62 +42,72 @@ interface UseProductosReturn {
 }
 
 /**
+ * Función para obtener todos los productos con ventas en batch
+ * Usa endpoint batch para evitar N+1
+ */
+async function fetchAllProducts(): Promise<AdminProducto[]> {
+  // Fetch en paralelo: productos + ventas batch
+  const [productos, ventasBatch] = await Promise.all([
+    getAllProducts(true),
+    getProductosVentasCountBatch().catch(
+      () => ({}) as Record<string, { total: number; pagadas: number; pendientes: number }>,
+    ),
+  ]);
+
+  // Combinar productos con sus ventas
+  return productos.map((p: Producto) => ({
+    ...p,
+    ventas: ventasBatch[p.id]?.total ?? 0,
+  }));
+}
+
+/**
  * useProductos - Hook para gestión de productos
+ *
+ * Usa React Query para:
+ * - Cachear datos por 5 minutos
+ * - Navegación instantánea entre pestañas
+ * - Invalidación automática al eliminar
  *
  * Llama al backend GET /productos para obtener todos los productos.
  */
 export function useProductos(): UseProductosReturn {
-  const [products, setProducts] = useState<AdminProducto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  // Estado local para UI
   const [searchQuery, setSearchQuery] = useState('');
   const [tierFilter, setTierFilter] = useState<TipoFilter>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('active');
   const [selectedProduct, setSelectedProduct] = useState<AdminProducto | null>(null);
-  // Estados para modal crear/editar
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<AdminProducto | null>(null);
 
-  const fetchProducts = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  // Query principal
+  const {
+    data: products = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: PRODUCTOS_KEY,
+    queryFn: fetchAllProducts,
+  });
 
-    try {
-      // Obtener todos los productos (incluye inactivos para admin)
-      const data = await getAllProducts(true);
-
-      // Obtener ventas de cada producto en paralelo
-      const ventasPromises = data.map(async (p: Producto) => {
-        try {
-          const ventas = await getProductoVentasCount(p.id);
-          return { id: p.id, total: ventas.total };
-        } catch {
-          return { id: p.id, total: 0 };
-        }
-      });
-
-      const ventasResults = await Promise.all(ventasPromises);
-      const ventasMap = new Map(ventasResults.map((v) => [v.id, v.total]));
-
-      // Adaptar al tipo AdminProducto con ventas reales
-      const productosUnicos: AdminProducto[] = data.map((p: Producto) => ({
-        ...p,
-        ventas: ventasMap.get(p.id) ?? 0,
-      }));
-
-      setProducts(productosUnicos);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al cargar productos';
-      setError(message);
-      console.error('useProductos: Error al cargar:', message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+  // Mutation para eliminar
+  const deleteMutation = useMutation({
+    mutationFn: async (product: AdminProducto) => {
+      await deleteProduct(product.id, false); // Soft delete
+      return product;
+    },
+    onSuccess: (deletedProduct) => {
+      // Actualizar cache - marcar como inactivo
+      queryClient.setQueryData<AdminProducto[]>(
+        PRODUCTOS_KEY,
+        (old) => old?.map((p) => (p.id === deletedProduct.id ? { ...p, activo: false } : p)) ?? [],
+      );
+      toast.success(`"${deletedProduct.nombre}" desactivado`);
+    },
+  });
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -155,26 +168,21 @@ export function useProductos(): UseProductosReturn {
   const handleDelete = useCallback(
     async (product: AdminProducto) => {
       const confirmMessage = `¿Desactivar "${product.nombre}"? Podrás reactivarlo desde el filtro "Inactivos".`;
-      if (!window.confirm(confirmMessage)) {
-        return;
-      }
+      if (!window.confirm(confirmMessage)) return;
 
       try {
-        await deleteProduct(product.id, false); // Soft delete
-        toast.success(`"${product.nombre}" desactivado`);
-        await fetchProducts(); // Refetch
+        await deleteMutation.mutateAsync(product);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Error al eliminar producto';
-        console.error('Error al eliminar producto:', message);
         toast.error(message);
       }
     },
-    [fetchProducts],
+    [deleteMutation],
   );
 
   return {
     isLoading,
-    error,
+    error: error ? (error instanceof Error ? error.message : 'Error al cargar productos') : null,
     searchQuery,
     setSearchQuery,
     tierFilter,
@@ -188,8 +196,9 @@ export function useProductos(): UseProductosReturn {
     totalCount: products.length,
     handleEdit,
     handleDelete,
-    refetch: fetchProducts,
-    // Modal de formulario
+    refetch: async () => {
+      await refetch();
+    },
     isFormModalOpen,
     editingProduct,
     openCreateModal,

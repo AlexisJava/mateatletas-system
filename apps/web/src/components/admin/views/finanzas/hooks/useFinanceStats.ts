@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getFinanceMetrics,
   getFinanceConfig,
@@ -6,6 +6,10 @@ import {
   type FinanceStats,
   type TierConfig,
 } from '@/lib/api/admin.api';
+
+/** Query keys para invalidación */
+export const FINANCE_METRICS_KEY = ['admin', 'finance', 'metrics'] as const;
+export const FINANCE_CONFIG_KEY = ['admin', 'finance', 'config'] as const;
 
 interface UseFinanceStatsReturn {
   stats: FinanceStats | null;
@@ -20,62 +24,57 @@ interface UseFinanceStatsReturn {
 /**
  * Hook para obtener métricas y configuración de finanzas
  *
+ * Usa React Query para:
+ * - Cachear datos por 5 minutos
+ * - Navegación instantánea entre pestañas
+ * - Invalidación automática al guardar config
+ *
  * Llama al backend:
  * - GET /pagos/dashboard/metricas
  * - GET /pagos/configuracion
  */
 export function useFinanceStats(): UseFinanceStatsReturn {
-  const [stats, setStats] = useState<FinanceStats | null>(null);
-  const [config, setConfig] = useState<TierConfig | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  // Query para métricas
+  const metricsQuery = useQuery({
+    queryKey: FINANCE_METRICS_KEY,
+    queryFn: getFinanceMetrics,
+  });
 
-    try {
-      const [metricsData, configData] = await Promise.all([
-        getFinanceMetrics(),
-        getFinanceConfig(),
-      ]);
-      setStats(metricsData);
-      setConfig(configData);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al cargar datos de finanzas';
-      setError(message);
-      console.error('useFinanceStats: Error al cargar datos:', message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // Query para configuración
+  const configQuery = useQuery({
+    queryKey: FINANCE_CONFIG_KEY,
+    queryFn: getFinanceConfig,
+  });
 
-  const saveConfig = useCallback(async (newConfig: TierConfig) => {
-    setIsSaving(true);
-    try {
-      const updated = await updateFinanceConfig(newConfig);
-      setConfig(updated);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al guardar configuración';
-      console.error('useFinanceStats.saveConfig:', message);
-      throw err; // Re-throw para que el componente pueda mostrar error
-    } finally {
-      setIsSaving(false);
-    }
-  }, []);
+  // Mutation para guardar configuración
+  const saveMutation = useMutation({
+    mutationFn: updateFinanceConfig,
+    onSuccess: (updated) => {
+      // Actualizar cache directamente
+      queryClient.setQueryData(FINANCE_CONFIG_KEY, updated);
+    },
+  });
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const isLoading = metricsQuery.isLoading || configQuery.isLoading;
+  const error = metricsQuery.error || configQuery.error;
 
   return {
-    stats,
-    config,
+    stats: metricsQuery.data ?? null,
+    config: configQuery.data ?? null,
     isLoading,
-    error,
-    isSaving,
-    refetch: fetchData,
-    saveConfig,
+    error: error
+      ? error instanceof Error
+        ? error.message
+        : 'Error al cargar datos de finanzas'
+      : null,
+    isSaving: saveMutation.isPending,
+    refetch: async () => {
+      await Promise.all([metricsQuery.refetch(), configQuery.refetch()]);
+    },
+    saveConfig: async (newConfig: TierConfig) => {
+      await saveMutation.mutateAsync(newConfig);
+    },
   };
 }

@@ -553,6 +553,21 @@ export const getDocenteClasesCount = async (docenteId: string): Promise<DocenteC
 };
 
 /**
+ * Obtiene el conteo de clases de TODOS los docentes en una sola query
+ * Evita el problema N+1
+ */
+export const getDocentesClasesCountBatch = async (): Promise<
+  Record<string, DocenteClasesCount>
+> => {
+  try {
+    return await axios.get<Record<string, DocenteClasesCount>>('/docentes/clases-count-batch');
+  } catch (error) {
+    console.error('Error al obtener conteo de clases batch:', error);
+    throw error;
+  }
+};
+
+/**
  * Estadísticas de contenidos leídos/completados
  * GET /api/admin/analytics/libros-leidos
  */
@@ -584,6 +599,21 @@ export const getProductoVentasCount = async (productoId: string): Promise<Produc
     return await axios.get<ProductoVentasCount>(`/productos/${productoId}/ventas-count`);
   } catch (error) {
     console.error('Error al obtener ventas del producto:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtiene el conteo de ventas de TODOS los productos en una sola query
+ * Evita el problema N+1
+ */
+export const getProductosVentasCountBatch = async (): Promise<
+  Record<string, ProductoVentasCount>
+> => {
+  try {
+    return await axios.get<Record<string, ProductoVentasCount>>('/productos/ventas-count-batch');
+  } catch (error) {
+    console.error('Error al obtener ventas batch:', error);
     throw error;
   }
 };

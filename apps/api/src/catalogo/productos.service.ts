@@ -305,6 +305,57 @@ export class ProductosService {
   }
 
   /**
+   * Obtiene el conteo de ventas de TODOS los productos en una sola query
+   * Evita el problema N+1 cuando se necesitan ventas de múltiples productos
+   * @returns Record<productoId, { total, pagadas, pendientes }>
+   */
+  async getVentasCountBatch(): Promise<
+    Record<string, { total: number; pagadas: number; pendientes: number }>
+  > {
+    // Usar groupBy para obtener todos los conteos en una sola query
+    const inscripcionesPorProducto =
+      await this.prisma.inscripcionMensual.groupBy({
+        by: ['producto_id'],
+        _count: { id: true },
+      });
+
+    const inscripcionesPagadasPorProducto =
+      await this.prisma.inscripcionMensual.groupBy({
+        by: ['producto_id'],
+        where: { estado_pago: 'Pagado' },
+        _count: { id: true },
+      });
+
+    // Crear mapa de pagadas para lookup rápido
+    const pagadasMap = new Map(
+      inscripcionesPagadasPorProducto.map((item) => [
+        item.producto_id,
+        item._count.id,
+      ]),
+    );
+
+    // Construir resultado
+    const result: Record<
+      string,
+      { total: number; pagadas: number; pendientes: number }
+    > = {};
+
+    for (const item of inscripcionesPorProducto) {
+      const productoId = item.producto_id;
+      const total = item._count.id;
+      const pagadas = pagadasMap.get(productoId) ?? 0;
+
+      result[productoId] = {
+        total,
+        pagadas,
+        pendientes: total - pagadas,
+      };
+    }
+
+    return result;
+  }
+
+  /**
    * Valida que los campos requeridos estén presentes según el tipo de producto
    * @param dto - DTO del producto
    * @throws BadRequestException si faltan campos requeridos o hay validaciones inválidas

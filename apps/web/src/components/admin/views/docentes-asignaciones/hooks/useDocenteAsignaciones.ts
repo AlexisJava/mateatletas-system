@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import {
   listarDocentesFiltrados,
@@ -17,6 +18,9 @@ import type {
   FiltrosAsignaciones,
   AsignacionesStats,
 } from '../types/asignaciones.types';
+
+/** Query key para invalidación */
+export const DOCENTES_ASIGNACIONES_KEY = ['admin', 'docentes-asignaciones'] as const;
 
 interface UseDocenteAsignacionesReturn {
   // Estado
@@ -49,38 +53,35 @@ interface UseDocenteAsignacionesReturn {
 /**
  * Hook para gestionar asignaciones Casa/Mundo de docentes
  * Sistema Casa/Mundo 2026
+ *
+ * Usa React Query para:
+ * - Cachear datos
+ * - Navegación instantánea entre pestañas
+ * - Invalidación automática al modificar
  */
 export function useDocenteAsignaciones(): UseDocenteAsignacionesReturn {
-  const [docentes, setDocentes] = useState<DocenteAsignacionesPerfil[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  // Estado local para UI
   const [filtros, setFiltros] = useState<FiltrosAsignaciones>({});
   const [selectedDocente, setSelectedDocente] = useState<DocenteAsignacionesPerfil | null>(null);
 
-  // Fetch docentes con filtros
-  const fetchDocentes = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  // Query principal - incluye filtros del servidor en la key
+  const serverFiltros = {
+    casa_tipo: filtros.casa_tipo,
+    mundo_tipo: filtros.mundo_tipo,
+    tipo_asignacion: filtros.tipo_asignacion,
+  };
 
-    try {
-      const result = await listarDocentesFiltrados({
-        casa_tipo: filtros.casa_tipo,
-        mundo_tipo: filtros.mundo_tipo,
-        tipo_asignacion: filtros.tipo_asignacion,
-      });
-      setDocentes(result);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al cargar docentes';
-      setError(message);
-      console.error('useDocenteAsignaciones: Error al cargar:', message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [filtros.casa_tipo, filtros.mundo_tipo, filtros.tipo_asignacion]);
-
-  useEffect(() => {
-    fetchDocentes();
-  }, [fetchDocentes]);
+  const {
+    data: docentes = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: [...DOCENTES_ASIGNACIONES_KEY, serverFiltros],
+    queryFn: () => listarDocentesFiltrados(serverFiltros),
+  });
 
   // Filtrado local por búsqueda (nombre/apellido)
   const docentesFiltrados = useMemo(() => {
@@ -118,101 +119,148 @@ export function useDocenteAsignaciones(): UseDocenteAsignacionesReturn {
     setFiltros({});
   }, []);
 
-  // Refrescar un docente específico (después de modificar)
-  const refreshDocente = useCallback(async (docenteId: string) => {
-    try {
-      const perfil = await obtenerPerfilAsignacionesDocente(docenteId);
-      setDocentes((prev) => prev.map((d) => (d.id === docenteId ? perfil : d)));
-      // También actualizar selectedDocente si es el mismo
-      setSelectedDocente((prev) => (prev?.id === docenteId ? perfil : prev));
-    } catch (err) {
-      console.error('Error al refrescar docente:', err);
-    }
-  }, []);
+  // Helper para refrescar un docente específico y actualizar cache
+  const refreshDocente = useCallback(
+    async (docenteId: string) => {
+      try {
+        const perfil = await obtenerPerfilAsignacionesDocente(docenteId);
 
-  // Asignar casa
+        // Actualizar en el cache de la query actual
+        queryClient.setQueryData<DocenteAsignacionesPerfil[]>(
+          [...DOCENTES_ASIGNACIONES_KEY, serverFiltros],
+          (old) => old?.map((d) => (d.id === docenteId ? perfil : d)) ?? [],
+        );
+
+        // Actualizar selectedDocente si es el mismo
+        if (selectedDocente?.id === docenteId) {
+          setSelectedDocente(perfil);
+        }
+      } catch (err) {
+        console.error('Error al refrescar docente:', err);
+      }
+    },
+    [queryClient, serverFiltros, selectedDocente?.id],
+  );
+
+  // Mutation para asignar casa
+  const asignarCasaMutation = useMutation({
+    mutationFn: async ({ docenteId, casaTipo }: { docenteId: string; casaTipo: CasaTipo }) => {
+      await asignarCasaDocente(docenteId, casaTipo);
+      return { docenteId, casaTipo };
+    },
+    onSuccess: async ({ docenteId, casaTipo }) => {
+      toast.success(`Casa ${casaTipo} asignada`);
+      await refreshDocente(docenteId);
+    },
+    onError: (err) => {
+      const message = err instanceof Error ? err.message : 'Error al asignar casa';
+      toast.error(message);
+    },
+  });
+
+  // Mutation para remover casa
+  const removerCasaMutation = useMutation({
+    mutationFn: async ({ docenteId, casaTipo }: { docenteId: string; casaTipo: CasaTipo }) => {
+      await removerCasaDocente(docenteId, casaTipo);
+      return { docenteId, casaTipo };
+    },
+    onSuccess: async ({ docenteId, casaTipo }) => {
+      toast.success(`Casa ${casaTipo} removida`);
+      await refreshDocente(docenteId);
+    },
+    onError: (err) => {
+      const message = err instanceof Error ? err.message : 'Error al remover casa';
+      toast.error(message);
+    },
+  });
+
+  // Mutation para asignar mundo
+  const asignarMundoMutation = useMutation({
+    mutationFn: async ({ docenteId, mundoTipo }: { docenteId: string; mundoTipo: MundoTipo }) => {
+      await asignarMundoDocente(docenteId, mundoTipo);
+      return { docenteId, mundoTipo };
+    },
+    onSuccess: async ({ docenteId, mundoTipo }) => {
+      toast.success(`Mundo ${mundoTipo} asignado`);
+      await refreshDocente(docenteId);
+    },
+    onError: (err) => {
+      const message = err instanceof Error ? err.message : 'Error al asignar mundo';
+      toast.error(message);
+    },
+  });
+
+  // Mutation para remover mundo
+  const removerMundoMutation = useMutation({
+    mutationFn: async ({ docenteId, mundoTipo }: { docenteId: string; mundoTipo: MundoTipo }) => {
+      await removerMundoDocente(docenteId, mundoTipo);
+      return { docenteId, mundoTipo };
+    },
+    onSuccess: async ({ docenteId, mundoTipo }) => {
+      toast.success(`Mundo ${mundoTipo} removido`);
+      await refreshDocente(docenteId);
+    },
+    onError: (err) => {
+      const message = err instanceof Error ? err.message : 'Error al remover mundo';
+      toast.error(message);
+    },
+  });
+
+  // Mutation para actualizar tipo asignación
+  const actualizarTipoMutation = useMutation({
+    mutationFn: async ({ docenteId, tipo }: { docenteId: string; tipo: TipoAsignacionDocente }) => {
+      await actualizarTipoAsignacionDocente(docenteId, tipo);
+      return { docenteId, tipo };
+    },
+    onSuccess: async ({ docenteId, tipo }) => {
+      toast.success(`Tipo de asignación actualizado a ${tipo}`);
+      await refreshDocente(docenteId);
+    },
+    onError: (err) => {
+      const message = err instanceof Error ? err.message : 'Error al actualizar tipo';
+      toast.error(message);
+    },
+  });
+
+  // Handlers que expone el hook
   const handleAsignarCasa = useCallback(
     async (docenteId: string, casaTipo: CasaTipo) => {
-      try {
-        await asignarCasaDocente(docenteId, casaTipo);
-        toast.success(`Casa ${casaTipo} asignada`);
-        await refreshDocente(docenteId);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Error al asignar casa';
-        toast.error(message);
-        throw err;
-      }
+      await asignarCasaMutation.mutateAsync({ docenteId, casaTipo });
     },
-    [refreshDocente],
+    [asignarCasaMutation],
   );
 
-  // Remover casa
   const handleRemoverCasa = useCallback(
     async (docenteId: string, casaTipo: CasaTipo) => {
-      try {
-        await removerCasaDocente(docenteId, casaTipo);
-        toast.success(`Casa ${casaTipo} removida`);
-        await refreshDocente(docenteId);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Error al remover casa';
-        toast.error(message);
-        throw err;
-      }
+      await removerCasaMutation.mutateAsync({ docenteId, casaTipo });
     },
-    [refreshDocente],
+    [removerCasaMutation],
   );
 
-  // Asignar mundo
   const handleAsignarMundo = useCallback(
     async (docenteId: string, mundoTipo: MundoTipo) => {
-      try {
-        await asignarMundoDocente(docenteId, mundoTipo);
-        toast.success(`Mundo ${mundoTipo} asignado`);
-        await refreshDocente(docenteId);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Error al asignar mundo';
-        toast.error(message);
-        throw err;
-      }
+      await asignarMundoMutation.mutateAsync({ docenteId, mundoTipo });
     },
-    [refreshDocente],
+    [asignarMundoMutation],
   );
 
-  // Remover mundo
   const handleRemoverMundo = useCallback(
     async (docenteId: string, mundoTipo: MundoTipo) => {
-      try {
-        await removerMundoDocente(docenteId, mundoTipo);
-        toast.success(`Mundo ${mundoTipo} removido`);
-        await refreshDocente(docenteId);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Error al remover mundo';
-        toast.error(message);
-        throw err;
-      }
+      await removerMundoMutation.mutateAsync({ docenteId, mundoTipo });
     },
-    [refreshDocente],
+    [removerMundoMutation],
   );
 
-  // Actualizar tipo de asignación
   const handleActualizarTipoAsignacion = useCallback(
     async (docenteId: string, tipo: TipoAsignacionDocente) => {
-      try {
-        await actualizarTipoAsignacionDocente(docenteId, tipo);
-        toast.success(`Tipo de asignación actualizado a ${tipo}`);
-        await refreshDocente(docenteId);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Error al actualizar tipo';
-        toast.error(message);
-        throw err;
-      }
+      await actualizarTipoMutation.mutateAsync({ docenteId, tipo });
     },
-    [refreshDocente],
+    [actualizarTipoMutation],
   );
 
   return {
     isLoading,
-    error,
+    error: error ? (error instanceof Error ? error.message : 'Error al cargar docentes') : null,
     docentes: docentesFiltrados,
     filtros,
     setFiltros,
@@ -225,7 +273,9 @@ export function useDocenteAsignaciones(): UseDocenteAsignacionesReturn {
     handleAsignarMundo,
     handleRemoverMundo,
     handleActualizarTipoAsignacion,
-    refetch: fetchDocentes,
+    refetch: async () => {
+      await refetch();
+    },
     refreshDocente,
   };
 }

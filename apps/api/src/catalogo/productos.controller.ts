@@ -69,6 +69,19 @@ export class ProductosController {
   }
 
   /**
+   * GET /productos/ventas-count-batch
+   * Obtiene conteo de ventas de TODOS los productos en una sola query
+   * Evita N+1 cuando se necesitan ventas de múltiples productos
+   * Requiere autenticación y rol Admin
+   */
+  @Get('ventas-count-batch')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async getVentasCountBatch() {
+    return this.productosService.getVentasCountBatch();
+  }
+
+  /**
    * GET /productos/:id/ventas-count
    * Obtiene conteo de ventas (inscripciones) de un producto
    * Requiere autenticación y rol Admin
