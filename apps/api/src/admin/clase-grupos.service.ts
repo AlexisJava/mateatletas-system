@@ -27,6 +27,17 @@ export class ClaseGruposService {
       );
     }
 
+    // Validar que el grupo pedagógico exista
+    const grupoPedagogico = await this.prisma.grupoPedagogico.findUnique({
+      where: { id: dto.grupoId },
+    });
+
+    if (!grupoPedagogico) {
+      throw new NotFoundException(
+        `No se encontró el grupo pedagógico con ID ${dto.grupoId}`,
+      );
+    }
+
     // Validar que el docente exista
     const docente = await this.prisma.docente.findUnique({
       where: { id: dto.docenteId },
@@ -360,26 +371,7 @@ export class ClaseGruposService {
     }
 
     // Preparar los datos a actualizar
-    const updateData: Prisma.ClaseGrupoUpdateInput = {};
-
-    if (dto.nombre) updateData.nombre = dto.nombre;
-    if (dto.tipo) updateData.tipo = dto.tipo;
-    if (dto.diaSemana) updateData.dia_semana = dto.diaSemana;
-    if (dto.horaInicio) updateData.hora_inicio = dto.horaInicio;
-    if (dto.horaFin) updateData.hora_fin = dto.horaFin;
-    if (dto.fechaInicio) updateData.fecha_inicio = new Date(dto.fechaInicio);
-    if (dto.fechaFin) updateData.fecha_fin = new Date(dto.fechaFin);
-    if (dto.anioLectivo) updateData.anio_lectivo = dto.anioLectivo;
-    if (dto.cupoMaximo) updateData.cupo_maximo = dto.cupoMaximo;
-    if (dto.docenteId) {
-      updateData.docente = { connect: { id: dto.docenteId } };
-    }
-    if (dto.sectorId !== undefined) {
-      updateData.sector = dto.sectorId
-        ? { connect: { id: dto.sectorId } }
-        : { disconnect: true };
-    }
-    if (dto.nivel !== undefined) updateData.nivel = dto.nivel;
+    const updateData = this.buildUpdateData(dto);
 
     // Actualizar en transacción
     const claseGrupo = await this.prisma.$transaction(
@@ -655,5 +647,35 @@ export class ClaseGruposService {
       success: true,
       message: `Estudiante ${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido} removido exitosamente`,
     };
+  }
+
+  /**
+   * Construye el objeto de actualización para ClaseGrupo
+   */
+  private buildUpdateData(
+    dto: ActualizarClaseGrupoDto,
+  ): Prisma.ClaseGrupoUpdateInput {
+    const updateData: Prisma.ClaseGrupoUpdateInput = {};
+
+    if (dto.nombre) updateData.nombre = dto.nombre;
+    if (dto.tipo) updateData.tipo = dto.tipo;
+    if (dto.diaSemana) updateData.dia_semana = dto.diaSemana;
+    if (dto.horaInicio) updateData.hora_inicio = dto.horaInicio;
+    if (dto.horaFin) updateData.hora_fin = dto.horaFin;
+    if (dto.fechaInicio) updateData.fecha_inicio = new Date(dto.fechaInicio);
+    if (dto.fechaFin) updateData.fecha_fin = new Date(dto.fechaFin);
+    if (dto.anioLectivo) updateData.anio_lectivo = dto.anioLectivo;
+    if (dto.cupoMaximo) updateData.cupo_maximo = dto.cupoMaximo;
+    if (dto.docenteId) {
+      updateData.docente = { connect: { id: dto.docenteId } };
+    }
+    if (dto.sectorId !== undefined) {
+      updateData.sector = dto.sectorId
+        ? { connect: { id: dto.sectorId } }
+        : { disconnect: true };
+    }
+    if (dto.nivel !== undefined) updateData.nivel = dto.nivel;
+
+    return updateData;
   }
 }
