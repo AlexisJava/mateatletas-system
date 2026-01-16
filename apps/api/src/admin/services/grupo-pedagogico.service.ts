@@ -8,7 +8,7 @@ import { CasaTipo, MundoTipo } from '@prisma/client';
 export interface FiltrosGrupoPedagogicoDto {
   casa_tipo?: CasaTipo;
   mundo_tipo?: MundoTipo;
-  activo?: boolean;
+  activo?: boolean | string; // Query params llegan como string
 }
 
 export interface ActualizarGrupoPedagogicoDto {
@@ -44,7 +44,9 @@ export class GrupoPedagogicoService {
       where.mundo_tipo = filtros.mundo_tipo;
     }
     if (filtros.activo !== undefined) {
-      where.activo = filtros.activo;
+      // Query params llegan como string, convertir a boolean
+      where.activo =
+        filtros.activo === true || filtros.activo === 'true' ? true : false;
     }
 
     return this.prisma.grupoPedagogico.findMany({
@@ -120,19 +122,49 @@ export class GrupoPedagogicoService {
   }
 
   /**
+   * Inferir MundoTipo a partir del nombre del sector
+   */
+  private inferirMundoDesdeNombreSector(
+    nombreSector: string | undefined,
+  ): MundoTipo | null {
+    if (!nombreSector) return null;
+
+    const nombreLower = nombreSector.toLowerCase();
+    if (nombreLower.includes('matem')) return MundoTipo.MATEMATICA;
+    if (nombreLower.includes('prog') || nombreLower.includes('compu')) {
+      return MundoTipo.PROGRAMACION;
+    }
+    if (nombreLower.includes('ciencia')) return MundoTipo.CIENCIAS;
+
+    return null;
+  }
+
+  /**
+   * Inferir CasaTipo a partir del rango de edad
+   */
+  private inferirCasaDesdeEdad(
+    edadMinima: number | null,
+    edadMaxima: number | null,
+  ): CasaTipo | null {
+    if (edadMinima === null || edadMaxima === null) return null;
+
+    const edadPromedio = (edadMinima + edadMaxima) / 2;
+    if (edadPromedio < 10) return CasaTipo.QUANTUM;
+    if (edadPromedio < 13) return CasaTipo.VERTEX;
+    return CasaTipo.PULSAR;
+  }
+
+  /**
    * Migrar grupos legacy (sector_id) a Casa/Mundo
    * Útil para migración de datos existentes
    */
   async migrarGruposLegacy() {
-    // Obtener grupos con sector_id pero sin casa_tipo/mundo_tipo
     const gruposLegacy = await this.prisma.grupoPedagogico.findMany({
       where: {
         sector_id: { not: null },
         OR: [{ casa_tipo: null }, { mundo_tipo: null }],
       },
-      include: {
-        sector: true,
-      },
+      include: { sector: true },
     });
 
     if (gruposLegacy.length === 0) {
@@ -142,51 +174,27 @@ export class GrupoPedagogicoService {
     const resultados = [];
 
     for (const grupo of gruposLegacy) {
-      // Mapear sector a mundo
-      let mundoTipo: MundoTipo | null = null;
-      if (grupo.sector?.nombre) {
-        const nombreLower = grupo.sector.nombre.toLowerCase();
-        if (nombreLower.includes('matem')) {
-          mundoTipo = MundoTipo.MATEMATICA;
-        } else if (
-          nombreLower.includes('prog') ||
-          nombreLower.includes('compu')
-        ) {
-          mundoTipo = MundoTipo.PROGRAMACION;
-        } else if (nombreLower.includes('ciencia')) {
-          mundoTipo = MundoTipo.CIENCIAS;
-        }
-      }
+      const mundoTipo = this.inferirMundoDesdeNombreSector(
+        grupo.sector?.nombre,
+      );
+      const casaTipo = this.inferirCasaDesdeEdad(
+        grupo.edad_minima,
+        grupo.edad_maxima,
+      );
 
-      // Inferir casa por rango de edad del grupo
-      let casaTipo: CasaTipo | null = null;
-      if (grupo.edad_minima !== null && grupo.edad_maxima !== null) {
-        const edadPromedio = (grupo.edad_minima + grupo.edad_maxima) / 2;
-        if (edadPromedio < 10) {
-          casaTipo = CasaTipo.QUANTUM;
-        } else if (edadPromedio < 13) {
-          casaTipo = CasaTipo.VERTEX;
-        } else {
-          casaTipo = CasaTipo.PULSAR;
-        }
-      }
+      if (!casaTipo && !mundoTipo) continue;
 
-      if (casaTipo || mundoTipo) {
-        await this.prisma.grupoPedagogico.update({
-          where: { id: grupo.id },
-          data: {
-            casa_tipo: casaTipo,
-            mundo_tipo: mundoTipo,
-          },
-        });
+      await this.prisma.grupoPedagogico.update({
+        where: { id: grupo.id },
+        data: { casa_tipo: casaTipo, mundo_tipo: mundoTipo },
+      });
 
-        resultados.push({
-          id: grupo.id,
-          codigo: grupo.codigo,
-          casa_tipo: casaTipo,
-          mundo_tipo: mundoTipo,
-        });
-      }
+      resultados.push({
+        id: grupo.id,
+        codigo: grupo.codigo,
+        casa_tipo: casaTipo,
+        mundo_tipo: mundoTipo,
+      });
     }
 
     this.logger.log(`Migrados ${resultados.length} grupos legacy a Casa/Mundo`);

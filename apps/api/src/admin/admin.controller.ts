@@ -1211,6 +1211,21 @@ export class AdminController {
   }
 
   /**
+   * Obtener estadísticas de grupos por Casa/Mundo
+   * GET /api/admin/grupos-pedagogicos/estadisticas
+   * Rol: Admin
+   * NOTA: Esta ruta DEBE estar ANTES de /:id para que NestJS no la interprete como ID
+   */
+  @Get('grupos-pedagogicos/estadisticas')
+  @ApiOperation({
+    summary: 'Estadísticas de grupos',
+    description: 'Obtiene estadísticas de grupos por casa y mundo',
+  })
+  async obtenerEstadisticasGrupos() {
+    return this.grupoPedagogicoService.obtenerEstadisticas();
+  }
+
+  /**
    * Obtener un grupo pedagógico por ID
    * GET /api/admin/grupos-pedagogicos/:id
    * Rol: Admin
@@ -1250,20 +1265,6 @@ export class AdminController {
   })
   async migrarGruposLegacy() {
     return this.grupoPedagogicoService.migrarGruposLegacy();
-  }
-
-  /**
-   * Obtener estadísticas de grupos por Casa/Mundo
-   * GET /api/admin/grupos-pedagogicos/estadisticas
-   * Rol: Admin
-   */
-  @Get('grupos-pedagogicos/estadisticas')
-  @ApiOperation({
-    summary: 'Estadísticas de grupos',
-    description: 'Obtiene estadísticas de grupos por casa y mundo',
-  })
-  async obtenerEstadisticasGrupos() {
-    return this.grupoPedagogicoService.obtenerEstadisticas();
   }
 
   // =========================================================================

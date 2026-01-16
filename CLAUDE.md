@@ -28,10 +28,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - PROHIBIDO: Mocks de base de datos en tests de integración (usar DB real con docker-compose.test.yml)
 - PROHIBIDO: Modificar test para que pase (modificar el CÓDIGO, no el test)
 - PROHIBIDO: Ejecutar tests - EL USUARIO LOS EJECUTA (Claude tarda demasiado)
+- PROHIBIDO: Corregir tests reactivamente cuando fallan (ver ciclo abajo)
 - OBLIGATORIO: TDD - test primero, código después
 - OBLIGATORIO: Verificar funcionamiento real en browser/Postman
 - OBLIGATORIO: Black Box Testing - testear REQUISITOS, no implementación
 - OBLIGATORIO: Leer `apps/api/test/TESTING.md` antes de escribir tests
+
+### Ciclo de Construcción de Tests (OBLIGATORIO)
+
+Cuando se escriben tests nuevos, seguir este ciclo **sin excepciones**:
+
+```
+1. ESCRIBIR    → Crear el archivo de test completo
+2. EJECUTAR   → Correr los tests (usuario o Claude según contexto)
+3. REPORTAR   → Si fallan, listar CUÁLES fallan y FRENAR
+4. INVESTIGAR → Averiguar POR QUÉ fallan SIN implementar nada
+5. PLANIFICAR → Explicar el fix propuesto al usuario
+6. IMPLEMENTAR → Solo después de entender la causa raíz
+7. REPETIR    → Volver al paso 2
+```
+
+**CRÍTICO:** Si un test falla, NUNCA corregir reactivamente. Siempre:
+
+1. Frenar
+2. Reportar qué tests fallan
+3. Investigar la causa raíz (leer código, verificar estructura de response, etc.)
+4. Explicar el diagnóstico al usuario
+5. Solo implementar después de entender el problema
+
+Este ciclo se repite cuantas veces sea necesario hasta que todos los tests pasen.
 
 ### Instrucciones del Usuario
 
