@@ -12,6 +12,7 @@ import { seedLogros } from './logros.seed';
 import { seedLogrosPlanificaciones } from './logros-planificaciones.seed';
 import { seedConfiguracionPrecios } from './configuracion-precios.seed';
 import { seedInscripcionesMensuales } from './inscripciones-mensuales.seed';
+import { seedTutorFamilia } from './tutor-familia.seed';
 
 /**
  * Orchestrator para todos los seeds modulares
@@ -49,6 +50,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedLogros(prisma);
     await seedLogrosPlanificaciones(prisma); // Logros de planificaciones
     await seedInscripcionesMensuales(prisma); // Inscripciones de prueba para el tutor
+    await seedTutorFamilia(prisma); // Tutor con 6 hijos - edge cases completos
   }
 
   console.log(`\n🎉 Seed completado exitosamente (${env})!`);
@@ -69,4 +71,5 @@ export {
   seedLogros,
   seedLogrosPlanificaciones,
   seedInscripcionesMensuales,
+  seedTutorFamilia,
 };
