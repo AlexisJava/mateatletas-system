@@ -185,6 +185,99 @@ export class SimularMontoQueryDto {
 }
 
 // ============================================================================
+// CAMBIAR HORARIO
+// ============================================================================
+
+/**
+ * DTO para cambiar el horario (ClaseGrupo) de una inscripción
+ */
+export class CambiarHorarioDto {
+  @ApiProperty({
+    description: 'ID de la inscripción a modificar (CUID)',
+    example: 'clxyz123abc456def',
+  })
+  @IsString({ message: 'El inscripcionId debe ser un string' })
+  @IsNotEmpty({ message: 'El inscripcionId es requerido' })
+  @MinLength(20, { message: 'El inscripcionId no tiene formato válido' })
+  inscripcionId!: string;
+
+  @ApiProperty({
+    description: 'ID del nuevo ClaseGrupo (CUID)',
+    example: 'clxyz789ghi012jkl',
+  })
+  @IsString({ message: 'El nuevoClaseGrupoId debe ser un string' })
+  @IsNotEmpty({ message: 'El nuevoClaseGrupoId es requerido' })
+  @MinLength(20, { message: 'El nuevoClaseGrupoId no tiene formato válido' })
+  nuevoClaseGrupoId!: string;
+}
+
+// ============================================================================
+// CAMBIAR PRODUCTO
+// ============================================================================
+
+/**
+ * DTO para cambiar el producto de una inscripción
+ */
+export class CambiarProductoDto {
+  @ApiProperty({
+    description: 'ID de la inscripción a modificar (CUID)',
+    example: 'clxyz123abc456def',
+  })
+  @IsString({ message: 'El inscripcionId debe ser un string' })
+  @IsNotEmpty({ message: 'El inscripcionId es requerido' })
+  @MinLength(20, { message: 'El inscripcionId no tiene formato válido' })
+  inscripcionId!: string;
+
+  @ApiProperty({
+    description: 'ID del nuevo producto (CUID)',
+    example: 'clxyz789ghi012jkl',
+  })
+  @IsString({ message: 'El nuevoProductoId debe ser un string' })
+  @IsNotEmpty({ message: 'El nuevoProductoId es requerido' })
+  @MinLength(20, { message: 'El nuevoProductoId no tiene formato válido' })
+  nuevoProductoId!: string;
+
+  @ApiPropertyOptional({
+    description: 'ID del ClaseGrupo del nuevo producto (CUID)',
+    example: 'clxyz345mno678pqr',
+  })
+  @IsString({ message: 'El nuevoClaseGrupoId debe ser un string' })
+  @MinLength(20, { message: 'El nuevoClaseGrupoId no tiene formato válido' })
+  @IsOptional()
+  nuevoClaseGrupoId?: string;
+
+  @ApiPropertyOptional({
+    description: 'ID de la comisión del nuevo producto (CUID)',
+    example: 'clxyz901stu234vwx',
+  })
+  @IsString({ message: 'El nuevaComisionId debe ser un string' })
+  @MinLength(20, { message: 'El nuevaComisionId no tiene formato válido' })
+  @IsOptional()
+  nuevaComisionId?: string;
+}
+
+// ============================================================================
+// CAMBIAR TIER
+// ============================================================================
+
+/**
+ * DTO para cambiar el tier de la suscripción
+ */
+export class CambiarTierDto {
+  @ApiProperty({
+    description: 'Nuevo tier de la suscripción',
+    enum: TierNombre,
+    example: 'STEAM_SINCRONICO',
+  })
+  @IsEnum(TierNombre, {
+    message:
+      'El tier debe ser: STEAM_LIBROS, STEAM_ASINCRONICO o STEAM_SINCRONICO',
+  })
+  @IsNotEmpty({ message: 'El nuevoTier es requerido' })
+  nuevoTier!: TierNombre;
+}
+
+// ============================================================================
 // ADMIN: FILTROS
 // ============================================================================
 

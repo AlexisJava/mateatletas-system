@@ -6,11 +6,14 @@
  * - Múltiples inscripciones a actividades
  * - Descuento 10% desde la 2da actividad
  *
- * Endpoints:
+ * Endpoints Tutor:
  * - POST /familiar - Crear suscripción familiar
  * - GET /familiar - Obtener mi suscripción
  * - POST /familiar/inscripciones - Agregar inscripciones
  * - DELETE /familiar/inscripciones - Dar de baja inscripciones
+ * - PATCH /familiar/inscripciones/horario - Cambiar horario de inscripción
+ * - PATCH /familiar/inscripciones/producto - Cambiar producto de inscripción
+ * - PATCH /familiar/tier - Cambiar tier de suscripción
  * - POST /familiar/cancelar - Cancelar suscripción
  * - GET /familiar/simular - Simular monto con nuevos productos
  *
@@ -23,6 +26,7 @@ import {
   Get,
   Post,
   Delete,
+  Patch,
   Param,
   Body,
   Query,
@@ -49,6 +53,9 @@ import {
   CrearSuscripcionFamiliarDto,
   AgregarInscripcionesDto,
   BajaInscripcionesDto,
+  CambiarHorarioDto,
+  CambiarProductoDto,
+  CambiarTierDto,
   SimularMontoQueryDto,
   AdminFiltrosDto,
 } from '../dto/suscripcion-familiar.dto';
@@ -198,6 +205,127 @@ export class SuscripcionFamiliarController {
         tutorId: user.id,
         inscripcionIds: dto.inscripcionIds,
         motivo: dto.motivo,
+      });
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
+  }
+
+  @Patch('inscripciones/horario')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ExactRoles(Role.TUTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cambiar horario de una inscripción' })
+  async cambiarHorario(
+    @Body() dto: CambiarHorarioDto,
+    @GetUser() user: AuthUser,
+  ) {
+    const suscripcion = await this.queryService.obtenerPorTutorId(user.id);
+
+    if (!suscripcion) {
+      throw new BadRequestException({
+        message: 'No tienes una suscripción familiar activa',
+        code: SuscripcionFamiliarErrorCode.NOT_FOUND,
+      });
+    }
+
+    try {
+      const result = await this.commandService.cambiarHorario({
+        suscripcionFamiliarId: suscripcion.id,
+        tutorId: user.id,
+        inscripcionId: dto.inscripcionId,
+        nuevoClaseGrupoId: dto.nuevoClaseGrupoId,
+      });
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
+  }
+
+  @Patch('inscripciones/producto')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ExactRoles(Role.TUTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cambiar producto de una inscripción' })
+  async cambiarProducto(
+    @Body() dto: CambiarProductoDto,
+    @GetUser() user: AuthUser,
+  ) {
+    const suscripcion = await this.queryService.obtenerPorTutorId(user.id);
+
+    if (!suscripcion) {
+      throw new BadRequestException({
+        message: 'No tienes una suscripción familiar activa',
+        code: SuscripcionFamiliarErrorCode.NOT_FOUND,
+      });
+    }
+
+    try {
+      const result = await this.commandService.cambiarProducto({
+        suscripcionFamiliarId: suscripcion.id,
+        tutorId: user.id,
+        inscripcionId: dto.inscripcionId,
+        nuevoProductoId: dto.nuevoProductoId,
+        nuevoClaseGrupoId: dto.nuevoClaseGrupoId,
+        nuevaComisionId: dto.nuevaComisionId,
+      });
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
+  }
+
+  @Patch('tier')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ExactRoles(Role.TUTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cambiar tier de la suscripción' })
+  async cambiarTier(@Body() dto: CambiarTierDto, @GetUser() user: AuthUser) {
+    const suscripcion = await this.queryService.obtenerPorTutorId(user.id);
+
+    if (!suscripcion) {
+      throw new BadRequestException({
+        message: 'No tienes una suscripción familiar activa',
+        code: SuscripcionFamiliarErrorCode.NOT_FOUND,
+      });
+    }
+
+    try {
+      const result = await this.commandService.cambiarTier({
+        suscripcionFamiliarId: suscripcion.id,
+        tutorId: user.id,
+        nuevoTier: dto.nuevoTier,
       });
 
       return {

@@ -124,6 +124,47 @@ export class MercadoPagoPreApprovalClientService {
   }
 
   /**
+   * Actualiza el monto de un preapproval existente en MercadoPago
+   *
+   * @param preapprovalId ID del preapproval a actualizar
+   * @param nuevoMonto Nuevo monto mensual en pesos
+   * @returns true si se actualizó correctamente
+   * @throws Error si el cliente no está configurado o falla la API
+   */
+  async updateAmount(
+    preapprovalId: string,
+    nuevoMonto: number,
+  ): Promise<boolean> {
+    if (!this.client) {
+      throw new Error('Cliente MercadoPago no configurado');
+    }
+
+    try {
+      await this.client.update({
+        id: preapprovalId,
+        body: {
+          auto_recurring: {
+            transaction_amount: nuevoMonto,
+            currency_id: 'ARS',
+          },
+        },
+      });
+
+      this.logger.log(
+        `PreApproval ${preapprovalId} actualizado a monto: $${nuevoMonto}`,
+      );
+      return true;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Error actualizando monto de preapproval ${preapprovalId}: ${errorMessage}`,
+      );
+      throw error;
+    }
+  }
+
+  /**
    * Cancela un preapproval existente en MercadoPago
    *
    * @param preapprovalId ID del preapproval a cancelar

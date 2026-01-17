@@ -116,6 +116,60 @@ export interface CancelarSuscripcionFamiliarInput {
   readonly canceladoPor: 'tutor' | 'admin' | 'system';
 }
 
+/**
+ * Input para cambiar horario de una inscripción
+ */
+export interface CambiarHorarioInput {
+  /** ID de la suscripción familiar */
+  readonly suscripcionFamiliarId: string;
+
+  /** ID del tutor (para validación de ownership) */
+  readonly tutorId: string;
+
+  /** ID de la inscripción a modificar */
+  readonly inscripcionId: string;
+
+  /** ID del nuevo ClaseGrupo */
+  readonly nuevoClaseGrupoId: string;
+}
+
+/**
+ * Input para cambiar producto de una inscripción
+ */
+export interface CambiarProductoInput {
+  /** ID de la suscripción familiar */
+  readonly suscripcionFamiliarId: string;
+
+  /** ID del tutor (para validación de ownership) */
+  readonly tutorId: string;
+
+  /** ID de la inscripción a modificar */
+  readonly inscripcionId: string;
+
+  /** ID del nuevo producto */
+  readonly nuevoProductoId: string;
+
+  /** ID del ClaseGrupo del nuevo producto (si aplica) */
+  readonly nuevoClaseGrupoId?: string;
+
+  /** ID de la comisión del nuevo producto (si aplica) */
+  readonly nuevaComisionId?: string;
+}
+
+/**
+ * Input para cambiar tier de la suscripción
+ */
+export interface CambiarTierInput {
+  /** ID de la suscripción familiar */
+  readonly suscripcionFamiliarId: string;
+
+  /** ID del tutor (para validación de ownership) */
+  readonly tutorId: string;
+
+  /** Nuevo tier */
+  readonly nuevoTier: TierNombre;
+}
+
 // ============================================================================
 // TIPOS DE OUTPUT
 // ============================================================================
@@ -172,6 +226,66 @@ export interface BajaInscripcionesResult {
 
   /** Monto anterior */
   readonly montoAnterior: number;
+}
+
+/**
+ * Resultado de cambiar horario
+ */
+export interface CambiarHorarioResult {
+  /** ID de la inscripción modificada */
+  readonly inscripcionId: string;
+
+  /** ID del ClaseGrupo anterior */
+  readonly claseGrupoAnteriorId: string;
+
+  /** ID del nuevo ClaseGrupo */
+  readonly nuevoClaseGrupoId: string;
+
+  /** Nombre del nuevo horario */
+  readonly nuevoHorarioNombre: string;
+}
+
+/**
+ * Resultado de cambiar producto
+ */
+export interface CambiarProductoResult {
+  /** ID de la inscripción modificada */
+  readonly inscripcionId: string;
+
+  /** ID del producto anterior */
+  readonly productoAnteriorId: string;
+
+  /** ID del nuevo producto */
+  readonly nuevoProductoId: string;
+
+  /** Nombre del nuevo producto */
+  readonly nuevoProductoNombre: string;
+
+  /** Nuevo monto mensual */
+  readonly nuevoMontoMensual: number;
+
+  /** Monto anterior */
+  readonly montoAnterior: number;
+}
+
+/**
+ * Resultado de cambiar tier
+ */
+export interface CambiarTierResult {
+  /** Tier anterior */
+  readonly tierAnterior: TierNombre;
+
+  /** Nuevo tier */
+  readonly nuevoTier: TierNombre;
+
+  /** Monto anterior */
+  readonly montoAnterior: number;
+
+  /** Nuevo monto mensual */
+  readonly nuevoMontoMensual: number;
+
+  /** Diferencia de monto */
+  readonly diferenciaMonto: number;
 }
 
 /**

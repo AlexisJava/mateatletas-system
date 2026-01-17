@@ -37,6 +37,12 @@ import {
   BajaInscripcionesInput,
   BajaInscripcionesResult,
   CancelarSuscripcionFamiliarInput,
+  CambiarHorarioInput,
+  CambiarHorarioResult,
+  CambiarProductoInput,
+  CambiarProductoResult,
+  CambiarTierInput,
+  CambiarTierResult,
   SuscripcionFamiliarError,
   SuscripcionFamiliarErrorCode,
 } from '../types';
@@ -576,5 +582,374 @@ export class SuscripcionFamiliarCommandService {
     });
 
     this.logger.log(`Suscripción familiar cancelada: ${suscripcionFamiliarId}`);
+  }
+
+  /**
+   * Cambia el horario (ClaseGrupo) de una inscripción
+   *
+   * No modifica el monto - solo el grupo/horario de la actividad
+   */
+  async cambiarHorario(
+    input: CambiarHorarioInput,
+  ): Promise<CambiarHorarioResult> {
+    const { suscripcionFamiliarId, tutorId, inscripcionId, nuevoClaseGrupoId } =
+      input;
+
+    // 1. Validar suscripción y ownership
+    const suscripcion = await this.prisma.suscripcionFamiliar.findUnique({
+      where: { id: suscripcionFamiliarId },
+      include: {
+        inscripciones: {
+          where: { id: inscripcionId },
+          include: { producto: { select: { id: true } } },
+        },
+      },
+    });
+
+    if (!suscripcion) {
+      throw new SuscripcionFamiliarError(
+        'Suscripción no encontrada',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    if (suscripcion.tutor_id !== tutorId) {
+      throw new SuscripcionFamiliarError(
+        'No autorizado',
+        SuscripcionFamiliarErrorCode.UNAUTHORIZED,
+      );
+    }
+
+    const inscripcion = suscripcion.inscripciones[0];
+    if (!inscripcion) {
+      throw new SuscripcionFamiliarError(
+        'Inscripción no encontrada',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    // 2. Validar que el nuevo ClaseGrupo pertenece al mismo producto
+    const nuevoClaseGrupo = await this.prisma.claseGrupo.findUnique({
+      where: { id: nuevoClaseGrupoId },
+      select: { id: true, nombre: true, producto_id: true },
+    });
+
+    if (!nuevoClaseGrupo) {
+      throw new SuscripcionFamiliarError(
+        'Grupo de clase no encontrado',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    if (nuevoClaseGrupo.producto_id !== inscripcion.producto.id) {
+      throw new SuscripcionFamiliarError(
+        'El nuevo horario debe pertenecer al mismo producto',
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    const claseGrupoAnteriorId = inscripcion.clase_grupo_id ?? '';
+
+    // 3. Actualizar inscripción
+    await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
+      await tx.inscripcionActividad.update({
+        where: { id: inscripcionId },
+        data: { clase_grupo_id: nuevoClaseGrupoId },
+      });
+
+      // Registrar cambio
+      await tx.cambioInscripcion.create({
+        data: {
+          suscripcion_familiar_id: suscripcionFamiliarId,
+          tipo: TipoCambioInscripcion.CAMBIO_HORARIO,
+          inscripcion_anterior_id: inscripcionId,
+          aplica_desde: new Date(),
+          monto_anterior: suscripcion.monto_mensual,
+          monto_nuevo: suscripcion.monto_mensual,
+          detalle: {
+            claseGrupoAnteriorId,
+            nuevoClaseGrupoId,
+          },
+        },
+      });
+    });
+
+    this.logger.log(
+      `Cambio de horario: inscripción ${inscripcionId} → grupo ${nuevoClaseGrupoId}`,
+    );
+
+    return {
+      inscripcionId,
+      claseGrupoAnteriorId,
+      nuevoClaseGrupoId,
+      nuevoHorarioNombre: nuevoClaseGrupo.nombre,
+    };
+  }
+
+  /**
+   * Cambia el producto de una inscripción
+   *
+   * Puede modificar el monto si el nuevo producto tiene precio diferente
+   */
+  async cambiarProducto(
+    input: CambiarProductoInput,
+  ): Promise<CambiarProductoResult> {
+    const {
+      suscripcionFamiliarId,
+      tutorId,
+      inscripcionId,
+      nuevoProductoId,
+      nuevoClaseGrupoId,
+      nuevaComisionId,
+    } = input;
+
+    // 1. Validar suscripción y ownership
+    const suscripcion = await this.prisma.suscripcionFamiliar.findUnique({
+      where: { id: suscripcionFamiliarId },
+      include: {
+        inscripciones: {
+          where: { estado: EstadoInscripcionActividad.ACTIVA },
+          include: { producto: { select: { id: true, precio: true } } },
+        },
+      },
+    });
+
+    if (!suscripcion) {
+      throw new SuscripcionFamiliarError(
+        'Suscripción no encontrada',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    if (suscripcion.tutor_id !== tutorId) {
+      throw new SuscripcionFamiliarError(
+        'No autorizado',
+        SuscripcionFamiliarErrorCode.UNAUTHORIZED,
+      );
+    }
+
+    const inscripcionActual = suscripcion.inscripciones.find(
+      (i) => i.id === inscripcionId,
+    );
+    if (!inscripcionActual) {
+      throw new SuscripcionFamiliarError(
+        'Inscripción no encontrada o no activa',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    // 2. Validar nuevo producto
+    const nuevoProducto = await this.prisma.producto.findUnique({
+      where: { id: nuevoProductoId, activo: true },
+      select: { id: true, nombre: true, precio: true },
+    });
+
+    if (!nuevoProducto) {
+      throw new SuscripcionFamiliarError(
+        'Producto no encontrado o inactivo',
+        SuscripcionFamiliarErrorCode.PRODUCTO_NOT_FOUND,
+      );
+    }
+
+    // 3. Calcular nuevo monto
+    const montoAnterior = suscripcion.monto_mensual;
+    const preciosActuales = suscripcion.inscripciones.map((i) =>
+      i.id === inscripcionId
+        ? (nuevoProducto.precio?.toNumber() ??
+          obtenerPrecioTier(suscripcion.tier))
+        : (i.producto.precio?.toNumber() ??
+          obtenerPrecioTier(suscripcion.tier)),
+    );
+
+    const calculoNuevo = calcularMontoMensualTotal(preciosActuales);
+    const nuevoMontoMensual = calculoNuevo.montoConDescuento;
+
+    // 4. Actualizar en transacción
+    await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
+      await tx.inscripcionActividad.update({
+        where: { id: inscripcionId },
+        data: {
+          producto_id: nuevoProductoId,
+          clase_grupo_id: nuevoClaseGrupoId ?? null,
+          comision_id: nuevaComisionId ?? null,
+        },
+      });
+
+      // Actualizar monto de suscripción
+      await tx.suscripcionFamiliar.update({
+        where: { id: suscripcionFamiliarId },
+        data: { monto_mensual: nuevoMontoMensual },
+      });
+
+      // Registrar cambio
+      await tx.cambioInscripcion.create({
+        data: {
+          suscripcion_familiar_id: suscripcionFamiliarId,
+          tipo: TipoCambioInscripcion.CAMBIO_PRODUCTO,
+          inscripcion_anterior_id: inscripcionId,
+          aplica_desde: new Date(),
+          monto_anterior: montoAnterior,
+          monto_nuevo: nuevoMontoMensual,
+          detalle: {
+            productoAnteriorId: inscripcionActual.producto.id,
+            nuevoProductoId,
+          },
+        },
+      });
+    });
+
+    // 5. Actualizar monto en MercadoPago si cambió
+    if (
+      montoAnterior !== nuevoMontoMensual &&
+      suscripcion.preapproval_id &&
+      this.mpClient.isConfigured()
+    ) {
+      await this.actualizarMontoEnMercadoPago(
+        suscripcion.preapproval_id,
+        nuevoMontoMensual,
+      );
+    }
+
+    this.logger.log(
+      `Cambio de producto: inscripción ${inscripcionId} → producto ${nuevoProductoId}`,
+    );
+
+    return {
+      inscripcionId,
+      productoAnteriorId: inscripcionActual.producto.id,
+      nuevoProductoId,
+      nuevoProductoNombre: nuevoProducto.nombre,
+      nuevoMontoMensual,
+      montoAnterior,
+    };
+  }
+
+  /**
+   * Cambia el tier de la suscripción familiar
+   *
+   * Esto NO recalcula los precios de las inscripciones existentes.
+   * Solo afecta el tier base para nuevas inscripciones sin precio específico.
+   */
+  async cambiarTier(input: CambiarTierInput): Promise<CambiarTierResult> {
+    const { suscripcionFamiliarId, tutorId, nuevoTier } = input;
+
+    // 1. Validar suscripción y ownership
+    const suscripcion = await this.prisma.suscripcionFamiliar.findUnique({
+      where: { id: suscripcionFamiliarId },
+      include: {
+        inscripciones: {
+          where: { estado: EstadoInscripcionActividad.ACTIVA },
+          include: { producto: { select: { precio: true } } },
+        },
+      },
+    });
+
+    if (!suscripcion) {
+      throw new SuscripcionFamiliarError(
+        'Suscripción no encontrada',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    if (suscripcion.tutor_id !== tutorId) {
+      throw new SuscripcionFamiliarError(
+        'No autorizado',
+        SuscripcionFamiliarErrorCode.UNAUTHORIZED,
+      );
+    }
+
+    if (suscripcion.estado === EstadoSuscripcionFamiliar.CANCELLED) {
+      throw new SuscripcionFamiliarError(
+        'No se puede cambiar tier de una suscripción cancelada',
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    const tierAnterior = suscripcion.tier;
+    const montoAnterior = suscripcion.monto_mensual;
+
+    // 2. Recalcular monto con nuevo tier (para inscripciones sin precio específico)
+    const precios = suscripcion.inscripciones.map(
+      (i) => i.producto.precio?.toNumber() ?? obtenerPrecioTier(nuevoTier),
+    );
+
+    const calculoNuevo = calcularMontoMensualTotal(precios);
+    const nuevoMontoMensual = calculoNuevo.montoConDescuento;
+
+    // 3. Actualizar en transacción
+    await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
+      await tx.suscripcionFamiliar.update({
+        where: { id: suscripcionFamiliarId },
+        data: {
+          tier: nuevoTier,
+          monto_mensual: nuevoMontoMensual,
+        },
+      });
+
+      // Registrar cambio
+      await tx.cambioInscripcion.create({
+        data: {
+          suscripcion_familiar_id: suscripcionFamiliarId,
+          tipo: TipoCambioInscripcion.CAMBIO_TIER,
+          aplica_desde: new Date(),
+          monto_anterior: montoAnterior,
+          monto_nuevo: nuevoMontoMensual,
+          detalle: {
+            tierAnterior,
+            nuevoTier,
+          },
+        },
+      });
+    });
+
+    // 4. Actualizar monto en MercadoPago si cambió
+    if (
+      montoAnterior !== nuevoMontoMensual &&
+      suscripcion.preapproval_id &&
+      this.mpClient.isConfigured()
+    ) {
+      await this.actualizarMontoEnMercadoPago(
+        suscripcion.preapproval_id,
+        nuevoMontoMensual,
+      );
+    }
+
+    this.logger.log(
+      `Cambio de tier: suscripción ${suscripcionFamiliarId} de ${tierAnterior} a ${nuevoTier}`,
+    );
+
+    return {
+      tierAnterior,
+      nuevoTier,
+      montoAnterior,
+      nuevoMontoMensual,
+      diferenciaMonto: nuevoMontoMensual - montoAnterior,
+    };
+  }
+
+  /**
+   * Actualiza el monto mensual del PreApproval en MercadoPago
+   *
+   * Se llama automáticamente cuando hay cambios que afectan el monto
+   */
+  private async actualizarMontoEnMercadoPago(
+    preapprovalId: string,
+    nuevoMonto: number,
+  ): Promise<void> {
+    try {
+      await this.circuitBreaker.execute(async () => {
+        return await this.mpClient.updateAmount(preapprovalId, nuevoMonto);
+      });
+
+      this.logger.log(
+        `Monto actualizado en MercadoPago: ${preapprovalId} → $${nuevoMonto}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error actualizando monto en MercadoPago: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      // No lanzamos el error - la transacción local ya se completó
+      // El monto se sincronizará en el próximo webhook o manualmente
+    }
   }
 }
