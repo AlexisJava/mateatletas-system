@@ -6,14 +6,13 @@ import { QuickAction } from './QuickAction';
 /**
  * QuickActionsGrid - Grid de acciones rápidas
  *
- * Accesos directos a las funcionalidades principales.
+ * Accesos directos a las funcionalidades principales en una fila compacta.
  */
 
 export function QuickActionsGrid() {
   return (
-    <div>
-      <h2 className="text-lg font-semibold text-[var(--admin-text)] mb-4">Acciones rápidas</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div className="p-4 rounded-2xl bg-[var(--admin-surface-1)] border border-[var(--admin-border)]">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <QuickAction
           href="/admin/personas"
           label="Gestionar Personas"
@@ -42,5 +41,3 @@ export function QuickActionsGrid() {
     </div>
   );
 }
-
-export default QuickActionsGrid;

@@ -157,6 +157,17 @@ export class AdminController {
     return this.adminService.getLibrosLeidos();
   }
 
+  /**
+   * Obtener distribución de estudiantes por tier/plan
+   * GET /api/admin/estadisticas/distribucion-tiers
+   * Rol: Admin
+   */
+  @Get('estadisticas/distribucion-tiers')
+  @ApiOperation({ summary: 'Obtener distribución de estudiantes por tier' })
+  async getDistribucionTiers() {
+    return this.adminService.getDistribucionTiers();
+  }
+
   // ============================================================================
   // EXPORTACIÓN DE REPORTES
   // ============================================================================

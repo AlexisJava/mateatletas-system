@@ -1,50 +1,33 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Users, GraduationCap, DollarSign, Clock } from 'lucide-react';
+import { Users, Clock, DollarSign } from 'lucide-react';
 import { formatCompactCurrency } from '@/lib/constants/admin-mock-data';
 import {
   StatCard,
+  TierDistributionCard,
   RevenueChart,
   QuickActionsGrid,
   CasaDistributionChart,
-  ColoniaHighlight,
-  TasksPanel,
   AlertsPanel,
-  QuickStatsSummary,
-  NotesButton,
-  NotesModal,
 } from './components';
-import { useDashboardStats, useTareas } from './hooks';
+import { useDashboardStats } from './hooks';
 
 /**
  * DashboardView - Vista principal del admin
  *
- * Orquesta los componentes del dashboard con datos reales del backend.
+ * Layout Bento Grid optimizado para viewport sin scroll.
+ * Estructura:
+ * - Row 1: 4 KPIs (Estudiantes Activos, Distribución Tier, Por Cobrar, Cobrado)
+ * - Row 2: Revenue Chart (2/3) + Casas + Alertas (1/3 stacked)
+ * - Row 3: Quick Actions
  */
 
 export function DashboardView() {
   const { stats, isLoading, error, refetch } = useDashboardStats();
-  const { tasks, isLoading: tasksLoading, error: tasksError, toggleTask } = useTareas();
-  const [notes, setNotes] = useState('');
-  const [showNotesModal, setShowNotesModal] = useState(false);
-
-  // Persistir notas en localStorage
-  useEffect(() => {
-    const savedNotes = localStorage.getItem('admin-dashboard-notes');
-    if (savedNotes) {
-      setNotes(savedNotes);
-    }
-  }, []);
-
-  const handleSaveNotes = (newNotes: string) => {
-    setNotes(newNotes);
-    localStorage.setItem('admin-dashboard-notes', newNotes);
-  };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
+      <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="w-10 h-10 border-2 border-[var(--admin-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm text-[var(--admin-text-muted)]">Cargando dashboard...</p>
@@ -53,10 +36,9 @@ export function DashboardView() {
     );
   }
 
-  // Error state - no hay datos
   if (error || !stats) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
+      <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <p className="text-[var(--status-danger)] mb-4">Error al cargar datos del dashboard</p>
           <button
@@ -71,76 +53,53 @@ export function DashboardView() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-4 animate-fade-in">
+      {/* Row 1: KPI Stats - 4 cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Card 1: Estudiantes Activos (inscripciones del mes) */}
         <StatCard
-          label="Total Estudiantes"
-          value={stats.totalEstudiantes.toLocaleString('es-AR')}
-          change={stats.crecimientoMensual}
-          changeLabel="vs mes anterior"
+          label="Estudiantes Activos"
+          value={stats.inscripcionesActivas.toLocaleString('es-AR')}
           icon={Users}
           status="info"
         />
+
+        {/* Card 2: Distribución por Tier */}
+        <TierDistributionCard />
+
+        {/* Card 3: Por Cobrar */}
         <StatCard
-          label="Inscripciones Activas"
-          value={stats.inscripcionesActivas.toLocaleString('es-AR')}
-          change={8.3}
-          changeLabel="este mes"
-          icon={GraduationCap}
-          status="success"
-        />
-        <StatCard
-          label="Pagos Pendientes"
+          label="Por Cobrar"
           value={formatCompactCurrency(stats.ingresosPendientes)}
-          change={-5.2}
           icon={Clock}
           status="warning"
         />
+
+        {/* Card 4: Cobrado este mes */}
         <StatCard
-          label="Ingresos del Mes"
+          label="Cobrado"
           value={formatCompactCurrency(stats.ingresosMes)}
-          change={15.7}
-          changeLabel="vs mes anterior"
           icon={DollarSign}
           status="success"
         />
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Charts & Quick Actions */}
-        <div className="lg:col-span-2 space-y-6">
+      {/* Row 2: Bento Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        {/* Revenue Chart - 2/3 del ancho */}
+        <div className="lg:col-span-2">
           <RevenueChart />
-          <QuickActionsGrid />
-          <CasaDistributionChart distribucion={stats.distribucionCasas} />
-          <ColoniaHighlight />
         </div>
 
-        {/* Right Column - Tasks & Alerts */}
-        <div className="space-y-6">
-          <TasksPanel
-            tasks={tasks}
-            isLoading={tasksLoading}
-            error={tasksError}
-            onToggleTask={toggleTask}
-          />
+        {/* Right Column - 1/3 del ancho, 2 cards stacked */}
+        <div className="flex flex-col gap-3">
+          <CasaDistributionChart distribucion={stats.distribucionCasas} />
           <AlertsPanel ingresosPendientes={stats.ingresosPendientes} />
-          <QuickStatsSummary
-            tasaCobro={stats.tasaCobro}
-            estudiantesActivos={stats.estudiantesActivos}
-            crecimientoMensual={stats.crecimientoMensual}
-          />
-          <NotesButton hasNotes={!!notes} onClick={() => setShowNotesModal(true)} />
         </div>
       </div>
 
-      <NotesModal
-        isOpen={showNotesModal}
-        onClose={() => setShowNotesModal(false)}
-        notes={notes}
-        onSave={handleSaveNotes}
-      />
+      {/* Row 3: Quick Actions */}
+      <QuickActionsGrid />
     </div>
   );
 }

@@ -3,7 +3,6 @@
  */
 
 import type { LucideIcon } from 'lucide-react';
-import type { TaskItemData } from '../hooks/useTareas';
 
 // =============================================================================
 // STAT CARD
@@ -43,24 +42,4 @@ export interface AlertItemProps {
   description: string;
   action?: string;
   href?: string;
-}
-
-// =============================================================================
-// TASK ITEM
-// =============================================================================
-
-export interface TaskItemProps {
-  task: TaskItemData;
-  onToggle: (id: string) => void;
-}
-
-// =============================================================================
-// NOTES MODAL
-// =============================================================================
-
-export interface NotesModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  notes: string;
-  onSave: (notes: string) => void;
 }

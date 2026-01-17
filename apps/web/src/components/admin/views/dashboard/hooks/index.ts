@@ -1,2 +1,2 @@
 export { useDashboardStats } from './useDashboardStats';
-export { useTareas } from './useTareas';
+export { useTierDistribution } from './useTierDistribution';

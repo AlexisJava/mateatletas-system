@@ -15,10 +15,12 @@ interface AlertsPanelProps {
 
 export function AlertsPanel({ ingresosPendientes }: AlertsPanelProps) {
   return (
-    <div>
-      <h2 className="text-lg font-semibold text-[var(--admin-text)] mb-4">Alertas del sistema</h2>
-      <div className="space-y-3">
-        {ingresosPendientes > 0 && (
+    <div className="h-full p-3 rounded-2xl bg-[var(--admin-surface-1)] border border-[var(--admin-border)] flex flex-col overflow-hidden">
+      <h2 className="text-base font-semibold text-[var(--admin-text)] mb-2 flex-shrink-0">
+        Alertas del sistema
+      </h2>
+      <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
+        {ingresosPendientes > 0 ? (
           <AlertItem
             type="warning"
             title={`${formatCompactCurrency(ingresosPendientes)} en pagos pendientes`}
@@ -26,22 +28,14 @@ export function AlertsPanel({ ingresosPendientes }: AlertsPanelProps) {
             action="Ver finanzas"
             href="/admin/finanzas"
           />
+        ) : (
+          <AlertItem
+            type="success"
+            title="Sin pagos pendientes"
+            description="Todos los pagos están al día"
+          />
         )}
-        <AlertItem
-          type="info"
-          title="Colonia 2026 activa"
-          description="Las inscripciones están abiertas"
-          action="Ver productos"
-          href="/admin/productos"
-        />
-        <AlertItem
-          type="success"
-          title="Sistema funcionando correctamente"
-          description="Todos los servicios operativos"
-        />
       </div>
     </div>
   );
 }
-
-export default AlertsPanel;

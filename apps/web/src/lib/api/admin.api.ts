@@ -1031,6 +1031,32 @@ export const updateFinanceConfig = async (config: Partial<TierConfig>): Promise<
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DISTRIBUCIÓN POR TIER
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Distribución de estudiantes por tier/plan */
+export interface DistribucionTiers {
+  STEAM_LIBROS: number;
+  STEAM_ASINCRONICO: number;
+  STEAM_SINCRONICO: number;
+  SIN_PLAN: number;
+  total: number;
+}
+
+/**
+ * Obtener distribución de estudiantes por tier
+ * GET /admin/estadisticas/distribucion-tiers
+ */
+export const getDistribucionTiers = async (): Promise<DistribucionTiers> => {
+  try {
+    return await axios.get<DistribucionTiers>('/admin/estadisticas/distribucion-tiers');
+  } catch (error) {
+    console.error('Error al obtener distribución por tiers:', error);
+    throw error;
+  }
+};
+
 export const getCombinedDashboardStats = async (): Promise<DashboardStats> => {
   const [dashboard, estadisticas, casas] = await Promise.all([
     axios.get<AdminDashboardResponse>('/admin/dashboard'),

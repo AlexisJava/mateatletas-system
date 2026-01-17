@@ -397,6 +397,14 @@ export class AdminService {
   }
 
   /**
+   * Obtener distribución de estudiantes por tier/plan de suscripción
+   * DELEGACIÓN: AdminStatsService
+   */
+  async getDistribucionTiers() {
+    return this.statsService.getDistribucionTiers();
+  }
+
+  /**
    * Exportar inscripciones como CSV
    * DELEGACIÓN: AdminStatsService
    */

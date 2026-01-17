@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { AlertCircle, Activity, CheckCircle, ArrowRight } from 'lucide-react';
-import type { AlertItemProps, AlertType } from '../types/dashboard.types';
+import type { AlertItemProps } from '../types/dashboard.types';
 
 /**
  * AlertItem - Ítem de alerta del sistema
@@ -33,23 +33,18 @@ export function AlertItem({ type, title, description, action, href }: AlertItemP
 
   const content = (
     <div
-      className={`flex items-start gap-3 p-4 rounded-lg bg-[var(--admin-surface-1)] border border-[var(--admin-border)] border-l-4 ${ALERT_BORDER_COLORS[type]} hover:border-[var(--admin-border-accent)] transition-colors`}
+      className={`flex items-center gap-2 p-2 rounded-lg bg-[var(--admin-surface-2)] border border-[var(--admin-border)] border-l-4 ${ALERT_BORDER_COLORS[type]} hover:border-[var(--admin-border-accent)] transition-colors`}
     >
       <div
-        className={`w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0 ${ALERT_COLORS[type]}`}
+        className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 ${ALERT_COLORS[type]}`}
       >
-        <Icon className="w-4 h-4" />
+        <Icon className="w-3.5 h-3.5" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[var(--admin-text)]">{title}</p>
-        <p className="text-xs text-[var(--admin-text-muted)] mt-0.5">{description}</p>
-        {action && (
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--admin-accent)] mt-2">
-            {action}
-            <ArrowRight className="w-3 h-3" />
-          </span>
-        )}
+        <p className="text-sm font-medium text-[var(--admin-text)] truncate">{title}</p>
+        <p className="text-xs text-[var(--admin-text-muted)] truncate">{description}</p>
       </div>
+      {action && <ArrowRight className="w-4 h-4 text-[var(--admin-accent)] flex-shrink-0" />}
     </div>
   );
 

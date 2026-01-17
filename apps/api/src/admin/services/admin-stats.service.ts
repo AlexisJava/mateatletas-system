@@ -802,4 +802,63 @@ export class AdminStatsService {
       });
     });
   }
+
+  /**
+   * Obtener distribución de estudiantes por tier/plan de suscripción
+   * Cuenta estudiantes agrupados por su plan asignado
+   * @returns Objeto con conteo por cada tier + sin plan
+   */
+  async getDistribucionTiers(): Promise<{
+    STEAM_LIBROS: number;
+    STEAM_ASINCRONICO: number;
+    STEAM_SINCRONICO: number;
+    SIN_PLAN: number;
+    total: number;
+  }> {
+    // Obtener todos los planes para mapear IDs a nombres
+    const planes = await this.prisma.planSuscripcion.findMany({
+      select: { id: true, nombre: true },
+    });
+
+    const planIdToNombre = new Map(planes.map((p) => [p.id, p.nombre]));
+
+    // Contar estudiantes agrupados por plan_id
+    const distribucion = await this.prisma.estudiante.groupBy({
+      by: ['plan_id'],
+      _count: { id: true },
+    });
+
+    // Inicializar contadores
+    const result = {
+      STEAM_LIBROS: 0,
+      STEAM_ASINCRONICO: 0,
+      STEAM_SINCRONICO: 0,
+      SIN_PLAN: 0,
+      total: 0,
+    };
+
+    // Mapear resultados
+    for (const item of distribucion) {
+      const count = item._count.id;
+      result.total += count;
+
+      if (item.plan_id === null) {
+        result.SIN_PLAN += count;
+      } else {
+        const nombrePlan = planIdToNombre.get(item.plan_id);
+        if (nombrePlan === 'STEAM_LIBROS') {
+          result.STEAM_LIBROS += count;
+        } else if (nombrePlan === 'STEAM_ASINCRONICO') {
+          result.STEAM_ASINCRONICO += count;
+        } else if (nombrePlan === 'STEAM_SINCRONICO') {
+          result.STEAM_SINCRONICO += count;
+        } else {
+          // Plan desconocido, contar como sin plan
+          result.SIN_PLAN += count;
+        }
+      }
+    }
+
+    return result;
+  }
 }
