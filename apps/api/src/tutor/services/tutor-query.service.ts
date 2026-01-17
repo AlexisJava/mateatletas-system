@@ -74,21 +74,23 @@ export class TutorQueryService {
   /**
    * Obtiene el resumen completo del dashboard del tutor
    *
-   * Ejecuta 4 queries en paralelo para optimizar performance:
+   * Ejecuta 5 queries en paralelo para optimizar performance:
    * 1. Métricas principales
-   * 2. Pagos pendientes
-   * 3. Clases de hoy
-   * 4. Alertas
+   * 2. Hijos con puntos y asistencia
+   * 3. Pagos pendientes
+   * 4. Clases de hoy
+   * 5. Alertas (depende de pagosPendientes y clasesHoy)
    *
    * @param tutorId - ID del tutor autenticado
-   * @returns Dashboard con métricas, alertas, pagos pendientes y clases de hoy
+   * @returns Dashboard con métricas, hijos, alertas, pagos pendientes y clases de hoy
    */
   async getDashboardResumen(
     tutorId: string,
   ): Promise<DashboardResumenResponse> {
     // Ejecutar queries en paralelo para optimizar performance
-    const [metricas, pagosPendientes, clasesHoy] = await Promise.all([
+    const [metricas, hijos, pagosPendientes, clasesHoy] = await Promise.all([
       this.statsService.calcularMetricasDashboard(tutorId),
+      this.statsService.obtenerHijos(tutorId),
       this.statsService.obtenerPagosPendientes(tutorId),
       this.statsService.obtenerClasesHoy(tutorId),
     ]);
@@ -102,6 +104,7 @@ export class TutorQueryService {
 
     return {
       metricas,
+      hijos,
       alertas,
       pagosPendientes,
       clasesHoy,
@@ -236,7 +239,7 @@ export class TutorQueryService {
             apellido: inscripcion.estudiante.apellido,
           },
           estado: clase.estado,
-          urlReunion: undefined, // TODO: agregar campo en BD si existe
+          urlReunion: undefined,
           puedeUnirse,
           esHoy,
           esManana,

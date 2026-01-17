@@ -60,8 +60,9 @@ export default function LoginPage() {
       case 'estudiante':
         return '/estudiante';
       case 'tutor':
+        return '/tutor/dashboard';
       default:
-        return '/dashboard';
+        return '/tutor/dashboard';
     }
   };
 

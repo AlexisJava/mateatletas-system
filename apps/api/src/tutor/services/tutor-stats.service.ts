@@ -7,6 +7,7 @@ import {
   PagoPendiente,
   ClaseHoy,
   PrioridadAlerta,
+  HijoInfo,
 } from '../types/tutor-dashboard.types';
 
 // ============================================================================
@@ -388,7 +389,7 @@ export class TutorStatsService {
           estudianteNombre: `${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido}`,
           docenteNombre: `${clase.docente.nombre} ${clase.docente.apellido}`,
           fechaHoraInicio,
-          urlReunion: undefined, // TODO: agregar campo en BD si existe
+          urlReunion: undefined,
           puedeUnirse,
         },
       ];
@@ -414,77 +415,213 @@ export class TutorStatsService {
   ): Promise<AlertaDashboard[]> {
     const alertas: AlertaDashboard[] = [];
 
-    // 1. Alertas de pagos vencidos y por vencer
-    for (const pago of pagosPendientes) {
-      if (pago.estaVencido) {
-        alertas.push({
-          id: `pago-vencido-${pago.id}`,
-          tipo: 'pago_vencido',
-          prioridad: 'alta',
-          titulo: 'Pago Vencido',
-          mensaje: `Tenés $${pago.monto.toLocaleString('es-AR')} vencido (${Math.abs(pago.diasParaVencer)} días de atraso)`,
-          accion: {
-            label: 'Pagar Ahora',
-            url: `/dashboard?tab=pagos&inscripcion=${pago.id}`,
-          },
-          metadata: {
-            estudianteId: pago.estudianteId,
-            estudianteNombre: pago.estudianteNombre,
-            monto: pago.monto,
-            fechaVencimiento: pago.fechaVencimiento,
-          },
-        });
-      } else if (pago.diasParaVencer <= 7) {
-        alertas.push({
-          id: `pago-por-vencer-${pago.id}`,
-          tipo: 'pago_por_vencer',
-          prioridad: pago.diasParaVencer <= 3 ? 'alta' : 'media',
-          titulo: 'Pago Próximo a Vencer',
-          mensaje: `Tenés $${pago.monto.toLocaleString('es-AR')} pendiente. Vence en ${pago.diasParaVencer} ${pago.diasParaVencer === 1 ? 'día' : 'días'}`,
-          accion: {
-            label: 'Ver Detalles',
-            url: `/dashboard?tab=pagos&inscripcion=${pago.id}`,
-          },
-          metadata: {
-            estudianteId: pago.estudianteId,
-            estudianteNombre: pago.estudianteNombre,
-            monto: pago.monto,
-            fechaVencimiento: pago.fechaVencimiento,
-          },
-        });
-      }
-    }
+    // 1. Alertas de pagos
+    this.agregarAlertasPagos(alertas, pagosPendientes);
 
     // 2. Alertas de clases hoy
-    if (clasesHoy.length > 0) {
-      alertas.push({
-        id: 'clases-hoy',
-        tipo: 'clase_hoy',
-        prioridad: 'media',
-        titulo: `${clasesHoy.length} ${clasesHoy.length === 1 ? 'Clase' : 'Clases'} Hoy`,
-        mensaje: `Tenés ${clasesHoy.length} ${clasesHoy.length === 1 ? 'clase programada' : 'clases programadas'} para hoy`,
+    this.agregarAlertaClasesHoy(alertas, clasesHoy);
+
+    // 3. Alertas de asistencia baja
+    await this.agregarAlertasAsistenciaBaja(alertas, tutorId);
+
+    // Ordenar por prioridad
+    return this.ordenarAlertasPorPrioridad(alertas);
+  }
+
+  /**
+   * Agrega alertas de pagos vencidos y por vencer
+   */
+  private agregarAlertasPagos(
+    alertas: AlertaDashboard[],
+    pagosPendientes: PagoPendiente[],
+  ): void {
+    for (const pago of pagosPendientes) {
+      const alerta = this.crearAlertaPago(pago);
+      if (alerta) {
+        alertas.push(alerta);
+      }
+    }
+  }
+
+  /**
+   * Crea una alerta de pago según su estado
+   */
+  private crearAlertaPago(pago: PagoPendiente): AlertaDashboard | null {
+    const metadata = {
+      estudianteId: pago.estudianteId,
+      estudianteNombre: pago.estudianteNombre,
+      monto: pago.monto,
+      fechaVencimiento: pago.fechaVencimiento,
+    };
+
+    if (pago.estaVencido) {
+      return {
+        id: `pago-vencido-${pago.id}`,
+        tipo: 'pago_vencido',
+        prioridad: 'alta',
+        titulo: 'Pago Vencido',
+        mensaje: `Tenés $${pago.monto.toLocaleString('es-AR')} vencido (${Math.abs(pago.diasParaVencer)} días de atraso)`,
         accion: {
-          label: 'Ver Calendario',
-          url: '/dashboard?tab=calendario',
+          label: 'Pagar Ahora',
+          url: `/dashboard?tab=pagos&inscripcion=${pago.id}`,
         },
-      });
+        metadata,
+      };
     }
 
-    // 3. Alertas de asistencia baja (< 70%)
-    const estudiantesIds = await this.prisma.estudiante.findMany({
+    if (pago.diasParaVencer <= 7) {
+      const diasLabel = pago.diasParaVencer === 1 ? 'día' : 'días';
+      return {
+        id: `pago-por-vencer-${pago.id}`,
+        tipo: 'pago_por_vencer',
+        prioridad: pago.diasParaVencer <= 3 ? 'alta' : 'media',
+        titulo: 'Pago Próximo a Vencer',
+        mensaje: `Tenés $${pago.monto.toLocaleString('es-AR')} pendiente. Vence en ${pago.diasParaVencer} ${diasLabel}`,
+        accion: {
+          label: 'Ver Detalles',
+          url: `/dashboard?tab=pagos&inscripcion=${pago.id}`,
+        },
+        metadata,
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Agrega alerta de clases de hoy si existen
+   */
+  private agregarAlertaClasesHoy(
+    alertas: AlertaDashboard[],
+    clasesHoy: ClaseHoy[],
+  ): void {
+    if (clasesHoy.length === 0) return;
+
+    const claseLabel = clasesHoy.length === 1 ? 'Clase' : 'Clases';
+    const programadaLabel =
+      clasesHoy.length === 1 ? 'clase programada' : 'clases programadas';
+
+    alertas.push({
+      id: 'clases-hoy',
+      tipo: 'clase_hoy',
+      prioridad: 'media',
+      titulo: `${clasesHoy.length} ${claseLabel} Hoy`,
+      mensaje: `Tenés ${clasesHoy.length} ${programadaLabel} para hoy`,
+      accion: { label: 'Ver Calendario', url: '/dashboard?tab=calendario' },
+    });
+  }
+
+  /**
+   * Agrega alertas de asistencia baja para estudiantes con menos del 70%
+   */
+  private async agregarAlertasAsistenciaBaja(
+    alertas: AlertaDashboard[],
+    tutorId: string,
+  ): Promise<void> {
+    const estudiantes = await this.prisma.estudiante.findMany({
       where: { tutor_id: tutorId },
       select: { id: true, nombre: true, apellido: true },
     });
 
-    for (const estudiante of estudiantesIds) {
+    for (const estudiante of estudiantes) {
+      const porcentaje = await this.calcularPorcentajeAsistencia(estudiante.id);
+      if (porcentaje !== null && porcentaje < 70) {
+        alertas.push({
+          id: `asistencia-baja-${estudiante.id}`,
+          tipo: 'asistencia_baja',
+          prioridad: porcentaje < 50 ? 'alta' : 'media',
+          titulo: 'Asistencia Baja',
+          mensaje: `${estudiante.nombre} ${estudiante.apellido} tiene ${porcentaje}% de asistencia`,
+          accion: {
+            label: 'Ver Detalle',
+            url: `/dashboard?tab=hijos&estudiante=${estudiante.id}`,
+          },
+          metadata: {
+            estudianteId: estudiante.id,
+            estudianteNombre: `${estudiante.nombre} ${estudiante.apellido}`,
+            porcentajeAsistencia: porcentaje,
+          },
+        });
+      }
+    }
+  }
+
+  /**
+   * Calcula el porcentaje de asistencia de un estudiante
+   * @returns null si tiene menos de 5 clases (no hay suficiente data)
+   */
+  private async calcularPorcentajeAsistencia(
+    estudianteId: string,
+  ): Promise<number | null> {
+    const asistencias = await this.prisma.asistencia.groupBy({
+      by: ['estado'],
+      where: { estudiante_id: estudianteId },
+      _count: { estado: true },
+    });
+
+    let total = 0;
+    let presentes = 0;
+
+    for (const grupo of asistencias) {
+      total += grupo._count.estado;
+      if (grupo.estado === 'Presente') {
+        presentes += grupo._count.estado;
+      }
+    }
+
+    // Solo alertar si tiene al menos 5 clases
+    if (total < 5) return null;
+
+    return Math.round((presentes / total) * 100);
+  }
+
+  /**
+   * Ordena alertas por prioridad (alta -> media -> baja)
+   */
+  private ordenarAlertasPorPrioridad(
+    alertas: AlertaDashboard[],
+  ): AlertaDashboard[] {
+    const orden: Record<PrioridadAlerta, number> = {
+      alta: 1,
+      media: 2,
+      baja: 3,
+    };
+    return alertas.sort((a, b) => orden[a.prioridad] - orden[b.prioridad]);
+  }
+
+  // ============================================================================
+  // HIJOS
+  // ============================================================================
+
+  /**
+   * Obtiene la información de los hijos del tutor con métricas
+   *
+   * @param tutorId - ID del tutor
+   * @returns Lista de hijos con puntos y asistencia
+   */
+  async obtenerHijos(tutorId: string): Promise<HijoInfo[]> {
+    const estudiantes = await this.prisma.estudiante.findMany({
+      where: { tutor_id: tutorId },
+      include: {
+        casa: {
+          select: { nombre: true },
+        },
+        recursos: {
+          select: { xp_total: true },
+        },
+      },
+      orderBy: { nombre: 'asc' },
+    });
+
+    // Calcular asistencia para cada estudiante
+    const hijosConAsistencia: HijoInfo[] = [];
+
+    for (const estudiante of estudiantes) {
+      // Obtener asistencias del estudiante
       const asistencias = await this.prisma.asistencia.groupBy({
         by: ['estado'],
-        where: {
-          estudiante_id: estudiante.id,
-        },
-        _count: {
-          estado: true,
-        },
+        where: { estudiante_id: estudiante.id },
+        _count: { estado: true },
       });
 
       let totalAsistencias = 0;
@@ -497,44 +634,24 @@ export class TutorStatsService {
         }
       }
 
-      if (totalAsistencias >= 5) {
-        // Solo alertar si tiene al menos 5 clases
-        const porcentajeAsistencia = Math.round(
-          (asistenciasPresente / totalAsistencias) * 100,
-        );
+      const asistenciaPromedio =
+        totalAsistencias > 0
+          ? Math.round((asistenciasPresente / totalAsistencias) * 100)
+          : 0;
 
-        if (porcentajeAsistencia < 70) {
-          alertas.push({
-            id: `asistencia-baja-${estudiante.id}`,
-            tipo: 'asistencia_baja',
-            prioridad: porcentajeAsistencia < 50 ? 'alta' : 'media',
-            titulo: 'Asistencia Baja',
-            mensaje: `${estudiante.nombre} ${estudiante.apellido} tiene ${porcentajeAsistencia}% de asistencia`,
-            accion: {
-              label: 'Ver Detalle',
-              url: `/dashboard?tab=hijos&estudiante=${estudiante.id}`,
-            },
-            metadata: {
-              estudianteId: estudiante.id,
-              estudianteNombre: `${estudiante.nombre} ${estudiante.apellido}`,
-              porcentajeAsistencia,
-            },
-          });
-        }
-      }
+      hijosConAsistencia.push({
+        id: estudiante.id,
+        nombre: estudiante.nombre,
+        apellido: estudiante.apellido,
+        edad: estudiante.edad,
+        nivelEscolar: estudiante.nivelEscolar,
+        casa: estudiante.casa?.nombre ?? null,
+        puntosTotales: estudiante.recursos?.xp_total ?? 0,
+        asistenciaPromedio,
+        avatarUrl: null,
+      });
     }
 
-    // Ordenar alertas por prioridad (alta -> media -> baja)
-    const prioridadOrden: Record<PrioridadAlerta, number> = {
-      alta: 1,
-      media: 2,
-      baja: 3,
-    };
-
-    alertas.sort(
-      (a, b) => prioridadOrden[a.prioridad] - prioridadOrden[b.prioridad],
-    );
-
-    return alertas;
+    return hijosConAsistencia;
   }
 }

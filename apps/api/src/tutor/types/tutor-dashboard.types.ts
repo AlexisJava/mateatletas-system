@@ -81,10 +81,26 @@ export interface ClaseHoy {
 }
 
 /**
+ * Info de hijo para el dashboard
+ */
+export interface HijoInfo {
+  id: string;
+  nombre: string;
+  apellido: string;
+  edad: number | null;
+  nivelEscolar: string | null;
+  casa: string | null;
+  puntosTotales: number;
+  asistenciaPromedio: number;
+  avatarUrl: string | null;
+}
+
+/**
  * Response completo del dashboard
  */
 export interface DashboardResumenResponse {
   metricas: MetricasDashboard;
+  hijos: HijoInfo[];
   alertas: AlertaDashboard[];
   pagosPendientes: PagoPendiente[];
   clasesHoy: ClaseHoy[];
