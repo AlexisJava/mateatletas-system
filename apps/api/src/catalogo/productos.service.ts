@@ -10,7 +10,7 @@ import { Cache } from 'cache-manager';
 import { PrismaService } from '../core/database/prisma.service';
 import { CrearProductoDto } from './dto/crear-producto.dto';
 import { ActualizarProductoDto } from './dto/actualizar-producto.dto';
-import { TipoProducto, Prisma } from '@prisma/client';
+import { TipoProducto, CasaTipo, MundoTipo, Prisma } from '@prisma/client';
 
 /**
  * Service para gestionar operaciones CRUD de productos del catálogo
@@ -58,6 +58,24 @@ export class ProductosService {
     } else if (createDto.tipo === 'Servicio') {
       data.duracion_meses = createDto.duracion_meses ?? 1;
     }
+
+    // Campos Sistema Casa/Mundo 2026
+    if (createDto.casa !== undefined) data.casa = createDto.casa;
+    if (createDto.mundo !== undefined) data.mundo = createDto.mundo;
+    if (createDto.subtipo_mundo !== undefined)
+      data.subtipo_mundo = createDto.subtipo_mundo;
+    if (createDto.nivel_olimpiada !== undefined)
+      data.nivel_olimpiada = createDto.nivel_olimpiada;
+    if (createDto.edad_minima !== undefined)
+      data.edad_minima = createDto.edad_minima;
+    if (createDto.edad_maxima !== undefined)
+      data.edad_maxima = createDto.edad_maxima;
+    if (createDto.permite_excepciones !== undefined)
+      data.permite_excepciones = createDto.permite_excepciones;
+    if (createDto.visible_en_landing !== undefined)
+      data.visible_en_landing = createDto.visible_en_landing;
+    if (createDto.orden_display !== undefined)
+      data.orden_display = createDto.orden_display;
 
     const producto = await this.prisma.producto.create({
       data,
@@ -169,6 +187,60 @@ export class ProductosService {
   }
 
   /**
+   * Construye el objeto de datos para actualización de producto
+   */
+  private buildUpdateData(
+    updateDto: ActualizarProductoDto,
+  ): Prisma.ProductoUpdateInput {
+    const data: Prisma.ProductoUpdateInput = {};
+
+    // Campos base
+    const baseFields = [
+      'nombre',
+      'descripcion',
+      'precio',
+      'tipo',
+      'activo',
+    ] as const;
+    for (const field of baseFields) {
+      if (updateDto[field] !== undefined) {
+        (data as Record<string, unknown>)[field] = updateDto[field];
+      }
+    }
+
+    // Campos de fecha (requieren conversión)
+    if (updateDto.fecha_inicio !== undefined) {
+      data.fecha_inicio = new Date(updateDto.fecha_inicio);
+    }
+    if (updateDto.fecha_fin !== undefined) {
+      data.fecha_fin = new Date(updateDto.fecha_fin);
+    }
+
+    // Campos adicionales (sin conversión)
+    const additionalFields = [
+      'cupo_maximo',
+      'duracion_meses',
+      'casa',
+      'mundo',
+      'subtipo_mundo',
+      'nivel_olimpiada',
+      'edad_minima',
+      'edad_maxima',
+      'permite_excepciones',
+      'visible_en_landing',
+      'orden_display',
+    ] as const;
+
+    for (const field of additionalFields) {
+      if (updateDto[field] !== undefined) {
+        (data as Record<string, unknown>)[field] = updateDto[field];
+      }
+    }
+
+    return data;
+  }
+
+  /**
    * Actualiza un producto existente
    * @param id - ID del producto
    * @param updateDto - Datos a actualizar
@@ -176,46 +248,17 @@ export class ProductosService {
    * @throws NotFoundException si el producto no existe
    */
   async update(id: string, updateDto: ActualizarProductoDto) {
-    // Verificar que el producto existe
     await this.findById(id);
 
-    // Si se está cambiando el tipo, validar los campos requeridos
     if (updateDto.tipo) {
       this.validateProductoFields(updateDto as CrearProductoDto);
     }
 
-    // Construir los datos para actualizar
-    const data: Prisma.ProductoUpdateInput = {};
-
-    if (updateDto.nombre !== undefined) data.nombre = updateDto.nombre;
-    if (updateDto.descripcion !== undefined)
-      data.descripcion = updateDto.descripcion;
-    if (updateDto.precio !== undefined) data.precio = updateDto.precio;
-    if (updateDto.tipo !== undefined) data.tipo = updateDto.tipo;
-    if (updateDto.activo !== undefined) data.activo = updateDto.activo;
-
-    // Campos específicos de Curso
-    if (updateDto.fecha_inicio !== undefined) {
-      data.fecha_inicio = new Date(updateDto.fecha_inicio);
-    }
-    if (updateDto.fecha_fin !== undefined) {
-      data.fecha_fin = new Date(updateDto.fecha_fin);
-    }
-    if (updateDto.cupo_maximo !== undefined) {
-      data.cupo_maximo = updateDto.cupo_maximo;
-    }
-
-    // Campos específicos de Suscripcion
-    if (updateDto.duracion_meses !== undefined) {
-      data.duracion_meses = updateDto.duracion_meses;
-    }
-
     const producto = await this.prisma.producto.update({
       where: { id },
-      data,
+      data: this.buildUpdateData(updateDto),
     });
 
-    // Invalidar caché
     await this.invalidateProductosCache();
 
     return producto;
@@ -382,5 +425,157 @@ export class ProductosService {
         );
       }
     }
+  }
+
+  // ============================================================================
+  // MÉTODOS CATÁLOGO PÚBLICO 2026
+  // ============================================================================
+
+  /**
+   * Obtiene productos visibles en landing filtrados por Casa/Mundo
+   * Para el catálogo público de la landing page
+   */
+  async findCatalogoPublico(filtros: {
+    casa?: CasaTipo;
+    mundo?: MundoTipo;
+    edad?: number;
+  }) {
+    const where: Prisma.ProductoWhereInput = {
+      activo: true,
+      visible_en_landing: true,
+    };
+
+    if (filtros.casa) {
+      where.casa = filtros.casa;
+    }
+
+    if (filtros.mundo) {
+      where.mundo = filtros.mundo;
+    }
+
+    // Filtrar por edad si se proporciona
+    if (filtros.edad !== undefined) {
+      where.OR = [
+        // Productos sin restricción de edad
+        { edad_minima: null, edad_maxima: null },
+        // Productos donde la edad está en rango
+        {
+          edad_minima: { lte: filtros.edad },
+          edad_maxima: { gte: filtros.edad },
+        },
+        // Productos que permiten excepciones
+        { permite_excepciones: true },
+      ];
+    }
+
+    return await this.prisma.producto.findMany({
+      where,
+      orderBy: [{ orden_display: 'asc' }, { nombre: 'asc' }],
+      select: {
+        id: true,
+        nombre: true,
+        descripcion: true,
+        precio: true,
+        tipo: true,
+        casa: true,
+        mundo: true,
+        subtipo_mundo: true,
+        nivel_olimpiada: true,
+        edad_minima: true,
+        edad_maxima: true,
+        permite_excepciones: true,
+        orden_display: true,
+      },
+    });
+  }
+
+  /**
+   * Obtiene productos por Casa pedagógica
+   */
+  async findByCasa(casa: CasaTipo) {
+    return await this.prisma.producto.findMany({
+      where: {
+        casa,
+        activo: true,
+        visible_en_landing: true,
+      },
+      orderBy: [{ orden_display: 'asc' }, { nombre: 'asc' }],
+    });
+  }
+
+  /**
+   * Obtiene productos por Mundo
+   */
+  async findByMundo(mundo: MundoTipo) {
+    return await this.prisma.producto.findMany({
+      where: {
+        mundo,
+        activo: true,
+        visible_en_landing: true,
+      },
+      orderBy: [{ orden_display: 'asc' }, { nombre: 'asc' }],
+    });
+  }
+
+  /**
+   * Obtiene productos Club para suscripciones familiares
+   */
+  async findClubs() {
+    return await this.prisma.producto.findMany({
+      where: {
+        tipo: 'Club',
+        activo: true,
+      },
+      include: {
+        claseGrupos: {
+          where: { activo: true },
+          select: {
+            id: true,
+            nombre: true,
+            dia_semana: true,
+            hora_inicio: true,
+            hora_fin: true,
+            cupo_maximo: true,
+          },
+        },
+      },
+      orderBy: [{ casa: 'asc' }, { mundo: 'asc' }, { orden_display: 'asc' }],
+    });
+  }
+
+  /**
+   * Obtiene resumen del catálogo agrupado por Casa y Mundo
+   */
+  async getCatalogoResumen() {
+    const productos = await this.prisma.producto.findMany({
+      where: { activo: true, visible_en_landing: true },
+      select: {
+        casa: true,
+        mundo: true,
+        tipo: true,
+      },
+    });
+
+    // Agrupar por casa
+    const porCasa: Record<string, number> = {};
+    const porMundo: Record<string, number> = {};
+    const porTipo: Record<string, number> = {};
+
+    for (const p of productos) {
+      if (p.casa) {
+        porCasa[p.casa] = (porCasa[p.casa] ?? 0) + 1;
+      }
+      if (p.mundo) {
+        porMundo[p.mundo] = (porMundo[p.mundo] ?? 0) + 1;
+      }
+      porTipo[p.tipo] = (porTipo[p.tipo] ?? 0) + 1;
+    }
+
+    return {
+      total: productos.length,
+      porCasa,
+      porMundo,
+      porTipo,
+    };
   }
 }

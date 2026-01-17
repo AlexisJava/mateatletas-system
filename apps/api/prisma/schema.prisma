@@ -57,6 +57,12 @@ model Tutor {
   /// SUSCRIPCIONES RECURRENTES (PreApproval MercadoPago)
   suscripciones Suscripcion[]
 
+  /// SISTEMA 2026: Suscripción familiar (un PreApproval por familia)
+  suscripcionFamiliar SuscripcionFamiliar?
+
+  /// SISTEMA 2026: Pagos de cursos temporales
+  pagosCurso PagoCurso[]
+
   @@map("tutores")
 }
 
@@ -182,6 +188,11 @@ model Estudiante {
   actividades_feed ActividadFeed[]
   /// ACTIVITY FEED: Reacciones del estudiante a actividades de otros
   reacciones_feed  ReaccionFeed[]
+
+  /// SISTEMA 2026: Inscripciones de actividades
+  inscripcionesActividad InscripcionActividad[]
+  /// SISTEMA 2026: Pagos de cursos temporales
+  pagosCurso             PagoCurso[]
 
   // Índices de performance para rankings y listados
   // NOTA: Índices de puntos_totales eliminados - usar RecursosEstudiante para rankings (SUB-FASE 1.3)
@@ -754,22 +765,18 @@ model RefreshTokenSession {
 
 /// Modelo para productos del catálogo
 /// Representa los productos que se pueden comprar: suscripciones, cursos, recursos
-///
-/// TODO: V2 - Expandir Producto para tienda virtual
-/// - Agregar tipos: DIGITAL, FISICO, EVENTO
-/// - Campos: archivo_url, stock, cupo_maximo, fecha_evento, requiere_envio
-/// - Frontend admin para crear productos
-/// - Catálogo público para comprar
+/// Sistema 2026: Productos tipo Club con segmentación Casa/Mundo
 model Producto {
   /// Identificador único del producto
   id                      String               @id @default(cuid())
-  /// Nombre del producto (ej: "Suscripción Mensual", "Curso de Álgebra")
+  /// Nombre del producto (ej: "Club Matemática Olímpica - Ñandú N1")
   nombre                  String
   /// Descripción detallada del producto
   descripcion             String?
   /// Precio del producto en pesos (formato decimal para precisión)
+  /// Para tipo Club: ignorado (el precio lo define el Tier)
   precio                  Decimal              @db.Decimal(10, 2)
-  /// Tipo de producto (Evento, Digital, Fisico, Curso, Servicio, Bundle, Certificacion)
+  /// Tipo de producto (Club, Evento, Digital, Fisico, Curso, etc.)
   tipo                    TipoProducto
   /// Subcategoría del producto (opcional, para agrupar por tipo)
   subcategoria            String?
@@ -777,11 +784,41 @@ model Producto {
   imagenPortada           String?              @map("imagen_portada")
   /// Indica si el producto está activo y disponible para compra
   activo                  Boolean              @default(true)
-  /// Fecha de inicio del curso (solo para tipo Curso)
+
+  // === SEGMENTACIÓN CASA/MUNDO (Sistema 2026) ===
+
+  /// Casa a la que pertenece el producto (QUANTUM, VERTEX, PULSAR)
+  casa                    CasaTipo?
+  /// Mundo al que pertenece el producto (MATEMATICA, PROGRAMACION, CIENCIAS)
+  mundo                   MundoTipo?
+  /// Subtipo de mundo (solo para Matemática: GENERAL u OLIMPICA)
+  subtipo_mundo           SubtipoMundo?
+  /// Nivel de olimpiadas (solo si subtipo_mundo = OLIMPICA)
+  nivel_olimpiada         NivelOlimpiada?
+
+  // === RESTRICCIONES DE EDAD ===
+
+  /// Edad mínima para inscribirse
+  edad_minima             Int?
+  /// Edad máxima para inscribirse
+  edad_maxima             Int?
+  /// Permite excepciones por altas capacidades
+  permite_excepciones     Boolean              @default(false)
+
+  // === VISIBILIDAD ===
+
+  /// Visible en la landing page pública
+  visible_en_landing      Boolean              @default(true)
+  /// Orden de display en listados (menor = primero)
+  orden_display           Int                  @default(0)
+
+  // === CAMPOS EXISTENTES (cursos temporales) ===
+
+  /// Fecha de inicio del curso (solo para tipo Curso/Evento)
   fecha_inicio            DateTime?
-  /// Fecha de finalización del curso (solo para tipo Curso)
+  /// Fecha de finalización del curso (solo para tipo Curso/Evento)
   fecha_fin               DateTime?
-  /// Cupo máximo de estudiantes (solo para tipo Curso)
+  /// Cupo máximo de estudiantes (solo para tipo Curso/Evento)
   cupo_maximo             Int?
   /// Duración en meses de la suscripción (1=mensual, 12=anual, etc.)
   duracion_meses          Int?                 @default(1)
@@ -791,15 +828,30 @@ model Producto {
   permite_cuotas          Boolean              @default(false)
   /// Máximo de cuotas permitidas (3, 6, 12, etc.)
   max_cuotas              Int?
+
+  // === TIMESTAMPS ===
+
   /// Timestamp de creación del registro
   createdAt               DateTime             @default(now())
   /// Timestamp de última actualización del registro
   updatedAt               DateTime             @updatedAt
+
+  // === RELACIONES ===
+
   clases                  Clase[]
   inscripciones_mensuales InscripcionMensual[]
   /// Comisiones (turnos/horarios) de este producto
   comisiones              Comision[]
+  /// ClaseGrupos (horarios de Club) de este producto
+  claseGrupos             ClaseGrupo[]
+  /// Inscripciones de actividad a este producto
+  inscripcionesActividad  InscripcionActividad[]
+  /// Pagos de cursos temporales
+  pagosCurso              PagoCurso[]
 
+  @@index([tipo, activo])
+  @@index([casa, mundo])
+  @@index([visible_en_landing, activo])
   @@map("productos")
 }
 
@@ -959,6 +1011,10 @@ model ClaseGrupo {
   /// ID del sector (Matemática o Programación)
   sector_id String?
 
+  /// ID del producto al que pertenece este horario (Sistema 2026)
+  /// Permite vincular ClaseGrupo con Producto tipo Club
+  producto_id String?
+
   /// Nivel o descripción (ej: "6 y 7 años", "Preparación olimpiadas")
   nivel String?
 
@@ -987,9 +1043,10 @@ model ClaseGrupo {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  grupo   GrupoPedagogico @relation(fields: [grupo_id], references: [id])
-  docente Docente         @relation(fields: [docente_id], references: [id])
-  sector  Sector? @relation(fields: [sector_id], references: [id])
+  grupo    GrupoPedagogico @relation(fields: [grupo_id], references: [id])
+  docente  Docente         @relation(fields: [docente_id], references: [id])
+  sector   Sector?         @relation(fields: [sector_id], references: [id])
+  producto Producto?       @relation(fields: [producto_id], references: [id])
 
   /// Estudiantes inscritos en el grupo
   inscripciones InscripcionClaseGrupo[]
@@ -1003,6 +1060,9 @@ model ClaseGrupo {
   /// Asignaciones de planificaciones a este grupo
   asignacionesPlanificacion AsignacionPlanificacion[]
 
+  /// Inscripciones de actividad (Sistema 2026)
+  inscripcionesActividad InscripcionActividad[]
+
   @@index([docente_id])
   @@index([dia_semana])
   @@index([fecha_inicio, fecha_fin])
@@ -1010,6 +1070,7 @@ model ClaseGrupo {
   @@index([activo])
   @@index([estado_clase])
   @@index([livekit_room_name])
+  @@index([producto_id])
   @@map("clase_grupos")
 }
 
@@ -1507,6 +1568,7 @@ model DocenteRuta {
 
 /// Enum para tipos de productos disponibles
 enum TipoProducto {
+  Club // Actividad recurrente todo el año (suscripción mensual)
   Evento // Colonia, talleres, workshops (con fecha y cupo)
   Digital // PDFs, guías, videos descargables
   Fisico // Remeras, libros, merch (con stock)
@@ -1583,6 +1645,76 @@ enum TierNombre {
 }
 
 // [ELIMINADO] EstadoMembresia y EstadoInscripcionCurso - enums de sistema legacy
+
+/// Subtipo de mundo para Matemática (2026)
+/// Solo aplica a Matemática: General (curricular) u Olímpica (competencia)
+enum SubtipoMundo {
+  GENERAL  // Matemática curricular estándar
+  OLIMPICA // Preparación para Olimpiadas Matemáticas
+
+  @@map("subtipo_mundo")
+}
+
+/// Niveles de Olimpiadas Matemáticas Argentinas (2026)
+/// Ñandú para VERTEX (10-12 años), OMA para PULSAR (13-17 años)
+enum NivelOlimpiada {
+  NANDU_N1 // Ñandú Nivel 1 - 10 años
+  NANDU_N2 // Ñandú Nivel 2 - 11-12 años
+  OMA_N1   // OMA Nivel 1 - 13 años
+  OMA_N2   // OMA Nivel 2 - 14-15 años
+  OMA_N3   // OMA Nivel 3 - 16-17 años
+
+  @@map("nivel_olimpiada")
+}
+
+/// Estado de la suscripción familiar (PreApproval MercadoPago)
+enum EstadoSuscripcionFamiliar {
+  PENDING    // Esperando autorización de MP
+  AUTHORIZED // Activa y cobrando
+  PAUSED     // Pausada por fallo de pago
+  CANCELLED  // Cancelada por tutor o admin
+
+  @@map("estado_suscripcion_familiar")
+}
+
+/// Estado de una inscripción a actividad
+enum EstadoInscripcionActividad {
+  ACTIVA    // Inscripción activa
+  PAUSADA   // Pausada temporalmente
+  CANCELADA // Cancelada (baja)
+
+  @@map("estado_inscripcion_actividad")
+}
+
+/// Tipo de cambio en inscripción (para historial)
+enum TipoCambioInscripcion {
+  ALTA            // Nueva inscripción
+  BAJA            // Cancelación de inscripción
+  CAMBIO_HORARIO  // Cambio de horario dentro del mismo producto
+  CAMBIO_PRODUCTO // Cambio a otro producto compatible
+  CAMBIO_TIER     // Cambio de tier familiar
+
+  @@map("tipo_cambio_inscripcion")
+}
+
+/// Modalidad de pago para cursos temporales
+enum ModalidadPagoCurso {
+  CONTADO // Pago único
+  CUOTAS  // Pago en cuotas
+
+  @@map("modalidad_pago_curso")
+}
+
+/// Estado de pago de curso temporal
+enum EstadoPagoCurso {
+  PENDING  // Esperando pago
+  PAID     // Pagado completo
+  PARTIAL  // Parcialmente pagado (cuotas)
+  FAILED   // Pago fallido
+  REFUNDED // Reembolsado
+
+  @@map("estado_pago_curso")
+}
 
 /// Enum para estados de clase (extendido para LiveKit)
 enum EstadoClase {
@@ -2800,6 +2932,12 @@ model Comision {
   /// Observaciones de docentes en esta comisión
   observaciones Observacion[]
 
+  /// SISTEMA 2026: Inscripciones de actividad
+  inscripcionesActividad InscripcionActividad[]
+
+  /// SISTEMA 2026: Pagos de cursos temporales
+  pagosCurso PagoCurso[]
+
   @@index([producto_id])
   @@index([docente_id])
   @@index([casa_id])
@@ -3383,4 +3521,243 @@ model WebhookFailed {
   @@index([status, created_at])
   @@index([payment_id])
   @@map("webhook_failed")
+}
+
+// =============================================================================
+// SISTEMA DE SUSCRIPCIONES FAMILIARES (2026)
+// Un solo PreApproval por familia con múltiples actividades
+// =============================================================================
+
+/// Suscripción familiar unificada
+/// Representa un único PreApproval de MercadoPago que cubre todas las actividades de la familia
+model SuscripcionFamiliar {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// Tutor titular de la suscripción (1 por familia)
+  tutor_id String @unique
+  tutor    Tutor  @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+
+  // === MERCADOPAGO ===
+
+  /// ID del PreApproval en MercadoPago
+  preapproval_id String? @unique
+
+  /// ID del plan de MercadoPago (si usamos plans)
+  preapproval_plan_id String?
+
+  // === ESTADO ===
+
+  /// Estado actual de la suscripción
+  estado EstadoSuscripcionFamiliar @default(PENDING)
+
+  // === FACTURACIÓN ===
+
+  /// Tier seleccionado por la familia (define el precio base)
+  tier TierNombre @default(STEAM_LIBROS)
+
+  /// Monto mensual total calculado (suma de actividades con descuentos)
+  monto_mensual Int @default(0)
+
+  /// Fecha del próximo cobro programado
+  fecha_proximo_cobro DateTime?
+
+  /// Período de gracia por fallo de pago (fecha límite)
+  fecha_gracia DateTime?
+
+  // === TIMESTAMPS ===
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // === RELACIONES ===
+
+  /// Inscripciones de actividades de todos los estudiantes de la familia
+  inscripciones InscripcionActividad[]
+
+  /// Historial de cambios en inscripciones
+  historial_cambios CambioInscripcion[]
+
+  @@index([estado])
+  @@index([fecha_proximo_cobro])
+  @@map("suscripciones_familiares")
+}
+
+/// Inscripción de un estudiante a una actividad
+/// Representa la relación estudiante + producto + horario específico
+model InscripcionActividad {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  // === RELACIONES PRINCIPALES ===
+
+  /// Suscripción familiar a la que pertenece
+  suscripcion_familiar_id String
+  suscripcion_familiar    SuscripcionFamiliar @relation(fields: [suscripcion_familiar_id], references: [id], onDelete: Cascade)
+
+  /// Estudiante inscrito
+  estudiante_id String
+  estudiante    Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  /// Producto al que se inscribe
+  producto_id String
+  producto    Producto @relation(fields: [producto_id], references: [id])
+
+  // === ASIGNACIÓN ESPECÍFICA (uno u otro) ===
+
+  /// ClaseGrupo para productos tipo Club
+  clase_grupo_id String?
+  clase_grupo    ClaseGrupo? @relation(fields: [clase_grupo_id], references: [id])
+
+  /// Comisión para cursos temporales
+  comision_id String?
+  comision    Comision? @relation(fields: [comision_id], references: [id])
+
+  // === ESTADO ===
+
+  /// Estado de la inscripción
+  estado EstadoInscripcionActividad @default(ACTIVA)
+
+  /// Fecha de inicio de la inscripción
+  fecha_inicio DateTime @default(now())
+
+  /// Fecha de fin (para cursos temporales o bajas)
+  fecha_fin DateTime?
+
+  // === TIMESTAMPS ===
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([estudiante_id, producto_id, clase_grupo_id])
+  @@unique([estudiante_id, comision_id])
+  @@index([suscripcion_familiar_id])
+  @@index([estudiante_id])
+  @@index([estado])
+  @@map("inscripciones_actividad")
+}
+
+/// Historial de cambios en inscripciones
+/// Registra altas, bajas, cambios de horario, producto y tier
+model CambioInscripcion {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// Suscripción familiar afectada
+  suscripcion_familiar_id String
+  suscripcion_familiar    SuscripcionFamiliar @relation(fields: [suscripcion_familiar_id], references: [id], onDelete: Cascade)
+
+  /// Tipo de cambio realizado
+  tipo TipoCambioInscripcion
+
+  // === REFERENCIAS A INSCRIPCIONES ===
+
+  /// ID de la inscripción anterior (para cambios)
+  inscripcion_anterior_id String?
+
+  /// ID de la inscripción nueva (para altas y cambios)
+  inscripcion_nueva_id String?
+
+  // === CUÁNDO APLICA ===
+
+  /// Fecha en que se solicitó el cambio
+  solicitado_en DateTime @default(now())
+
+  /// Fecha desde la cual aplica el cambio (siempre el 1ro del mes siguiente)
+  aplica_desde DateTime
+
+  /// Indica si el cambio ya fue procesado
+  procesado Boolean @default(false)
+
+  // === MONTOS PARA REGISTRO HISTÓRICO ===
+
+  /// Monto mensual antes del cambio
+  monto_anterior Int
+
+  /// Monto mensual después del cambio
+  monto_nuevo Int
+
+  /// Detalle adicional del cambio (JSON flexible)
+  detalle Json?
+
+  // === TIMESTAMPS ===
+
+  created_at DateTime @default(now())
+
+  @@index([suscripcion_familiar_id])
+  @@index([aplica_desde, procesado])
+  @@map("cambios_inscripcion")
+}
+
+/// Pago de curso temporal
+/// Gestiona pagos únicos o en cuotas para productos que no son Club
+model PagoCurso {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  // === RELACIONES ===
+
+  /// Tutor que realiza el pago
+  tutor_id String
+  tutor    Tutor @relation(fields: [tutor_id], references: [id])
+
+  /// Estudiante beneficiario
+  estudiante_id String
+  estudiante    Estudiante @relation(fields: [estudiante_id], references: [id])
+
+  /// Comisión a la que se inscribe
+  comision_id String
+  comision    Comision @relation(fields: [comision_id], references: [id])
+
+  /// Producto (para referencia rápida)
+  producto_id String
+  producto    Producto @relation(fields: [producto_id], references: [id])
+
+  // === MODALIDAD DE PAGO ===
+
+  /// Modalidad: contado o cuotas
+  modalidad ModalidadPagoCurso
+
+  // === MONTOS ===
+
+  /// Monto total del curso
+  monto_total Int
+
+  /// Monto por cuota (si es en cuotas)
+  monto_por_cuota Int?
+
+  /// Cantidad de cuotas (si es en cuotas)
+  cantidad_cuotas Int?
+
+  /// Cuotas ya pagadas
+  cuotas_pagadas Int @default(0)
+
+  // === MERCADOPAGO ===
+
+  /// ID del payment de MercadoPago (pago único)
+  payment_id String?
+
+  /// ID del PreApproval de MercadoPago (para cuotas)
+  preapproval_id String?
+
+  // === ESTADO ===
+
+  /// Estado del pago
+  estado EstadoPagoCurso @default(PENDING)
+
+  /// Fecha del pago inicial
+  fecha_pago DateTime?
+
+  /// Fecha del próximo cobro (para cuotas)
+  fecha_proximo_cobro DateTime?
+
+  // === TIMESTAMPS ===
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([estudiante_id, comision_id])
+  @@index([tutor_id])
+  @@index([estado])
+  @@map("pagos_curso")
 }

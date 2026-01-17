@@ -14,7 +14,7 @@ import { ProductosService } from './productos.service';
 import { CrearProductoDto } from './dto/crear-producto.dto';
 import { ActualizarProductoDto } from './dto/actualizar-producto.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { TipoProducto } from '@prisma/client';
+import { TipoProducto, CasaTipo, MundoTipo } from '@prisma/client';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role, Roles } from '../auth/decorators/roles.decorator';
 import { Public } from '../auth/decorators/public.decorator';
@@ -66,6 +66,74 @@ export class ProductosController {
   @Get('servicios')
   async findServicios() {
     return this.productosService.findServicios();
+  }
+
+  // ============================================================================
+  // CATÁLOGO PÚBLICO 2026 - Sistema Casa/Mundo
+  // ============================================================================
+
+  /**
+   * GET /productos/catalogo
+   * Catálogo público con filtros Casa/Mundo para landing
+   * Endpoint público
+   */
+  @Public()
+  @Get('catalogo')
+  async findCatalogoPublico(
+    @Query('casa') casa?: CasaTipo,
+    @Query('mundo') mundo?: MundoTipo,
+    @Query('edad') edad?: string,
+  ) {
+    return this.productosService.findCatalogoPublico({
+      casa,
+      mundo,
+      edad: edad ? parseInt(edad, 10) : undefined,
+    });
+  }
+
+  /**
+   * GET /productos/catalogo/resumen
+   * Resumen del catálogo agrupado por Casa/Mundo
+   * Endpoint público
+   */
+  @Public()
+  @Get('catalogo/resumen')
+  async getCatalogoResumen() {
+    return this.productosService.getCatalogoResumen();
+  }
+
+  /**
+   * GET /productos/casa/:casa
+   * Productos por Casa pedagógica
+   * Endpoint público
+   */
+  @Public()
+  @Get('casa/:casa')
+  async findByCasa(@Param('casa') casa: CasaTipo) {
+    return this.productosService.findByCasa(casa);
+  }
+
+  /**
+   * GET /productos/mundo/:mundo
+   * Productos por Mundo
+   * Endpoint público
+   */
+  @Public()
+  @Get('mundo/:mundo')
+  async findByMundo(@Param('mundo') mundo: MundoTipo) {
+    return this.productosService.findByMundo(mundo);
+  }
+
+  /**
+   * GET /productos/clubs
+   * Lista de Clubs para suscripciones familiares
+   * Incluye grupos de clase disponibles
+   * Endpoint público
+   */
+  @Public()
+  @Get('clubs')
+  async findClubs() {
+    return this.productosService.findClubs();
   }
 
   /**

@@ -1,0 +1,296 @@
+/**
+ * Tipos para el sistema de Suscripciones Familiares 2026
+ *
+ * Modelo de negocio:
+ * - Una suscripción por familia (tutor)
+ * - Múltiples inscripciones a actividades dentro de la suscripción
+ * - Monto mensual = suma de todas las actividades con descuento 10% desde la 2da
+ * - Un solo PreApproval en MercadoPago por familia
+ */
+
+import { TierNombre, EstadoSuscripcionFamiliar } from '@prisma/client';
+
+// ============================================================================
+// TIPOS DE INPUT
+// ============================================================================
+
+/**
+ * Input para crear una suscripción familiar
+ */
+export interface CrearSuscripcionFamiliarInput {
+  /** ID del tutor (se verifica que exista) */
+  readonly tutorId: string;
+
+  /** Tier inicial de la suscripción */
+  readonly tier: TierNombre;
+
+  /** Email del tutor para MercadoPago */
+  readonly tutorEmail: string;
+
+  /** Nombre completo del tutor para descripción */
+  readonly tutorNombre: string;
+
+  /**
+   * Inscripciones iniciales de actividades
+   * Puede estar vacío si solo se crea la suscripción
+   */
+  readonly inscripciones?: InscripcionActividadInput[];
+
+  // === Campos opcionales para MercadoPago Bricks ===
+
+  /**
+   * Token de tarjeta generado por MercadoPago Bricks
+   * Si presente, se cobra inmediatamente
+   */
+  readonly cardTokenId?: string;
+
+  /**
+   * Email del pagador para cobro con Bricks
+   * REQUERIDO si cardTokenId está presente
+   */
+  readonly payerEmail?: string;
+}
+
+/**
+ * Input para agregar una inscripción a una suscripción existente
+ */
+export interface InscripcionActividadInput {
+  /** ID del estudiante */
+  readonly estudianteId: string;
+
+  /** ID del producto */
+  readonly productoId: string;
+
+  /** ID del grupo de clase (para Clubs) */
+  readonly claseGrupoId?: string;
+
+  /** ID de la comisión (para cursos temporales) */
+  readonly comisionId?: string;
+}
+
+/**
+ * Input para agregar inscripciones a una suscripción existente
+ */
+export interface AgregarInscripcionesInput {
+  /** ID de la suscripción familiar */
+  readonly suscripcionFamiliarId: string;
+
+  /** ID del tutor (para validación de ownership) */
+  readonly tutorId: string;
+
+  /** Inscripciones a agregar */
+  readonly inscripciones: InscripcionActividadInput[];
+}
+
+/**
+ * Input para dar de baja inscripciones
+ */
+export interface BajaInscripcionesInput {
+  /** ID de la suscripción familiar */
+  readonly suscripcionFamiliarId: string;
+
+  /** ID del tutor (para validación de ownership) */
+  readonly tutorId: string;
+
+  /** IDs de inscripciones a dar de baja */
+  readonly inscripcionIds: string[];
+
+  /** Motivo de la baja */
+  readonly motivo: string;
+}
+
+/**
+ * Input para cancelar suscripción familiar
+ */
+export interface CancelarSuscripcionFamiliarInput {
+  /** ID de la suscripción familiar */
+  readonly suscripcionFamiliarId: string;
+
+  /** ID del tutor (para validación de ownership) */
+  readonly tutorId: string;
+
+  /** Motivo de la cancelación */
+  readonly motivo: string;
+
+  /** Quién solicita la cancelación */
+  readonly canceladoPor: 'tutor' | 'admin' | 'system';
+}
+
+// ============================================================================
+// TIPOS DE OUTPUT
+// ============================================================================
+
+/**
+ * Resultado de crear una suscripción familiar
+ */
+export interface CrearSuscripcionFamiliarResult {
+  /** ID de la suscripción en nuestra DB */
+  readonly suscripcionId: string;
+
+  /** ID del PreApproval en MercadoPago */
+  readonly mpPreapprovalId: string;
+
+  /** URL de checkout (null si cobro inmediato) */
+  readonly checkoutUrl: string | null;
+
+  /** Monto mensual calculado */
+  readonly montoMensual: number;
+
+  /** Tier seleccionado */
+  readonly tier: TierNombre;
+
+  /** Indica si se cobró inmediatamente */
+  readonly cobradoInmediatamente: boolean;
+}
+
+/**
+ * Resultado de agregar inscripciones
+ */
+export interface AgregarInscripcionesResult {
+  /** IDs de las nuevas inscripciones creadas */
+  readonly inscripcionesCreadas: string[];
+
+  /** Nuevo monto mensual de la suscripción */
+  readonly nuevoMontoMensual: number;
+
+  /** Monto anterior */
+  readonly montoAnterior: number;
+
+  /** Diferencia de monto */
+  readonly diferenciaMonto: number;
+}
+
+/**
+ * Resultado de dar de baja inscripciones
+ */
+export interface BajaInscripcionesResult {
+  /** IDs de las inscripciones dadas de baja */
+  readonly inscripcionesBaja: string[];
+
+  /** Nuevo monto mensual */
+  readonly nuevoMontoMensual: number;
+
+  /** Monto anterior */
+  readonly montoAnterior: number;
+}
+
+/**
+ * Detalle de una inscripción de actividad
+ */
+export interface InscripcionActividadDetalle {
+  readonly id: string;
+  readonly estudianteId: string;
+  readonly estudianteNombre: string;
+  readonly productoId: string;
+  readonly productoNombre: string;
+  readonly claseGrupoId: string | null;
+  readonly claseGrupoNombre: string | null;
+  readonly comisionId: string | null;
+  readonly comisionNombre: string | null;
+  readonly estado: string;
+  readonly precioBase: number;
+  readonly precioConDescuento: number;
+  readonly descuentoAplicado: number;
+  readonly ordenInscripcion: number;
+  readonly fechaInicio: Date;
+  readonly fechaFin: Date | null;
+}
+
+/**
+ * Detalle completo de una suscripción familiar
+ */
+export interface SuscripcionFamiliarDetalle {
+  readonly id: string;
+  readonly tutorId: string;
+  readonly tutorNombre: string;
+  readonly estado: EstadoSuscripcionFamiliar;
+  readonly tier: TierNombre;
+  readonly montoMensual: number;
+  readonly fechaProximoCobro: Date | null;
+  readonly fechaGracia: Date | null;
+  readonly inscripciones: InscripcionActividadDetalle[];
+  readonly cantidadEstudiantes: number;
+  readonly cantidadActividades: number;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+// ============================================================================
+// ERRORES
+// ============================================================================
+
+/**
+ * Códigos de error para SuscripcionFamiliar
+ */
+export enum SuscripcionFamiliarErrorCode {
+  /** Suscripción no encontrada */
+  NOT_FOUND = 'SUSCRIPCION_FAMILIAR_NOT_FOUND',
+
+  /** Ya existe una suscripción para este tutor */
+  ALREADY_EXISTS = 'SUSCRIPCION_FAMILIAR_ALREADY_EXISTS',
+
+  /** No autorizado para esta operación */
+  UNAUTHORIZED = 'UNAUTHORIZED_ACCESS',
+
+  /** Estado inválido para la operación */
+  INVALID_STATE = 'INVALID_STATE',
+
+  /** Tutor no encontrado */
+  TUTOR_NOT_FOUND = 'TUTOR_NOT_FOUND',
+
+  /** Estudiante no encontrado o no pertenece al tutor */
+  ESTUDIANTE_NOT_FOUND = 'ESTUDIANTE_NOT_FOUND',
+
+  /** Producto no encontrado o no disponible */
+  PRODUCTO_NOT_FOUND = 'PRODUCTO_NOT_FOUND',
+
+  /** Inscripción duplicada */
+  INSCRIPCION_DUPLICADA = 'INSCRIPCION_DUPLICADA',
+
+  /** Error de comunicación con MercadoPago */
+  MP_API_ERROR = 'MERCADOPAGO_API_ERROR',
+
+  /** Circuito abierto (MercadoPago no disponible) */
+  CIRCUIT_OPEN = 'CIRCUIT_BREAKER_OPEN',
+}
+
+/**
+ * Error específico del servicio de SuscripcionFamiliar
+ */
+export class SuscripcionFamiliarError extends Error {
+  constructor(
+    message: string,
+    public readonly code: SuscripcionFamiliarErrorCode,
+    public readonly details?: Record<string, string | number | boolean | null>,
+  ) {
+    super(message);
+    this.name = 'SuscripcionFamiliarError';
+  }
+}
+
+// ============================================================================
+// CÁLCULO DE PRECIOS
+// ============================================================================
+
+/**
+ * Resultado del cálculo de precio mensual
+ */
+export interface CalculoMontoMensualResult {
+  /** Monto total sin descuentos */
+  readonly montoSinDescuento: number;
+
+  /** Monto total con descuentos aplicados */
+  readonly montoConDescuento: number;
+
+  /** Ahorro total */
+  readonly ahorroTotal: number;
+
+  /** Detalle por inscripción */
+  readonly detalleInscripciones: {
+    readonly inscripcionId: string;
+    readonly productoNombre: string;
+    readonly precioBase: number;
+    readonly descuentoPorcentaje: number;
+    readonly precioFinal: number;
+  }[];
+}

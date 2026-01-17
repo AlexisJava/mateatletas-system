@@ -7,12 +7,19 @@ import {
   IsDateString,
   IsInt,
   Min,
+  Max,
   IsPositive,
   ValidateIf,
   IsBoolean,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TipoProducto } from '@prisma/client';
+import {
+  TipoProducto,
+  CasaTipo,
+  MundoTipo,
+  SubtipoMundo,
+  NivelOlimpiada,
+} from '@prisma/client';
 
 /**
  * DTO para crear un nuevo producto en el catálogo
@@ -181,4 +188,107 @@ export class CrearProductoDto {
   @Min(1, { message: 'La duración debe ser al menos 1 mes' })
   @IsOptional()
   duracionMeses?: number;
+
+  // --- Campos Sistema Casa/Mundo 2026 ---
+
+  @ApiPropertyOptional({
+    description: 'Casa pedagógica del producto (QUANTUM, VERTEX, PULSAR)',
+    enum: CasaTipo,
+    example: 'QUANTUM',
+  })
+  @IsEnum(CasaTipo, {
+    message: 'La casa debe ser: QUANTUM, VERTEX o PULSAR',
+  })
+  @IsOptional()
+  casa?: CasaTipo;
+
+  @ApiPropertyOptional({
+    description: 'Mundo del producto (MATEMATICA, PROGRAMACION, CIENCIAS)',
+    enum: MundoTipo,
+    example: 'MATEMATICA',
+  })
+  @IsEnum(MundoTipo, {
+    message: 'El mundo debe ser: MATEMATICA, PROGRAMACION o CIENCIAS',
+  })
+  @IsOptional()
+  mundo?: MundoTipo;
+
+  @ApiPropertyOptional({
+    description: 'Subtipo del mundo (GENERAL u OLIMPICA)',
+    enum: SubtipoMundo,
+    example: 'GENERAL',
+  })
+  @IsEnum(SubtipoMundo, {
+    message: 'El subtipo debe ser: GENERAL u OLIMPICA',
+  })
+  @IsOptional()
+  subtipo_mundo?: SubtipoMundo;
+
+  @ApiPropertyOptional({
+    description: 'Nivel de olimpiada (solo para subtipo OLIMPICA)',
+    enum: NivelOlimpiada,
+    example: 'NANDU_N1',
+  })
+  @IsEnum(NivelOlimpiada, {
+    message: 'El nivel debe ser: NANDU_N1, NANDU_N2, OMA_N1, OMA_N2 u OMA_N3',
+  })
+  @IsOptional()
+  nivel_olimpiada?: NivelOlimpiada;
+
+  @ApiPropertyOptional({
+    description: 'Edad mínima requerida para el producto',
+    example: 6,
+    type: Number,
+    minimum: 4,
+    maximum: 99,
+  })
+  @IsInt({ message: 'La edad mínima debe ser un número entero' })
+  @Min(4, { message: 'La edad mínima debe ser al menos 4' })
+  @Max(99, { message: 'La edad mínima no puede ser mayor a 99' })
+  @IsOptional()
+  edad_minima?: number;
+
+  @ApiPropertyOptional({
+    description: 'Edad máxima permitida para el producto',
+    example: 9,
+    type: Number,
+    minimum: 4,
+    maximum: 99,
+  })
+  @IsInt({ message: 'La edad máxima debe ser un número entero' })
+  @Min(4, { message: 'La edad máxima debe ser al menos 4' })
+  @Max(99, { message: 'La edad máxima no puede ser mayor a 99' })
+  @IsOptional()
+  edad_maxima?: number;
+
+  @ApiPropertyOptional({
+    description: 'Si el producto permite excepciones de edad',
+    example: false,
+    type: Boolean,
+    default: false,
+  })
+  @IsBoolean({ message: 'permite_excepciones debe ser verdadero o falso' })
+  @IsOptional()
+  permite_excepciones?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Si el producto es visible en la landing pública',
+    example: true,
+    type: Boolean,
+    default: true,
+  })
+  @IsBoolean({ message: 'visible_en_landing debe ser verdadero o falso' })
+  @IsOptional()
+  visible_en_landing?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Orden de display en listados',
+    example: 0,
+    type: Number,
+    default: 0,
+  })
+  @IsInt({ message: 'El orden debe ser un número entero' })
+  @Min(0, { message: 'El orden no puede ser negativo' })
+  @IsOptional()
+  orden_display?: number;
 }

@@ -127,6 +127,15 @@ export async function cleanAllTestTables(prisma: PrismaService) {
   await prisma.suscripcion.deleteMany({});
 
   // ============================================================================
+  // SUSCRIPCIONES FAMILIARES 2026 (Sistema nuevo)
+  // Orden crítico: CambioInscripcion → InscripcionActividad → SuscripcionFamiliar
+  // Debe ir ANTES de: Comision, ClaseGrupo, Producto, Estudiante, Tutor
+  // ============================================================================
+  await prisma.cambioInscripcion.deleteMany({});
+  await prisma.inscripcionActividad.deleteMany({});
+  await prisma.suscripcionFamiliar.deleteMany({});
+
+  // ============================================================================
   // COMISIONES Y CLASE GRUPOS (ahora sin hijos)
   // ============================================================================
   await prisma.comision.deleteMany({});

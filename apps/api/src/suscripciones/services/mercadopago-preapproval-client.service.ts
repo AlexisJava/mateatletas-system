@@ -4,7 +4,9 @@
  * Encapsula el SDK de MercadoPago para facilitar testing por inyección de dependencias.
  *
  * RESPONSABILIDADES:
+ * - Crear preapproval (POST /preapproval)
  * - Obtener detalle de preapproval (GET /preapproval/{id})
+ * - Cancelar preapproval (PUT /preapproval/{id})
  * - Proveer interfaz mockeable para tests
  */
 import { Injectable, Logger } from '@nestjs/common';
@@ -39,6 +41,23 @@ interface MpPreApprovalGetResponse {
   };
 }
 
+/**
+ * Respuesta de crear un preapproval
+ */
+interface MpPreApprovalCreateResponse {
+  id: string;
+  init_point: string;
+  status: string;
+}
+
+/**
+ * Body para crear un preapproval
+ */
+type MpPreApprovalCreateBody = Record<
+  string,
+  string | number | boolean | object
+>;
+
 @Injectable()
 export class MercadoPagoPreApprovalClientService {
   private readonly logger = new Logger(
@@ -63,6 +82,75 @@ export class MercadoPagoPreApprovalClientService {
    */
   isConfigured(): boolean {
     return this.client !== null;
+  }
+
+  /**
+   * Crea un nuevo preapproval en MercadoPago
+   *
+   * @param body Datos para crear el preapproval
+   * @returns Respuesta con id, init_point y status
+   * @throws Error si el cliente no está configurado o falla la API
+   */
+  async create(
+    body: MpPreApprovalCreateBody,
+  ): Promise<MpPreApprovalCreateResponse> {
+    if (!this.client) {
+      throw new Error('Cliente MercadoPago no configurado');
+    }
+
+    try {
+      const response = await this.client.create({ body });
+
+      // Extraer campos con validación de tipos
+      const id = typeof response.id === 'string' ? response.id : '';
+      const initPoint =
+        typeof response.init_point === 'string' ? response.init_point : '';
+      const status =
+        typeof response.status === 'string' ? response.status : 'pending';
+
+      if (!id) {
+        throw new Error('MercadoPago no retornó ID de preapproval');
+      }
+
+      this.logger.log(`PreApproval creado: ${id}`);
+
+      return { id, init_point: initPoint, status };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error creando preapproval: ${errorMessage}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Cancela un preapproval existente en MercadoPago
+   *
+   * @param preapprovalId ID del preapproval a cancelar
+   * @returns true si se canceló correctamente
+   * @throws Error si el cliente no está configurado o falla la API
+   */
+  async cancel(preapprovalId: string): Promise<boolean> {
+    if (!this.client) {
+      throw new Error('Cliente MercadoPago no configurado');
+    }
+
+    try {
+      await this.client.update({
+        id: preapprovalId,
+        body: { status: 'cancelled' },
+      });
+
+      this.logger.log(`PreApproval cancelado: ${preapprovalId}`);
+      return true;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Error cancelando preapproval ${preapprovalId}: ${errorMessage}`,
+      );
+      throw error;
+    }
   }
 
   /**

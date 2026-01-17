@@ -18,6 +18,7 @@ import { BullModule } from '@nestjs/bullmq';
 // Controllers
 import { SuscripcionesWebhookController } from './presentation/suscripciones-webhook.controller';
 import { SuscripcionesController } from './presentation/suscripciones.controller';
+import { SuscripcionFamiliarController } from './presentation/suscripcion-familiar.controller';
 
 // Services
 import { PreapprovalService } from './services/preapproval.service';
@@ -28,6 +29,10 @@ import { SuscripcionAccesoService } from './services/suscripcion-acceso.service'
 import { MercadoPagoPreApprovalClientService } from './services/mercadopago-preapproval-client.service';
 import { GracePeriodService } from './services/grace-period.service';
 import { SuscripcionStateTransitionService } from './services/suscripcion-state-transition.service';
+
+// Servicios Suscripción Familiar 2026
+import { SuscripcionFamiliarCommandService } from './services/suscripcion-familiar-command.service';
+import { SuscripcionFamiliarQueryService } from './services/suscripcion-familiar-query.service';
 
 // Jobs (BullMQ)
 import { WEBHOOK_PREAPPROVAL_QUEUE } from './jobs/webhook-preapproval.queue';
@@ -60,7 +65,13 @@ import { MercadoPagoIpWhitelistService } from '../pagos/services/mercadopago-ip-
       name: WEBHOOK_PREAPPROVAL_QUEUE,
     }),
   ],
-  controllers: [SuscripcionesWebhookController, SuscripcionesController],
+  controllers: [
+    SuscripcionesWebhookController,
+    // IMPORTANTE: SuscripcionFamiliarController ANTES de SuscripcionesController
+    // porque SuscripcionesController tiene @Get(':id') que capturaría 'familiar'
+    SuscripcionFamiliarController,
+    SuscripcionesController,
+  ],
   providers: [
     // Servicios propios del módulo
     PreapprovalService,
@@ -71,6 +82,10 @@ import { MercadoPagoIpWhitelistService } from '../pagos/services/mercadopago-ip-
     MercadoPagoPreApprovalClientService,
     GracePeriodService,
     SuscripcionStateTransitionService,
+
+    // Servicios Suscripción Familiar 2026
+    SuscripcionFamiliarCommandService,
+    SuscripcionFamiliarQueryService,
 
     // Processors (BullMQ)
     WebhookPreapprovalProcessor,
@@ -88,6 +103,10 @@ import { MercadoPagoIpWhitelistService } from '../pagos/services/mercadopago-ip-
     SuscripcionAccesoService,
     SuscripcionQueryService,
     SuscripcionAdminService,
+
+    // Suscripción Familiar 2026
+    SuscripcionFamiliarCommandService,
+    SuscripcionFamiliarQueryService,
   ],
 })
 export class SuscripcionesModule {}
