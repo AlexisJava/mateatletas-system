@@ -1853,7 +1853,8 @@ function validarCompatibilidadEdad(estudiante, producto) {
   - [x] DELETE `/familiar/inscripciones` - Dar de baja
   - [x] PATCH `/familiar/inscripciones/horario` - Cambiar horario
   - [x] PATCH `/familiar/inscripciones/producto` - Cambiar producto
-  - [x] PATCH `/familiar/tier` - Cambiar tier
+  - [x] PATCH `/familiar/inscripciones/:id/tier` - **Cambiar tier por inscripción (MODELO 2026)**
+  - [x] ~~PATCH `/familiar/tier`~~ - ~~Cambiar tier familia~~ (DEPRECATED)
   - [x] POST `/familiar/cancelar` - Cancelar suscripción
   - [x] GET `/familiar/simular` - Simular monto
   - [x] GET `/familiar/admin` - Admin: listar todas
@@ -1878,7 +1879,7 @@ function validarCompatibilidadEdad(estudiante, producto) {
 - [ ] Componente `ClaseGrupoForm`
 - [ ] Modal de asignación de planificación
 
-### 14.6 Frontend - Tutor 🔄 EN PROGRESO
+### 14.6 Frontend - Tutor ✅ COMPLETADO
 
 - [x] Página `/tutor/dashboard` - Restaurada
 - [x] `TutorDashboard.tsx` - Componente principal
@@ -1887,15 +1888,14 @@ function validarCompatibilidadEdad(estudiante, producto) {
 - [x] `ProximasClasesList.tsx` - Próximas clases
 - [x] `AlertasBanner.tsx` - Alertas
 - [x] Modales existentes (4 modales)
-- [ ] Página `/tutor/suscripcion` - **NUEVO, PENDIENTE**
-- [ ] Componente `SuscripcionResumen`
-- [ ] Componente `InscripcionCard`
-- [ ] Modal `AgregarActividad`
-- [ ] Modal `CambiarHorario`
-- [ ] Modal `CambiarProducto`
-- [ ] Modal `ConfirmarBaja`
-- [ ] Modal `CambiarTier`
-- [ ] Modal `CancelarSuscripcion`
+- [x] Página `/tutor/suscripcion` - **IMPLEMENTADO**
+- [x] Componente `SuscripcionDashboard` - Vista principal
+- [x] Componente `InscripcionCard` - Card por inscripción con tier
+- [x] Página `/tutor/suscripcion/agregar` - Wizard de agregar actividad
+- [x] `NuevaSuscripcionWizard` - Modularizado en componentes pequeños
+- [x] Modal `CambiarTier` - Cambio de tier por inscripción
+- [x] Auditoría UX completa (3 fases: quick wins, medium, improvements)
+- [x] Tests de integración (boundary & validation)
 
 ### 14.7 Frontend - Landing ❌ PENDIENTE
 
@@ -1947,6 +1947,48 @@ function validarCompatibilidadEdad(estudiante, producto) {
 - [ ] Test E2E: Pago de curso temporal
 - [ ] Pruebas de carga
 - [ ] Pruebas de seguridad
+
+---
+
+## APÉNDICE A-1: MODELO 2026 - Tier por Inscripción
+
+**BREAKING CHANGE implementado en commit `32cc7f87`** (2026-01-18)
+
+### Cambio Principal
+
+El tier ahora se asigna **por inscripción**, no por suscripción familiar.
+
+**ANTES (modelo descartado):**
+
+```
+SuscripcionFamiliar { tier: STEAM_SINCRONICO }
+  └─ InscripcionActividad (sin tier)
+  └─ InscripcionActividad (sin tier)
+```
+
+**DESPUÉS (MODELO 2026):**
+
+```
+SuscripcionFamiliar { tier: null } // deprecated
+  └─ InscripcionActividad { tier: STEAM_SINCRONICO }
+  └─ InscripcionActividad { tier: STEAM_ASINCRONICO }
+```
+
+### Reglas de Negocio Actualizadas
+
+1. **Cada inscripción puede tener diferente tier** (LIBROS, ASINCRONICO, SINCRONICO)
+2. **Descuento 10% aplica a productos de MENOR VALOR** (ordenados por precio DESC)
+3. **Primera inscripción (más cara) paga precio completo**
+4. **Clubs requieren Asincrónico o Sincrónico** (LIBROS no aplica - tienen clases)
+5. **Monto mensual se calcula dinámicamente** desde los tiers de inscripciones
+
+### Archivos Modificados
+
+- **Schema**: `InscripcionActividad.tier` (nuevo campo)
+- **Constants**: `obtenerPrecioInscripcion()`, `calcularMontoMensualConTiers()`
+- **Types**: `InscripcionConTier`, `CambiarTierInscripcionInput`
+- **Controller**: `PATCH /inscripciones/:id/tier` (nuevo endpoint)
+- **Frontend**: `InscripcionCard` muestra tier individual
 
 ---
 
@@ -2017,5 +2059,6 @@ Con el nuevo modelo de Productos, la navegación quedaría:
 
 **FIN DEL DOCUMENTO**
 
-_Última actualización: 2026-01-17 (checklist actualizado con progreso)_
+_Última actualización: 2026-01-18_
+_Cambios: Frontend Tutor COMPLETADO, MODELO 2026 tier por inscripción documentado_
 _Autor: Claude Code / Equipo Mateatletas_
