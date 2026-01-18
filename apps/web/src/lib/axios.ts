@@ -63,7 +63,33 @@ const apiClient: ApiClient = axios.create({
  * - 422 Unprocessable Entity: Errores de validación
  * - 500 Internal Server Error: Error del servidor
  *
- * NOTA: Retornamos response.data directamente para simplificar el uso en los archivos API
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * ⚠️ UNWRAPPING DE RESPUESTAS - LEER ANTES DE MODIFICAR ⚠️
+ * ═══════════════════════════════════════════════════════════════════════════════
+ *
+ * El backend (TransformResponseInterceptor) envuelve TODAS las respuestas en:
+ *   { data: <payload>, metadata: { timestamp } }
+ *
+ * Este interceptor "desenvuelve" automáticamente para que los consumidores
+ * reciban solo el payload (sin el wrapper).
+ *
+ * CASO ESPECIAL - RESPUESTAS PAGINADAS:
+ * Las respuestas paginadas tienen metadata CON INFO DE PAGINACIÓN:
+ *   { data: [...], metadata: { total, page, limit, totalPages, timestamp } }
+ *
+ * Estas NO deben ser desenvueltas porque el consumidor necesita acceder
+ * a metadata.total, metadata.page, etc.
+ *
+ * DETECCIÓN DE PAGINACIÓN:
+ * - Si metadata tiene: total, page, o totalPages → ES PAGINADA → NO unwrap
+ * - Si metadata solo tiene timestamp → NO ES PAGINADA → SÍ unwrap a data
+ *
+ * ⚠️ BUG HISTÓRICO (2026-01-18):
+ * Se introdujo un bug al agregar soporte para 'metadata' sin verificar si tenía
+ * propiedades de paginación. Esto causó que TODAS las respuestas retornaran
+ * el wrapper completo, rompiendo dashboards que esperaban data directamente.
+ * FIX: Ahora se verifica si metadata tiene propiedades de paginación específicas.
+ * ═══════════════════════════════════════════════════════════════════════════════
  */
 apiClient.interceptors.response.use(
   (response) => {
@@ -73,11 +99,19 @@ apiClient.interceptors.response.use(
 
     // Si la respuesta tiene el formato del backend { data: ... }, extraer data
     if (axiosData && typeof axiosData === 'object' && 'data' in axiosData) {
-      // PERO: si tiene 'meta' o 'metadata' junto con 'data', es una respuesta paginada
-      // En ese caso, devolver el objeto completo { data, meta/metadata } sin desenvolver
-      if ('meta' in axiosData || 'metadata' in axiosData) {
+      // Detectar respuestas PAGINADAS que necesitan conservar metadata de paginación
+      // Las respuestas paginadas tienen: { data: [...], metadata: { total, page, limit, totalPages } }
+      // Las respuestas normales tienen: { data: {...}, metadata: { timestamp } } - solo timestamp
+      const metadata = axiosData.metadata as Record<string, unknown> | undefined;
+      const isPaginatedResponse =
+        'meta' in axiosData ||
+        (metadata && ('total' in metadata || 'page' in metadata || 'totalPages' in metadata));
+
+      if (isPaginatedResponse) {
+        // Respuesta paginada: devolver completo { data, metadata }
         return axiosData;
       }
+      // Respuesta normal: unwrap y devolver solo data
       return axiosData.data;
     }
 
