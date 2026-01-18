@@ -25,12 +25,16 @@ import apiClient from '../axios';
 
 export type TierNombre = 'STEAM_LIBROS' | 'STEAM_ASINCRONICO' | 'STEAM_SINCRONICO';
 
-export type EstadoSuscripcionFamiliar =
-  | 'PENDIENTE_PAGO'
-  | 'ACTIVA'
-  | 'EN_GRACIA'
-  | 'SUSPENDIDA'
-  | 'CANCELADA';
+/**
+ * Estados de SuscripcionFamiliar (MODELO 2026)
+ *
+ * Sincronizado con Prisma enum EstadoSuscripcionFamiliar:
+ * - PENDING: Esperando autorización de MercadoPago
+ * - AUTHORIZED: Activa y cobrando (equivalente a ACTIVA)
+ * - PAUSED: Pausada por fallo de pago (equivalente a SUSPENDIDA)
+ * - CANCELLED: Cancelada por tutor o admin
+ */
+export type EstadoSuscripcionFamiliar = 'PENDING' | 'AUTHORIZED' | 'PAUSED' | 'CANCELLED';
 
 export type EstadoInscripcionActividad = 'ACTIVA' | 'PENDIENTE_BAJA' | 'BAJA' | 'CONGELADA';
 

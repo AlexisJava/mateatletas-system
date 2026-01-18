@@ -209,9 +209,19 @@ function mapClubToProducto(club: ClubConClaseGrupos): ProductoConCasa {
 // UTILIDADES
 // ============================================================================
 
-/** Calcula la casa según la edad */
-function calcularCasa(fechaNacimiento: string | Date | null): CasaTipo | null {
-  if (!fechaNacimiento) return null;
+/** Resultado del cálculo de casa con posible error de validación */
+interface CalcularCasaResult {
+  casa: CasaTipo | null;
+  error: string | null;
+}
+
+/**
+ * Calcula la casa según la edad
+ *
+ * CRIT-08: Retorna error descriptivo cuando la edad está fuera del rango 6-17
+ */
+function calcularCasa(fechaNacimiento: string | Date | null): CalcularCasaResult {
+  if (!fechaNacimiento) return { casa: null, error: null };
 
   const hoy = new Date();
   const nacimiento = new Date(fechaNacimiento);
@@ -221,10 +231,18 @@ function calcularCasa(fechaNacimiento: string | Date | null): CasaTipo | null {
     edad--;
   }
 
-  if (edad >= 6 && edad <= 9) return 'QUANTUM';
-  if (edad >= 10 && edad <= 12) return 'VERTEX';
-  if (edad >= 13 && edad <= 17) return 'PULSAR';
-  return null;
+  if (edad < 6) {
+    return { casa: null, error: 'El estudiante debe tener al menos 6 años para Mateatletas' };
+  }
+  if (edad > 17) {
+    return { casa: null, error: 'Mateatletas es para estudiantes de hasta 17 años' };
+  }
+
+  if (edad >= 6 && edad <= 9) return { casa: 'QUANTUM', error: null };
+  if (edad >= 10 && edad <= 12) return { casa: 'VERTEX', error: null };
+  if (edad >= 13 && edad <= 17) return { casa: 'PULSAR', error: null };
+
+  return { casa: null, error: null };
 }
 
 /** Calcula edad desde fecha de nacimiento */
@@ -282,10 +300,12 @@ export function NuevaSuscripcionWizard(): React.ReactElement {
   // Mundo seleccionado (filtro de productos)
   const [mundoSeleccionado, setMundoSeleccionado] = useState<MundoTipo | null>(null);
 
-  // Casa calculada del hijo seleccionado
+  // Casa calculada del hijo seleccionado (CRIT-08: incluye validación de edad)
+  const casaResult = seleccion.nuevoHijo
+    ? calcularCasa(seleccion.nuevoHijo.fechaNacimiento)
+    : { casa: null, error: null };
   const casaCalculada: CasaTipo | null =
-    (seleccion.hijo?.casa as CasaTipo | null) ??
-    (seleccion.nuevoHijo ? calcularCasa(seleccion.nuevoHijo.fechaNacimiento) : null);
+    (seleccion.hijo?.casa as CasaTipo | null) ?? casaResult.casa;
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -341,7 +361,13 @@ export function NuevaSuscripcionWizard(): React.ReactElement {
   const canGoNext = useCallback((): boolean => {
     switch (step) {
       case 'hijo':
-        return !!(seleccion.hijo || (showNuevoHijoForm && nuevoHijoForm.fechaNacimiento));
+        // CRIT-08: Bloquear si la edad está fuera del rango 6-17
+        if (showNuevoHijoForm && nuevoHijoForm.fechaNacimiento) {
+          const result = calcularCasa(nuevoHijoForm.fechaNacimiento);
+          if (result.error) return false; // Edad fuera de rango
+          return true;
+        }
+        return !!seleccion.hijo;
       case 'producto':
         return !!seleccion.producto;
       case 'horario':
@@ -873,7 +899,12 @@ function HijoStep({
   onHideForm: () => void;
   onFormChange: (data: NuevoHijoData) => void;
 }): React.ReactElement {
-  const casaCalculada = formData.fechaNacimiento ? calcularCasa(formData.fechaNacimiento) : null;
+  // CRIT-08: calcularCasa ahora retorna { casa, error } para validar rango de edad
+  const casaResult = formData.fechaNacimiento
+    ? calcularCasa(formData.fechaNacimiento)
+    : { casa: null, error: null };
+  const casaCalculada = casaResult.casa;
+  const casaError = casaResult.error;
   const edadCalculada = formData.fechaNacimiento ? calcularEdad(formData.fechaNacimiento) : null;
 
   return (
@@ -1003,8 +1034,25 @@ function HijoStep({
             </div>
           </div>
 
-          {/* Mostrar casa calculada */}
-          {casaCalculada && edadCalculada && (
+          {/* CRIT-08: Mostrar error si la edad está fuera de rango */}
+          {casaError && edadCalculada && (
+            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
+                  <AlertCircle className="w-5 h-5 text-red-400" />
+                </div>
+                <div>
+                  <p className="text-red-400 font-medium">{casaError}</p>
+                  <p className="text-sm text-slate-400">
+                    Edad calculada: {edadCalculada} años. El rango permitido es de 6 a 17 años.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Mostrar casa calculada (solo si no hay error) */}
+          {casaCalculada && edadCalculada && !casaError && (
             <div className="p-4 bg-gradient-to-r from-cyan-500/10 to-violet-500/10 border border-cyan-500/20 rounded-xl">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-cyan-500/20 rounded-lg flex items-center justify-center">

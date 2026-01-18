@@ -738,9 +738,10 @@ const TierStep = dynamic(() => import('./steps/TierStep'), { loading: () => <Ste
 
 - [x] Eliminar todos los console.log ✅ Corregido
 - [x] Verificar FRONTEND_URL en Railway ✅ Ahora usa getOrThrow()
-- [ ] Confirmar versión Next.js ≥15.2.3
+- [x] Confirmar versión Next.js ≥15.2.3 ✅ Versión 15.5.9 (sin middleware)
 - [x] Tipar todos los catch blocks ✅ Corregido
-- [ ] Validar rango de edades en wizard
+- [x] Validar rango de edades en wizard ✅ CRIT-08 implementado
+- [x] Sincronizar estados frontend/backend ✅ MOD-07 implementado
 - [ ] Tests de integración corriendo
 - [ ] Error boundaries implementados
 - [ ] Sentry configurado

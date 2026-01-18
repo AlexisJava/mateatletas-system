@@ -121,30 +121,36 @@ export function formatTierNombre(tier: TierNombre): string {
 
 /**
  * Formatea el estado de suscripción para mostrar
+ *
+ * MODELO 2026: Estados sincronizados con MercadoPago PreApproval
+ * - PENDING → Pendiente de Pago
+ * - AUTHORIZED → Activa
+ * - PAUSED → Pausada (fallo de pago)
+ * - CANCELLED → Cancelada
  */
 export function formatEstadoSuscripcion(estado: EstadoSuscripcionFamiliar): string {
   const estadoLabels: Record<EstadoSuscripcionFamiliar, string> = {
-    PENDIENTE_PAGO: 'Pendiente de Pago',
-    ACTIVA: 'Activa',
-    EN_GRACIA: 'En Período de Gracia',
-    SUSPENDIDA: 'Suspendida',
-    CANCELADA: 'Cancelada',
+    PENDING: 'Pendiente de Pago',
+    AUTHORIZED: 'Activa',
+    PAUSED: 'Pausada',
+    CANCELLED: 'Cancelada',
   };
   return estadoLabels[estado] || estado;
 }
 
 /**
  * Retorna el color del badge según el estado
+ *
+ * MODELO 2026: Estados sincronizados con MercadoPago PreApproval
  */
 export function getEstadoBadgeColor(
   estado: EstadoSuscripcionFamiliar,
 ): 'green' | 'yellow' | 'red' | 'gray' {
   const colorMap: Record<EstadoSuscripcionFamiliar, 'green' | 'yellow' | 'red' | 'gray'> = {
-    ACTIVA: 'green',
-    PENDIENTE_PAGO: 'yellow',
-    EN_GRACIA: 'yellow',
-    SUSPENDIDA: 'red',
-    CANCELADA: 'gray',
+    AUTHORIZED: 'green',
+    PENDING: 'yellow',
+    PAUSED: 'red',
+    CANCELLED: 'gray',
   };
   return colorMap[estado] || 'gray';
 }

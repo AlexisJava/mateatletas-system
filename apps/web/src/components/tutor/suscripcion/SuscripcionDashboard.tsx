@@ -106,15 +106,15 @@ interface EstadoBadgeProps {
 }
 
 function EstadoBadge({ estado }: EstadoBadgeProps): React.ReactElement {
+  // MODELO 2026: Estados sincronizados con MercadoPago PreApproval
   const config: Record<
     EstadoSuscripcionFamiliar,
     { bg: string; text: string; icon: typeof CheckCircle2 }
   > = {
-    ACTIVA: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', icon: CheckCircle2 },
-    PENDIENTE_PAGO: { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: Clock },
-    EN_GRACIA: { bg: 'bg-orange-500/20', text: 'text-orange-400', icon: AlertCircle },
-    SUSPENDIDA: { bg: 'bg-red-500/20', text: 'text-red-400', icon: XCircle },
-    CANCELADA: { bg: 'bg-slate-500/20', text: 'text-slate-400', icon: XCircle },
+    AUTHORIZED: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', icon: CheckCircle2 },
+    PENDING: { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: Clock },
+    PAUSED: { bg: 'bg-red-500/20', text: 'text-red-400', icon: XCircle },
+    CANCELLED: { bg: 'bg-slate-500/20', text: 'text-slate-400', icon: XCircle },
   };
 
   // Fallback for unknown states
