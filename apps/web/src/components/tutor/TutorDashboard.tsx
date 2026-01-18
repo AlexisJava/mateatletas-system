@@ -63,8 +63,7 @@ export function TutorDashboard() {
         ]);
         setDashboardData(dashboard);
         setProximasClases(clases);
-      } catch (err) {
-        console.error('Error cargando dashboard tutor:', err);
+      } catch {
         setError('No pudimos cargar los datos. Intentá de nuevo.');
       } finally {
         setIsLoading(false);
@@ -192,7 +191,7 @@ export function TutorDashboard() {
                 <div className="p-2 bg-emerald-500/20 rounded-lg">
                   <TrendingUp className="w-4 h-4 text-emerald-400" />
                 </div>
-                <span className="text-sm text-slate-400">Pagado 2026</span>
+                <span className="text-sm text-slate-400">Pagado {new Date().getFullYear()}</span>
               </div>
               <p className="text-2xl font-bold text-emerald-400">
                 {formatMoney(dashboardData?.metricas.totalPagadoAnio ?? 0)}

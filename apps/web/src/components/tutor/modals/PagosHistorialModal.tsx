@@ -22,8 +22,8 @@ export function PagosHistorialModal({ pagosPendientes, onClose }: PagosHistorial
       try {
         const data = await tutoresApi.getMisInscripciones();
         setInscripciones(data);
-      } catch (error) {
-        console.error('Error cargando inscripciones:', error);
+      } catch {
+        // Error silencioso - el modal mostrará estado vacío
       } finally {
         setIsLoading(false);
       }

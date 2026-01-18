@@ -191,8 +191,7 @@ export default function AgregarActividadPage(): React.ReactElement {
       try {
         const dashboard = await tutoresApi.getDashboardResumen();
         setHijos(dashboard.hijos);
-      } catch (error) {
-        console.error('Error cargando hijos:', error);
+      } catch {
         toast.error('Error al cargar los estudiantes');
       } finally {
         setLoadingHijos(false);
@@ -209,20 +208,9 @@ export default function AgregarActividadPage(): React.ReactElement {
       setLoadingClubes(true);
       try {
         const casa = (selectedEstudiante.casa as CasaTipo) || 'QUANTUM';
-        console.log('[DEBUG] Buscando clubs:', {
-          casa,
-          mundo: selectedMundo,
-          estudianteCasa: selectedEstudiante.casa,
-        });
         const result = await getClubsPorCasaMundo(casa, selectedMundo);
-        console.log(
-          '[DEBUG] Clubs encontrados:',
-          result.length,
-          result.map((c) => c.nombre),
-        );
         setClubes(result);
-      } catch (error) {
-        console.error('Error cargando clubes:', error);
+      } catch {
         toast.error('Error al cargar las actividades');
       } finally {
         setLoadingClubes(false);
@@ -309,8 +297,7 @@ export default function AgregarActividadPage(): React.ReactElement {
       setResultado(response);
       toast.success('Actividades agregadas correctamente');
       await refetch();
-    } catch (error) {
-      console.error('Error agregando actividades:', error);
+    } catch {
       toast.error('Error al agregar las actividades');
     } finally {
       setIsSubmitting(false);

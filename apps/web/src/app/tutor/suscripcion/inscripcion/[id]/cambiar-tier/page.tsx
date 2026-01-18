@@ -109,8 +109,7 @@ export default function CambiarTierInscripcionPage(): React.ReactElement {
       toast.success('Plan actualizado correctamente');
       await refetch();
       router.push('/tutor/suscripcion');
-    } catch (error) {
-      console.error('Error al cambiar tier:', error);
+    } catch {
       toast.error('Error al cambiar el plan. Intentá de nuevo.');
     }
   };

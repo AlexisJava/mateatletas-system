@@ -74,8 +74,7 @@ export default function GestionarSuscripcionPage(): React.ReactElement {
       setResultadoBaja(response);
       toast.success('Inscripciones dadas de baja');
       await refetch();
-    } catch (error) {
-      console.error('Error dando de baja:', error);
+    } catch {
       toast.error('Error al procesar la baja');
     } finally {
       setIsSubmitting(false);
@@ -97,8 +96,7 @@ export default function GestionarSuscripcionPage(): React.ReactElement {
       setResultadoCancelacion(response);
       toast.success('Suscripción cancelada');
       await refetch();
-    } catch (error) {
-      console.error('Error cancelando:', error);
+    } catch {
       toast.error('Error al cancelar la suscripción');
     } finally {
       setIsSubmitting(false);

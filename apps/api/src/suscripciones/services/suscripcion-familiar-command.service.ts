@@ -71,8 +71,8 @@ export class SuscripcionFamiliarCommandService {
     private readonly eventEmitter: EventEmitter2,
     private readonly mpClient: MercadoPagoPreApprovalClientService,
   ) {
-    this.frontendUrl =
-      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    // CRIT-04: Fail fast si FRONTEND_URL no está configurado
+    this.frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
 
     this.circuitBreaker = new CircuitBreaker({
       name: 'MercadoPago-SuscripcionFamiliar',

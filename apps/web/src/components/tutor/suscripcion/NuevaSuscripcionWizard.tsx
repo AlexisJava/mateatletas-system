@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/auth.store';
 import {
   ArrowLeft,
   ArrowRight,
@@ -248,7 +247,6 @@ function calcularEdad(fechaNacimiento: string | Date | null): number | null {
 
 export function NuevaSuscripcionWizard(): React.ReactElement {
   const router = useRouter();
-  useAuthStore();
   const { crearSuscripcion, isCreating } = useSuscripcionFamiliar();
   // TODO: Descomentar cuando se integre con backend real
   // const { simular, data: simulacion, isLoading: isSimulando } = useSimularMonto();
@@ -301,8 +299,7 @@ export function NuevaSuscripcionWizard(): React.ReactElement {
         if (dashboard.hijos.length === 0) {
           setShowNuevoHijoForm(true);
         }
-      } catch (err) {
-        console.error('Error cargando datos:', err);
+      } catch {
         setError('No pudimos cargar los datos. Intentá de nuevo.');
       } finally {
         setIsLoading(false);
@@ -321,8 +318,7 @@ export function NuevaSuscripcionWizard(): React.ReactElement {
             mundoSeleccionado as APIMundoTipo,
           );
           setProductos(clubs.map(mapClubToProducto));
-        } catch (err) {
-          console.error('Error cargando clubs:', err);
+        } catch {
           setProductos([]);
         }
       };
@@ -441,7 +437,6 @@ export function NuevaSuscripcionWizard(): React.ReactElement {
 
       // Si hay nuevoHijo, primero crearlo en el backend
       if (!estudianteId && seleccion.nuevoHijo) {
-        console.log('[WIZARD] Creando nuevo hijo primero...');
         setIsCreatingChild(true);
 
         const edad = calcularEdad(seleccion.nuevoHijo.fechaNacimiento);
@@ -458,15 +453,10 @@ export function NuevaSuscripcionWizard(): React.ReactElement {
           nivelEscolar: seleccion.nuevoHijo.nivelEscolar,
         };
 
-        console.log('[WIZARD] Payload para crear hijo:', nuevoHijoPayload);
-
         try {
           const response = await tutoresApi.crearHijo(nuevoHijoPayload);
-          console.log('[WIZARD] Hijo creado exitosamente:', response);
           estudianteId = response.estudiante.id;
-          console.log('[WIZARD] EstudianteId extraído:', estudianteId);
-        } catch (hijoErr) {
-          console.error('[WIZARD] Error creando hijo:', hijoErr);
+        } catch {
           setError('Error al crear el nuevo hijo. Verificá los datos e intentá de nuevo.');
           setIsCreatingChild(false);
           return;
@@ -497,17 +487,6 @@ export function NuevaSuscripcionWizard(): React.ReactElement {
         inscripciones,
       };
 
-      console.log('═══════════════════════════════════════════════════════');
-      console.log('[WIZARD] Creando suscripción con payload:');
-      console.log(JSON.stringify(payload, null, 2));
-      console.log('═══════════════════════════════════════════════════════');
-      console.log('[WIZARD] Detalles de selección:');
-      console.log('  - EstudianteId:', estudianteId);
-      console.log('  - Producto:', seleccion.producto?.id, seleccion.producto?.nombre);
-      console.log('  - ClaseGrupo:', seleccion.claseGrupo?.id, seleccion.claseGrupo?.nombre);
-      console.log('  - Tier:', seleccion.tier);
-      console.log('═══════════════════════════════════════════════════════');
-
       const result = await crearSuscripcion(payload);
 
       if (result.checkoutUrl) {
@@ -515,8 +494,7 @@ export function NuevaSuscripcionWizard(): React.ReactElement {
       } else {
         router.push('/tutor/suscripcion');
       }
-    } catch (err) {
-      console.error('Error creando suscripción:', err);
+    } catch {
       setError('Error al crear la suscripción. Intentá de nuevo.');
     }
   };
