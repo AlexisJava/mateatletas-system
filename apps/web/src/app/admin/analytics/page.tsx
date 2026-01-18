@@ -1,6 +1,6 @@
 'use client';
 
-import { AnalyticsView } from '@/components/admin';
+import { AnalyticsView } from '@/components/admin/views/analytics';
 
 /**
  * Admin Analytics Page

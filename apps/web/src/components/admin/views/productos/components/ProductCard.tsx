@@ -12,7 +12,7 @@ import {
   CheckCircle,
   XCircle,
 } from 'lucide-react';
-import { formatCurrency } from '@/lib/constants/admin-mock-data';
+import { formatCurrency } from '@/lib/utils/format';
 import type { ProductCardProps } from '../types/productos.types';
 import {
   TIPO_ICON_MAP,

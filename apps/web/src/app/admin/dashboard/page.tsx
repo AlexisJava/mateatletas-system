@@ -1,6 +1,6 @@
 'use client';
 
-import { DashboardView } from '@/components/admin';
+import { DashboardView } from '@/components/admin/views/dashboard';
 
 /**
  * Admin Dashboard Page

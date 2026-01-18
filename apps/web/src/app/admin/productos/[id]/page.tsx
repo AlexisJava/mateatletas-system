@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getProductById, updateProduct, deleteProduct } from '@/lib/api/admin.api';
-import { formatCurrency } from '@/lib/constants/admin-mock-data';
+import { formatCurrency } from '@/lib/utils/format';
 import { ComisionesSection } from '@/components/admin/views/productos/components/ComisionesSection';
 import type { Producto } from '@/types/catalogo.types';
 

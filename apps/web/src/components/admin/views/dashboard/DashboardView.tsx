@@ -1,7 +1,7 @@
 'use client';
 
 import { Users, Clock, DollarSign } from 'lucide-react';
-import { formatCompactCurrency } from '@/lib/constants/admin-mock-data';
+import { formatCompactCurrency } from '@/lib/utils/format';
 import {
   StatCard,
   TierDistributionCard,

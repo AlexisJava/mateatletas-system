@@ -1,6 +1,6 @@
 'use client';
 
-import { DocenteAsignacionesView } from '@/components/admin';
+import { DocenteAsignacionesView } from '@/components/admin/views/docentes-asignaciones';
 
 /**
  * Admin Asignaciones Page

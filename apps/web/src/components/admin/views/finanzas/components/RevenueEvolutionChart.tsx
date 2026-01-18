@@ -2,7 +2,7 @@
 
 import { TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { formatCurrency, formatCompactCurrency } from '@/lib/constants/admin-mock-data';
+import { formatCurrency, formatCompactCurrency } from '@/lib/utils/format';
 import { useRevenueData } from '../hooks/useRevenueData';
 
 /**

@@ -1,7 +1,7 @@
 'use client';
 
 import { Settings, Gamepad2, Sparkles, Crown, UserMinus } from 'lucide-react';
-import { formatCurrency } from '@/lib/constants/admin-mock-data';
+import { formatCurrency } from '@/lib/utils/format';
 import type { TierConfig } from '../types/finance.types';
 
 /**

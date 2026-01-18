@@ -1,6 +1,6 @@
 'use client';
 
-import { PersonasView } from '@/components/admin';
+import { PersonasView } from '@/components/admin/views/personas';
 
 /**
  * Admin Personas Page

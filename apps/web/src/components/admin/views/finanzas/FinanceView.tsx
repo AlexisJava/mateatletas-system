@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { DollarSign, Clock, Users, TrendingUp, CreditCard } from 'lucide-react';
-import { formatCompactCurrency } from '@/lib/constants/admin-mock-data';
+import { formatCompactCurrency } from '@/lib/utils/format';
 import type { FinanceStatCardProps } from './types/finance.types';
 import {
   FinanceStatCard,

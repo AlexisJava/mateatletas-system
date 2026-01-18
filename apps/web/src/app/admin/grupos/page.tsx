@@ -1,6 +1,6 @@
 'use client';
 
-import { GruposPedagogicosView } from '@/components/admin';
+import { GruposPedagogicosView } from '@/components/admin/views/grupos-pedagogicos';
 
 /**
  * Admin Grupos Page

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { MoreVertical, Eye, Edit, Trash2, Home, CreditCard, Key } from 'lucide-react';
-import { formatDate } from '@/lib/constants/admin-mock-data';
+import { formatDate } from '@/lib/utils/format';
 import type { PersonRowProps } from '../types/personas.types';
 import { ROLE_CONFIG } from '../constants/role-config';
 

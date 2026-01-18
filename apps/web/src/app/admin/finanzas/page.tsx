@@ -1,6 +1,6 @@
 'use client';
 
-import { FinanceView } from '@/components/admin';
+import { FinanceView } from '@/components/admin/views/finanzas';
 
 /**
  * Admin Finanzas Page

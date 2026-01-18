@@ -7,7 +7,7 @@ import {
   type TransaccionAdmin,
   type PaginatedResponse,
 } from '@/lib/api/admin.api';
-import { formatCurrency, formatRelativeTime } from '@/lib/constants/admin-mock-data';
+import { formatCurrency, formatRelativeTime } from '@/lib/utils/format';
 
 /**
  * TransactionsList - Lista de transacciones recientes

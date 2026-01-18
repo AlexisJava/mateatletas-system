@@ -1,6 +1,6 @@
 'use client';
 
-import { ProductosView } from '@/components/admin';
+import { ProductosView } from '@/components/admin/views/productos';
 
 /**
  * Admin Productos Page

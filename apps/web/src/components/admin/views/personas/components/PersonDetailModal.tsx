@@ -1,7 +1,7 @@
 'use client';
 
 import { X, Mail, Calendar, Home, Award, GraduationCap } from 'lucide-react';
-import { formatDate } from '@/lib/constants/admin-mock-data';
+import { formatDate } from '@/lib/utils/format';
 import type { PersonDetailModalProps } from '../types/personas.types';
 import { ROLE_CONFIG } from '../constants/role-config';
 

@@ -10,7 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { formatCompactCurrency } from '@/lib/constants/admin-mock-data';
+import { formatCompactCurrency } from '@/lib/utils/format';
 import { useRevenueData } from '../../finanzas/hooks/useRevenueData';
 
 /**

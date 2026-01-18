@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertItem } from './AlertItem';
-import { formatCompactCurrency } from '@/lib/constants/admin-mock-data';
+import { formatCompactCurrency } from '@/lib/utils/format';
 
 /**
  * AlertsPanel - Panel de alertas del sistema

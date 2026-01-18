@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X, ShoppingCart, DollarSign, Calendar, Trash2, Loader2 } from 'lucide-react';
-import { formatCurrency, formatDate } from '@/lib/constants/admin-mock-data';
+import { formatCurrency, formatDate } from '@/lib/utils/format';
 import type { ProductDetailModalProps } from '../types/productos.types';
 import {
   TIPO_ICON_MAP,

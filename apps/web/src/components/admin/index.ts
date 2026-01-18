@@ -5,18 +5,10 @@
  */
 
 export { Header } from './Header';
-export { TabNavigation } from './TabNavigation';
+export { AdminSidebar } from './AdminSidebar';
 
-// Views
-export {
-  DashboardView,
-  FinanceView,
-  AnalyticsView,
-  PersonasView,
-  ProductosView,
-  DocenteAsignacionesView,
-  GruposPedagogicosView,
-} from './views';
+// Views - importar directamente desde carpetas específicas
+// Ejemplo: import { DashboardView } from '@/components/admin/views/dashboard'
 
 // Charts
 export {
