@@ -25,7 +25,7 @@ function StatCard({ label, value, icon, color, isActive, onClick }: StatCardProp
       type="button"
       onClick={onClick}
       className={`
-        relative flex items-center gap-4 p-4 rounded-xl border transition-all duration-200
+        relative flex items-center gap-2 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-all duration-200
         ${
           isActive
             ? `bg-gradient-to-br ${color} border-transparent shadow-lg`
@@ -35,17 +35,21 @@ function StatCard({ label, value, icon, color, isActive, onClick }: StatCardProp
     >
       <div
         className={`
-          w-12 h-12 rounded-xl flex items-center justify-center
+          w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0
           ${isActive ? 'bg-white/20' : 'bg-[var(--admin-surface-2)]'}
         `}
       >
         {icon}
       </div>
-      <div className="text-left">
-        <p className={`text-2xl font-bold ${isActive ? 'text-white' : 'text-[var(--admin-text)]'}`}>
+      <div className="text-left min-w-0">
+        <p
+          className={`text-lg sm:text-2xl font-bold truncate ${isActive ? 'text-white' : 'text-[var(--admin-text)]'}`}
+        >
           {value}
         </p>
-        <p className={`text-sm ${isActive ? 'text-white/80' : 'text-[var(--admin-text-muted)]'}`}>
+        <p
+          className={`text-xs sm:text-sm truncate ${isActive ? 'text-white/80' : 'text-[var(--admin-text-muted)]'}`}
+        >
           {label}
         </p>
       </div>
