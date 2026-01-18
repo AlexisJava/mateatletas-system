@@ -519,6 +519,7 @@ export class ProductosService {
 
   /**
    * Obtiene productos Club para suscripciones familiares
+   * Incluye ClaseGrupos con información del docente
    */
   async findClubs() {
     return await this.prisma.producto.findMany({
@@ -536,6 +537,12 @@ export class ProductosService {
             hora_inicio: true,
             hora_fin: true,
             cupo_maximo: true,
+            docente: {
+              select: {
+                nombre: true,
+                apellido: true,
+              },
+            },
           },
         },
       },

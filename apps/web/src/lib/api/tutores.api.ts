@@ -165,10 +165,46 @@ export interface MisInscripcionesResponse {
 }
 
 // ============================================================================
+// TIPOS DE REQUEST
+// ============================================================================
+
+export interface CrearHijoRequest {
+  nombre: string;
+  apellido: string;
+  edad: number;
+  nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
+}
+
+export interface EstudianteCreado {
+  id: string;
+  nombre: string;
+  apellido: string;
+  edad: number;
+  nivelEscolar: string;
+  casaId: string | null;
+}
+
+export interface CrearHijoResponse {
+  estudiante: EstudianteCreado;
+  credenciales: {
+    codigoAcceso: string;
+    password: string;
+  };
+}
+
+// ============================================================================
 // API CLIENT
 // ============================================================================
 
 export const tutoresApi = {
+  /**
+   * POST /estudiantes
+   * Crear un nuevo hijo (estudiante) asociado al tutor autenticado
+   */
+  crearHijo: async (data: CrearHijoRequest): Promise<CrearHijoResponse> => {
+    return apiClient.post<CrearHijoResponse>('/estudiantes', data);
+  },
+
   /**
    * GET /tutor/dashboard-resumen
    * Dashboard completo: métricas, alertas, pagos pendientes, clases de hoy

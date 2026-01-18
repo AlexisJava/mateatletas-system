@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import {
   LogOut,
@@ -18,6 +19,8 @@ import {
   Star,
   BarChart3,
   Sparkles,
+  CreditCard,
+  Plus,
 } from 'lucide-react';
 import {
   tutoresApi,
@@ -36,6 +39,7 @@ import { NovedadesModal } from './modals/NovedadesModal';
  * Layout: Header fijo + Contenido principal en 2 columnas
  */
 export function TutorDashboard() {
+  const router = useRouter();
   const { user, logout } = useAuthStore();
 
   const [dashboardData, setDashboardData] = useState<DashboardResumenResponse | null>(null);
@@ -136,16 +140,23 @@ export function TutorDashboard() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <span className="text-slate-400 text-sm">
+        <div className="flex items-center gap-3">
+          <span className="text-slate-400 text-sm hidden sm:inline">
             Hola, <span className="font-semibold text-white">{user?.nombre}</span>
           </span>
+          <button
+            onClick={() => router.push('/tutor/suscripcion')}
+            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 hover:text-white transition-all text-sm"
+          >
+            <CreditCard className="w-4 h-4" />
+            <span className="hidden sm:inline">Mi Suscripción</span>
+          </button>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 hover:text-white transition-all text-sm"
           >
             <LogOut className="w-4 h-4" />
-            Salir
+            <span className="hidden sm:inline">Salir</span>
           </button>
         </div>
       </header>
@@ -243,15 +254,29 @@ export function TutorDashboard() {
                   <Users className="w-5 h-5 text-white" />
                 </div>
                 <h2 className="text-xl font-bold text-white">Mis Hijos</h2>
-                <span className="ml-auto px-3 py-1 bg-violet-500/20 text-violet-300 text-sm font-semibold rounded-full">
+                <span className="px-3 py-1 bg-violet-500/20 text-violet-300 text-sm font-semibold rounded-full">
                   {dashboardData?.hijos?.length ?? 0}
                 </span>
+                <button
+                  onClick={() => router.push('/tutor/suscripcion/nueva')}
+                  className="ml-auto flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-violet-600 hover:from-cyan-500 hover:to-violet-500 text-white rounded-xl font-semibold text-sm transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  Inscribir hijo
+                </button>
               </div>
 
               {(dashboardData?.hijos?.length ?? 0) === 0 ? (
                 <div className="text-center py-8">
                   <Users className="w-12 h-12 text-slate-700 mx-auto mb-3" />
-                  <p className="text-slate-500">No hay hijos registrados</p>
+                  <p className="text-slate-500 mb-4">No hay hijos registrados</p>
+                  <button
+                    onClick={() => router.push('/tutor/suscripcion/nueva')}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-violet-600 hover:from-cyan-500 hover:to-violet-500 text-white rounded-xl font-semibold transition-all"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Inscribir a tu primer hijo
+                  </button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -353,7 +378,7 @@ export function TutorDashboard() {
             </div>
           </div>
 
-          {/* Row 4: Novedades */}
+          {/* Row 5: Novedades */}
           <div className="bg-gradient-to-r from-slate-900/80 to-violet-900/20 backdrop-blur-xl border border-violet-500/20 rounded-2xl p-6 relative overflow-hidden">
             {/* Decoración de fondo */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-violet-500/20 to-pink-500/10 rounded-full blur-2xl" />

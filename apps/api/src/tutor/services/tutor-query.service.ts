@@ -10,6 +10,7 @@ import {
   DashboardResumenResponse,
   AlertasResponse,
 } from '../types/tutor-dashboard.types';
+import { DiaSemana } from '@prisma/client';
 
 /**
  * TutorQueryService
@@ -116,7 +117,63 @@ export class TutorQueryService {
   // ============================================================================
 
   /**
+   * Mapea DiaSemana enum a número de día de la semana (0=Domingo, 1=Lunes, etc.)
+   */
+  private diaSemanaToNumber(dia: DiaSemana): number {
+    const mapping: Record<DiaSemana, number> = {
+      DOMINGO: 0,
+      LUNES: 1,
+      MARTES: 2,
+      MIERCOLES: 3,
+      JUEVES: 4,
+      VIERNES: 5,
+      SABADO: 6,
+    };
+    return mapping[dia];
+  }
+
+  /**
+   * Calcula la próxima ocurrencia de un ClaseGrupo basado en su día de semana y hora
+   */
+  private calcularProximaFecha(
+    diaSemana: DiaSemana,
+    horaInicio: string,
+    ahora: Date,
+  ): Date {
+    const diaObjetivo = this.diaSemanaToNumber(diaSemana);
+    const diaActual = ahora.getDay();
+
+    // Parsear hora (formato HH:MM)
+    const partesHora = horaInicio.split(':');
+    const hora = Number(partesHora[0]) || 0;
+    const minutos = Number(partesHora[1]) || 0;
+
+    // Calcular días hasta la próxima ocurrencia
+    let diasHastaProxima = diaObjetivo - diaActual;
+
+    // Si es el mismo día, verificar si ya pasó la hora
+    if (diasHastaProxima === 0) {
+      const horaActual = ahora.getHours() * 60 + ahora.getMinutes();
+      const horaClase = hora * 60 + minutos;
+      if (horaActual > horaClase) {
+        // Ya pasó, ir a la próxima semana
+        diasHastaProxima = 7;
+      }
+    } else if (diasHastaProxima < 0) {
+      // El día ya pasó esta semana, ir a la próxima
+      diasHastaProxima += 7;
+    }
+
+    const proximaFecha = new Date(ahora);
+    proximaFecha.setDate(proximaFecha.getDate() + diasHastaProxima);
+    proximaFecha.setHours(hora, minutos, 0, 0);
+
+    return proximaFecha;
+  }
+
+  /**
    * Obtiene las próximas N clases de todos los hijos del tutor
+   * Incluye tanto el sistema antiguo (Clase) como el nuevo (ClaseGrupo/InscripcionActividad)
    *
    * @param tutorId - ID del tutor autenticado
    * @param limit - Cantidad máxima de clases a retornar (default: 5)
@@ -136,8 +193,10 @@ export class TutorQueryService {
 
     const estudiantesIdsArray = estudiantesIds.map((e) => e.id);
 
-    // Obtener próximas clases
-    const clases = await this.prisma.clase.findMany({
+    // ============================================================================
+    // SISTEMA ANTIGUO: Clase + InscripcionClase
+    // ============================================================================
+    const clasesAntiguas = await this.prisma.clase.findMany({
       where: {
         fecha_hora_inicio: { gte: ahora },
         estado: 'Programada',
@@ -176,82 +235,228 @@ export class TutorQueryService {
       take: limit,
     });
 
+    // ============================================================================
+    // SISTEMA 2026: ClaseGrupo + InscripcionActividad
+    // ============================================================================
+    const inscripcionesActividad =
+      await this.prisma.inscripcionActividad.findMany({
+        where: {
+          estudiante_id: { in: estudiantesIdsArray },
+          estado: 'ACTIVA',
+          clase_grupo_id: { not: null },
+          suscripcion_familiar: {
+            estado: 'AUTHORIZED', // EstadoSuscripcionFamiliar.AUTHORIZED
+          },
+        },
+        select: {
+          id: true,
+          estado: true,
+          estudiante: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+            },
+          },
+          clase_grupo: {
+            select: {
+              id: true,
+              nombre: true,
+              dia_semana: true,
+              hora_inicio: true,
+              hora_fin: true,
+              fecha_inicio: true,
+              fecha_fin: true,
+              activo: true,
+              estado_clase: true,
+              docente: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  apellido: true,
+                },
+              },
+              producto: {
+                select: {
+                  nombre: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
     const manana = new Date(hoy);
     manana.setDate(manana.getDate() + 1);
 
-    // Usar flatMap para filtrar y mapear en un paso (narrowing correcto)
-    const clasesProximas: ClaseProxima[] = clases.flatMap((clase) => {
-      const inscripcion = clase.inscripciones[0];
-      // Skip clases sin inscripciones
-      if (!inscripcion) {
-        return [];
-      }
-      const fechaHoraInicio = new Date(clase.fecha_hora_inicio);
-      const fechaHoraFin = new Date(
-        fechaHoraInicio.getTime() + clase.duracion_minutos * 60 * 1000,
-      );
+    // Procesar clases del sistema antiguo
+    const clasesProximasAntiguas: ClaseProxima[] = clasesAntiguas.flatMap(
+      (clase) => {
+        const inscripcion = clase.inscripciones[0];
+        if (!inscripcion) return [];
 
-      // Determinar si es hoy, mañana, o mostrar fecha
-      const fechaClase = new Date(fechaHoraInicio);
-      fechaClase.setHours(0, 0, 0, 0);
+        const fechaHoraInicio = new Date(clase.fecha_hora_inicio);
+        const fechaHoraFin = new Date(
+          fechaHoraInicio.getTime() + clase.duracion_minutos * 60 * 1000,
+        );
 
-      const esHoy = fechaClase.getTime() === hoy.getTime();
-      const esManana = fechaClase.getTime() === manana.getTime();
+        const fechaClase = new Date(fechaHoraInicio);
+        fechaClase.setHours(0, 0, 0, 0);
 
-      let labelFecha: string;
-      if (esHoy) {
-        labelFecha = 'HOY';
-      } else if (esManana) {
-        labelFecha = 'MAÑANA';
-      } else {
-        labelFecha = fechaHoraInicio
-          .toLocaleDateString('es-AR', {
-            weekday: 'short',
-            day: '2-digit',
-            month: '2-digit',
-          })
-          .toUpperCase();
-      }
+        const esHoy = fechaClase.getTime() === hoy.getTime();
+        const esManana = fechaClase.getTime() === manana.getTime();
 
-      // Puede unirse si faltan menos de 10 minutos
-      const diffMinutos =
-        (fechaHoraInicio.getTime() - ahora.getTime()) / (1000 * 60);
-      const puedeUnirse =
-        diffMinutos <= 10 && diffMinutos >= -clase.duracion_minutos;
-
-      return [
-        {
-          id: clase.id,
+        const labelFecha = this.generarLabelFecha(
           fechaHoraInicio,
-          fechaHoraFin,
-          duracionMinutos: clase.duracion_minutos,
-          nombre: clase.nombre,
-          docente: {
-            id: clase.docente.id,
-            nombre: clase.docente.nombre,
-            apellido: clase.docente.apellido,
-          },
-          estudiante: {
-            id: inscripcion.estudiante.id,
-            nombre: inscripcion.estudiante.nombre,
-            apellido: inscripcion.estudiante.apellido,
-          },
-          estado: clase.estado,
-          urlReunion: undefined,
-          puedeUnirse,
           esHoy,
           esManana,
-          labelFecha,
-        },
-      ];
-    });
+        );
+
+        const diffMinutos =
+          (fechaHoraInicio.getTime() - ahora.getTime()) / (1000 * 60);
+        const puedeUnirse =
+          diffMinutos <= 10 && diffMinutos >= -clase.duracion_minutos;
+
+        return [
+          {
+            id: clase.id,
+            fechaHoraInicio,
+            fechaHoraFin,
+            duracionMinutos: clase.duracion_minutos,
+            nombre: clase.nombre,
+            docente: {
+              id: clase.docente.id,
+              nombre: clase.docente.nombre,
+              apellido: clase.docente.apellido,
+            },
+            estudiante: {
+              id: inscripcion.estudiante.id,
+              nombre: inscripcion.estudiante.nombre,
+              apellido: inscripcion.estudiante.apellido,
+            },
+            estado: clase.estado,
+            urlReunion: undefined,
+            puedeUnirse,
+            esHoy,
+            esManana,
+            labelFecha,
+          },
+        ];
+      },
+    );
+
+    // Procesar clases del sistema 2026 (ClaseGrupo recurrentes)
+    const clasesProximasNuevas: ClaseProxima[] = inscripcionesActividad.flatMap(
+      (inscripcion) => {
+        const claseGrupo = inscripcion.clase_grupo;
+        if (!claseGrupo || !claseGrupo.activo) return [];
+
+        // Verificar que el ClaseGrupo está dentro de su rango de vigencia
+        const fechaFin = new Date(claseGrupo.fecha_fin);
+        if (fechaFin < ahora) return [];
+
+        // Calcular próxima fecha de la clase recurrente
+        const fechaHoraInicio = this.calcularProximaFecha(
+          claseGrupo.dia_semana,
+          claseGrupo.hora_inicio,
+          ahora,
+        );
+
+        // Verificar que no excede la fecha de fin del grupo
+        if (fechaHoraInicio > fechaFin) return [];
+
+        // Calcular duración desde hora_inicio y hora_fin
+        const partesInicio = claseGrupo.hora_inicio.split(':');
+        const partesFin = claseGrupo.hora_fin.split(':');
+        const minutosInicio =
+          (Number(partesInicio[0]) || 0) * 60 + (Number(partesInicio[1]) || 0);
+        const minutosFin =
+          (Number(partesFin[0]) || 0) * 60 + (Number(partesFin[1]) || 0);
+        const duracionMinutos = minutosFin - minutosInicio;
+
+        const fechaHoraFin = new Date(
+          fechaHoraInicio.getTime() + duracionMinutos * 60 * 1000,
+        );
+
+        const fechaClase = new Date(fechaHoraInicio);
+        fechaClase.setHours(0, 0, 0, 0);
+
+        const esHoy = fechaClase.getTime() === hoy.getTime();
+        const esManana = fechaClase.getTime() === manana.getTime();
+
+        const labelFecha = this.generarLabelFecha(
+          fechaHoraInicio,
+          esHoy,
+          esManana,
+        );
+
+        const diffMinutos =
+          (fechaHoraInicio.getTime() - ahora.getTime()) / (1000 * 60);
+        const puedeUnirse =
+          diffMinutos <= 10 && diffMinutos >= -duracionMinutos;
+
+        // Nombre: usar producto.nombre o el nombre del grupo
+        const nombreClase =
+          claseGrupo.producto?.nombre || claseGrupo.nombre || 'Clase';
+
+        return [
+          {
+            id: `${claseGrupo.id}-${inscripcion.estudiante.id}-${fechaHoraInicio.toISOString().slice(0, 10)}`,
+            fechaHoraInicio,
+            fechaHoraFin,
+            duracionMinutos,
+            nombre: nombreClase,
+            docente: {
+              id: claseGrupo.docente.id,
+              nombre: claseGrupo.docente.nombre,
+              apellido: claseGrupo.docente.apellido,
+            },
+            estudiante: {
+              id: inscripcion.estudiante.id,
+              nombre: inscripcion.estudiante.nombre,
+              apellido: inscripcion.estudiante.apellido,
+            },
+            estado: claseGrupo.estado_clase,
+            urlReunion: undefined,
+            puedeUnirse,
+            esHoy,
+            esManana,
+            labelFecha,
+          },
+        ];
+      },
+    );
+
+    // Combinar y ordenar todas las clases por fecha
+    const todasLasClases = [...clasesProximasAntiguas, ...clasesProximasNuevas]
+      .sort((a, b) => a.fechaHoraInicio.getTime() - b.fechaHoraInicio.getTime())
+      .slice(0, limit);
 
     return {
-      clases: clasesProximas,
-      total: clasesProximas.length,
+      clases: todasLasClases,
+      total: todasLasClases.length,
     };
+  }
+
+  /**
+   * Genera el label de fecha para mostrar (HOY, MAÑANA, o fecha corta)
+   */
+  private generarLabelFecha(
+    fecha: Date,
+    esHoy: boolean,
+    esManana: boolean,
+  ): string {
+    if (esHoy) return 'HOY';
+    if (esManana) return 'MAÑANA';
+    return fecha
+      .toLocaleDateString('es-AR', {
+        weekday: 'short',
+        day: '2-digit',
+        month: '2-digit',
+      })
+      .toUpperCase();
   }
 
   // ============================================================================

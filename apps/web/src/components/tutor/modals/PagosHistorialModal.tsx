@@ -41,14 +41,6 @@ export function PagosHistorialModal({ pagosPendientes, onClose }: PagosHistorial
     }).format(amount);
   };
 
-  const formatDate = (dateStr: string): string => {
-    return new Date(dateStr).toLocaleDateString('es-AR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  };
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
@@ -124,38 +116,45 @@ export function PagosHistorialModal({ pagosPendientes, onClose }: PagosHistorial
               </div>
             ) : inscripciones && inscripciones.inscripciones.length > 0 ? (
               <div className="space-y-2">
-                {inscripciones.inscripciones.map((insc) => (
-                  <div
-                    key={insc.id}
-                    className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"
-                  >
-                    <div className="flex items-center gap-3">
-                      <StatusIcon estado={insc.estadoPago} />
-                      <div>
-                        <p className="text-sm font-medium text-white">
-                          {insc.estudiante.nombre} {insc.estudiante.apellido}
+                {inscripciones.inscripciones.map((insc) => {
+                  const estudianteNombre = insc.estudiante
+                    ? `${insc.estudiante.nombre} ${insc.estudiante.apellido}`
+                    : 'Estudiante';
+                  const productoNombre = insc.producto?.nombre ?? 'Inscripción';
+
+                  return (
+                    <div
+                      key={insc.id}
+                      className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"
+                    >
+                      <div className="flex items-center gap-3">
+                        <StatusIcon estado={insc.estadoPago} />
+                        <div>
+                          <p className="text-sm font-medium text-white">{estudianteNombre}</p>
+                          <p className="text-xs text-slate-400">
+                            {productoNombre} • {insc.periodo}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-white">
+                          {formatMoney(Number(insc.precioFinal))}
                         </p>
-                        <p className="text-xs text-slate-400">Período: {insc.periodo}</p>
+                        <p
+                          className={`text-xs ${
+                            insc.estadoPago === 'Pagado'
+                              ? 'text-emerald-400'
+                              : insc.estadoPago === 'Vencido'
+                                ? 'text-red-400'
+                                : 'text-amber-400'
+                          }`}
+                        >
+                          {insc.estadoPago}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-white">
-                        {formatMoney(Number(insc.precioFinal))}
-                      </p>
-                      <p
-                        className={`text-xs ${
-                          insc.estadoPago === 'Pagado'
-                            ? 'text-emerald-400'
-                            : insc.estadoPago === 'Vencido'
-                              ? 'text-red-400'
-                              : 'text-amber-400'
-                        }`}
-                      >
-                        {insc.estadoPago}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-8">
