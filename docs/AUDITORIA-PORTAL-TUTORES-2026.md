@@ -239,7 +239,7 @@ if (edad > 17) return { error: 'Mateatletas es para estudiantes hasta 17 años' 
 
 ## ⚠️ Issues Moderados
 
-### MOD-01: Duplicación de constantes TIERS
+### MOD-01: Duplicación de constantes TIERS ✅ PARCIAL
 
 **Ubicaciones:**
 
@@ -249,12 +249,17 @@ if (edad > 17) return { error: 'Mateatletas es para estudiantes hasta 17 años' 
 
 **Problema:** Precios y nombres de tiers duplicados en 3+ lugares. Desincronización probable.
 
-**Recomendación:** Usar `@mateatletas/contracts` para compartir constantes:
+**Solución implementada:**
 
-```typescript
-// packages/contracts/src/tiers.ts
-export const TIERS_CONFIG = { ... } as const;
-```
+Se creó `packages/contracts/src/schemas/tiers.schema.ts` con:
+
+- `TIERS_PRECIOS`: Precios de cada tier (40k, 65k, 95k)
+- `TIERS_CONFIG`: Configuración completa con nombre, descripción, gradientes y características
+- `TIERS_ARRAY`: Array ordenado para UI
+- Helpers: `obtenerPrecioTier()`, `formatTierNombre()`, `formatMonto()`
+- Schemas Zod para validación
+
+**Pendiente:** Actualizar los componentes frontend para importar desde `@mateatletas/contracts` en lugar de definir constantes locales. Este refactoring se hará en el sprint de CRIT-01 (dividir wizard).
 
 ---
 
@@ -287,40 +292,60 @@ const agregarMutation = useMutation({
 
 ---
 
-### MOD-03: Falta de error boundaries en componentes críticos
+### MOD-03: Falta de error boundaries en componentes críticos ✅ RESUELTO
 
 **Ubicación:** Todo el portal de tutores
 
 **Problema:** Un error en cualquier componente crashea toda la aplicación. No hay fallback UI.
 
-**Recomendación:**
+**Solución implementada:**
+
+Se creó `TutorErrorBoundary.tsx` con:
+
+- UI amigable con glassmorphism siguiendo el estilo del portal
+- Opciones de recuperación: "Intentar de nuevo", "Volver al inicio", "Recargar página"
+- Detalles técnicos visibles solo en desarrollo
+- Integración en `apps/web/src/app/tutor/layout.tsx`
 
 ```typescript
-// components/tutor/TutorErrorBoundary.tsx
-export function TutorErrorBoundary({ children }) {
+// apps/web/src/components/tutor/TutorErrorBoundary.tsx
+export class TutorErrorBoundary extends Component<Props, State> {
+  // Captura errores de renderizado y muestra fallback UI
+}
+
+// apps/web/src/app/tutor/layout.tsx
+function TutorLayoutContent({ children }) {
   return (
-    <ErrorBoundary
-      fallback={<TutorErrorFallback />}
-      onError={(error) => logToSentry(error)}
-    >
+    <TutorErrorBoundary>
       {children}
-    </ErrorBoundary>
+    </TutorErrorBoundary>
   );
 }
 ```
 
 ---
 
-### MOD-04: Falta de loading skeletons
+### MOD-04: Falta de loading skeletons ✅ RESUELTO
 
 **Ubicación:** `TutorDashboard.tsx`, `SuscripcionDashboard.tsx`
 
 **Problema:** Durante la carga se muestra un spinner genérico. Causa layout shift cuando cargan los datos.
 
-**Recomendación:** Usar skeletons que coincidan con el layout final:
+**Solución implementada:**
+
+Se crearon skeletons específicos en `components/tutor/skeletons/`:
+
+- `DashboardSkeleton.tsx`: Skeleton para TutorDashboard con header, stats cards, hijos y clases
+- `SuscripcionSkeleton.tsx`: Skeleton para SuscripcionDashboard con estado, inscripciones y acciones
+
+Ambos usan animación shimmer y coinciden exactamente con el layout final para evitar layout shift.
 
 ```typescript
+// TutorDashboard.tsx
 if (isLoading) return <DashboardSkeleton />;
+
+// SuscripcionDashboard.tsx
+if (isLoading) return <SuscripcionSkeleton userName={user?.nombre ?? 'Tutor'} />;
 ```
 
 ---
@@ -691,21 +716,21 @@ const TierStep = dynamic(() => import('./steps/TierStep'), { loading: () => <Ste
 
 ### Sprint 2: Refactoring (Post-launch priority)
 
-| ID      | Tarea                                | Esfuerzo | Prioridad |
-| ------- | ------------------------------------ | -------- | --------- |
-| CRIT-01 | Dividir NuevaSuscripcionWizard       | 8h       | P1        |
-| CRIT-03 | Escribir tests para módulo tutor     | 16h      | P1        |
-| MOD-01  | Unificar constantes TIERS            | 4h       | P1        |
-| MOD-07  | Sincronizar estados frontend/backend | 4h       | P1        |
+| ID      | Tarea                                | Esfuerzo | Prioridad | Estado      |
+| ------- | ------------------------------------ | -------- | --------- | ----------- |
+| CRIT-01 | Dividir NuevaSuscripcionWizard       | 8h       | P1        | Pendiente   |
+| CRIT-03 | Escribir tests para módulo tutor     | 16h      | P1        | Pendiente   |
+| MOD-01  | Unificar constantes TIERS            | 4h       | P1        | ✅ Parcial  |
+| MOD-07  | Sincronizar estados frontend/backend | 4h       | P1        | ✅ Completo |
 
 ### Sprint 3: Mejoras UX
 
-| ID     | Tarea                          | Esfuerzo | Prioridad |
-| ------ | ------------------------------ | -------- | --------- |
-| MOD-02 | Implementar optimistic updates | 8h       | P2        |
-| MOD-03 | Agregar error boundaries       | 4h       | P2        |
-| MOD-04 | Crear loading skeletons        | 6h       | P2        |
-| MOD-09 | Mejorar accesibilidad modales  | 4h       | P2        |
+| ID     | Tarea                          | Esfuerzo | Prioridad | Estado      |
+| ------ | ------------------------------ | -------- | --------- | ----------- |
+| MOD-02 | Implementar optimistic updates | 8h       | P2        | Pendiente   |
+| MOD-03 | Agregar error boundaries       | 4h       | P2        | ✅ Completo |
+| MOD-04 | Crear loading skeletons        | 6h       | P2        | ✅ Completo |
+| MOD-09 | Mejorar accesibilidad modales  | 4h       | P2        | Pendiente   |
 
 ### Backlog: Optimizaciones
 
@@ -743,7 +768,9 @@ const TierStep = dynamic(() => import('./steps/TierStep'), { loading: () => <Ste
 - [x] Validar rango de edades en wizard ✅ CRIT-08 implementado
 - [x] Sincronizar estados frontend/backend ✅ MOD-07 implementado
 - [ ] Tests de integración corriendo
-- [ ] Error boundaries implementados
+- [x] Error boundaries implementados ✅ MOD-03 implementado
+- [x] Loading skeletons implementados ✅ MOD-04 implementado
+- [x] Constantes TIERS unificadas ✅ MOD-01 parcial (contracts creado)
 - [ ] Sentry configurado
 - [ ] Feature flags activos
 - [ ] Documentación API actualizada

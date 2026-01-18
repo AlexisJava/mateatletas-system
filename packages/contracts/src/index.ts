@@ -39,5 +39,8 @@ export * from './schemas/progreso-actividad.schema';
 // Enums compartidos (sincronizados con Prisma)
 export * from './schemas/enums.schema';
 
+// Tiers de suscripción STEAM 2026
+export * from './schemas/tiers.schema';
+
 // Content system schemas (Microlecciones)
 export * from './schemas/content';

@@ -3,6 +3,7 @@
 import { ProtectedLayout } from '@/components/shared/ProtectedLayout';
 import { LoadingScreen } from '@/components/shared/LoadingScreen';
 import ModalCambioPasswordObligatorio from '@/components/auth/ModalCambioPasswordObligatorio';
+import { TutorErrorBoundary } from '@/components/tutor/TutorErrorBoundary';
 import { useAuthStore } from '@/store/auth.store';
 
 /**
@@ -28,9 +29,11 @@ function TutorLayoutContent({ children }: { children: React.ReactNode }) {
   const mustChangePassword = user?.debe_cambiar_password === true;
 
   return (
-    <div className="h-screen bg-[#020617] flex flex-col overflow-hidden" data-tutor="true">
-      <ModalCambioPasswordObligatorio isOpen={mustChangePassword} />
-      {children}
-    </div>
+    <TutorErrorBoundary>
+      <div className="h-screen bg-[#020617] flex flex-col overflow-hidden" data-tutor="true">
+        <ModalCambioPasswordObligatorio isOpen={mustChangePassword} />
+        {children}
+      </div>
+    </TutorErrorBoundary>
   );
 }

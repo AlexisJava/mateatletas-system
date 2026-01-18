@@ -6,10 +6,8 @@ import { useAuthStore } from '@/store/auth.store';
 import {
   LogOut,
   GraduationCap,
-  Loader2,
   Users,
   Calendar,
-  DollarSign,
   Bell,
   TrendingUp,
   Clock,
@@ -18,10 +16,12 @@ import {
   ChevronRight,
   Star,
   BarChart3,
-  Sparkles,
   CreditCard,
   Plus,
+  DollarSign,
+  Sparkles,
 } from 'lucide-react';
+import { DashboardSkeleton } from './skeletons/DashboardSkeleton';
 import {
   tutoresApi,
   DashboardResumenResponse,
@@ -86,17 +86,7 @@ export function TutorDashboard() {
   };
 
   if (isLoading) {
-    return (
-      <div className="h-full flex items-center justify-center bg-[#0a0a12]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="absolute inset-0 bg-cyan-500/30 blur-2xl rounded-full" />
-            <Loader2 className="relative w-14 h-14 text-cyan-400 animate-spin" />
-          </div>
-          <p className="text-slate-400 text-lg">Cargando tu dashboard...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (error) {

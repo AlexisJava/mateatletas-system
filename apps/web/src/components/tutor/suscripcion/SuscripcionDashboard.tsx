@@ -15,7 +15,6 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  Loader2,
   Star,
   Zap,
   Crown,
@@ -23,6 +22,7 @@ import {
   Video,
   Rocket,
 } from 'lucide-react';
+import { SuscripcionSkeleton } from '../skeletons/SuscripcionSkeleton';
 import {
   useSuscripcionFamiliar,
   formatTierNombre,
@@ -460,20 +460,7 @@ export function SuscripcionDashboard(): React.ReactElement {
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="h-full flex flex-col bg-[#0a0a12]">
-        <Header userName={user?.nombre ?? 'Tutor'} onBack={() => router.push('/tutor/dashboard')} />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative">
-              <div className="absolute inset-0 bg-cyan-500/30 blur-2xl rounded-full" />
-              <Loader2 className="relative w-14 h-14 text-cyan-400 animate-spin" />
-            </div>
-            <p className="text-slate-400 text-lg">Cargando tu suscripción...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <SuscripcionSkeleton userName={user?.nombre ?? 'Tutor'} />;
   }
 
   // Error state
