@@ -111,7 +111,15 @@ PROHIBIDO: Decir "listo" sin verificar funcionamiento real
 
 ## STACK TECNOLÓGICO
 
-- **Backend**: NestJS 11.0 + Prisma 6.18 + PostgreSQL 15
+### Requisitos del Entorno
+
+- **Node.js**: 22.x (obligatorio)
+- **Package Manager**: Yarn 4.10+ (usa Corepack)
+- **Docker**: Para tests de integración
+
+### Stack Principal
+
+- **Backend**: NestJS 11 + Prisma 6.18 + PostgreSQL 15
 - **Frontend**: Next.js 15.5 + React 19.1 + Tailwind 4
 - **Testing Backend**: Jest 30 con DB real (docker-compose.test.yml)
 - **Testing Frontend**: Vitest 4 + Playwright 1.56 (E2E)
@@ -121,6 +129,15 @@ PROHIBIDO: Decir "listo" sin verificar funcionamiento real
 - **Cache**: Redis (Keyv) + In-Memory fallback
 - **Queues**: BullMQ
 - **Deploy**: Railway (API) + Vercel (Web)
+
+### Pre-commit Hooks (Husky + lint-staged)
+
+Los commits fallan automáticamente si:
+
+- ESLint encuentra **cualquier warning** en `apps/api/src/` (`--max-warnings=0`)
+- Prettier encuentra archivos mal formateados
+
+Para saltear en emergencias (NO recomendado): `git commit --no-verify`
 
 ---
 
@@ -448,10 +465,10 @@ cd apps/api && npm test -- --testPathPattern="nombre-archivo"
 
 # Integration tests (requiere docker-compose.test.yml)
 docker-compose -f apps/api/docker-compose.test.yml up -d
-DATABASE_URL="postgresql://test:test_password_123@localhost:5433/mateatletas_test" npx prisma migrate deploy
-yarn test:integration
+cd apps/api && npx prisma migrate deploy  # Usa DATABASE_URL del .env de test
+yarn test:integration                      # DATABASE_URL se configura automáticamente
 
-# E2E tests
+# E2E tests (Playwright)
 yarn test:e2e             # Playwright completo
 yarn test:e2e:ui          # Con UI interactivo
 yarn test:e2e:headed      # Con browser visible
@@ -492,8 +509,16 @@ yarn workspaces foreach run build    # Build en todos
 cd apps/api
 npx prisma migrate deploy     # Aplicar migraciones (SEGURO)
 npx prisma migrate status     # Ver estado
-npx prisma studio             # UI para explorar datos
-npx prisma generate           # Regenerar cliente
+npx prisma studio             # UI para explorar datos (localhost:5555)
+npx prisma generate           # Regenerar cliente después de cambios en schema
+```
+
+### Atajos Útiles
+
+```bash
+yarn dev:stop             # Mata procesos en puertos 3000/3001
+yarn stop                 # Alias más corto
+yarn build:contracts      # Rebuild contracts (necesario si cambian DTOs)
 ```
 
 ---
@@ -650,6 +675,18 @@ docker-compose -f apps/api/docker-compose.test.yml up -d
 
 ```bash
 yarn build:contracts                   # Rebuild contracts primero
+```
+
+---
+
+## SCRIPTS DE CALIDAD
+
+Antes de hacer commit o PR, verificar:
+
+```bash
+yarn quality              # typecheck + lint:strict (rápido)
+yarn quality:full         # quality + test:api (completo)
+yarn validate             # Script de validación completa
 ```
 
 ---
