@@ -10,6 +10,7 @@ import {
   Package,
   BookOpen,
   Code2,
+  Repeat,
   type LucideIcon,
 } from 'lucide-react';
 import { ADMIN_NAV_ITEMS, type AdminNavItem } from '@/types/admin-dashboard.types';
@@ -33,6 +34,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Package,
   BookOpen,
   Code2,
+  Repeat,
 };
 
 function getIcon(iconName: string): LucideIcon {

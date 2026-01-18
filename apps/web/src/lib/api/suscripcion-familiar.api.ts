@@ -388,6 +388,76 @@ export const suscripcionFamiliarApi = {
 } as const;
 
 // ============================================================================
+// ADMIN API - Suscripciones Familiares (Role: ADMIN)
+// ============================================================================
+
+/**
+ * Filtros para listar suscripciones familiares desde admin
+ */
+export interface AdminSuscripcionesFiltros {
+  readonly estado?: EstadoSuscripcionFamiliar;
+  readonly page?: number;
+  readonly limit?: number;
+}
+
+/**
+ * Respuesta paginada de suscripciones familiares para admin
+ */
+export interface AdminSuscripcionesResponse {
+  readonly success: boolean;
+  readonly data: SuscripcionFamiliarDetalle[];
+  readonly metadata: {
+    readonly total: number;
+    readonly page: number;
+    readonly limit: number;
+    readonly totalPages: number;
+  };
+}
+
+/**
+ * Respuesta de detalle de suscripción para admin
+ */
+export interface AdminSuscripcionDetalleResponse {
+  readonly success: boolean;
+  readonly data: SuscripcionFamiliarDetalle;
+}
+
+/**
+ * API Client para Admin - Suscripciones Familiares
+ */
+export const suscripcionFamiliarAdminApi = {
+  /**
+   * GET /suscripciones/familiar/admin
+   * Lista todas las suscripciones familiares (paginado)
+   *
+   * @param filtros - Filtros opcionales (estado, página, límite)
+   * @returns Lista paginada de suscripciones
+   */
+  listarTodas: async (filtros?: AdminSuscripcionesFiltros): Promise<AdminSuscripcionesResponse> => {
+    const params = new URLSearchParams();
+    if (filtros?.estado) params.append('estado', filtros.estado);
+    if (filtros?.page) params.append('page', String(filtros.page));
+    if (filtros?.limit) params.append('limit', String(filtros.limit));
+
+    const queryString = params.toString();
+    const url = `/suscripciones/familiar/admin${queryString ? `?${queryString}` : ''}`;
+
+    return apiClient.get<AdminSuscripcionesResponse>(url);
+  },
+
+  /**
+   * GET /suscripciones/familiar/admin/:id
+   * Obtiene el detalle de una suscripción específica
+   *
+   * @param id - ID de la suscripción familiar
+   * @returns Detalle completo de la suscripción
+   */
+  obtenerDetalle: async (id: string): Promise<AdminSuscripcionDetalleResponse> => {
+    return apiClient.get<AdminSuscripcionDetalleResponse>(`/suscripciones/familiar/admin/${id}`);
+  },
+} as const;
+
+// ============================================================================
 // UTILS
 // ============================================================================
 

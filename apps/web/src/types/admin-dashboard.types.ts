@@ -47,6 +47,7 @@ export const AdminView = {
   ASIGNACIONES: 'asignaciones',
   GRUPOS: 'grupos',
   PRODUCTOS: 'productos',
+  SUSCRIPCIONES: 'suscripciones',
   CONTENIDOS: 'contenidos',
   SANDBOX: 'sandbox',
 } as const;
@@ -211,6 +212,12 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   },
   { view: AdminView.GRUPOS, label: 'Grupos', href: '/admin/grupos', icon: 'Layers' },
   { view: AdminView.PRODUCTOS, label: 'Productos', href: '/admin/productos', icon: 'Package' },
+  {
+    view: AdminView.SUSCRIPCIONES,
+    label: 'Suscripciones',
+    href: '/admin/suscripciones',
+    icon: 'Repeat',
+  },
   { view: AdminView.CONTENIDOS, label: 'Contenidos', href: '/admin/contenidos', icon: 'BookOpen' },
   { view: AdminView.SANDBOX, label: 'Sandbox', href: '/admin/sandbox', icon: 'Code2' },
 ];

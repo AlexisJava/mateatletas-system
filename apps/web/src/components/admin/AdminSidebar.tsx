@@ -11,6 +11,7 @@ import {
   Package,
   BookOpen,
   Code2,
+  Repeat,
   ChevronLeft,
   ChevronRight,
   type LucideIcon,
@@ -38,6 +39,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Package,
   BookOpen,
   Code2,
+  Repeat,
 };
 
 function getIcon(iconName: string): LucideIcon {
