@@ -11,7 +11,16 @@ export const productoSchema = z.object({
   nombre: z.string(),
   descripcion: z.string().nullable(), // Opcional en Prisma
   precio: z.coerce.number(), // Prisma Decimal viene como string
-  tipo: z.enum(['Evento', 'Digital', 'Fisico', 'Curso', 'Servicio', 'Bundle', 'Certificacion']),
+  tipo: z.enum([
+    'Club',
+    'Evento',
+    'Digital',
+    'Fisico',
+    'Curso',
+    'Servicio',
+    'Bundle',
+    'Certificacion',
+  ]),
   subcategoria: z.string().nullable().optional(),
   duracion_dias: z.coerce.number().nullable().optional(), // Campo legacy, puede no existir
   activo: z.boolean(),
