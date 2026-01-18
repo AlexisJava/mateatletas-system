@@ -1,0 +1,2326 @@
+{
+  "sistema": "Mateatletas Ecosystem",
+  "version": "2026",
+  "descripcion": "Plataforma educativa gamificada con sistema de suscripciones, clases sincrónicas/asincrónicas y múltiples portales (Admin, Docente, Tutor, Estudiante)",
+  "generado_en": "2026-01-18",
+
+  "entidades": {
+    "usuarios": [
+      {
+        "modelo": "Admin",
+        "tabla": "admins",
+        "descripcion": "Administradores del sistema con acceso completo al dashboard",
+        "campos_clave": [
+          "id",
+          "email",
+          "password_hash",
+          "nombre",
+          "apellido",
+          "roles",
+          "mfa_enabled"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Contenido",
+            "tipo": "1:N",
+            "campo": "contenidosCreados",
+            "descripcion": "Contenidos educativos creados"
+          }
+        ]
+      },
+      {
+        "modelo": "Docente",
+        "tabla": "docentes",
+        "descripcion": "Profesores que dictan clases y gestionan estudiantes",
+        "campos_clave": [
+          "id",
+          "email",
+          "password_hash",
+          "nombre",
+          "apellido",
+          "roles",
+          "estado",
+          "tipo_asignacion"
+        ],
+        "relaciones": [
+          { "hacia": "Clase", "tipo": "1:N", "campo": "clases", "descripcion": "Clases asignadas" },
+          {
+            "hacia": "ClaseGrupo",
+            "tipo": "1:N",
+            "campo": "claseGrupos",
+            "descripcion": "Grupos de clase asignados"
+          },
+          {
+            "hacia": "DocenteRuta",
+            "tipo": "1:N",
+            "campo": "rutasEspecialidad",
+            "descripcion": "Rutas de especialidad"
+          },
+          {
+            "hacia": "DocenteCasa",
+            "tipo": "1:N",
+            "campo": "casas",
+            "descripcion": "Casas asignadas (2026)"
+          },
+          {
+            "hacia": "DocenteMundo",
+            "tipo": "1:N",
+            "campo": "mundos",
+            "descripcion": "Mundos asignados (2026)"
+          },
+          {
+            "hacia": "Comision",
+            "tipo": "1:N",
+            "campo": "comisiones",
+            "descripcion": "Comisiones a cargo"
+          },
+          {
+            "hacia": "Evento",
+            "tipo": "1:N",
+            "campo": "eventos",
+            "descripcion": "Eventos del calendario"
+          },
+          {
+            "hacia": "Notificacion",
+            "tipo": "1:N",
+            "campo": "notificaciones",
+            "descripcion": "Notificaciones"
+          },
+          {
+            "hacia": "PuntoObtenido",
+            "tipo": "1:N",
+            "campo": "puntosOtorgados",
+            "descripcion": "Puntos otorgados a estudiantes"
+          },
+          {
+            "hacia": "AsignacionPlanificacion",
+            "tipo": "1:N",
+            "campo": "asignacionesPlanificacion",
+            "descripcion": "Planificaciones asignadas"
+          },
+          {
+            "hacia": "Observacion",
+            "tipo": "1:N",
+            "campo": "observaciones",
+            "descripcion": "Observaciones de estudiantes"
+          }
+        ]
+      },
+      {
+        "modelo": "Tutor",
+        "tabla": "tutores",
+        "descripcion": "Padres/tutores que gestionan estudiantes e inscripciones",
+        "campos_clave": [
+          "id",
+          "email",
+          "username",
+          "password_hash",
+          "nombre",
+          "apellido",
+          "cuil",
+          "roles"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "1:N",
+            "campo": "estudiantes",
+            "descripcion": "Estudiantes a cargo"
+          },
+          {
+            "hacia": "InscripcionClase",
+            "tipo": "1:N",
+            "campo": "inscripciones_clase",
+            "descripcion": "Inscripciones a clases"
+          },
+          {
+            "hacia": "InscripcionClaseGrupo",
+            "tipo": "1:N",
+            "campo": "inscripciones_clase_grupo",
+            "descripcion": "Inscripciones a grupos"
+          },
+          {
+            "hacia": "InscripcionMensual",
+            "tipo": "1:N",
+            "campo": "inscripciones_mensuales",
+            "descripcion": "Inscripciones mensuales"
+          },
+          {
+            "hacia": "ColoniaInscripcion",
+            "tipo": "1:N",
+            "campo": "inscripciones_colonia",
+            "descripcion": "Inscripciones a colonia"
+          },
+          {
+            "hacia": "Suscripcion",
+            "tipo": "1:N",
+            "campo": "suscripciones",
+            "descripcion": "Suscripciones legacy"
+          },
+          {
+            "hacia": "SuscripcionFamiliar",
+            "tipo": "1:1",
+            "campo": "suscripcionFamiliar",
+            "descripcion": "Suscripción familiar 2026"
+          },
+          {
+            "hacia": "PagoCurso",
+            "tipo": "1:N",
+            "campo": "pagosCurso",
+            "descripcion": "Pagos de cursos temporales"
+          }
+        ]
+      },
+      {
+        "modelo": "Estudiante",
+        "tabla": "estudiantes",
+        "descripcion": "Alumnos que utilizan la plataforma educativa gamificada",
+        "campos_clave": [
+          "id",
+          "username",
+          "email",
+          "password_hash",
+          "nombre",
+          "apellido",
+          "edad",
+          "nivelEscolar",
+          "nivel_actual",
+          "estado_acceso",
+          "plan_id"
+        ],
+        "relaciones": [
+          { "hacia": "Tutor", "tipo": "N:1", "campo": "tutor", "descripcion": "Tutor responsable" },
+          {
+            "hacia": "Casa",
+            "tipo": "N:1",
+            "campo": "casa",
+            "descripcion": "Casa por edad (QUANTUM/VERTEX/PULSAR)"
+          },
+          {
+            "hacia": "PlanSuscripcion",
+            "tipo": "N:1",
+            "campo": "plan",
+            "descripcion": "Plan de suscripción asignado"
+          },
+          {
+            "hacia": "RecursosEstudiante",
+            "tipo": "1:1",
+            "campo": "recursos",
+            "descripcion": "XP y recursos de gamificación"
+          },
+          {
+            "hacia": "RachaEstudiante",
+            "tipo": "1:1",
+            "campo": "racha",
+            "descripcion": "Racha de días activos"
+          },
+          {
+            "hacia": "LogroEstudiante",
+            "tipo": "1:N",
+            "campo": "logros_desbloqueados",
+            "descripcion": "Logros desbloqueados"
+          },
+          {
+            "hacia": "ProgresoContenido",
+            "tipo": "1:N",
+            "campo": "progresosContenido",
+            "descripcion": "Progreso en contenidos"
+          },
+          {
+            "hacia": "ProgresoClaseEstudiante",
+            "tipo": "1:N",
+            "campo": "progresosClase",
+            "descripcion": "Progreso en clases"
+          },
+          {
+            "hacia": "ProgresoTareaEstudiante",
+            "tipo": "1:N",
+            "campo": "progresosTarea",
+            "descripcion": "Progreso en tareas"
+          },
+          {
+            "hacia": "InscripcionClase",
+            "tipo": "1:N",
+            "campo": "inscripciones_clase",
+            "descripcion": "Inscripciones a clases"
+          },
+          {
+            "hacia": "InscripcionClaseGrupo",
+            "tipo": "1:N",
+            "campo": "inscripciones_clase_grupo",
+            "descripcion": "Inscripciones a grupos"
+          },
+          {
+            "hacia": "InscripcionComision",
+            "tipo": "1:N",
+            "campo": "inscripcionesComision",
+            "descripcion": "Inscripciones a comisiones"
+          },
+          {
+            "hacia": "InscripcionActividad",
+            "tipo": "1:N",
+            "campo": "inscripcionesActividad",
+            "descripcion": "Inscripciones de actividades 2026"
+          },
+          {
+            "hacia": "InscripcionMensual",
+            "tipo": "1:N",
+            "campo": "inscripciones_mensuales",
+            "descripcion": "Inscripciones mensuales"
+          },
+          {
+            "hacia": "Asistencia",
+            "tipo": "1:N",
+            "campo": "asistencias",
+            "descripcion": "Registros de asistencia"
+          },
+          {
+            "hacia": "AsistenciaClaseGrupo",
+            "tipo": "1:N",
+            "campo": "asistencias_clase_grupo",
+            "descripcion": "Asistencia en grupos"
+          },
+          {
+            "hacia": "AsistenciaLive",
+            "tipo": "1:N",
+            "campo": "asistencias_live",
+            "descripcion": "Asistencia en clases LiveKit"
+          },
+          {
+            "hacia": "AsistenciaComision",
+            "tipo": "1:N",
+            "campo": "asistencias_comision",
+            "descripcion": "Asistencia en comisiones"
+          },
+          {
+            "hacia": "Alerta",
+            "tipo": "1:N",
+            "campo": "alertas",
+            "descripcion": "Alertas administrativas"
+          },
+          {
+            "hacia": "PuntoObtenido",
+            "tipo": "1:N",
+            "campo": "puntosObtenidos",
+            "descripcion": "Puntos obtenidos"
+          },
+          {
+            "hacia": "ColoniaEstudiante",
+            "tipo": "1:N",
+            "campo": "colonia_inscripciones",
+            "descripcion": "Inscripciones colonia"
+          },
+          {
+            "hacia": "ObservacionEstudiante",
+            "tipo": "1:N",
+            "campo": "observaciones",
+            "descripcion": "Observaciones recibidas"
+          },
+          {
+            "hacia": "HistorialAccesoEstudiante",
+            "tipo": "1:N",
+            "campo": "historial_acceso",
+            "descripcion": "Historial de acceso"
+          },
+          {
+            "hacia": "ActividadFeed",
+            "tipo": "1:N",
+            "campo": "actividades_feed",
+            "descripcion": "Actividades en el feed"
+          },
+          {
+            "hacia": "ReaccionFeed",
+            "tipo": "1:N",
+            "campo": "reacciones_feed",
+            "descripcion": "Reacciones a actividades"
+          },
+          {
+            "hacia": "PagoCurso",
+            "tipo": "1:N",
+            "campo": "pagosCurso",
+            "descripcion": "Pagos de cursos"
+          }
+        ]
+      }
+    ],
+
+    "estructura_organizativa": [
+      {
+        "modelo": "Casa",
+        "tabla": "casas",
+        "descripcion": "Casas del sistema 2026 que agrupan estudiantes por edad (QUANTUM 6-9, VERTEX 10-12, PULSAR 13-17)",
+        "campos_clave": [
+          "id",
+          "tipo",
+          "nombre",
+          "edadMinima",
+          "edadMaxima",
+          "colorPrimary",
+          "puntosTotales"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "1:N",
+            "campo": "estudiantes",
+            "descripcion": "Estudiantes de la casa"
+          },
+          {
+            "hacia": "Comision",
+            "tipo": "1:N",
+            "campo": "comisiones",
+            "descripcion": "Comisiones asignadas"
+          },
+          {
+            "hacia": "ActividadFeed",
+            "tipo": "1:N",
+            "campo": "actividades_feed",
+            "descripcion": "Actividades del feed"
+          }
+        ]
+      },
+      {
+        "modelo": "Mundo",
+        "tabla": "mundos",
+        "descripcion": "Mundos STEAM 2026 - áreas de conocimiento (MATEMATICA, PROGRAMACION, CIENCIAS)",
+        "campos_clave": ["id", "tipo", "nombre", "icono", "colorPrimary", "activo"],
+        "relaciones": []
+      },
+      {
+        "modelo": "Sector",
+        "tabla": "sectores",
+        "descripcion": "Sectores de trabajo legacy (Matemática, Programación)",
+        "campos_clave": ["id", "nombre", "descripcion", "color", "activo"],
+        "relaciones": [
+          {
+            "hacia": "Clase",
+            "tipo": "1:N",
+            "campo": "clases",
+            "descripcion": "Clases del sector"
+          },
+          {
+            "hacia": "ClaseGrupo",
+            "tipo": "1:N",
+            "campo": "claseGrupos",
+            "descripcion": "Grupos del sector"
+          },
+          {
+            "hacia": "GrupoPedagogico",
+            "tipo": "1:N",
+            "campo": "grupos",
+            "descripcion": "Grupos pedagógicos"
+          },
+          {
+            "hacia": "RutaEspecialidad",
+            "tipo": "1:N",
+            "campo": "rutas",
+            "descripcion": "Rutas de especialidad"
+          },
+          {
+            "hacia": "DocenteRuta",
+            "tipo": "1:N",
+            "campo": "docentes",
+            "descripcion": "Docentes asignados"
+          },
+          {
+            "hacia": "Estudiante",
+            "tipo": "1:N",
+            "campo": "estudiantes",
+            "descripcion": "Estudiantes (legacy)"
+          }
+        ]
+      },
+      {
+        "modelo": "GrupoPedagogico",
+        "tabla": "grupos",
+        "descripcion": "Grupos pedagógicos que representan niveles educativos (B1, B2, B3, A1)",
+        "campos_clave": [
+          "id",
+          "codigo",
+          "nombre",
+          "casa_tipo",
+          "mundo_tipo",
+          "sector_id",
+          "activo"
+        ],
+        "relaciones": [
+          { "hacia": "Sector", "tipo": "N:1", "campo": "sector", "descripcion": "Sector (legacy)" },
+          {
+            "hacia": "ClaseGrupo",
+            "tipo": "1:N",
+            "campo": "claseGrupos",
+            "descripcion": "Instancias de clase"
+          },
+          {
+            "hacia": "Comision",
+            "tipo": "1:N",
+            "campo": "comisionesProducto",
+            "descripcion": "Comisiones vinculadas"
+          }
+        ]
+      },
+      {
+        "modelo": "RutaEspecialidad",
+        "tabla": "rutas_especialidad",
+        "descripcion": "Rutas de especialidad dentro de cada sector (Roblox, Scratch, etc.)",
+        "campos_clave": ["id", "nombre", "sectorId", "activo"],
+        "relaciones": [
+          { "hacia": "Sector", "tipo": "N:1", "campo": "sector", "descripcion": "Sector padre" },
+          {
+            "hacia": "DocenteRuta",
+            "tipo": "1:N",
+            "campo": "docentes",
+            "descripcion": "Docentes asignados"
+          }
+        ]
+      },
+      {
+        "modelo": "DocenteRuta",
+        "tabla": "docentes_rutas",
+        "descripcion": "Relación N:M entre docentes y rutas de especialidad",
+        "campos_clave": ["id", "docenteId", "rutaId", "sectorId"],
+        "relaciones": [
+          { "hacia": "Docente", "tipo": "N:1", "campo": "docente", "descripcion": "Docente" },
+          { "hacia": "RutaEspecialidad", "tipo": "N:1", "campo": "ruta", "descripcion": "Ruta" },
+          { "hacia": "Sector", "tipo": "N:1", "campo": "sector", "descripcion": "Sector" }
+        ]
+      },
+      {
+        "modelo": "DocenteCasa",
+        "tabla": "docentes_casas",
+        "descripcion": "Asignación de docente a una Casa (2026)",
+        "campos_clave": ["id", "docente_id", "casa_tipo"],
+        "relaciones": [
+          {
+            "hacia": "Docente",
+            "tipo": "N:1",
+            "campo": "docente",
+            "descripcion": "Docente asignado"
+          }
+        ]
+      },
+      {
+        "modelo": "DocenteMundo",
+        "tabla": "docentes_mundos",
+        "descripcion": "Asignación de docente a un Mundo (2026)",
+        "campos_clave": ["id", "docente_id", "mundo_tipo"],
+        "relaciones": [
+          {
+            "hacia": "Docente",
+            "tipo": "N:1",
+            "campo": "docente",
+            "descripcion": "Docente asignado"
+          }
+        ]
+      }
+    ],
+
+    "clases_y_grupos": [
+      {
+        "modelo": "Clase",
+        "tabla": "clases",
+        "descripcion": "Clases programadas en vivo por un admin",
+        "campos_clave": [
+          "id",
+          "docente_id",
+          "producto_id",
+          "sector_id",
+          "nombre",
+          "fecha_hora_inicio",
+          "duracion_minutos",
+          "estado",
+          "cupos_maximo"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Docente",
+            "tipo": "N:1",
+            "campo": "docente",
+            "descripcion": "Docente asignado"
+          },
+          {
+            "hacia": "Producto",
+            "tipo": "N:1",
+            "campo": "producto",
+            "descripcion": "Producto asociado"
+          },
+          { "hacia": "Sector", "tipo": "N:1", "campo": "sector", "descripcion": "Sector" },
+          {
+            "hacia": "InscripcionClase",
+            "tipo": "1:N",
+            "campo": "inscripciones",
+            "descripcion": "Inscripciones"
+          },
+          {
+            "hacia": "Asistencia",
+            "tipo": "1:N",
+            "campo": "asistencias",
+            "descripcion": "Registros de asistencia"
+          },
+          {
+            "hacia": "Alerta",
+            "tipo": "1:N",
+            "campo": "alertas",
+            "descripcion": "Alertas generadas"
+          },
+          {
+            "hacia": "Evento",
+            "tipo": "1:N",
+            "campo": "eventos",
+            "descripcion": "Eventos del calendario"
+          },
+          {
+            "hacia": "PuntoObtenido",
+            "tipo": "1:N",
+            "campo": "puntosObtenidos",
+            "descripcion": "Puntos otorgados"
+          }
+        ]
+      },
+      {
+        "modelo": "ClaseGrupo",
+        "tabla": "clase_grupos",
+        "descripcion": "Grupos de clases recurrentes semanales (comisiones)",
+        "campos_clave": [
+          "id",
+          "codigo",
+          "nombre",
+          "tipo",
+          "grupo_id",
+          "docente_id",
+          "producto_id",
+          "dia_semana",
+          "hora_inicio",
+          "hora_fin",
+          "anio_lectivo",
+          "cupo_maximo",
+          "estado_clase",
+          "livekit_room_name"
+        ],
+        "relaciones": [
+          {
+            "hacia": "GrupoPedagogico",
+            "tipo": "N:1",
+            "campo": "grupo",
+            "descripcion": "Grupo pedagógico"
+          },
+          {
+            "hacia": "Docente",
+            "tipo": "N:1",
+            "campo": "docente",
+            "descripcion": "Docente asignado"
+          },
+          { "hacia": "Sector", "tipo": "N:1", "campo": "sector", "descripcion": "Sector" },
+          {
+            "hacia": "Producto",
+            "tipo": "N:1",
+            "campo": "producto",
+            "descripcion": "Producto (Club)"
+          },
+          {
+            "hacia": "InscripcionClaseGrupo",
+            "tipo": "1:N",
+            "campo": "inscripciones",
+            "descripcion": "Inscripciones"
+          },
+          {
+            "hacia": "AsistenciaClaseGrupo",
+            "tipo": "1:N",
+            "campo": "asistencias",
+            "descripcion": "Asistencias"
+          },
+          {
+            "hacia": "AsistenciaLive",
+            "tipo": "1:N",
+            "campo": "asistencias_live",
+            "descripcion": "Asistencias LiveKit"
+          },
+          {
+            "hacia": "AsignacionPlanificacion",
+            "tipo": "1:N",
+            "campo": "asignacionesPlanificacion",
+            "descripcion": "Planificaciones asignadas"
+          },
+          {
+            "hacia": "InscripcionActividad",
+            "tipo": "1:N",
+            "campo": "inscripcionesActividad",
+            "descripcion": "Inscripciones 2026"
+          }
+        ]
+      },
+      {
+        "modelo": "InscripcionClase",
+        "tabla": "inscripciones_clase",
+        "descripcion": "Inscripción de estudiante a una clase específica",
+        "campos_clave": ["id", "clase_id", "estudiante_id", "tutor_id", "fecha_inscripcion"],
+        "relaciones": [
+          { "hacia": "Clase", "tipo": "N:1", "campo": "clase", "descripcion": "Clase" },
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          { "hacia": "Tutor", "tipo": "N:1", "campo": "tutor", "descripcion": "Tutor responsable" }
+        ]
+      },
+      {
+        "modelo": "InscripcionClaseGrupo",
+        "tabla": "inscripciones_clase_grupo",
+        "descripcion": "Inscripción de estudiante a un grupo de clases",
+        "campos_clave": ["id", "clase_grupo_id", "estudiante_id", "tutor_id", "tipo_acceso"],
+        "relaciones": [
+          {
+            "hacia": "ClaseGrupo",
+            "tipo": "N:1",
+            "campo": "claseGrupo",
+            "descripcion": "Grupo de clase"
+          },
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          { "hacia": "Tutor", "tipo": "N:1", "campo": "tutor", "descripcion": "Tutor" }
+        ]
+      },
+      {
+        "modelo": "Asistencia",
+        "tabla": "asistencias",
+        "descripcion": "Registro de asistencia a clases individuales",
+        "campos_clave": ["id", "clase_id", "estudiante_id", "estado", "puntos_otorgados"],
+        "relaciones": [
+          { "hacia": "Clase", "tipo": "N:1", "campo": "clase", "descripcion": "Clase" },
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          }
+        ]
+      },
+      {
+        "modelo": "AsistenciaClaseGrupo",
+        "tabla": "asistencias_clase_grupo",
+        "descripcion": "Registro de asistencia por sesión en grupos de clase",
+        "campos_clave": ["id", "clase_grupo_id", "estudiante_id", "fecha", "estado"],
+        "relaciones": [
+          { "hacia": "ClaseGrupo", "tipo": "N:1", "campo": "claseGrupo", "descripcion": "Grupo" },
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          }
+        ]
+      },
+      {
+        "modelo": "AsistenciaLive",
+        "tabla": "asistencias_live",
+        "descripcion": "Registro de asistencia en tiempo real en clases LiveKit",
+        "campos_clave": [
+          "id",
+          "clase_grupo_id",
+          "estudiante_id",
+          "entro_en",
+          "salio_en",
+          "duracion_minutos"
+        ],
+        "relaciones": [
+          { "hacia": "ClaseGrupo", "tipo": "N:1", "campo": "claseGrupo", "descripcion": "Grupo" },
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          }
+        ]
+      }
+    ],
+
+    "productos_y_comisiones": [
+      {
+        "modelo": "Producto",
+        "tabla": "productos",
+        "descripcion": "Productos del catálogo (Club, Evento, Digital, Curso, etc.)",
+        "campos_clave": [
+          "id",
+          "nombre",
+          "tipo",
+          "precio",
+          "casa",
+          "mundo",
+          "subtipo_mundo",
+          "nivel_olimpiada",
+          "edad_minima",
+          "edad_maxima",
+          "activo"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Clase",
+            "tipo": "1:N",
+            "campo": "clases",
+            "descripcion": "Clases del producto"
+          },
+          {
+            "hacia": "ClaseGrupo",
+            "tipo": "1:N",
+            "campo": "claseGrupos",
+            "descripcion": "Grupos del producto"
+          },
+          {
+            "hacia": "Comision",
+            "tipo": "1:N",
+            "campo": "comisiones",
+            "descripcion": "Comisiones"
+          },
+          {
+            "hacia": "InscripcionMensual",
+            "tipo": "1:N",
+            "campo": "inscripciones_mensuales",
+            "descripcion": "Inscripciones mensuales"
+          },
+          {
+            "hacia": "InscripcionActividad",
+            "tipo": "1:N",
+            "campo": "inscripcionesActividad",
+            "descripcion": "Inscripciones 2026"
+          },
+          {
+            "hacia": "PagoCurso",
+            "tipo": "1:N",
+            "campo": "pagosCurso",
+            "descripcion": "Pagos de cursos"
+          }
+        ]
+      },
+      {
+        "modelo": "Comision",
+        "tabla": "comisiones",
+        "descripcion": "Turnos/grupos operativos de un producto con horario y cupo específico",
+        "campos_clave": [
+          "id",
+          "nombre",
+          "producto_id",
+          "casa_id",
+          "grupo_id",
+          "docente_id",
+          "cupo_maximo",
+          "horario",
+          "modalidad",
+          "estado_clase",
+          "livekit_room_name"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Producto",
+            "tipo": "N:1",
+            "campo": "producto",
+            "descripcion": "Producto padre"
+          },
+          { "hacia": "Casa", "tipo": "N:1", "campo": "casa", "descripcion": "Casa asignada" },
+          {
+            "hacia": "GrupoPedagogico",
+            "tipo": "N:1",
+            "campo": "grupo",
+            "descripcion": "Grupo pedagógico"
+          },
+          {
+            "hacia": "Docente",
+            "tipo": "N:1",
+            "campo": "docente",
+            "descripcion": "Docente a cargo"
+          },
+          {
+            "hacia": "InscripcionComision",
+            "tipo": "1:N",
+            "campo": "inscripciones",
+            "descripcion": "Inscripciones"
+          },
+          {
+            "hacia": "AsistenciaComision",
+            "tipo": "1:N",
+            "campo": "asistencias",
+            "descripcion": "Asistencias"
+          },
+          {
+            "hacia": "Observacion",
+            "tipo": "1:N",
+            "campo": "observaciones",
+            "descripcion": "Observaciones"
+          },
+          {
+            "hacia": "InscripcionActividad",
+            "tipo": "1:N",
+            "campo": "inscripcionesActividad",
+            "descripcion": "Inscripciones 2026"
+          },
+          {
+            "hacia": "PagoCurso",
+            "tipo": "1:N",
+            "campo": "pagosCurso",
+            "descripcion": "Pagos de cursos"
+          }
+        ]
+      },
+      {
+        "modelo": "InscripcionComision",
+        "tabla": "inscripciones_comision",
+        "descripcion": "Inscripción de estudiante a una comisión de producto",
+        "campos_clave": ["id", "comision_id", "estudiante_id", "estado"],
+        "relaciones": [
+          { "hacia": "Comision", "tipo": "N:1", "campo": "comision", "descripcion": "Comisión" },
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          }
+        ]
+      },
+      {
+        "modelo": "AsistenciaComision",
+        "tabla": "asistencia_comision",
+        "descripcion": "Registro de asistencia en comisiones por sesión",
+        "campos_clave": ["id", "comision_id", "estudiante_id", "fecha", "estado"],
+        "relaciones": [
+          { "hacia": "Comision", "tipo": "N:1", "campo": "comision", "descripcion": "Comisión" },
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          }
+        ]
+      }
+    ],
+
+    "contenido_educativo": [
+      {
+        "modelo": "Contenido",
+        "tabla": "contenidos",
+        "descripcion": "Contenido educativo (lección) creado en el Sandbox",
+        "campos_clave": ["id", "titulo", "casaTipo", "mundoTipo", "estado", "tipo", "creadorId"],
+        "relaciones": [
+          { "hacia": "Admin", "tipo": "N:1", "campo": "creador", "descripcion": "Admin creador" },
+          {
+            "hacia": "NodoContenido",
+            "tipo": "1:N",
+            "campo": "nodos",
+            "descripcion": "Nodos del árbol"
+          },
+          {
+            "hacia": "ProgresoContenido",
+            "tipo": "1:N",
+            "campo": "progresos",
+            "descripcion": "Progresos de estudiantes"
+          },
+          {
+            "hacia": "ClasePlanificacion",
+            "tipo": "1:N",
+            "campo": "clasesTeoria",
+            "descripcion": "Clases como teoría"
+          },
+          {
+            "hacia": "ClasePlanificacion",
+            "tipo": "1:N",
+            "campo": "clasesPractica",
+            "descripcion": "Clases como práctica"
+          },
+          {
+            "hacia": "TareaClase",
+            "tipo": "1:N",
+            "campo": "tareasClase",
+            "descripcion": "Tareas de clase"
+          }
+        ]
+      },
+      {
+        "modelo": "NodoContenido",
+        "tabla": "nodos_contenido",
+        "descripcion": "Nodo jerárquico dentro de un contenido (árbol)",
+        "campos_clave": ["id", "contenidoId", "parentId", "titulo", "orden", "contenidoJson"],
+        "relaciones": [
+          {
+            "hacia": "Contenido",
+            "tipo": "N:1",
+            "campo": "contenido",
+            "descripcion": "Contenido raíz"
+          },
+          {
+            "hacia": "NodoContenido",
+            "tipo": "N:1",
+            "campo": "parent",
+            "descripcion": "Nodo padre"
+          },
+          {
+            "hacia": "NodoContenido",
+            "tipo": "1:N",
+            "campo": "hijos",
+            "descripcion": "Nodos hijos"
+          },
+          {
+            "hacia": "ProgresoContenido",
+            "tipo": "1:N",
+            "campo": "progresosEnNodo",
+            "descripcion": "Progresos apuntando aquí"
+          }
+        ]
+      },
+      {
+        "modelo": "ProgresoContenido",
+        "tabla": "progreso_contenidos",
+        "descripcion": "Progreso del estudiante en un contenido",
+        "campos_clave": [
+          "id",
+          "estudianteId",
+          "contenidoId",
+          "nodoActualId",
+          "completado",
+          "tiempoTotalSegundos"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          { "hacia": "Contenido", "tipo": "N:1", "campo": "contenido", "descripcion": "Contenido" },
+          {
+            "hacia": "NodoContenido",
+            "tipo": "N:1",
+            "campo": "nodoActual",
+            "descripcion": "Último nodo visitado"
+          }
+        ]
+      }
+    ],
+
+    "planificaciones": [
+      {
+        "modelo": "Planificacion",
+        "tabla": "planificaciones",
+        "descripcion": "Curso completo (ej: 16 clases de Scratch)",
+        "campos_clave": ["id", "titulo", "cantidad_clases", "casa_tipo", "mundo_tipo", "estado"],
+        "relaciones": [
+          {
+            "hacia": "ClasePlanificacion",
+            "tipo": "1:N",
+            "campo": "clases",
+            "descripcion": "Clases del curso"
+          },
+          {
+            "hacia": "AsignacionPlanificacion",
+            "tipo": "1:N",
+            "campo": "asignaciones",
+            "descripcion": "Asignaciones a grupos"
+          }
+        ]
+      },
+      {
+        "modelo": "ClasePlanificacion",
+        "tabla": "clases_planificacion",
+        "descripcion": "Clase dentro de una planificación",
+        "campos_clave": ["id", "planificacion_id", "numero", "titulo", "teoria_id", "practica_id"],
+        "relaciones": [
+          {
+            "hacia": "Planificacion",
+            "tipo": "N:1",
+            "campo": "planificacion",
+            "descripcion": "Planificación padre"
+          },
+          {
+            "hacia": "Contenido",
+            "tipo": "N:1",
+            "campo": "teoria",
+            "descripcion": "Contenido de teoría"
+          },
+          {
+            "hacia": "Contenido",
+            "tipo": "N:1",
+            "campo": "practica",
+            "descripcion": "Contenido de práctica"
+          },
+          {
+            "hacia": "TareaClase",
+            "tipo": "1:N",
+            "campo": "tareas",
+            "descripcion": "Tareas de la clase"
+          },
+          {
+            "hacia": "EstadoClaseGrupo",
+            "tipo": "1:N",
+            "campo": "estadosClase",
+            "descripcion": "Estados por grupo"
+          },
+          {
+            "hacia": "ProgresoClaseEstudiante",
+            "tipo": "1:N",
+            "campo": "progresosClase",
+            "descripcion": "Progresos de estudiantes"
+          }
+        ]
+      },
+      {
+        "modelo": "TareaClase",
+        "tabla": "tareas_clase",
+        "descripcion": "Tarea asociada a una clase (contenido asignable)",
+        "campos_clave": ["id", "clase_id", "contenido_id", "orden", "obligatoria"],
+        "relaciones": [
+          {
+            "hacia": "ClasePlanificacion",
+            "tipo": "N:1",
+            "campo": "clase",
+            "descripcion": "Clase padre"
+          },
+          {
+            "hacia": "Contenido",
+            "tipo": "N:1",
+            "campo": "contenido",
+            "descripcion": "Contenido de la tarea"
+          },
+          {
+            "hacia": "TareaAsignada",
+            "tipo": "1:N",
+            "campo": "asignaciones",
+            "descripcion": "Asignaciones a grupos"
+          }
+        ]
+      },
+      {
+        "modelo": "AsignacionPlanificacion",
+        "tabla": "asignaciones_planificacion",
+        "descripcion": "Asignación de planificación a un ClaseGrupo",
+        "campos_clave": [
+          "id",
+          "planificacion_id",
+          "clase_grupo_id",
+          "docente_id",
+          "fecha_inicio",
+          "activa"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Planificacion",
+            "tipo": "N:1",
+            "campo": "planificacion",
+            "descripcion": "Planificación"
+          },
+          {
+            "hacia": "ClaseGrupo",
+            "tipo": "N:1",
+            "campo": "claseGrupo",
+            "descripcion": "Grupo de clase"
+          },
+          {
+            "hacia": "Docente",
+            "tipo": "N:1",
+            "campo": "docente",
+            "descripcion": "Docente responsable"
+          },
+          {
+            "hacia": "EstadoClaseGrupo",
+            "tipo": "1:N",
+            "campo": "estadosClases",
+            "descripcion": "Estados de clases"
+          },
+          {
+            "hacia": "TareaAsignada",
+            "tipo": "1:N",
+            "campo": "tareasAsignadas",
+            "descripcion": "Tareas asignadas"
+          }
+        ]
+      },
+      {
+        "modelo": "EstadoClaseGrupo",
+        "tabla": "estados_clase_grupo",
+        "descripcion": "Estado de una clase para un grupo específico",
+        "campos_clave": ["id", "asignacion_id", "clase_id", "teoria_activa", "practica_activa"],
+        "relaciones": [
+          {
+            "hacia": "AsignacionPlanificacion",
+            "tipo": "N:1",
+            "campo": "asignacion",
+            "descripcion": "Asignación"
+          },
+          { "hacia": "ClasePlanificacion", "tipo": "N:1", "campo": "clase", "descripcion": "Clase" }
+        ]
+      },
+      {
+        "modelo": "TareaAsignada",
+        "tabla": "tareas_asignadas",
+        "descripcion": "Instancia de TareaClase para una asignación específica",
+        "campos_clave": ["id", "asignacion_id", "tarea_clase_id", "fecha_limite", "activa"],
+        "relaciones": [
+          {
+            "hacia": "AsignacionPlanificacion",
+            "tipo": "N:1",
+            "campo": "asignacion",
+            "descripcion": "Asignación"
+          },
+          {
+            "hacia": "TareaClase",
+            "tipo": "N:1",
+            "campo": "tareaClase",
+            "descripcion": "Tarea de clase"
+          },
+          {
+            "hacia": "ProgresoTareaEstudiante",
+            "tipo": "1:N",
+            "campo": "progresos",
+            "descripcion": "Progresos de estudiantes"
+          }
+        ]
+      },
+      {
+        "modelo": "ProgresoClaseEstudiante",
+        "tabla": "progresos_clase_estudiante",
+        "descripcion": "Progreso de estudiante en una clase (teoría + práctica)",
+        "campos_clave": [
+          "id",
+          "estudiante_id",
+          "clase_id",
+          "teoria_completada",
+          "practica_completada"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          { "hacia": "ClasePlanificacion", "tipo": "N:1", "campo": "clase", "descripcion": "Clase" }
+        ]
+      },
+      {
+        "modelo": "ProgresoTareaEstudiante",
+        "tabla": "progresos_tarea_estudiante",
+        "descripcion": "Progreso de estudiante en una tarea asignada",
+        "campos_clave": ["id", "estudiante_id", "tarea_asignada_id", "estado", "calificacion"],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          {
+            "hacia": "TareaAsignada",
+            "tipo": "N:1",
+            "campo": "tareaAsignada",
+            "descripcion": "Tarea asignada"
+          }
+        ]
+      }
+    ],
+
+    "gamificacion": [
+      {
+        "modelo": "RecursosEstudiante",
+        "tabla": "recursos_estudiante",
+        "descripcion": "XP y progresión del estudiante",
+        "campos_clave": ["id", "estudiante_id", "xp_total"],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "1:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          {
+            "hacia": "TransaccionRecurso",
+            "tipo": "1:N",
+            "campo": "transacciones",
+            "descripcion": "Historial de cambios"
+          }
+        ]
+      },
+      {
+        "modelo": "TransaccionRecurso",
+        "tabla": "transacciones_recurso",
+        "descripcion": "Transacciones de XP (historial de cambios)",
+        "campos_clave": ["id", "recursos_estudiante_id", "tipo_recurso", "cantidad", "razon"],
+        "relaciones": [
+          {
+            "hacia": "RecursosEstudiante",
+            "tipo": "N:1",
+            "campo": "recursosEstudiante",
+            "descripcion": "Recursos del estudiante"
+          }
+        ]
+      },
+      {
+        "modelo": "Logro",
+        "tabla": "logros_gamificacion",
+        "descripcion": "Definiciones de logros (67 logros con criterios automáticos)",
+        "campos_clave": [
+          "id",
+          "codigo",
+          "nombre",
+          "categoria",
+          "xp_recompensa",
+          "criterio_tipo",
+          "criterio_valor",
+          "rareza"
+        ],
+        "relaciones": [
+          {
+            "hacia": "LogroEstudiante",
+            "tipo": "1:N",
+            "campo": "logros_estudiantes",
+            "descripcion": "Desbloqueos"
+          }
+        ]
+      },
+      {
+        "modelo": "LogroEstudiante",
+        "tabla": "logros_estudiantes_gamificacion",
+        "descripcion": "Logros desbloqueados por estudiantes",
+        "campos_clave": ["id", "estudiante_id", "logro_id", "fecha_desbloqueo", "visto"],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          { "hacia": "Logro", "tipo": "N:1", "campo": "logro", "descripcion": "Logro" }
+        ]
+      },
+      {
+        "modelo": "RachaEstudiante",
+        "tabla": "rachas_estudiantes",
+        "descripcion": "Racha de días activos del estudiante",
+        "campos_clave": ["id", "estudiante_id", "racha_actual", "racha_maxima", "ultima_actividad"],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "1:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          }
+        ]
+      },
+      {
+        "modelo": "PuntoObtenido",
+        "tabla": "puntos_obtenidos",
+        "descripcion": "Registro transaccional de puntos obtenidos",
+        "campos_clave": ["id", "estudiante_id", "docente_id", "clase_id", "tipo_accion", "puntos"],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          {
+            "hacia": "Docente",
+            "tipo": "N:1",
+            "campo": "docente",
+            "descripcion": "Docente que otorgó"
+          },
+          { "hacia": "Clase", "tipo": "N:1", "campo": "clase", "descripcion": "Clase" }
+        ]
+      },
+      {
+        "modelo": "ActividadFeed",
+        "tabla": "actividad_feed",
+        "descripcion": "Feed de actividades de estudiantes para gamificación social",
+        "campos_clave": ["id", "estudiante_id", "tipo", "mensaje", "xp_ganado", "casa_id"],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          { "hacia": "Casa", "tipo": "N:1", "campo": "casa", "descripcion": "Casa" },
+          {
+            "hacia": "ReaccionFeed",
+            "tipo": "1:N",
+            "campo": "reacciones",
+            "descripcion": "Reacciones"
+          }
+        ]
+      },
+      {
+        "modelo": "ReaccionFeed",
+        "tabla": "reacciones_feed",
+        "descripcion": "Reacciones a items del feed (emojis)",
+        "campos_clave": ["id", "actividad_id", "estudiante_id", "emoji"],
+        "relaciones": [
+          {
+            "hacia": "ActividadFeed",
+            "tipo": "N:1",
+            "campo": "actividad",
+            "descripcion": "Actividad"
+          },
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante que reaccionó"
+          }
+        ]
+      }
+    ],
+
+    "suscripciones_y_pagos": [
+      {
+        "modelo": "Tier",
+        "tabla": "tiers",
+        "descripcion": "Tiers de suscripción STEAM 2026 (LIBROS, ASINCRONICO, SINCRONICO)",
+        "campos_clave": [
+          "id",
+          "nombre",
+          "precio_mensual",
+          "mundos_async",
+          "mundos_sync",
+          "tiene_docente"
+        ],
+        "relaciones": []
+      },
+      {
+        "modelo": "PlanSuscripcion",
+        "tabla": "planes_suscripcion",
+        "descripcion": "Planes de suscripción disponibles con precios y configuración",
+        "campos_clave": ["id", "nombre", "precio_base", "intervalo", "activo"],
+        "relaciones": [
+          {
+            "hacia": "Suscripcion",
+            "tipo": "1:N",
+            "campo": "suscripciones",
+            "descripcion": "Suscripciones de tutores"
+          },
+          {
+            "hacia": "Estudiante",
+            "tipo": "1:N",
+            "campo": "estudiantes",
+            "descripcion": "Estudiantes con este plan"
+          }
+        ]
+      },
+      {
+        "modelo": "Suscripcion",
+        "tabla": "suscripciones",
+        "descripcion": "Suscripción activa de un tutor (legacy PreApproval)",
+        "campos_clave": [
+          "id",
+          "tutor_id",
+          "plan_id",
+          "mp_preapproval_id",
+          "estado",
+          "precio_final"
+        ],
+        "relaciones": [
+          { "hacia": "Tutor", "tipo": "N:1", "campo": "tutor", "descripcion": "Tutor propietario" },
+          {
+            "hacia": "PlanSuscripcion",
+            "tipo": "N:1",
+            "campo": "plan",
+            "descripcion": "Plan de suscripción"
+          },
+          {
+            "hacia": "PagoSuscripcion",
+            "tipo": "1:N",
+            "campo": "pagos",
+            "descripcion": "Pagos realizados"
+          },
+          {
+            "hacia": "HistorialEstadoSuscripcion",
+            "tipo": "1:N",
+            "campo": "historial",
+            "descripcion": "Historial de estados"
+          }
+        ]
+      },
+      {
+        "modelo": "PagoSuscripcion",
+        "tabla": "pagos_suscripcion",
+        "descripcion": "Registro de pagos de suscripción",
+        "campos_clave": [
+          "id",
+          "suscripcion_id",
+          "mp_payment_id",
+          "mp_status",
+          "monto",
+          "periodo_inicio",
+          "periodo_fin"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Suscripcion",
+            "tipo": "N:1",
+            "campo": "suscripcion",
+            "descripcion": "Suscripción"
+          }
+        ]
+      },
+      {
+        "modelo": "HistorialEstadoSuscripcion",
+        "tabla": "historial_estado_suscripcion",
+        "descripcion": "Historial de cambios de estado de suscripción",
+        "campos_clave": ["id", "suscripcion_id", "estado_anterior", "estado_nuevo", "motivo"],
+        "relaciones": [
+          {
+            "hacia": "Suscripcion",
+            "tipo": "N:1",
+            "campo": "suscripcion",
+            "descripcion": "Suscripción"
+          }
+        ]
+      },
+      {
+        "modelo": "SuscripcionFamiliar",
+        "tabla": "suscripciones_familiares",
+        "descripcion": "Suscripción familiar 2026 (un PreApproval por familia)",
+        "campos_clave": ["id", "tutor_id", "preapproval_id", "estado", "tier", "monto_mensual"],
+        "relaciones": [
+          { "hacia": "Tutor", "tipo": "1:1", "campo": "tutor", "descripcion": "Tutor titular" },
+          {
+            "hacia": "InscripcionActividad",
+            "tipo": "1:N",
+            "campo": "inscripciones",
+            "descripcion": "Inscripciones de actividades"
+          },
+          {
+            "hacia": "CambioInscripcion",
+            "tipo": "1:N",
+            "campo": "historial_cambios",
+            "descripcion": "Historial de cambios"
+          }
+        ]
+      },
+      {
+        "modelo": "InscripcionActividad",
+        "tabla": "inscripciones_actividad",
+        "descripcion": "Inscripción de estudiante a actividad (2026)",
+        "campos_clave": [
+          "id",
+          "suscripcion_familiar_id",
+          "estudiante_id",
+          "producto_id",
+          "clase_grupo_id",
+          "comision_id",
+          "tier",
+          "estado"
+        ],
+        "relaciones": [
+          {
+            "hacia": "SuscripcionFamiliar",
+            "tipo": "N:1",
+            "campo": "suscripcion_familiar",
+            "descripcion": "Suscripción familiar"
+          },
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          { "hacia": "Producto", "tipo": "N:1", "campo": "producto", "descripcion": "Producto" },
+          {
+            "hacia": "ClaseGrupo",
+            "tipo": "N:1",
+            "campo": "clase_grupo",
+            "descripcion": "Grupo de clase"
+          },
+          { "hacia": "Comision", "tipo": "N:1", "campo": "comision", "descripcion": "Comisión" }
+        ]
+      },
+      {
+        "modelo": "CambioInscripcion",
+        "tabla": "cambios_inscripcion",
+        "descripcion": "Historial de cambios en inscripciones",
+        "campos_clave": [
+          "id",
+          "suscripcion_familiar_id",
+          "tipo",
+          "aplica_desde",
+          "monto_anterior",
+          "monto_nuevo"
+        ],
+        "relaciones": [
+          {
+            "hacia": "SuscripcionFamiliar",
+            "tipo": "N:1",
+            "campo": "suscripcion_familiar",
+            "descripcion": "Suscripción familiar"
+          }
+        ]
+      },
+      {
+        "modelo": "PagoCurso",
+        "tabla": "pagos_curso",
+        "descripcion": "Pago de curso temporal (contado o cuotas)",
+        "campos_clave": [
+          "id",
+          "tutor_id",
+          "estudiante_id",
+          "comision_id",
+          "producto_id",
+          "modalidad",
+          "monto_total",
+          "estado"
+        ],
+        "relaciones": [
+          { "hacia": "Tutor", "tipo": "N:1", "campo": "tutor", "descripcion": "Tutor" },
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          { "hacia": "Comision", "tipo": "N:1", "campo": "comision", "descripcion": "Comisión" },
+          { "hacia": "Producto", "tipo": "N:1", "campo": "producto", "descripcion": "Producto" }
+        ]
+      },
+      {
+        "modelo": "InscripcionMensual",
+        "tabla": "inscripciones_mensuales",
+        "descripcion": "Inscripción mensual de estudiante a producto con facturación",
+        "campos_clave": [
+          "id",
+          "estudiante_id",
+          "producto_id",
+          "tutor_id",
+          "periodo",
+          "precio_final",
+          "estado_pago"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          { "hacia": "Producto", "tipo": "N:1", "campo": "producto", "descripcion": "Producto" },
+          { "hacia": "Tutor", "tipo": "N:1", "campo": "tutor", "descripcion": "Tutor" }
+        ]
+      },
+      {
+        "modelo": "ConfiguracionPrecios",
+        "tabla": "configuracion_precios",
+        "descripcion": "Configuración global de precios (singleton)",
+        "campos_clave": [
+          "id",
+          "precio_steam_libros",
+          "precio_steam_asincronico",
+          "precio_steam_sincronico",
+          "descuento_segundo_hermano"
+        ],
+        "relaciones": [
+          {
+            "hacia": "HistorialCambioPrecios",
+            "tipo": "1:N",
+            "campo": "historial",
+            "descripcion": "Historial de cambios"
+          }
+        ]
+      },
+      {
+        "modelo": "HistorialCambioPrecios",
+        "tabla": "historial_cambio_precios",
+        "descripcion": "Historial de cambios en configuración de precios",
+        "campos_clave": [
+          "id",
+          "configuracion_id",
+          "valores_anteriores",
+          "valores_nuevos",
+          "admin_id"
+        ],
+        "relaciones": [
+          {
+            "hacia": "ConfiguracionPrecios",
+            "tipo": "N:1",
+            "campo": "configuracion",
+            "descripcion": "Configuración"
+          }
+        ]
+      }
+    ],
+
+    "colonia_verano": [
+      {
+        "modelo": "ColoniaInscripcion",
+        "tabla": "colonia_inscripciones",
+        "descripcion": "Inscripción a la Colonia de Verano 2026",
+        "campos_clave": ["id", "tutor_id", "estado", "descuento_aplicado", "total_mensual"],
+        "relaciones": [
+          { "hacia": "Tutor", "tipo": "N:1", "campo": "tutor", "descripcion": "Tutor" },
+          {
+            "hacia": "ColoniaEstudiante",
+            "tipo": "1:N",
+            "campo": "estudiantes",
+            "descripcion": "Estudiantes inscritos"
+          },
+          {
+            "hacia": "ColoniaPago",
+            "tipo": "1:N",
+            "campo": "pagos",
+            "descripcion": "Pagos mensuales"
+          }
+        ]
+      },
+      {
+        "modelo": "ColoniaEstudiante",
+        "tabla": "colonia_estudiantes",
+        "descripcion": "Estudiante inscrito en colonia",
+        "campos_clave": ["id", "inscripcion_id", "estudiante_id", "nombre", "edad", "pin"],
+        "relaciones": [
+          {
+            "hacia": "ColoniaInscripcion",
+            "tipo": "N:1",
+            "campo": "inscripcion",
+            "descripcion": "Inscripción"
+          },
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          {
+            "hacia": "ColoniaEstudianteCurso",
+            "tipo": "1:N",
+            "campo": "cursos",
+            "descripcion": "Cursos seleccionados"
+          }
+        ]
+      },
+      {
+        "modelo": "ColoniaEstudianteCurso",
+        "tabla": "colonia_estudiante_cursos",
+        "descripcion": "Curso seleccionado por estudiante en colonia",
+        "campos_clave": [
+          "id",
+          "colonia_estudiante_id",
+          "course_id",
+          "course_name",
+          "course_area",
+          "day_of_week",
+          "time_slot"
+        ],
+        "relaciones": [
+          {
+            "hacia": "ColoniaEstudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante colonia"
+          }
+        ]
+      },
+      {
+        "modelo": "ColoniaPago",
+        "tabla": "colonia_pagos",
+        "descripcion": "Pago mensual de colonia",
+        "campos_clave": ["id", "inscripcion_id", "mes", "anio", "monto", "estado"],
+        "relaciones": [
+          {
+            "hacia": "ColoniaInscripcion",
+            "tipo": "N:1",
+            "campo": "inscripcion",
+            "descripcion": "Inscripción"
+          }
+        ]
+      }
+    ],
+
+    "calendario_y_eventos": [
+      {
+        "modelo": "Evento",
+        "tabla": "eventos",
+        "descripcion": "Eventos del calendario del docente (base polimórfica)",
+        "campos_clave": [
+          "id",
+          "titulo",
+          "tipo",
+          "fecha_inicio",
+          "fecha_fin",
+          "docente_id",
+          "clase_id"
+        ],
+        "relaciones": [
+          { "hacia": "Docente", "tipo": "N:1", "campo": "docente", "descripcion": "Docente" },
+          { "hacia": "Clase", "tipo": "N:1", "campo": "clase", "descripcion": "Clase relacionada" },
+          { "hacia": "Tarea", "tipo": "1:1", "campo": "tarea", "descripcion": "Tarea específica" },
+          {
+            "hacia": "Recordatorio",
+            "tipo": "1:1",
+            "campo": "recordatorio",
+            "descripcion": "Recordatorio"
+          },
+          { "hacia": "Nota", "tipo": "1:1", "campo": "nota", "descripcion": "Nota" }
+        ]
+      },
+      {
+        "modelo": "Tarea",
+        "tabla": "tareas",
+        "descripcion": "Tarea administrativa/pedagógica del docente",
+        "campos_clave": ["id", "evento_id", "estado", "prioridad", "porcentaje_completado"],
+        "relaciones": [
+          { "hacia": "Evento", "tipo": "1:1", "campo": "evento", "descripcion": "Evento base" }
+        ]
+      },
+      {
+        "modelo": "Recordatorio",
+        "tabla": "recordatorios",
+        "descripcion": "Recordatorio simple del docente",
+        "campos_clave": ["id", "evento_id", "completado", "color"],
+        "relaciones": [
+          { "hacia": "Evento", "tipo": "1:1", "campo": "evento", "descripcion": "Evento base" }
+        ]
+      },
+      {
+        "modelo": "Nota",
+        "tabla": "notas",
+        "descripcion": "Nota de texto largo del docente",
+        "campos_clave": ["id", "evento_id", "contenido", "categoria"],
+        "relaciones": [
+          { "hacia": "Evento", "tipo": "1:1", "campo": "evento", "descripcion": "Evento base" }
+        ]
+      },
+      {
+        "modelo": "Notificacion",
+        "tabla": "notificaciones",
+        "descripcion": "Notificaciones para docentes",
+        "campos_clave": ["id", "tipo", "titulo", "mensaje", "leida", "docente_id"],
+        "relaciones": [
+          {
+            "hacia": "Docente",
+            "tipo": "N:1",
+            "campo": "docente",
+            "descripcion": "Docente destinatario"
+          }
+        ]
+      },
+      {
+        "modelo": "Alerta",
+        "tabla": "alertas",
+        "descripcion": "Alertas administrativas de estudiantes",
+        "campos_clave": ["id", "estudiante_id", "clase_id", "descripcion", "resuelta"],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          },
+          { "hacia": "Clase", "tipo": "N:1", "campo": "clase", "descripcion": "Clase" }
+        ]
+      },
+      {
+        "modelo": "TareaAdmin",
+        "tabla": "tareas_admin",
+        "descripcion": "Tareas del dashboard administrativo",
+        "campos_clave": ["id", "title", "description", "priority", "status", "dueDate"],
+        "relaciones": []
+      }
+    ],
+
+    "observaciones": [
+      {
+        "modelo": "Observacion",
+        "tabla": "observaciones_docente",
+        "descripcion": "Observación de docente sobre estudiante(s) (inmutable)",
+        "campos_clave": [
+          "id",
+          "docente_id",
+          "comision_id",
+          "contenido",
+          "tipo",
+          "prioridad",
+          "estado"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Docente",
+            "tipo": "N:1",
+            "campo": "docente",
+            "descripcion": "Docente que creó"
+          },
+          {
+            "hacia": "Comision",
+            "tipo": "N:1",
+            "campo": "comision",
+            "descripcion": "Comisión/contexto"
+          },
+          {
+            "hacia": "ObservacionEstudiante",
+            "tipo": "1:N",
+            "campo": "estudiantes",
+            "descripcion": "Estudiantes observados"
+          },
+          {
+            "hacia": "SeguimientoObservacion",
+            "tipo": "1:N",
+            "campo": "seguimientos",
+            "descripcion": "Seguimientos"
+          }
+        ]
+      },
+      {
+        "modelo": "ObservacionEstudiante",
+        "tabla": "observaciones_estudiantes",
+        "descripcion": "Relación N:M entre Observación y Estudiante",
+        "campos_clave": ["observacion_id", "estudiante_id"],
+        "relaciones": [
+          {
+            "hacia": "Observacion",
+            "tipo": "N:1",
+            "campo": "observacion",
+            "descripcion": "Observación"
+          },
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          }
+        ]
+      },
+      {
+        "modelo": "SeguimientoObservacion",
+        "tabla": "seguimientos_observacion",
+        "descripcion": "Seguimiento agregado a una observación (inmutable)",
+        "campos_clave": ["id", "observacion_id", "autor_id", "autor_tipo", "contenido"],
+        "relaciones": [
+          {
+            "hacia": "Observacion",
+            "tipo": "N:1",
+            "campo": "observacion",
+            "descripcion": "Observación padre"
+          }
+        ]
+      }
+    ],
+
+    "historial_y_acceso": [
+      {
+        "modelo": "HistorialAccesoEstudiante",
+        "tabla": "historial_acceso_estudiante",
+        "descripcion": "Historial de cambios de acceso de estudiante",
+        "campos_clave": [
+          "id",
+          "estudiante_id",
+          "accion",
+          "origen",
+          "estado_anterior",
+          "estado_nuevo"
+        ],
+        "relaciones": [
+          {
+            "hacia": "Estudiante",
+            "tipo": "N:1",
+            "campo": "estudiante",
+            "descripcion": "Estudiante"
+          }
+        ]
+      }
+    ],
+
+    "seguridad_y_auditoria": [
+      {
+        "modelo": "LoginAttempt",
+        "tabla": "login_attempts",
+        "descripcion": "Registro de intentos de login para seguridad",
+        "campos_clave": ["id", "email", "ip", "success", "createdAt"],
+        "relaciones": []
+      },
+      {
+        "modelo": "PasswordResetToken",
+        "tabla": "password_reset_tokens",
+        "descripcion": "Tokens para recuperación de contraseña",
+        "campos_clave": ["id", "email", "token", "user_type", "expiresAt", "used"],
+        "relaciones": []
+      },
+      {
+        "modelo": "RefreshTokenSession",
+        "tabla": "refresh_token_sessions",
+        "descripcion": "Sesiones activas de refresh tokens",
+        "campos_clave": ["id", "user_id", "user_type", "ip_address", "expiresAt", "revoked"],
+        "relaciones": []
+      },
+      {
+        "modelo": "AuditLog",
+        "tabla": "audit_logs",
+        "descripcion": "Audit logs para rastrear acciones críticas",
+        "campos_clave": [
+          "id",
+          "timestamp",
+          "user_id",
+          "user_type",
+          "action",
+          "entity_type",
+          "entity_id",
+          "severity",
+          "category"
+        ],
+        "relaciones": []
+      },
+      {
+        "modelo": "SecretRotation",
+        "tabla": "secret_rotations",
+        "descripcion": "Gestión de rotación de secretos críticos",
+        "campos_clave": ["id", "secret_type", "version", "secret_hash", "status", "expires_at"],
+        "relaciones": []
+      },
+      {
+        "modelo": "WebhookProcessed",
+        "tabla": "webhooks_processed",
+        "descripcion": "Tracking de webhooks procesados (idempotencia)",
+        "campos_clave": ["id", "payment_id", "webhook_type", "status", "external_reference"],
+        "relaciones": []
+      },
+      {
+        "modelo": "WebhookFailed",
+        "tabla": "webhook_failed",
+        "descripcion": "Dead Letter Queue para webhooks fallidos",
+        "campos_clave": [
+          "id",
+          "payment_id",
+          "webhook_type",
+          "payload",
+          "error_message",
+          "retries",
+          "status"
+        ],
+        "relaciones": []
+      }
+    ]
+  },
+
+  "enumeraciones": {
+    "usuarios": [
+      {
+        "nombre": "EstadoAccesoEstudiante",
+        "valores": ["ACTIVO", "SUSPENDIDO", "VENCIDO", "BECA"],
+        "descripcion": "Estado del acceso del estudiante a la plataforma"
+      }
+    ],
+    "casas_y_mundos": [
+      {
+        "nombre": "CasaTipo",
+        "valores": ["QUANTUM", "VERTEX", "PULSAR"],
+        "descripcion": "Tipos de casa por edad (6-9, 10-12, 13-17)"
+      },
+      {
+        "nombre": "MundoTipo",
+        "valores": ["MATEMATICA", "PROGRAMACION", "CIENCIAS"],
+        "descripcion": "Áreas de conocimiento STEAM"
+      },
+      {
+        "nombre": "SubtipoMundo",
+        "valores": ["GENERAL", "OLIMPICA"],
+        "descripcion": "Subtipo solo para Matemática"
+      },
+      {
+        "nombre": "NivelOlimpiada",
+        "valores": ["NANDU_N1", "NANDU_N2", "OMA_N1", "OMA_N2", "OMA_N3"],
+        "descripcion": "Niveles de Olimpiadas Matemáticas Argentinas"
+      }
+    ],
+    "productos": [
+      {
+        "nombre": "TipoProducto",
+        "valores": [
+          "Club",
+          "Evento",
+          "Digital",
+          "Fisico",
+          "Curso",
+          "Servicio",
+          "Bundle",
+          "Certificacion"
+        ],
+        "descripcion": "Tipos de productos disponibles"
+      }
+    ],
+    "contenido": [
+      {
+        "nombre": "EstadoContenido",
+        "valores": ["BORRADOR", "PUBLICADO", "ARCHIVADO"],
+        "descripcion": "Estado del contenido educativo"
+      },
+      {
+        "nombre": "TipoContenido",
+        "valores": [
+          "LECCION",
+          "TAREA",
+          "MICROLECCION",
+          "EVALUACION",
+          "JUEGO",
+          "SIMULACION",
+          "RECURSO"
+        ],
+        "descripcion": "Tipo de contenido educativo"
+      }
+    ],
+    "clases": [
+      {
+        "nombre": "EstadoClase",
+        "valores": ["Programada", "EnVivo", "Finalizada", "Cancelada"],
+        "descripcion": "Estado de una clase"
+      },
+      {
+        "nombre": "TipoClaseGrupo",
+        "valores": ["GRUPO_REGULAR", "CURSO_TEMPORAL"],
+        "descripcion": "Tipo de grupo de clase"
+      },
+      {
+        "nombre": "DiaSemana",
+        "valores": ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO"],
+        "descripcion": "Días de la semana"
+      },
+      {
+        "nombre": "TipoAccesoInscripcion",
+        "valores": ["SINCRONICO", "ASINCRONICO"],
+        "descripcion": "Tipo de acceso del estudiante"
+      },
+      {
+        "nombre": "EstadoAsistencia",
+        "valores": ["Presente", "Ausente", "Justificado"],
+        "descripcion": "Estado de asistencia"
+      }
+    ],
+    "suscripciones": [
+      {
+        "nombre": "TierNombre",
+        "valores": ["STEAM_LIBROS", "STEAM_ASINCRONICO", "STEAM_SINCRONICO"],
+        "descripcion": "Tiers de suscripción STEAM 2026"
+      },
+      {
+        "nombre": "IntervaloSuscripcion",
+        "valores": ["DIARIO", "SEMANAL", "MENSUAL", "ANUAL"],
+        "descripcion": "Intervalo de cobro"
+      },
+      {
+        "nombre": "EstadoSuscripcion",
+        "valores": ["PENDIENTE", "ACTIVA", "EN_GRACIA", "MOROSA", "PAUSADA", "CANCELADA"],
+        "descripcion": "Estados de suscripción"
+      },
+      {
+        "nombre": "EstadoSuscripcionFamiliar",
+        "valores": ["PENDING", "AUTHORIZED", "PAUSED", "CANCELLED"],
+        "descripcion": "Estado de suscripción familiar"
+      },
+      {
+        "nombre": "EstadoInscripcionActividad",
+        "valores": ["ACTIVA", "PAUSADA", "CANCELADA"],
+        "descripcion": "Estado de inscripción a actividad"
+      },
+      {
+        "nombre": "TipoCambioInscripcion",
+        "valores": ["ALTA", "BAJA", "CAMBIO_HORARIO", "CAMBIO_PRODUCTO", "CAMBIO_TIER"],
+        "descripcion": "Tipo de cambio en inscripción"
+      }
+    ],
+    "pagos": [
+      {
+        "nombre": "EstadoPago",
+        "valores": ["Pendiente", "Pagado", "Vencido", "Parcial", "Anulado"],
+        "descripcion": "Estados de pago"
+      },
+      {
+        "nombre": "TipoDescuento",
+        "valores": ["NINGUNO", "HERMANO_2", "HERMANO_3_MAS"],
+        "descripcion": "Tipos de descuento aplicables"
+      },
+      {
+        "nombre": "ModalidadPagoCurso",
+        "valores": ["CONTADO", "CUOTAS"],
+        "descripcion": "Modalidad de pago para cursos"
+      },
+      {
+        "nombre": "EstadoPagoCurso",
+        "valores": ["PENDING", "PAID", "PARTIAL", "FAILED", "REFUNDED"],
+        "descripcion": "Estado de pago de curso"
+      }
+    ],
+    "tareas_y_eventos": [
+      {
+        "nombre": "TipoEvento",
+        "valores": ["CLASE", "TAREA", "RECORDATORIO", "NOTA"],
+        "descripcion": "Tipos de evento del calendario"
+      },
+      {
+        "nombre": "EstadoTarea",
+        "valores": ["PENDIENTE", "EN_PROGRESO", "COMPLETADA", "CANCELADA", "VENCIDA"],
+        "descripcion": "Estados de una tarea"
+      },
+      {
+        "nombre": "PrioridadTarea",
+        "valores": ["BAJA", "MEDIA", "ALTA", "URGENTE"],
+        "descripcion": "Niveles de prioridad"
+      },
+      {
+        "nombre": "TipoNotificacion",
+        "valores": [
+          "ClaseProxima",
+          "AsistenciaPendiente",
+          "EstudianteAlerta",
+          "ClaseCancelada",
+          "LogroEstudiante",
+          "Recordatorio",
+          "General"
+        ],
+        "descripcion": "Tipos de notificación"
+      }
+    ],
+    "observaciones": [
+      {
+        "nombre": "TipoObservacion",
+        "valores": ["Academica", "Conductual", "Asistencia", "Logro", "Incidente"],
+        "descripcion": "Tipos de observación"
+      },
+      {
+        "nombre": "PrioridadObservacion",
+        "valores": ["Baja", "Media", "Alta", "Urgente"],
+        "descripcion": "Prioridad de observación"
+      },
+      {
+        "nombre": "EstadoObservacion",
+        "valores": ["Abierta", "EnSeguimiento", "Resuelta", "Cerrada"],
+        "descripcion": "Estado del ciclo de vida"
+      },
+      {
+        "nombre": "TipoAutorSeguimiento",
+        "valores": ["Docente", "Admin"],
+        "descripcion": "Tipo de autor de seguimiento"
+      }
+    ],
+    "comisiones": [
+      {
+        "nombre": "EstadoInscripcionComision",
+        "valores": ["Pendiente", "Confirmada", "Cancelada", "ListaEspera"],
+        "descripcion": "Estado de inscripción a comisión"
+      }
+    ],
+    "gamificacion": [
+      {
+        "nombre": "TipoRecurso",
+        "valores": ["XP"],
+        "descripcion": "Tipos de recursos del estudiante"
+      },
+      {
+        "nombre": "TipoActividadFeed",
+        "valores": [
+          "LECCION_COMPLETADA",
+          "CLASE_COMPLETADA",
+          "TAREA_COMPLETADA",
+          "TAREA_PERFECTA",
+          "PLANIFICACION_COMPLETADA",
+          "LOGRO_DESBLOQUEADO",
+          "NIVEL_SUBIDO",
+          "RACHA_EXTENDIDA"
+        ],
+        "descripcion": "Tipos de actividad para el feed"
+      }
+    ],
+    "onboarding": [
+      {
+        "nombre": "OnboardingEstado",
+        "valores": [
+          "PENDIENTE",
+          "SELECCION_MUNDOS",
+          "TEST_UBICACION",
+          "CONFIRMACION_CASA",
+          "CREACION_AVATAR",
+          "COMPLETADO"
+        ],
+        "descripcion": "Estado del onboarding del estudiante"
+      }
+    ],
+    "docentes": [
+      {
+        "nombre": "TipoAsignacionDocente",
+        "valores": ["CLASE_GRUPOS", "COMISIONES", "AMBOS"],
+        "descripcion": "Tipo de asignación del docente"
+      }
+    ],
+    "webhooks": [
+      {
+        "nombre": "DLQStatus",
+        "valores": ["PENDING", "PROCESSING", "RESOLVED", "ABANDONED"],
+        "descripcion": "Estado de webhooks en Dead Letter Queue"
+      }
+    ]
+  },
+
+  "metricas": {
+    "total_modelos": 69,
+    "total_enumeraciones": 39,
+    "modelos_por_categoria": {
+      "usuarios": 4,
+      "estructura_organizativa": 8,
+      "clases_y_grupos": 8,
+      "productos_y_comisiones": 4,
+      "contenido_educativo": 3,
+      "planificaciones": 9,
+      "gamificacion": 8,
+      "suscripciones_y_pagos": 12,
+      "colonia_verano": 4,
+      "calendario_y_eventos": 6,
+      "observaciones": 3,
+      "historial_y_acceso": 1,
+      "seguridad_y_auditoria": 7
+    }
+  },
+
+  "posibles_inconsistencias_detectadas": [
+    {
+      "tipo": "REDUNDANCIA",
+      "descripcion": "Sistema de clases legacy (Clase) coexiste con nuevo sistema (ClaseGrupo)",
+      "modelos_afectados": ["Clase", "ClaseGrupo"],
+      "recomendacion": "Evaluar migración completa al sistema ClaseGrupo"
+    },
+    {
+      "tipo": "REDUNDANCIA",
+      "descripcion": "Dos sistemas de suscripciones: Suscripcion (legacy) y SuscripcionFamiliar (2026)",
+      "modelos_afectados": ["Suscripcion", "SuscripcionFamiliar"],
+      "recomendacion": "Migrar completamente a SuscripcionFamiliar para 2026"
+    },
+    {
+      "tipo": "LEGACY",
+      "descripcion": "Sector marcado como legacy pero aún tiene relaciones activas",
+      "modelos_afectados": ["Sector", "ClaseGrupo", "GrupoPedagogico", "Estudiante"],
+      "recomendacion": "Completar migración a sistema Casa/Mundo"
+    },
+    {
+      "tipo": "REDUNDANCIA",
+      "descripcion": "InscripcionClase e InscripcionClaseGrupo son similares",
+      "modelos_afectados": ["InscripcionClase", "InscripcionClaseGrupo"],
+      "recomendacion": "Consolidar en un solo modelo de inscripciones"
+    },
+    {
+      "tipo": "REDUNDANCIA",
+      "descripcion": "Múltiples formas de registrar asistencia",
+      "modelos_afectados": [
+        "Asistencia",
+        "AsistenciaClaseGrupo",
+        "AsistenciaLive",
+        "AsistenciaComision"
+      ],
+      "recomendacion": "Evaluar unificación con modelo polimórfico"
+    },
+    {
+      "tipo": "HUERFANO",
+      "descripcion": "Tier tiene campos definidos pero no tiene relaciones con otros modelos",
+      "modelos_afectados": ["Tier"],
+      "recomendacion": "Verificar si Tier debe relacionarse con PlanSuscripcion o SuscripcionFamiliar"
+    },
+    {
+      "tipo": "REDUNDANCIA",
+      "descripcion": "InscripcionComision e InscripcionActividad tienen propósitos similares",
+      "modelos_afectados": ["InscripcionComision", "InscripcionActividad"],
+      "recomendacion": "Evaluar consolidación hacia InscripcionActividad (sistema 2026)"
+    }
+  ]
+}

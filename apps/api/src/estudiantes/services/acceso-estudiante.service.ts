@@ -542,12 +542,13 @@ export class AccesoEstudianteService {
     estudianteId: string,
     claseGrupoId: string,
   ): Promise<ResultadoEntrarClase> {
-    // Verificar inscripción en el grupo
-    const inscripcion = await this.prisma.inscripcionClaseGrupo.findFirst({
+    // Verificar inscripción en el grupo usando vista unificada
+    // Incluye inscripciones manuales (admin/becas) y via suscripción (tutor 2026)
+    const inscripcion = await this.prisma.inscripcionUnificada.findFirst({
       where: {
         estudiante_id: estudianteId,
         clase_grupo_id: claseGrupoId,
-        fecha_baja: null, // Sin fecha de baja = activa
+        estado: 'ACTIVA',
       },
     });
 

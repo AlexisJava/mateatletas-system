@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -62,6 +63,9 @@ model Tutor {
 
   /// SISTEMA 2026: Pagos de cursos temporales
   pagosCurso PagoCurso[]
+
+  /// Vista unificada: todas las inscripciones de los hijos del tutor
+  inscripcionesUnificadas InscripcionUnificada[] @relation("InscripcionUnificadaTutor")
 
   @@map("tutores")
 }
@@ -193,6 +197,9 @@ model Estudiante {
   inscripcionesActividad InscripcionActividad[]
   /// SISTEMA 2026: Pagos de cursos temporales
   pagosCurso             PagoCurso[]
+
+  /// Vista unificada: todas las inscripciones (manual + suscripción)
+  inscripcionesUnificadas InscripcionUnificada[] @relation("InscripcionUnificadaEstudiante")
 
   // Índices de performance para rankings y listados
   // NOTA: Índices de puntos_totales eliminados - usar RecursosEstudiante para rankings (SUB-FASE 1.3)
@@ -1063,6 +1070,9 @@ model ClaseGrupo {
   /// Inscripciones de actividad (Sistema 2026)
   inscripcionesActividad InscripcionActividad[]
 
+  /// Vista unificada: todas las inscripciones (manual + suscripción)
+  inscripcionesUnificadas InscripcionUnificada[] @relation("InscripcionUnificadaClaseGrupo")
+
   @@index([docente_id])
   @@index([dia_semana])
   @@index([fecha_inicio, fecha_fin])
@@ -1076,6 +1086,10 @@ model ClaseGrupo {
 
 /// Inscripción de un estudiante a un ClaseGrupo
 /// Relación muchos-a-muchos entre Estudiante y ClaseGrupo
+///
+/// @deprecated Para LECTURA, usar InscripcionUnificada (view)
+/// Solo usar esta tabla para ESCRITURA de inscripciones manuales (admin/becas)
+/// Las inscripciones via suscripción 2026 se crean en InscripcionActividad
 model InscripcionClaseGrupo {
   /// Identificador único
   id String @id @default(cuid())
@@ -3764,4 +3778,46 @@ model PagoCurso {
   @@index([tutor_id])
   @@index([estado])
   @@map("pagos_curso")
+}
+
+// ============================================================================
+// VISTAS (Views) - Solo lectura
+// ============================================================================
+
+/// Vista unificada de inscripciones a ClaseGrupos
+/// Combina inscripciones manuales (admin/becas) con suscripciones familiares (tutor 2026)
+///
+/// USAR ESTA VISTA en lugar de InscripcionClaseGrupo para consultas de LECTURA
+///
+/// Campos importantes:
+/// - fuente: 'MANUAL' (admin) o 'SUSCRIPCION_2026' (tutor via suscripción)
+/// - estado: 'ACTIVA', 'CANCELADA', o 'PAUSADA'
+/// - tipo_acceso: 'SINCRONICO' o 'ASINCRONICO'
+///
+/// Para ESCRITURA:
+/// - Manual (becas): usar InscripcionClaseGrupo
+/// - Suscripción 2026: usar InscripcionActividad
+view InscripcionUnificada {
+  id                      String    @unique
+  estudiante_id           String
+  clase_grupo_id          String
+  tutor_id                String
+  fecha_inscripcion       DateTime
+  fecha_baja              DateTime?
+  tipo_acceso             String // 'SINCRONICO' | 'ASINCRONICO'
+  observaciones           String?
+  created_at              DateTime
+  updated_at              DateTime
+  fuente                  String // 'MANUAL' | 'SUSCRIPCION_2026'
+  suscripcion_familiar_id String? // Solo para fuente SUSCRIPCION_2026
+  producto_id             String? // Solo para fuente SUSCRIPCION_2026
+  tier                    String? // Solo para fuente SUSCRIPCION_2026
+  estado                  String // 'ACTIVA' | 'CANCELADA' | 'PAUSADA'
+
+  // Relaciones (read-only)
+  estudiante Estudiante @relation("InscripcionUnificadaEstudiante", fields: [estudiante_id], references: [id])
+  claseGrupo ClaseGrupo @relation("InscripcionUnificadaClaseGrupo", fields: [clase_grupo_id], references: [id])
+  tutor      Tutor      @relation("InscripcionUnificadaTutor", fields: [tutor_id], references: [id])
+
+  @@map("inscripciones_unificadas")
 }

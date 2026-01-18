@@ -120,12 +120,14 @@ export class DocenteStatsService {
     await this.validator.validarDocenteExiste(docenteId);
 
     // Obtener todos los estudiantes del docente (de sus clases activas)
-    const inscripciones = await this.prisma.inscripcionClaseGrupo.findMany({
+    // Usa vista unificada para incluir inscripciones manuales y via suscripción
+    const inscripciones = await this.prisma.inscripcionUnificada.findMany({
       where: {
         claseGrupo: {
           docente_id: docenteId,
           activo: true,
         },
+        estado: 'ACTIVA',
       },
       select: {
         estudiante_id: true,
@@ -307,9 +309,10 @@ export class DocenteStatsService {
     const clasesDelDiaData: ClaseDelDia[] = [];
 
     for (const claseGrupo of clasesGrupo) {
+      // Usa vista unificada para incluir inscripciones manuales y via suscripción
       const estudiantesInscritos =
-        await this.prisma.inscripcionClaseGrupo.findMany({
-          where: { clase_grupo_id: claseGrupo.id },
+        await this.prisma.inscripcionUnificada.findMany({
+          where: { clase_grupo_id: claseGrupo.id, estado: 'ACTIVA' },
           include: {
             estudiante: {
               select: {
@@ -440,6 +443,7 @@ export class DocenteStatsService {
       tutor_email: string | null;
     };
 
+    // Usa vista unificada para incluir inscripciones manuales y via suscripción
     const estudiantesConFaltasData: QueryEstudianteFalta[] =
       await this.prisma.$queryRaw(
         Prisma.sql`
@@ -451,10 +455,11 @@ export class DocenteStatsService {
           cg.nombre as ultimo_grupo,
           t.email as tutor_email
         FROM "estudiantes" e
-        INNER JOIN "inscripciones_clase_grupo" icg ON e.id = icg.estudiante_id
-        INNER JOIN "clase_grupos" cg ON icg.clase_grupo_id = cg.id
+        INNER JOIN "inscripciones_unificadas" iu ON e.id = iu.estudiante_id
+        INNER JOIN "clase_grupos" cg ON iu.clase_grupo_id = cg.id
         LEFT JOIN "tutores" t ON e.tutor_id = t.id
         WHERE cg.docente_id = ${docenteId}
+          AND iu.estado = 'ACTIVA'
         LIMIT 10
       `,
       );
@@ -565,12 +570,14 @@ export class DocenteStatsService {
     const observacionesPendientes = 0; // TODO: Implementar cuando exista campo "respondida"
 
     // Contar estudiantes únicos del docente
-    const estudiantesUnicos = await this.prisma.inscripcionClaseGrupo.findMany({
+    // Usa vista unificada para incluir inscripciones manuales y via suscripción
+    const estudiantesUnicos = await this.prisma.inscripcionUnificada.findMany({
       where: {
         claseGrupo: {
           docente_id: docenteId,
           activo: true,
         },
+        estado: 'ACTIVA',
       },
       select: {
         estudiante_id: true,

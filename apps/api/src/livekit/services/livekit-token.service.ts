@@ -207,11 +207,12 @@ export class LivekitTokenService {
       throw new ForbiddenException('Clase no encontrada');
     }
 
-    const inscripcion = await this.prisma.inscripcionClaseGrupo.findFirst({
+    // Usa vista unificada para incluir inscripciones manuales y via suscripción
+    const inscripcion = await this.prisma.inscripcionUnificada.findFirst({
       where: {
         clase_grupo_id: claseGrupoId,
         estudiante_id: estudianteId,
-        fecha_baja: null, // Inscripción activa = sin fecha de baja
+        estado: 'ACTIVA',
       },
     });
 

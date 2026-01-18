@@ -28,10 +28,11 @@ export class EstudianteAulaService {
    */
   async getMiAula(estudianteId: string) {
     // 1. Obtener todos los grupos donde el estudiante está inscrito
-    const inscripciones = await this.prisma.inscripcionClaseGrupo.findMany({
+    // Usa vista unificada para incluir inscripciones manuales y via suscripción
+    const inscripciones = await this.prisma.inscripcionUnificada.findMany({
       where: {
         estudiante_id: estudianteId,
-        fecha_baja: null,
+        estado: 'ACTIVA',
       },
       select: {
         clase_grupo_id: true,
@@ -748,10 +749,11 @@ export class EstudianteAulaService {
     filtro: 'todas' | 'pendientes' | 'completadas' = 'todas',
   ) {
     // 1. Obtener grupos del estudiante
-    const inscripciones = await this.prisma.inscripcionClaseGrupo.findMany({
+    // Usa vista unificada para incluir inscripciones manuales y via suscripción
+    const inscripciones = await this.prisma.inscripcionUnificada.findMany({
       where: {
         estudiante_id: estudianteId,
-        fecha_baja: null,
+        estado: 'ACTIVA',
       },
       select: { clase_grupo_id: true },
     });

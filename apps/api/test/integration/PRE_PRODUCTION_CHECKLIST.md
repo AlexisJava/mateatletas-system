@@ -62,6 +62,13 @@ Análisis de cobertura de tests de integración para lanzamiento a producción.
 | ---------------------------------- | ------------------------------------------------------------- |
 | `tutor-portal.integration.spec.ts` | Inscripciones, dashboard, próximas clases, alertas (24 tests) |
 
+### Cross-Portal Flows
+
+| Test                                           | Cobertura                                                           |
+| ---------------------------------------------- | ------------------------------------------------------------------- |
+| `inscripcion-completa.integration.spec.ts`     | Flujo TUTOR → ADMIN → ESTUDIANTE, estados, prioridades              |
+| `inscripcion-cross-portal.integration.spec.ts` | Vista unificada inscripciones (MANUAL + SUSCRIPCION_2026) → DOCENTE |
+
 ### Admin (Portal)
 
 | Test                                          | Cobertura                 |

@@ -41,8 +41,7 @@ export class PasswordResetService {
     private readonly userLookupService: UserLookupService,
     private readonly configService: ConfigService,
   ) {
-    this.frontendUrl =
-      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    this.frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
   }
 
   /**

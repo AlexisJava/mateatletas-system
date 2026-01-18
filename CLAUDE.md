@@ -553,6 +553,44 @@ test(api): add integration tests for pagos module
 
 ---
 
+## INSCRIPCIONES A CLASEGROUPOS (Vista Unificada)
+
+### Contexto
+
+Existen **dos fuentes de inscripción** a ClaseGrupos que se unifican via una vista PostgreSQL:
+
+| Tabla                       | Fuente                                   | Uso                                    |
+| --------------------------- | ---------------------------------------- | -------------------------------------- |
+| `inscripciones_clase_grupo` | Admin crea manualmente (becas, especial) | ESCRITURA de inscripciones manuales    |
+| `inscripciones_actividad`   | Tutor crea via suscripción familiar 2026 | ESCRITURA de inscripciones suscripción |
+| `inscripciones_unificadas`  | **VISTA** que combina ambas fuentes      | **LECTURA** - Single Source of Truth   |
+
+### Reglas Obligatorias
+
+- **LECTURA**: Siempre usar `prisma.inscripcionUnificada` (la vista)
+- **ESCRITURA MANUAL** (admin/becas): Usar `prisma.inscripcionClaseGrupo`
+- **ESCRITURA SUSCRIPCIÓN** (tutor): Usar `prisma.inscripcionActividad`
+- PROHIBIDO: Leer de `inscripcionClaseGrupo` directamente en módulos de docentes/estudiantes
+
+### Campos Importantes de la Vista
+
+```typescript
+// La vista tiene campos adicionales que indican la fuente
+{
+  fuente: 'MANUAL' | 'SUSCRIPCION_2026';
+  estado: 'ACTIVA' | 'CANCELADA' | 'PAUSADA';
+  tipo_acceso: 'SINCRONICO' | 'ASINCRONICO';
+  tier: 'STEAM_LIBROS' | 'STEAM_ASINCRONICO' | 'STEAM_SINCRONICO' | null;
+  suscripcion_familiar_id: string | null; // Solo para SUSCRIPCION_2026
+}
+```
+
+### Migraciones Afectadas
+
+Ver `apps/api/prisma/migrations/20260118100000_create_inscripciones_unificadas_view/`
+
+---
+
 ## ANTI-PATRONES A EVITAR
 
 - God Services/Components (>300 líneas)

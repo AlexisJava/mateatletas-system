@@ -460,24 +460,24 @@ export class EstudianteQueryService {
    * @returns Lista de compañeros con sus puntos totales
    */
   async obtenerCompanerosDeClase(estudianteId: string) {
-    // 1. Buscar primero en ClaseGrupo
+    // 1. Buscar primero en ClaseGrupo usando vista unificada
     const inscripcionClaseGrupo =
-      await this.prisma.inscripcionClaseGrupo.findFirst({
+      await this.prisma.inscripcionUnificada.findFirst({
         where: {
           estudiante_id: estudianteId,
-          fecha_baja: null,
+          estado: 'ACTIVA',
         },
       });
 
     if (inscripcionClaseGrupo) {
-      // Obtener compañeros del mismo ClaseGrupo
+      // Obtener compañeros del mismo ClaseGrupo usando vista unificada
       const companeros = await this.prisma.estudiante.findMany({
         where: {
           id: { not: estudianteId }, // Excluir al estudiante actual
-          inscripciones_clase_grupo: {
+          inscripcionesUnificadas: {
             some: {
               clase_grupo_id: inscripcionClaseGrupo.clase_grupo_id,
-              fecha_baja: null,
+              estado: 'ACTIVA',
             },
           },
         },
@@ -581,12 +581,13 @@ export class EstudianteQueryService {
     };
 
     // Buscar inscripciones a ClaseGrupo Y Comisiones en paralelo
+    // Usa vista unificada para incluir inscripciones manuales y via suscripción
     const [inscripcionesClaseGrupo, inscripcionesComision] = await Promise.all([
       // 1. Inscripciones a ClaseGrupo (clases regulares semanales)
-      this.prisma.inscripcionClaseGrupo.findMany({
+      this.prisma.inscripcionUnificada.findMany({
         where: {
           estudiante_id: estudianteId,
-          fecha_baja: null,
+          estado: 'ACTIVA',
         },
         include: {
           claseGrupo: {
@@ -887,10 +888,11 @@ export class EstudianteQueryService {
    */
   async obtenerMisSectores(estudianteId: string) {
     // 1. Obtener todas las inscripciones del estudiante con grupos y sectores
-    const inscripciones = await this.prisma.inscripcionClaseGrupo.findMany({
+    // Usa vista unificada para incluir inscripciones manuales y via suscripción
+    const inscripciones = await this.prisma.inscripcionUnificada.findMany({
       where: {
         estudiante_id: estudianteId,
-        fecha_baja: null, // Solo inscripciones activas
+        estado: 'ACTIVA',
       },
       include: {
         claseGrupo: {

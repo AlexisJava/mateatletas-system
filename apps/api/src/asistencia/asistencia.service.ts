@@ -238,12 +238,13 @@ export class AsistenciaService {
     }
 
     // 2. Verificar que todos los estudiantes están inscritos en el grupo
+    // Usa vista unificada para incluir inscripciones manuales y via suscripción
     const estudiantesIds = asistencias.map((a) => a.estudianteId);
-    const inscripciones = await this.prisma.inscripcionClaseGrupo.findMany({
+    const inscripciones = await this.prisma.inscripcionUnificada.findMany({
       where: {
         clase_grupo_id,
         estudiante_id: { in: estudiantesIds },
-        fecha_baja: null, // Solo inscritos activos
+        estado: 'ACTIVA',
       },
       include: {
         estudiante: {

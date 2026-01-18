@@ -89,8 +89,7 @@ export class PreapprovalService {
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
   ) {
-    this.frontendUrl =
-      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    this.frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
 
     // Inicializar Circuit Breaker
     this.circuitBreaker = new CircuitBreaker({

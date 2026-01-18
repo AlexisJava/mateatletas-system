@@ -52,8 +52,9 @@ export class AdminStatsService {
       totalDocentes,
       totalTutores,
     ] = await Promise.all([
-      this.prisma.inscripcionClaseGrupo.count({
-        where: { fecha_baja: null },
+      // Usa vista unificada para contar inscripciones de ambas fuentes
+      this.prisma.inscripcionUnificada.count({
+        where: { estado: 'ACTIVA' },
       }),
       this.prisma.clase.count({
         where: {
@@ -216,8 +217,10 @@ export class AdminStatsService {
         });
 
       // Bajas: inscripciones que fueron dadas de baja en este mes
-      const bajas = await this.prisma.inscripcionClaseGrupo.count({
+      // Usa vista unificada para contar bajas de ambas fuentes
+      const bajas = await this.prisma.inscripcionUnificada.count({
         where: {
+          estado: 'CANCELADA',
           fecha_baja: {
             gte: inicioMes,
             lte: finMes,
