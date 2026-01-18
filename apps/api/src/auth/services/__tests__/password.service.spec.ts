@@ -319,7 +319,7 @@ describe('PasswordService', () => {
     it('should contain at least one number', () => {
       const password = service.generateTemporaryPassword();
 
-      expect(/[0-9]/.test(password)).toBe(true);
+      expect(/\d/.test(password)).toBe(true);
     });
 
     it('should contain at least one special character', () => {

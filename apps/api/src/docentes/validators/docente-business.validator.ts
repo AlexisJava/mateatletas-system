@@ -149,7 +149,7 @@ export class DocenteBusinessValidator {
       );
     }
 
-    if (!/[0-9]/.test(password)) {
+    if (!/\d/.test(password)) {
       throw new ConflictException(
         'La contraseña debe contener al menos un número',
       );

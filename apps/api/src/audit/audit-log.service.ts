@@ -361,7 +361,9 @@ export class AuditLogService {
       action: AuditAction.PAYMENT_REJECTED,
       entityType: EntityType.PAGO,
       entityId: paymentId,
-      description: `Pago rechazado: $${amount.toFixed(2)} (${type})${reason ? ` - ${reason}` : ''}`,
+      description:
+        `Pago rechazado: $${amount.toFixed(2)} (${type})` +
+        (reason ? ` - ${reason}` : ''),
       category: AuditCategory.PAYMENT,
       severity: AuditSeverity.WARNING,
       metadata: { amount, type, reason },
@@ -478,7 +480,9 @@ export class AuditLogService {
       action: AuditAction.CREATE,
       entityType,
       entityId,
-      description: `Usuario creado: ${email} (${entityType})${createdBy ? ` por ${createdBy.userEmail}` : ''}`,
+      description:
+        `Usuario creado: ${email} (${entityType})` +
+        (createdBy ? ` por ${createdBy.userEmail}` : ''),
       category: AuditCategory.USER_MANAGEMENT,
       severity: AuditSeverity.INFO,
     });
@@ -507,7 +511,9 @@ export class AuditLogService {
       action: AuditAction.UPDATE,
       entityType,
       entityId,
-      description: `Usuario modificado: ${email} (${entityType})${updatedBy ? ` por ${updatedBy.userEmail}` : ''}`,
+      description:
+        `Usuario modificado: ${email} (${entityType})` +
+        (updatedBy ? ` por ${updatedBy.userEmail}` : ''),
       category: AuditCategory.USER_MANAGEMENT,
       severity: AuditSeverity.INFO,
       changes: sanitizedChanges,
@@ -530,7 +536,9 @@ export class AuditLogService {
       action: AuditAction.DELETE,
       entityType,
       entityId,
-      description: `Usuario eliminado: ${email} (${entityType})${deletedBy ? ` por ${deletedBy.userEmail}` : ''}`,
+      description:
+        `Usuario eliminado: ${email} (${entityType})` +
+        (deletedBy ? ` por ${deletedBy.userEmail}` : ''),
       category: AuditCategory.USER_MANAGEMENT,
       severity: AuditSeverity.WARNING,
     });

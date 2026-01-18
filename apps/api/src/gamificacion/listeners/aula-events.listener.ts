@@ -195,7 +195,8 @@ export class AulaEventsListener {
       await this.crearEntradaFeed(
         event.estudianteId,
         TipoActividadFeed.TAREA_COMPLETADA,
-        `completó la tarea "${event.tareaTitulo}"${event.calificacion ? ` con ${event.calificacion}%` : ''}`,
+        `completó la tarea "${event.tareaTitulo}"` +
+          (event.calificacion ? ` con ${event.calificacion}%` : ''),
         event.xpTotal,
         {
           tareaAsignadaId: event.tareaAsignadaId,

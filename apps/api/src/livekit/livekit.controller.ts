@@ -231,7 +231,9 @@ export class LivekitController {
       );
       return {
         exito: true,
-        mensaje: `Se habilitaron ${result.exitosos} estudiantes.${result.fallidos > 0 ? ` (${result.fallidos} fallaron)` : ''}`,
+        mensaje:
+          `Se habilitaron ${result.exitosos} estudiantes.` +
+          (result.fallidos > 0 ? ` (${result.fallidos} fallaron)` : ''),
       };
     } catch (error) {
       this.logger.error(
@@ -277,7 +279,9 @@ export class LivekitController {
       );
       return {
         exito: true,
-        mensaje: `Se deshabilitaron ${result.exitosos} estudiantes.${result.fallidos > 0 ? ` (${result.fallidos} fallaron)` : ''}`,
+        mensaje:
+          `Se deshabilitaron ${result.exitosos} estudiantes.` +
+          (result.fallidos > 0 ? ` (${result.fallidos} fallaron)` : ''),
       };
     } catch (error) {
       this.logger.error(

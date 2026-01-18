@@ -45,7 +45,7 @@ export class ActualizarClaseGrupoDto {
   })
   @IsOptional()
   @IsString()
-  @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+  @Matches(/^([0-1]?\d|2[0-3]):[0-5]\d$/, {
     message: 'horaInicio debe tener formato HH:MM',
   })
   horaInicio?: string;
@@ -56,7 +56,7 @@ export class ActualizarClaseGrupoDto {
   })
   @IsOptional()
   @IsString()
-  @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+  @Matches(/^([0-1]?\d|2[0-3]):[0-5]\d$/, {
     message: 'horaFin debe tener formato HH:MM',
   })
   horaFin?: string;

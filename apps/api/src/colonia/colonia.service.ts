@@ -465,7 +465,11 @@ export class ColoniaService {
         {
           id: `colonia-${result.inscriptionId}`,
           title: `Colonia de Verano 2026 - Enero`,
-          description: `${pricing.totalCursos} curso(s) - ${pricing.cantidadEstudiantes} estudiante(s)${pricing.descuentoPorcentaje > 0 ? ` - ${pricing.descuentoPorcentaje}% descuento` : ''}`,
+          description:
+            `${pricing.totalCursos} curso(s) - ${pricing.cantidadEstudiantes} estudiante(s)` +
+            (pricing.descuentoPorcentaje > 0
+              ? ` - ${pricing.descuentoPorcentaje}% descuento`
+              : ''),
           quantity: 1,
           unit_price: pricing.totalMensual,
           currency_id: 'ARS',

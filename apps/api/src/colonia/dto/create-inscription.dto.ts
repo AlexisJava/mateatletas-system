@@ -67,13 +67,13 @@ export class CreateInscriptionDto {
   email: string;
 
   @IsString()
-  @Matches(/^[0-9]{10,15}$/)
+  @Matches(/^\d{10,15}$/)
   telefono: string;
 
   @IsString()
   @MinLength(8)
   @MaxLength(128)
-  @Matches(/^(?=.*[A-Z])(?=.*[0-9])/, {
+  @Matches(/^(?=.*[A-Z])(?=.*\d)/, {
     message:
       'La contraseña debe tener al menos 8 caracteres, una mayúscula y un número',
   })

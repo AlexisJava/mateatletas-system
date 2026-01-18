@@ -183,7 +183,7 @@ export class PasswordService {
       errors.push('La contraseña debe contener al menos una minúscula');
     }
 
-    if (!/[0-9]/.test(password)) {
+    if (!/\d/.test(password)) {
       errors.push('La contraseña debe contener al menos un número');
     }
 

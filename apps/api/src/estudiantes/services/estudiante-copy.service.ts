@@ -30,7 +30,8 @@ export class EstudianteCopyService {
     apellido: string,
     sufijo?: string,
   ): Promise<string> {
-    const baseUsername = `${nombre}.${apellido}${sufijo ? `.${sufijo}` : ''}`
+    const sufijoStr = sufijo ? `.${sufijo}` : '';
+    const baseUsername = `${nombre}.${apellido}${sufijoStr}`
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '') // Remover acentos
