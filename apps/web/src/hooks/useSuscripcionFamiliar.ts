@@ -3,6 +3,10 @@
 /**
  * useSuscripcionFamiliar - Hook para gestión de suscripción familiar
  *
+ * MODELO 2026: Tier por inscripción (no por familia)
+ * - Cada inscripción puede tener un tier diferente
+ * - Descuento 10% se aplica al producto de MENOR VALOR
+ *
  * Usa React Query para:
  * - Cachear datos de suscripción por 5 minutos
  * - Mutations optimistas para cambios inmediatos
@@ -13,7 +17,8 @@
  * - POST /suscripciones/familiar
  * - POST /suscripciones/familiar/inscripciones
  * - DELETE /suscripciones/familiar/inscripciones
- * - PATCH /suscripciones/familiar/tier
+ * - PATCH /suscripciones/familiar/inscripciones/:id/tier (NUEVO 2026)
+ * - PATCH /suscripciones/familiar/tier (deprecated)
  * - POST /suscripciones/familiar/cancelar
  * - GET /suscripciones/familiar/simular
  */
@@ -27,11 +32,13 @@ import {
   type AgregarInscripcionesRequest,
   type BajaInscripcionesRequest,
   type CambiarTierRequest,
+  type CambiarTierInscripcionRequest,
   type CancelarSuscripcionRequest,
   type CrearSuscripcionResponse,
   type AgregarInscripcionesResponse,
   type BajaInscripcionesResponse,
   type CambiarTierResponse,
+  type CambiarTierInscripcionResponse,
   type CancelarSuscripcionResponse,
   type SimularMontoResponse,
   type TierNombre,
@@ -63,6 +70,16 @@ export interface UseSuscripcionFamiliarReturn {
     data: AgregarInscripcionesRequest,
   ) => Promise<AgregarInscripcionesResponse>;
   bajaInscripciones: (data: BajaInscripcionesRequest) => Promise<BajaInscripcionesResponse>;
+  /**
+   * Cambia el tier de una inscripción específica (MODELO 2026)
+   * @param inscripcionId - ID de la inscripción a modificar
+   * @param data - Nuevo tier para la inscripción
+   */
+  cambiarTierInscripcion: (
+    inscripcionId: string,
+    data: CambiarTierInscripcionRequest,
+  ) => Promise<CambiarTierInscripcionResponse>;
+  /** @deprecated Usar cambiarTierInscripcion */
   cambiarTier: (data: CambiarTierRequest) => Promise<CambiarTierResponse>;
   cancelarSuscripcion: (data: CancelarSuscripcionRequest) => Promise<CancelarSuscripcionResponse>;
 
@@ -70,6 +87,8 @@ export interface UseSuscripcionFamiliarReturn {
   isCreating: boolean;
   isAddingInscripciones: boolean;
   isRemovingInscripciones: boolean;
+  isChangingTierInscripcion: boolean;
+  /** @deprecated */
   isChangingTier: boolean;
   isCancelling: boolean;
 
@@ -209,7 +228,27 @@ export function useSuscripcionFamiliar(): UseSuscripcionFamiliarReturn {
     },
   });
 
-  // Mutation: Cambiar tier
+  // Mutation: Cambiar tier de inscripción (MODELO 2026)
+  const cambiarTierInscripcionMutation = useMutation({
+    mutationFn: ({
+      inscripcionId,
+      data,
+    }: {
+      inscripcionId: string;
+      data: CambiarTierInscripcionRequest;
+    }) => suscripcionFamiliarApi.cambiarTierInscripcion(inscripcionId, data),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: SUSCRIPCION_FAMILIAR_KEY });
+      toast.success(
+        `Plan de ${result.estudianteNombre} (${result.productoNombre}) cambiado a ${formatTierNombre(result.nuevoTier)}. Nuevo monto: ${formatMonto(result.nuevoMontoMensual)}`,
+      );
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Error al cambiar plan de la inscripción');
+    },
+  });
+
+  // Mutation: Cambiar tier (deprecated - usar cambiarTierInscripcion)
   const cambiarTierMutation = useMutation({
     mutationFn: suscripcionFamiliarApi.cambiarTier,
     onSuccess: (result) => {
@@ -252,6 +291,9 @@ export function useSuscripcionFamiliar(): UseSuscripcionFamiliarReturn {
     bajaInscripciones: async (data: BajaInscripcionesRequest) => {
       return bajaMutation.mutateAsync(data);
     },
+    cambiarTierInscripcion: async (inscripcionId: string, data: CambiarTierInscripcionRequest) => {
+      return cambiarTierInscripcionMutation.mutateAsync({ inscripcionId, data });
+    },
     cambiarTier: async (data: CambiarTierRequest) => {
       return cambiarTierMutation.mutateAsync(data);
     },
@@ -263,6 +305,7 @@ export function useSuscripcionFamiliar(): UseSuscripcionFamiliarReturn {
     isCreating: crearMutation.isPending,
     isAddingInscripciones: agregarMutation.isPending,
     isRemovingInscripciones: bajaMutation.isPending,
+    isChangingTierInscripcion: cambiarTierInscripcionMutation.isPending,
     isChangingTier: cambiarTierMutation.isPending,
     isCancelling: cancelarMutation.isPending,
 
@@ -299,10 +342,13 @@ export function useSimularMonto(): UseSimularMontoReturn {
 export type {
   SuscripcionFamiliarDetalle,
   InscripcionActividadDetalle,
+  InscripcionActividadRequest,
   CrearSuscripcionFamiliarRequest,
   AgregarInscripcionesRequest,
   BajaInscripcionesRequest,
   CambiarTierRequest,
+  CambiarTierInscripcionRequest,
+  CambiarTierInscripcionResponse,
   CancelarSuscripcionRequest,
   CrearSuscripcionResponse,
   SimularMontoResponse,

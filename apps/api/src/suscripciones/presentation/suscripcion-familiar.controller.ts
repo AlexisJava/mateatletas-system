@@ -1,10 +1,10 @@
 /**
  * SuscripcionFamiliarController - Endpoints para Suscripciones Familiares 2026
  *
- * Modelo de negocio:
+ * Modelo de negocio 2026:
  * - Una suscripción por familia (tutor)
- * - Múltiples inscripciones a actividades
- * - Descuento 10% desde la 2da actividad
+ * - Múltiples inscripciones a actividades, CADA UNA CON SU PROPIO TIER
+ * - Descuento 10% se aplica al producto de MENOR VALOR (no al 2do cronológicamente)
  *
  * Endpoints Tutor:
  * - POST /familiar - Crear suscripción familiar
@@ -13,7 +13,8 @@
  * - DELETE /familiar/inscripciones - Dar de baja inscripciones
  * - PATCH /familiar/inscripciones/horario - Cambiar horario de inscripción
  * - PATCH /familiar/inscripciones/producto - Cambiar producto de inscripción
- * - PATCH /familiar/tier - Cambiar tier de suscripción
+ * - PATCH /familiar/inscripciones/:id/tier - Cambiar tier de una inscripción (NUEVO 2026)
+ * - PATCH /familiar/tier - Cambiar tier de suscripción (deprecated)
  * - POST /familiar/cancelar - Cancelar suscripción
  * - GET /familiar/simular - Simular monto con nuevos productos
  *
@@ -55,7 +56,9 @@ import {
   BajaInscripcionesDto,
   CambiarHorarioDto,
   CambiarProductoDto,
+  // eslint-disable-next-line sonarjs/deprecation -- Backward compatibility
   CambiarTierDto,
+  CambiarTierInscripcionDto,
   SimularMontoQueryDto,
   AdminFiltrosDto,
 } from '../dto/suscripcion-familiar.dto';
@@ -92,6 +95,7 @@ export class SuscripcionFamiliarController {
           productoId: i.productoId,
           claseGrupoId: i.claseGrupoId,
           comisionId: i.comisionId,
+          tier: i.tier, // MODELO 2026: tier por inscripción
         })),
         cardTokenId: dto.cardTokenId,
         payerEmail: dto.payerEmail,
@@ -163,6 +167,7 @@ export class SuscripcionFamiliarController {
           productoId: i.productoId,
           claseGrupoId: i.claseGrupoId,
           comisionId: i.comisionId,
+          tier: i.tier, // MODELO 2026: tier por inscripción
         })),
       });
 
@@ -306,11 +311,56 @@ export class SuscripcionFamiliarController {
     }
   }
 
+  @Patch('inscripciones/:id/tier')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ExactRoles(Role.TUTOR)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Cambiar tier de una inscripción específica (MODELO 2026)',
+    description:
+      'Permite cambiar el tier de una inscripción individual. El monto mensual se recalcula aplicando el descuento del 10% al producto de MENOR valor.',
+  })
+  async cambiarTierInscripcion(
+    @Param('id', ParseIdPipe) inscripcionId: string,
+    @Body() dto: CambiarTierInscripcionDto,
+    @GetUser() user: AuthUser,
+  ) {
+    try {
+      const result = await this.commandService.cambiarTierInscripcion({
+        inscripcionId,
+        tutorId: user.id,
+        nuevoTier: dto.nuevoTier,
+      });
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * @deprecated Usar PATCH /inscripciones/:id/tier para cambiar tier por inscripción
+   */
   @Patch('tier')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ExactRoles(Role.TUTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Cambiar tier de la suscripción' })
+  @ApiOperation({
+    summary: 'Cambiar tier de la suscripción (DEPRECATED)',
+    description:
+      'Deprecado: Usar PATCH /inscripciones/:id/tier para cambiar tier de inscripciones individuales',
+    deprecated: true,
+  })
+  // eslint-disable-next-line sonarjs/deprecation -- Backward compatibility
   async cambiarTier(@Body() dto: CambiarTierDto, @GetUser() user: AuthUser) {
     const suscripcion = await this.queryService.obtenerPorTutorId(user.id);
 
@@ -322,6 +372,7 @@ export class SuscripcionFamiliarController {
     }
 
     try {
+      // eslint-disable-next-line sonarjs/deprecation -- Backward compatibility
       const result = await this.commandService.cambiarTier({
         suscripcionFamiliarId: suscripcion.id,
         tutorId: user.id,

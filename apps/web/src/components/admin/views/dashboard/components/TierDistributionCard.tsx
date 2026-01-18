@@ -60,15 +60,15 @@ export function TierDistributionCard() {
   }
 
   const total = distribution.total || 1; // Evitar división por 0
-  const tiers = [
-    { key: 'STEAM_SINCRONICO' as const, value: distribution.STEAM_SINCRONICO },
-    { key: 'STEAM_ASINCRONICO' as const, value: distribution.STEAM_ASINCRONICO },
-    { key: 'STEAM_LIBROS' as const, value: distribution.STEAM_LIBROS },
+  const tiers: Array<{ key: keyof typeof TIER_CONFIG; value: number }> = [
+    { key: 'STEAM_SINCRONICO', value: distribution.STEAM_SINCRONICO },
+    { key: 'STEAM_ASINCRONICO', value: distribution.STEAM_ASINCRONICO },
+    { key: 'STEAM_LIBROS', value: distribution.STEAM_LIBROS },
   ];
 
   // Solo mostrar SIN_PLAN si hay estudiantes sin plan
   if (distribution.SIN_PLAN > 0) {
-    tiers.push({ key: 'SIN_PLAN' as const, value: distribution.SIN_PLAN });
+    tiers.push({ key: 'SIN_PLAN', value: distribution.SIN_PLAN });
   }
 
   return (

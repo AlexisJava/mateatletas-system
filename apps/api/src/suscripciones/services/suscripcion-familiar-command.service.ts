@@ -41,14 +41,20 @@ import {
   CambiarHorarioResult,
   CambiarProductoInput,
   CambiarProductoResult,
+  // eslint-disable-next-line sonarjs/deprecation -- Backward compatibility
   CambiarTierInput,
+  // eslint-disable-next-line sonarjs/deprecation -- Backward compatibility
   CambiarTierResult,
+  CambiarTierInscripcionInput,
+  CambiarTierInscripcionResult,
   SuscripcionFamiliarError,
   SuscripcionFamiliarErrorCode,
 } from '../types';
 import {
   calcularMontoMensualTotal,
+  calcularMontoMensualConTiers,
   obtenerPrecioTier,
+  type InscripcionConTier,
 } from '../domain/constants/suscripcion-familiar.constants';
 
 type PrismaTransactionClient = Prisma.TransactionClient;
@@ -196,7 +202,7 @@ export class SuscripcionFamiliarCommandService {
           },
         });
 
-        // 4.2 Crear inscripciones si las hay
+        // 4.2 Crear inscripciones si las hay (MODELO 2026: tier por inscripción)
         if (inscripciones && inscripciones.length > 0) {
           const inscripcionesData = inscripciones.map((insc) => ({
             suscripcion_familiar_id: suscripcion.id,
@@ -205,6 +211,9 @@ export class SuscripcionFamiliarCommandService {
             clase_grupo_id: insc.claseGrupoId ?? null,
             comision_id: insc.comisionId ?? null,
             estado: EstadoInscripcionActividad.ACTIVA,
+            // MODELO 2026: Guardar tier específico de cada inscripción
+            // Si no se especifica, usa el tier de la suscripción como fallback
+            tier: insc.tier ?? tier,
           }));
 
           await tx.inscripcionActividad.createMany({
@@ -288,7 +297,11 @@ export class SuscripcionFamiliarCommandService {
       include: {
         inscripciones: {
           where: { estado: EstadoInscripcionActividad.ACTIVA },
-          include: { producto: { select: { precio: true } } },
+          select: {
+            id: true,
+            tier: true,
+            producto: { select: { precio: true } },
+          },
         },
         tutor: { include: { estudiantes: { select: { id: true } } } },
       },
@@ -334,13 +347,16 @@ export class SuscripcionFamiliarCommandService {
     });
     const productosMap = new Map(productos.map((p) => [p.id, p]));
 
-    // 3. Calcular nuevo monto
-    const preciosActuales = suscripcion.inscripciones.map(
-      (i) =>
-        i.producto.precio?.toNumber() ?? obtenerPrecioTier(suscripcion.tier),
-    );
+    // 3. Calcular nuevo monto - MODELO 2026: usar tiers de inscripciones
+    // Las inscripciones existentes ya tienen tier asignado
+    const inscripcionesActualesConTier: InscripcionConTier[] =
+      suscripcion.inscripciones.map((i) => ({
+        id: i.id,
+        tier: i.tier ?? suscripcion.tier,
+      }));
 
-    const preciosNuevos: number[] = [];
+    // Validar productos y construir inscripciones nuevas con tier
+    const inscripcionesNuevasConTier: InscripcionConTier[] = [];
     for (const insc of inscripciones) {
       const producto = productosMap.get(insc.productoId);
       if (!producto) {
@@ -349,19 +365,19 @@ export class SuscripcionFamiliarCommandService {
           SuscripcionFamiliarErrorCode.PRODUCTO_NOT_FOUND,
         );
       }
-      preciosNuevos.push(
-        producto.precio?.toNumber() ?? obtenerPrecioTier(suscripcion.tier),
-      );
+      inscripcionesNuevasConTier.push({
+        tier: insc.tier ?? suscripcion.tier,
+      });
     }
 
     const montoAnterior = suscripcion.monto_mensual;
-    const calculoNuevo = calcularMontoMensualTotal([
-      ...preciosActuales,
-      ...preciosNuevos,
+    const calculoNuevo = calcularMontoMensualConTiers([
+      ...inscripcionesActualesConTier,
+      ...inscripcionesNuevasConTier,
     ]);
     const nuevoMontoMensual = calculoNuevo.montoConDescuento;
 
-    // 4. Crear inscripciones en transacción
+    // 4. Crear inscripciones en transacción (MODELO 2026: tier por inscripción)
     const inscripcionesCreadas = await this.prisma.$transaction(
       async (tx: PrismaTransactionClient) => {
         const creadas: string[] = [];
@@ -375,6 +391,8 @@ export class SuscripcionFamiliarCommandService {
               clase_grupo_id: insc.claseGrupoId ?? null,
               comision_id: insc.comisionId ?? null,
               estado: EstadoInscripcionActividad.ACTIVA,
+              // MODELO 2026: tier específico por inscripción
+              tier: insc.tier ?? suscripcion.tier,
             },
           });
           creadas.push(nueva.id);
@@ -829,7 +847,10 @@ export class SuscripcionFamiliarCommandService {
    *
    * Esto NO recalcula los precios de las inscripciones existentes.
    * Solo afecta el tier base para nuevas inscripciones sin precio específico.
+   *
+   * @deprecated Usar cambiarTierInscripcion para cambiar tier de inscripciones individuales
    */
+  // eslint-disable-next-line sonarjs/deprecation -- Backward compatibility
   async cambiarTier(input: CambiarTierInput): Promise<CambiarTierResult> {
     const { suscripcionFamiliarId, tutorId, nuevoTier } = input;
 
@@ -924,6 +945,148 @@ export class SuscripcionFamiliarCommandService {
       montoAnterior,
       nuevoMontoMensual,
       diferenciaMonto: nuevoMontoMensual - montoAnterior,
+    };
+  }
+
+  /**
+   * Cambia el tier de una inscripción específica (MODELO 2026)
+   *
+   * Permite cambiar el tier de una inscripción individual sin afectar
+   * las demás inscripciones de la familia. Recalcula el monto total
+   * aplicando el descuento del 10% al producto de MENOR valor.
+   */
+  async cambiarTierInscripcion(
+    input: CambiarTierInscripcionInput,
+  ): Promise<CambiarTierInscripcionResult> {
+    const { inscripcionId, tutorId, nuevoTier } = input;
+
+    // 1. Obtener inscripción con su suscripción
+    const inscripcion = await this.prisma.inscripcionActividad.findUnique({
+      where: { id: inscripcionId },
+      include: {
+        suscripcion_familiar: {
+          include: {
+            inscripciones: {
+              where: { estado: EstadoInscripcionActividad.ACTIVA },
+            },
+          },
+        },
+        estudiante: { select: { nombre: true, apellido: true } },
+        producto: { select: { nombre: true } },
+      },
+    });
+
+    if (!inscripcion) {
+      throw new SuscripcionFamiliarError(
+        'Inscripción no encontrada',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    // 2. Validar ownership
+    if (inscripcion.suscripcion_familiar.tutor_id !== tutorId) {
+      throw new SuscripcionFamiliarError(
+        'No autorizado',
+        SuscripcionFamiliarErrorCode.UNAUTHORIZED,
+      );
+    }
+
+    // 3. Validar estado de inscripción
+    if (inscripcion.estado !== EstadoInscripcionActividad.ACTIVA) {
+      throw new SuscripcionFamiliarError(
+        'Solo se puede cambiar el tier de inscripciones activas',
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    // 4. Validar estado de suscripción
+    if (
+      inscripcion.suscripcion_familiar.estado ===
+      EstadoSuscripcionFamiliar.CANCELLED
+    ) {
+      throw new SuscripcionFamiliarError(
+        'No se puede modificar una suscripción cancelada',
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    const tierAnterior = inscripcion.tier;
+    const montoAnterior = inscripcion.suscripcion_familiar.monto_mensual;
+    const suscripcionId = inscripcion.suscripcion_familiar_id;
+
+    // 5. Calcular nuevo monto con la nueva lógica (tier por inscripción)
+    // Crear array de inscripciones con sus tiers, actualizando el tier de la inscripción actual
+    const inscripcionesParaCalculo: InscripcionConTier[] =
+      inscripcion.suscripcion_familiar.inscripciones.map((insc) => ({
+        id: insc.id,
+        tier:
+          insc.id === inscripcionId
+            ? nuevoTier
+            : (insc.tier ?? inscripcion.suscripcion_familiar.tier),
+      }));
+
+    const calculoNuevo = calcularMontoMensualConTiers(inscripcionesParaCalculo);
+    const nuevoMontoMensual = calculoNuevo.montoConDescuento;
+
+    // 6. Actualizar en transacción
+    await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
+      // Actualizar tier de la inscripción
+      await tx.inscripcionActividad.update({
+        where: { id: inscripcionId },
+        data: { tier: nuevoTier },
+      });
+
+      // Actualizar monto de la suscripción
+      await tx.suscripcionFamiliar.update({
+        where: { id: suscripcionId },
+        data: { monto_mensual: nuevoMontoMensual },
+      });
+
+      // Registrar cambio
+      await tx.cambioInscripcion.create({
+        data: {
+          suscripcion_familiar_id: suscripcionId,
+          tipo: TipoCambioInscripcion.CAMBIO_TIER,
+          inscripcion_anterior_id: inscripcionId,
+          aplica_desde: new Date(),
+          monto_anterior: montoAnterior,
+          monto_nuevo: nuevoMontoMensual,
+          detalle: {
+            tierAnterior,
+            nuevoTier,
+            inscripcionId,
+          },
+        },
+      });
+    });
+
+    // 7. Actualizar monto en MercadoPago si cambió
+    if (
+      montoAnterior !== nuevoMontoMensual &&
+      inscripcion.suscripcion_familiar.preapproval_id &&
+      this.mpClient.isConfigured()
+    ) {
+      await this.actualizarMontoEnMercadoPago(
+        inscripcion.suscripcion_familiar.preapproval_id,
+        nuevoMontoMensual,
+      );
+    }
+
+    const estudianteNombre = `${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido}`;
+
+    this.logger.log(
+      `Cambio de tier inscripción: ${inscripcionId} (${estudianteNombre}) de ${tierAnterior} a ${nuevoTier}`,
+    );
+
+    return {
+      inscripcionId,
+      tierAnterior,
+      nuevoTier,
+      montoAnterior,
+      nuevoMontoMensual,
+      diferenciaMonto: nuevoMontoMensual - montoAnterior,
+      productoNombre: inscripcion.producto.nombre,
+      estudianteNombre,
     };
   }
 

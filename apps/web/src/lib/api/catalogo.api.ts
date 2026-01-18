@@ -120,15 +120,19 @@ export const getClubs = async (): Promise<ClubConClaseGrupos[]> => {
 /**
  * Obtener Clubs filtrados por Casa y Mundo
  * Usa el endpoint de catálogo con filtros
+ *
+ * Nota: La comparación es case-insensitive porque el backend devuelve
+ * casa en MAYUSCULAS (QUANTUM) pero el dashboard del tutor puede
+ * devolverlo en formato Title Case (Quantum).
  */
 export const getClubsPorCasaMundo = async (
-  casa?: CasaTipo,
+  casa?: CasaTipo | string,
   mundo?: MundoTipo,
 ): Promise<ClubConClaseGrupos[]> => {
   try {
     const clubs = await getClubs();
     return clubs.filter((club) => {
-      const matchCasa = !casa || club.casa === casa;
+      const matchCasa = !casa || club.casa?.toUpperCase() === casa.toUpperCase();
       const matchMundo = !mundo || club.mundo === mundo;
       return matchCasa && matchMundo;
     });

@@ -17,8 +17,11 @@ import {
   SuscripcionFamiliarErrorCode,
 } from '../types';
 import {
+  calcularMontoMensualConTiers,
   calcularPrecioActividad,
   obtenerPrecioTier,
+  obtenerPrecioInscripcion,
+  type InscripcionConTier,
 } from '../domain/constants/suscripcion-familiar.constants';
 
 @Injectable()
@@ -39,7 +42,16 @@ export class SuscripcionFamiliarQueryService {
         },
         inscripciones: {
           where: { estado: EstadoInscripcionActividad.ACTIVA },
-          include: {
+          select: {
+            id: true,
+            estudiante_id: true,
+            producto_id: true,
+            clase_grupo_id: true,
+            comision_id: true,
+            estado: true,
+            tier: true, // MODELO 2026: tier por inscripción
+            fecha_inicio: true,
+            fecha_fin: true,
             estudiante: { select: { id: true, nombre: true, apellido: true } },
             producto: { select: { id: true, nombre: true, precio: true } },
             clase_grupo: { select: { id: true, nombre: true } },
@@ -72,7 +84,16 @@ export class SuscripcionFamiliarQueryService {
         },
         inscripciones: {
           where: { estado: EstadoInscripcionActividad.ACTIVA },
-          include: {
+          select: {
+            id: true,
+            estudiante_id: true,
+            producto_id: true,
+            clase_grupo_id: true,
+            comision_id: true,
+            estado: true,
+            tier: true, // MODELO 2026: tier por inscripción
+            fecha_inicio: true,
+            fecha_fin: true,
             estudiante: { select: { id: true, nombre: true, apellido: true } },
             producto: { select: { id: true, nombre: true, precio: true } },
             clase_grupo: { select: { id: true, nombre: true } },
@@ -199,7 +220,16 @@ export class SuscripcionFamiliarQueryService {
           tutor: { select: { nombre: true, apellido: true } },
           inscripciones: {
             where: { estado: EstadoInscripcionActividad.ACTIVA },
-            include: {
+            select: {
+              id: true,
+              estudiante_id: true,
+              producto_id: true,
+              clase_grupo_id: true,
+              comision_id: true,
+              estado: true,
+              tier: true, // MODELO 2026: tier por inscripción
+              fecha_inicio: true,
+              fecha_fin: true,
               estudiante: {
                 select: { id: true, nombre: true, apellido: true },
               },
@@ -227,6 +257,9 @@ export class SuscripcionFamiliarQueryService {
 
   /**
    * Mapea el resultado de Prisma al tipo de detalle
+   *
+   * MODELO 2026: Usa calcularMontoMensualConTiers que ordena por precio
+   * descendente para aplicar descuento a los productos de MENOR valor.
    */
   private mapToDetalle(suscripcion: {
     id: string;
@@ -254,18 +287,52 @@ export class SuscripcionFamiliarQueryService {
       comision_id: string | null;
       comision: { id: string; nombre: string } | null;
       estado: string;
+      /** Tier específico de esta inscripción (MODELO 2026) */
+      tier: string | null;
       fecha_inicio: Date;
       fecha_fin: Date | null;
     }>;
   }): SuscripcionFamiliarDetalle {
-    const tier = suscripcion.tier as SuscripcionFamiliarDetalle['tier'];
+    const tierSuscripcion =
+      suscripcion.tier as SuscripcionFamiliarDetalle['tier'];
 
-    // Calcular precios con descuento para cada inscripción
+    // MODELO 2026: Preparar inscripciones con sus tiers para cálculo
+    // Incluimos el ID para poder matchear después del ordenamiento
+    const inscripcionesParaCalculo: InscripcionConTier[] =
+      suscripcion.inscripciones.map((insc) => ({
+        id: insc.id,
+        tier: (insc.tier as InscripcionConTier['tier']) ?? tierSuscripcion,
+      }));
+
+    // Calcular precios con la nueva lógica que ordena por precio DESCENDENTE
+    // El descuento se aplica a los productos de MENOR valor
+    const resultado = calcularMontoMensualConTiers(inscripcionesParaCalculo);
+
+    // Crear mapa de resultados por ID para acceso rápido
+    // El ID viene del detalle porque se preserva en el cálculo
+    const resultadosPorId = new Map(
+      resultado.detalleInscripciones.map((r) => [r.id, r]),
+    );
+
+    // Mapear inscripciones manteniendo orden original pero con precios calculados
     const inscripcionesDetalle: InscripcionActividadDetalle[] =
       suscripcion.inscripciones.map((insc, index) => {
-        const precioBase =
-          insc.producto.precio?.toNumber() ?? obtenerPrecioTier(tier);
-        const resultado = calcularPrecioActividad(precioBase, index + 1);
+        // Buscar resultado para esta inscripción
+        const tierInsc =
+          (insc.tier as InscripcionActividadDetalle['tier']) ?? tierSuscripcion;
+        // Convertir Decimal a number para compatibilidad
+        const precioProducto = insc.producto.precio?.toNumber() ?? null;
+        const precioBase = obtenerPrecioInscripcion(
+          { tier: tierInsc, producto: { precio: precioProducto } },
+          tierSuscripcion,
+        );
+
+        // Obtener datos del cálculo ordenado por precio
+        const resultadoCalculo = resultadosPorId.get(insc.id);
+        const esMasCara = resultadoCalculo?.esMasCara ?? false;
+        const precioConDescuento = resultadoCalculo?.precioFinal ?? precioBase;
+        const descuentoAplicado =
+          resultadoCalculo?.descuentoPorcentaje ?? (esMasCara ? 0 : 10);
 
         return {
           id: insc.id,
@@ -278,9 +345,11 @@ export class SuscripcionFamiliarQueryService {
           comisionId: insc.comision_id,
           comisionNombre: insc.comision?.nombre ?? null,
           estado: insc.estado,
+          tier: tierInsc,
           precioBase,
-          precioConDescuento: resultado.precioFinal,
-          descuentoAplicado: resultado.descuentoPorcentaje,
+          precioConDescuento,
+          descuentoAplicado,
+          esMasCara,
           ordenInscripcion: index + 1,
           fechaInicio: insc.fecha_inicio,
           fechaFin: insc.fecha_fin,
@@ -292,13 +361,17 @@ export class SuscripcionFamiliarQueryService {
       suscripcion.inscripciones.map((i) => i.estudiante_id),
     );
 
+    // MODELO 2026: El monto mensual se calcula dinámicamente basado en
+    // los tiers de las inscripciones activas, no del campo en DB (puede estar desactualizado)
+    const montoMensualCalculado = resultado.montoConDescuento;
+
     return {
       id: suscripcion.id,
       tutorId: suscripcion.tutor_id,
       tutorNombre: `${suscripcion.tutor.nombre} ${suscripcion.tutor.apellido}`,
       estado: suscripcion.estado as SuscripcionFamiliarDetalle['estado'],
-      tier,
-      montoMensual: suscripcion.monto_mensual,
+      tier: tierSuscripcion,
+      montoMensual: montoMensualCalculado,
       fechaProximoCobro: suscripcion.fecha_proximo_cobro,
       fechaGracia: suscripcion.fecha_gracia,
       inscripciones: inscripcionesDetalle,

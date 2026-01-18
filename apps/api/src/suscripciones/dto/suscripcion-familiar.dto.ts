@@ -68,6 +68,19 @@ export class InscripcionActividadDto {
   @MinLength(20, { message: 'El comisionId no tiene formato válido' })
   @IsOptional()
   comisionId?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Tier específico de esta inscripción (MODELO 2026). Si no se especifica, usa el tier de la suscripción.',
+    enum: TierNombre,
+    example: 'STEAM_SINCRONICO',
+  })
+  @IsEnum(TierNombre, {
+    message:
+      'El tier debe ser: STEAM_LIBROS, STEAM_ASINCRONICO o STEAM_SINCRONICO',
+  })
+  @IsOptional()
+  tier?: TierNombre;
 }
 
 // ============================================================================
@@ -261,11 +274,32 @@ export class CambiarProductoDto {
 // ============================================================================
 
 /**
- * DTO para cambiar el tier de la suscripción
+ * DTO para cambiar el tier de la suscripción (toda la familia)
+ * @deprecated Usar CambiarTierInscripcionDto para cambiar tier por inscripción
  */
 export class CambiarTierDto {
   @ApiProperty({
     description: 'Nuevo tier de la suscripción',
+    enum: TierNombre,
+    example: 'STEAM_SINCRONICO',
+  })
+  @IsEnum(TierNombre, {
+    message:
+      'El tier debe ser: STEAM_LIBROS, STEAM_ASINCRONICO o STEAM_SINCRONICO',
+  })
+  @IsNotEmpty({ message: 'El nuevoTier es requerido' })
+  nuevoTier!: TierNombre;
+}
+
+/**
+ * DTO para cambiar el tier de una inscripción específica (MODELO 2026)
+ *
+ * Permite cambiar el tier de una inscripción individual sin afectar
+ * las demás inscripciones de la familia.
+ */
+export class CambiarTierInscripcionDto {
+  @ApiProperty({
+    description: 'Nuevo tier para esta inscripción',
     enum: TierNombre,
     example: 'STEAM_SINCRONICO',
   })

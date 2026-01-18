@@ -1,15 +1,21 @@
 /**
  * Constantes y funciones para el cálculo de precios de Suscripciones Familiares 2026
  *
- * Modelo de negocio:
- * - Una suscripción por familia
- * - Precio base según tier: STEAM_LIBROS ($40k), STEAM_ASINCRONICO ($65k), STEAM_SINCRONICO ($95k)
- * - Descuento 10% FIJO desde la 2da actividad (no incremental como el modelo anterior)
- * - Clubs adicionales tienen precio por producto
+ * Modelo de negocio 2026 (ACTUALIZADO):
+ * - Una suscripción por familia, pero TIER POR INSCRIPCIÓN
+ * - Cada inscripción puede tener un tier diferente (LIBROS, ASINCRONICO, SINCRONICO)
+ * - Precio según tier: STEAM_LIBROS ($40k), STEAM_ASINCRONICO ($65k), STEAM_SINCRONICO ($95k)
+ * - Descuento 10% se aplica al producto de MENOR VALOR (no al segundo agregado cronológicamente)
  *
- * DIFERENCIA vs modelo 2025:
- * - Antes: Descuento por hijo (10%, 20%, 30%... hasta 50%)
- * - Ahora: Descuento FIJO 10% desde la 2da actividad, sin límite
+ * REGLA DE DESCUENTO FAMILIAR:
+ * - Se ordenan las inscripciones por precio DESCENDENTE
+ * - La más cara paga precio completo
+ * - Las demás tienen 10% de descuento
+ *
+ * Ejemplo: Juan tiene SINCRÓNICO ($95k) + ASINCRÓNICO ($65k)
+ * - SINCRÓNICO: $95,000 (sin descuento - es el más caro)
+ * - ASINCRÓNICO: $65,000 - 10% = $58,500 (con descuento)
+ * - TOTAL: $153,500/mes
  */
 
 import { TierNombre } from '@prisma/client';
@@ -211,5 +217,220 @@ export function simularAgregarActividades(
     diferencia:
       resultadoNuevo.montoConDescuento - resultadoActual.montoConDescuento,
     ahorroAdicional: resultadoNuevo.ahorroTotal - resultadoActual.ahorroTotal,
+  };
+}
+
+// ============================================================================
+// NUEVAS FUNCIONES PARA TIER POR INSCRIPCIÓN (2026)
+// ============================================================================
+
+/**
+ * Representa una inscripción con su tier para cálculo de precios
+ */
+export interface InscripcionConTier {
+  /** Tier de la inscripción (puede ser null si aún no se asignó) */
+  readonly tier: TierNombre | null;
+  /** ID opcional para identificar la inscripción en el resultado */
+  readonly id?: string;
+}
+
+/**
+ * Resultado detallado del cálculo de precio por inscripción
+ */
+export interface ResultadoPrecioInscripcion {
+  /** ID de la inscripción (si se proporcionó) */
+  readonly id?: string;
+  /** Tier de la inscripción */
+  readonly tier: TierNombre;
+  /** Precio base según el tier */
+  readonly precioBase: number;
+  /** Porcentaje de descuento aplicado (0 o 10) */
+  readonly descuentoPorcentaje: number;
+  /** Monto del descuento en pesos */
+  readonly descuentoMonto: number;
+  /** Precio final después del descuento */
+  readonly precioFinal: number;
+  /** Indica si es la inscripción más cara (sin descuento) */
+  readonly esMasCara: boolean;
+}
+
+/**
+ * Resultado completo del cálculo mensual con tiers por inscripción
+ */
+export interface ResultadoMontoMensualConTiers extends ResultadoMontoMensual {
+  /** Detalle de cada inscripción con su cálculo */
+  readonly detalleInscripciones: ResultadoPrecioInscripcion[];
+}
+
+/**
+ * Obtiene el precio de una inscripción según su tier
+ *
+ * Prioridad:
+ * 1. Tier de la inscripción
+ * 2. Tier de fallback (si se proporciona)
+ * 3. STEAM_LIBROS como default
+ *
+ * @param inscripcion - Objeto con tier y opcionalmente precio del producto
+ * @param tierFallback - Tier a usar si la inscripción no tiene tier
+ * @returns Precio en pesos argentinos
+ */
+export function obtenerPrecioInscripcion(
+  inscripcion: {
+    tier?: TierNombre | null;
+    producto?: { precio?: number | null };
+  },
+  tierFallback?: TierNombre,
+): number {
+  // Prioridad 1: tier de la inscripción
+  if (inscripcion.tier) {
+    return obtenerPrecioTier(inscripcion.tier);
+  }
+
+  // Prioridad 2: precio del producto (si existe)
+  if (inscripcion.producto?.precio) {
+    return inscripcion.producto.precio;
+  }
+
+  // Prioridad 3: tier de fallback o LIBROS por defecto
+  return obtenerPrecioTier(tierFallback ?? 'STEAM_LIBROS');
+}
+
+/**
+ * Calcula el monto mensual total ordenando por precio DESCENDENTE
+ *
+ * REGLA DE NEGOCIO 2026:
+ * - Se ordenan las inscripciones por precio DESCENDENTE (mayor primero)
+ * - La inscripción MÁS CARA paga precio completo
+ * - Las demás inscripciones tienen 10% de descuento
+ *
+ * Esto significa que el descuento se aplica a los productos de MENOR VALOR,
+ * no al segundo agregado cronológicamente.
+ *
+ * @param inscripciones - Array de inscripciones con su tier
+ * @returns Resultado con monto total, ahorro y detalle por inscripción
+ *
+ * @example
+ * // Juan: SINCRÓNICO ($95k) + ASINCRÓNICO ($65k)
+ * calcularMontoMensualConTiers([
+ *   { tier: 'STEAM_SINCRONICO' },
+ *   { tier: 'STEAM_ASINCRONICO' }
+ * ])
+ * // Resultado:
+ * // - SINCRÓNICO: $95,000 (sin descuento - es el más caro)
+ * // - ASINCRÓNICO: $58,500 (con 10% descuento)
+ * // - TOTAL: $153,500/mes
+ */
+export function calcularMontoMensualConTiers(
+  inscripciones: InscripcionConTier[],
+): ResultadoMontoMensualConTiers {
+  if (inscripciones.length === 0) {
+    return {
+      montoSinDescuento: 0,
+      montoConDescuento: 0,
+      ahorroTotal: 0,
+      actividadesConDescuento: 0,
+      totalActividades: 0,
+      detalleInscripciones: [],
+    };
+  }
+
+  // Paso 1: Calcular precio base de cada inscripción según su tier
+  const inscripcionesConPrecio = inscripciones.map((insc) => {
+    const tier = insc.tier ?? 'STEAM_LIBROS';
+    const precioBase = obtenerPrecioTier(tier);
+    return {
+      id: insc.id,
+      tier,
+      precioBase,
+    };
+  });
+
+  // Paso 2: Ordenar por precio DESCENDENTE (mayor primero)
+  // El más caro queda primero y no tiene descuento
+  const ordenadas = [...inscripcionesConPrecio].sort(
+    (a, b) => b.precioBase - a.precioBase,
+  );
+
+  // Paso 3: Calcular precios con descuento
+  // - Primera (más cara): sin descuento
+  // - Resto: 10% de descuento
+  const detalleInscripciones: ResultadoPrecioInscripcion[] = ordenadas.map(
+    (insc, index) => {
+      const esMasCara = index === 0;
+      const descuentoPorcentaje = esMasCara ? 0 : DESCUENTO_ACTIVIDAD_ADICIONAL;
+      const descuentoMonto = esMasCara
+        ? 0
+        : Math.round((insc.precioBase * DESCUENTO_ACTIVIDAD_ADICIONAL) / 100);
+      const precioFinal = insc.precioBase - descuentoMonto;
+
+      return {
+        id: insc.id,
+        tier: insc.tier,
+        precioBase: insc.precioBase,
+        descuentoPorcentaje,
+        descuentoMonto,
+        precioFinal,
+        esMasCara,
+      };
+    },
+  );
+
+  // Paso 4: Calcular totales
+  const montoSinDescuento = detalleInscripciones.reduce(
+    (sum, d) => sum + d.precioBase,
+    0,
+  );
+  const montoConDescuento = detalleInscripciones.reduce(
+    (sum, d) => sum + d.precioFinal,
+    0,
+  );
+  const ahorroTotal = montoSinDescuento - montoConDescuento;
+  const actividadesConDescuento = detalleInscripciones.filter(
+    (d) => d.descuentoPorcentaje > 0,
+  ).length;
+
+  return {
+    montoSinDescuento,
+    montoConDescuento,
+    ahorroTotal,
+    actividadesConDescuento,
+    totalActividades: inscripciones.length,
+    detalleInscripciones,
+  };
+}
+
+/**
+ * Simula agregar nuevas inscripciones con tiers específicos
+ *
+ * Útil para preview en frontend antes de confirmar nuevas inscripciones.
+ * Recalcula el orden por precio para aplicar descuentos correctamente.
+ *
+ * @param inscripcionesActuales - Inscripciones ya existentes
+ * @param inscripcionesNuevas - Nuevas inscripciones a agregar
+ * @returns Comparación entre monto actual y nuevo
+ */
+export function simularAgregarInscripcionesConTiers(
+  inscripcionesActuales: InscripcionConTier[],
+  inscripcionesNuevas: InscripcionConTier[],
+): {
+  readonly montoActual: number;
+  readonly montoNuevo: number;
+  readonly diferencia: number;
+  readonly ahorroAdicional: number;
+  readonly detalleNuevo: ResultadoPrecioInscripcion[];
+} {
+  const resultadoActual = calcularMontoMensualConTiers(inscripcionesActuales);
+  const resultadoNuevo = calcularMontoMensualConTiers([
+    ...inscripcionesActuales,
+    ...inscripcionesNuevas,
+  ]);
+
+  return {
+    montoActual: resultadoActual.montoConDescuento,
+    montoNuevo: resultadoNuevo.montoConDescuento,
+    diferencia:
+      resultadoNuevo.montoConDescuento - resultadoActual.montoConDescuento,
+    ahorroAdicional: resultadoNuevo.ahorroTotal - resultadoActual.ahorroTotal,
+    detalleNuevo: resultadoNuevo.detalleInscripciones,
   };
 }

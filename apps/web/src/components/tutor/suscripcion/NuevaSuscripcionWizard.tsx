@@ -475,12 +475,15 @@ export function NuevaSuscripcionWizard(): React.ReactElement {
       }
 
       // Build inscripciones array if we have producto and estudianteId
+      // MODELO 2026: El tier se asocia a cada inscripción, no a la familia
       const inscripciones =
-        seleccion.producto && estudianteId
+        seleccion.producto && estudianteId && seleccion.tier
           ? [
               {
                 estudianteId,
                 productoId: seleccion.producto.id,
+                // Tier específico de esta inscripción (MODELO 2026)
+                tier: seleccion.tier,
                 // Include claseGrupoId when tier is STEAM_SINCRONICO and has selected horario
                 ...(seleccion.tier === 'STEAM_SINCRONICO' && seleccion.claseGrupo
                   ? { claseGrupoId: seleccion.claseGrupo.id }
@@ -639,7 +642,11 @@ export function NuevaSuscripcionWizard(): React.ReactElement {
           )}
 
           {step === 'tier' && (
-            <TierStep selectedTier={seleccion.tier} onSelectTier={handleSelectTier} />
+            <TierStep
+              selectedTier={seleccion.tier}
+              onSelectTier={handleSelectTier}
+              productoNombre={seleccion.producto?.nombre}
+            />
           )}
 
           {step === 'horario' && seleccion.producto?.claseGrupos && (
@@ -1174,15 +1181,24 @@ function ProductoStep({
 function TierStep({
   selectedTier,
   onSelectTier,
+  productoNombre,
 }: {
   selectedTier: TierNombre | null;
   onSelectTier: (tier: TierNombre) => void;
+  productoNombre?: string;
 }): React.ReactElement {
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white mb-2">Elegí tu plan</h2>
+      <h2 className="text-2xl font-bold text-white mb-2">Elegí el plan para esta actividad</h2>
       <p className="text-slate-400 mb-8">
-        El plan aplica a toda la familia. Podés cambiarlo en cualquier momento.
+        {productoNombre ? (
+          <>
+            Seleccioná el plan para <span className="text-cyan-400">{productoNombre}</span>. Cada
+            actividad puede tener su propio plan.
+          </>
+        ) : (
+          'Cada actividad puede tener un plan diferente. Podés cambiarlo en cualquier momento.'
+        )}
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1397,11 +1413,11 @@ function ConfirmarStep({
             </div>
           )}
 
-          {/* Plan */}
+          {/* Plan de esta actividad */}
           {tierInfo && (
             <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-5">
               <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">
-                Plan seleccionado
+                Plan de esta actividad
               </h3>
               <div className="flex items-center gap-3">
                 <div
@@ -1414,6 +1430,9 @@ function ConfirmarStep({
                   <p className="text-sm text-slate-400">{tierInfo.descripcion}</p>
                 </div>
               </div>
+              <p className="text-xs text-slate-500 mt-3">
+                Podés elegir un plan diferente para cada actividad de tu familia.
+              </p>
             </div>
           )}
 

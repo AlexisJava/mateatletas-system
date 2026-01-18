@@ -29,6 +29,7 @@ import {
   formatEstadoSuscripcion,
   formatMonto,
   type SuscripcionFamiliarDetalle,
+  type InscripcionActividadDetalle,
   type TierNombre,
   type EstadoSuscripcionFamiliar,
 } from '@/hooks/useSuscripcionFamiliar';
@@ -128,6 +129,59 @@ function EstadoBadge({ estado }: EstadoBadgeProps): React.ReactElement {
   );
 }
 
+interface InscripcionCardProps {
+  inscripcion: InscripcionActividadDetalle;
+  onChangeTier: () => void;
+}
+
+/**
+ * Card de inscripción que muestra el tier individual y permite cambiarlo
+ * MODELO 2026: Cada inscripción puede tener un tier diferente
+ */
+function InscripcionCard({ inscripcion, onChangeTier }: InscripcionCardProps): React.ReactElement {
+  const tierConfig: Record<TierNombre, { gradient: string; icon: typeof Star }> = {
+    STEAM_LIBROS: { gradient: 'from-cyan-500 to-blue-600', icon: BookOpen },
+    STEAM_ASINCRONICO: { gradient: 'from-violet-500 to-purple-600', icon: Video },
+    STEAM_SINCRONICO: { gradient: 'from-amber-500 to-orange-600', icon: Crown },
+  };
+
+  const tier = inscripcion.tier ?? 'STEAM_LIBROS';
+  const config = tierConfig[tier];
+  const TierIcon = config.icon;
+
+  return (
+    <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-xl">
+      <div
+        className={`w-10 h-10 bg-gradient-to-br ${config.gradient} rounded-lg flex items-center justify-center shrink-0`}
+      >
+        <TierIcon className="w-5 h-5 text-white" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-white truncate">{inscripcion.productoNombre}</p>
+        {inscripcion.claseGrupoNombre && (
+          <p className="text-sm text-slate-500">Grupo: {inscripcion.claseGrupoNombre}</p>
+        )}
+        <button
+          onClick={onChangeTier}
+          className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors mt-1 flex items-center gap-1"
+        >
+          <span className="px-2 py-0.5 bg-white/5 rounded-full">{formatTierNombre(tier)}</span>
+          <ChevronRight className="w-3 h-3" />
+        </button>
+      </div>
+      <div className="text-right shrink-0">
+        <p className="text-emerald-400 font-semibold">
+          {formatMonto(inscripcion.precioConDescuento)}
+        </p>
+        {inscripcion.descuentoAplicado > 0 && (
+          <p className="text-xs text-amber-400">-{inscripcion.descuentoAplicado}% dto</p>
+        )}
+        {inscripcion.esMasCara && <p className="text-xs text-slate-500">Sin descuento</p>}
+      </div>
+    </div>
+  );
+}
+
 interface TierBadgeProps {
   tier: TierNombre;
   size?: 'sm' | 'lg';
@@ -189,13 +243,26 @@ function SuscripcionActivaView({ suscripcion }: SuscripcionActivaViewProps): Rea
 
   const estudiantes = Object.values(inscripcionesPorEstudiante);
 
-  const fechaProximoCobro = suscripcion.fechaProximoCobro
-    ? new Date(suscripcion.fechaProximoCobro).toLocaleDateString('es-AR', {
+  // Calcular fecha de próximo cobro
+  // Si no hay fecha del backend, estimar el 1ro del mes siguiente
+  const calcularFechaProximoCobro = (): string => {
+    if (suscripcion.fechaProximoCobro) {
+      return new Date(suscripcion.fechaProximoCobro).toLocaleDateString('es-AR', {
         day: '2-digit',
         month: 'long',
         year: 'numeric',
-      })
-    : 'Sin fecha programada';
+      });
+    }
+    // Estimar: primer día del mes siguiente
+    const hoy = new Date();
+    const primeroDeMesSiguiente = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 1);
+    return primeroDeMesSiguiente.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+  };
+  const fechaProximoCobro = calcularFechaProximoCobro();
 
   return (
     <div className="flex-1 overflow-auto p-4 md:p-6">
@@ -207,18 +274,15 @@ function SuscripcionActivaView({ suscripcion }: SuscripcionActivaViewProps): Rea
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-emerald-500/10 to-cyan-500/10 rounded-full blur-2xl" />
 
           <div className="relative z-10">
-            {/* Header con estado y tier */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                  <CreditCard className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white">Mi Suscripción</h2>
-                  <EstadoBadge estado={suscripcion.estado} />
-                </div>
+            {/* Header con estado */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                <CreditCard className="w-8 h-8 text-white" />
               </div>
-              <TierBadge tier={suscripcion.tier} size="lg" />
+              <div>
+                <h2 className="text-2xl font-bold text-white">Mi Suscripción</h2>
+                <EstadoBadge estado={suscripcion.estado} />
+              </div>
             </div>
 
             {/* Stats Grid */}
@@ -327,34 +391,16 @@ function SuscripcionActivaView({ suscripcion }: SuscripcionActivaViewProps): Rea
                   {expandedHijo === estudiante.id && (
                     <div className="px-5 pb-5 space-y-3">
                       {estudiante.inscripciones.map((inscripcion) => (
-                        <div
+                        <InscripcionCard
                           key={inscripcion.id}
-                          className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-xl"
-                        >
-                          <div className="w-10 h-10 bg-cyan-500/20 rounded-lg flex items-center justify-center shrink-0">
-                            <Star className="w-5 h-5 text-cyan-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-white truncate">
-                              {inscripcion.productoNombre}
-                            </p>
-                            {inscripcion.claseGrupoNombre && (
-                              <p className="text-sm text-slate-500">
-                                Grupo: {inscripcion.claseGrupoNombre}
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-right shrink-0">
-                            <p className="text-emerald-400 font-semibold">
-                              {formatMonto(inscripcion.precioConDescuento)}
-                            </p>
-                            {inscripcion.descuentoAplicado > 0 && (
-                              <p className="text-xs text-amber-400">
-                                -{inscripcion.descuentoAplicado}% dto
-                              </p>
-                            )}
-                          </div>
-                        </div>
+                          inscripcion={inscripcion}
+                          onChangeTier={() => {
+                            // TODO: Abrir modal para cambiar tier
+                            router.push(
+                              `/tutor/suscripcion/inscripcion/${inscripcion.id}/cambiar-tier`,
+                            );
+                          }}
+                        />
                       ))}
                     </div>
                   )}
@@ -367,17 +413,17 @@ function SuscripcionActivaView({ suscripcion }: SuscripcionActivaViewProps): Rea
         {/* Acciones rápidas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
-            onClick={() => router.push('/tutor/suscripcion/cambiar-plan')}
+            onClick={() => router.push('/tutor/suscripcion/agregar')}
             className="flex items-center gap-4 p-5 bg-gradient-to-r from-slate-900/80 to-violet-900/20 backdrop-blur-xl border border-violet-500/20 rounded-2xl text-left hover:border-violet-500/40 transition-all group"
           >
             <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl shrink-0">
-              <Crown className="w-6 h-6 text-white" />
+              <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
               <h4 className="font-bold text-white group-hover:text-violet-300 transition-colors">
-                Cambiar Plan
+                Agregar Actividad
               </h4>
-              <p className="text-sm text-slate-500">Upgrade o downgrade tu suscripción</p>
+              <p className="text-sm text-slate-500">Cada actividad puede tener su propio plan</p>
             </div>
             <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-violet-400" />
           </button>

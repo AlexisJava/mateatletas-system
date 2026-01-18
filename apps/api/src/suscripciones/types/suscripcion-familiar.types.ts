@@ -66,6 +66,12 @@ export interface InscripcionActividadInput {
 
   /** ID de la comisión (para cursos temporales) */
   readonly comisionId?: string;
+
+  /**
+   * Tier específico de esta inscripción (MODELO 2026)
+   * Si no se especifica, usa el tier de la suscripción como fallback
+   */
+  readonly tier?: TierNombre;
 }
 
 /**
@@ -158,6 +164,7 @@ export interface CambiarProductoInput {
 
 /**
  * Input para cambiar tier de la suscripción
+ * @deprecated Usar CambiarTierInscripcionInput para cambiar tier por inscripción
  */
 export interface CambiarTierInput {
   /** ID de la suscripción familiar */
@@ -167,6 +174,23 @@ export interface CambiarTierInput {
   readonly tutorId: string;
 
   /** Nuevo tier */
+  readonly nuevoTier: TierNombre;
+}
+
+/**
+ * Input para cambiar tier de una inscripción específica (MODELO 2026)
+ *
+ * Permite cambiar el tier de una inscripción individual sin afectar
+ * las demás inscripciones de la familia.
+ */
+export interface CambiarTierInscripcionInput {
+  /** ID de la inscripción a modificar */
+  readonly inscripcionId: string;
+
+  /** ID del tutor (para validación de ownership) */
+  readonly tutorId: string;
+
+  /** Nuevo tier para esta inscripción */
   readonly nuevoTier: TierNombre;
 }
 
@@ -270,6 +294,7 @@ export interface CambiarProductoResult {
 
 /**
  * Resultado de cambiar tier
+ * @deprecated Usar CambiarTierInscripcionResult
  */
 export interface CambiarTierResult {
   /** Tier anterior */
@@ -289,6 +314,35 @@ export interface CambiarTierResult {
 }
 
 /**
+ * Resultado de cambiar tier de una inscripción específica (MODELO 2026)
+ */
+export interface CambiarTierInscripcionResult {
+  /** ID de la inscripción modificada */
+  readonly inscripcionId: string;
+
+  /** Tier anterior de la inscripción */
+  readonly tierAnterior: TierNombre | null;
+
+  /** Nuevo tier de la inscripción */
+  readonly nuevoTier: TierNombre;
+
+  /** Monto mensual anterior de la suscripción */
+  readonly montoAnterior: number;
+
+  /** Nuevo monto mensual de la suscripción */
+  readonly nuevoMontoMensual: number;
+
+  /** Diferencia de monto */
+  readonly diferenciaMonto: number;
+
+  /** Nombre del producto de la inscripción */
+  readonly productoNombre: string;
+
+  /** Nombre del estudiante */
+  readonly estudianteNombre: string;
+}
+
+/**
  * Detalle de una inscripción de actividad
  */
 export interface InscripcionActividadDetalle {
@@ -302,9 +356,18 @@ export interface InscripcionActividadDetalle {
   readonly comisionId: string | null;
   readonly comisionNombre: string | null;
   readonly estado: string;
+  /**
+   * Tier específico de esta inscripción (MODELO 2026)
+   * Cada inscripción puede tener un tier diferente
+   */
+  readonly tier: TierNombre | null;
   readonly precioBase: number;
   readonly precioConDescuento: number;
   readonly descuentoAplicado: number;
+  /**
+   * Indica si esta inscripción es la más cara (no tiene descuento)
+   */
+  readonly esMasCara: boolean;
   readonly ordenInscripcion: number;
   readonly fechaInicio: Date;
   readonly fechaFin: Date | null;

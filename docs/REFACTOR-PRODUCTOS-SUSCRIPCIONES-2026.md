@@ -218,17 +218,47 @@ interface Producto {
 
 ## 5. SISTEMA DE PRECIOS Y TIERS
 
-### 5.1 Tiers STEAM (Solo para Club)
+### 5.1 Modelo de Pricing 2026 (CORREGIDO)
 
-Los precios de Club NO se definen en el Producto, sino por el Tier que elige el tutor:
+> **CAMBIO CRÍTICO**: El tier se define **POR INSCRIPCIÓN/ACTIVIDAD**, no por familia.
+> Esto permite que Juan tenga Club Matemática SINCRÓNICO y Curso Programación ASINCRÓNICO.
 
-| Tier              | Precio Mensual | Incluye                              |
-| ----------------- | -------------- | ------------------------------------ |
-| STEAM_LIBROS      | $40.000        | Microlecciones + Juegos (sin clases) |
-| STEAM_ASINCRONICO | $65.000        | Todo + Clases grabadas               |
-| STEAM_SINCRONICO  | $95.000        | Todo + Clases en vivo con docente    |
+#### Tipos de Producto
 
-**IMPORTANTE**: El Tier se elige a nivel de familia, no por actividad. Todos los estudiantes de la familia tienen el mismo Tier.
+| Tipo Producto | Aplica a                     | Tiene Tier | Modelo de Pago      |
+| ------------- | ---------------------------- | ---------- | ------------------- |
+| **CLUB**      | Solo MATEMÁTICA              | SÍ         | Suscripción mensual |
+| **CURSO**     | Programación, Ciencias, etc. | SÍ         | Suscripción mensual |
+| **COLONIA**   | Cualquier mundo              | NO         | Pago único / cuotas |
+| **TALLER**    | Cualquier mundo              | NO         | Pago único          |
+
+#### Tiers STEAM (Aplican a CLUBS y CURSOS)
+
+| Tier              | Precio Mensual | Incluye                                         |
+| ----------------- | -------------- | ----------------------------------------------- |
+| STEAM_LIBROS      | $40.000        | Solo Plataforma + Libros digitales (sin clases) |
+| STEAM_ASINCRONICO | $65.000        | Plataforma + Libros + Videos grabados           |
+| STEAM_SINCRONICO  | $95.000        | Todo lo anterior + Clases en vivo con docente   |
+
+> **IMPORTANTE - REGLA DE INCLUSIÓN**:
+>
+> - **STEAM_LIBROS** ($40k): Solo acceso a plataforma y libros digitales, SIN inscribirse a Club ni Curso
+> - **STEAM_ASINCRONICO** ($65k): Club o Curso con videos, los libros **VIENEN INCLUIDOS**
+> - **STEAM_SINCRONICO** ($95k): Club o Curso con clases en vivo, los libros **VIENEN INCLUIDOS**
+>
+> **En otras palabras**: Los tiers ASYNC y SYNC ya incluyen el acceso a libros. NO hay que sumar $40k.
+> El tier LIBROS es para familias que SOLO quieren la plataforma sin inscribirse a ningún Club o Curso.
+
+#### Diferencia entre CLUB y CURSO
+
+| Aspecto      | CLUB                                 | CURSO                           |
+| ------------ | ------------------------------------ | ------------------------------- |
+| **Mundo**    | Solo MATEMÁTICA (General u Olímpica) | Programación, Ciencias, etc.    |
+| **Tiers**    | LIBROS, ASINCRÓNICO, SINCRÓNICO      | LIBROS, ASINCRÓNICO, SINCRÓNICO |
+| **Pricing**  | Según tier elegido                   | Según tier elegido              |
+| **Duración** | Todo el año (recurrente)             | Todo el año (recurrente)        |
+
+**IMPORTANTE**: El tier se elige **POR CADA INSCRIPCIÓN** (Club o Curso), no por familia.
 
 ### 5.2 Descuento Familiar
 

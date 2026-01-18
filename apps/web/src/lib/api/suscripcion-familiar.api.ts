@@ -1,12 +1,17 @@
 /**
  * API Client para Suscripciones Familiares 2026
  *
+ * MODELO 2026: Tier por inscripción (no por familia)
+ * - Cada inscripción puede tener un tier diferente
+ * - Descuento 10% se aplica al producto de MENOR VALOR
+ *
  * Endpoints:
  * - GET /suscripciones/familiar → Mi suscripción
  * - POST /suscripciones/familiar → Crear suscripción
  * - POST /suscripciones/familiar/inscripciones → Agregar inscripciones
  * - DELETE /suscripciones/familiar/inscripciones → Dar de baja
- * - PATCH /suscripciones/familiar/tier → Cambiar tier
+ * - PATCH /suscripciones/familiar/inscripciones/:id/tier → Cambiar tier de inscripción (NUEVO)
+ * - PATCH /suscripciones/familiar/tier → Cambiar tier (deprecated)
  * - POST /suscripciones/familiar/cancelar → Cancelar suscripción
  * - GET /suscripciones/familiar/simular → Simular monto
  *
@@ -45,6 +50,11 @@ export interface InscripcionActividadRequest {
   readonly claseGrupoId?: string;
   /** ID de la comisión - para cursos temporales */
   readonly comisionId?: string;
+  /**
+   * Tier específico de esta inscripción (MODELO 2026)
+   * Si no se especifica, usa el tier de la suscripción como fallback
+   */
+  readonly tier?: TierNombre;
 }
 
 /**
@@ -80,10 +90,19 @@ export interface BajaInscripcionesRequest {
 }
 
 /**
- * Request para cambiar tier
+ * Request para cambiar tier de la suscripción (toda la familia)
+ * @deprecated Usar CambiarTierInscripcionRequest para cambiar tier por inscripción
  */
 export interface CambiarTierRequest {
   /** Nuevo tier */
+  readonly nuevoTier: TierNombre;
+}
+
+/**
+ * Request para cambiar tier de una inscripción específica (MODELO 2026)
+ */
+export interface CambiarTierInscripcionRequest {
+  /** Nuevo tier para esta inscripción */
   readonly nuevoTier: TierNombre;
 }
 
@@ -113,9 +132,19 @@ export interface InscripcionActividadDetalle {
   readonly comisionId: string | null;
   readonly comisionNombre: string | null;
   readonly estado: EstadoInscripcionActividad;
+  /**
+   * Tier específico de esta inscripción (MODELO 2026)
+   * Cada inscripción puede tener un tier diferente
+   */
+  readonly tier: TierNombre | null;
   readonly precioBase: number;
   readonly precioConDescuento: number;
   readonly descuentoAplicado: number;
+  /**
+   * Indica si esta inscripción es la más cara (no tiene descuento)
+   * El descuento se aplica a los productos de MENOR valor
+   */
+  readonly esMasCara: boolean;
   readonly ordenInscripcion: number;
   readonly fechaInicio: string;
   readonly fechaFin: string | null;
@@ -172,7 +201,8 @@ export interface BajaInscripcionesResponse {
 }
 
 /**
- * Response de cambiar tier
+ * Response de cambiar tier de suscripción
+ * @deprecated Usar CambiarTierInscripcionResponse
  */
 export interface CambiarTierResponse {
   readonly tierAnterior: TierNombre;
@@ -180,6 +210,28 @@ export interface CambiarTierResponse {
   readonly montoAnterior: number;
   readonly nuevoMontoMensual: number;
   readonly diferenciaMonto: number;
+}
+
+/**
+ * Response de cambiar tier de una inscripción específica (MODELO 2026)
+ */
+export interface CambiarTierInscripcionResponse {
+  /** ID de la inscripción modificada */
+  readonly inscripcionId: string;
+  /** Tier anterior de la inscripción */
+  readonly tierAnterior: TierNombre | null;
+  /** Nuevo tier de la inscripción */
+  readonly nuevoTier: TierNombre;
+  /** Monto mensual anterior de la suscripción */
+  readonly montoAnterior: number;
+  /** Nuevo monto mensual de la suscripción */
+  readonly nuevoMontoMensual: number;
+  /** Diferencia de monto */
+  readonly diferenciaMonto: number;
+  /** Nombre del producto de la inscripción */
+  readonly productoNombre: string;
+  /** Nombre del estudiante */
+  readonly estudianteNombre: string;
 }
 
 /**
@@ -272,9 +324,31 @@ export const suscripcionFamiliarApi = {
   },
 
   /**
+   * PATCH /suscripciones/familiar/inscripciones/:id/tier
+   * Cambia el tier de una inscripción específica (MODELO 2026)
+   *
+   * El monto mensual se recalcula aplicando el descuento del 10%
+   * al producto de MENOR valor (no al segundo cronológicamente).
+   *
+   * @param inscripcionId - ID de la inscripción a modificar
+   * @param data - Nuevo tier para la inscripción
+   * @returns Resultado con comparación de montos
+   */
+  cambiarTierInscripcion: async (
+    inscripcionId: string,
+    data: CambiarTierInscripcionRequest,
+  ): Promise<CambiarTierInscripcionResponse> => {
+    return apiClient.patch<CambiarTierInscripcionResponse>(
+      `/suscripciones/familiar/inscripciones/${inscripcionId}/tier`,
+      data,
+    );
+  },
+
+  /**
    * PATCH /suscripciones/familiar/tier
    * Cambia el tier de la suscripción
    *
+   * @deprecated Usar cambiarTierInscripcion para cambiar tier de inscripciones individuales
    * @param data - Nuevo tier
    * @returns Resultado con comparación de montos
    */
