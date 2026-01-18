@@ -219,7 +219,9 @@ export class ClaseGruposService {
             nombre: true,
           },
         },
-        inscripciones: {
+        // IMPORTANTE: Usar vista unificada para lecturas (incluye inscripciones manuales + suscripción 2026)
+        inscripcionesUnificadas: {
+          where: { estado: 'ACTIVA' },
           include: {
             estudiante: {
               select: {
@@ -232,7 +234,9 @@ export class ClaseGruposService {
         },
         _count: {
           select: {
-            inscripciones: true,
+            inscripcionesUnificadas: {
+              where: { estado: 'ACTIVA' },
+            },
             asistencias: true,
           },
         },
@@ -246,9 +250,12 @@ export class ClaseGruposService {
       success: true,
       data: grupos.map((grupo: GrupoConContadores) => ({
         ...grupo,
-        total_inscriptos: grupo._count.inscripciones,
+        // Mapear inscripcionesUnificadas a inscripciones para mantener compatibilidad API
+        inscripciones: grupo.inscripcionesUnificadas,
+        total_inscriptos: grupo._count.inscripcionesUnificadas,
         total_asistencias: grupo._count.asistencias,
-        cupos_disponibles: grupo.cupo_maximo - grupo._count.inscripciones,
+        cupos_disponibles:
+          grupo.cupo_maximo - grupo._count.inscripcionesUnificadas,
       })),
       total: grupos.length,
     };
@@ -277,7 +284,9 @@ export class ClaseGruposService {
             color: true,
           },
         },
-        inscripciones: {
+        // IMPORTANTE: Usar vista unificada para lecturas (incluye inscripciones manuales + suscripción 2026)
+        inscripcionesUnificadas: {
+          where: { estado: 'ACTIVA' },
           include: {
             estudiante: {
               select: {
@@ -306,7 +315,9 @@ export class ClaseGruposService {
         },
         _count: {
           select: {
-            inscripciones: true,
+            inscripcionesUnificadas: {
+              where: { estado: 'ACTIVA' },
+            },
             asistencias: true,
           },
         },
@@ -321,9 +332,12 @@ export class ClaseGruposService {
       success: true,
       data: {
         ...grupo,
-        total_inscriptos: grupo._count.inscripciones,
+        // Mapear inscripcionesUnificadas a inscripciones para mantener compatibilidad API
+        inscripciones: grupo.inscripcionesUnificadas,
+        total_inscriptos: grupo._count.inscripcionesUnificadas,
         total_asistencias: grupo._count.asistencias,
-        cupos_disponibles: grupo.cupo_maximo - grupo._count.inscripciones,
+        cupos_disponibles:
+          grupo.cupo_maximo - grupo._count.inscripcionesUnificadas,
       },
     };
   }
@@ -480,12 +494,15 @@ export class ClaseGruposService {
    */
   async eliminarClaseGrupo(id: string) {
     // Verificar que el grupo existe
+    // IMPORTANTE: Usar vista unificada para contar inscripciones activas (incluye manuales + suscripción 2026)
     const grupoExistente = await this.prisma.claseGrupo.findUnique({
       where: { id },
       include: {
         _count: {
           select: {
-            inscripciones: true,
+            inscripcionesUnificadas: {
+              where: { estado: 'ACTIVA' },
+            },
           },
         },
       },
@@ -503,7 +520,7 @@ export class ClaseGruposService {
 
     return {
       success: true,
-      message: `Horario eliminado exitosamente. ${grupoExistente._count.inscripciones} inscripciones fueron desactivadas.`,
+      message: `Horario eliminado exitosamente. ${grupoExistente._count.inscripcionesUnificadas} inscripciones fueron desactivadas.`,
     };
   }
 
@@ -512,11 +529,16 @@ export class ClaseGruposService {
    */
   async agregarEstudiantes(claseGrupoId: string, estudiantesIds: string[]) {
     // Verificar que el grupo existe
+    // IMPORTANTE: Usar vista unificada para contar inscripciones activas (incluye manuales + suscripción 2026)
     const grupo = await this.prisma.claseGrupo.findUnique({
       where: { id: claseGrupoId },
       include: {
         _count: {
-          select: { inscripciones: true },
+          select: {
+            inscripcionesUnificadas: {
+              where: { estado: 'ACTIVA' },
+            },
+          },
         },
       },
     });
@@ -528,7 +550,8 @@ export class ClaseGruposService {
     }
 
     // Verificar que no se exceda el cupo máximo
-    const cuposDisponibles = grupo.cupo_maximo - grupo._count.inscripciones;
+    const cuposDisponibles =
+      grupo.cupo_maximo - grupo._count.inscripcionesUnificadas;
     if (estudiantesIds.length > cuposDisponibles) {
       throw new BadRequestException(
         `No hay suficientes cupos disponibles. Disponibles: ${cuposDisponibles}, Solicitados: ${estudiantesIds.length}`,
@@ -547,12 +570,13 @@ export class ClaseGruposService {
       );
     }
 
-    // Verificar que los estudiantes no estén ya inscritos
+    // Verificar que los estudiantes no estén ya inscritos (usar vista unificada para incluir ambas fuentes)
     const inscripcionesExistentes =
-      await this.prisma.inscripcionClaseGrupo.findMany({
+      await this.prisma.inscripcionUnificada.findMany({
         where: {
           clase_grupo_id: claseGrupoId,
           estudiante_id: { in: estudiantesIds },
+          estado: 'ACTIVA',
         },
       });
 
@@ -562,36 +586,40 @@ export class ClaseGruposService {
       );
     }
 
-    // Crear las inscripciones
-    const nuevasInscripciones = await Promise.all(
-      estudiantes.map((estudiante) =>
-        this.prisma.inscripcionClaseGrupo.create({
-          data: {
-            clase_grupo_id: claseGrupoId,
-            estudiante_id: estudiante.id,
-            tutor_id: estudiante.tutor_id,
-            fecha_inscripcion: new Date(),
-          },
-          include: {
-            estudiante: {
-              select: {
-                id: true,
-                nombre: true,
-                apellido: true,
-                edad: true,
+    // Crear las inscripciones en transacción para evitar race conditions
+    const nuevasInscripciones = await this.prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        return await Promise.all(
+          estudiantes.map((estudiante) =>
+            tx.inscripcionClaseGrupo.create({
+              data: {
+                clase_grupo_id: claseGrupoId,
+                estudiante_id: estudiante.id,
+                tutor_id: estudiante.tutor_id,
+                fecha_inscripcion: new Date(),
               },
-            },
-            tutor: {
-              select: {
-                id: true,
-                nombre: true,
-                apellido: true,
-                email: true,
+              include: {
+                estudiante: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    edad: true,
+                  },
+                },
+                tutor: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                  },
+                },
               },
-            },
-          },
-        }),
-      ),
+            }),
+          ),
+        );
+      },
     );
 
     return {
@@ -603,6 +631,8 @@ export class ClaseGruposService {
 
   /**
    * Remover un estudiante de un ClaseGrupo
+   * NOTA: Solo puede remover inscripciones manuales. Las inscripciones via suscripción
+   * deben cancelarse desde el portal tutor.
    */
   async removerEstudiante(claseGrupoId: string, estudianteId: string) {
     // Verificar que el grupo existe
@@ -616,36 +646,64 @@ export class ClaseGruposService {
       );
     }
 
-    // Verificar que la inscripción existe
-    const inscripcion = await this.prisma.inscripcionClaseGrupo.findFirst({
-      where: {
-        clase_grupo_id: claseGrupoId,
-        estudiante_id: estudianteId,
-      },
-      include: {
-        estudiante: {
-          select: {
-            nombre: true,
-            apellido: true,
+    // Verificar que la inscripción existe usando vista unificada
+    const inscripcionUnificada =
+      await this.prisma.inscripcionUnificada.findFirst({
+        where: {
+          clase_grupo_id: claseGrupoId,
+          estudiante_id: estudianteId,
+          estado: 'ACTIVA',
+        },
+        include: {
+          estudiante: {
+            select: {
+              nombre: true,
+              apellido: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (!inscripcion) {
+    if (!inscripcionUnificada) {
       throw new NotFoundException(
         `El estudiante no está inscrito en este horario`,
       );
     }
 
-    // Eliminar la inscripción
-    await this.prisma.inscripcionClaseGrupo.delete({
-      where: { id: inscripcion.id },
+    // Solo se pueden eliminar inscripciones manuales desde admin
+    if (inscripcionUnificada.fuente === 'SUSCRIPCION_2026') {
+      throw new BadRequestException(
+        `Esta inscripción proviene de una suscripción familiar. ` +
+          `Debe cancelarse desde el portal del tutor o modificando la suscripción.`,
+      );
+    }
+
+    // Buscar la inscripción manual para eliminarla
+    const inscripcionManual = await this.prisma.inscripcionClaseGrupo.findFirst(
+      {
+        where: {
+          clase_grupo_id: claseGrupoId,
+          estudiante_id: estudianteId,
+          fecha_baja: null,
+        },
+      },
+    );
+
+    if (!inscripcionManual) {
+      throw new NotFoundException(
+        `No se encontró la inscripción manual para eliminar`,
+      );
+    }
+
+    // Eliminar la inscripción (soft delete con fecha_baja)
+    await this.prisma.inscripcionClaseGrupo.update({
+      where: { id: inscripcionManual.id },
+      data: { fecha_baja: new Date() },
     });
 
     return {
       success: true,
-      message: `Estudiante ${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido} removido exitosamente`,
+      message: `Estudiante ${inscripcionUnificada.estudiante.nombre} ${inscripcionUnificada.estudiante.apellido} removido exitosamente`,
     };
   }
 

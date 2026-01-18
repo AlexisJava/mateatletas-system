@@ -63,9 +63,9 @@ export const JWT_EXPIRATION =
 // ============================================================================
 
 /**
- * Longitud mínima de password
+ * Longitud mínima de password (OWASP recomienda 8-12 caracteres)
  */
-export const MIN_PASSWORD_LENGTH = 6;
+export const MIN_PASSWORD_LENGTH = 8;
 
 /**
  * Longitud máxima de password

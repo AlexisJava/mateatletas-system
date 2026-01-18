@@ -42,5 +42,19 @@ export * from './schemas/enums.schema';
 // Tiers de suscripción STEAM 2026
 export * from './schemas/tiers.schema';
 
+// === Sistema de Suscripciones 2026 ===
+
+// Suscripción Familiar (titular por familia)
+export * from './schemas/suscripcion-familiar.schema';
+
+// Inscripción a Actividad (estudiante + producto + horario)
+export * from './schemas/inscripcion-actividad.schema';
+
+// Inscripción Unificada (Vista PostgreSQL - READ ONLY)
+export * from './schemas/inscripcion-unificada.schema';
+
+// Pago de Curso (cursos temporales)
+export * from './schemas/pago-curso.schema';
+
 // Content system schemas (Microlecciones)
 export * from './schemas/content';

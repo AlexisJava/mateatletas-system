@@ -48,7 +48,8 @@ export class EstudianteCommandService {
     apellido: string,
     sufijo?: string,
   ): Promise<string> {
-    const baseUsername = `${nombre}.${apellido}${sufijo ? `.${sufijo}` : ''}`
+    const sufijoStr = sufijo ? `.${sufijo}` : '';
+    const baseUsername = `${nombre}.${apellido}${sufijoStr}`
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '') // Remover acentos
@@ -437,7 +438,7 @@ export class EstudianteCommandService {
    * @returns Inscripción creada
    */
   async asignarClaseAEstudiante(estudianteId: string, claseId: string) {
-    // Validar que el estudiante existe
+    // Validar que el estudiante existe (fuera de transacción, solo lectura)
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: estudianteId },
     });
@@ -449,53 +450,63 @@ export class EstudianteCommandService {
     // Validar que la clase existe
     await this.validator.validateClaseExists(claseId);
 
-    const clase = await this.prisma.clase.findUnique({
-      where: { id: claseId },
-    });
+    // Ejecutar validaciones y escrituras en transacción para evitar race conditions
+    const inscripcion = await this.prisma.$transaction(async (tx) => {
+      // Re-fetch clase dentro de la transacción para tener datos actualizados
+      const clase = await tx.clase.findUnique({
+        where: { id: claseId },
+      });
 
-    // Validar que la clase pertenece al sector del estudiante
-    if (clase!.sector_id !== estudiante.sector_id) {
-      throw new BadRequestException(
-        'La clase no pertenece al sector del estudiante',
-      );
-    }
+      if (!clase) {
+        throw new BadRequestException('La clase no existe');
+      }
 
-    // Validar cupos disponibles
-    if (clase!.cupos_ocupados >= clase!.cupos_maximo) {
-      throw new ConflictException('La clase no tiene cupos disponibles');
-    }
+      // Validar que la clase pertenece al sector del estudiante
+      if (clase.sector_id !== estudiante.sector_id) {
+        throw new BadRequestException(
+          'La clase no pertenece al sector del estudiante',
+        );
+      }
 
-    // Validar que no esté ya inscrito
-    const inscripcionExistente = await this.prisma.inscripcionClase.findFirst({
-      where: {
-        estudiante_id: estudianteId,
-        clase_id: claseId,
-      },
-    });
+      // Validar cupos disponibles (dentro de transacción para evitar race condition)
+      if (clase.cupos_ocupados >= clase.cupos_maximo) {
+        throw new ConflictException('La clase no tiene cupos disponibles');
+      }
 
-    if (inscripcionExistente) {
-      throw new ConflictException(
-        'El estudiante ya está inscrito en esta clase',
-      );
-    }
-
-    // Crear inscripción e incrementar cupos
-    const inscripcion = await this.prisma.inscripcionClase.create({
-      data: {
-        estudiante_id: estudianteId,
-        clase_id: claseId,
-        tutor_id: estudiante.tutor_id,
-      },
-    });
-
-    // Incrementar cupos ocupados
-    await this.prisma.clase.update({
-      where: { id: claseId },
-      data: {
-        cupos_ocupados: {
-          increment: 1,
+      // Validar que no esté ya inscrito
+      const inscripcionExistente = await tx.inscripcionClase.findFirst({
+        where: {
+          estudiante_id: estudianteId,
+          clase_id: claseId,
         },
-      },
+      });
+
+      if (inscripcionExistente) {
+        throw new ConflictException(
+          'El estudiante ya está inscrito en esta clase',
+        );
+      }
+
+      // Crear inscripción
+      const nuevaInscripcion = await tx.inscripcionClase.create({
+        data: {
+          estudiante_id: estudianteId,
+          clase_id: claseId,
+          tutor_id: estudiante.tutor_id,
+        },
+      });
+
+      // Incrementar cupos ocupados (atómico dentro de la transacción)
+      await tx.clase.update({
+        where: { id: claseId },
+        data: {
+          cupos_ocupados: {
+            increment: 1,
+          },
+        },
+      });
+
+      return nuevaInscripcion;
     });
 
     this.logger.log(`Estudiante ${estudianteId} asignado a clase ${claseId}`);
@@ -510,7 +521,7 @@ export class EstudianteCommandService {
    * @returns Array de inscripciones creadas
    */
   async asignarClasesAEstudiante(estudianteId: string, clasesIds: string[]) {
-    // Validar estudiante
+    // Validar estudiante (fuera de transacción, solo lectura)
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: estudianteId },
     });
@@ -519,39 +530,46 @@ export class EstudianteCommandService {
       throw new BadRequestException('El estudiante no existe');
     }
 
-    // Validar clases
-    const clases = await this.prisma.clase.findMany({
-      where: {
-        id: {
-          in: clasesIds,
-        },
-      },
+    // Validar que las clases existen (fuera de transacción, validación básica)
+    const clasesExistentes = await this.prisma.clase.findMany({
+      where: { id: { in: clasesIds } },
+      select: { id: true },
     });
 
-    if (clases.length !== clasesIds.length) {
+    if (clasesExistentes.length !== clasesIds.length) {
       throw new BadRequestException('Una o más clases no existen');
     }
 
-    // Validar que todas las clases pertenecen al sector
-    for (const clase of clases) {
-      if (clase.sector_id !== estudiante.sector_id) {
-        throw new BadRequestException(
-          `La clase ${clase.nombre} no pertenece al sector del estudiante`,
-        );
-      }
+    // Crear inscripciones en transacción para evitar race conditions
+    const inscripciones = await this.prisma.$transaction(async (tx) => {
+      const resultados = [];
 
-      if (clase.cupos_ocupados >= clase.cupos_maximo) {
-        throw new ConflictException(
-          `La clase ${clase.nombre} no tiene cupos disponibles`,
-        );
-      }
-    }
+      for (const claseId of clasesIds) {
+        // Re-fetch clase dentro de transacción para datos actualizados
+        const clase = await tx.clase.findUnique({
+          where: { id: claseId },
+        });
 
-    // Crear inscripciones en transacción
-    const inscripciones = await this.prisma.$transaction(async (prisma) => {
-      const inscripcionesPromises = clasesIds.map(async (claseId) => {
+        if (!clase) {
+          throw new BadRequestException(`La clase ${claseId} no existe`);
+        }
+
+        // Validar sector
+        if (clase.sector_id !== estudiante.sector_id) {
+          throw new BadRequestException(
+            `La clase ${clase.nombre} no pertenece al sector del estudiante`,
+          );
+        }
+
+        // Validar cupos (dentro de transacción para evitar race condition)
+        if (clase.cupos_ocupados >= clase.cupos_maximo) {
+          throw new ConflictException(
+            `La clase ${clase.nombre} no tiene cupos disponibles`,
+          );
+        }
+
         // Verificar inscripción duplicada
-        const existente = await prisma.inscripcionClase.findFirst({
+        const existente = await tx.inscripcionClase.findFirst({
           where: {
             estudiante_id: estudianteId,
             clase_id: claseId,
@@ -560,12 +578,12 @@ export class EstudianteCommandService {
 
         if (existente) {
           throw new ConflictException(
-            'El estudiante ya está inscrito en una de las clases',
+            `El estudiante ya está inscrito en la clase ${clase.nombre}`,
           );
         }
 
         // Crear inscripción
-        const inscripcion = await prisma.inscripcionClase.create({
+        const inscripcion = await tx.inscripcionClase.create({
           data: {
             estudiante_id: estudianteId,
             clase_id: claseId,
@@ -573,20 +591,18 @@ export class EstudianteCommandService {
           },
         });
 
-        // Incrementar cupos
-        await prisma.clase.update({
+        // Incrementar cupos (atómico dentro de transacción)
+        await tx.clase.update({
           where: { id: claseId },
           data: {
-            cupos_ocupados: {
-              increment: 1,
-            },
+            cupos_ocupados: { increment: 1 },
           },
         });
 
-        return inscripcion;
-      });
+        resultados.push(inscripcion);
+      }
 
-      return await Promise.all(inscripcionesPromises);
+      return resultados;
     });
 
     this.logger.log(

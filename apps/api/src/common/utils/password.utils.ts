@@ -49,11 +49,11 @@ export function generateSecurePassword(): string {
  * @returns true si cumple los requisitos, false en caso contrario
  */
 export function isPasswordSecure(password: string): boolean {
-  if (password.length < 6) return false;
+  if (password.length < 8) return false;
 
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
+  const hasNumber = /\d/.test(password);
 
   return hasUppercase && hasLowercase && hasNumber;
 }
