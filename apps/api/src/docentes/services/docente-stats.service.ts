@@ -566,8 +566,8 @@ export class DocenteStatsService {
       else if (diferencia < -5) tendenciaAsistencia = 'down';
     }
 
-    // Contar observaciones pendientes
-    const observacionesPendientes = 0; // TODO: Implementar cuando exista campo "respondida"
+    // Contar observaciones pendientes (pendiente campo "respondida" en modelo)
+    const observacionesPendientes = 0;
 
     // Contar estudiantes únicos del docente
     // Usa vista unificada para incluir inscripciones manuales y via suscripción
@@ -1344,14 +1344,76 @@ export class DocenteStatsService {
     };
   }
 
-  /**
-   * Calcula la próxima ocurrencia de una clase basado en el horario
-   * Soporta formatos: "Lunes 14:30", "Lun y Mie 19:00", "Lun-Vie 9:00-12:00"
-   *
-   * @param horario - String con el horario (ej: "Lunes 14:30")
-   * @param fechaFin - Fecha de fin de la comisión (opcional)
-   * @returns Date de la próxima clase o null
-   */
+  /** Mapeo de días en español a número (0=Domingo, 1=Lunes, etc.) */
+  private static readonly DIAS_SEMANA_MAP: Record<string, number> = {
+    domingo: 0,
+    dom: 0,
+    lunes: 1,
+    lun: 1,
+    martes: 2,
+    mar: 2,
+    miercoles: 3,
+    miércoles: 3,
+    mie: 3,
+    jueves: 4,
+    jue: 4,
+    viernes: 5,
+    vie: 5,
+    sabado: 6,
+    sábado: 6,
+    sab: 6,
+  };
+
+  /** Regex para extraer hora en formato HH:MM */
+  private static readonly HORA_REGEX = /(\d{1,2}):(\d{2})/;
+
+  /** Extrae los días de la semana mencionados en un string de horario */
+  private extraerDiasDeHorario(horario: string): number[] {
+    const horarioLower = horario.toLowerCase();
+    const diasEncontrados: number[] = [];
+
+    for (const [dia, num] of Object.entries(
+      DocenteStatsService.DIAS_SEMANA_MAP,
+    )) {
+      if (horarioLower.includes(dia) && !diasEncontrados.includes(num)) {
+        diasEncontrados.push(num);
+      }
+    }
+
+    return diasEncontrados;
+  }
+
+  /** Extrae hora y minutos de un string de horario */
+  private extraerHoraDeHorario(
+    horario: string,
+  ): { hora: number; minutos: number } | null {
+    const match = DocenteStatsService.HORA_REGEX.exec(horario);
+    if (!match?.[1] || !match[2]) return null;
+    return {
+      hora: parseInt(match[1], 10),
+      minutos: parseInt(match[2], 10),
+    };
+  }
+
+  /** Calcula días hasta la próxima ocurrencia de un día de la semana */
+  private calcularDiasHastaDia(
+    diaClase: number,
+    diaActual: number,
+    horaActual: number,
+    horaClase: number,
+  ): number {
+    let diasHasta = diaClase - diaActual;
+
+    if (diasHasta === 0 && horaActual >= horaClase) {
+      diasHasta = 7;
+    } else if (diasHasta < 0) {
+      diasHasta += 7;
+    }
+
+    return diasHasta;
+  }
+
+  /** Calcula la próxima ocurrencia de una clase basado en el horario */
   private calcularProximaClase(
     horario: string | null,
     fechaFin: Date | null,
@@ -1359,84 +1421,37 @@ export class DocenteStatsService {
     if (!horario) return null;
 
     const now = new Date();
-
-    // Si la comisión ya terminó, no hay próxima clase
     if (fechaFin && fechaFin < now) return null;
 
-    // Mapeo de días en español a número (0=Domingo, 1=Lunes, etc.)
-    const diasMap: Record<string, number> = {
-      domingo: 0,
-      dom: 0,
-      lunes: 1,
-      lun: 1,
-      martes: 2,
-      mar: 2,
-      miercoles: 3,
-      miércoles: 3,
-      mie: 3,
-      jueves: 4,
-      jue: 4,
-      viernes: 5,
-      vie: 5,
-      sabado: 6,
-      sábado: 6,
-      sab: 6,
-    };
+    const diasEncontrados = this.extraerDiasDeHorario(horario);
+    const tiempo = this.extraerHoraDeHorario(horario);
 
-    // Extraer días del horario
-    const horarioLower = horario.toLowerCase();
-    const diasEncontrados: number[] = [];
+    if (diasEncontrados.length === 0 || !tiempo) return null;
 
-    // Buscar días individuales
-    for (const [dia, num] of Object.entries(diasMap)) {
-      if (horarioLower.includes(dia)) {
-        if (!diasEncontrados.includes(num)) {
-          diasEncontrados.push(num);
-        }
-      }
-    }
-
-    // Extraer hora (formato HH:MM)
-    const horaMatch = horario.match(/(\d{1,2}):(\d{2})/);
-    if (!horaMatch?.[1] || !horaMatch[2] || diasEncontrados.length === 0) {
-      return null;
-    }
-
-    const hora = parseInt(horaMatch[1], 10);
-    const minutos = parseInt(horaMatch[2], 10);
-
-    // Encontrar la próxima ocurrencia
+    const { hora, minutos } = tiempo;
     const diaActual = now.getDay();
     const horaActual = now.getHours() * 60 + now.getMinutes();
     const horaClase = hora * 60 + minutos;
 
     let diasHastaProxima = Infinity;
-    let diaProximo = -1;
-
     for (const diaClase of diasEncontrados) {
-      let diasHasta = diaClase - diaActual;
-
-      // Si es hoy pero ya pasó la hora, buscar la próxima semana
-      if (diasHasta === 0 && horaActual >= horaClase) {
-        diasHasta = 7;
-      } else if (diasHasta < 0) {
-        diasHasta += 7;
-      }
-
+      const diasHasta = this.calcularDiasHastaDia(
+        diaClase,
+        diaActual,
+        horaActual,
+        horaClase,
+      );
       if (diasHasta < diasHastaProxima) {
         diasHastaProxima = diasHasta;
-        diaProximo = diaClase;
       }
     }
 
-    if (diaProximo === -1) return null;
+    if (diasHastaProxima === Infinity) return null;
 
-    // Construir la fecha de la próxima clase
     const proximaClase = new Date(now);
     proximaClase.setDate(now.getDate() + diasHastaProxima);
     proximaClase.setHours(hora, minutos, 0, 0);
 
-    // Verificar que no exceda la fecha de fin
     if (fechaFin && proximaClase > fechaFin) return null;
 
     return proximaClase;
@@ -1446,84 +1461,82 @@ export class DocenteStatsService {
   // NUEVOS ENDPOINTS - Dashboard Docente (Gráficos)
   // ============================================================================
 
-  /**
-   * Obtiene la carga horaria semanal del docente
-   * Cuenta cuántas clases tiene cada día de la semana
-   */
+  /** Mapea prefijos de días a su key normalizada */
+  private static readonly DIA_NORMALIZADO: Record<string, string> = {
+    lun: 'lun',
+    lunes: 'lun',
+    mar: 'mar',
+    martes: 'mar',
+    mi: 'mie',
+    mie: 'mie',
+    mié: 'mie',
+    miercoles: 'mie',
+    miércoles: 'mie',
+    jue: 'jue',
+    jueves: 'jue',
+    vie: 'vie',
+    viernes: 'vie',
+    sa: 'sab',
+    sab: 'sab',
+    sá: 'sab',
+    sáb: 'sab',
+    sabado: 'sab',
+    sábado: 'sab',
+    dom: 'dom',
+    domingo: 'dom',
+  };
+
+  /** Cuenta clases por día para un horario dado */
+  private contarClasesPorDia(
+    horario: string,
+    contadores: Record<string, number>,
+  ): void {
+    const horarioLower = horario.toLowerCase();
+
+    for (const [patron, diaNormalizado] of Object.entries(
+      DocenteStatsService.DIA_NORMALIZADO,
+    )) {
+      if (horarioLower.includes(patron)) {
+        contadores[diaNormalizado] = (contadores[diaNormalizado] ?? 0) + 1;
+        return; // Solo contar una vez por comisión
+      }
+    }
+  }
+
+  /** Obtiene la carga horaria semanal del docente */
   async getCargaHorariaSemanal(docenteId: string): Promise<{
     data: { day: string; classes: number }[];
   }> {
     await this.validator.validarDocenteExiste(docenteId);
 
-    // Obtener comisiones activas del docente
     const comisiones = await this.prisma.comision.findMany({
-      where: {
-        docente_id: docenteId,
-        activo: true,
-      },
-      select: {
-        horario: true,
-      },
+      where: { docente_id: docenteId, activo: true },
+      select: { horario: true },
     });
 
-    // Mapeo de días
-    const diasMap: Record<string, number> = {
+    const contadores: Record<string, number> = {
       lun: 0,
       mar: 0,
-      mié: 0,
       mie: 0,
       jue: 0,
       vie: 0,
-      sáb: 0,
       sab: 0,
       dom: 0,
-      lunes: 0,
-      martes: 0,
-      miércoles: 0,
-      miercoles: 0,
-      jueves: 0,
-      viernes: 0,
-      sábado: 0,
-      sabado: 0,
-      domingo: 0,
     };
 
-    // Contar clases por día basado en horario
     for (const comision of comisiones) {
-      if (!comision.horario) continue;
-
-      const horarioLower = comision.horario.toLowerCase();
-
-      // Buscar días mencionados en el horario
-      for (const dia of Object.keys(diasMap)) {
-        if (horarioLower.includes(dia)) {
-          // Mapear día al índice correcto
-          if (dia.startsWith('lun')) diasMap['lun'] = (diasMap['lun'] ?? 0) + 1;
-          else if (dia.startsWith('mar'))
-            diasMap['mar'] = (diasMap['mar'] ?? 0) + 1;
-          else if (dia.startsWith('mi'))
-            diasMap['mié'] = (diasMap['mié'] ?? 0) + 1;
-          else if (dia.startsWith('jue'))
-            diasMap['jue'] = (diasMap['jue'] ?? 0) + 1;
-          else if (dia.startsWith('vie'))
-            diasMap['vie'] = (diasMap['vie'] ?? 0) + 1;
-          else if (dia.startsWith('sa') || dia.startsWith('sá'))
-            diasMap['sáb'] = (diasMap['sáb'] ?? 0) + 1;
-          else if (dia.startsWith('dom'))
-            diasMap['dom'] = (diasMap['dom'] ?? 0) + 1;
-          break; // Solo contar una vez por comisión para este día
-        }
+      if (comision.horario) {
+        this.contarClasesPorDia(comision.horario, contadores);
       }
     }
 
-    // Construir respuesta (Lun a Vie para dashboard típico)
     return {
       data: [
-        { day: 'Lun', classes: diasMap['lun'] || 0 },
-        { day: 'Mar', classes: diasMap['mar'] || 0 },
-        { day: 'Mié', classes: diasMap['mié'] || 0 },
-        { day: 'Jue', classes: diasMap['jue'] || 0 },
-        { day: 'Vie', classes: diasMap['vie'] || 0 },
+        { day: 'Lun', classes: contadores['lun'] ?? 0 },
+        { day: 'Mar', classes: contadores['mar'] ?? 0 },
+        { day: 'Mié', classes: contadores['mie'] ?? 0 },
+        { day: 'Jue', classes: contadores['jue'] ?? 0 },
+        { day: 'Vie', classes: contadores['vie'] ?? 0 },
       ],
     };
   }
