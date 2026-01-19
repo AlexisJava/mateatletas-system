@@ -80,7 +80,6 @@ export function calculateBackoffWithJitter(attemptsMade: number): number {
   const cappedDelay = Math.min(exponentialDelay, MAX_DELAY);
 
   // Full jitter: random between 0 and capped delay
-  // eslint-disable-next-line sonarjs/pseudo-random -- Safe: jitter for backoff timing, not cryptographic
   const jitteredDelay = Math.floor(Math.random() * cappedDelay);
 
   // Ensure minimum delay of 500ms

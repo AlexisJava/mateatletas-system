@@ -4,7 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 import { Trophy, Star, Zap, Flame, ChevronRight, Sparkles } from 'lucide-react';
-import { Button, Badge } from '@mateatletas/ui/primitives';
+import { Button } from '@mateatletas/ui/primitives';
 import { BitMascot } from '@mateatletas/ui/organisms';
 import { backgrounds, blur, lessonSprings } from '@mateatletas/ui/tokens';
 

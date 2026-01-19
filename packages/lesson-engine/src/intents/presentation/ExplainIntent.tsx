@@ -4,7 +4,7 @@ import { useState, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 import { Lightbulb, ChevronRight, ChevronLeft, Check } from 'lucide-react';
-import { Card, Button } from '@mateatletas/ui/primitives';
+import { Button } from '@mateatletas/ui/primitives';
 import { Badge } from '@mateatletas/ui/primitives';
 import { backgrounds, borders, blur, lessonSprings, shadows } from '@mateatletas/ui/tokens';
 
@@ -117,7 +117,6 @@ export function ExplainIntent({
   const step = steps[currentStep];
   const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
-  const allStepsVisited = visitedSteps.size === steps.length;
 
   const goToStep = (newStep: number) => {
     if (newStep < 0 || newStep >= steps.length) return;

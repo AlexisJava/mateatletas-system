@@ -56,7 +56,6 @@ import {
   BajaInscripcionesDto,
   CambiarHorarioDto,
   CambiarProductoDto,
-  // eslint-disable-next-line sonarjs/deprecation -- Backward compatibility
   CambiarTierDto,
   CambiarTierInscripcionDto,
   SimularMontoQueryDto,
@@ -360,7 +359,6 @@ export class SuscripcionFamiliarController {
       'Deprecado: Usar PATCH /inscripciones/:id/tier para cambiar tier de inscripciones individuales',
     deprecated: true,
   })
-  // eslint-disable-next-line sonarjs/deprecation -- Backward compatibility
   async cambiarTier(@Body() dto: CambiarTierDto, @GetUser() user: AuthUser) {
     const suscripcion = await this.queryService.obtenerPorTutorId(user.id);
 
@@ -372,7 +370,6 @@ export class SuscripcionFamiliarController {
     }
 
     try {
-      // eslint-disable-next-line sonarjs/deprecation -- Backward compatibility
       const result = await this.commandService.cambiarTier({
         suscripcionFamiliarId: suscripcion.id,
         tutorId: user.id,

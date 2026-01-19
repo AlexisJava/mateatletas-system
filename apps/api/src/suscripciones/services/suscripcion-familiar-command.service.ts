@@ -41,9 +41,7 @@ import {
   CambiarHorarioResult,
   CambiarProductoInput,
   CambiarProductoResult,
-  // eslint-disable-next-line sonarjs/deprecation -- Backward compatibility
   CambiarTierInput,
-  // eslint-disable-next-line sonarjs/deprecation -- Backward compatibility
   CambiarTierResult,
   CambiarTierInscripcionInput,
   CambiarTierInscripcionResult,
@@ -850,7 +848,6 @@ export class SuscripcionFamiliarCommandService {
    *
    * @deprecated Usar cambiarTierInscripcion para cambiar tier de inscripciones individuales
    */
-  // eslint-disable-next-line sonarjs/deprecation -- Backward compatibility
   async cambiarTier(input: CambiarTierInput): Promise<CambiarTierResult> {
     const { suscripcionFamiliarId, tutorId, nuevoTier } = input;
 

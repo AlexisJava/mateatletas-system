@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
 import { ChevronRight, Trophy, Medal, Crown, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Button, Badge } from '@mateatletas/ui/primitives';
-import { backgrounds, borders, blur, lessonSprings } from '@mateatletas/ui/tokens';
+import { backgrounds, blur, lessonSprings } from '@mateatletas/ui/tokens';
 
 // =============================================================================
 // TYPES

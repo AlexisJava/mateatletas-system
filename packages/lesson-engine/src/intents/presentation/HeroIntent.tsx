@@ -4,8 +4,8 @@ import { type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
 import { Sparkles, ChevronRight } from 'lucide-react';
-import { Button, Card } from '@mateatletas/ui/primitives';
-import { backgrounds, borders, blur, lessonSprings, shadows } from '@mateatletas/ui/tokens';
+import { Button } from '@mateatletas/ui/primitives';
+import { backgrounds, blur, lessonSprings, shadows } from '@mateatletas/ui/tokens';
 
 // =============================================================================
 // TYPES

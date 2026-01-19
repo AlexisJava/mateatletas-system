@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { clsx } from 'clsx';
 import { Star, Flame, Trophy, Zap } from 'lucide-react';
-import { feedback, backgrounds, borders, radius } from '../tokens/lesson';
+import { feedback } from '../tokens/lesson';
 
 /**
  * Badge variants using class-variance-authority

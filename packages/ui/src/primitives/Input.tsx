@@ -2,7 +2,7 @@ import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { clsx } from 'clsx';
 import { AlertCircle, Check } from 'lucide-react';
-import { backgrounds, borders, radius, feedback } from '../tokens/lesson';
+import { backgrounds, borders, feedback } from '../tokens/lesson';
 
 /**
  * Input variants using class-variance-authority

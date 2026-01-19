@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { clsx } from 'clsx';
 import { Zap } from 'lucide-react';
@@ -70,7 +70,7 @@ export function QuizCard({
   onAnswer,
   onContinue,
   combo,
-  timeLimit,
+  _timeLimit,
   showMascot = true,
   feedback: feedbackMessages,
   className,

@@ -1,4 +1,3 @@
-import { type ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { BookOpen, Lightbulb } from 'lucide-react';
 import { Card } from '../primitives/Card';

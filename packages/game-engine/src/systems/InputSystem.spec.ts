@@ -7,12 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InputSystem } from './InputSystem';
-import {
-  createMockScene,
-  createMockPointer,
-  type MockScene,
-  type MockPointer,
-} from '../__mocks__/phaser';
+import { createMockScene, createMockPointer, type MockScene } from '../__mocks__/phaser';
 import type Phaser from 'phaser';
 
 describe('InputSystem', () => {

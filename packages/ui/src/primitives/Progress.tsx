@@ -2,7 +2,7 @@ import { forwardRef, type HTMLAttributes } from 'react';
 import { motion } from 'framer-motion';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { clsx } from 'clsx';
-import { backgrounds, borders, radius } from '../tokens/lesson';
+import { backgrounds, borders } from '../tokens/lesson';
 
 /**
  * Progress variants using class-variance-authority

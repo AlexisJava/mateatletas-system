@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { IntentRegistry } from '../renderer/IntentRegistry';
 import { LessonProvider, useLessonContext, type LessonMetadata } from '../context/LessonContext';
 import { registerAllIntents, areIntentsRegistered } from '../intents/registerIntents';
-import { backgrounds } from '@mateatletas/ui/tokens';
 
 // =============================================================================
 // TYPES
@@ -212,7 +211,7 @@ export function LessonPlayer({
   lesson,
   onComplete,
   onSlideComplete,
-  onExit,
+  _onExit,
   houseColors = { primary: '#00d4ff', secondary: '#0066ff' },
 }: LessonPlayerProps) {
   const [startTime] = useState(() => Date.now());

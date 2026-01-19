@@ -24,12 +24,6 @@ const sizeClasses: Record<MascotSize, string> = {
   lg: 'w-48 h-48',
 };
 
-const sizePx: Record<MascotSize, number> = {
-  sm: 64,
-  md: 128,
-  lg: 192,
-};
-
 /**
  * BitMascot - The Mateatletas robot mascot
  *

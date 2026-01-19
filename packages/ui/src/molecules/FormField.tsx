@@ -1,4 +1,4 @@
-import { type ReactNode, forwardRef, type ComponentPropsWithoutRef } from 'react';
+import { type ReactNode, forwardRef } from 'react';
 import { clsx } from 'clsx';
 import { Input, type InputProps } from '../primitives/Input';
 

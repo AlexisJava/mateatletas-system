@@ -4,16 +4,9 @@ import { useState, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 import { Check, X, Zap, ChevronRight, RotateCcw } from 'lucide-react';
-import { Card, Button, Badge } from '@mateatletas/ui/primitives';
+import { Button, Badge } from '@mateatletas/ui/primitives';
 import { BitMascot } from '@mateatletas/ui/organisms';
-import {
-  backgrounds,
-  borders,
-  blur,
-  lessonSprings,
-  shadows,
-  feedback,
-} from '@mateatletas/ui/tokens';
+import { backgrounds, borders, blur, lessonSprings, feedback } from '@mateatletas/ui/tokens';
 
 // =============================================================================
 // TYPES

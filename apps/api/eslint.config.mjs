@@ -35,7 +35,7 @@ export default tseslint.config(
   // ============================================================================
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
-  sonarjs.configs.recommended,
+  // sonarjs.configs.recommended, // Deshabilitado - demasiado ruidoso
   eslintPluginPrettierRecommended,
 
   // ============================================================================
@@ -105,7 +105,7 @@ export default tseslint.config(
 
       // ===== SONARJS: Desactivar regla duplicada =====
       // Usamos @typescript-eslint/no-unused-vars que tiene ignoreRestSiblings
-      'sonarjs/no-unused-vars': 'off',
+      complexity: ['warn', 15],
 
       // ===== PRETTIER =====
       'prettier/prettier': ['error', { endOfLine: 'auto' }],

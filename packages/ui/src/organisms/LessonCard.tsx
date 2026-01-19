@@ -1,7 +1,6 @@
-import { type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
-import { BookOpen, Lock, Star, Play, CheckCircle } from 'lucide-react';
+import { BookOpen, Lock, Play, CheckCircle } from 'lucide-react';
 import { Card } from '../primitives/Card';
 import { Badge } from '../primitives/Badge';
 import { Progress } from '../primitives/Progress';

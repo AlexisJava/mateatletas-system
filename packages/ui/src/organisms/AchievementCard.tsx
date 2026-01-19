@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
 import { Lock, Star } from 'lucide-react';
 import { Card } from '../primitives/Card';
-import { backgrounds } from '../tokens/lesson';
 
 export interface AchievementCardProps {
   /** Achievement title */
