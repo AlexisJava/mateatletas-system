@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database/prisma.service';
 import { DocenteBusinessValidator } from '../validators/docente-business.validator';
 
@@ -14,36 +15,41 @@ import { DocenteBusinessValidator } from '../validators/docente-business.validat
  */
 
 // ============================================================================
-// TIPOS DE RESPUESTA
+// PRISMA INCLUDES - Definidos con satisfies para type-safety
 // ============================================================================
 
-interface CasaData {
-  id: string;
-  tipo: string;
-  nombre: string;
-  colorPrimary: string;
-}
+const estudianteInclude = {
+  tutor: true,
+  casa: true,
+  recursos: true,
+  racha: true,
+} satisfies Prisma.EstudianteInclude;
 
-interface TutorData {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string | null;
-  telefono: string | null;
-}
+const inscripcionManualInclude = {
+  estudiante: { include: estudianteInclude },
+} satisfies Prisma.InscripcionComisionInclude;
 
-interface EstudianteWithRelations {
-  id: string;
-  nombre: string;
-  apellido: string;
-  fotoUrl: string | null;
-  edad: number | null;
-  nivel_actual: number | null;
-  casa: CasaData | null;
-  tutor: TutorData | null;
-  recursos: { xp_total: number } | null;
-  racha: { racha_actual: number } | null;
-}
+const inscripcionSuscripcionInclude = {
+  estudiante: { include: estudianteInclude },
+  suscripcion_familiar: { select: { tutor: true } },
+} satisfies Prisma.InscripcionActividadInclude;
+
+// ============================================================================
+// TIPOS DERIVADOS DE PRISMA (GetPayload)
+// ============================================================================
+
+type InscripcionManualWithEstudiante = Prisma.InscripcionComisionGetPayload<{
+  include: typeof inscripcionManualInclude;
+}>;
+
+type InscripcionSuscripcionWithEstudiante =
+  Prisma.InscripcionActividadGetPayload<{
+    include: typeof inscripcionSuscripcionInclude;
+  }>;
+
+type EstudianteFromInscripcion = InscripcionManualWithEstudiante['estudiante'];
+
+type TutorFromEstudiante = NonNullable<EstudianteFromInscripcion['tutor']>;
 
 export interface EstudianteComisionResponse {
   id: string;
@@ -363,29 +369,24 @@ export class DocenteComisionQueriesService {
   /**
    * Obtiene inscripciones manuales (admin/becas) de una comisión
    */
-  private async fetchInscripcionesManuales(comisionId: string) {
+  private async fetchInscripcionesManuales(
+    comisionId: string,
+  ): Promise<InscripcionManualWithEstudiante[]> {
     return this.prisma.inscripcionComision.findMany({
       where: { comision_id: comisionId, estado: { not: 'Cancelada' } },
-      include: {
-        estudiante: {
-          include: { tutor: true, casa: true, recursos: true, racha: true },
-        },
-      },
+      include: inscripcionManualInclude,
     });
   }
 
   /**
    * Obtiene inscripciones via suscripción 2026 de una comisión
    */
-  private async fetchInscripcionesSuscripcion(comisionId: string) {
+  private async fetchInscripcionesSuscripcion(
+    comisionId: string,
+  ): Promise<InscripcionSuscripcionWithEstudiante[]> {
     return this.prisma.inscripcionActividad.findMany({
       where: { comision_id: comisionId, estado: 'ACTIVA' },
-      include: {
-        estudiante: {
-          include: { tutor: true, casa: true, recursos: true, racha: true },
-        },
-        suscripcion_familiar: { select: { tutor: true } },
-      },
+      include: inscripcionSuscripcionInclude,
     });
   }
 
@@ -393,12 +394,12 @@ export class DocenteComisionQueriesService {
    * Mapea un estudiante a la respuesta de la API
    */
   private async mapEstudianteToResponse(
-    est: EstudianteWithRelations,
+    est: EstudianteFromInscripcion,
     comisionId: string,
     estadoInscripcion: string,
     fechaInscripcion: Date,
     fuente: 'MANUAL' | 'SUSCRIPCION_2026',
-    tutorData: TutorData | null,
+    tutorData: TutorFromEstudiante | null,
   ): Promise<EstudianteComisionResponse> {
     const [ultimaAsistencia, asistenciaPorcentaje] = await Promise.all([
       this.prisma.asistenciaComision.findFirst({
