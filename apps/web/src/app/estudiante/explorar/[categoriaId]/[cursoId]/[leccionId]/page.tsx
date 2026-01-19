@@ -12,6 +12,7 @@ import {
   PlayCircle,
   Loader2,
   AlertCircle,
+  Clock,
 } from 'lucide-react';
 import {
   getContenidoEstudiante,
@@ -20,6 +21,7 @@ import {
   type MundoTipo,
 } from '@/lib/api/contenidos.api';
 import { LessonRenderer, HOUSE_COLORS, type HouseColors } from '@/components/lesson-renderer';
+import { useLessonTimer, formatTime } from '@/hooks/useLessonTimer';
 
 // ============================================================================
 // TYPES
@@ -182,6 +184,22 @@ export default function LeccionPage({
 
   const categoria = categoriasData[categoriaId] || categoriaDefault;
 
+  // Callback para reportar tiempo al backend
+  const handleTimeUpdate = useCallback(
+    (elapsedSeconds: number) => {
+      if (elapsedSeconds > 0) {
+        updateProgresoEstudiante(cursoId, {
+          tiempoAdicionalSegundos: elapsedSeconds,
+        }).catch(console.error);
+      }
+    },
+    [cursoId],
+  );
+
+  // Timer de lección con Page Visibility API
+  // Reporta cada 30s y pausa cuando la pestaña está oculta
+  const { elapsedSeconds, reset: resetTimer, reportFinalTime } = useLessonTimer(handleTimeUpdate);
+
   // Cargar datos del contenido
   const cargarDatos = useCallback(async () => {
     try {
@@ -212,8 +230,10 @@ export default function LeccionPage({
   const anteriorLeccion = currentIndex > 0 ? lecciones[currentIndex - 1] : null;
   const siguienteLeccion = currentIndex < lecciones.length - 1 ? lecciones[currentIndex + 1] : null;
 
-  // Verificar si la siguiente está disponible
-  const siguienteDisponible = siguienteLeccion && siguienteLeccion.estado !== 'bloqueada';
+  // Reset timer cuando cambia de lección
+  useEffect(() => {
+    resetTimer();
+  }, [leccionId, resetTimer]);
 
   // Estado de carga
   if (loading) {
@@ -282,6 +302,8 @@ export default function LeccionPage({
         <Link
           href={`/estudiante/explorar/${categoriaId}/${cursoId}/${siguienteLeccion.id}`}
           onClick={() => {
+            // Reportar tiempo pendiente antes de navegar
+            reportFinalTime();
             // Auto-completar la lección actual al navegar a la siguiente
             updateProgresoEstudiante(cursoId, { nodoActualId: siguienteLeccion.id }).catch(
               console.error,
@@ -376,8 +398,13 @@ export default function LeccionPage({
             <span className={categoria.textColor}>{leccionActual.titulo}</span>
           </div>
 
-          {/* Estado de la lección */}
+          {/* Estado de la lección y tiempo */}
           <div className="flex items-center gap-3">
+            {/* Timer de la lección */}
+            <div className="flex items-center gap-1 px-2 py-1 bg-white/5 rounded-full">
+              <Clock className="w-3 h-3 text-slate-400" />
+              <span className="text-xs text-slate-400 font-mono">{formatTime(elapsedSeconds)}</span>
+            </div>
             {leccionActual.estado === 'en-progreso' && !estaCompletada && (
               <div className="flex items-center gap-1 px-2 py-1 bg-amber-400/10 rounded-full">
                 <PlayCircle className="w-3 h-3 text-amber-400" />
@@ -439,6 +466,8 @@ export default function LeccionPage({
             <Link
               href={`/estudiante/explorar/${categoriaId}/${cursoId}/${siguienteLeccion.id}`}
               onClick={() => {
+                // Reportar tiempo pendiente antes de navegar
+                reportFinalTime();
                 // Auto-completar al navegar
                 updateProgresoEstudiante(cursoId, { nodoActualId: siguienteLeccion.id }).catch(
                   console.error,
@@ -461,6 +490,8 @@ export default function LeccionPage({
             <Link
               href={`/estudiante/explorar/${categoriaId}/${cursoId}`}
               onClick={() => {
+                // Reportar tiempo pendiente antes de navegar
+                reportFinalTime();
                 // Marcar curso como completado
                 updateProgresoEstudiante(cursoId, { completado: true }).catch(console.error);
               }}
