@@ -339,6 +339,60 @@ export interface HistorialAsistenciaResponse {
   fechas: AsistenciaFecha[];
 }
 
+// ============================================================================
+// NOTIFICACIONES DOCENTE - Endpoints para gestión de notificaciones
+// ============================================================================
+
+export interface Notificacion {
+  id: string;
+  tipo: string;
+  titulo: string;
+  mensaje: string;
+  leida: boolean;
+  createdAt: string;
+}
+
+export const notificacionesApi = {
+  /**
+   * Obtener todas las notificaciones del docente
+   * @param soloNoLeidas - Filtrar solo no leídas
+   */
+  getAll: async (soloNoLeidas = false): Promise<Notificacion[]> => {
+    const url = soloNoLeidas ? '/notificaciones?soloNoLeidas=true' : '/notificaciones';
+    return apiClient.get<Notificacion[]>(url);
+  },
+
+  /**
+   * Obtener contador de notificaciones no leídas
+   */
+  getCountNoLeidas: async (): Promise<{ count: number }> => {
+    return apiClient.get<{ count: number }>('/notificaciones/count');
+  },
+
+  /**
+   * Marcar una notificación como leída
+   * @param id - ID de la notificación
+   */
+  marcarComoLeida: async (id: string): Promise<{ success: boolean }> => {
+    return apiClient.patch<{ success: boolean }>(`/notificaciones/${id}/leer`);
+  },
+
+  /**
+   * Marcar todas las notificaciones como leídas
+   */
+  marcarTodasComoLeidas: async (): Promise<{ message: string; count: number }> => {
+    return apiClient.patch<{ message: string; count: number }>('/notificaciones/leer-todas');
+  },
+
+  /**
+   * Eliminar una notificación
+   * @param id - ID de la notificación
+   */
+  eliminar: async (id: string): Promise<{ message: string }> => {
+    return apiClient.delete<{ message: string }>(`/notificaciones/${id}`);
+  },
+};
+
 export const docentesApi = {
   /**
    * Obtener dashboard del docente autenticado
