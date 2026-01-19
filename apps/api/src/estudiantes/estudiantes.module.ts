@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { EstudiantesFacadeService } from './estudiantes-facade.service';
 import { EstudiantesController } from './estudiantes.controller';
+import { EstudianteNotificacionesController } from './estudiante-notificaciones.controller';
 import { AuthModule } from '../auth/auth.module';
+import { NotificacionesModule } from '../notificaciones/notificaciones.module';
 import { EstudianteBusinessValidator } from './validators/estudiante-business.validator';
 import { EstudianteQueryService } from './services/estudiante-query.service';
 import { EstudianteCommandService } from './services/estudiante-command.service';
@@ -31,8 +33,8 @@ import { InscripcionesListener } from './listeners/inscripciones.listener';
  * NOTA 2026: Equipos/Casas ahora se gestionan desde CasasModule
  */
 @Module({
-  imports: [AuthModule],
-  controllers: [EstudiantesController],
+  imports: [AuthModule, NotificacionesModule],
+  controllers: [EstudiantesController, EstudianteNotificacionesController],
   providers: [
     // Servicios especializados
     EstudianteBusinessValidator,
