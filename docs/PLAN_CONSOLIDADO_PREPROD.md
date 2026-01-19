@@ -820,26 +820,27 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 
 ## Checklist de Progreso General
 
-### FASE 0: Quick Wins
+### FASE 0: Quick Wins ✅ COMPLETADA
 
 - [x] 0.1 Mostrar casa real del estudiante ✅ (2026-01-19)
 - [x] 0.2 Casa → Theme en Portal Estudiante ✅ (2026-01-19)
-- [ ] 0.3 Componente UI Ranking por Casa
-- [ ] 0.4 Marcar notificación como leída (Docente)
-- [ ] 0.5 Resolver alertas en Dashboard Admin
-- [ ] 0.6 Exportar CSV/PDF con filtros
+- [x] 0.3 Componente UI Ranking por Casa ✅ (2026-01-19)
+- [x] 0.4 Marcar notificación como leída (Docente) ✅ (2026-01-19)
+- [x] 0.5 Resolver alertas en Dashboard Admin ✅ (2026-01-19)
+- [x] 0.6 Exportar CSV/PDF con filtros ✅ (2026-01-19)
 
 ### FASE 1: Bugs Críticos
 
-- [ ] 1.1 Fix: Docente no ve inscripciones de tutor
-- [ ] 1.2 Tracking de tiempo en contenidos
+- [x] 1.1 Fix: Docente no ve inscripciones de tutor ✅ (2026-01-19)
+- [x] 1.2 Tracking de tiempo en contenidos ✅ (2026-01-19)
 
-### FASE 2: Sistema de Notificaciones
+### FASE 2: Sistema de Notificaciones ✅ COMPLETADA
 
-- [ ] 2.1 Extender NotificacionesService para Tutores
-- [ ] 2.2 Endpoints de notificaciones para Estudiantes
-- [ ] 2.3 Cron Job: Notificar Clase Próxima
-- [ ] 2.4 Event Listeners para cambios de Suscripción
+- [x] 2.1 Extender NotificacionesService para Tutores ✅ (2026-01-19)
+- [x] 2.2 Endpoints de notificaciones para Estudiantes ✅ (2026-01-19)
+- [x] 2.3 Cron Job: Notificar Clase Próxima ✅ (2026-01-19)
+- [x] 2.4 Event Listeners para cambios de Suscripción ✅ (2026-01-19)
+- [x] Tests de integración (131 tests passing) ✅ (2026-01-19)
 
 ### FASE 3: Portal Admin
 

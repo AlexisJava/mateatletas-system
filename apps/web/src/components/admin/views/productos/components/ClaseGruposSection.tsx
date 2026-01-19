@@ -5,12 +5,25 @@
  *
  * Similar a ComisionesSection pero para ClaseGrupos.
  * Muestra los horarios semanales vinculados a un producto Club.
+ * CRUD completo: crear, editar, eliminar horarios.
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Clock, Users, ChevronDown, ChevronUp, AlertCircle, User } from 'lucide-react';
-import { listarClaseGrupos, type ClaseGrupo } from '@/lib/api/clase-grupos.api';
+import {
+  Clock,
+  Users,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+  User,
+  Plus,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { listarClaseGrupos, eliminarClaseGrupo, type ClaseGrupo } from '@/lib/api/clase-grupos.api';
 import { DIA_SEMANA_LABELS } from '@/types/clase-grupo';
+import { ClaseGrupoFormModal } from './ClaseGrupoFormModal';
 
 interface ClaseGruposSectionProps {
   productoId: string;
@@ -22,6 +35,14 @@ export function ClaseGruposSection({ productoId, productoNombre }: ClaseGruposSe
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingClaseGrupo, setEditingClaseGrupo] = useState<ClaseGrupo | null>(null);
+
+  // Delete confirmation state
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Para evitar race conditions
   const requestIdRef = useRef(0);
@@ -55,6 +76,54 @@ export function ClaseGruposSection({ productoId, productoNombre }: ClaseGruposSe
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
+  };
+
+  // Modal handlers
+  const handleOpenCreate = () => {
+    setEditingClaseGrupo(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (grupo: ClaseGrupo, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingClaseGrupo(grupo);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingClaseGrupo(null);
+  };
+
+  const handleModalSuccess = () => {
+    fetchClaseGrupos();
+  };
+
+  // Delete handlers
+  const handleDeleteClick = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDeletingId(id);
+  };
+
+  const handleCancelDelete = () => {
+    setDeletingId(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+
+    setIsDeleting(true);
+    try {
+      await eliminarClaseGrupo(deletingId);
+      toast.success('Horario eliminado');
+      setDeletingId(null);
+      fetchClaseGrupos();
+    } catch (err) {
+      console.error('Error al eliminar:', err);
+      toast.error('Error al eliminar el horario');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Loading state
@@ -99,6 +168,13 @@ export function ClaseGruposSection({ productoId, productoNombre }: ClaseGruposSe
             {claseGrupos.length}
           </span>
         </div>
+        <button
+          onClick={handleOpenCreate}
+          className="flex items-center gap-2 px-3 py-2 bg-[var(--admin-accent)] text-black rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+        >
+          <Plus className="w-4 h-4" />
+          Nuevo Horario
+        </button>
       </div>
 
       {/* Lista de horarios */}
@@ -178,6 +254,24 @@ export function ClaseGruposSection({ productoId, productoNombre }: ClaseGruposSe
                     >
                       {grupo.activo ? 'Activo' : 'Inactivo'}
                     </span>
+
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => handleOpenEdit(grupo, e)}
+                        className="p-1.5 rounded-lg hover:bg-[var(--admin-surface-1)] text-[var(--admin-text-muted)] hover:text-[var(--admin-accent)] transition-colors"
+                        title="Editar horario"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteClick(grupo.id, e)}
+                        className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--admin-text-muted)] hover:text-red-400 transition-colors"
+                        title="Eliminar horario"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
 
                     {/* Expand icon */}
                     {isExpanded ? (
@@ -274,6 +368,57 @@ export function ClaseGruposSection({ productoId, productoNombre }: ClaseGruposSe
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Modal de formulario crear/editar */}
+      <ClaseGrupoFormModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSuccess={handleModalSuccess}
+        productoId={productoId}
+        productoNombre={productoNombre}
+        claseGrupo={editingClaseGrupo}
+      />
+
+      {/* Modal de confirmación de borrado */}
+      {deletingId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-2xl max-w-sm w-full p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-[var(--admin-text)]">Eliminar Horario</h3>
+            </div>
+            <p className="text-[var(--admin-text-muted)] text-sm mb-6">
+              ¿Estás seguro de eliminar este horario? Esta acción no se puede deshacer. Los
+              estudiantes inscriptos perderán su inscripción.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelDelete}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 bg-[var(--admin-surface-2)] text-[var(--admin-text)] rounded-xl font-medium hover:bg-[var(--admin-surface-1)] border border-[var(--admin-border)] transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Eliminando...
+                  </>
+                ) : (
+                  'Eliminar'
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

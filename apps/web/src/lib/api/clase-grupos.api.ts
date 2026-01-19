@@ -92,6 +92,58 @@ export async function obtenerClaseGrupo(id: string): Promise<{
 }
 
 /**
+ * DTO para actualizar un ClaseGrupo (todos los campos opcionales)
+ */
+export interface ActualizarClaseGrupoDto {
+  codigo?: string;
+  nombre?: string;
+  tipo?: 'GRUPO_REGULAR' | 'CURSO_TEMPORAL';
+  diaSemana?: 'LUNES' | 'MARTES' | 'MIERCOLES' | 'JUEVES' | 'VIERNES' | 'SABADO' | 'DOMINGO';
+  horaInicio?: string;
+  horaFin?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  cupoMaximo?: number;
+  docenteId?: string;
+  activo?: boolean;
+}
+
+/**
+ * Actualizar un ClaseGrupo existente
+ * PUT /admin/clase-grupos/:id
+ */
+export async function actualizarClaseGrupo(
+  id: string,
+  data: ActualizarClaseGrupoDto,
+): Promise<ClaseGrupo> {
+  try {
+    const response = await axios.put<ClaseGrupo>(`/admin/clase-grupos/${id}`, data);
+    return response;
+  } catch (error) {
+    console.error('Error al actualizar el grupo de clases:', error);
+    throw error;
+  }
+}
+
+/**
+ * Eliminar un ClaseGrupo (soft delete)
+ * DELETE /admin/clase-grupos/:id
+ */
+export async function eliminarClaseGrupo(
+  id: string,
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const response = await axios.delete<{ success: boolean; message: string }>(
+      `/admin/clase-grupos/${id}`,
+    );
+    return response;
+  } catch (error) {
+    console.error('Error al eliminar el grupo de clases:', error);
+    throw error;
+  }
+}
+
+/**
  * =============================================================================
  * ENDPOINTS PARA DOCENTES - Portal Docente
  * =============================================================================
