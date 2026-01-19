@@ -373,6 +373,9 @@ export class DocenteStatsService {
 
   /**
    * Obtiene las comisiones asignadas al docente
+   * IMPORTANTE: Cuenta estudiantes de ambas fuentes:
+   * - InscripcionComision (manual/admin/becas)
+   * - InscripcionActividad (tutor via suscripción 2026)
    */
   private async obtenerMisComisiones(
     docenteId: string,
@@ -397,38 +400,57 @@ export class DocenteStatsService {
             emoji: true,
           },
         },
+        // FUENTE 1: Inscripciones manuales (admin/becas)
         inscripciones: {
           where: {
             estado: { in: ['Pendiente', 'Confirmada'] },
+          },
+        },
+        // FUENTE 2: Inscripciones via suscripción 2026
+        inscripcionesActividad: {
+          where: {
+            estado: 'ACTIVA',
           },
         },
       },
       orderBy: { createdAt: 'desc' },
     });
 
-    return comisiones.map((comision) => ({
-      id: comision.id,
-      nombre: comision.nombre,
-      descripcion: comision.descripcion,
-      producto: {
-        id: comision.producto.id,
-        nombre: comision.producto.nombre,
-        tipo: comision.producto.tipo,
-      },
-      casa: comision.casa
-        ? {
-            id: comision.casa.id,
-            nombre: comision.casa.nombre,
-            emoji: comision.casa.emoji,
-          }
-        : null,
-      horario: comision.horario,
-      fecha_inicio: comision.fecha_inicio?.toISOString() ?? null,
-      fecha_fin: comision.fecha_fin?.toISOString() ?? null,
-      cupo_maximo: comision.cupo_maximo,
-      estudiantesInscritos: comision.inscripciones.length,
-      activo: comision.activo,
-    }));
+    return comisiones.map((comision) => {
+      // Combinar estudiantes de ambas fuentes (evitar duplicados)
+      const estudiantesIdsManuales = new Set(
+        comision.inscripciones.map((i) => i.estudiante_id),
+      );
+      const estudiantesSuscripcion = comision.inscripcionesActividad.filter(
+        (i) => !estudiantesIdsManuales.has(i.estudiante_id),
+      );
+      const totalInscritos =
+        comision.inscripciones.length + estudiantesSuscripcion.length;
+
+      return {
+        id: comision.id,
+        nombre: comision.nombre,
+        descripcion: comision.descripcion,
+        producto: {
+          id: comision.producto.id,
+          nombre: comision.producto.nombre,
+          tipo: comision.producto.tipo,
+        },
+        casa: comision.casa
+          ? {
+              id: comision.casa.id,
+              nombre: comision.casa.nombre,
+              emoji: comision.casa.emoji,
+            }
+          : null,
+        horario: comision.horario,
+        fecha_inicio: comision.fecha_inicio?.toISOString() ?? null,
+        fecha_fin: comision.fecha_fin?.toISOString() ?? null,
+        cupo_maximo: comision.cupo_maximo,
+        estudiantesInscritos: totalInscritos,
+        activo: comision.activo,
+      };
+    });
   }
 
   private async obtenerEstudiantesConFaltas(
@@ -1034,6 +1056,10 @@ export class DocenteStatsService {
 
   /**
    * Obtiene el detalle de una comisión específica con sus estudiantes inscritos
+   * IMPORTANTE: Combina estudiantes de ambas fuentes:
+   * - InscripcionComision (manual/admin/becas)
+   * - InscripcionActividad (tutor via suscripción 2026)
+   *
    * @param comisionId - ID de la comisión
    * @param docenteId - ID del docente (para verificar ownership)
    * @returns Detalle de la comisión con lista de estudiantes
@@ -1063,9 +1089,26 @@ export class DocenteStatsService {
             emoji: true,
           },
         },
+        // FUENTE 1: Inscripciones manuales (admin/becas)
         inscripciones: {
           where: {
             estado: { in: ['Pendiente', 'Confirmada'] },
+          },
+          include: {
+            estudiante: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                email: true,
+              },
+            },
+          },
+        },
+        // FUENTE 2: Inscripciones via suscripción 2026
+        inscripcionesActividad: {
+          where: {
+            estado: 'ACTIVA',
           },
           include: {
             estudiante: {
@@ -1083,6 +1126,45 @@ export class DocenteStatsService {
 
     if (!comision) {
       throw new Error('Comisión no encontrada o no tienes acceso');
+    }
+
+    // Combinar estudiantes de ambas fuentes (evitar duplicados)
+    const estudiantesMap = new Map<
+      string,
+      {
+        id: string;
+        nombre: string;
+        apellido: string;
+        email: string | null;
+        estado: string;
+        fuente: string;
+      }
+    >();
+
+    // Agregar estudiantes de inscripciones manuales (FUENTE 1)
+    for (const insc of comision.inscripciones) {
+      estudiantesMap.set(insc.estudiante.id, {
+        id: insc.estudiante.id,
+        nombre: insc.estudiante.nombre,
+        apellido: insc.estudiante.apellido,
+        email: insc.estudiante.email,
+        estado: insc.estado,
+        fuente: 'MANUAL',
+      });
+    }
+
+    // Agregar estudiantes de suscripción 2026 (FUENTE 2)
+    for (const insc of comision.inscripcionesActividad) {
+      if (!estudiantesMap.has(insc.estudiante.id)) {
+        estudiantesMap.set(insc.estudiante.id, {
+          id: insc.estudiante.id,
+          nombre: insc.estudiante.nombre,
+          apellido: insc.estudiante.apellido,
+          email: insc.estudiante.email,
+          estado: insc.estado,
+          fuente: 'SUSCRIPCION_2026',
+        });
+      }
     }
 
     return {
@@ -1106,13 +1188,7 @@ export class DocenteStatsService {
       fecha_fin: comision.fecha_fin?.toISOString() ?? null,
       cupo_maximo: comision.cupo_maximo,
       activo: comision.activo,
-      estudiantes: comision.inscripciones.map((insc) => ({
-        id: insc.estudiante.id,
-        nombre: insc.estudiante.nombre,
-        apellido: insc.estudiante.apellido,
-        email: insc.estudiante.email,
-        estado: insc.estado,
-      })),
+      estudiantes: Array.from(estudiantesMap.values()),
     };
   }
 
@@ -1184,6 +1260,10 @@ export class DocenteStatsService {
    * Filtra comisiones con fecha_fin pasada
    * Ordena por próxima clase (más cercana primero)
    *
+   * IMPORTANTE: Cuenta estudiantes de ambas fuentes:
+   * - InscripcionComision (manual/admin/becas)
+   * - InscripcionActividad (tutor via suscripción 2026)
+   *
    * @param docenteId - ID del docente
    * @returns Lista de comisiones formateadas
    */
@@ -1221,12 +1301,24 @@ export class DocenteStatsService {
             colorSecondary: true,
           },
         },
+        // FUENTE 1: Inscripciones manuales (admin/becas)
         inscripciones: {
           where: {
             estado: { in: ['Pendiente', 'Confirmada'] },
           },
           select: {
             id: true,
+            estudiante_id: true,
+          },
+        },
+        // FUENTE 2: Inscripciones via suscripción 2026
+        inscripcionesActividad: {
+          where: {
+            estado: 'ACTIVA',
+          },
+          select: {
+            id: true,
+            estudiante_id: true,
           },
         },
       },
@@ -1239,6 +1331,16 @@ export class DocenteStatsService {
         comision.fecha_fin,
       );
 
+      // Combinar estudiantes de ambas fuentes (evitar duplicados)
+      const estudiantesIdsManuales = new Set(
+        comision.inscripciones.map((i) => i.estudiante_id),
+      );
+      const estudiantesSuscripcion = comision.inscripcionesActividad.filter(
+        (i) => !estudiantesIdsManuales.has(i.estudiante_id),
+      );
+      const totalInscritos =
+        comision.inscripciones.length + estudiantesSuscripcion.length;
+
       return {
         id: comision.id,
         nombre: comision.nombre,
@@ -1246,7 +1348,7 @@ export class DocenteStatsService {
         cupo_maximo: comision.cupo_maximo,
         producto: comision.producto,
         casa: comision.casa,
-        inscripciones_count: comision.inscripciones.length,
+        inscripciones_count: totalInscritos,
         proxima_clase: proximaClase?.toISOString() ?? null,
       };
     });

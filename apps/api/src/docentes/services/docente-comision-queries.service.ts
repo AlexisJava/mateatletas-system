@@ -17,6 +17,34 @@ import { DocenteBusinessValidator } from '../validators/docente-business.validat
 // TIPOS DE RESPUESTA
 // ============================================================================
 
+interface CasaData {
+  id: string;
+  tipo: string;
+  nombre: string;
+  colorPrimary: string;
+}
+
+interface TutorData {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string | null;
+  telefono: string | null;
+}
+
+interface EstudianteWithRelations {
+  id: string;
+  nombre: string;
+  apellido: string;
+  fotoUrl: string | null;
+  edad: number | null;
+  nivel_actual: number | null;
+  casa: CasaData | null;
+  tutor: TutorData | null;
+  recursos: { xp_total: number } | null;
+  racha: { racha_actual: number } | null;
+}
+
 export interface EstudianteComisionResponse {
   id: string;
   nombre: string;
@@ -48,6 +76,8 @@ export interface EstudianteComisionResponse {
   } | null;
   estado_inscripcion: string;
   inscripcion_fecha: Date;
+  /** Fuente de la inscripción: 'MANUAL' (admin) o 'SUSCRIPCION_2026' (tutor via suscripción) */
+  fuente: 'MANUAL' | 'SUSCRIPCION_2026';
 }
 
 export interface MetricasComisionResponse {
@@ -80,114 +110,71 @@ export class DocenteComisionQueriesService {
 
   /**
    * Obtiene la lista de estudiantes de una comisión con sus stats
+   * IMPORTANTE: Combina inscripciones de ambas fuentes:
+   * - InscripcionComision (manual/admin/becas)
+   * - InscripcionActividad (tutor via suscripción 2026)
+   *
    * @param comisionId - ID de la comisión
    * @param docenteId - ID del docente (para verificar ownership)
-   * @returns Lista de estudiantes con stats
+   * @returns Lista de estudiantes con stats y fuente de inscripción
    */
   async getEstudiantesComision(
     comisionId: string,
     docenteId: string,
   ): Promise<{ estudiantes: EstudianteComisionResponse[] }> {
-    // Verificar que el docente existe
     await this.validator.validarDocenteExiste(docenteId);
+    await this.verificarOwnershipComision(comisionId, docenteId);
 
-    // Buscar comisión verificando ownership
-    const comision = await this.prisma.comision.findFirst({
-      where: {
-        id: comisionId,
-        docente_id: docenteId,
-      },
-      include: {
-        inscripciones: {
-          where: {
-            estado: { not: 'Cancelada' },
-          },
-          include: {
-            estudiante: {
-              include: {
-                tutor: true,
-                casa: true,
-                recursos: true,
-                racha: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!comision) {
-      throw new Error('Comisión no encontrada o no tienes acceso');
-    }
-
-    // Mapear estudiantes con sus stats
-    const estudiantes: EstudianteComisionResponse[] = await Promise.all(
-      comision.inscripciones.map(async (inscripcion) => {
-        const est = inscripcion.estudiante;
-
-        // Obtener última asistencia del estudiante en esta comisión
-        const ultimaAsistencia = await this.prisma.asistenciaComision.findFirst(
-          {
-            where: {
-              estudiante_id: est.id,
-              comision_id: comisionId,
-            },
-            orderBy: { fecha: 'desc' },
-          },
-        );
-
-        // Calcular porcentaje de asistencia
-        const asistenciaPorcentaje = await this.calcularAsistenciaPorcentaje(
-          est.id,
-          comisionId,
-        );
-
-        return {
-          id: est.id,
-          nombre: est.nombre,
-          apellido: est.apellido,
-          avatar_url: est.fotoUrl,
-          edad: est.edad ?? 0,
-          casa: est.casa
-            ? {
-                id: est.casa.id,
-                tipo: est.casa.tipo,
-                nombre: est.casa.nombre,
-                colorPrimario: est.casa.colorPrimary,
-              }
-            : null,
-          stats: {
-            xp_total: est.recursos?.xp_total ?? 0,
-            nivel: est.nivel_actual ?? 1,
-            racha_actual: est.racha?.racha_actual ?? 0,
-            asistencia_porcentaje: asistenciaPorcentaje,
-            ultima_asistencia: ultimaAsistencia
-              ? {
-                  fecha: ultimaAsistencia.fecha,
-                  estado: ultimaAsistencia.estado,
-                }
-              : null,
-          },
-          tutor: est.tutor
-            ? {
-                id: est.tutor.id,
-                nombre: est.tutor.nombre,
-                apellido: est.tutor.apellido,
-                email: est.tutor.email,
-                telefono: est.tutor.telefono,
-              }
-            : null,
-          estado_inscripcion: inscripcion.estado,
-          inscripcion_fecha: inscripcion.fecha_inscripcion,
-        };
-      }),
+    const [inscripcionesManuales, inscripcionesSuscripcion] = await Promise.all(
+      [
+        this.fetchInscripcionesManuales(comisionId),
+        this.fetchInscripcionesSuscripcion(comisionId),
+      ],
     );
 
-    return { estudiantes };
+    const estudiantesMap = new Map<string, EstudianteComisionResponse>();
+
+    // Procesar inscripciones manuales (FUENTE 1)
+    for (const inscripcion of inscripcionesManuales) {
+      if (estudiantesMap.has(inscripcion.estudiante.id)) continue;
+      const response = await this.mapEstudianteToResponse(
+        inscripcion.estudiante,
+        comisionId,
+        inscripcion.estado,
+        inscripcion.fecha_inscripcion,
+        'MANUAL',
+        inscripcion.estudiante.tutor,
+      );
+      estudiantesMap.set(inscripcion.estudiante.id, response);
+    }
+
+    // Procesar inscripciones via suscripción (FUENTE 2)
+    for (const inscripcion of inscripcionesSuscripcion) {
+      if (estudiantesMap.has(inscripcion.estudiante.id)) continue;
+      const tutorData =
+        inscripcion.estudiante.tutor ??
+        inscripcion.suscripcion_familiar?.tutor ??
+        null;
+      const response = await this.mapEstudianteToResponse(
+        inscripcion.estudiante,
+        comisionId,
+        inscripcion.estado,
+        inscripcion.fecha_inicio,
+        'SUSCRIPCION_2026',
+        tutorData,
+      );
+      estudiantesMap.set(inscripcion.estudiante.id, response);
+    }
+
+    return { estudiantes: Array.from(estudiantesMap.values()) };
   }
 
   /**
    * Obtiene métricas de una comisión
+   * IMPORTANTE: Cuenta estudiantes de ambas fuentes:
+   * - InscripcionComision (manual/admin/becas)
+   * - InscripcionActividad (tutor via suscripción 2026)
+   *
    * @param comisionId - ID de la comisión
    * @param docenteId - ID del docente (para verificar ownership)
    * @returns Métricas de la comisión
@@ -211,13 +198,24 @@ export class DocenteComisionQueriesService {
       throw new Error('Comisión no encontrada o no tienes acceso');
     }
 
-    // Total de estudiantes activos (no cancelados)
-    const totalEstudiantes = await this.prisma.inscripcionComision.count({
-      where: {
-        comision_id: comisionId,
-        estado: { not: 'Cancelada' },
-      },
-    });
+    // Total de estudiantes activos - combinar ambas fuentes
+    const [estudiantesManuales, estudiantesSuscripcion] = await Promise.all([
+      // FUENTE 1: InscripcionComision (manual/admin/becas)
+      this.prisma.inscripcionComision.count({
+        where: {
+          comision_id: comisionId,
+          estado: { not: 'Cancelada' },
+        },
+      }),
+      // FUENTE 2: InscripcionActividad (suscripción 2026)
+      this.prisma.inscripcionActividad.count({
+        where: {
+          comision_id: comisionId,
+          estado: 'ACTIVA',
+        },
+      }),
+    ]);
+    const totalEstudiantes = estudiantesManuales + estudiantesSuscripcion;
 
     // Total de clases (fechas únicas con asistencias registradas)
     const clasesDistintas = await this.prisma.asistenciaComision.groupBy({
@@ -348,18 +346,115 @@ export class DocenteComisionQueriesService {
   // ============================================================================
 
   /**
+   * Verifica que el docente tenga ownership de la comisión
+   */
+  private async verificarOwnershipComision(
+    comisionId: string,
+    docenteId: string,
+  ): Promise<void> {
+    const comision = await this.prisma.comision.findFirst({
+      where: { id: comisionId, docente_id: docenteId },
+    });
+    if (!comision) {
+      throw new Error('Comisión no encontrada o no tienes acceso');
+    }
+  }
+
+  /**
+   * Obtiene inscripciones manuales (admin/becas) de una comisión
+   */
+  private async fetchInscripcionesManuales(comisionId: string) {
+    return this.prisma.inscripcionComision.findMany({
+      where: { comision_id: comisionId, estado: { not: 'Cancelada' } },
+      include: {
+        estudiante: {
+          include: { tutor: true, casa: true, recursos: true, racha: true },
+        },
+      },
+    });
+  }
+
+  /**
+   * Obtiene inscripciones via suscripción 2026 de una comisión
+   */
+  private async fetchInscripcionesSuscripcion(comisionId: string) {
+    return this.prisma.inscripcionActividad.findMany({
+      where: { comision_id: comisionId, estado: 'ACTIVA' },
+      include: {
+        estudiante: {
+          include: { tutor: true, casa: true, recursos: true, racha: true },
+        },
+        suscripcion_familiar: { select: { tutor: true } },
+      },
+    });
+  }
+
+  /**
+   * Mapea un estudiante a la respuesta de la API
+   */
+  private async mapEstudianteToResponse(
+    est: EstudianteWithRelations,
+    comisionId: string,
+    estadoInscripcion: string,
+    fechaInscripcion: Date,
+    fuente: 'MANUAL' | 'SUSCRIPCION_2026',
+    tutorData: TutorData | null,
+  ): Promise<EstudianteComisionResponse> {
+    const [ultimaAsistencia, asistenciaPorcentaje] = await Promise.all([
+      this.prisma.asistenciaComision.findFirst({
+        where: { estudiante_id: est.id, comision_id: comisionId },
+        orderBy: { fecha: 'desc' },
+      }),
+      this.calcularAsistenciaPorcentaje(est.id, comisionId),
+    ]);
+
+    return {
+      id: est.id,
+      nombre: est.nombre,
+      apellido: est.apellido,
+      avatar_url: est.fotoUrl,
+      edad: est.edad ?? 0,
+      casa: est.casa
+        ? {
+            id: est.casa.id,
+            tipo: est.casa.tipo,
+            nombre: est.casa.nombre,
+            colorPrimario: est.casa.colorPrimary,
+          }
+        : null,
+      stats: {
+        xp_total: est.recursos?.xp_total ?? 0,
+        nivel: est.nivel_actual ?? 1,
+        racha_actual: est.racha?.racha_actual ?? 0,
+        asistencia_porcentaje: asistenciaPorcentaje,
+        ultima_asistencia: ultimaAsistencia
+          ? { fecha: ultimaAsistencia.fecha, estado: ultimaAsistencia.estado }
+          : null,
+      },
+      tutor: tutorData
+        ? {
+            id: tutorData.id,
+            nombre: tutorData.nombre,
+            apellido: tutorData.apellido,
+            email: tutorData.email,
+            telefono: tutorData.telefono,
+          }
+        : null,
+      estado_inscripcion: estadoInscripcion,
+      inscripcion_fecha: fechaInscripcion,
+      fuente,
+    };
+  }
+
+  /**
    * Calcula el porcentaje de asistencia de un estudiante en una comisión
    */
   private async calcularAsistenciaPorcentaje(
     estudianteId: string,
     comisionId: string,
   ): Promise<number> {
-    // Calcular porcentaje de asistencia en esta comisión
     const totalAsistencias = await this.prisma.asistenciaComision.count({
-      where: {
-        estudiante_id: estudianteId,
-        comision_id: comisionId,
-      },
+      where: { estudiante_id: estudianteId, comision_id: comisionId },
     });
 
     if (totalAsistencias === 0) {
