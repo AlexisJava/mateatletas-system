@@ -375,12 +375,14 @@ rm -rf apps/web/src/components/admin/views/grupos-pedagogicos/
 - [x] Seed data con 6 familias edge cases
 - [x] Fix axios interceptor para paginación
 
-### FASE 2: Integrar Asignaciones en Personas
+### FASE 2: Integrar Asignaciones en Personas (✅ COMPLETADO)
 
-- [ ] Agregar tabs a PersonasView
-- [ ] Mover lógica de asignaciones
-- [ ] Actualizar PersonDetailModal
-- [ ] Eliminar páginas antiguas
+- [x] Agregar tabs a PersonasView ("Todas las Personas" / "Asignaciones Docentes")
+- [x] Crear useDocenteAsignaciones hook con React Query mutations
+- [x] Crear DocenteAsignacionCard component
+- [x] Eliminar /admin/asignaciones page
+- [x] Eliminar docentes-asignaciones/ view folder
+- [x] Actualizar navegación (remover ASIGNACIONES del menu)
 
 ### FASE 3: Integrar ClaseGrupos en Productos
 
@@ -445,8 +447,9 @@ Variables CSS definidas en `globals.css`:
 
 ## 8. Historial de Cambios
 
-| Fecha      | Cambio                                       | Autor  |
-| ---------- | -------------------------------------------- | ------ |
-| 2026-01-18 | Creación inicial del documento               | Claude |
-| 2026-01-18 | Completada FASE 0 (cleanup)                  | Claude |
-| 2026-01-18 | Completada FASE 1 (SuscripcionesView + seed) | Claude |
+| Fecha      | Cambio                                                  | Autor  |
+| ---------- | ------------------------------------------------------- | ------ |
+| 2026-01-18 | Creación inicial del documento                          | Claude |
+| 2026-01-18 | Completada FASE 0 (cleanup)                             | Claude |
+| 2026-01-18 | Completada FASE 1 (SuscripcionesView + seed)            | Claude |
+| 2026-01-18 | Completada FASE 2 (Asignaciones integradas en Personas) | Claude |
