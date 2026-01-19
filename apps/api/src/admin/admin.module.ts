@@ -18,6 +18,7 @@ import { AsistenciasService } from './asistencias.service';
 import { ComisionesService } from './comisiones.service';
 import { DatabaseModule } from '../core/database/database.module';
 import { PagosModule } from '../pagos/pagos.module';
+import { NotificacionesModule } from '../notificaciones/notificaciones.module';
 
 /**
  * Módulo administrativo con servicios especializados
@@ -29,7 +30,7 @@ import { PagosModule } from '../pagos/pagos.module';
  * - AdminEstudiantesService: Solo gestión de estudiantes
  */
 @Module({
-  imports: [DatabaseModule, PagosModule],
+  imports: [DatabaseModule, PagosModule, NotificacionesModule],
   controllers: [AdminController, PlanificacionesAdminController],
   providers: [
     AdminService,

@@ -1961,6 +1961,8 @@ enum TipoNotificacion {
   DOCENTE_FEEDBACK_ADMIN
   /// Recordatorio general
   DOCENTE_RECORDATORIO
+  /// Asignado a un nuevo horario/clase grupal
+  DOCENTE_CLASE_ASIGNADA
 
   // ═══════════════════════════════════════════════════════════════
   // NOTIFICACIONES PARA ADMINS (15 tipos)

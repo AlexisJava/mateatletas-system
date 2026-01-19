@@ -223,8 +223,9 @@ export function PlanificacionSection({
                   <div>
                     <p className="font-medium text-[var(--admin-text)]">{plan.titulo}</p>
                     <p className="text-sm text-[var(--admin-text-muted)]">
-                      {plan.cantidad_clases} clases - {CASA_LABELS[plan.casa_tipo] || plan.casa_tipo}{' '}
-                      / {MUNDO_LABELS[plan.mundo_tipo] || plan.mundo_tipo}
+                      {plan.cantidad_clases} clases -{' '}
+                      {CASA_LABELS[plan.casa_tipo] || plan.casa_tipo} /{' '}
+                      {MUNDO_LABELS[plan.mundo_tipo] || plan.mundo_tipo}
                     </p>
                   </div>
                   {plan.id === planificacionActual?.id && (

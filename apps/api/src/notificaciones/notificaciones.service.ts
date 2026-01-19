@@ -313,6 +313,30 @@ export class NotificacionesService {
     });
   }
 
+  /**
+   * Notificar al docente que fue asignado a un nuevo ClaseGrupo/horario
+   */
+  async notificarClaseAsignada(
+    docenteId: string,
+    claseGrupoId: string,
+    claseGrupoNombre: string,
+    diaSemana: string,
+    horaInicio: string,
+    horaFin: string,
+  ) {
+    return this.createParaDocente(docenteId, {
+      tipo: TipoNotificacion.DOCENTE_CLASE_ASIGNADA,
+      titulo: 'Nueva clase asignada',
+      mensaje: `Te asignaron el horario "${claseGrupoNombre}" - ${diaSemana} de ${horaInicio} a ${horaFin}`,
+      metadata: {
+        clase_grupo_id: claseGrupoId,
+        dia_semana: diaSemana,
+        hora_inicio: horaInicio,
+        hora_fin: horaFin,
+      },
+    });
+  }
+
   // ═══════════════════════════════════════════════════════════════
   // MÉTODOS DE NOTIFICACIÓN AUTOMÁTICA (TUTORES)
   // ═══════════════════════════════════════════════════════════════

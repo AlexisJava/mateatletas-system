@@ -2,15 +2,34 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
+import { NotificacionesService } from '../notificaciones/notificaciones.service';
 import { CrearClaseGrupoDto } from './dto/crear-clase-grupo.dto';
 import { ActualizarClaseGrupoDto } from './dto/actualizar-clase-grupo.dto';
 import { TipoClaseGrupo, Prisma } from '@prisma/client';
 
+import { DiaSemana } from '@prisma/client';
+
+const DIA_SEMANA_LABELS: Record<DiaSemana, string> = {
+  LUNES: 'Lunes',
+  MARTES: 'Martes',
+  MIERCOLES: 'Miércoles',
+  JUEVES: 'Jueves',
+  VIERNES: 'Viernes',
+  SABADO: 'Sábado',
+  DOMINGO: 'Domingo',
+};
+
 @Injectable()
 export class ClaseGruposService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(ClaseGruposService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificacionesService: NotificacionesService,
+  ) {}
 
   /**
    * Crear un nuevo ClaseGrupo con estudiantes inscritos
@@ -162,6 +181,16 @@ export class ClaseGruposService {
           total_inscriptos: inscripciones.length,
         };
       },
+    );
+
+    // Notificar al docente que fue asignado a este horario
+    this.notificarDocenteAsignado(
+      dto.docenteId,
+      claseGrupo.id,
+      dto.nombre,
+      dto.diaSemana,
+      dto.horaInicio,
+      dto.horaFin,
     );
 
     return {
@@ -488,6 +517,23 @@ export class ClaseGruposService {
       },
     );
 
+    // Si cambió el docente, notificar al nuevo docente
+    if (dto.docenteId && dto.docenteId !== grupoExistente.docente_id) {
+      const nombre = dto.nombre || grupoExistente.nombre;
+      const diaSemana = dto.diaSemana ?? grupoExistente.dia_semana;
+      const horaInicio = dto.horaInicio || grupoExistente.hora_inicio;
+      const horaFin = dto.horaFin || grupoExistente.hora_fin;
+
+      this.notificarDocenteAsignado(
+        dto.docenteId,
+        id,
+        nombre,
+        diaSemana,
+        horaInicio,
+        horaFin,
+      );
+    }
+
     return {
       success: true,
       data: claseGrupo,
@@ -741,5 +787,40 @@ export class ClaseGruposService {
     if (dto.nivel !== undefined) updateData.nivel = dto.nivel;
 
     return updateData;
+  }
+
+  /**
+   * Notifica al docente que fue asignado a un ClaseGrupo
+   * Ejecuta en background (fire-and-forget) para no bloquear la respuesta
+   */
+  private notificarDocenteAsignado(
+    docenteId: string,
+    claseGrupoId: string,
+    nombre: string,
+    diaSemana: DiaSemana,
+    horaInicio: string,
+    horaFin: string,
+  ): void {
+    const diaSemanaLabel = DIA_SEMANA_LABELS[diaSemana] || diaSemana;
+
+    this.notificacionesService
+      .notificarClaseAsignada(
+        docenteId,
+        claseGrupoId,
+        nombre,
+        diaSemanaLabel,
+        horaInicio,
+        horaFin,
+      )
+      .then(() => {
+        this.logger.log(
+          `Notificación enviada a docente ${docenteId} por ClaseGrupo ${claseGrupoId}`,
+        );
+      })
+      .catch((err: Error) => {
+        this.logger.error(
+          `Error al notificar docente ${docenteId}: ${err.message}`,
+        );
+      });
   }
 }
