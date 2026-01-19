@@ -101,16 +101,13 @@ export function RankingCasa({ estudianteId, className = '' }: RankingCasaProps) 
             </div>
           </div>
 
-          {/* Posición del estudiante */}
+          {/* Posición del estudiante - Sin mostrar total para evitar competencia */}
           <div className="text-right">
             <div className="flex items-center gap-1 text-white/80 text-[10px] font-medium">
               <ChevronUp className="w-3 h-3" />
               Tu posición
             </div>
-            <div className="flex items-baseline gap-0.5">
-              <span className="text-2xl font-black text-white">#{posicionCasa}</span>
-              <span className="text-white/60 text-xs">/ {rankingCasa.length}</span>
-            </div>
+            <span className="text-2xl font-black text-white">#{posicionCasa}</span>
           </div>
         </div>
       </div>
