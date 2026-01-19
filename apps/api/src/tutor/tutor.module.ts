@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TutorController } from './tutor.controller';
+import { TutorNotificacionesController } from './tutor-notificaciones.controller';
 import { TutorService } from './tutor.service';
 import { PagosModule } from '../pagos/pagos.module';
+import { NotificacionesModule } from '../notificaciones/notificaciones.module';
 import { PrismaService } from '../core/database/prisma.service';
 
 // 🆕 CQRS Services
@@ -11,8 +13,8 @@ import { TutorStatsService } from './services/tutor-stats.service';
 import { TutorFacade } from './services/tutor-facade.service';
 
 @Module({
-  imports: [PagosModule],
-  controllers: [TutorController],
+  imports: [PagosModule, NotificacionesModule],
+  controllers: [TutorController, TutorNotificacionesController],
   providers: [
     TutorService,
     PrismaService,
