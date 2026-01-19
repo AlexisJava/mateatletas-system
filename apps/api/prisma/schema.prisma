@@ -852,6 +852,12 @@ model Producto {
   /// Timestamp de última actualización del registro
   updatedAt               DateTime             @updatedAt
 
+  // === PLANIFICACIÓN (Solo para tipo Club) ===
+
+  /// Planificación asignada a nivel producto (aplica a todos sus ClaseGrupos)
+  planificacion_id        String?
+  planificacion           Planificacion? @relation(fields: [planificacion_id], references: [id])
+
   // === RELACIONES ===
 
   clases                  Clase[]
@@ -868,6 +874,7 @@ model Producto {
   @@index([tipo, activo])
   @@index([casa, mundo])
   @@index([visible_en_landing, activo])
+  @@index([planificacion_id])
   @@map("productos")
 }
 
@@ -3338,6 +3345,8 @@ model Planificacion {
   /// Relaciones
   clases          ClasePlanificacion[]
   asignaciones    AsignacionPlanificacion[]
+  /// Productos que usan esta planificación (Clubs)
+  productos       Producto[]
 
   @@index([casa_tipo, mundo_tipo])
   @@index([estado])

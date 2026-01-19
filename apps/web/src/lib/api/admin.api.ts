@@ -2278,3 +2278,146 @@ export const getSugerenciaAlerta = async (
     throw error;
   }
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PLANIFICACIONES
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface Planificacion {
+  id: string;
+  titulo: string;
+  descripcion: string | null;
+  cantidad_clases: number;
+  casa_tipo: 'QUANTUM' | 'VERTEX' | 'PULSAR';
+  mundo_tipo: 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
+  estado: 'BORRADOR' | 'PUBLICADO' | 'ARCHIVADO';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlanificacionesResponse {
+  data: Planificacion[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+/**
+ * Listar planificaciones con filtros
+ * GET /admin/planificaciones
+ */
+export const getPlanificaciones = async (params?: {
+  page?: number;
+  limit?: number;
+  estado?: 'BORRADOR' | 'PUBLICADO' | 'ARCHIVADO';
+  casa_tipo?: 'QUANTUM' | 'VERTEX' | 'PULSAR';
+  mundo_tipo?: 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
+}): Promise<PlanificacionesResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', String(params.page));
+    if (params?.limit) queryParams.append('limit', String(params.limit));
+    if (params?.estado) queryParams.append('estado', params.estado);
+    if (params?.casa_tipo) queryParams.append('casa_tipo', params.casa_tipo);
+    if (params?.mundo_tipo) queryParams.append('mundo_tipo', params.mundo_tipo);
+
+    const url = queryParams.toString()
+      ? `/admin/planificaciones?${queryParams.toString()}`
+      : '/admin/planificaciones';
+
+    return await axios.get<PlanificacionesResponse>(url);
+  } catch (error) {
+    console.error('Error al obtener planificaciones:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener planificación por ID
+ * GET /admin/planificaciones/:id
+ */
+export const getPlanificacionById = async (id: string): Promise<Planificacion> => {
+  try {
+    return await axios.get<Planificacion>(`/admin/planificaciones/${id}`);
+  } catch (error) {
+    console.error('Error al obtener planificación:', error);
+    throw error;
+  }
+};
+
+/**
+ * Asignar planificación a un producto (Club)
+ * PUT /productos/:id/planificacion
+ */
+export interface AsignarPlanificacionResponse {
+  success: boolean;
+  message: string;
+  data: Producto & {
+    planificacion?: Planificacion;
+  };
+}
+
+export const asignarPlanificacionProducto = async (
+  productoId: string,
+  planificacionId: string,
+): Promise<AsignarPlanificacionResponse> => {
+  try {
+    return await axios.put<AsignarPlanificacionResponse>(`/productos/${productoId}/planificacion`, {
+      planificacionId,
+    });
+  } catch (error) {
+    console.error('Error al asignar planificación al producto:', error);
+    throw error;
+  }
+};
+
+/**
+ * Quitar planificación de un producto
+ * DELETE /productos/:id/planificacion
+ */
+export const quitarPlanificacionProducto = async (
+  productoId: string,
+): Promise<{ success: boolean; message: string; data: Producto }> => {
+  try {
+    return await axios.delete<{ success: boolean; message: string; data: Producto }>(
+      `/productos/${productoId}/planificacion`,
+    );
+  } catch (error) {
+    console.error('Error al quitar planificación del producto:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener producto con planificación y ClaseGrupos
+ * GET /productos/:id/detalle
+ */
+export interface ProductoConPlanificacion extends Producto {
+  planificacion?: Planificacion | null;
+  claseGrupos?: Array<{
+    id: string;
+    nombre: string;
+    dia_semana: string;
+    hora_inicio: string;
+    hora_fin: string;
+    docente?: {
+      id: string;
+      nombre: string;
+      apellido: string;
+    };
+  }>;
+}
+
+export const getProductoConPlanificacion = async (
+  id: string,
+): Promise<ProductoConPlanificacion> => {
+  try {
+    return await axios.get<ProductoConPlanificacion>(`/productos/${id}/detalle`);
+  } catch (error) {
+    console.error('Error al obtener producto con planificación:', error);
+    throw error;
+  }
+};

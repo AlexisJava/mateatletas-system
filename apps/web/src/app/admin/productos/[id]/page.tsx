@@ -18,6 +18,7 @@ import { formatCurrency } from '@/lib/utils/format';
 import {
   ComisionesSection,
   ClaseGruposSection,
+  PlanificacionSection,
 } from '@/components/admin/views/productos/components';
 import type { Producto } from '@/types/catalogo.types';
 
@@ -389,7 +390,14 @@ export default function ProductoDetailPage() {
             </div>
           )}
           {showClaseGrupos && (
-            <ClaseGruposSection productoId={productoId} productoNombre={producto.nombre} />
+            <>
+              <PlanificacionSection
+                productoId={productoId}
+                productoNombre={producto.nombre}
+                onPlanificacionChange={fetchProducto}
+              />
+              <ClaseGruposSection productoId={productoId} productoNombre={producto.nombre} />
+            </>
           )}
           {!showComisiones && !showClaseGrupos && (
             <div className="p-8 bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-xl text-center">

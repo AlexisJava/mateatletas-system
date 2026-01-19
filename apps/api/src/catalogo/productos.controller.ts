@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
   Patch,
   Param,
@@ -217,5 +218,53 @@ export class ProductosController {
   ) {
     const permanent = hardDelete === 'true';
     return this.productosService.remove(id, permanent);
+  }
+
+  // ============================================================================
+  // ASIGNACIÓN DE PLANIFICACIÓN A PRODUCTO (Solo Clubs)
+  // ============================================================================
+
+  /**
+   * GET /productos/:id/detalle
+   * Obtiene producto con planificación y ClaseGrupos para admin
+   * Requiere autenticación y rol Admin
+   */
+  @Get(':id/detalle')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async findOneConPlanificacion(@Param('id', ParseIdPipe) id: string) {
+    return this.productosService.findByIdConPlanificacion(id);
+  }
+
+  /**
+   * PUT /productos/:id/planificacion
+   * Asigna una planificación a un producto (Club)
+   * Requiere autenticación y rol Admin
+   *
+   * Body: { planificacionId: string }
+   */
+  @Put(':id/planificacion')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async asignarPlanificacion(
+    @Param('id', ParseIdPipe) id: string,
+    @Body('planificacionId') planificacionId: string,
+  ) {
+    if (!planificacionId) {
+      throw new Error('Se requiere planificacionId en el body');
+    }
+    return this.productosService.asignarPlanificacion(id, planificacionId);
+  }
+
+  /**
+   * DELETE /productos/:id/planificacion
+   * Quita la planificación de un producto
+   * Requiere autenticación y rol Admin
+   */
+  @Delete(':id/planificacion')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async quitarPlanificacion(@Param('id', ParseIdPipe) id: string) {
+    return this.productosService.quitarPlanificacion(id);
   }
 }

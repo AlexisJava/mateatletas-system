@@ -585,4 +585,181 @@ export class ProductosService {
       porTipo,
     };
   }
+
+  // ============================================================================
+  // ASIGNACIÓN DE PLANIFICACIÓN A PRODUCTO
+  // ============================================================================
+
+  /**
+   * Asigna una planificación a un producto (Club)
+   * La planificación aplica a todos los ClaseGrupos del producto
+   * @param productoId - ID del producto
+   * @param planificacionId - ID de la planificación a asignar
+   * @returns El producto actualizado con la planificación
+   */
+  async asignarPlanificacion(productoId: string, planificacionId: string) {
+    // Verificar que el producto existe y es de tipo Club
+    const producto = await this.prisma.producto.findUnique({
+      where: { id: productoId },
+    });
+
+    if (!producto) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    if (producto.tipo !== 'Club') {
+      throw new BadRequestException(
+        'Solo los productos de tipo Club pueden tener planificación asignada',
+      );
+    }
+
+    // Verificar que la planificación existe y está publicada
+    const planificacion = await this.prisma.planificacion.findUnique({
+      where: { id: planificacionId },
+      select: {
+        id: true,
+        titulo: true,
+        estado: true,
+        casa_tipo: true,
+        mundo_tipo: true,
+      },
+    });
+
+    if (!planificacion) {
+      throw new NotFoundException('Planificación no encontrada');
+    }
+
+    if (planificacion.estado !== 'PUBLICADO') {
+      throw new BadRequestException(
+        'Solo se pueden asignar planificaciones publicadas',
+      );
+    }
+
+    // Actualizar el producto con la planificación
+    const productoActualizado = await this.prisma.producto.update({
+      where: { id: productoId },
+      data: {
+        planificacion_id: planificacionId,
+      },
+      include: {
+        planificacion: {
+          select: {
+            id: true,
+            titulo: true,
+            cantidad_clases: true,
+            casa_tipo: true,
+            mundo_tipo: true,
+            estado: true,
+          },
+        },
+      },
+    });
+
+    this.logger.log(
+      `Planificación ${planificacion.titulo} asignada a producto ${producto.nombre}`,
+    );
+
+    await this.invalidateProductosCache();
+
+    return {
+      success: true,
+      message: `Planificación "${planificacion.titulo}" asignada exitosamente`,
+      data: productoActualizado,
+    };
+  }
+
+  /**
+   * Quita la planificación asignada a un producto
+   * @param productoId - ID del producto
+   * @returns El producto actualizado sin planificación
+   */
+  async quitarPlanificacion(productoId: string) {
+    // Verificar que el producto existe
+    const producto = await this.prisma.producto.findUnique({
+      where: { id: productoId },
+      include: {
+        planificacion: {
+          select: { titulo: true },
+        },
+      },
+    });
+
+    if (!producto) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    if (!producto.planificacion_id) {
+      throw new BadRequestException(
+        'El producto no tiene planificación asignada',
+      );
+    }
+
+    const planificacionTitulo = producto.planificacion?.titulo;
+
+    // Quitar la planificación del producto
+    const productoActualizado = await this.prisma.producto.update({
+      where: { id: productoId },
+      data: {
+        planificacion_id: null,
+      },
+    });
+
+    this.logger.log(
+      `Planificación "${planificacionTitulo}" removida del producto ${producto.nombre}`,
+    );
+
+    await this.invalidateProductosCache();
+
+    return {
+      success: true,
+      message: `Planificación removida exitosamente`,
+      data: productoActualizado,
+    };
+  }
+
+  /**
+   * Obtiene un producto por ID con su planificación (si tiene)
+   * Usado para mostrar detalles en admin
+   */
+  async findByIdConPlanificacion(id: string) {
+    const producto = await this.prisma.producto.findUnique({
+      where: { id },
+      include: {
+        planificacion: {
+          select: {
+            id: true,
+            titulo: true,
+            descripcion: true,
+            cantidad_clases: true,
+            casa_tipo: true,
+            mundo_tipo: true,
+            estado: true,
+          },
+        },
+        claseGrupos: {
+          where: { activo: true },
+          select: {
+            id: true,
+            nombre: true,
+            dia_semana: true,
+            hora_inicio: true,
+            hora_fin: true,
+            docente: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!producto) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    return producto;
+  }
 }
