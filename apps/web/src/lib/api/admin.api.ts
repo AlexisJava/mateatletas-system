@@ -2204,3 +2204,77 @@ export const registrarPagoManual = async (
     throw error;
   }
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ALERTAS ADMIN
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface AlertaAdmin {
+  id: string;
+  descripcion: string;
+  fecha: string;
+  resuelta: boolean;
+  estudiante: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    nivelEscolar: string;
+  };
+  clase: {
+    id: string;
+    nombre: string;
+    fecha_hora_inicio: string;
+    duracion_minutos: number;
+  };
+  createdAt: string;
+}
+
+/**
+ * Listar alertas pendientes
+ * GET /admin/alertas
+ */
+export const getAlertas = async (): Promise<AlertaAdmin[]> => {
+  try {
+    return await axios.get<AlertaAdmin[]>('/admin/alertas');
+  } catch (error) {
+    console.error('Error al obtener alertas:', error);
+    throw error;
+  }
+};
+
+/**
+ * Resolver (marcar como resuelta) una alerta
+ * PATCH /admin/alertas/:id/resolver
+ */
+export const resolverAlerta = async (
+  id: string,
+): Promise<{ message: string; alertaId: string }> => {
+  try {
+    return await axios.patch<{ message: string; alertaId: string }>(
+      `/admin/alertas/${id}/resolver`,
+    );
+  } catch (error) {
+    console.error('Error al resolver alerta:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener sugerencia de solución para una alerta
+ * GET /admin/alertas/:id/sugerencia
+ */
+export const getSugerenciaAlerta = async (
+  id: string,
+): Promise<{ alertaId: string; estudiante: string; problema: string; sugerencia: string }> => {
+  try {
+    return await axios.get<{
+      alertaId: string;
+      estudiante: string;
+      problema: string;
+      sugerencia: string;
+    }>(`/admin/alertas/${id}/sugerencia`);
+  } catch (error) {
+    console.error('Error al obtener sugerencia de alerta:', error);
+    throw error;
+  }
+};
