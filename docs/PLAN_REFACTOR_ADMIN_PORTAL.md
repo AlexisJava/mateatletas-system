@@ -408,18 +408,20 @@ La ClaseGruposSection actual es **solo lectura**. Falta implementar:
 **Caso de uso:** Admin crea "Ñandú Nivel 1 - Lunes 18:00 - Prof. Fabricio" →
 Padre sin suscripción lo ve en landing → Paga con MercadoPago → Queda inscripto
 
-### FASE 4: Actualizar Navegación
+### FASE 4: Actualizar Navegación (✅ COMPLETADO)
 
-- [ ] Modificar ADMIN_NAV_ITEMS
-- [ ] Verificar sidebar
-- [ ] Agregar redirects
+Realizado como parte de FASE 2 y FASE 3:
 
-### FASE 5: Cleanup Final
+- [x] Modificar ADMIN_NAV_ITEMS (eliminado ASIGNACIONES y GRUPOS)
+- [x] Verificar sidebar (8 items coherentes)
+- [x] No se necesitan redirects (páginas eliminadas completamente)
 
-- [ ] Eliminar archivos obsoletos
-- [ ] Verificar build
-- [ ] Actualizar documentación
-- [ ] Commit final
+### FASE 5: Cleanup Final (✅ COMPLETADO)
+
+- [x] Eliminar archivos obsoletos (grupos-pedagogicos/, docentes-asignaciones/, demos)
+- [x] Verificar build (API ✅, Web ✅)
+- [x] Verificar lint (solo warnings de complejidad preexistentes)
+- [x] Actualizar documentación
 
 ---
 
@@ -471,3 +473,7 @@ Variables CSS definidas en `globals.css`:
 | 2026-01-18 | Completada FASE 0 (cleanup)                             | Claude |
 | 2026-01-18 | Completada FASE 1 (SuscripcionesView + seed)            | Claude |
 | 2026-01-18 | Completada FASE 2 (Asignaciones integradas en Personas) | Claude |
+| 2026-01-19 | Completada FASE 3 (ClaseGrupos en Productos tipo Club)  | Claude |
+| 2026-01-19 | Completada FASE 4 (Navegación verificada)               | Claude |
+| 2026-01-19 | Completada FASE 5 (Cleanup: demos eliminadas, build OK) | Claude |
+| 2026-01-19 | **REFACTOR COMPLETADO** - Build pasa, lint OK           | Claude |
