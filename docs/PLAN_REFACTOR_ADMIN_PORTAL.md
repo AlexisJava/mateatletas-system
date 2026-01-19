@@ -384,11 +384,29 @@ rm -rf apps/web/src/components/admin/views/grupos-pedagogicos/
 - [x] Eliminar docentes-asignaciones/ view folder
 - [x] Actualizar navegación (remover ASIGNACIONES del menu)
 
-### FASE 3: Integrar ClaseGrupos en Productos
+### FASE 3: Integrar ClaseGrupos en Productos (✅ COMPLETADO)
 
-- [ ] Crear ClaseGruposSection
-- [ ] Integrar en ProductoDetailPage
-- [ ] Eliminar páginas antiguas
+- [x] Agregar filtro producto_id al backend (clase-grupos.service.ts)
+- [x] Actualizar tipos frontend (ClaseGrupo, ListarClaseGruposParams)
+- [x] Crear ClaseGruposSection component (solo lectura)
+- [x] Integrar en ProductoDetailPage para tipo Club
+- [x] Agregar "Club" al enum TipoProducto en contracts
+- [x] Eliminar /admin/grupos page
+- [x] Eliminar grupos-pedagogicos/ view folder
+- [x] Actualizar navegación (remover GRUPOS del menu)
+
+#### TODO: Funcionalidad completa de Clubs (pendiente)
+
+La ClaseGruposSection actual es **solo lectura**. Falta implementar:
+
+- [ ] CRUD de ClaseGrupos desde ProductoDetailPage (crear/editar/eliminar horarios)
+- [ ] Conectar horarios con MercadoPago para compra individual
+- [ ] Landing page pública que muestre horarios disponibles de Clubs
+- [ ] Flujo de inscripción para padres sin suscripción (pago único por horario)
+- [ ] Webhook que procese pago y cree inscripción automáticamente
+
+**Caso de uso:** Admin crea "Ñandú Nivel 1 - Lunes 18:00 - Prof. Fabricio" →
+Padre sin suscripción lo ve en landing → Paga con MercadoPago → Queda inscripto
 
 ### FASE 4: Actualizar Navegación
 
