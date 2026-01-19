@@ -45,7 +45,7 @@ export const AdminView = {
   ANALYTICS: 'analytics',
   PERSONAS: 'personas',
   // ASIGNACIONES eliminado en FASE 2 - integrado en PERSONAS con tabs
-  GRUPOS: 'grupos',
+  // GRUPOS eliminado en FASE 3 - ClaseGrupos integrado en ProductoDetailPage (Club)
   PRODUCTOS: 'productos',
   SUSCRIPCIONES: 'suscripciones',
   CONTENIDOS: 'contenidos',
@@ -205,7 +205,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { view: AdminView.ANALYTICS, label: 'Analytics', href: '/admin/analytics', icon: 'BarChart3' },
   { view: AdminView.PERSONAS, label: 'Personas', href: '/admin/personas', icon: 'Users' },
   // ASIGNACIONES eliminado - integrado en PERSONAS con tab "Asignaciones Docentes"
-  { view: AdminView.GRUPOS, label: 'Grupos', href: '/admin/grupos', icon: 'Layers' },
+  // GRUPOS eliminado - ClaseGrupos integrado en ProductoDetailPage para tipo Club
   { view: AdminView.PRODUCTOS, label: 'Productos', href: '/admin/productos', icon: 'Package' },
   {
     view: AdminView.SUSCRIPCIONES,

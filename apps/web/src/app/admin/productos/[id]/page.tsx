@@ -15,7 +15,10 @@ import {
 import { toast } from 'react-hot-toast';
 import { getProductById, updateProduct, deleteProduct } from '@/lib/api/admin.api';
 import { formatCurrency } from '@/lib/utils/format';
-import { ComisionesSection } from '@/components/admin/views/productos/components/ComisionesSection';
+import {
+  ComisionesSection,
+  ClaseGruposSection,
+} from '@/components/admin/views/productos/components';
 import type { Producto } from '@/types/catalogo.types';
 
 /**
@@ -191,6 +194,7 @@ export default function ProductoDetailPage() {
   }
 
   const showComisiones = producto.tipo === 'Curso' || producto.tipo === 'Evento';
+  const showClaseGrupos = producto.tipo === 'Club';
 
   return (
     <div className="space-y-6 pb-8">
@@ -377,17 +381,21 @@ export default function ProductoDetailPage() {
           </div>
         </div>
 
-        {/* Right: Comisiones */}
+        {/* Right: Comisiones o Horarios según tipo */}
         <div className="col-span-2">
-          {showComisiones ? (
+          {showComisiones && (
             <div className="p-5 bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-xl">
               <ComisionesSection productoId={productoId} productoNombre={producto.nombre} />
             </div>
-          ) : (
+          )}
+          {showClaseGrupos && (
+            <ClaseGruposSection productoId={productoId} productoNombre={producto.nombre} />
+          )}
+          {!showComisiones && !showClaseGrupos && (
             <div className="p-8 bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-xl text-center">
               <Package className="w-12 h-12 text-[var(--admin-text-muted)] mx-auto mb-3" />
               <p className="text-[var(--admin-text-muted)]">
-                Las comisiones solo estan disponibles para productos de tipo Curso o Evento
+                Este tipo de producto no tiene horarios ni comisiones asociadas
               </p>
             </div>
           )}

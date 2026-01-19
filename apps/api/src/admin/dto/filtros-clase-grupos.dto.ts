@@ -56,4 +56,13 @@ export class FiltrosClaseGruposDto {
   @IsOptional()
   @IsString()
   grupo_id?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Filtrar por ID del producto (para listar horarios de un Club)',
+    example: 'clxxx789',
+  })
+  @IsOptional()
+  @IsString()
+  producto_id?: string;
 }

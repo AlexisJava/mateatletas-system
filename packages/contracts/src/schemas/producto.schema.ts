@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 /**
  * Enum para tipo de producto
+ * - Club: Actividad recurrente todo el año (suscripción mensual, con ClaseGrupos)
  * - Evento: Colonia, talleres, workshops (con fecha y cupo)
  * - Digital: PDFs, guías, videos descargables
  * - Fisico: Remeras, libros, merch (con stock)
@@ -15,6 +16,7 @@ import { z } from 'zod';
  * - Certificacion: Examen + certificado
  */
 export const tipoProductoEnum = z.enum([
+  'Club',
   'Evento',
   'Digital',
   'Fisico',

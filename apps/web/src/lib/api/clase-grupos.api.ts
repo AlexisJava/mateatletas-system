@@ -44,6 +44,13 @@ export async function listarClaseGrupos(params?: ListarClaseGruposParams): Promi
   if (params?.tipo) {
     queryParams.append('tipo', params.tipo);
   }
+  // FASE 3: Filtro por producto (para listar horarios de un Club)
+  if (params?.productoId) {
+    queryParams.append('producto_id', params.productoId);
+  }
+  if (params?.grupoId) {
+    queryParams.append('grupo_id', params.grupoId);
+  }
 
   const queryString = queryParams.toString();
   const url = `/admin/clase-grupos${queryString ? `?${queryString}` : ''}`;

@@ -9,3 +9,4 @@ export { ProductsGrid } from './ProductsGrid';
 export { ProductsFilters } from './ProductsFilters';
 export { ProductsStatsGrid } from './ProductsStatsGrid';
 export { ComisionesSection } from './ComisionesSection';
+export { ClaseGruposSection } from './ClaseGruposSection';

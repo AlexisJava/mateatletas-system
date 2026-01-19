@@ -48,6 +48,8 @@ export interface ClaseGrupo {
   cupoMaximo: number;
   activo: boolean;
   docenteId: string;
+  productoId?: string; // FASE 3: Vinculación con Producto tipo Club
+  grupoId?: string; // GrupoPedagogico al que pertenece
   rutaCurricularId?: string;
   sectorId?: string;
   nivel?: string;
@@ -126,4 +128,6 @@ export interface ListarClaseGruposParams {
   activo?: boolean;
   docenteId?: string;
   tipo?: TipoClaseGrupo;
+  productoId?: string; // FASE 3: Filtrar por producto (para Clubs)
+  grupoId?: string; // Filtrar por GrupoPedagogico
 }

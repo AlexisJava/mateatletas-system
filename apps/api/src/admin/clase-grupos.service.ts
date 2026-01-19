@@ -180,6 +180,7 @@ export class ClaseGruposService {
     docente_id?: string;
     tipo?: TipoClaseGrupo;
     grupo_id?: string;
+    producto_id?: string; // FASE 3: Filtro por producto (para Clubs)
   }) {
     const where: Prisma.ClaseGrupoWhereInput = {};
 
@@ -201,6 +202,11 @@ export class ClaseGruposService {
 
     if (params?.grupo_id) {
       where.grupo_id = params.grupo_id;
+    }
+
+    // FASE 3: Filtro por producto (para listar horarios de un Club específico)
+    if (params?.producto_id) {
+      where.producto_id = params.producto_id;
     }
 
     const grupos = await this.prisma.claseGrupo.findMany({
