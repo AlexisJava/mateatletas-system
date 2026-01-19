@@ -34,7 +34,9 @@ import { InscripcionesListener } from './listeners/inscripciones.listener';
  */
 @Module({
   imports: [AuthModule, NotificacionesModule],
-  controllers: [EstudiantesController, EstudianteNotificacionesController],
+  // IMPORTANTE: EstudianteNotificacionesController DEBE ir primero
+  // porque EstudiantesController tiene @Get(':id') que capturaría /notificaciones
+  controllers: [EstudianteNotificacionesController, EstudiantesController],
   providers: [
     // Servicios especializados
     EstudianteBusinessValidator,

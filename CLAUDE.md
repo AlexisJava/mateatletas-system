@@ -726,6 +726,39 @@ docker-compose -f apps/api/docker-compose.test.yml up -d
 yarn build:contracts                   # Rebuild contracts primero
 ```
 
+### Tests de integración fallan con 403/404 inesperado
+
+**Causa común:** Conflicto de rutas en NestJS. Las rutas con parámetros dinámicos (`@Get(':id')`) capturan rutas más específicas si están registradas primero.
+
+**Ejemplo del problema:**
+
+```typescript
+// EstudiantesController tiene @Get(':id')
+// La ruta /estudiantes/notificaciones es capturada como /estudiantes/:id con id="notificaciones"
+```
+
+**Solución:** En el módulo, registrar controllers específicos ANTES de controllers con rutas dinámicas:
+
+```typescript
+@Module({
+  // ✅ CORRECTO - Controller específico primero
+  controllers: [EstudianteNotificacionesController, EstudiantesController],
+
+  // ❌ INCORRECTO - @Get(':id') captura /notificaciones
+  controllers: [EstudiantesController, EstudianteNotificacionesController],
+})
+```
+
+**Cómo debuggear:** Agregar log temporal a `JwtAuthGuard.canActivate()`:
+
+```typescript
+const handler = context.getHandler().name;
+const controller = context.getClass().name;
+console.log(`[DEBUG] ${controller}.${handler}`);
+```
+
+Si el controller/handler es diferente al esperado, hay conflicto de rutas.
+
 ---
 
 ## SCRIPTS DE CALIDAD

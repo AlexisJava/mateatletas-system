@@ -75,6 +75,20 @@ function extractTokenFromCookie(cookie: string | undefined) {
   return match?.[1];
 }
 
+/**
+ * Extrae solo la parte "nombre=valor" de una cookie completa.
+ * Input: "auth-token=eyJ...; Path=/; HttpOnly; SameSite=Lax"
+ * Output: "auth-token=eyJ..."
+ */
+function extractCookieNameValue(fullCookie: string): string {
+  // La parte nombre=valor siempre está antes del primer ";"
+  const semicolonIndex = fullCookie.indexOf(';');
+  if (semicolonIndex === -1) {
+    return fullCookie; // No hay atributos, retornar completa
+  }
+  return fullCookie.substring(0, semicolonIndex);
+}
+
 // ============================================================================
 // LOGIN HELPERS
 // ============================================================================
@@ -139,8 +153,16 @@ export async function loginEstudiante(
 }
 
 /**
- * Login de estudiante que retorna cookies raw (array de strings).
+ * Login de estudiante que retorna cookies limpias (array de "nombre=valor").
  * Útil para tests que necesitan pasar cookies directamente a .set('Cookie', cookies).
+ *
+ * IMPORTANTE: Retorna cookies sin atributos (Path, HttpOnly, etc.) para que
+ * cookie-parser las parsee correctamente en el servidor.
+ *
+ * @example
+ * const cookies = await loginEstudianteRaw(app, { username, password });
+ * // cookies = ["auth-token=eyJ...", "refresh-token=eyJ..."]
+ * await request(app).get('/api/endpoint').set('Cookie', cookies);
  */
 export async function loginEstudianteRaw(
   app: INestApplication,
@@ -165,7 +187,9 @@ export async function loginEstudianteRaw(
     throw new Error(`No cookies returned for ${credentials.username}`);
   }
 
-  return cookies;
+  // Extraer solo "nombre=valor" de cada cookie, sin atributos (Path, HttpOnly, etc.)
+  // Esto evita que cookie-parser interprete los atributos como cookies separadas
+  return cookies.map(extractCookieNameValue);
 }
 
 // ============================================================================

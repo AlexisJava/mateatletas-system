@@ -19,7 +19,7 @@ import {
 import { NotificacionesService } from '../notificaciones/notificaciones.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles, Role } from '../auth/decorators/roles.decorator';
+import { Role, ExactRoles } from '../auth/decorators/roles.decorator';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { ParseIdPipe } from '../common/pipes';
 
@@ -31,7 +31,7 @@ import { ParseIdPipe } from '../common/pipes';
 @ApiBearerAuth()
 @Controller('estudiantes/notificaciones')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ESTUDIANTE)
+@ExactRoles(Role.ESTUDIANTE)
 export class EstudianteNotificacionesController {
   constructor(private readonly notificacionesService: NotificacionesService) {}
 
