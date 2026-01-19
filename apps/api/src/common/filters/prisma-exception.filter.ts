@@ -9,12 +9,59 @@ import { Prisma } from '@prisma/client';
 import { LoggerService } from '../logger/logger.service';
 import { v4 as uuidv4 } from 'uuid';
 
+interface ErrorMapping {
+  status: HttpStatus;
+  message: string;
+  detailsKey?: string;
+  detailsFormatter?: (
+    meta: Prisma.PrismaClientKnownRequestError['meta'],
+  ) => string | undefined;
+}
+
 /**
  * Global exception filter para manejar errores de Prisma
  * Convierte errores de BD en respuestas HTTP apropiadas con logging estructurado
  */
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
+  private static readonly ERROR_MAPPINGS: Record<string, ErrorMapping> = {
+    P2000: {
+      status: HttpStatus.BAD_REQUEST,
+      message: 'El valor proporcionado es demasiado largo para el campo',
+      detailsKey: 'column_name',
+    },
+    P2001: {
+      status: HttpStatus.NOT_FOUND,
+      message: 'Registro no encontrado',
+      detailsKey: 'cause',
+    },
+    P2004: {
+      status: HttpStatus.BAD_REQUEST,
+      message: 'Fallo en restricción de la base de datos',
+      detailsKey: 'database_error',
+    },
+    P2015: {
+      status: HttpStatus.NOT_FOUND,
+      message: 'No se encontró el registro relacionado',
+      detailsKey: 'cause',
+    },
+    P2018: {
+      status: HttpStatus.BAD_REQUEST,
+      message: 'No se encontraron los registros conectados requeridos',
+      detailsKey: 'cause',
+    },
+    P2019: {
+      status: HttpStatus.BAD_REQUEST,
+      message: 'Error de entrada de datos',
+      detailsKey: 'cause',
+    },
+    P2025: {
+      status: HttpStatus.NOT_FOUND,
+      message: 'Registro no encontrado para actualizar o eliminar',
+      detailsKey: 'cause',
+    },
+  };
+
   constructor(private readonly logger: LoggerService) {
     this.logger.setContext('PrismaExceptionFilter');
   }
@@ -23,15 +70,28 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-
-    // Generar ID único para rastrear el error
     const errorId = uuidv4();
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Error en la base de datos';
-    let details: string | undefined;
+    this.logError(exception, request, errorId);
 
-    // Log del error con contexto completo
+    const { status, message, details } = this.mapErrorCode(exception);
+    const errorResponse = this.buildErrorResponse(
+      status,
+      message,
+      details,
+      errorId,
+      request,
+      exception,
+    );
+
+    response.status(status).json(errorResponse);
+  }
+
+  private logError(
+    exception: Prisma.PrismaClientKnownRequestError,
+    request: Request,
+    errorId: string,
+  ): void {
     this.logger.logDatabase(
       `Prisma Error: ${exception.code}`,
       exception.message,
@@ -45,114 +105,101 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       method: request.method,
       userId: (request as Request & { user?: { id: string } }).user?.id,
     });
+  }
 
-    // Mapear códigos de error de Prisma a respuestas HTTP
+  private mapErrorCode(exception: Prisma.PrismaClientKnownRequestError): {
+    status: HttpStatus;
+    message: string;
+    details?: string;
+  } {
+    // Casos especiales que requieren lógica adicional
+    const specialCase = this.handleSpecialCases(exception);
+    if (specialCase) {
+      return specialCase;
+    }
+
+    // Usar mapeo estático para casos simples
+    const mapping = PrismaExceptionFilter.ERROR_MAPPINGS[exception.code];
+    if (mapping) {
+      const details = mapping.detailsKey
+        ? this.getMetaValue<string>(exception.meta, mapping.detailsKey)
+        : undefined;
+      return { status: mapping.status, message: mapping.message, details };
+    }
+
+    // Default
+    return {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Error inesperado en la base de datos',
+      details: `Código de error: ${exception.code}`,
+    };
+  }
+
+  private handleSpecialCases(
+    exception: Prisma.PrismaClientKnownRequestError,
+  ): { status: HttpStatus; message: string; details?: string } | null {
     switch (exception.code) {
-      case 'P2000': {
-        status = HttpStatus.BAD_REQUEST;
-        message = 'El valor proporcionado es demasiado largo para el campo';
-        details = this.getMetaValue<string>(exception.meta, 'column_name');
-        break;
-      }
-
-      case 'P2001': {
-        status = HttpStatus.NOT_FOUND;
-        message = 'Registro no encontrado';
-        details = this.getMetaValue<string>(exception.meta, 'cause');
-        break;
-      }
-
       case 'P2002': {
-        status = HttpStatus.CONFLICT;
         const target = this.getMetaValue<string[]>(exception.meta, 'target');
         const field = target?.[0] ?? 'campo';
-        message = `Ya existe un registro con ese ${field}`;
-        details = target
-          ? `Violación de restricción única en: ${target.join(', ')}`
-          : undefined;
-        break;
+        return {
+          status: HttpStatus.CONFLICT,
+          message: `Ya existe un registro con ese ${field}`,
+          details: target
+            ? `Violación de restricción única en: ${target.join(', ')}`
+            : undefined,
+        };
       }
-
       case 'P2003': {
-        status = HttpStatus.BAD_REQUEST;
         const fieldName = this.getMetaValue<string>(
           exception.meta,
           'field_name',
         );
-        message = 'Referencia inválida - el registro relacionado no existe';
-        details = fieldName
-          ? `El campo ${fieldName} hace referencia a un registro que no existe`
-          : 'Error de clave foránea';
-        break;
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Referencia inválida - el registro relacionado no existe',
+          details: fieldName
+            ? `El campo ${fieldName} hace referencia a un registro que no existe`
+            : 'Error de clave foránea',
+        };
       }
-
-      case 'P2004': {
-        status = HttpStatus.BAD_REQUEST;
-        message = 'Fallo en restricción de la base de datos';
-        details = this.getMetaValue<string>(exception.meta, 'database_error');
-        break;
-      }
-
       case 'P2011': {
-        status = HttpStatus.BAD_REQUEST;
         const constraint = this.getMetaValue<string>(
           exception.meta,
           'constraint',
         );
-        message = 'Violación de restricción de nulabilidad';
-        details = constraint
-          ? `El campo ${constraint} no puede ser nulo`
-          : undefined;
-        break;
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Violación de restricción de nulabilidad',
+          details: constraint
+            ? `El campo ${constraint} no puede ser nulo`
+            : undefined,
+        };
       }
-
       case 'P2014': {
-        status = HttpStatus.BAD_REQUEST;
         const relation = this.getMetaValue<string>(
           exception.meta,
           'relation_name',
         );
-        message = 'La operación viola una relación requerida';
-        details = relation ? `Relación requerida: ${relation}` : undefined;
-        break;
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'La operación viola una relación requerida',
+          details: relation ? `Relación requerida: ${relation}` : undefined,
+        };
       }
-
-      case 'P2015': {
-        status = HttpStatus.NOT_FOUND;
-        message = 'No se encontró el registro relacionado';
-        details = this.getMetaValue<string>(exception.meta, 'cause');
-        break;
-      }
-
-      case 'P2018': {
-        status = HttpStatus.BAD_REQUEST;
-        message = 'No se encontraron los registros conectados requeridos';
-        details = this.getMetaValue<string>(exception.meta, 'cause');
-        break;
-      }
-
-      case 'P2019': {
-        status = HttpStatus.BAD_REQUEST;
-        message = 'Error de entrada de datos';
-        details = this.getMetaValue<string>(exception.meta, 'cause');
-        break;
-      }
-
-      case 'P2025': {
-        status = HttpStatus.NOT_FOUND;
-        message = 'Registro no encontrado para actualizar o eliminar';
-        details = this.getMetaValue<string>(exception.meta, 'cause');
-        break;
-      }
-
-      default: {
-        status = HttpStatus.INTERNAL_SERVER_ERROR;
-        message = 'Error inesperado en la base de datos';
-        details = `Código de error: ${exception.code}`;
-      }
+      default:
+        return null;
     }
+  }
 
-    // Construir respuesta
+  private buildErrorResponse(
+    status: HttpStatus,
+    message: string,
+    details: string | undefined,
+    errorId: string,
+    request: Request,
+    exception: Prisma.PrismaClientKnownRequestError,
+  ): PrismaErrorResponse {
     const errorResponse: PrismaErrorResponse = {
       statusCode: status,
       message,
@@ -160,15 +207,13 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
       method: request.method,
-      errorId, // ID único para rastreo
+      errorId,
     };
 
-    // Agregar detalles solo si existen
     if (details) {
       errorResponse.details = details;
     }
 
-    // En desarrollo, agregar información adicional
     if (process.env.NODE_ENV !== 'production') {
       errorResponse.prismaCode = exception.code;
       errorResponse.prismaMessage = exception.message;
@@ -177,7 +222,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       }
     }
 
-    response.status(status).json(errorResponse);
+    return errorResponse;
   }
 
   private getErrorName(status: HttpStatus): string {

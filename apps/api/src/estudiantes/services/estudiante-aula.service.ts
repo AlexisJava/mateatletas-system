@@ -374,66 +374,15 @@ export class EstudianteAulaService {
     );
 
     // 4. Estructurar clases con información de activación y progreso
-    const clases = asignacion.planificacion.clases.map((clase) => {
-      const estado = estadosMap.get(clase.id);
-      const progresoClase = progresosClasesMap.get(clase.id);
-
-      // Tareas de esta clase que están asignadas
-      const tareasConEstado = clase.tareas.map((tarea) => {
-        const tareaAsignada = tareasAsignadasMap.get(tarea.id);
-        const progresoTarea = tareaAsignada
-          ? progresosTareasMap.get(tareaAsignada.id)
-          : null;
-
-        return {
-          id: tarea.id,
-          contenido: tarea.contenido,
-          orden: tarea.orden,
-          obligatoria: tarea.obligatoria,
-          asignada: !!tareaAsignada,
-          tarea_asignada_id: tareaAsignada?.id || null,
-          fecha_limite: tareaAsignada?.fecha_limite || null,
-          progreso: progresoTarea
-            ? {
-                estado: progresoTarea.estado,
-                iniciada_en: progresoTarea.iniciada_en,
-                completada_en: progresoTarea.completada_en,
-                calificacion: progresoTarea.calificacion,
-              }
-            : null,
-        };
-      });
-
-      return {
-        id: clase.id,
-        numero: clase.numero,
-        titulo: clase.titulo,
-        descripcion: clase.descripcion,
-        // Teoría (solo si está activada)
-        teoria: estado?.teoria_activa
-          ? {
-              ...clase.teoria,
-              completada: progresoClase?.teoria_completada || false,
-              completada_en: progresoClase?.teoria_completada_en || null,
-              tiempo_segundos: progresoClase?.tiempo_teoria_segundos || 0,
-            }
-          : null,
-        // Práctica (solo si está activada)
-        practica: estado?.practica_activa
-          ? {
-              ...clase.practica,
-              completada: progresoClase?.practica_completada || false,
-              completada_en: progresoClase?.practica_completada_en || null,
-              tiempo_segundos: progresoClase?.tiempo_practica_segundos || 0,
-            }
-          : null,
-        // Estado de activación
-        activada: !!(estado?.teoria_activa || estado?.practica_activa),
-        activada_en: estado?.activada_en || null,
-        // Tareas de esta clase
-        tareas: tareasConEstado.filter((t) => t.asignada),
-      };
-    });
+    const clases = asignacion.planificacion.clases.map((clase) =>
+      this.mapClaseConEstadoYProgreso(
+        clase,
+        estadosMap,
+        progresosClasesMap,
+        tareasAsignadasMap,
+        progresosTareasMap,
+      ),
+    );
 
     return {
       asignacion_id: asignacion.id,
@@ -1298,5 +1247,155 @@ export class EstudianteAulaService {
         bonus_tiempo: xpBonusTiempo,
       },
     };
+  }
+
+  // ==================== HELPERS PRIVADOS ====================
+
+  /**
+   * Mapea una clase con su estado de activación y progreso del estudiante
+   */
+  private mapClaseConEstadoYProgreso(
+    clase: {
+      id: string;
+      numero: number;
+      titulo: string;
+      descripcion: string | null;
+      teoria: unknown;
+      practica: unknown;
+      tareas: Array<{
+        id: string;
+        contenido: unknown;
+        orden: number;
+        obligatoria: boolean;
+      }>;
+    },
+    estadosMap: Map<
+      string,
+      {
+        teoria_activa: boolean;
+        practica_activa: boolean;
+        activada_en: Date | null;
+      }
+    >,
+    progresosClasesMap: Map<
+      string,
+      {
+        teoria_completada: boolean;
+        teoria_completada_en: Date | null;
+        tiempo_teoria_segundos: number;
+        practica_completada: boolean;
+        practica_completada_en: Date | null;
+        tiempo_practica_segundos: number;
+      }
+    >,
+    tareasAsignadasMap: Map<string, { id: string; fecha_limite: Date | null }>,
+    progresosTareasMap: Map<
+      string,
+      {
+        estado: EstadoTarea;
+        iniciada_en: Date | null;
+        completada_en: Date | null;
+        calificacion: number | null;
+      }
+    >,
+  ) {
+    const estado = estadosMap.get(clase.id);
+    const progresoClase = progresosClasesMap.get(clase.id);
+
+    const tareasConEstado = this.mapTareasConProgreso(
+      clase.tareas,
+      tareasAsignadasMap,
+      progresosTareasMap,
+    );
+
+    return {
+      id: clase.id,
+      numero: clase.numero,
+      titulo: clase.titulo,
+      descripcion: clase.descripcion,
+      teoria: this.buildSeccionConProgreso(
+        estado?.teoria_activa,
+        clase.teoria,
+        progresoClase?.teoria_completada,
+        progresoClase?.teoria_completada_en,
+        progresoClase?.tiempo_teoria_segundos,
+      ),
+      practica: this.buildSeccionConProgreso(
+        estado?.practica_activa,
+        clase.practica,
+        progresoClase?.practica_completada,
+        progresoClase?.practica_completada_en,
+        progresoClase?.tiempo_practica_segundos,
+      ),
+      activada: !!(estado?.teoria_activa || estado?.practica_activa),
+      activada_en: estado?.activada_en || null,
+      tareas: tareasConEstado.filter((t) => t.asignada),
+    };
+  }
+
+  /**
+   * Construye la sección de teoría/práctica con progreso si está activa
+   */
+  private buildSeccionConProgreso(
+    activa: boolean | undefined,
+    contenido: unknown,
+    completada: boolean | undefined,
+    completadaEn: Date | null | undefined,
+    tiempoSegundos: number | undefined,
+  ) {
+    if (!activa) return null;
+    return {
+      ...(contenido as object),
+      completada: completada || false,
+      completada_en: completadaEn || null,
+      tiempo_segundos: tiempoSegundos || 0,
+    };
+  }
+
+  /**
+   * Mapea las tareas de una clase con su estado de asignación y progreso
+   */
+  private mapTareasConProgreso(
+    tareas: Array<{
+      id: string;
+      contenido: unknown;
+      orden: number;
+      obligatoria: boolean;
+    }>,
+    tareasAsignadasMap: Map<string, { id: string; fecha_limite: Date | null }>,
+    progresosTareasMap: Map<
+      string,
+      {
+        estado: EstadoTarea;
+        iniciada_en: Date | null;
+        completada_en: Date | null;
+        calificacion: number | null;
+      }
+    >,
+  ) {
+    return tareas.map((tarea) => {
+      const tareaAsignada = tareasAsignadasMap.get(tarea.id);
+      const progresoTarea = tareaAsignada
+        ? progresosTareasMap.get(tareaAsignada.id)
+        : null;
+
+      return {
+        id: tarea.id,
+        contenido: tarea.contenido,
+        orden: tarea.orden,
+        obligatoria: tarea.obligatoria,
+        asignada: !!tareaAsignada,
+        tarea_asignada_id: tareaAsignada?.id || null,
+        fecha_limite: tareaAsignada?.fecha_limite || null,
+        progreso: progresoTarea
+          ? {
+              estado: progresoTarea.estado,
+              iniciada_en: progresoTarea.iniciada_en,
+              completada_en: progresoTarea.completada_en,
+              calificacion: progresoTarea.calificacion,
+            }
+          : null,
+      };
+    });
   }
 }

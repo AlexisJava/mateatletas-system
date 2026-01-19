@@ -310,47 +310,85 @@ export class EventosService {
       throw new BadRequestException('El evento no es una tarea');
     }
 
+    const updateData = this.buildEventoBaseUpdateData(dto);
+    const tareaUpdate = this.buildTareaUpdateData(dto);
+
+    if (Object.keys(tareaUpdate).length > 0) {
+      updateData.tarea = { update: tareaUpdate };
+    }
+
+    return this.prisma.evento.update({
+      where: { id },
+      data: updateData,
+      include: { tarea: true, clase: true },
+    });
+  }
+
+  /**
+   * Construye datos base para actualizar un Evento
+   */
+  private buildEventoBaseUpdateData(
+    dto: UpdateTareaDto | UpdateRecordatorioDto | UpdateNotaDto,
+  ): Prisma.EventoUpdateInput {
     const updateData: Prisma.EventoUpdateInput = {};
 
-    // Actualizar campos del evento base
     if (dto.titulo !== undefined) updateData.titulo = dto.titulo;
     if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion;
-    if (dto.fechaInicio !== undefined)
+    if (dto.fechaInicio !== undefined) {
       updateData.fecha_inicio = new Date(dto.fechaInicio);
-    if (dto.fechaFin !== undefined)
+    }
+    if (dto.fechaFin !== undefined) {
       updateData.fecha_fin = new Date(dto.fechaFin);
-    if (dto.esTodoElDia !== undefined)
+    }
+    if (dto.esTodoElDia !== undefined) {
       updateData.es_todo_el_dia = dto.esTodoElDia;
+    }
     if (dto.claseId !== undefined) {
       updateData.clase = dto.claseId
         ? { connect: { id: dto.claseId } }
         : { disconnect: true };
     }
 
-    // Actualizar campos de la tarea
+    return updateData;
+  }
+
+  /**
+   * Construye datos específicos para actualizar una Tarea
+   */
+  private buildTareaUpdateData(dto: UpdateTareaDto): Prisma.TareaUpdateInput {
     const tareaUpdate: Prisma.TareaUpdateInput = {};
+
     if (dto.estado !== undefined) tareaUpdate.estado = dto.estado;
     if (dto.prioridad !== undefined) tareaUpdate.prioridad = dto.prioridad;
-    if (dto.porcentajeCompletado !== undefined)
+    if (dto.porcentajeCompletado !== undefined) {
       tareaUpdate.porcentaje_completado = dto.porcentajeCompletado;
+    }
     if (dto.categoria !== undefined) tareaUpdate.categoria = dto.categoria;
     if (dto.etiquetas !== undefined) tareaUpdate.etiquetas = dto.etiquetas;
-    if (dto.subtareas !== undefined)
+    if (dto.subtareas !== undefined) {
       tareaUpdate.subtareas = this.serializeArray(dto.subtareas);
-    if (dto.archivos !== undefined)
+    }
+    if (dto.archivos !== undefined) {
       tareaUpdate.archivos = this.serializeArray(dto.archivos);
-    if (dto.claseRelacionadaId !== undefined)
+    }
+    if (dto.claseRelacionadaId !== undefined) {
       tareaUpdate.clase_relacionada_id = dto.claseRelacionadaId;
-    if (dto.estudianteRelacionadoId !== undefined)
+    }
+    if (dto.estudianteRelacionadoId !== undefined) {
       tareaUpdate.estudiante_relacionado_id = dto.estudianteRelacionadoId;
-    if (dto.tiempoEstimadoMinutos !== undefined)
+    }
+    if (dto.tiempoEstimadoMinutos !== undefined) {
       tareaUpdate.tiempo_estimado_minutos = dto.tiempoEstimadoMinutos;
-    if (dto.tiempoRealMinutos !== undefined)
+    }
+    if (dto.tiempoRealMinutos !== undefined) {
       tareaUpdate.tiempo_real_minutos = dto.tiempoRealMinutos;
-    if (dto.recurrencia !== undefined)
+    }
+    if (dto.recurrencia !== undefined) {
       tareaUpdate.recurrencia = this.serializeObject(dto.recurrencia);
-    if (dto.recordatorios !== undefined)
+    }
+    if (dto.recordatorios !== undefined) {
       tareaUpdate.recordatorios = this.serializeArray(dto.recordatorios);
+    }
 
     // Marcar como completada si porcentaje es 100
     if (dto.porcentajeCompletado === 100) {
@@ -358,20 +396,7 @@ export class EventosService {
       tareaUpdate.estado = 'COMPLETADA';
     }
 
-    if (Object.keys(tareaUpdate).length > 0) {
-      updateData.tarea = {
-        update: tareaUpdate,
-      };
-    }
-
-    return this.prisma.evento.update({
-      where: { id },
-      data: updateData,
-      include: {
-        tarea: true,
-        clase: true,
-      },
-    });
+    return tareaUpdate;
   }
 
   /**
@@ -388,40 +413,22 @@ export class EventosService {
       throw new BadRequestException('El evento no es un recordatorio');
     }
 
-    const updateData: Prisma.EventoUpdateInput = {};
-
-    if (dto.titulo !== undefined) updateData.titulo = dto.titulo;
-    if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion;
-    if (dto.fechaInicio !== undefined)
-      updateData.fecha_inicio = new Date(dto.fechaInicio);
-    if (dto.fechaFin !== undefined)
-      updateData.fecha_fin = new Date(dto.fechaFin);
-    if (dto.esTodoElDia !== undefined)
-      updateData.es_todo_el_dia = dto.esTodoElDia;
-    if (dto.claseId !== undefined) {
-      updateData.clase = dto.claseId
-        ? { connect: { id: dto.claseId } }
-        : { disconnect: true };
-    }
+    const updateData = this.buildEventoBaseUpdateData(dto);
 
     const recordatorioUpdate: Prisma.RecordatorioUpdateInput = {};
-    if (dto.completado !== undefined)
+    if (dto.completado !== undefined) {
       recordatorioUpdate.completado = dto.completado;
+    }
     if (dto.color !== undefined) recordatorioUpdate.color = dto.color;
 
     if (Object.keys(recordatorioUpdate).length > 0) {
-      updateData.recordatorio = {
-        update: recordatorioUpdate,
-      };
+      updateData.recordatorio = { update: recordatorioUpdate };
     }
 
     return this.prisma.evento.update({
       where: { id },
       data: updateData,
-      include: {
-        recordatorio: true,
-        clase: true,
-      },
+      include: { recordatorio: true, clase: true },
     });
   }
 
@@ -435,21 +442,7 @@ export class EventosService {
       throw new BadRequestException('El evento no es una nota');
     }
 
-    const updateData: Prisma.EventoUpdateInput = {};
-
-    if (dto.titulo !== undefined) updateData.titulo = dto.titulo;
-    if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion;
-    if (dto.fechaInicio !== undefined)
-      updateData.fecha_inicio = new Date(dto.fechaInicio);
-    if (dto.fechaFin !== undefined)
-      updateData.fecha_fin = new Date(dto.fechaFin);
-    if (dto.esTodoElDia !== undefined)
-      updateData.es_todo_el_dia = dto.esTodoElDia;
-    if (dto.claseId !== undefined) {
-      updateData.clase = dto.claseId
-        ? { connect: { id: dto.claseId } }
-        : { disconnect: true };
-    }
+    const updateData = this.buildEventoBaseUpdateData(dto);
 
     const notaUpdate: Prisma.NotaUpdateInput = {};
     if (dto.contenido !== undefined) notaUpdate.contenido = dto.contenido;
@@ -457,18 +450,13 @@ export class EventosService {
     if (dto.color !== undefined) notaUpdate.color = dto.color;
 
     if (Object.keys(notaUpdate).length > 0) {
-      updateData.nota = {
-        update: notaUpdate,
-      };
+      updateData.nota = { update: notaUpdate };
     }
 
     return this.prisma.evento.update({
       where: { id },
       data: updateData,
-      include: {
-        nota: true,
-        clase: true,
-      },
+      include: { nota: true, clase: true },
     });
   }
 

@@ -31,11 +31,51 @@ export class LoggerService implements NestLoggerService {
     return Object.values(value).every((item) => typeof item === 'string');
   }
 
+  // Campos conocidos para validación de tipos en sanitizeMetadata
+  private static readonly STRING_FIELDS = new Set([
+    'eventType',
+    'operation',
+    'action',
+    'userId',
+    'userRole',
+    'method',
+    'url',
+    'field',
+    'errorId',
+    'ip',
+    'userAgent',
+    'severity',
+    'type',
+    'dataId',
+    'timestamp',
+    'errorMessage',
+    'errorName',
+    'stack',
+  ]);
+  private static readonly NUMBER_FIELDS = new Set(['durationMs', 'statusCode']);
+  private static readonly BOOLEAN_FIELDS = new Set(['alert']);
+  private static readonly SKIP_FIELDS = new Set(['context', 'trace']);
+
   private sanitizeMetadata(metadata?: unknown): LoggerMetadata | undefined {
     if (metadata === undefined || metadata === null) {
       return undefined;
     }
 
+    const primitiveResult = this.handlePrimitiveMetadata(metadata);
+    if (primitiveResult !== null) {
+      return primitiveResult;
+    }
+
+    if (!this.isRecord(metadata)) {
+      return undefined;
+    }
+
+    return this.sanitizeRecordMetadata(metadata);
+  }
+
+  private handlePrimitiveMetadata(
+    metadata: unknown,
+  ): LoggerMetadata | undefined | null {
     if (metadata instanceof Error) {
       return {
         errorName: metadata.name,
@@ -57,90 +97,59 @@ export class LoggerService implements NestLoggerService {
       return { detail: metadata };
     }
 
-    if (!this.isRecord(metadata)) {
-      return undefined;
-    }
+    // null indica que no es primitivo, seguir procesando
+    return null;
+  }
 
-    const stringFields = new Set([
-      'eventType',
-      'operation',
-      'action',
-      'userId',
-      'userRole',
-      'method',
-      'url',
-      'field',
-      'errorId',
-      'ip',
-      'userAgent',
-      'severity',
-      'type',
-      'dataId',
-      'timestamp',
-      'errorMessage',
-      'errorName',
-      'stack',
-    ]);
-    const numberFields = new Set(['durationMs', 'statusCode']);
-    const booleanFields = new Set(['alert']);
-
+  private sanitizeRecordMetadata(
+    metadata: Record<string, unknown>,
+  ): LoggerMetadata {
     const sanitized: LoggerMetadata = {};
 
     for (const [key, value] of Object.entries(metadata)) {
-      if (value === undefined) {
+      if (value === undefined || LoggerService.SKIP_FIELDS.has(key)) {
         continue;
       }
 
-      if (key === 'context' || key === 'trace') {
-        continue;
+      const sanitizedValue = this.sanitizeFieldValue(key, value);
+      if (sanitizedValue !== undefined) {
+        sanitized[key] = sanitizedValue;
       }
-
-      if (key === 'query') {
-        if (typeof value === 'string' || this.isRecord(value)) {
-          sanitized.query = value;
-        }
-        continue;
-      }
-
-      if (stringFields.has(key)) {
-        if (typeof value === 'string') {
-          sanitized[key] = value;
-        }
-        continue;
-      }
-
-      if (numberFields.has(key)) {
-        if (typeof value === 'number') {
-          sanitized[key] = value;
-        }
-        continue;
-      }
-
-      if (booleanFields.has(key)) {
-        if (typeof value === 'boolean') {
-          sanitized[key] = value;
-        }
-        continue;
-      }
-
-      if (key === 'liveMode') {
-        if (typeof value === 'boolean' || typeof value === 'string') {
-          sanitized[key] = value;
-        }
-        continue;
-      }
-
-      if (key === 'constraints') {
-        if (this.isStringRecord(value)) {
-          sanitized.constraints = value;
-        }
-        continue;
-      }
-
-      sanitized[key] = value as unknown;
     }
 
     return sanitized;
+  }
+
+  private sanitizeFieldValue(key: string, value: unknown): unknown {
+    if (key === 'query') {
+      return typeof value === 'string' || this.isRecord(value)
+        ? value
+        : undefined;
+    }
+
+    if (LoggerService.STRING_FIELDS.has(key)) {
+      return typeof value === 'string' ? value : undefined;
+    }
+
+    if (LoggerService.NUMBER_FIELDS.has(key)) {
+      return typeof value === 'number' ? value : undefined;
+    }
+
+    if (LoggerService.BOOLEAN_FIELDS.has(key)) {
+      return typeof value === 'boolean' ? value : undefined;
+    }
+
+    if (key === 'liveMode') {
+      return typeof value === 'boolean' || typeof value === 'string'
+        ? value
+        : undefined;
+    }
+
+    if (key === 'constraints') {
+      return this.isStringRecord(value) ? value : undefined;
+    }
+
+    return value;
   }
 
   private mergeMetadata(metadata?: LoggerMetadata): LoggerMetadata | undefined {

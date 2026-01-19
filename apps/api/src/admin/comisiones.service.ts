@@ -277,7 +277,6 @@ export class ComisionesService {
    * Actualizar una comisión existente
    */
   async update(id: string, dto: UpdateComisionDto) {
-    // Verificar que la comisión existe
     const comisionExistente = await this.prisma.comision.findUnique({
       where: { id },
     });
@@ -286,26 +285,33 @@ export class ComisionesService {
       throw new NotFoundException(`No se encontró la comisión con ID ${id}`);
     }
 
-    // Validar producto si se cambia
-    if (dto.producto_id && dto.producto_id !== comisionExistente.producto_id) {
-      const producto = await this.prisma.producto.findUnique({
-        where: { id: dto.producto_id },
-      });
+    await this.validateUpdateRelations(dto, comisionExistente.producto_id);
+    const updateData = this.buildComisionUpdateData(dto);
 
-      if (!producto) {
-        throw new NotFoundException(
-          `No se encontró el producto con ID ${dto.producto_id}`,
-        );
-      }
+    const comision = await this.prisma.comision.update({
+      where: { id },
+      data: updateData,
+      include: this.getComisionInclude(),
+    });
 
-      if (producto.tipo !== 'Curso' && producto.tipo !== 'Evento') {
-        throw new BadRequestException(
-          'Las comisiones solo pueden asociarse a productos de tipo Curso o Evento',
-        );
-      }
+    return {
+      success: true,
+      data: this.formatComisionResponse(comision),
+      message: 'Comisión actualizada exitosamente',
+    };
+  }
+
+  /**
+   * Valida relaciones antes de actualizar comisión
+   */
+  private async validateUpdateRelations(
+    dto: UpdateComisionDto,
+    currentProductoId: string,
+  ): Promise<void> {
+    if (dto.producto_id && dto.producto_id !== currentProductoId) {
+      await this.validateProductoForComision(dto.producto_id);
     }
 
-    // Validar casa si se especifica
     if (dto.casa_id) {
       const casa = await this.prisma.casa.findUnique({
         where: { id: dto.casa_id },
@@ -317,7 +323,6 @@ export class ComisionesService {
       }
     }
 
-    // Validar docente si se especifica
     if (dto.docente_id) {
       const docente = await this.prisma.docente.findUnique({
         where: { id: dto.docente_id },
@@ -328,8 +333,35 @@ export class ComisionesService {
         );
       }
     }
+  }
 
-    // Preparar datos de actualización
+  /**
+   * Valida que el producto sea válido para comisiones
+   */
+  private async validateProductoForComision(productoId: string): Promise<void> {
+    const producto = await this.prisma.producto.findUnique({
+      where: { id: productoId },
+    });
+
+    if (!producto) {
+      throw new NotFoundException(
+        `No se encontró el producto con ID ${productoId}`,
+      );
+    }
+
+    if (producto.tipo !== 'Curso' && producto.tipo !== 'Evento') {
+      throw new BadRequestException(
+        'Las comisiones solo pueden asociarse a productos de tipo Curso o Evento',
+      );
+    }
+  }
+
+  /**
+   * Construye el objeto de actualización para Comision
+   */
+  private buildComisionUpdateData(
+    dto: UpdateComisionDto,
+  ): Prisma.ComisionUpdateInput {
     const updateData: Prisma.ComisionUpdateInput = {};
 
     if (dto.nombre !== undefined) updateData.nombre = dto.nombre;
@@ -359,49 +391,43 @@ export class ComisionesService {
     }
     if (dto.activo !== undefined) updateData.activo = dto.activo;
 
-    const comision = await this.prisma.comision.update({
-      where: { id },
-      data: updateData,
-      include: {
-        producto: {
-          select: {
-            id: true,
-            nombre: true,
-            tipo: true,
-          },
-        },
-        casa: {
-          select: {
-            id: true,
-            nombre: true,
-            emoji: true,
-          },
-        },
-        docente: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-          },
-        },
-        _count: {
-          select: {
-            inscripciones: true,
-          },
-        },
-      },
-    });
+    return updateData;
+  }
 
+  /**
+   * Include común para consultas de Comision
+   */
+  private getComisionInclude() {
     return {
-      success: true,
-      data: {
-        ...comision,
-        total_inscriptos: comision._count.inscripciones,
-        cupos_disponibles: comision.cupo_maximo
-          ? comision.cupo_maximo - comision._count.inscripciones
-          : null,
+      producto: {
+        select: { id: true, nombre: true, tipo: true },
       },
-      message: 'Comisión actualizada exitosamente',
+      casa: {
+        select: { id: true, nombre: true, emoji: true },
+      },
+      docente: {
+        select: { id: true, nombre: true, apellido: true },
+      },
+      _count: {
+        select: { inscripciones: true },
+      },
+    };
+  }
+
+  /**
+   * Formatea la respuesta de comisión con campos calculados
+   */
+  private formatComisionResponse(comision: {
+    _count: { inscripciones: number };
+    cupo_maximo: number | null;
+    [key: string]: unknown;
+  }) {
+    return {
+      ...comision,
+      total_inscriptos: comision._count.inscripciones,
+      cupos_disponibles: comision.cupo_maximo
+        ? comision.cupo_maximo - comision._count.inscripciones
+        : null,
     };
   }
 
