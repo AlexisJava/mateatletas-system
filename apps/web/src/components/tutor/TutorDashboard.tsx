@@ -106,8 +106,8 @@ export function TutorDashboard() {
     );
   }
 
-  const totalPendiente = dashboardData?.pagosPendientes.reduce((sum, p) => sum + p.monto, 0) ?? 0;
-  const hayAlertas = (dashboardData?.alertas.length ?? 0) > 0;
+  const totalPendiente = dashboardData?.pagosPendientes?.reduce((sum, p) => sum + p.monto, 0) ?? 0;
+  const hayAlertas = (dashboardData?.alertas?.length ?? 0) > 0;
 
   return (
     <div className="h-full flex flex-col bg-[#0a0a12] overflow-hidden">
@@ -184,7 +184,7 @@ export function TutorDashboard() {
                 <span className="text-sm text-slate-400">Pagado {new Date().getFullYear()}</span>
               </div>
               <p className="text-2xl font-bold text-emerald-400">
-                {formatMoney(dashboardData?.metricas.totalPagadoAnio ?? 0)}
+                {formatMoney(dashboardData?.metricas?.totalPagadoAnio ?? 0)}
               </p>
             </div>
 
@@ -197,7 +197,7 @@ export function TutorDashboard() {
                 <span className="text-sm text-slate-400">Asistencia</span>
               </div>
               <p className="text-2xl font-bold text-cyan-400">
-                {dashboardData?.metricas.asistenciaPromedio ?? 0}%
+                {dashboardData?.metricas?.asistenciaPromedio ?? 0}%
               </p>
             </div>
 
@@ -224,11 +224,11 @@ export function TutorDashboard() {
               <p
                 className={`text-2xl font-bold ${hayAlertas ? 'text-amber-400' : 'text-emerald-400'}`}
               >
-                {hayAlertas ? dashboardData?.alertas.length : 'OK'}
+                {hayAlertas ? dashboardData?.alertas?.length : 'OK'}
               </p>
               {hayAlertas && (
                 <p className="text-xs text-amber-300/80 mt-1 truncate">
-                  {dashboardData?.alertas[0]?.titulo}
+                  {dashboardData?.alertas?.[0]?.titulo}
                 </p>
               )}
             </div>
@@ -310,14 +310,14 @@ export function TutorDashboard() {
                 <h2 className="text-xl font-bold text-white">Próximas Clases</h2>
               </div>
 
-              {proximasClases?.clases.length === 0 ? (
+              {(proximasClases?.clases?.length ?? 0) === 0 ? (
                 <div className="text-center py-8">
                   <Calendar className="w-12 h-12 text-slate-700 mx-auto mb-3" />
                   <p className="text-slate-500">Sin clases programadas</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {proximasClases?.clases.slice(0, 5).map((clase) => (
+                  {proximasClases?.clases?.slice(0, 5).map((clase) => (
                     <button
                       key={clase.id}
                       onClick={() => setSelectedClase(clase)}
@@ -351,8 +351,8 @@ export function TutorDashboard() {
                 <div>
                   <h3 className="text-lg font-bold text-white">Historial de Pagos</h3>
                   <p className="text-sm text-slate-400">
-                    {(dashboardData?.pagosPendientes.length ?? 0) > 0
-                      ? `Tenés ${dashboardData?.pagosPendientes.length} pago${(dashboardData?.pagosPendientes.length ?? 0) > 1 ? 's' : ''} pendiente${(dashboardData?.pagosPendientes.length ?? 0) > 1 ? 's' : ''}`
+                    {(dashboardData?.pagosPendientes?.length ?? 0) > 0
+                      ? `Tenés ${dashboardData?.pagosPendientes?.length} pago${(dashboardData?.pagosPendientes?.length ?? 0) > 1 ? 's' : ''} pendiente${(dashboardData?.pagosPendientes?.length ?? 0) > 1 ? 's' : ''}`
                       : 'Todos tus pagos están al día'}
                   </p>
                 </div>

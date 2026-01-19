@@ -364,14 +364,16 @@ rm -rf apps/web/src/components/admin/views/grupos-pedagogicos/
 - [x] Eliminar barrel exports innecesarios
 - [x] Verificar build limpio
 
-### FASE 1: Vista Suscripciones
+### FASE 1: Vista Suscripciones (✅ COMPLETADO)
 
-- [ ] Crear estructura de carpetas
-- [ ] Implementar SuscripcionesView
-- [ ] Implementar hooks
-- [ ] Implementar componentes
-- [ ] Agregar al nav (temporalmente)
-- [ ] Tests
+- [x] Crear estructura de carpetas
+- [x] Implementar SuscripcionesView
+- [x] Implementar hooks (useSuscripciones)
+- [x] Implementar componentes (StatsGrid, Filters, Table, DetailModal)
+- [x] Agregar al nav
+- [x] Responsive design (cards mobile, table desktop)
+- [x] Seed data con 6 familias edge cases
+- [x] Fix axios interceptor para paginación
 
 ### FASE 2: Integrar Asignaciones en Personas
 
@@ -443,7 +445,8 @@ Variables CSS definidas en `globals.css`:
 
 ## 8. Historial de Cambios
 
-| Fecha      | Cambio                         | Autor  |
-| ---------- | ------------------------------ | ------ |
-| 2026-01-18 | Creación inicial del documento | Claude |
-| 2026-01-18 | Completada FASE 0 (cleanup)    | Claude |
+| Fecha      | Cambio                                       | Autor  |
+| ---------- | -------------------------------------------- | ------ |
+| 2026-01-18 | Creación inicial del documento               | Claude |
+| 2026-01-18 | Completada FASE 0 (cleanup)                  | Claude |
+| 2026-01-18 | Completada FASE 1 (SuscripcionesView + seed) | Claude |

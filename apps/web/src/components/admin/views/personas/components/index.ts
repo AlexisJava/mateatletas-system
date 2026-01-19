@@ -13,3 +13,6 @@ export { PersonasTable } from './PersonasTable';
 export { PersonasFilters } from './PersonasFilters';
 export { PersonasStatsGrid } from './PersonasStatsGrid';
 export { CredencialesModal } from './CredencialesModal';
+
+// Asignaciones Casa/Mundo (FASE 2)
+export { DocenteAsignacionCard } from './DocenteAsignacionCard';

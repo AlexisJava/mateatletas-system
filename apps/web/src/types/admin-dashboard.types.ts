@@ -44,7 +44,7 @@ export const AdminView = {
   FINANZAS: 'finanzas',
   ANALYTICS: 'analytics',
   PERSONAS: 'personas',
-  ASIGNACIONES: 'asignaciones',
+  // ASIGNACIONES eliminado en FASE 2 - integrado en PERSONAS con tabs
   GRUPOS: 'grupos',
   PRODUCTOS: 'productos',
   SUSCRIPCIONES: 'suscripciones',
@@ -204,12 +204,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { view: AdminView.FINANZAS, label: 'Finanzas', href: '/admin/finanzas', icon: 'CreditCard' },
   { view: AdminView.ANALYTICS, label: 'Analytics', href: '/admin/analytics', icon: 'BarChart3' },
   { view: AdminView.PERSONAS, label: 'Personas', href: '/admin/personas', icon: 'Users' },
-  {
-    view: AdminView.ASIGNACIONES,
-    label: 'Asignaciones',
-    href: '/admin/asignaciones',
-    icon: 'UserCog',
-  },
+  // ASIGNACIONES eliminado - integrado en PERSONAS con tab "Asignaciones Docentes"
   { view: AdminView.GRUPOS, label: 'Grupos', href: '/admin/grupos', icon: 'Layers' },
   { view: AdminView.PRODUCTOS, label: 'Productos', href: '/admin/productos', icon: 'Package' },
   {
