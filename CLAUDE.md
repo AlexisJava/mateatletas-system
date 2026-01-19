@@ -82,6 +82,55 @@ Este ciclo se repite cuantas veces sea necesario hasta que todos los tests pasen
 
 ---
 
+## CICLO DE CONSTRUCCIÓN ROBUSTO (INDEFECTIBLE)
+
+> ⚠️ **ESTE CICLO ES OBLIGATORIO PARA TODA IMPLEMENTACIÓN. SIN EXCEPCIONES.**
+
+Antes de implementar CUALQUIER feature, fix, o mejora, se debe seguir este ciclo **al pie de la letra**:
+
+```
+0. LEER CLAUDE.MD  → Releer este archivo COMPLETO antes de empezar
+1. PLANIFICAR      → Definir qué vamos a hacer con detalle absoluto
+2. INVESTIGAR      → Buscar en internet las mejores prácticas actuales (2025/2026)
+3. IMPLEMENTAR     → Código robusto, production-ready, SIN PARCHES
+4. VERIFICAR       → Si hay errores → FRENAR INMEDIATAMENTE y REPORTAR
+5. DIAGNOSTICAR    → Investigar causa raíz JUNTO CON EL USUARIO
+6. RESOLVER        → Buscar en internet la solución más robusta antes de implementar
+7. REPETIR         → Volver al paso 4 hasta que esté PERFECTO
+```
+
+### Reglas Indefectibles del Ciclo
+
+**TERMINANTEMENTE PROHIBIDO:**
+
+- Implementar parches temporales "para marcar como resuelto"
+- Implementar sin investigar primero las mejores prácticas en internet
+- Intentar arreglar errores sin antes FRENAR y REPORTAR al usuario
+- Resolver problemas sin buscar la solución más robusta y actualizada
+- Tomar decisiones unilaterales sobre cómo resolver errores
+
+**ABSOLUTAMENTE OBLIGATORIO:**
+
+- Leer CLAUDE.md completo antes de cada fase de trabajo
+- Buscar en internet ANTES de implementar (mejores prácticas 2025/2026)
+- FRENAR y REPORTAR errores al usuario antes de intentar arreglarlos
+- Buscar en internet ANTES de resolver cualquier problema encontrado
+- Trabajar EN EQUIPO con el usuario - las decisiones se toman JUNTOS
+- Código production-ready desde el primer momento, no "después lo mejoramos"
+
+### Filosofía
+
+> "No existe tal cosa como un fix temporal. O está bien hecho, o no está hecho."
+
+El objetivo es **calidad clase mundial**. Cada implementación debe ser:
+
+- **Robusta**: Maneja edge cases, errores, y situaciones inesperadas
+- **Actualizada**: Usa las mejores prácticas del mercado (2025/2026)
+- **Completa**: No deja cabos sueltos ni TODOs para después
+- **Verificada**: Funciona en browser, no solo compila
+
+---
+
 ## METODOLOGÍA DE TRABAJO
 
 ### Flujo obligatorio (sin excepciones)

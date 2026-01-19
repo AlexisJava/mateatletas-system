@@ -62,6 +62,17 @@ const ESTUDIANTE_PROFILE_SELECT = {
     },
   },
   casaId: true,
+  casa: {
+    select: {
+      id: true,
+      tipo: true,
+      nombre: true,
+      colorPrimary: true,
+      colorSecondary: true,
+      colorAccent: true,
+      gradiente: true,
+    },
+  },
   tutor_id: true,
   createdAt: true,
   updatedAt: true,

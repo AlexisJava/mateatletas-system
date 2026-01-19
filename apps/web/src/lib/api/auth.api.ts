@@ -29,6 +29,24 @@ export interface LoginEstudianteData {
 
 export type AuthRole = 'tutor' | 'docente' | 'admin' | 'estudiante';
 
+/**
+ * Tipo de casa del estudiante (sistema 2026)
+ */
+export type CasaTipo = 'QUANTUM' | 'VERTEX' | 'PULSAR';
+
+/**
+ * Casa del estudiante con colores para theming dinámico
+ */
+export interface AuthUserCasa {
+  id: string;
+  tipo: CasaTipo;
+  nombre: string;
+  colorPrimary: string;
+  colorSecondary: string;
+  colorAccent: string;
+  gradiente: string;
+}
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -47,11 +65,14 @@ export interface AuthUser {
   puntos_totales?: number;
   nivel_actual?: number;
   debe_cambiar_password?: boolean;
+  /** @deprecated Usar casa en su lugar */
   equipo?: {
     id: string;
     nombre: string;
     color_primario: string;
   } | null;
+  /** Casa del estudiante (sistema 2026) - solo para rol estudiante */
+  casa?: AuthUserCasa | null;
   tutor?: {
     id: string;
     nombre: string;

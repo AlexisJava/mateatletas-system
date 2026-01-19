@@ -172,6 +172,74 @@ main {
   /* Feedback */
   --color-correct: #22c55e; /* Green */
   --color-incorrect: #ef4444; /* Red */
+
+  /* ─────────────────────────────────────────────
+     CASA THEME VARIABLES (Default: PULSAR)
+     Estas variables se sobrescriben via data-casa attribute
+     ───────────────────────────────────────────── */
+  --casa-primary: #ffaa00;
+  --casa-secondary: #f59e0b;
+  --casa-accent: #d97706;
+  --casa-dark: #92400e;
+  --casa-gradient: linear-gradient(135deg, #ffaa00 0%, #f59e0b 50%, #d97706 100%);
+  --casa-glow: rgba(255, 170, 0, 0.4);
+  --casa-name: 'Casa Pulsar';
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CASA THEMES - Portal Estudiante (Sistema 2026)
+   Cada casa tiene su paleta de colores única
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* QUANTUM (6-9 años) - Cyan/Turquesa - Exploradores curiosos */
+[data-casa='QUANTUM'] {
+  --casa-primary: #00d4ff;
+  --casa-secondary: #06b6d4;
+  --casa-accent: #0891b2;
+  --casa-dark: #155e75;
+  --casa-gradient: linear-gradient(135deg, #00d4ff 0%, #06b6d4 50%, #0891b2 100%);
+  --casa-glow: rgba(0, 212, 255, 0.4);
+  --casa-name: 'Casa Quantum';
+
+  /* Override house colors para componentes existentes */
+  --house-primary: #00d4ff;
+  --house-secondary: #06b6d4;
+  --house-accent: #67e8f9;
+  --house-primary-alpha: rgba(0, 212, 255, 0.4);
+}
+
+/* VERTEX (10-12 años) - Magenta/Púrpura - Constructores creativos */
+[data-casa='VERTEX'] {
+  --casa-primary: #ff00ff;
+  --casa-secondary: #c026d3;
+  --casa-accent: #a21caf;
+  --casa-dark: #701a75;
+  --casa-gradient: linear-gradient(135deg, #ff00ff 0%, #c026d3 50%, #a21caf 100%);
+  --casa-glow: rgba(255, 0, 255, 0.4);
+  --casa-name: 'Casa Vertex';
+
+  /* Override house colors para componentes existentes */
+  --house-primary: #ff00ff;
+  --house-secondary: #c026d3;
+  --house-accent: #f0abfc;
+  --house-primary-alpha: rgba(255, 0, 255, 0.4);
+}
+
+/* PULSAR (13-17 años) - Amber/Naranja - Innovadores ambiciosos */
+[data-casa='PULSAR'] {
+  --casa-primary: #ffaa00;
+  --casa-secondary: #f59e0b;
+  --casa-accent: #d97706;
+  --casa-dark: #92400e;
+  --casa-gradient: linear-gradient(135deg, #ffaa00 0%, #f59e0b 50%, #d97706 100%);
+  --casa-glow: rgba(255, 170, 0, 0.4);
+  --casa-name: 'Casa Pulsar';
+
+  /* Override house colors para componentes existentes */
+  --house-primary: #ffaa00;
+  --house-secondary: #f59e0b;
+  --house-accent: #fde68a;
+  --house-primary-alpha: rgba(255, 170, 0, 0.4);
 }
 
 /* ════════════════════════════════════════════════════════════════════════════

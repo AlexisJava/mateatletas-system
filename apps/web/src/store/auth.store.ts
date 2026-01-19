@@ -6,12 +6,20 @@ import {
   LoginMfaRequiredResponse,
   isLoginMfaRequired,
   isLoginSuccess,
+  type CasaTipo,
+  type AuthUserCasa,
 } from '@/lib/api/auth.api';
 
 /**
  * Interface del usuario (versión simplificada para el store)
  */
 export type UserRole = 'tutor' | 'docente' | 'admin' | 'estudiante';
+
+/**
+ * Casa del estudiante para theming dinámico
+ * Re-exportamos el tipo para uso en componentes
+ */
+export type { CasaTipo, AuthUserCasa as UserCasa };
 
 export interface User {
   id: string;
@@ -33,6 +41,8 @@ export interface User {
   puntos_totales?: number;
   nivel_actual?: number;
   avatar_url?: string | null;
+  /** Casa del estudiante (sistema 2026) - solo para rol estudiante */
+  casa?: AuthUserCasa | null;
 }
 
 /**
@@ -150,6 +160,7 @@ export const useAuthStore = create<AuthState>()(
               bio: authUser.bio,
               puntos_totales: authUser.puntos_totales,
               nivel_actual: authUser.nivel_actual,
+              casa: authUser.casa,
             };
 
             set({
@@ -206,6 +217,7 @@ export const useAuthStore = create<AuthState>()(
             puntos_totales: authUser.puntos_totales,
             nivel_actual: authUser.nivel_actual,
             avatar_url: authUser.foto_url,
+            casa: authUser.casa,
           };
 
           set({
@@ -303,6 +315,7 @@ export const useAuthStore = create<AuthState>()(
             bio: profile.bio,
             puntos_totales: profile.puntos_totales,
             nivel_actual: profile.nivel_actual,
+            casa: profile.casa,
           };
 
           // Actualizar estado con los datos del usuario

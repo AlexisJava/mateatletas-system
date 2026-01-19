@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/auth.store';
 import { gamificacionApi } from '@/lib/api/gamificacion.api';
 import { useAccesoEstudiante } from '@/hooks/useAccesoEstudiante';
+import { useCasaTheme } from '@/hooks/useCasaTheme';
 import { LogOut, Home, Crown, Zap, Flame, Sparkles, AlertTriangle, RefreshCw } from 'lucide-react';
 
 /**
@@ -20,6 +21,9 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
   const { user, checkAuth, logout } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
   const [stats, setStats] = useState({ nivel: 1, xp: 0, racha: 0 });
+
+  // Aplicar tema de casa dinámicamente
+  useCasaTheme(user?.casa?.tipo);
 
   // Hook de acceso - solo se activa después de validar auth
   const {
@@ -289,18 +293,18 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                   </div>
                 </Link>
 
-                {/* Casa badge */}
-                <div
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
-                  style={{
-                    background:
-                      'linear-gradient(135deg, var(--color-xp) 0%, #f59e0b 50%, #d97706 100%)',
-                    boxShadow:
-                      '0 2px 10px rgba(251,191,36,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.1)',
-                  }}
-                >
-                  <span className="text-white">Casa Pulsar</span>
-                </div>
+                {/* Casa badge - usa variables CSS dinámicas */}
+                {user?.casa && (
+                  <div
+                    className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
+                    style={{
+                      background: 'var(--casa-gradient)',
+                      boxShadow: `0 2px 10px var(--casa-glow), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.1)`,
+                    }}
+                  >
+                    <span className="text-white">{user.casa.nombre}</span>
+                  </div>
+                )}
 
                 {/* Avatar */}
                 <div className="flex items-center gap-3">
