@@ -23,6 +23,7 @@ import {
 
 import { useRouter } from 'next/navigation';
 import FloatingLines from '@/components/ui/FloatingLines';
+import { RankingCasa } from '@/components/estudiante/RankingCasa';
 
 interface DashboardData {
   nivel: number;
@@ -244,60 +245,57 @@ export default function EstudianteDashboard() {
             />
           )}
 
-          {/* Bento Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            {/* Explorar - Card grande */}
-            <div className="lg:col-span-5">
+          {/* Bento Grid - Simétrico */}
+          <div className="space-y-4">
+            {/* Fila superior: 3 cards iguales */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <CandyCard
                 href="/estudiante/explorar"
                 title="Explorar"
                 subtitle="Mapa del Conocimiento"
-                description="Descubre mundos de Matemáticas, Programación y Ciencias"
-                icon={<Compass className="w-10 h-10 text-white" />}
+                icon={<Compass className="w-8 h-8 text-white" />}
                 colors={['#f472b6', '#c026d3', '#7c3aed']}
-                featured
+              />
+              <CandyCard
+                href="/estudiante/jugar"
+                title="Jugar"
+                subtitle="Arcade Zone"
+                icon={<Gamepad2 className="w-8 h-8 text-white" />}
+                colors={['#06b6d4', '#14b8a6', '#10b981']}
+              />
+              <CandyCard
+                href="/estudiante/progreso"
+                title="Mi Progreso"
+                subtitle="Tu viaje épico"
+                icon={<Rocket className="w-8 h-8 text-white" />}
+                colors={['#10b981', 'var(--color-correct)', '#84cc16']}
+                extraContent={
+                  <div className="mt-2">
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="text-white/80 font-bold">Nivel {data?.nivel ?? 1}</span>
+                      <span className="text-white/50">
+                        {data?.xp ?? 0}/{data?.xpSiguienteNivel ?? 100} XP
+                      </span>
+                    </div>
+                    <div className="h-2 bg-black/30 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${Math.min(((data?.xp ?? 0) / (data?.xpSiguienteNivel ?? 100)) * 100, 100)}%`,
+                          background:
+                            'linear-gradient(90deg, #10b981, var(--color-correct), #84cc16)',
+                        }}
+                      />
+                    </div>
+                  </div>
+                }
               />
             </div>
 
-            {/* Columna derecha */}
-            <div className="lg:col-span-7 flex flex-col gap-4">
-              {/* Fila superior */}
-              <div className="grid grid-cols-2 gap-4">
-                <CandyCard
-                  href="/estudiante/jugar"
-                  title="Jugar"
-                  subtitle="Arcade Zone"
-                  icon={<Gamepad2 className="w-8 h-8 text-white" />}
-                  colors={['#06b6d4', '#14b8a6', '#10b981']}
-                />
-                <CandyCard
-                  href="/estudiante/progreso"
-                  title="Mi Progreso"
-                  subtitle="Tu viaje épico"
-                  icon={<Rocket className="w-8 h-8 text-white" />}
-                  colors={['#10b981', 'var(--color-correct)', '#84cc16']}
-                  extraContent={
-                    <div className="mt-2">
-                      <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="text-white/80 font-bold">Nivel {data?.nivel ?? 1}</span>
-                        <span className="text-white/50">
-                          {data?.xp ?? 0}/{data?.xpSiguienteNivel ?? 100} XP
-                        </span>
-                      </div>
-                      <div className="h-2 bg-black/30 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${Math.min(((data?.xp ?? 0) / (data?.xpSiguienteNivel ?? 100)) * 100, 100)}%`,
-                            background:
-                              'linear-gradient(90deg, #10b981, var(--color-correct), #84cc16)',
-                          }}
-                        />
-                      </div>
-                    </div>
-                  }
-                />
-              </div>
+            {/* Fila inferior: Ranking + Clases (50/50) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Ranking por Casa - Top 3 */}
+              {user?.casa && <RankingCasa estudianteId={user.id} />}
 
               {/* Clases */}
               <ClasesCard
@@ -487,7 +485,7 @@ function ClasesCard({
   if (!tieneAcceso) {
     return (
       <div
-        className="relative overflow-hidden rounded-3xl p-6 h-[240px] flex flex-col"
+        className="relative overflow-hidden rounded-3xl p-6 h-[310px] flex flex-col"
         style={{
           background: 'linear-gradient(145deg, #64748b 0%, #475569 50%, #334155 100%)',
           boxShadow:
@@ -540,7 +538,7 @@ function ClasesCard({
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden rounded-3xl p-6 h-[240px] transition-transform hover:scale-[1.02] active:scale-[0.98] flex flex-col"
+      className="group relative overflow-hidden rounded-3xl p-6 h-[310px] transition-transform hover:scale-[1.02] active:scale-[0.98] flex flex-col"
       style={{
         background: 'linear-gradient(145deg, var(--color-xp) 0%, #f59e0b 50%, #ea580c 100%)',
         boxShadow:

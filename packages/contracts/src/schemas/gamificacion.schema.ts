@@ -28,6 +28,21 @@ const equipoResumenSchema = z
 
 export type EquipoResumen = z.infer<typeof equipoResumenSchema>;
 
+// Casa schema (sistema 2026) - reemplaza equipo para estudiantes
+const casaResumenSchema = z
+  .object({
+    id: z.string(),
+    tipo: z.enum(['QUANTUM', 'VERTEX', 'PULSAR']),
+    nombre: z.string(),
+    colorPrimary: z.string().optional(),
+    colorSecondary: z.string().optional(),
+    colorAccent: z.string().optional(),
+    gradiente: z.string().optional(),
+  })
+  .passthrough();
+
+export type CasaResumen = z.infer<typeof casaResumenSchema>;
+
 export const proximaClaseSchema = z.object({
   id: z.string(),
   fecha_hora_inicio: z.string(),
@@ -136,12 +151,17 @@ const rankingGlobalItemSchema = rankingIntegranteSchema
 
 export type RankingGlobalItem = z.infer<typeof rankingGlobalItemSchema>;
 
+// Schema legacy con equipo (mantener para compatibilidad)
 export const rankingSchema = z.object({
-  equipoActual: equipoResumenSchema.nullable(),
-  posicionEquipo: z.number().int().nonnegative(),
+  equipoActual: equipoResumenSchema.nullable().optional(),
+  posicionEquipo: z.number().int().nonnegative().optional(),
   posicionGlobal: z.number().int().nonnegative(),
-  rankingEquipo: z.array(rankingIntegranteSchema),
+  rankingEquipo: z.array(rankingIntegranteSchema).optional(),
   rankingGlobal: z.array(rankingGlobalItemSchema),
+  // Sistema 2026: Casa reemplaza equipo
+  casaActual: casaResumenSchema.nullable().optional(),
+  posicionCasa: z.number().int().nonnegative().optional(),
+  rankingCasa: z.array(rankingIntegranteSchema).optional(),
 });
 
 export type Ranking = z.infer<typeof rankingSchema>;
