@@ -32,59 +32,80 @@ export class ProductosService {
    * @returns El producto creado
    */
   async create(createDto: CrearProductoDto) {
-    // Validar campos según el tipo de producto
     this.validateProductoFields(createDto);
 
-    // Construir los datos para crear el producto
+    const data = this.buildCreateData(createDto);
+
+    const producto = await this.prisma.producto.create({ data });
+
+    await this.invalidateProductosCache();
+
+    return producto;
+  }
+
+  /**
+   * Construye los datos base para crear un producto
+   */
+  private buildCreateData(dto: CrearProductoDto): Prisma.ProductoCreateInput {
     const data: Prisma.ProductoCreateInput = {
-      nombre: createDto.nombre,
-      descripcion: createDto.descripcion,
-      precio: createDto.precio,
-      tipo: createDto.tipo,
-      activo: createDto.activo ?? true,
-      subcategoria: createDto.subcategoria,
+      nombre: dto.nombre,
+      descripcion: dto.descripcion,
+      precio: dto.precio,
+      tipo: dto.tipo,
+      activo: dto.activo ?? true,
+      subcategoria: dto.subcategoria,
     };
 
-    // Agregar campos específicos según el tipo
-    if (createDto.tipo === 'Curso' || createDto.tipo === 'Evento') {
-      // Soportar tanto snake_case como camelCase
-      const fechaInicio = createDto.fecha_inicio || createDto.fechaInicio;
-      const fechaFin = createDto.fecha_fin || createDto.fechaFin;
-      const cupoMaximo = createDto.cupo_maximo || createDto.cupoMaximo;
+    this.addTipoSpecificFields(data, dto);
+    this.addCasaMundoFields(data, dto);
+
+    return data;
+  }
+
+  /**
+   * Agrega campos específicos según el tipo de producto
+   */
+  private addTipoSpecificFields(
+    data: Prisma.ProductoCreateInput,
+    dto: CrearProductoDto,
+  ): void {
+    if (dto.tipo === 'Curso' || dto.tipo === 'Evento') {
+      const fechaInicio = dto.fecha_inicio || dto.fechaInicio;
+      const fechaFin = dto.fecha_fin || dto.fechaFin;
+      const cupoMaximo = dto.cupo_maximo || dto.cupoMaximo;
 
       data.fecha_inicio = fechaInicio ? new Date(fechaInicio) : undefined;
       data.fecha_fin = fechaFin ? new Date(fechaFin) : undefined;
       data.cupo_maximo = cupoMaximo;
-    } else if (createDto.tipo === 'Servicio') {
-      data.duracion_meses = createDto.duracion_meses ?? 1;
+    } else if (dto.tipo === 'Servicio') {
+      data.duracion_meses = dto.duracion_meses ?? 1;
     }
+  }
 
-    // Campos Sistema Casa/Mundo 2026
-    if (createDto.casa !== undefined) data.casa = createDto.casa;
-    if (createDto.mundo !== undefined) data.mundo = createDto.mundo;
-    if (createDto.subtipo_mundo !== undefined)
-      data.subtipo_mundo = createDto.subtipo_mundo;
-    if (createDto.nivel_olimpiada !== undefined)
-      data.nivel_olimpiada = createDto.nivel_olimpiada;
-    if (createDto.edad_minima !== undefined)
-      data.edad_minima = createDto.edad_minima;
-    if (createDto.edad_maxima !== undefined)
-      data.edad_maxima = createDto.edad_maxima;
-    if (createDto.permite_excepciones !== undefined)
-      data.permite_excepciones = createDto.permite_excepciones;
-    if (createDto.visible_en_landing !== undefined)
-      data.visible_en_landing = createDto.visible_en_landing;
-    if (createDto.orden_display !== undefined)
-      data.orden_display = createDto.orden_display;
+  /**
+   * Agrega campos del Sistema Casa/Mundo 2026
+   */
+  private addCasaMundoFields(
+    data: Prisma.ProductoCreateInput,
+    dto: CrearProductoDto,
+  ): void {
+    const casaMundoFields = [
+      'casa',
+      'mundo',
+      'subtipo_mundo',
+      'nivel_olimpiada',
+      'edad_minima',
+      'edad_maxima',
+      'permite_excepciones',
+      'visible_en_landing',
+      'orden_display',
+    ] as const;
 
-    const producto = await this.prisma.producto.create({
-      data,
-    });
-
-    // Invalidar caché
-    await this.invalidateProductosCache();
-
-    return producto;
+    for (const field of casaMundoFields) {
+      if (dto[field] !== undefined) {
+        (data as Record<string, unknown>)[field] = dto[field];
+      }
+    }
   }
 
   /**

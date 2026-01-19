@@ -656,7 +656,6 @@ export class ColoniaService {
       action: webhookData.action,
     });
 
-    // Solo procesar notificaciones de tipo "payment"
     if (webhookData.type !== 'payment') {
       this.logger.log(`Webhook ignorado: tipo ${webhookData.type}`);
       return { message: 'Webhook type not handled' };
@@ -666,96 +665,29 @@ export class ColoniaService {
     this.logger.log('Procesando pago Colonia', { paymentId });
 
     try {
-      // Consultar detalles del pago a MercadoPago
       const payment = await this.mercadoPagoService.getPayment(paymentId);
-
       this.logger.log('Pago Colonia consultado', {
         status: payment.status,
         externalReference: payment.external_reference,
       });
 
-      // Parsear external_reference para identificar pago
-      const externalRef = payment.external_reference;
-
-      if (!externalRef) {
-        this.logger.warn('Pago sin external_reference', { paymentId });
-        return { message: 'Payment without external_reference' };
+      const pagoIdResult = this.extractPagoIdFromPayment(payment, paymentId);
+      if (!pagoIdResult.success) {
+        return { message: pagoIdResult.message };
       }
 
-      // Parsear external_reference usando parser centralizado
-      const parsed = parseLegacyExternalReference(externalRef);
-
-      if (!parsed || parsed.tipo !== TipoExternalReference.PAGO_COLONIA) {
-        this.logger.warn('External reference inválida', {
-          externalRef,
-          expectedType: TipoExternalReference.PAGO_COLONIA,
-          actualType: parsed?.tipo,
-        });
-        return { message: 'Invalid external_reference format' };
-      }
-
-      const { pagoId } = parsed.ids;
-
-      // Buscar el pago directamente por ID (el external_reference ES el pagoId)
-      let pago = await this.prisma.coloniaPago.findUnique({
-        where: { id: pagoId },
-      });
-
-      // Fallback: si no se encuentra por ID, intentar buscar por inscripcion_id
-      if (!pago) {
-        this.logger.warn('Pago no encontrado por ID, intentando fallback', {
-          pagoId,
-        });
-
-        // Extraer inscripcion_id de payment.additional_info.items[0].id
-        // Formato esperado: "colonia-{inscriptionId}"
-        const itemId = payment.additional_info?.items?.[0]?.id;
-        if (
-          itemId &&
-          typeof itemId === 'string' &&
-          itemId.startsWith('colonia-')
-        ) {
-          const inscripcionId = itemId.replace('colonia-', '');
-          this.logger.log('Buscando pago pendiente por inscripción', {
-            inscripcionId,
-          });
-
-          // Buscar primer pago pendiente de esta inscripción
-          pago = await this.prisma.coloniaPago.findFirst({
-            where: {
-              inscripcion_id: inscripcionId,
-              estado: 'pending',
-            },
-            orderBy: {
-              fecha_creacion: 'asc',
-            },
-          });
-
-          if (pago) {
-            this.logger.log('Pago pendiente encontrado', { pagoId: pago.id });
-          }
-        }
-      }
-
+      const pago = await this.findColoniaPago(pagoIdResult.pagoId, payment);
       if (!pago) {
         this.logger.error('No se encontró pago de Colonia', {
-          pagoId,
+          pagoId: pagoIdResult.pagoId,
           paymentId,
         });
         return { message: 'No pending payments found' };
       }
 
-      // Verificar idempotencia: si ya fue procesado, ignorar
-      if (pago.processed_at) {
-        this.logger.log('Webhook ya procesado previamente', {
-          pagoId: pago.id,
-          processedAt: pago.processed_at,
-          paymentId,
-        });
-        return {
-          message: 'Webhook already processed',
-          processedAt: pago.processed_at,
-        };
+      const idempotencyCheck = this.checkIdempotency(pago, paymentId);
+      if (idempotencyCheck) {
+        return idempotencyCheck;
       }
 
       return this.actualizarPagoColonia(pago.id, payment);
@@ -769,6 +701,114 @@ export class ColoniaService {
       });
       throw new BadRequestException('Error processing webhook');
     }
+  }
+
+  /**
+   * Extrae el pagoId del external_reference del pago
+   */
+  private extractPagoIdFromPayment(
+    payment: MercadoPagoPayment,
+    paymentId: string,
+  ): { success: true; pagoId: string } | { success: false; message: string } {
+    const externalRef = payment.external_reference;
+
+    if (!externalRef) {
+      this.logger.warn('Pago sin external_reference', { paymentId });
+      return { success: false, message: 'Payment without external_reference' };
+    }
+
+    const parsed = parseLegacyExternalReference(externalRef);
+
+    if (!parsed || parsed.tipo !== TipoExternalReference.PAGO_COLONIA) {
+      this.logger.warn('External reference inválida', {
+        externalRef,
+        expectedType: TipoExternalReference.PAGO_COLONIA,
+        actualType: parsed?.tipo,
+      });
+      return { success: false, message: 'Invalid external_reference format' };
+    }
+
+    const pagoId = parsed.ids.pagoId;
+    if (!pagoId) {
+      this.logger.warn('External reference sin pagoId', { externalRef });
+      return {
+        success: false,
+        message: 'Missing pagoId in external_reference',
+      };
+    }
+
+    return { success: true, pagoId };
+  }
+
+  /**
+   * Busca el pago de colonia por ID o por fallback de inscripción
+   */
+  private async findColoniaPago(
+    pagoId: string,
+    payment: MercadoPagoPayment,
+  ): Promise<Awaited<
+    ReturnType<typeof this.prisma.coloniaPago.findUnique>
+  > | null> {
+    // Buscar directamente por ID
+    let pago = await this.prisma.coloniaPago.findUnique({
+      where: { id: pagoId },
+    });
+
+    if (pago) return pago;
+
+    // Fallback: buscar por inscripcion_id desde additional_info
+    this.logger.warn('Pago no encontrado por ID, intentando fallback', {
+      pagoId,
+    });
+
+    const itemId = payment.additional_info?.items?.[0]?.id;
+    if (
+      !itemId ||
+      typeof itemId !== 'string' ||
+      !itemId.startsWith('colonia-')
+    ) {
+      return null;
+    }
+
+    const inscripcionId = itemId.replace('colonia-', '');
+    this.logger.log('Buscando pago pendiente por inscripción', {
+      inscripcionId,
+    });
+
+    pago = await this.prisma.coloniaPago.findFirst({
+      where: {
+        inscripcion_id: inscripcionId,
+        estado: 'pending',
+      },
+      orderBy: { fecha_creacion: 'asc' },
+    });
+
+    if (pago) {
+      this.logger.log('Pago pendiente encontrado', { pagoId: pago.id });
+    }
+
+    return pago;
+  }
+
+  /**
+   * Verifica idempotencia del webhook
+   */
+  private checkIdempotency(
+    pago: { id: string; processed_at: Date | null },
+    paymentId: string,
+  ): { message: string; processedAt: Date } | null {
+    if (!pago.processed_at) return null;
+
+    this.logger.log('Webhook ya procesado previamente', {
+      pagoId: pago.id,
+      processedAt: pago.processed_at,
+      paymentId,
+    });
+
+    return {
+      message: 'Webhook already processed',
+      processedAt: pago.processed_at,
+    };
   }
 
   /**

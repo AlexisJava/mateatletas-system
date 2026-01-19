@@ -73,12 +73,25 @@ export class ObservacionesService {
    * - RN-008: Docente solo puede crear observaciones de estudiantes en sus comisiones
    */
   async crear(dto: CreateObservacionDto, docenteId: string) {
-    // RN-002: Debe incluir al menos 1 estudiante
+    // Validaciones sincrónicas (sin DB)
+    this.validateBasicFields(dto);
+    const fechaEvento = this.parseFechaEvento(dto.fechaEvento);
+
+    // Validaciones async (con DB)
+    await this.validateDocenteEstudiantesAccess(dto, docenteId);
+
+    // Crear la observación
+    return this.createObservacionRecord(dto, docenteId, fechaEvento);
+  }
+
+  /**
+   * Valida campos básicos del DTO (RN-002, RN-004)
+   */
+  private validateBasicFields(dto: CreateObservacionDto): void {
     if (!dto.estudianteIds || dto.estudianteIds.length === 0) {
       throw new BadRequestException('Debe incluir al menos un estudiante');
     }
 
-    // RN-004: Validar longitud de contenido
     if (dto.contenido.length < 10) {
       throw new BadRequestException(
         'Contenido debe tener al menos 10 caracteres',
@@ -89,10 +102,13 @@ export class ObservacionesService {
         'Contenido no puede exceder 2000 caracteres',
       );
     }
+  }
 
-    // RN-003: fecha_evento no puede ser futura (validar ANTES de queries a DB)
-    // Comparar solo las fechas (sin tiempo) para evitar problemas de timezone
-    const parts = dto.fechaEvento.split('-').map(Number);
+  /**
+   * Parsea y valida la fecha del evento (RN-003)
+   */
+  private parseFechaEvento(fechaEvento: string): Date {
+    const parts = fechaEvento.split('-').map(Number);
     const year = parts[0] ?? 0;
     const month = parts[1] ?? 1;
     const day = parts[2] ?? 1;
@@ -101,7 +117,6 @@ export class ObservacionesService {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    // Mañana a medianoche
     const manana = new Date(hoy);
     manana.setDate(manana.getDate() + 1);
 
@@ -109,67 +124,94 @@ export class ObservacionesService {
       throw new BadRequestException('Fecha del evento no puede ser futura');
     }
 
-    // Usar la fecha para el registro (sin problemas de timezone)
-    const fechaEvento = fechaEventoDate;
+    return fechaEventoDate;
+  }
 
-    // Validaciones que no requieren DB ya están completas
-    // Ahora validar pertenencia docente-comisión y estudiantes
+  /**
+   * Valida acceso del docente a los estudiantes (RN-007, RN-008)
+   */
+  private async validateDocenteEstudiantesAccess(
+    dto: CreateObservacionDto,
+    docenteId: string,
+  ): Promise<void> {
     if (dto.comisionId) {
-      // RN-007: Validar que docente pertenece a la comisión
-      const comision = await this.prisma.comision.findFirst({
-        where: {
-          id: dto.comisionId,
-          docente_id: docenteId,
-        },
-      });
-
-      if (!comision) {
-        throw new ForbiddenException(
-          'No tienes acceso a esta comisión o no existe',
-        );
-      }
-
-      // RN-008: Validar que los estudiantes están en la comisión
-      const inscripciones = await this.prisma.inscripcionComision.findMany({
-        where: {
-          comision_id: dto.comisionId,
-          estudiante_id: { in: dto.estudianteIds },
-        },
-      });
-
-      if (inscripciones.length !== dto.estudianteIds.length) {
-        throw new ForbiddenException(
-          'Uno o más estudiantes no están inscritos en la comisión especificada',
-        );
-      }
+      await this.validateEstudiantesEnComision(dto, docenteId);
     } else {
-      // Sin comisión específica: validar que estudiantes están en ALGUNA comisión del docente
-      const comisionesDocente = await this.prisma.comision.findMany({
-        where: { docente_id: docenteId },
-        select: { id: true },
-      });
+      await this.validateEstudiantesEnComisionesDocente(dto, docenteId);
+    }
+  }
 
-      const comisionIds = comisionesDocente.map((c) => c.id);
+  /**
+   * Valida estudiantes cuando se especifica comisión (RN-007, RN-008)
+   */
+  private async validateEstudiantesEnComision(
+    dto: CreateObservacionDto,
+    docenteId: string,
+  ): Promise<void> {
+    const comision = await this.prisma.comision.findFirst({
+      where: { id: dto.comisionId, docente_id: docenteId },
+    });
 
-      const inscripciones = await this.prisma.inscripcionComision.findMany({
-        where: {
-          comision_id: { in: comisionIds },
-          estudiante_id: { in: dto.estudianteIds },
-        },
-      });
-
-      // Obtener IDs únicos de estudiantes inscritos
-      const estudiantesInscritos = [
-        ...new Set(inscripciones.map((i) => i.estudiante_id)),
-      ];
-
-      if (estudiantesInscritos.length !== dto.estudianteIds.length) {
-        throw new ForbiddenException(
-          'Uno o más estudiantes no están en ninguna de tus comisiones',
-        );
-      }
+    if (!comision) {
+      throw new ForbiddenException(
+        'No tienes acceso a esta comisión o no existe',
+      );
     }
 
+    const inscripciones = await this.prisma.inscripcionComision.findMany({
+      where: {
+        comision_id: dto.comisionId,
+        estudiante_id: { in: dto.estudianteIds },
+      },
+    });
+
+    if (inscripciones.length !== dto.estudianteIds.length) {
+      throw new ForbiddenException(
+        'Uno o más estudiantes no están inscritos en la comisión especificada',
+      );
+    }
+  }
+
+  /**
+   * Valida estudiantes sin comisión específica (RN-008)
+   */
+  private async validateEstudiantesEnComisionesDocente(
+    dto: CreateObservacionDto,
+    docenteId: string,
+  ): Promise<void> {
+    const comisionesDocente = await this.prisma.comision.findMany({
+      where: { docente_id: docenteId },
+      select: { id: true },
+    });
+
+    const comisionIds = comisionesDocente.map((c) => c.id);
+
+    const inscripciones = await this.prisma.inscripcionComision.findMany({
+      where: {
+        comision_id: { in: comisionIds },
+        estudiante_id: { in: dto.estudianteIds },
+      },
+    });
+
+    const estudiantesInscritos = [
+      ...new Set(inscripciones.map((i) => i.estudiante_id)),
+    ];
+
+    if (estudiantesInscritos.length !== dto.estudianteIds.length) {
+      throw new ForbiddenException(
+        'Uno o más estudiantes no están en ninguna de tus comisiones',
+      );
+    }
+  }
+
+  /**
+   * Crea el registro de observación en la DB
+   */
+  private async createObservacionRecord(
+    dto: CreateObservacionDto,
+    docenteId: string,
+    fechaEvento: Date,
+  ) {
     // RN-005: Auto-setear notificar_admin si prioridad es Urgente
     const notificarAdmin =
       dto.prioridad === PrioridadObservacion.Urgente
@@ -182,8 +224,7 @@ export class ObservacionesService {
         ? true
         : (dto.requiereSeguimiento ?? false);
 
-    // Crear la observación con estudiantes relacionados
-    const observacion = await this.prisma.observacion.create({
+    return this.prisma.observacion.create({
       data: {
         docente_id: docenteId,
         comision_id: dto.comisionId || null,
@@ -205,26 +246,16 @@ export class ObservacionesService {
         estudiantes: {
           include: {
             estudiante: {
-              select: {
-                id: true,
-                nombre: true,
-                apellido: true,
-              },
+              select: { id: true, nombre: true, apellido: true },
             },
           },
         },
         docente: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-          },
+          select: { id: true, nombre: true, apellido: true },
         },
         seguimientos: true,
       },
     });
-
-    return observacion;
   }
 
   /**
