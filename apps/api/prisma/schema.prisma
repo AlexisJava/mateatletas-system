@@ -67,6 +67,9 @@ model Tutor {
   /// Vista unificada: todas las inscripciones de los hijos del tutor
   inscripcionesUnificadas InscripcionUnificada[] @relation("InscripcionUnificadaTutor")
 
+  /// NOTIFICACIONES: Notificaciones del tutor
+  notificaciones Notificacion[]
+
   @@map("tutores")
 }
 
@@ -200,6 +203,9 @@ model Estudiante {
 
   /// Vista unificada: todas las inscripciones (manual + suscripción)
   inscripcionesUnificadas InscripcionUnificada[] @relation("InscripcionUnificadaEstudiante")
+
+  /// NOTIFICACIONES: Notificaciones del estudiante
+  notificaciones Notificacion[]
 
   // Índices de performance para rankings y listados
   // NOTA: Índices de puntos_totales eliminados - usar RecursosEstudiante para rankings (SUB-FASE 1.3)
@@ -694,6 +700,9 @@ model Admin {
 
   /// SANDBOX: Contenidos educativos creados por este admin
   contenidosCreados Contenido[]
+
+  /// NOTIFICACIONES: Notificaciones del admin
+  notificaciones Notificacion[]
 
   @@map("admins")
 }
@@ -1355,30 +1364,92 @@ model PuntoObtenido {
 // [ELIMINADO] Modulo, Leccion, ProgresoLeccion - sistema de contenido legacy
 // Reemplazado por nuevo sistema: Area → SubArea → Microleccion (FASE 2)
 
-/// Sistema de notificaciones para docentes
-/// Permite notificar eventos importantes como clases próximas, alertas de estudiantes, etc.
+/// Sistema de notificaciones polimórfico
+/// Soporta notificaciones para Tutores, Estudiantes, Docentes y Admins
+/// IMPORTANTE: Exactamente UNO de los campos *_id debe estar presente (constraint a nivel de app)
 model Notificacion {
   /// Identificador único de la notificación
-  id         String           @id @default(cuid())
-  /// Tipo de notificación
-  tipo       TipoNotificacion
-  /// Título de la notificación
-  titulo     String
-  /// Mensaje descriptivo de la notificación
-  mensaje    String
+  id            String             @id @default(cuid())
+  /// Tipo de notificación (determina destinatario y comportamiento)
+  tipo          TipoNotificacion
+  /// Título de la notificación (max 100 chars recomendado)
+  titulo        String
+  /// Mensaje descriptivo de la notificación (max 500 chars recomendado)
+  mensaje       String
   /// Indica si la notificación ha sido leída
-  leida      Boolean          @default(false)
-  /// ID del docente al que pertenece la notificación
-  docente_id String
-  /// Metadata adicional en formato JSON (clase_id, estudiante_id, etc)
-  metadata   Json?
-  /// Timestamp de creación de la notificación
-  createdAt  DateTime         @default(now())
-  docente    Docente          @relation(fields: [docente_id], references: [id], onDelete: Cascade)
+  leida         Boolean            @default(false)
+  /// Prioridad de la notificación (afecta UI y orden)
+  prioridad     PrioridadNotificacion @default(MEDIA)
 
+  // ═══════════════════════════════════════════════════════════════
+  // CAMPOS POLIMÓRFICOS (exactamente uno debe estar presente)
+  // ═══════════════════════════════════════════════════════════════
+
+  /// ID del tutor destinatario (null si no es para tutor)
+  tutor_id      String?
+  /// ID del estudiante destinatario (null si no es para estudiante)
+  estudiante_id String?
+  /// ID del docente destinatario (null si no es para docente)
+  docente_id    String?
+  /// ID del admin destinatario (null si no es para admin)
+  admin_id      String?
+
+  // ═══════════════════════════════════════════════════════════════
+  // METADATA Y TIMESTAMPS
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Metadata adicional en formato JSON (clase_id, estudiante_id, urls, etc)
+  /// Estructura flexible según el tipo de notificación
+  metadata      Json?
+  /// Timestamp de creación de la notificación
+  createdAt     DateTime           @default(now())
+  /// Fecha de expiración (notificaciones pueden auto-eliminarse)
+  expiraEn      DateTime?
+
+  // ═══════════════════════════════════════════════════════════════
+  // RELACIONES
+  // ═══════════════════════════════════════════════════════════════
+
+  tutor         Tutor?             @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  estudiante    Estudiante?        @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  docente       Docente?           @relation(fields: [docente_id], references: [id], onDelete: Cascade)
+  admin         Admin?             @relation(fields: [admin_id], references: [id], onDelete: Cascade)
+
+  // ═══════════════════════════════════════════════════════════════
+  // ÍNDICES DE PERFORMANCE
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Índice para listar notificaciones no leídas de tutor
+  @@index([tutor_id, leida])
+  @@index([tutor_id, createdAt])
+  /// Índice para listar notificaciones no leídas de estudiante
+  @@index([estudiante_id, leida])
+  @@index([estudiante_id, createdAt])
+  /// Índice para listar notificaciones no leídas de docente
   @@index([docente_id, leida])
   @@index([docente_id, createdAt])
+  /// Índice para listar notificaciones no leídas de admin
+  @@index([admin_id, leida])
+  @@index([admin_id, createdAt])
+  /// Índice para cleanup de notificaciones expiradas
+  @@index([expiraEn])
+
   @@map("notificaciones")
+}
+
+/// Niveles de prioridad para notificaciones
+/// Afecta el orden de visualización y posibles indicadores visuales
+enum PrioridadNotificacion {
+  /// Información general, puede esperar
+  BAJA
+  /// Importancia normal
+  MEDIA
+  /// Requiere atención pronto
+  ALTA
+  /// Crítica, requiere acción inmediata
+  CRITICA
+
+  @@map("prioridad_notificacion")
 }
 
 /// Eventos del calendario del docente
@@ -1769,13 +1840,173 @@ enum TipoAccesoInscripcion {
 // [ELIMINADO] TipoContenido - usado por modelo Leccion eliminado
 
 /// Tipos de notificaciones disponibles
+/// Organizados por entidad destinataria (64 tipos totales)
 enum TipoNotificacion {
+  // ═══════════════════════════════════════════════════════════════
+  // NOTIFICACIONES PARA TUTORES (17 tipos)
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Pago procesado exitosamente
+  TUTOR_PAGO_EXITOSO
+  /// Pago fallido o rechazado
+  TUTOR_PAGO_FALLIDO
+  /// Suscripción próxima a vencer
+  TUTOR_SUSCRIPCION_PROXIMA_VENCER
+  /// Suscripción renovada automáticamente
+  TUTOR_SUSCRIPCION_RENOVADA
+  /// Suscripción cancelada
+  TUTOR_SUSCRIPCION_CANCELADA
+  /// Suscripción pausada
+  TUTOR_SUSCRIPCION_PAUSADA
+  /// Hijo inscrito exitosamente a una clase/actividad
+  TUTOR_HIJO_INSCRITO
+  /// Clase de hijo próxima (24h antes)
+  TUTOR_CLASE_PROXIMA_HIJO
+  /// Clase de hijo cancelada
+  TUTOR_CLASE_CANCELADA_HIJO
+  /// Hijo obtuvo un logro/badge
+  TUTOR_LOGRO_HIJO
+  /// Reporte semanal de progreso del hijo
+  TUTOR_REPORTE_PROGRESO_HIJO
+  /// Alerta de asistencia (hijo con 2+ faltas seguidas)
+  TUTOR_ALERTA_ASISTENCIA_HIJO
+  /// Mensaje del docente
+  TUTOR_MENSAJE_DOCENTE
+  /// Nuevo material disponible para el hijo
+  TUTOR_NUEVO_MATERIAL
+  /// Tarea asignada al hijo
+  TUTOR_TAREA_ASIGNADA_HIJO
+  /// Período de inscripción abierto
+  TUTOR_PERIODO_INSCRIPCION_ABIERTO
+  /// Recordatorio general del sistema
+  TUTOR_RECORDATORIO
+
+  // ═══════════════════════════════════════════════════════════════
+  // NOTIFICACIONES PARA ESTUDIANTES (16 tipos)
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Logro desbloqueado
+  ESTUDIANTE_LOGRO_DESBLOQUEADO
+  /// Subió de nivel
+  ESTUDIANTE_NIVEL_SUBIDO
+  /// Nuevo contenido disponible
+  ESTUDIANTE_NUEVO_CONTENIDO
+  /// Clase próxima (1h antes)
+  ESTUDIANTE_CLASE_PROXIMA
+  /// Clase cancelada
+  ESTUDIANTE_CLASE_CANCELADA
+  /// Tarea asignada
+  ESTUDIANTE_TAREA_ASIGNADA
+  /// Tarea próxima a vencer
+  ESTUDIANTE_TAREA_PROXIMA_VENCER
+  /// Feedback del docente recibido
+  ESTUDIANTE_FEEDBACK_DOCENTE
+  /// Recompensa diaria disponible
+  ESTUDIANTE_RECOMPENSA_DIARIA
+  /// Racha en riesgo (no ingresó ayer)
+  ESTUDIANTE_RACHA_EN_RIESGO
+  /// Racha perdida
+  ESTUDIANTE_RACHA_PERDIDA
+  /// Desafío disponible
+  ESTUDIANTE_DESAFIO_DISPONIBLE
+  /// Posición en ranking cambió
+  ESTUDIANTE_RANKING_ACTUALIZADO
+  /// Evento especial próximo
+  ESTUDIANTE_EVENTO_ESPECIAL
+  /// Mensaje de bienvenida
+  ESTUDIANTE_BIENVENIDA
+  /// Recordatorio general
+  ESTUDIANTE_RECORDATORIO
+
+  // ═══════════════════════════════════════════════════════════════
+  // NOTIFICACIONES PARA DOCENTES (16 tipos)
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Clase próxima (24h antes)
+  DOCENTE_CLASE_PROXIMA
+  /// Asistencia pendiente de registrar
+  DOCENTE_ASISTENCIA_PENDIENTE
+  /// Alerta de estudiante (bajo rendimiento, faltas)
+  DOCENTE_ESTUDIANTE_ALERTA
+  /// Clase cancelada
+  DOCENTE_CLASE_CANCELADA
+  /// Estudiante obtuvo logro
+  DOCENTE_LOGRO_ESTUDIANTE
+  /// Nuevo estudiante inscrito en su clase
+  DOCENTE_NUEVO_ESTUDIANTE
+  /// Estudiante dado de baja
+  DOCENTE_ESTUDIANTE_BAJA
+  /// Mensaje de tutor
+  DOCENTE_MENSAJE_TUTOR
+  /// Tarea sin entregar (varios estudiantes)
+  DOCENTE_TAREAS_PENDIENTES
+  /// Evaluación pendiente de revisar
+  DOCENTE_EVALUACION_PENDIENTE
+  /// Material nuevo asignado a su clase
+  DOCENTE_MATERIAL_ASIGNADO
+  /// Clase reprogramada
+  DOCENTE_CLASE_REPROGRAMADA
+  /// Reporte mensual listo
+  DOCENTE_REPORTE_MENSUAL
+  /// Recordatorio de planificación
+  DOCENTE_RECORDATORIO_PLANIFICACION
+  /// Feedback del admin
+  DOCENTE_FEEDBACK_ADMIN
+  /// Recordatorio general
+  DOCENTE_RECORDATORIO
+
+  // ═══════════════════════════════════════════════════════════════
+  // NOTIFICACIONES PARA ADMINS (15 tipos)
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Nuevo pago recibido
+  ADMIN_NUEVO_PAGO
+  /// Pago fallido
+  ADMIN_PAGO_FALLIDO
+  /// Nueva suscripción creada
+  ADMIN_NUEVA_SUSCRIPCION
+  /// Suscripción cancelada
+  ADMIN_SUSCRIPCION_CANCELADA
+  /// Nuevo usuario registrado
+  ADMIN_NUEVO_USUARIO
+  /// Alerta de sistema (error, servicio caído)
+  ADMIN_ALERTA_SISTEMA
+  /// Reporte diario automático
+  ADMIN_REPORTE_DIARIO
+  /// Contenido pendiente de revisión
+  ADMIN_CONTENIDO_PENDIENTE
+  /// Solicitud de soporte
+  ADMIN_SOLICITUD_SOPORTE
+  /// Docente inactivo (sin clases en X días)
+  ADMIN_DOCENTE_INACTIVO
+  /// Capacidad de clase alcanzada
+  ADMIN_CLASE_LLENA
+  /// Migración completada
+  ADMIN_MIGRACION_COMPLETADA
+  /// Backup completado
+  ADMIN_BACKUP_COMPLETADO
+  /// Auditoría de seguridad
+  ADMIN_AUDITORIA_SEGURIDAD
+  /// Recordatorio general
+  ADMIN_RECORDATORIO
+
+  // ═══════════════════════════════════════════════════════════════
+  // TIPOS LEGACY (mantener por compatibilidad con datos existentes)
+  // ═══════════════════════════════════════════════════════════════
+
+  /// @deprecated Usar DOCENTE_CLASE_PROXIMA
   ClaseProxima
+  /// @deprecated Usar DOCENTE_ASISTENCIA_PENDIENTE
   AsistenciaPendiente
+  /// @deprecated Usar DOCENTE_ESTUDIANTE_ALERTA
   EstudianteAlerta
+  /// @deprecated Usar DOCENTE_CLASE_CANCELADA
   ClaseCancelada
+  /// @deprecated Usar DOCENTE_LOGRO_ESTUDIANTE
   LogroEstudiante
+  /// @deprecated Usar entidad específica + _RECORDATORIO
   Recordatorio
+  /// @deprecated Usar tipo específico
   General
 
   @@map("tipo_notificacion")
