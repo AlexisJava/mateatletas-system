@@ -859,7 +859,7 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 ### FASE 4: Portal Docente
 
 - [x] 4.1 Recuperación de contraseña ✅ (2026-01-20) - Compartido con Tutor
-- [ ] 4.2 Compartir pantalla
+- [x] 4.2 Compartir pantalla ✅ (Ya implementado en ControlBar.tsx)
 - [ ] 4.3 Historial detallado de asistencia
 - [ ] 4.4 Reportes gráficos de asistencia
 - [ ] 4.5 Historial de puntos otorgados
@@ -869,7 +869,7 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 
 - [x] 5.1 Recuperación de contraseña ✅ (2026-01-20) - Compartido con Docente
 - [ ] 5.2 Editar datos de estudiante
-- [ ] 5.3 Pausar suscripción
+- [x] 5.3 Pausar suscripción ✅ (2026-01-20) - Endpoints y UI para pausar/reactivar inscripciones individuales y suscripción completa
 - [ ] 5.4 UI cambiar horario de inscripción
 - [ ] 5.5 Flujo de eventos/cursos temporales
 
@@ -997,3 +997,4 @@ Semana 4+: FASE 7 + FASE 9 (Mensajería + Contenido)
 | 2026-01-20 | ✅ Endpoint tiempoPromedioMinutos en admin-stats.service.ts                                                  | Claude |
 | 2026-01-20 | ✅ crecimientoMensual calculado desde retention data (no hardcodeado)                                        | Claude |
 | 2026-01-20 | ✅ FASE 4.1+5.1+6.1: Recuperación de contraseña - páginas /forgot-password y /reset-password                 | Claude |
+| 2026-01-20 | ✅ FASE 5.3: Pausar suscripción - Endpoints y UI granular para pausar/reactivar inscripciones o suscripción  | Claude |

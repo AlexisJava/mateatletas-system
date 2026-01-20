@@ -14,8 +14,12 @@
  * - PATCH /familiar/inscripciones/horario - Cambiar horario de inscripción
  * - PATCH /familiar/inscripciones/producto - Cambiar producto de inscripción
  * - PATCH /familiar/inscripciones/:id/tier - Cambiar tier de una inscripción (NUEVO 2026)
+ * - PATCH /familiar/inscripciones/:id/pausar - Pausar inscripción individual (NUEVO)
+ * - PATCH /familiar/inscripciones/:id/reactivar - Reactivar inscripción pausada (NUEVO)
  * - PATCH /familiar/tier - Cambiar tier de suscripción (deprecated)
  * - POST /familiar/cancelar - Cancelar suscripción
+ * - POST /familiar/pausar - Pausar suscripción completa (NUEVO)
+ * - POST /familiar/reactivar - Reactivar suscripción pausada (NUEVO)
  * - GET /familiar/simular - Simular monto con nuevos productos
  *
  * Endpoints Admin:
@@ -454,6 +458,146 @@ export class SuscripcionFamiliarController {
       success: true,
       data: resultado,
     };
+  }
+
+  // ============================================================================
+  // TUTOR - PAUSAR/REACTIVAR INSCRIPCIONES
+  // ============================================================================
+
+  @Patch('inscripciones/:id/pausar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ExactRoles(Role.TUTOR)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Pausar una inscripción individual',
+    description:
+      'Permite pausar una inscripción específica sin afectar las demás. El monto mensual se recalcula automáticamente.',
+  })
+  async pausarInscripcion(
+    @Param('id', ParseIdPipe) inscripcionId: string,
+    @Body() dto: { motivo?: string },
+    @GetUser() user: AuthUser,
+  ) {
+    try {
+      const result = await this.commandService.pausarInscripcion({
+        inscripcionId,
+        tutorId: user.id,
+        motivo: dto.motivo,
+      });
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
+  }
+
+  @Patch('inscripciones/:id/reactivar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ExactRoles(Role.TUTOR)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Reactivar una inscripción pausada',
+    description:
+      'Reactiva una inscripción que estaba pausada. El monto mensual se recalcula automáticamente.',
+  })
+  async reactivarInscripcion(
+    @Param('id', ParseIdPipe) inscripcionId: string,
+    @GetUser() user: AuthUser,
+  ) {
+    try {
+      const result = await this.commandService.reactivarInscripcion({
+        inscripcionId,
+        tutorId: user.id,
+      });
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
+  }
+
+  @Post('pausar')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ExactRoles(Role.TUTOR)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Pausar suscripción completa',
+    description:
+      'Pausa la suscripción familiar y todas sus inscripciones activas. También pausa el cobro automático.',
+  })
+  async tutorPausarSuscripcion(
+    @Body() dto: { motivo?: string },
+    @GetUser() user: AuthUser,
+  ) {
+    try {
+      const result = await this.commandService.tutorPausarSuscripcion({
+        tutorId: user.id,
+        motivo: dto.motivo,
+      });
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
+  }
+
+  @Post('reactivar')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ExactRoles(Role.TUTOR)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Reactivar suscripción pausada',
+    description:
+      'Reactiva la suscripción familiar y todas sus inscripciones. También reactiva el cobro automático.',
+  })
+  async tutorReactivarSuscripcion(@GetUser() user: AuthUser) {
+    try {
+      const result = await this.commandService.tutorReactivarSuscripcion({
+        tutorId: user.id,
+      });
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
   }
 
   // ============================================================================

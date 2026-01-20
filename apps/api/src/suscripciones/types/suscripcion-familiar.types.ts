@@ -235,6 +235,60 @@ export interface AdminCambiarTierInscripcionInput {
 }
 
 // ============================================================================
+// TIPOS DE INPUT - TUTOR PAUSAR/REACTIVAR INSCRIPCIÓN
+// ============================================================================
+
+/**
+ * Input para pausar una inscripción individual (Tutor)
+ *
+ * Permite al tutor pausar una inscripción específica de su suscripción familiar.
+ * Solo pausa la inscripción, no toda la suscripción ni el cobro en MercadoPago.
+ */
+export interface PausarInscripcionInput {
+  /** ID de la inscripción a pausar */
+  readonly inscripcionId: string;
+
+  /** ID del tutor (para validación de ownership) */
+  readonly tutorId: string;
+
+  /** Motivo de la pausa (opcional) */
+  readonly motivo?: string;
+}
+
+/**
+ * Input para reactivar una inscripción pausada (Tutor)
+ */
+export interface ReactivarInscripcionInput {
+  /** ID de la inscripción a reactivar */
+  readonly inscripcionId: string;
+
+  /** ID del tutor (para validación de ownership) */
+  readonly tutorId: string;
+}
+
+/**
+ * Input para pausar suscripción completa (Tutor)
+ *
+ * Pausa la suscripción familiar y todas sus inscripciones activas.
+ * También pausa el cobro automático en MercadoPago.
+ */
+export interface TutorPausarSuscripcionInput {
+  /** ID del tutor (para obtener su suscripción) */
+  readonly tutorId: string;
+
+  /** Motivo de la pausa (opcional) */
+  readonly motivo?: string;
+}
+
+/**
+ * Input para reactivar suscripción pausada (Tutor)
+ */
+export interface TutorReactivarSuscripcionInput {
+  /** ID del tutor (para obtener su suscripción) */
+  readonly tutorId: string;
+}
+
+// ============================================================================
 // TIPOS DE OUTPUT
 // ============================================================================
 
@@ -435,6 +489,87 @@ export interface AdminCambiarTierResult {
 
   /** Diferencia de monto */
   readonly diferenciaMonto: number;
+}
+
+// ============================================================================
+// TIPOS DE OUTPUT - TUTOR PAUSAR/REACTIVAR INSCRIPCIÓN
+// ============================================================================
+
+/**
+ * Resultado de pausar una inscripción individual
+ */
+export interface PausarInscripcionResult {
+  /** ID de la inscripción pausada */
+  readonly inscripcionId: string;
+
+  /** Nombre del estudiante */
+  readonly estudianteNombre: string;
+
+  /** Nombre del producto/actividad */
+  readonly productoNombre: string;
+
+  /** Nuevo monto mensual (sin la inscripción pausada) */
+  readonly nuevoMontoMensual: number;
+
+  /** Monto anterior */
+  readonly montoAnterior: number;
+
+  /** Mensaje descriptivo */
+  readonly mensaje: string;
+}
+
+/**
+ * Resultado de reactivar una inscripción
+ */
+export interface ReactivarInscripcionResult {
+  /** ID de la inscripción reactivada */
+  readonly inscripcionId: string;
+
+  /** Nombre del estudiante */
+  readonly estudianteNombre: string;
+
+  /** Nombre del producto/actividad */
+  readonly productoNombre: string;
+
+  /** Nuevo monto mensual (con la inscripción reactivada) */
+  readonly nuevoMontoMensual: number;
+
+  /** Monto anterior */
+  readonly montoAnterior: number;
+
+  /** Mensaje descriptivo */
+  readonly mensaje: string;
+}
+
+/**
+ * Resultado de pausar suscripción completa (Tutor)
+ */
+export interface TutorPausarSuscripcionResult {
+  /** ID de la suscripción pausada */
+  readonly suscripcionId: string;
+
+  /** Cantidad de inscripciones pausadas */
+  readonly inscripcionesPausadas: number;
+
+  /** Mensaje descriptivo */
+  readonly mensaje: string;
+}
+
+/**
+ * Resultado de reactivar suscripción (Tutor)
+ */
+export interface TutorReactivarSuscripcionResult {
+  /** ID de la suscripción reactivada */
+  readonly suscripcionId: string;
+
+  /** Cantidad de inscripciones reactivadas */
+  readonly inscripcionesReactivadas: number;
+
+  /** Monto mensual reactivado */
+  readonly montoMensual: number;
+
+  /** Mensaje descriptivo */
+  readonly mensaje: string;
 }
 
 /**

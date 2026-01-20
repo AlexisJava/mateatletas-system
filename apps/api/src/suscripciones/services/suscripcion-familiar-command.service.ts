@@ -51,6 +51,15 @@ import {
   ReactivarSuscripcionResult,
   AdminCambiarTierInscripcionInput,
   AdminCambiarTierResult,
+  // Tipos para Tutor pausar/reactivar inscripciones
+  PausarInscripcionInput,
+  PausarInscripcionResult,
+  ReactivarInscripcionInput,
+  ReactivarInscripcionResult,
+  TutorPausarSuscripcionInput,
+  TutorPausarSuscripcionResult,
+  TutorReactivarSuscripcionInput,
+  TutorReactivarSuscripcionResult,
   SuscripcionFamiliarError,
   SuscripcionFamiliarErrorCode,
 } from '../types';
@@ -1332,6 +1341,480 @@ export class SuscripcionFamiliarCommandService {
       montoAnterior,
       nuevoMontoMensual,
       diferenciaMonto: nuevoMontoMensual - montoAnterior,
+    };
+  }
+
+  // ============================================================================
+  // TUTOR - PAUSAR/REACTIVAR INSCRIPCIONES
+  // ============================================================================
+
+  /**
+   * Pausa una inscripción individual (Tutor)
+   *
+   * Permite al tutor pausar una inscripción específica de su suscripción familiar.
+   * El monto mensual se recalcula sin incluir la inscripción pausada.
+   * NO pausa el cobro en MercadoPago, solo excluye esta inscripción del cálculo.
+   */
+  async pausarInscripcion(
+    input: PausarInscripcionInput,
+  ): Promise<PausarInscripcionResult> {
+    const { inscripcionId, tutorId, motivo } = input;
+
+    // 1. Obtener inscripción con datos relacionados
+    const inscripcion = await this.prisma.inscripcionActividad.findUnique({
+      where: { id: inscripcionId },
+      include: {
+        suscripcion_familiar: {
+          include: {
+            inscripciones: {
+              where: { estado: EstadoInscripcionActividad.ACTIVA },
+            },
+          },
+        },
+        estudiante: { select: { nombre: true, apellido: true } },
+        producto: { select: { nombre: true } },
+      },
+    });
+
+    if (!inscripcion) {
+      throw new SuscripcionFamiliarError(
+        'Inscripción no encontrada',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    // 2. Validar ownership
+    if (inscripcion.suscripcion_familiar.tutor_id !== tutorId) {
+      throw new SuscripcionFamiliarError(
+        'No autorizado',
+        SuscripcionFamiliarErrorCode.UNAUTHORIZED,
+      );
+    }
+
+    // 3. Validar estado actual
+    if (inscripcion.estado !== EstadoInscripcionActividad.ACTIVA) {
+      throw new SuscripcionFamiliarError(
+        `La inscripción no está activa (estado actual: ${inscripcion.estado})`,
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    // 4. Validar que la suscripción no esté cancelada
+    if (
+      inscripcion.suscripcion_familiar.estado ===
+      EstadoSuscripcionFamiliar.CANCELLED
+    ) {
+      throw new SuscripcionFamiliarError(
+        'No se puede pausar inscripciones de una suscripción cancelada',
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    const montoAnterior = inscripcion.suscripcion_familiar.monto_mensual;
+    const suscripcionId = inscripcion.suscripcion_familiar_id;
+
+    // 5. Calcular nuevo monto (sin la inscripción pausada)
+    const inscripcionesActivas =
+      inscripcion.suscripcion_familiar.inscripciones.filter(
+        (i) => i.id !== inscripcionId,
+      );
+
+    const inscripcionesParaCalculo: InscripcionConTier[] =
+      inscripcionesActivas.map((insc) => ({
+        id: insc.id,
+        tier: insc.tier ?? inscripcion.suscripcion_familiar.tier,
+      }));
+
+    const calculoNuevo = calcularMontoMensualConTiers(inscripcionesParaCalculo);
+    const nuevoMontoMensual = calculoNuevo.montoConDescuento;
+
+    // 6. Actualizar en transacción
+    await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
+      // Pausar inscripción
+      await tx.inscripcionActividad.update({
+        where: { id: inscripcionId },
+        data: { estado: EstadoInscripcionActividad.PAUSADA },
+      });
+
+      // Actualizar monto de suscripción
+      await tx.suscripcionFamiliar.update({
+        where: { id: suscripcionId },
+        data: { monto_mensual: nuevoMontoMensual },
+      });
+
+      // Registrar cambio
+      await tx.cambioInscripcion.create({
+        data: {
+          suscripcion_familiar_id: suscripcionId,
+          tipo: TipoCambioInscripcion.BAJA, // Usamos BAJA como tipo para pausas temporales
+          inscripcion_anterior_id: inscripcionId,
+          aplica_desde: new Date(),
+          monto_anterior: montoAnterior,
+          monto_nuevo: nuevoMontoMensual,
+          detalle: {
+            accion: 'pausar',
+            motivo: motivo ?? 'Pausa solicitada por tutor',
+          },
+        },
+      });
+    });
+
+    // 7. Actualizar monto en MercadoPago si cambió
+    if (
+      montoAnterior !== nuevoMontoMensual &&
+      inscripcion.suscripcion_familiar.preapproval_id &&
+      this.mpClient.isConfigured()
+    ) {
+      await this.actualizarMontoEnMercadoPago(
+        inscripcion.suscripcion_familiar.preapproval_id,
+        nuevoMontoMensual,
+      );
+    }
+
+    const estudianteNombre = `${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido}`;
+
+    this.logger.log(
+      `Inscripción pausada: ${inscripcionId} (${estudianteNombre} - ${inscripcion.producto.nombre})`,
+    );
+
+    return {
+      inscripcionId,
+      estudianteNombre,
+      productoNombre: inscripcion.producto.nombre,
+      nuevoMontoMensual,
+      montoAnterior,
+      mensaje: `Inscripción de ${estudianteNombre} a ${inscripcion.producto.nombre} pausada exitosamente`,
+    };
+  }
+
+  /**
+   * Reactiva una inscripción pausada (Tutor)
+   *
+   * Permite al tutor reactivar una inscripción que había pausado previamente.
+   * El monto mensual se recalcula incluyendo la inscripción reactivada.
+   */
+  async reactivarInscripcion(
+    input: ReactivarInscripcionInput,
+  ): Promise<ReactivarInscripcionResult> {
+    const { inscripcionId, tutorId } = input;
+
+    // 1. Obtener inscripción con datos relacionados
+    const inscripcion = await this.prisma.inscripcionActividad.findUnique({
+      where: { id: inscripcionId },
+      include: {
+        suscripcion_familiar: {
+          include: {
+            inscripciones: {
+              where: { estado: EstadoInscripcionActividad.ACTIVA },
+            },
+          },
+        },
+        estudiante: { select: { nombre: true, apellido: true } },
+        producto: { select: { nombre: true } },
+      },
+    });
+
+    if (!inscripcion) {
+      throw new SuscripcionFamiliarError(
+        'Inscripción no encontrada',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    // 2. Validar ownership
+    if (inscripcion.suscripcion_familiar.tutor_id !== tutorId) {
+      throw new SuscripcionFamiliarError(
+        'No autorizado',
+        SuscripcionFamiliarErrorCode.UNAUTHORIZED,
+      );
+    }
+
+    // 3. Validar estado actual
+    if (inscripcion.estado !== EstadoInscripcionActividad.PAUSADA) {
+      throw new SuscripcionFamiliarError(
+        `Solo se pueden reactivar inscripciones pausadas (estado actual: ${inscripcion.estado})`,
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    // 4. Validar que la suscripción esté activa o pausada (no cancelada)
+    if (
+      inscripcion.suscripcion_familiar.estado ===
+      EstadoSuscripcionFamiliar.CANCELLED
+    ) {
+      throw new SuscripcionFamiliarError(
+        'No se puede reactivar inscripciones de una suscripción cancelada',
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    const montoAnterior = inscripcion.suscripcion_familiar.monto_mensual;
+    const suscripcionId = inscripcion.suscripcion_familiar_id;
+
+    // 5. Calcular nuevo monto (incluyendo la inscripción reactivada)
+    const inscripcionesActivas = inscripcion.suscripcion_familiar.inscripciones;
+
+    const inscripcionesParaCalculo: InscripcionConTier[] = [
+      ...inscripcionesActivas.map((insc) => ({
+        id: insc.id,
+        tier: insc.tier ?? inscripcion.suscripcion_familiar.tier,
+      })),
+      // Agregar la inscripción que vamos a reactivar
+      {
+        id: inscripcionId,
+        tier: inscripcion.tier ?? inscripcion.suscripcion_familiar.tier,
+      },
+    ];
+
+    const calculoNuevo = calcularMontoMensualConTiers(inscripcionesParaCalculo);
+    const nuevoMontoMensual = calculoNuevo.montoConDescuento;
+
+    // 6. Actualizar en transacción
+    await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
+      // Reactivar inscripción
+      await tx.inscripcionActividad.update({
+        where: { id: inscripcionId },
+        data: { estado: EstadoInscripcionActividad.ACTIVA },
+      });
+
+      // Actualizar monto de suscripción
+      await tx.suscripcionFamiliar.update({
+        where: { id: suscripcionId },
+        data: { monto_mensual: nuevoMontoMensual },
+      });
+
+      // Registrar cambio
+      await tx.cambioInscripcion.create({
+        data: {
+          suscripcion_familiar_id: suscripcionId,
+          tipo: TipoCambioInscripcion.ALTA, // Usamos ALTA para reactivaciones
+          inscripcion_nueva_id: inscripcionId,
+          aplica_desde: new Date(),
+          monto_anterior: montoAnterior,
+          monto_nuevo: nuevoMontoMensual,
+          detalle: { accion: 'reactivar' },
+        },
+      });
+    });
+
+    // 7. Actualizar monto en MercadoPago si cambió
+    if (
+      montoAnterior !== nuevoMontoMensual &&
+      inscripcion.suscripcion_familiar.preapproval_id &&
+      this.mpClient.isConfigured()
+    ) {
+      await this.actualizarMontoEnMercadoPago(
+        inscripcion.suscripcion_familiar.preapproval_id,
+        nuevoMontoMensual,
+      );
+    }
+
+    const estudianteNombre = `${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido}`;
+
+    this.logger.log(
+      `Inscripción reactivada: ${inscripcionId} (${estudianteNombre} - ${inscripcion.producto.nombre})`,
+    );
+
+    return {
+      inscripcionId,
+      estudianteNombre,
+      productoNombre: inscripcion.producto.nombre,
+      nuevoMontoMensual,
+      montoAnterior,
+      mensaje: `Inscripción de ${estudianteNombre} a ${inscripcion.producto.nombre} reactivada exitosamente`,
+    };
+  }
+
+  /**
+   * Pausa la suscripción completa (Tutor)
+   *
+   * Pausa la suscripción familiar y todas sus inscripciones activas.
+   * También pausa el cobro automático en MercadoPago.
+   */
+  async tutorPausarSuscripcion(
+    input: TutorPausarSuscripcionInput,
+  ): Promise<TutorPausarSuscripcionResult> {
+    const { tutorId, motivo } = input;
+
+    // 1. Obtener suscripción del tutor
+    const suscripcion = await this.prisma.suscripcionFamiliar.findFirst({
+      where: { tutor_id: tutorId },
+      include: {
+        inscripciones: {
+          where: { estado: EstadoInscripcionActividad.ACTIVA },
+        },
+      },
+    });
+
+    if (!suscripcion) {
+      throw new SuscripcionFamiliarError(
+        'No tienes una suscripción familiar activa',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    if (suscripcion.estado !== EstadoSuscripcionFamiliar.AUTHORIZED) {
+      throw new SuscripcionFamiliarError(
+        `Solo se pueden pausar suscripciones activas (estado actual: ${suscripcion.estado})`,
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    const inscripcionesAPausar = suscripcion.inscripciones.length;
+
+    // 2. Pausar en MercadoPago si está configurado
+    if (suscripcion.preapproval_id && this.mpClient.isConfigured()) {
+      await this.circuitBreaker.execute(async () => {
+        return await this.mpClient.pause(suscripcion.preapproval_id as string);
+      });
+    }
+
+    // 3. Actualizar en transacción
+    await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
+      // Pausar suscripción
+      await tx.suscripcionFamiliar.update({
+        where: { id: suscripcion.id },
+        data: { estado: EstadoSuscripcionFamiliar.PAUSED },
+      });
+
+      // Pausar todas las inscripciones activas
+      await tx.inscripcionActividad.updateMany({
+        where: {
+          suscripcion_familiar_id: suscripcion.id,
+          estado: EstadoInscripcionActividad.ACTIVA,
+        },
+        data: { estado: EstadoInscripcionActividad.PAUSADA },
+      });
+
+      // Registrar cambio
+      await tx.cambioInscripcion.create({
+        data: {
+          suscripcion_familiar_id: suscripcion.id,
+          tipo: TipoCambioInscripcion.BAJA,
+          aplica_desde: new Date(),
+          monto_anterior: suscripcion.monto_mensual,
+          monto_nuevo: 0,
+          detalle: {
+            accion: 'pausar_suscripcion',
+            motivo: motivo ?? 'Pausa solicitada por tutor',
+            inscripcionesPausadas: inscripcionesAPausar,
+          },
+        },
+      });
+    });
+
+    this.logger.log(
+      `Suscripción pausada por tutor: ${suscripcion.id} (${inscripcionesAPausar} inscripciones)`,
+    );
+
+    return {
+      suscripcionId: suscripcion.id,
+      inscripcionesPausadas: inscripcionesAPausar,
+      mensaje: `Suscripción pausada exitosamente. ${inscripcionesAPausar} inscripciones fueron pausadas.`,
+    };
+  }
+
+  /**
+   * Reactiva la suscripción pausada (Tutor)
+   *
+   * Reactiva la suscripción familiar y todas sus inscripciones que estaban pausadas.
+   * También reactiva el cobro automático en MercadoPago.
+   */
+  async tutorReactivarSuscripcion(
+    input: TutorReactivarSuscripcionInput,
+  ): Promise<TutorReactivarSuscripcionResult> {
+    const { tutorId } = input;
+
+    // 1. Obtener suscripción del tutor
+    const suscripcion = await this.prisma.suscripcionFamiliar.findFirst({
+      where: { tutor_id: tutorId },
+      include: {
+        inscripciones: {
+          where: { estado: EstadoInscripcionActividad.PAUSADA },
+        },
+      },
+    });
+
+    if (!suscripcion) {
+      throw new SuscripcionFamiliarError(
+        'No tienes una suscripción familiar',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    if (suscripcion.estado !== EstadoSuscripcionFamiliar.PAUSED) {
+      throw new SuscripcionFamiliarError(
+        `Solo se pueden reactivar suscripciones pausadas (estado actual: ${suscripcion.estado})`,
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    const inscripcionesAReactivar = suscripcion.inscripciones.length;
+
+    // 2. Calcular monto con inscripciones reactivadas
+    const inscripcionesParaCalculo: InscripcionConTier[] =
+      suscripcion.inscripciones.map((insc) => ({
+        id: insc.id,
+        tier: insc.tier ?? suscripcion.tier,
+      }));
+
+    const calculoNuevo = calcularMontoMensualConTiers(inscripcionesParaCalculo);
+    const nuevoMontoMensual = calculoNuevo.montoConDescuento;
+
+    // 3. Reactivar en MercadoPago si está configurado
+    if (suscripcion.preapproval_id && this.mpClient.isConfigured()) {
+      await this.circuitBreaker.execute(async () => {
+        return await this.mpClient.reactivate(
+          suscripcion.preapproval_id as string,
+        );
+      });
+    }
+
+    // 4. Actualizar en transacción
+    await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
+      // Reactivar suscripción
+      await tx.suscripcionFamiliar.update({
+        where: { id: suscripcion.id },
+        data: {
+          estado: EstadoSuscripcionFamiliar.AUTHORIZED,
+          monto_mensual: nuevoMontoMensual,
+        },
+      });
+
+      // Reactivar todas las inscripciones pausadas
+      await tx.inscripcionActividad.updateMany({
+        where: {
+          suscripcion_familiar_id: suscripcion.id,
+          estado: EstadoInscripcionActividad.PAUSADA,
+        },
+        data: { estado: EstadoInscripcionActividad.ACTIVA },
+      });
+
+      // Registrar cambio
+      await tx.cambioInscripcion.create({
+        data: {
+          suscripcion_familiar_id: suscripcion.id,
+          tipo: TipoCambioInscripcion.ALTA,
+          aplica_desde: new Date(),
+          monto_anterior: 0,
+          monto_nuevo: nuevoMontoMensual,
+          detalle: {
+            accion: 'reactivar_suscripcion',
+            inscripcionesReactivadas: inscripcionesAReactivar,
+          },
+        },
+      });
+    });
+
+    this.logger.log(
+      `Suscripción reactivada por tutor: ${suscripcion.id} (${inscripcionesAReactivar} inscripciones)`,
+    );
+
+    return {
+      suscripcionId: suscripcion.id,
+      inscripcionesReactivadas: inscripcionesAReactivar,
+      montoMensual: nuevoMontoMensual,
+      mensaje: `Suscripción reactivada exitosamente. ${inscripcionesAReactivar} inscripciones fueron reactivadas. Monto mensual: $${nuevoMontoMensual}`,
     };
   }
 

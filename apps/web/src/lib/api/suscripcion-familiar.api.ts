@@ -263,6 +263,69 @@ export interface CancelarSuscripcionResponse {
 }
 
 // ============================================================================
+// TIPOS PARA PAUSAR/REACTIVAR (Tutor)
+// ============================================================================
+
+/**
+ * Request para pausar una inscripción individual
+ */
+export interface PausarInscripcionRequest {
+  /** Motivo de la pausa (opcional) */
+  readonly motivo?: string;
+}
+
+/**
+ * Response de pausar inscripción
+ */
+export interface PausarInscripcionResponse {
+  readonly inscripcionId: string;
+  readonly estudianteNombre: string;
+  readonly productoNombre: string;
+  readonly nuevoMontoMensual: number;
+  readonly montoAnterior: number;
+  readonly mensaje: string;
+}
+
+/**
+ * Response de reactivar inscripción
+ */
+export interface ReactivarInscripcionResponse {
+  readonly inscripcionId: string;
+  readonly estudianteNombre: string;
+  readonly productoNombre: string;
+  readonly nuevoMontoMensual: number;
+  readonly montoAnterior: number;
+  readonly mensaje: string;
+}
+
+/**
+ * Request para pausar suscripción completa
+ */
+export interface PausarSuscripcionRequest {
+  /** Motivo de la pausa (opcional) */
+  readonly motivo?: string;
+}
+
+/**
+ * Response de pausar suscripción completa
+ */
+export interface PausarSuscripcionResponse {
+  readonly suscripcionId: string;
+  readonly inscripcionesPausadas: number;
+  readonly mensaje: string;
+}
+
+/**
+ * Response de reactivar suscripción
+ */
+export interface ReactivarSuscripcionResponse {
+  readonly suscripcionId: string;
+  readonly inscripcionesReactivadas: number;
+  readonly montoMensual: number;
+  readonly mensaje: string;
+}
+
+// ============================================================================
 // API CLIENT
 // ============================================================================
 
@@ -384,6 +447,76 @@ export const suscripcionFamiliarApi = {
     return apiClient.get<SimularMontoResponse>('/suscripciones/familiar/simular', {
       params: { productoIds: productoIds.join(',') },
     });
+  },
+
+  // ============================================================================
+  // PAUSAR/REACTIVAR INSCRIPCIONES (Tutor)
+  // ============================================================================
+
+  /**
+   * PATCH /suscripciones/familiar/inscripciones/:id/pausar
+   * Pausa una inscripción individual
+   *
+   * Permite pausar una inscripción específica sin afectar las demás.
+   * El monto mensual se recalcula automáticamente.
+   *
+   * @param inscripcionId - ID de la inscripción a pausar
+   * @param data - Motivo opcional de la pausa
+   * @returns Resultado con nuevo monto mensual
+   */
+  pausarInscripcion: async (
+    inscripcionId: string,
+    data?: PausarInscripcionRequest,
+  ): Promise<PausarInscripcionResponse> => {
+    return apiClient.patch<PausarInscripcionResponse>(
+      `/suscripciones/familiar/inscripciones/${inscripcionId}/pausar`,
+      data ?? {},
+    );
+  },
+
+  /**
+   * PATCH /suscripciones/familiar/inscripciones/:id/reactivar
+   * Reactiva una inscripción pausada
+   *
+   * Permite reactivar una inscripción que había sido pausada.
+   * El monto mensual se recalcula automáticamente.
+   *
+   * @param inscripcionId - ID de la inscripción a reactivar
+   * @returns Resultado con nuevo monto mensual
+   */
+  reactivarInscripcion: async (inscripcionId: string): Promise<ReactivarInscripcionResponse> => {
+    return apiClient.patch<ReactivarInscripcionResponse>(
+      `/suscripciones/familiar/inscripciones/${inscripcionId}/reactivar`,
+    );
+  },
+
+  /**
+   * POST /suscripciones/familiar/pausar
+   * Pausa la suscripción completa
+   *
+   * Pausa la suscripción familiar y todas sus inscripciones activas.
+   * También pausa el cobro automático en MercadoPago.
+   *
+   * @param data - Motivo opcional de la pausa
+   * @returns Resultado con cantidad de inscripciones pausadas
+   */
+  pausarSuscripcion: async (
+    data?: PausarSuscripcionRequest,
+  ): Promise<PausarSuscripcionResponse> => {
+    return apiClient.post<PausarSuscripcionResponse>('/suscripciones/familiar/pausar', data ?? {});
+  },
+
+  /**
+   * POST /suscripciones/familiar/reactivar
+   * Reactiva la suscripción pausada
+   *
+   * Reactiva la suscripción familiar y todas sus inscripciones.
+   * También reactiva el cobro automático en MercadoPago.
+   *
+   * @returns Resultado con cantidad de inscripciones reactivadas y monto mensual
+   */
+  reactivarSuscripcion: async (): Promise<ReactivarSuscripcionResponse> => {
+    return apiClient.post<ReactivarSuscripcionResponse>('/suscripciones/familiar/reactivar');
   },
 } as const;
 

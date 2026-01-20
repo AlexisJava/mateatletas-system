@@ -21,7 +21,11 @@ import {
   BookOpen,
   Video,
   Rocket,
+  PauseCircle,
+  PlayCircle,
+  Loader2,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { SuscripcionSkeleton } from '../skeletons/SuscripcionSkeleton';
 import {
   useSuscripcionFamiliar,
@@ -33,6 +37,7 @@ import {
   type TierNombre,
   type EstadoSuscripcionFamiliar,
 } from '@/hooks/useSuscripcionFamiliar';
+import { suscripcionFamiliarApi } from '@/lib/api/suscripcion-familiar.api';
 
 // ============================================================================
 // SUBCOMPONENTES - Estado sin suscripción
@@ -132,13 +137,21 @@ function EstadoBadge({ estado }: EstadoBadgeProps): React.ReactElement {
 interface InscripcionCardProps {
   inscripcion: InscripcionActividadDetalle;
   onChangeTier: () => void;
+  onRefetch: () => Promise<void>;
 }
 
 /**
  * Card de inscripción que muestra el tier individual y permite cambiarlo
  * MODELO 2026: Cada inscripción puede tener un tier diferente
+ * Incluye funcionalidad para pausar/reactivar inscripción individual
  */
-function InscripcionCard({ inscripcion, onChangeTier }: InscripcionCardProps): React.ReactElement {
+function InscripcionCard({
+  inscripcion,
+  onChangeTier,
+  onRefetch,
+}: InscripcionCardProps): React.ReactElement {
+  const [isPausing, setIsPausing] = useState(false);
+
   const tierConfig: Record<TierNombre, { gradient: string; icon: typeof Star }> = {
     STEAM_LIBROS: { gradient: 'from-cyan-500 to-blue-600', icon: BookOpen },
     STEAM_ASINCRONICO: { gradient: 'from-violet-500 to-purple-600', icon: Video },
@@ -148,35 +161,104 @@ function InscripcionCard({ inscripcion, onChangeTier }: InscripcionCardProps): R
   const tier = inscripcion.tier ?? 'STEAM_LIBROS';
   const config = tierConfig[tier];
   const TierIcon = config.icon;
+  const isPausada = inscripcion.estado === 'PAUSADA';
+
+  const handlePausar = async (): Promise<void> => {
+    setIsPausing(true);
+    try {
+      const result = await suscripcionFamiliarApi.pausarInscripcion(inscripcion.id);
+      toast.success(result.mensaje);
+      await onRefetch();
+    } catch {
+      toast.error('Error al pausar la inscripción');
+    } finally {
+      setIsPausing(false);
+    }
+  };
+
+  const handleReactivar = async (): Promise<void> => {
+    setIsPausing(true);
+    try {
+      const result = await suscripcionFamiliarApi.reactivarInscripcion(inscripcion.id);
+      toast.success(result.mensaje);
+      await onRefetch();
+    } catch {
+      toast.error('Error al reactivar la inscripción');
+    } finally {
+      setIsPausing(false);
+    }
+  };
 
   return (
-    <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-xl">
+    <div
+      className={`flex items-center gap-4 p-4 rounded-xl transition-all ${
+        isPausada
+          ? 'bg-amber-500/10 border border-amber-500/30'
+          : 'bg-white/5 border border-white/5'
+      }`}
+    >
       <div
-        className={`w-10 h-10 bg-gradient-to-br ${config.gradient} rounded-lg flex items-center justify-center shrink-0`}
+        className={`w-10 h-10 bg-gradient-to-br ${config.gradient} rounded-lg flex items-center justify-center shrink-0 ${isPausada ? 'opacity-50' : ''}`}
       >
         <TierIcon className="w-5 h-5 text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-white truncate">{inscripcion.productoNombre}</p>
+        <div className="flex items-center gap-2">
+          <p className={`font-medium truncate ${isPausada ? 'text-slate-400' : 'text-white'}`}>
+            {inscripcion.productoNombre}
+          </p>
+          {isPausada && (
+            <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-medium rounded-full">
+              Pausada
+            </span>
+          )}
+        </div>
         {inscripcion.claseGrupoNombre && (
           <p className="text-sm text-slate-500">Grupo: {inscripcion.claseGrupoNombre}</p>
         )}
-        <button
-          onClick={onChangeTier}
-          className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors mt-1 flex items-center gap-1"
-        >
-          <span className="px-2 py-0.5 bg-white/5 rounded-full">{formatTierNombre(tier)}</span>
-          <ChevronRight className="w-3 h-3" />
-        </button>
-      </div>
-      <div className="text-right shrink-0">
-        <p className="text-emerald-400 font-semibold">
-          {formatMonto(inscripcion.precioConDescuento)}
-        </p>
-        {inscripcion.descuentoAplicado > 0 && (
-          <p className="text-xs text-amber-400">-{inscripcion.descuentoAplicado}% dto</p>
+        {!isPausada && (
+          <button
+            onClick={onChangeTier}
+            className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors mt-1 flex items-center gap-1"
+          >
+            <span className="px-2 py-0.5 bg-white/5 rounded-full">{formatTierNombre(tier)}</span>
+            <ChevronRight className="w-3 h-3" />
+          </button>
         )}
-        {inscripcion.esMasCara && <p className="text-xs text-slate-500">Sin descuento</p>}
+      </div>
+      <div className="flex items-center gap-3 shrink-0">
+        <div className="text-right">
+          <p
+            className={`font-semibold ${isPausada ? 'text-slate-500 line-through' : 'text-emerald-400'}`}
+          >
+            {formatMonto(inscripcion.precioConDescuento)}
+          </p>
+          {inscripcion.descuentoAplicado > 0 && !isPausada && (
+            <p className="text-xs text-amber-400">-{inscripcion.descuentoAplicado}% dto</p>
+          )}
+          {inscripcion.esMasCara && !isPausada && (
+            <p className="text-xs text-slate-500">Sin descuento</p>
+          )}
+        </div>
+        {/* Botón de pausar/reactivar */}
+        <button
+          onClick={isPausada ? handleReactivar : handlePausar}
+          disabled={isPausing}
+          className={`p-2 rounded-lg transition-all ${
+            isPausada
+              ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400'
+              : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400'
+          } disabled:opacity-50 disabled:cursor-not-allowed`}
+          title={isPausada ? 'Reactivar inscripción' : 'Pausar inscripción'}
+        >
+          {isPausing ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : isPausada ? (
+            <PlayCircle className="w-4 h-4" />
+          ) : (
+            <PauseCircle className="w-4 h-4" />
+          )}
+        </button>
       </div>
     </div>
   );
@@ -211,9 +293,13 @@ function TierBadge({ tier, size = 'sm' }: TierBadgeProps): React.ReactElement {
 
 interface SuscripcionActivaViewProps {
   suscripcion: SuscripcionFamiliarDetalle;
+  onRefetch: () => Promise<void>;
 }
 
-function SuscripcionActivaView({ suscripcion }: SuscripcionActivaViewProps): React.ReactElement {
+function SuscripcionActivaView({
+  suscripcion,
+  onRefetch,
+}: SuscripcionActivaViewProps): React.ReactElement {
   const router = useRouter();
   const [expandedHijo, setExpandedHijo] = useState<string | null>(null);
 
@@ -395,11 +481,11 @@ function SuscripcionActivaView({ suscripcion }: SuscripcionActivaViewProps): Rea
                           key={inscripcion.id}
                           inscripcion={inscripcion}
                           onChangeTier={() => {
-                            // TODO: Abrir modal para cambiar tier
                             router.push(
                               `/tutor/suscripcion/inscripcion/${inscripcion.id}/cambiar-tier`,
                             );
                           }}
+                          onRefetch={onRefetch}
                         />
                       ))}
                     </div>
@@ -456,7 +542,7 @@ function SuscripcionActivaView({ suscripcion }: SuscripcionActivaViewProps): Rea
 export function SuscripcionDashboard(): React.ReactElement {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { suscripcion, isLoading, error, hasSuscripcion } = useSuscripcionFamiliar();
+  const { suscripcion, isLoading, error, hasSuscripcion, refetch } = useSuscripcionFamiliar();
 
   // Loading state
   if (isLoading) {
@@ -498,7 +584,7 @@ export function SuscripcionDashboard(): React.ReactElement {
       {/* Content */}
       <div className="relative z-10 flex-1 overflow-hidden">
         {hasSuscripcion && suscripcion ? (
-          <SuscripcionActivaView suscripcion={suscripcion} />
+          <SuscripcionActivaView suscripcion={suscripcion} onRefetch={refetch} />
         ) : (
           <NoSuscripcionView />
         )}
