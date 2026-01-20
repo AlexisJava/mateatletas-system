@@ -1058,16 +1058,29 @@ export const getDistribucionTiers = async (): Promise<DistribucionTiers> => {
 };
 
 export const getCombinedDashboardStats = async (): Promise<DashboardStats> => {
-  const [dashboard, estadisticas, casas] = await Promise.all([
+  const [dashboard, estadisticas, casas, retention] = await Promise.all([
     axios.get<AdminDashboardResponse>('/admin/dashboard'),
     getSystemStats(),
     getCasasEstadisticas(),
+    getRetentionStats(2), // Solo últimos 2 meses para calcular crecimiento
   ]);
 
   // Calcular tasa de cobro
   const totalFacturado = estadisticas.ingresosTotal + estadisticas.pagosPendientes;
   const tasaCobro =
     totalFacturado > 0 ? Math.round((estadisticas.ingresosTotal / totalFacturado) * 1000) / 10 : 0;
+
+  // Calcular crecimiento mensual desde datos de retención
+  let crecimientoMensual = 0;
+  if (retention.length >= 2) {
+    const mesActual = retention[retention.length - 1];
+    const mesAnterior = retention[retention.length - 2];
+    if (mesAnterior.activos > 0) {
+      crecimientoMensual = Math.round(
+        ((mesActual.activos - mesAnterior.activos) / mesAnterior.activos) * 100,
+      );
+    }
+  }
 
   // Transformar distribución de casas desde ranking
   const distribucionCasas = {
@@ -1084,12 +1097,12 @@ export const getCombinedDashboardStats = async (): Promise<DashboardStats> => {
 
   return {
     totalEstudiantes: estadisticas.totalEstudiantes,
-    estudiantesActivos: dashboard.activeMemberships, // Inscripciones activas como proxy
+    estudiantesActivos: dashboard.activeMemberships,
     inscripcionesActivas: estadisticas.inscripcionesActivas,
     ingresosMes: estadisticas.ingresosTotal,
     ingresosPendientes: estadisticas.pagosPendientes,
     tasaCobro,
-    crecimientoMensual: 0, // TODO: Implementar cuando exista endpoint de histórico
+    crecimientoMensual,
     distribucionCasas,
   };
 };

@@ -63,15 +63,7 @@ export function ResumenTab() {
             stats.crecimientoMensual > 0 ? 'up' : stats.crecimientoMensual < 0 ? 'down' : 'neutral'
           }
         />
-        <KPICard
-          label="MRR"
-          value={formatCompactCurrency(mrr)}
-          icon={DollarSign}
-          color="#10b981"
-          change={8}
-          changeLabel="vs mes anterior"
-          trend="up"
-        />
+        <KPICard label="MRR" value={formatCompactCurrency(mrr)} icon={DollarSign} color="#10b981" />
         <KPICard
           label="Tasa de Cobro"
           value={`${stats.tasaCobro}%`}
