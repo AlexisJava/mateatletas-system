@@ -808,10 +808,12 @@ export const StudentList: React.FC<StudentListProps> = ({
                 </span>
               </div>
               <p className="text-sm text-slate-300 mt-2">{obs.contenido}</p>
-              {obs.seguimientos && obs.seguimientos.length > 0 && (
+              {/* Mostrar conteo de seguimientos: usa _count de la lista o length del array */}
+              {((obs._count?.seguimientos ?? 0) > 0 ||
+                (obs.seguimientos && obs.seguimientos.length > 0)) && (
                 <div className="mt-3 pt-3 border-t border-slate-800/50">
                   <span className="text-xs text-slate-500 font-semibold">
-                    {obs.seguimientos.length} seguimiento(s)
+                    {obs._count?.seguimientos ?? obs.seguimientos?.length ?? 0} seguimiento(s)
                   </span>
                 </div>
               )}

@@ -55,7 +55,7 @@ export interface Observacion {
     nombre: string;
     apellido: string;
   };
-  seguimientos: SeguimientoObservacion[];
+  seguimientos?: SeguimientoObservacion[];
   comision?: {
     id: string;
     nombre: string;
