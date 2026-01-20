@@ -264,9 +264,44 @@ export class DocenteComisionQueriesService {
           : 0;
     }
 
-    // Total puntos otorgados (sumar XP de estudiantes en esta comisión)
-    // Por ahora retornamos 0 ya que no hay tabla de puntos por comisión
-    const totalPuntosOtorgados = 0;
+    // Total XP de estudiantes en esta comisión (suma de xp_total de cada estudiante)
+    const [xpManuales, xpSuscripcion] = await Promise.all([
+      // FUENTE 1: XP de estudiantes con inscripción manual
+      this.prisma.inscripcionComision.findMany({
+        where: {
+          comision_id: comisionId,
+          estado: { not: 'Cancelada' },
+        },
+        select: {
+          estudiante: {
+            select: { recursos: { select: { xp_total: true } } },
+          },
+        },
+      }),
+      // FUENTE 2: XP de estudiantes con suscripción
+      this.prisma.inscripcionActividad.findMany({
+        where: {
+          comision_id: comisionId,
+          estado: 'ACTIVA',
+        },
+        select: {
+          estudiante: {
+            select: { recursos: { select: { xp_total: true } } },
+          },
+        },
+      }),
+    ]);
+
+    // Sumar XP de ambas fuentes
+    const totalXpManuales = xpManuales.reduce(
+      (sum, insc) => sum + (insc.estudiante.recursos?.xp_total ?? 0),
+      0,
+    );
+    const totalXpSuscripcion = xpSuscripcion.reduce(
+      (sum, insc) => sum + (insc.estudiante.recursos?.xp_total ?? 0),
+      0,
+    );
+    const totalPuntosOtorgados = totalXpManuales + totalXpSuscripcion;
 
     return {
       asistenciaPromedio,
