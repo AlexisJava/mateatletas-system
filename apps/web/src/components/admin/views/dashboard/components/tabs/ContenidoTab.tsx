@@ -46,8 +46,8 @@ export function ContenidoTab() {
       completados: d.completados,
     })) ?? [];
 
-  // Estimate average completion time (mock data for now)
-  const avgCompletionMinutes = 45;
+  // Tiempo promedio de contenidos completados (desde el backend)
+  const avgCompletionMinutes = libros.tiempoPromedioMinutos || 0;
 
   // Calculate month-over-month growth
   const lastMonthCompletados = trendChartData[trendChartData.length - 1]?.completados ?? 0;

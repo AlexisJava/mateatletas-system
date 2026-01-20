@@ -575,6 +575,7 @@ export interface LibrosLeidosStats {
   total: number;
   porEstudiante: number;
   completadosEsteMes: number;
+  tiempoPromedioMinutos: number;
   tendencia: Array<{ month: string; completados: number }>;
 }
 

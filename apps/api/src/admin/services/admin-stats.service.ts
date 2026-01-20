@@ -358,7 +358,7 @@ export class AdminStatsService {
   /**
    * Obtener estadísticas de contenidos leídos/completados
    * Para el dashboard de Analytics
-   * @returns { total, porEstudiante, completadosEsteMes, tendenciaMensual }
+   * @returns { total, porEstudiante, completadosEsteMes, tiempoPromedioMinutos, tendenciaMensual }
    */
   async getLibrosLeidos() {
     const now = new Date();
@@ -368,6 +368,7 @@ export class AdminStatsService {
       totalCompletados,
       totalEstudiantes,
       completadosEsteMes,
+      tiempoPromedio,
       contenidosPorMes,
     ] = await Promise.all([
       // Total de contenidos completados
@@ -383,6 +384,14 @@ export class AdminStatsService {
           fechaCompletitud: { gte: inicioMes },
         },
       }),
+      // Tiempo promedio de contenidos completados (en segundos)
+      this.prisma.progresoContenido.aggregate({
+        where: {
+          completado: true,
+          tiempoTotalSegundos: { gt: 0 },
+        },
+        _avg: { tiempoTotalSegundos: true },
+      }),
       // Tendencia de los últimos 6 meses
       this.getContenidosTendencia(6),
     ]);
@@ -392,10 +401,17 @@ export class AdminStatsService {
         ? Math.round((totalCompletados / totalEstudiantes) * 10) / 10
         : 0;
 
+    // Convertir segundos a minutos y redondear
+    const tiempoPromedioMinutos =
+      tiempoPromedio._avg.tiempoTotalSegundos !== null
+        ? Math.round(tiempoPromedio._avg.tiempoTotalSegundos / 60)
+        : 0;
+
     return {
       total: totalCompletados,
       porEstudiante,
       completadosEsteMes,
+      tiempoPromedioMinutos,
       tendencia: contenidosPorMes,
     };
   }
