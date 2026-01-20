@@ -2,10 +2,8 @@ import { isAxiosError } from 'axios';
 
 import apiClient from '../axios';
 import {
-  accionesPuntuablesListSchema,
   dashboardGamificacionSchema,
   logrosListSchema,
-  otorgarPuntosSchema,
   puntosObtenidosListSchema,
   puntosSchema,
   progresoRutaListSchema,
@@ -13,7 +11,6 @@ import {
   type AccionPuntuable as ContractsAccionPuntuable,
   type DashboardGamificacion,
   type Logro as ContractsLogro,
-  type OtorgarPuntosInput,
   type PuntoObtenido as ContractsPuntoObtenido,
   type Puntos as ContractsPuntos,
   type Ranking as ContractsRanking,
@@ -36,8 +33,31 @@ export type Puntos = ContractsPuntos;
 export type Ranking = ContractsRanking;
 export type Progreso = ProgresoRuta;
 export type AccionPuntuable = ContractsAccionPuntuable & { codigo?: string };
+
+/**
+ * Tipo de acción que retorna el backend actualmente
+ * Backend usa: { tipo: 'PARTICIPACION', puntos: 5 }
+ * Contracts espera: { id, nombre, descripcion, puntos, activo }
+ */
+interface AccionBackend {
+  tipo: string;
+  puntos: number;
+}
+
+/**
+ * Datos para otorgar puntos - adaptado al backend actual
+ * Backend espera: { estudianteId, tipoAccion, contexto? }
+ * El tipoAccion es el código de la acción (ej: 'PARTICIPACION')
+ */
+export interface OtorgarPuntosData {
+  estudianteId: string;
+  /** ID de la acción (que en realidad es el tipoAccion string) */
+  accionId: string;
+  claseId?: string;
+  contexto?: string;
+}
+
 export type PuntoObtenido = ContractsPuntoObtenido;
-export type OtorgarPuntosData = OtorgarPuntosInput;
 export type RankingEquipoEntry = RankingIntegrante;
 export type RankingGlobalEntry = RankingGlobalItem;
 
@@ -194,11 +214,56 @@ export const gamificacionApi = {
 
   /**
    * Obtener acciones puntuables disponibles (docentes)
+   *
+   * NOTA: El backend retorna { tipo, puntos } pero el frontend espera
+   * el formato de contracts { id, nombre, descripcion, puntos, activo }.
+   * Transformamos aquí para mantener compatibilidad.
    */
   getAcciones: async (): Promise<AccionPuntuable[]> => {
     try {
-      const response = await apiClient.get('/gamificacion/acciones');
-      return accionesPuntuablesListSchema.parse(response);
+      const response = await apiClient.get<AccionBackend[]>('/gamificacion/acciones');
+
+      // Mapeo de tipos a nombres legibles para UI
+      const NOMBRES_ACCIONES: Record<string, { nombre: string; descripcion: string }> = {
+        PARTICIPACION: {
+          nombre: 'Participación',
+          descripcion: 'Por participar activamente en clase',
+        },
+        TAREA_COMPLETADA: {
+          nombre: 'Tarea Completada',
+          descripcion: 'Por entregar una tarea correctamente',
+        },
+        QUIZ_APROBADO: {
+          nombre: 'Quiz Aprobado',
+          descripcion: 'Por aprobar un quiz o evaluación',
+        },
+        AYUDA_COMPANERO: {
+          nombre: 'Ayuda a Compañero',
+          descripcion: 'Por ayudar a un compañero',
+        },
+        BONUS: {
+          nombre: 'Bonus',
+          descripcion: 'Puntos bonus especiales',
+        },
+        LOGRO: {
+          nombre: 'Logro',
+          descripcion: 'Por desbloquear un logro',
+        },
+        ASISTENCIA: {
+          nombre: 'Asistencia',
+          descripcion: 'Por asistir a clase',
+        },
+      };
+
+      // Transformar formato backend → formato frontend
+      return response.map((accion) => ({
+        id: accion.tipo, // Usamos el tipo como ID
+        nombre: NOMBRES_ACCIONES[accion.tipo]?.nombre ?? accion.tipo,
+        descripcion: NOMBRES_ACCIONES[accion.tipo]?.descripcion ?? '',
+        puntos: accion.puntos,
+        activo: true,
+        codigo: accion.tipo, // Campo extra para mapear al backend
+      }));
     } catch (error) {
       console.error('Error al obtener las acciones puntuables:', error);
       throw error;
@@ -220,11 +285,20 @@ export const gamificacionApi = {
 
   /**
    * Otorgar puntos a un estudiante (docentes)
+   *
+   * NOTA: El frontend usa accionId (que es el código de acción como 'PARTICIPACION')
+   * El backend espera tipoAccion. Transformamos aquí.
    */
   otorgarPuntos: async (data: OtorgarPuntosData): Promise<void> => {
     try {
-      const payload = otorgarPuntosSchema.parse(data);
-      await apiClient.post<void, typeof payload>('/gamificacion/puntos', payload);
+      // Transformar formato frontend → formato backend
+      const payload = {
+        estudianteId: data.estudianteId,
+        tipoAccion: data.accionId, // accionId es realmente el tipoAccion (ej: 'PARTICIPACION')
+        claseId: data.claseId,
+        contexto: data.contexto,
+      };
+      await apiClient.post('/gamificacion/puntos', payload);
     } catch (error) {
       console.error('Error al otorgar puntos de gamificación:', error);
       throw error;
