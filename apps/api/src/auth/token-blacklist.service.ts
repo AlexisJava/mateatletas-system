@@ -214,14 +214,38 @@ export class TokenBlacklistService {
    * Verificar si TODOS los tokens de un usuario están blacklisted
    *
    * @param userId - ID del usuario
+   * @param tokenIssuedAt - Timestamp (en segundos) de cuando se emitió el token actual
    * @returns true si todos los tokens del usuario están invalidados
+   *
+   * IMPORTANTE: Si se proporciona tokenIssuedAt y el token fue emitido DESPUÉS
+   * del blacklist, el token es válido (fue emitido en un nuevo login).
    */
-  async isUserBlacklisted(userId: string): Promise<boolean> {
+  async isUserBlacklisted(
+    userId: string,
+    tokenIssuedAt?: number,
+  ): Promise<boolean> {
     try {
       const userBlacklistKey = `blacklist:user:${userId}`;
-      const blacklistedData = await this.cacheManager.get(userBlacklistKey);
+      const blacklistedData =
+        await this.cacheManager.get<UserBlacklistEntry>(userBlacklistKey);
 
       if (blacklistedData) {
+        // Si tenemos el timestamp de emisión del token, verificar si fue emitido
+        // DESPUÉS del blacklist (es decir, en un nuevo login post-cambio de contraseña)
+        if (tokenIssuedAt && blacklistedData.blacklistedAt) {
+          const blacklistTimestamp = new Date(
+            blacklistedData.blacklistedAt,
+          ).getTime();
+          const tokenTimestamp = tokenIssuedAt * 1000; // Convertir a milisegundos
+
+          if (tokenTimestamp > blacklistTimestamp) {
+            this.logger.debug(
+              `Token del usuario ${userId} emitido DESPUÉS del blacklist masivo - Token válido`,
+            );
+            return false; // Token es válido, fue emitido después del blacklist
+          }
+        }
+
         this.logger.warn(
           `Usuario ${userId} tiene blacklist masiva - Data: ${JSON.stringify(blacklistedData)}`,
         );
@@ -393,6 +417,12 @@ interface RefreshTokenBlacklistEntry {
   reason: string;
   blacklistedAt: string;
   jti: string;
+}
+
+interface UserBlacklistEntry {
+  reason: string;
+  blacklistedAt: string;
+  allTokens: boolean;
 }
 
 const isDecodedToken = (value: unknown): value is DecodedToken => {

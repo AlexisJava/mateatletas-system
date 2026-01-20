@@ -34,6 +34,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - OBLIGATORIO: Black Box Testing - testear REQUISITOS, no implementación
 - OBLIGATORIO: Leer `apps/api/test/TESTING.md` antes de escribir tests
 
+#### ⛔ REGLA CRÍTICA: Tests como JUEZ, no como CÓMPLICE
+
+**Si un test falla, Claude DEBE:**
+
+1. **FRENAR** - No tocar nada
+2. **REPORTAR** - Qué test falló, qué esperaba vs qué recibió
+3. **DIAGNOSTICAR** - ¿Es bug en código o test incorrecto?
+4. **PREGUNTAR** - "¿Cuál es el comportamiento correcto?"
+
+**PROHIBIDO ABSOLUTO** (sin autorización explícita):
+
+- ❌ Cambiar `expect(200)` a `expect(404)` porque "así funciona el código"
+- ❌ Agregar `.optional()` porque el código no retorna el campo
+- ❌ Decir "ajusté el test para reflejar la implementación actual"
+- ❌ Eliminar/comentar/skipear assertions que fallan
+
+**Ver `apps/api/test/TESTING.md` sección "REGLA CRÍTICA" para protocolo completo.**
+
 ### Ciclo de Construcción de Tests (OBLIGATORIO)
 
 Cuando se escriben tests nuevos, seguir este ciclo **sin excepciones**:

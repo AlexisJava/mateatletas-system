@@ -229,6 +229,28 @@ export class DocentesFacade {
     );
   }
 
+  /**
+   * Obtiene historial de puntos otorgados en una comisión
+   * @param comisionId - ID de la comisión
+   * @param docenteId - ID del docente (para verificar ownership)
+   * @param desde - Fecha desde (opcional)
+   * @param hasta - Fecha hasta (opcional)
+   * @returns Historial de puntos con total
+   */
+  async getHistorialPuntosComision(
+    comisionId: string,
+    docenteId: string,
+    desde?: Date,
+    hasta?: Date,
+  ) {
+    return this.comisionQueriesService.getHistorialPuntosComision(
+      comisionId,
+      docenteId,
+      desde,
+      hasta,
+    );
+  }
+
   // ============================================================================
   // DASHBOARD GRAPHS - Delegación a StatsService
   // ============================================================================

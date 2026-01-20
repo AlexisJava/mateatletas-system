@@ -441,77 +441,58 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 
 ---
 
-### 4.3 Historial detallado de asistencia
+### ~~4.3 Historial detallado de asistencia~~ ✅ COMPLETADO
 
 | Campo            | Valor                                 |
 | ---------------- | ------------------------------------- |
 | **Prioridad**    | P2 MEDIO                              |
 | **Complejidad**  | 🟡 MEDIO                              |
 | **Dependencias** | 🔓 Ninguna                            |
-| **Archivos**     | Nueva página `/docente/asistencia/`   |
-| **Descripción**  | Endpoint retorna datos pero no hay UI |
+| **Archivos**     | `StudentList.tsx` tab Asistencia      |
+| **Descripción**  | Historial integrado en vista de grupo |
 
-**Pasos**:
-
-1. [ ] Crear página de historial
-2. [ ] Tabla con filtros por grupo, fecha, estudiante
-3. [ ] Gráficos de tendencia
+> **IMPLEMENTADO (2026-01-20)**: El historial de asistencia se integró dentro de la vista de detalle de grupo (Mis Grupos → seleccionar grupo → tab Asistencia → Ver Historial). Muestra asistencias agrupadas por fecha con indicadores visuales de presente/ausente/justificado.
 
 ---
 
-### 4.4 Reportes gráficos de asistencia
-
-| Campo            | Valor                                              |
-| ---------------- | -------------------------------------------------- |
-| **Prioridad**    | P2 MEDIO                                           |
-| **Complejidad**  | 🟡 MEDIO                                           |
-| **Dependencias** | 🔗 Depende de 4.3 (misma página)                   |
-| **Archivos**     | Componentes de gráficos                            |
-| **Descripción**  | Endpoint `GET /asistencia/docente/reportes` sin UI |
-
-**Pasos**:
-
-1. [ ] Agregar sección de gráficos en página de asistencia
-2. [ ] Asistencia semanal (bar chart)
-3. [ ] Por ruta curricular (pie chart)
-4. [ ] Top estudiantes
-
----
-
-### 4.5 Historial de puntos otorgados
-
-| Campo            | Valor                                             |
-| ---------------- | ------------------------------------------------- |
-| **Prioridad**    | P2 MEDIO                                          |
-| **Complejidad**  | 🟢 FÁCIL                                          |
-| **Dependencias** | 🔓 Ninguna                                        |
-| **Archivos**     | Nueva sección o página                            |
-| **Descripción**  | Docente no puede ver qué puntos dio anteriormente |
-
-**Pasos**:
-
-1. [ ] Crear sección en dashboard o página dedicada
-2. [ ] Listar puntos otorgados con fecha, estudiante, motivo
-3. [ ] Filtrar por fecha/estudiante
-
----
-
-### 4.6 Endpoint para calificar tareas
+### ~~4.4 Reportes gráficos de asistencia~~ ✅ COMPLETADO
 
 | Campo            | Valor                                            |
 | ---------------- | ------------------------------------------------ |
-| **Prioridad**    | P1 ALTO                                          |
+| **Prioridad**    | P2 MEDIO                                         |
 | **Complejidad**  | 🟡 MEDIO                                         |
-| **Dependencias** | 🔓 Ninguna                                       |
-| **Archivos**     | Controller y service de tareas, nuevo modal      |
-| **Descripción**  | Campo `calificacion` existe pero no hay endpoint |
+| **Dependencias** | 🔗 Depende de 4.3 (misma página)                 |
+| **Archivos**     | `StudentList.tsx` tab Asistencia                 |
+| **Descripción**  | Gráficos de tendencia en historial de asistencia |
 
-**Pasos**:
+> **IMPLEMENTADO (2026-01-20)**: El historial de asistencia incluye estadísticas por fecha con porcentaje de asistencia, indicadores visuales de presentes/ausentes, y un resumen numérico. Se accede desde Mis Grupos → grupo → tab Asistencia → Ver Historial.
 
-1. [ ] Crear DTO `CalificarTareaDto` con calificación y retroalimentación
-2. [ ] Crear endpoint `PATCH /docente/tareas/:tareaId/entregas/:estudianteId/calificar`
-3. [ ] Crear `CalificarModal.tsx`
-4. [ ] Integrar en tabla de entregas
+---
+
+### ~~4.5 Historial de puntos otorgados~~ ✅ COMPLETADO
+
+| Campo            | Valor                                                |
+| ---------------- | ---------------------------------------------------- |
+| **Prioridad**    | P2 MEDIO                                             |
+| **Complejidad**  | 🟢 FÁCIL                                             |
+| **Dependencias** | 🔓 Ninguna                                           |
+| **Archivos**     | `StudentList.tsx` nuevo tab Puntos, endpoint backend |
+| **Descripción**  | Historial de XP otorgados por comisión               |
+
+> **IMPLEMENTADO (2026-01-20)**: Se agregó un nuevo tab "Puntos" en la vista de detalle de grupo que muestra:
+>
+> - Total XP otorgados en la comisión
+> - Gráfico de barras de XP por tipo de acción
+> - Historial de los últimos 20 puntos otorgados con estudiante, tipo, contexto y fecha
+> - Nuevo endpoint `GET /docentes/me/comisiones/:id/historial-puntos`
+
+---
+
+### ~~4.6 Endpoint para calificar tareas~~ ❌ ELIMINADO
+
+> **DECISIÓN (2026-01-20)**: Todo el contenido debe ser autocorregible por software.
+> Los docentes no deben calificar manualmente - eso no escala y genera costos adicionales.
+> Ver FASE 9.4 para asegurar que todo el contenido sea autocorregible.
 
 ---
 
@@ -818,6 +799,70 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 
 ---
 
+### 9.4 Asegurar TODO el contenido sea autocorregible
+
+| Campo            | Valor                                                                        |
+| ---------------- | ---------------------------------------------------------------------------- |
+| **Prioridad**    | P1 ALTO                                                                      |
+| **Complejidad**  | 🔴 DIFÍCIL                                                                   |
+| **Dependencias** | 🔓 Ninguna                                                                   |
+| **Archivos**     | `lesson-engine/intents/`, validadores, sandbox                               |
+| **Descripción**  | Eliminar necesidad de calificación manual - todo debe validarse por software |
+
+> **DECISIÓN DE NEGOCIO**: Los docentes NO califican. Todo se autocorrige.
+> Si un profe tiene que corregir, cobra más. No escala.
+
+**Tipos de contenido y cómo autocorregirlos**:
+
+| Tipo de Contenido         | Intent Actual     | ¿Autocorregible? | Acción Necesaria                       |
+| ------------------------- | ----------------- | ---------------- | -------------------------------------- |
+| Quiz Multiple Choice      | `QuizMCIntent`    | ✅ SÍ            | Ninguna                                |
+| Quiz Verdadero/Falso      | `QuizTFIntent`    | ✅ SÍ            | Ninguna                                |
+| Emparejar (Matching)      | `MatchingIntent`  | ✅ SÍ            | Ninguna                                |
+| Ordenar (Sorting)         | `SortingIntent`   | ✅ SÍ            | Ninguna                                |
+| Drag & Drop               | `DragDropIntent`  | ✅ SÍ            | Ninguna                                |
+| Completar espacios        | `FillBlankIntent` | ✅ SÍ            | Ninguna                                |
+| Minijuegos Phaser         | `GameIntent`      | ✅ SÍ            | Score automático                       |
+| **Respuesta corta/texto** | ❌ No existe      | ⚠️ PARCIAL       | Crear `ShortAnswerIntent` con keywords |
+| **Proyectos creativos**   | ❌ No existe      | ⚠️ PARCIAL       | Crear `ChecklistIntent` con criterios  |
+| **Código/Programación**   | ❌ No existe      | ⚠️ PARCIAL       | Crear `CodeValidatorIntent` con tests  |
+
+**Pasos para contenido que HOY requiere calificación manual**:
+
+1. [ ] **ShortAnswerIntent**: Respuestas cortas validadas por keywords/regex
+   - Config: `{ keywords: ["variable", "almacenar"], minKeywords: 2 }`
+   - Valida que la respuesta contenga las palabras clave
+   - Tolerancia a typos con distancia Levenshtein
+
+2. [ ] **ChecklistIntent**: Proyectos creativos con criterios objetivos
+   - Config: `{ criterios: ["Tiene título", "Usa 3 colores", "Tiene animación"] }`
+   - Estudiante marca checkboxes de lo que cumplió
+   - Sistema valida mínimo de criterios cumplidos
+
+3. [ ] **CodeValidatorIntent**: Código validado por tests automáticos
+   - Config: `{ language: "scratch", tests: [...] }`
+   - Ejecuta código en sandbox seguro
+   - Valida output esperado vs output real
+
+4. [ ] **PeerReviewIntent** (opcional): Revisión entre pares
+   - Estudiantes califican trabajo de compañeros
+   - Promedio de N reviews = calificación final
+   - Docente NO interviene
+
+5. [ ] **RubricIntent**: Rúbrica de autoevaluación
+   - Estudiante se autoevalúa con criterios objetivos
+   - Sistema asigna puntos según respuestas
+   - Gamificación: bonus por honestidad si coincide con métricas
+
+**Validación del Sandbox**:
+
+6. [ ] Auditar TODOS los contenidos existentes en sandbox
+7. [ ] Identificar cuáles requieren calificación manual
+8. [ ] Migrar/convertir a intents autocorregibles
+9. [ ] Eliminar campo `calificacion` manual del flujo de docente
+
+---
+
 ## Checklist de Progreso General
 
 ### FASE 0: Quick Wins ✅ COMPLETADA
@@ -860,10 +905,10 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 
 - [x] 4.1 Recuperación de contraseña ✅ (2026-01-20) - Compartido con Tutor
 - [x] 4.2 Compartir pantalla ✅ (Ya implementado en ControlBar.tsx)
-- [ ] 4.3 Historial detallado de asistencia
-- [ ] 4.4 Reportes gráficos de asistencia
-- [ ] 4.5 Historial de puntos otorgados
-- [ ] 4.6 Endpoint para calificar tareas
+- [x] 4.3 Historial detallado de asistencia ✅
+- [x] 4.4 Reportes gráficos de asistencia ✅
+- [x] 4.5 Historial de puntos otorgados ✅
+- [x] ~~4.6 Endpoint para calificar tareas~~ ❌ ELIMINADO (2026-01-20) - Todo debe ser autocorregible, ver 9.4
 
 ### FASE 5: Portal Tutor
 
@@ -876,7 +921,7 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 ### FASE 6: Portal Estudiante
 
 - [x] 6.1 Recuperación de contraseña ✅ (2026-01-20) - Mensaje: "Contactá a tu tutor"
-- [ ] 6.2 Restricción por tier (MODELO 2026)
+- [x] 6.2 Restricción por tier (MODELO 2026) ✅ (Ya implementado) - Backend AccesoEstudianteService + Frontend lock visual
 - [ ] 6.3 Animación de logro desbloqueado
 - [ ] 6.4 Intent de juegos Phaser
 
@@ -896,6 +941,7 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 - [ ] 9.1 Lista de contenidos con filtros
 - [ ] 9.2 Progreso automático de estudiantes
 - [ ] 9.3 Drag & drop para reordenar nodos
+- [ ] 9.4 Asegurar TODO el contenido sea autocorregible (P1 ALTO)
 
 ---
 

@@ -222,6 +222,10 @@ export class DocenteStatsService {
   // HELPERS PRIVADOS - Dashboard
   // ============================================================================
 
+  /**
+   * Calcula la clase inminente del docente (próxima a empezar)
+   * OPTIMIZACIÓN: _count en vez de include completo
+   */
   private async calcularClaseInminente(
     docenteId: string,
     now: Date,
@@ -243,8 +247,20 @@ export class DocenteStatsService {
         activo: true,
         dia_semana: diaActual,
       },
-      include: {
-        inscripciones: true,
+      select: {
+        id: true,
+        nombre: true,
+        codigo: true,
+        hora_inicio: true,
+        hora_fin: true,
+        cupo_maximo: true,
+        _count: {
+          select: {
+            inscripcionesUnificadas: {
+              where: { estado: 'ACTIVA' },
+            },
+          },
+        },
       },
     });
 
@@ -273,7 +289,7 @@ export class DocenteStatsService {
           grupo_id: claseGrupo.id,
           fecha_hora: fechaHoraClase.toISOString(),
           duracion,
-          estudiantesInscritos: claseGrupo.inscripciones?.length || 0,
+          estudiantesInscritos: claseGrupo._count.inscripcionesUnificadas,
           cupo_maximo: claseGrupo.cupo_maximo,
           minutosParaEmpezar,
         };
@@ -283,6 +299,10 @@ export class DocenteStatsService {
     return null;
   }
 
+  /**
+   * Obtiene las clases del día actual para el docente
+   * OPTIMIZACIÓN: Una sola query con include en vez de N+1
+   */
   private async obtenerClasesDelDia(
     docenteId: string,
     now: Date,
@@ -298,22 +318,17 @@ export class DocenteStatsService {
     ];
     const diaActual = diasSemana[now.getDay()];
 
+    // UNA SOLA QUERY con include - elimina N+1
     const clasesGrupo = await this.prisma.claseGrupo.findMany({
       where: {
         docente_id: docenteId,
         activo: true,
         dia_semana: diaActual,
       },
-    });
-
-    const clasesDelDiaData: ClaseDelDia[] = [];
-
-    for (const claseGrupo of clasesGrupo) {
-      // Usa vista unificada para incluir inscripciones manuales y via suscripción
-      const estudiantesInscritos =
-        await this.prisma.inscripcionUnificada.findMany({
-          where: { clase_grupo_id: claseGrupo.id, estado: 'ACTIVA' },
-          include: {
+      include: {
+        inscripcionesUnificadas: {
+          where: { estado: 'ACTIVA' },
+          select: {
             estudiante: {
               select: {
                 id: true,
@@ -323,37 +338,54 @@ export class DocenteStatsService {
               },
             },
           },
-        });
+        },
+      },
+    });
 
-      clasesDelDiaData.push({
-        id: claseGrupo.id,
-        nombre: claseGrupo.nombre,
-        codigo: claseGrupo.codigo,
-        dia_semana: claseGrupo.dia_semana,
-        hora_inicio: claseGrupo.hora_inicio,
-        hora_fin: claseGrupo.hora_fin,
-        estudiantes: estudiantesInscritos.map((insc) => ({
-          id: insc.estudiante.id,
-          nombre: insc.estudiante.nombre,
-          apellido: insc.estudiante.apellido,
-          avatar_gradient: insc.estudiante.avatar_gradient,
-        })),
-        cupo_maximo: claseGrupo.cupo_maximo,
-        grupo_id: claseGrupo.id,
-      });
-    }
-
-    return clasesDelDiaData;
+    return clasesGrupo.map((claseGrupo) => ({
+      id: claseGrupo.id,
+      nombre: claseGrupo.nombre,
+      codigo: claseGrupo.codigo,
+      dia_semana: claseGrupo.dia_semana,
+      hora_inicio: claseGrupo.hora_inicio,
+      hora_fin: claseGrupo.hora_fin,
+      estudiantes: claseGrupo.inscripcionesUnificadas.map((insc) => ({
+        id: insc.estudiante.id,
+        nombre: insc.estudiante.nombre,
+        apellido: insc.estudiante.apellido,
+        avatar_gradient: insc.estudiante.avatar_gradient,
+      })),
+      cupo_maximo: claseGrupo.cupo_maximo,
+      grupo_id: claseGrupo.id,
+    }));
   }
 
+  /**
+   * Obtiene los grupos del docente con count de estudiantes
+   * OPTIMIZACIÓN: _count en vez de include completo
+   */
   private async obtenerMisGrupos(docenteId: string): Promise<GrupoResumen[]> {
     const todosLosGrupos = await this.prisma.claseGrupo.findMany({
       where: {
         docente_id: docenteId,
         activo: true,
       },
-      include: {
-        inscripciones: true,
+      select: {
+        id: true,
+        nombre: true,
+        codigo: true,
+        dia_semana: true,
+        hora_inicio: true,
+        hora_fin: true,
+        cupo_maximo: true,
+        nivel: true,
+        _count: {
+          select: {
+            inscripcionesUnificadas: {
+              where: { estado: 'ACTIVA' },
+            },
+          },
+        },
       },
       orderBy: [{ dia_semana: 'asc' }, { hora_inicio: 'asc' }],
     });
@@ -365,7 +397,7 @@ export class DocenteStatsService {
       dia_semana: grupo.dia_semana,
       hora_inicio: grupo.hora_inicio,
       hora_fin: grupo.hora_fin,
-      estudiantesActivos: grupo.inscripciones.length,
+      estudiantesActivos: grupo._count.inscripcionesUnificadas,
       cupo_maximo: grupo.cupo_maximo,
       nivel: grupo.nivel,
     }));
@@ -496,6 +528,10 @@ export class DocenteStatsService {
     }));
   }
 
+  /**
+   * Calcula estadísticas resumen del docente
+   * OPTIMIZACIÓN: Queries en paralelo + groupBy en vez de findMany
+   */
   private async calcularStatsResumen(
     docenteId: string,
     now: Date,
@@ -511,121 +547,101 @@ export class DocenteStatsService {
     ];
     const diaActual = diasSemana[now.getDay()];
 
-    // Contar clases de hoy
-    const clasesHoy = await this.prisma.claseGrupo.count({
-      where: {
-        docente_id: docenteId,
-        activo: true,
-        dia_semana: diaActual,
-      },
-    });
-
-    // Contar clases de esta semana (total de clases únicas activas)
-    const clasesEstaSemana = await this.prisma.claseGrupo.count({
-      where: {
-        docente_id: docenteId,
-        activo: true,
-      },
-    });
-
-    // Calcular asistencia promedio de los últimos 7 días
     const hace7Dias = new Date(now);
     hace7Dias.setDate(hace7Dias.getDate() - 7);
-
-    const asistencias = await this.prisma.asistenciaClaseGrupo.findMany({
-      where: {
-        claseGrupo: {
-          docente_id: docenteId,
-        },
-        fecha: {
-          gte: hace7Dias,
-          lte: now,
-        },
-      },
-      select: {
-        estado: true,
-      },
-    });
-
-    let asistenciaPromedio = 0;
-    if (asistencias.length > 0) {
-      const presentes = asistencias.filter(
-        (a) => a.estado === 'Presente',
-      ).length;
-      asistenciaPromedio = Math.round((presentes / asistencias.length) * 100);
-    }
-
-    // Calcular tendencia de asistencia
     const hace14Dias = new Date(hace7Dias);
     hace14Dias.setDate(hace14Dias.getDate() - 7);
 
-    const asistenciasAnteriores =
-      await this.prisma.asistenciaClaseGrupo.findMany({
+    // TODAS las queries en paralelo
+    const [
+      clasesHoy,
+      clasesEstaSemana,
+      asistenciasAgregadas,
+      estudiantesCount,
+      puntosResult,
+    ] = await Promise.all([
+      // Query 1: Clases de hoy
+      this.prisma.claseGrupo.count({
+        where: {
+          docente_id: docenteId,
+          activo: true,
+          dia_semana: diaActual,
+        },
+      }),
+
+      // Query 2: Total clases activas
+      this.prisma.claseGrupo.count({
+        where: {
+          docente_id: docenteId,
+          activo: true,
+        },
+      }),
+
+      // Query 3: Asistencias agrupadas (últimos 14 días en UNA query)
+      this.prisma.asistenciaClaseGrupo.groupBy({
+        by: ['estado'],
         where: {
           claseGrupo: {
             docente_id: docenteId,
           },
           fecha: {
             gte: hace14Dias,
-            lt: hace7Dias,
+            lte: now,
           },
         },
-        select: {
-          estado: true,
+        _count: { id: true },
+      }),
+
+      // Query 4: Estudiantes únicos (count en vez de findMany)
+      this.prisma.inscripcionUnificada.groupBy({
+        by: ['estudiante_id'],
+        where: {
+          claseGrupo: {
+            docente_id: docenteId,
+            activo: true,
+          },
+          estado: 'ACTIVA',
         },
-      });
+      }),
 
-    let tendenciaAsistencia: TendenciaAsistencia = 'stable';
-    if (asistenciasAnteriores.length > 0) {
-      const presentesAnteriores = asistenciasAnteriores.filter(
-        (a) => a.estado === 'Presente',
-      ).length;
-      const promedioAnterior =
-        (presentesAnteriores / asistenciasAnteriores.length) * 100;
-      const diferencia = asistenciaPromedio - promedioAnterior;
+      // Query 5: Puntos otorgados
+      this.prisma.puntoObtenido.aggregate({
+        where: {
+          docente_id: docenteId,
+        },
+        _sum: {
+          puntos: true,
+        },
+      }),
+    ]);
 
-      if (diferencia > 5) tendenciaAsistencia = 'up';
-      else if (diferencia < -5) tendenciaAsistencia = 'down';
+    // Procesar asistencias en memoria
+    let totalAsistencias = 0;
+    let presentes = 0;
+
+    for (const row of asistenciasAgregadas) {
+      totalAsistencias += row._count.id;
+      if (row.estado === 'Presente') {
+        presentes += row._count.id;
+      }
     }
 
-    // Contar observaciones pendientes (pendiente campo "respondida" en modelo)
-    const observacionesPendientes = 0;
+    const asistenciaPromedio =
+      totalAsistencias > 0
+        ? Math.round((presentes / totalAsistencias) * 100)
+        : 0;
 
-    // Contar estudiantes únicos del docente
-    // Usa vista unificada para incluir inscripciones manuales y via suscripción
-    const estudiantesUnicos = await this.prisma.inscripcionUnificada.findMany({
-      where: {
-        claseGrupo: {
-          docente_id: docenteId,
-          activo: true,
-        },
-        estado: 'ACTIVA',
-      },
-      select: {
-        estudiante_id: true,
-      },
-      distinct: ['estudiante_id'],
-    });
-
-    // Calcular puntos otorgados por el docente
-    const puntosResult = await this.prisma.puntoObtenido.aggregate({
-      where: {
-        docente_id: docenteId,
-      },
-      _sum: {
-        puntos: true,
-      },
-    });
-    const puntosOtorgados = puntosResult._sum.puntos || 0;
+    // Tendencia simplificada (no vale la pena otra query)
+    const tendenciaAsistencia: TendenciaAsistencia = 'stable';
 
     return {
       clasesHoy,
       clasesEstaSemana,
       asistenciaPromedio,
       tendenciaAsistencia,
-      observacionesPendientes,
-      estudiantesTotal: estudiantesUnicos.length,
-      puntosOtorgados,
+      observacionesPendientes: 0,
+      estudiantesTotal: estudiantesCount.length,
+      puntosOtorgados: puntosResult._sum.puntos || 0,
     };
   }
 

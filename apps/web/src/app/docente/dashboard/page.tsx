@@ -1,25 +1,23 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Radio, LogOut, Clock } from 'lucide-react';
+import { Bell, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { docentesApi, ComisionResumen, EstudianteConFalta } from '@/lib/api/docentes.api';
 import { toast } from '@/components/ui/Toast';
 import { LoadingSpinner } from '@/components/ui';
 
-// New Components
+// Components
 import { Sidebar } from '@/components/docente/Sidebar';
 import { LiveClassPage } from '@/components/docente/LiveClassPage';
-import { StudentList } from '@/components/docente/StudentList';
-import { CalendarPage } from '@/components/docente/CalendarPage';
-import { PlanificacionesPage } from '@/components/docente/PlanificacionesPage';
-import { AlertsPage } from '@/components/docente/AlertsPage';
 import { NotificationsDropdown } from '@/components/docente/NotificationsDropdown';
-import { DashboardModal } from '@/components/docente/DashboardModals';
-import { ProximaClaseCard } from '@/components/docente/ProximaClaseCard';
-import { StatsDocente } from '@/components/docente/StatsDocente';
-import { ComisionesGrid } from '@/components/docente/ComisionesGrid';
+
+// New Glassmorphism Views
+import { HoyView } from '@/components/docente/views/HoyView';
+import { GruposView } from '@/components/docente/views/GruposView';
+import { CalendarioView } from '@/components/docente/views/CalendarioView';
+import { AlertsPage } from '@/components/docente/AlertsPage';
 
 // Types
 import { Comision, DashboardStats, Alerta } from '@/types/docente.types';
@@ -34,7 +32,7 @@ export default function DocenteDashboard() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [greeting, setGreeting] = useState<string>('');
-  const [currentView, setCurrentView] = useState<string>('dashboard');
+  const [currentView, setCurrentView] = useState<string>('hoy');
   const [currentDateStr, setCurrentDateStr] = useState<string>('');
   const [currentTime, setCurrentTime] = useState<string>(() => {
     if (typeof window !== 'undefined') {
@@ -47,9 +45,6 @@ export default function DocenteDashboard() {
   // Navigation State
   const [selectedComisionId, setSelectedComisionId] = useState<string | null>(null);
   const [liveComisionId, setLiveComisionId] = useState<string | null>(null);
-
-  // Dashboard Interaction State
-  const [selectedStat, setSelectedStat] = useState<string | null>(null);
 
   // Data from API
   const [comisiones, setComisiones] = useState<Comision[]>([]);
@@ -152,15 +147,15 @@ export default function DocenteDashboard() {
   // Handler for navigation
   const handleNavigate = (view: string) => {
     setCurrentView(view);
-    // Reset selected commission if navigating away from commissions tab
-    if (view !== 'comisiones') {
+    // Reset selected commission if navigating away from grupos tab
+    if (view !== 'grupos') {
       setSelectedComisionId(null);
     }
   };
 
   const handleSelectComision = (id: string) => {
     setSelectedComisionId(id);
-    setCurrentView('comisiones');
+    setCurrentView('grupos');
   };
 
   const handleStartLiveClass = (comisionId: string) => {
@@ -195,7 +190,7 @@ export default function DocenteDashboard() {
       >
         <div
           className="flex items-center gap-4 cursor-pointer"
-          onClick={() => handleNavigate('dashboard')}
+          onClick={() => handleNavigate('hoy')}
         >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
             <span className="font-bold text-white text-xl">M</span>
@@ -231,37 +226,9 @@ export default function DocenteDashboard() {
             <NotificationsDropdown
               alertas={alertas}
               onClose={() => setShowNotifications(false)}
-              onViewAll={() => handleNavigate('alerts')}
+              onViewAll={() => setShowNotifications(false)}
             />
           )}
-
-          <div className="h-10 w-[1px] bg-slate-800 mx-1"></div>
-
-          <div
-            className={`flex items-center gap-3 bg-indigo-950/30 border pl-1.5 pr-5 py-1.5 rounded-full cursor-pointer transition-all group ${
-              currentView === 'live'
-                ? 'border-indigo-500 bg-indigo-900/50'
-                : 'border-indigo-500/20 hover:bg-indigo-900/40'
-            }`}
-            onClick={() => handleNavigate('live')}
-          >
-            <div className="relative">
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center shadow-inner ${currentView === 'live' ? 'bg-red-600' : 'bg-indigo-600'}`}
-              >
-                <Radio size={18} className="text-white animate-pulse" />
-              </div>
-              <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#020617] rounded-full"></span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-white leading-none mb-0.5 group-hover:text-indigo-300 transition-colors">
-                Clases en Vivo
-              </span>
-              <span className="text-xs text-indigo-300/70 font-medium">Transmitiendo ahora</span>
-            </div>
-          </div>
-
-          <div className="h-10 w-[1px] bg-slate-800 mx-1"></div>
 
           {/* Botón Cerrar Sesión */}
           <button
@@ -279,95 +246,40 @@ export default function DocenteDashboard() {
       <Sidebar currentView={currentView} onNavigate={handleNavigate} />
 
       {/* 3. Main Content */}
-      <main className="flex-1 min-h-0 p-6 lg:p-8 overflow-hidden w-full flex flex-col gap-6 relative">
-        {currentView === 'dashboard' ? (
-          <>
-            {/* Top Section: Greeting & Quick Stats */}
-            <div className="shrink-0 flex flex-col gap-4">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
-                <div>
-                  <h2 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">
-                    {greeting}, {user?.nombre || 'Docente'}
-                  </h2>
-                  <p className="text-base text-slate-400 capitalize mt-1">{currentDateStr}</p>
-                </div>
-              </div>
-              {stats && <StatsDocente stats={stats} onStatClick={setSelectedStat} />}
-            </div>
-
-            {/* Dashboard Grid - usa grid-rows para altura fija */}
-            <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 grid-rows-1 gap-8">
-              {/* Left Column (Next Class) - 8/12 */}
-              <div className="lg:col-span-8 h-full min-h-0 overflow-hidden">
-                {comisiones.length > 0 ? (
-                  <ProximaClaseCard
-                    comision={comisiones[0] ?? null}
-                    onStartLiveClass={handleStartLiveClass}
-                  />
-                ) : (
-                  <div className="h-full flex items-center justify-center bg-slate-900/40 border border-slate-800 rounded-2xl">
-                    <p className="text-slate-500">No hay comisiones asignadas</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Column (My Commissions Grid) - 4/12 */}
-              <div className="lg:col-span-4 h-full min-h-0 overflow-hidden">
-                <ComisionesGrid comisiones={comisiones} onSelect={handleSelectComision} />
-              </div>
-            </div>
-
-            {/* Interactive Modals Layer */}
-            <DashboardModal type={selectedStat} onClose={() => setSelectedStat(null)} />
-          </>
+      <main className="flex-1 min-h-0 p-6 lg:p-8 overflow-hidden w-full relative">
+        {currentView === 'hoy' ? (
+          <HoyView
+            greeting={greeting}
+            userName={user?.nombre || 'Docente'}
+            currentDateStr={currentDateStr}
+            stats={stats}
+            comisiones={comisiones}
+            alertas={alertas}
+            onStartLiveClass={handleStartLiveClass}
+            onSelectComision={handleSelectComision}
+          />
+        ) : currentView === 'grupos' ? (
+          <GruposView
+            comisiones={comisiones}
+            selectedComisionId={selectedComisionId}
+            onSelectComision={setSelectedComisionId}
+            onStartLiveClass={handleStartLiveClass}
+          />
+        ) : currentView === 'calendario' ? (
+          <CalendarioView />
         ) : currentView === 'live' ? (
           <LiveClassPage comisionId={liveComisionId ?? undefined} />
-        ) : currentView === 'alerts' ? (
-          <AlertsPage />
-        ) : currentView === 'comisiones' ? (
-          selectedComisionId ? (
-            <StudentList
-              comisionId={selectedComisionId}
-              onBack={() => setSelectedComisionId(null)}
-              onStartLiveClass={handleStartLiveClass}
-            />
-          ) : (
-            <div className="flex flex-col h-full gap-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-white">Selecciona una Comision</h2>
-                <div className="text-sm text-slate-400">
-                  Mostrando {comisiones.length} cursos activos
-                </div>
-              </div>
-              <div className="flex-1 overflow-y-auto no-scrollbar">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {comisiones.map((c) => (
-                    <div
-                      key={c.id}
-                      onClick={() => handleSelectComision(c.id)}
-                      className="cursor-pointer h-full"
-                    >
-                      <ComisionesGrid comisiones={[c]} onSelect={handleSelectComision} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )
-        ) : currentView === 'calendar' ? (
-          <CalendarPage />
-        ) : currentView === 'plannings' ? (
-          <PlanificacionesPage />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500">
-            <p>Seccion en construccion</p>
-            <button
-              onClick={() => handleNavigate('dashboard')}
-              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm"
-            >
-              Volver
-            </button>
-          </div>
+          <HoyView
+            greeting={greeting}
+            userName={user?.nombre || 'Docente'}
+            currentDateStr={currentDateStr}
+            stats={stats}
+            comisiones={comisiones}
+            alertas={alertas}
+            onStartLiveClass={handleStartLiveClass}
+            onSelectComision={handleSelectComision}
+          />
         )}
       </main>
     </div>

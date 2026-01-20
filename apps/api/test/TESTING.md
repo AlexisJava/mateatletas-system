@@ -41,6 +41,83 @@ Incluso leyendo el código primero, estos tests son "universales" y valiosos:
 - **Idempotencia**: Operaciones repetidas no rompen nada
 - **Edge cases**: Datos vacíos, nulos, duplicados, estudiantes dados de baja, etc.
 
+---
+
+## ⛔ REGLA CRÍTICA: Qué Hacer Cuando un Test Falla
+
+> **ESTA ES LA REGLA MÁS IMPORTANTE DE ESTE DOCUMENTO. LEER SIEMPRE.**
+
+**PROHIBIDO ABSOLUTO:** Modificar el test para que pase sin antes diagnosticar la causa raíz.
+
+### Protocolo Obligatorio (Sin Excepciones)
+
+Cuando un test falla, Claude Code **DEBE**:
+
+1. **FRENAR** - No tocar nada de código ni tests
+2. **REPORTAR** - Decir exactamente:
+   - Qué test falló
+   - Qué se esperaba vs qué se recibió
+   - El error completo
+3. **DIAGNOSTICAR** - Investigar si el problema es:
+   - **A) Bug en el código** → Arreglar el CÓDIGO, no el test
+   - **B) Test incorrecto** → Explicar POR QUÉ el test está mal (con justificación de negocio)
+   - **C) Requisito ambiguo** → Preguntar al usuario qué comportamiento espera
+4. **PREGUNTAR** antes de actuar:
+   > "El test X falló porque esperaba Y pero recibió Z.
+   > Esto puede ser:
+   >
+   > - Un bug en el código (arreglo el código)
+   > - El test tiene una expectativa incorrecta (arreglo el test)
+   >   ¿Cuál es el comportamiento correcto según el negocio?"
+
+### 🚫 Señales de que Claude está siendo CÓMPLICE (PROHIBIDO)
+
+Estas acciones están **TERMINANTEMENTE PROHIBIDAS** sin autorización explícita del usuario:
+
+- ❌ Cambiar `expect(200)` a `expect(404)` sin explicar por qué
+- ❌ Agregar `.optional()` a un campo porque el código no lo retorna
+- ❌ Modificar el assertion para que "coincida con la implementación actual"
+- ❌ Decir "ajusté el test para que refleje el comportamiento actual"
+- ❌ Cambiar el valor esperado en el test para que coincida con lo que retorna el código
+- ❌ Eliminar assertions que fallan
+- ❌ Comentar tests que no pasan
+- ❌ Agregar `skip` o `todo` a tests sin explicar y pedir permiso
+
+### ✅ Señales de que Claude está siendo JUEZ (CORRECTO)
+
+- ✅ "El test espera X, el código retorna Y. El código tiene un bug, voy a arreglarlo."
+- ✅ "¿El endpoint debería retornar 200 o 404 en este caso? Necesito saber el requisito."
+- ✅ "El test está mal porque asume Z, pero según [documento/requisito] debería ser W. ¿Confirmo?"
+- ✅ "Encontré que el código no cumple el contrato esperado. Arreglo el service, no el test."
+- ✅ Reportar el fallo ANTES de intentar arreglarlo
+
+### Ejemplo de Diagnóstico Correcto
+
+```
+❌ MAL (Cómplice):
+"El test esperaba { success: true } pero recibió { ok: true }.
+Voy a cambiar el test para que espere { ok: true }."
+
+✅ BIEN (Juez):
+"El test esperaba { success: true } pero recibió { ok: true }.
+Esto indica que:
+- O el código está retornando un formato incorrecto (debería ser success)
+- O el test tiene la expectativa equivocada (debería ser ok)
+
+¿Cuál es el contrato correcto de este endpoint según la documentación/requisitos?
+Necesito saberlo antes de hacer cualquier cambio."
+```
+
+### Consecuencia de Violar Esta Regla
+
+Si Claude modifica un test para que pase sin diagnosticar primero, el usuario tiene derecho a:
+
+1. Revertir todos los cambios
+2. Exigir que se siga el protocolo correctamente
+3. Considerar el trabajo como NO TERMINADO
+
+---
+
 ## Técnicas Black Box Testing
 
 Todos los tests de integración DEBEN aplicar estas técnicas formales de testing.

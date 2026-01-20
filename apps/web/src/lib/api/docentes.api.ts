@@ -339,6 +339,28 @@ export interface HistorialAsistenciaResponse {
   fechas: AsistenciaFecha[];
 }
 
+/**
+ * Punto otorgado en una comisión
+ */
+export interface PuntoOtorgado {
+  id: string;
+  estudiante_id: string;
+  estudiante_nombre: string;
+  tipo_accion: string;
+  puntos: number;
+  contexto: string | null;
+  fecha_otorgado: string;
+}
+
+/**
+ * Respuesta del historial de puntos de una comisión
+ */
+export interface HistorialPuntosComisionResponse {
+  puntos: PuntoOtorgado[];
+  totalPuntos: number;
+  totalRegistros: number;
+}
+
 // ============================================================================
 // NOTIFICACIONES DOCENTE - Endpoints para gestión de notificaciones
 // ============================================================================
@@ -709,6 +731,31 @@ export const docentesApi = {
       return await apiClient.get<HistorialAsistenciaResponse>(url);
     } catch (error) {
       console.error('Error al obtener historial de asistencia:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener historial de puntos otorgados en una comisión
+   * @param comisionId - ID de la comisión
+   * @param desde - Fecha desde (opcional, formato YYYY-MM-DD)
+   * @param hasta - Fecha hasta (opcional, formato YYYY-MM-DD)
+   * @returns Historial de puntos con total
+   */
+  getHistorialPuntosComision: async (
+    comisionId: string,
+    desde?: string,
+    hasta?: string,
+  ): Promise<HistorialPuntosComisionResponse> => {
+    try {
+      const params = new URLSearchParams();
+      if (desde) params.append('desde', desde);
+      if (hasta) params.append('hasta', hasta);
+      const queryString = params.toString();
+      const url = `/docentes/me/comisiones/${comisionId}/historial-puntos${queryString ? `?${queryString}` : ''}`;
+      return await apiClient.get<HistorialPuntosComisionResponse>(url);
+    } catch (error) {
+      console.error('Error al obtener historial de puntos:', error);
       throw error;
     }
   },

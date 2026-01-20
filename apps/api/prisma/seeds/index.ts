@@ -14,6 +14,7 @@ import { seedConfiguracionPrecios } from './configuracion-precios.seed';
 import { seedInscripcionesMensuales } from './inscripciones-mensuales.seed';
 import { seedTutorFamilia } from './tutor-familia.seed';
 import { seedSuscripcionesFamiliares } from './suscripciones-familiares.seed';
+import { seedPuntosPrueba } from './puntos-prueba.seed';
 
 /**
  * Orchestrator para todos los seeds modulares
@@ -53,6 +54,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedInscripcionesMensuales(prisma); // Inscripciones de prueba para el tutor
     await seedTutorFamilia(prisma); // Tutor con 6 hijos - edge cases completos
     await seedSuscripcionesFamiliares(prisma); // Suscripciones familiares 2026 - edge cases
+    await seedPuntosPrueba(prisma); // Puntos de prueba para Portal Docente
   }
 
   console.log(`\n🎉 Seed completado exitosamente (${env})!`);
@@ -75,4 +77,5 @@ export {
   seedInscripcionesMensuales,
   seedTutorFamilia,
   seedSuscripcionesFamiliares,
+  seedPuntosPrueba,
 };

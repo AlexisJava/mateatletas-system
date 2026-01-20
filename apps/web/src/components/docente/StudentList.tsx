@@ -30,6 +30,7 @@ import {
   docentesApi,
   EstudianteComision,
   HistorialAsistenciaResponse,
+  HistorialPuntosComisionResponse,
   asistenciaApi,
   EstadoAsistencia,
 } from '@/lib/api/docentes.api';
@@ -93,7 +94,7 @@ export const StudentList: React.FC<StudentListProps> = ({
   onStartLiveClass,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'students' | 'attendance' | 'observations' | 'metrics'
+    'students' | 'attendance' | 'observations' | 'metrics' | 'puntos'
   >('students');
 
   // API Data States
@@ -148,6 +149,12 @@ export const StudentList: React.FC<StudentListProps> = ({
   const [isSavingAttendance, setIsSavingAttendance] = useState(false);
   const [attendanceDate, setAttendanceDate] = useState<string>(getLocalDateString());
   const [attendanceMode, setAttendanceMode] = useState<'take' | 'history'>('take');
+
+  // Puntos Tab States (historial de XP)
+  const [historialPuntos, setHistorialPuntos] = useState<HistorialPuntosComisionResponse | null>(
+    null,
+  );
+  const [isLoadingPuntos, setIsLoadingPuntos] = useState(false);
 
   // Cargar datos de la comisión y estudiantes
   useEffect(() => {
@@ -244,6 +251,24 @@ export const StudentList: React.FC<StudentListProps> = ({
       fetchObservaciones();
     }
   }, [activeTab, comisionId, observacionesLoaded]);
+
+  // Cargar historial de puntos cuando se abre el tab
+  useEffect(() => {
+    if (activeTab === 'puntos' && !historialPuntos) {
+      const fetchPuntos = async () => {
+        setIsLoadingPuntos(true);
+        try {
+          const res = await docentesApi.getHistorialPuntosComision(comisionId);
+          setHistorialPuntos(res);
+        } catch (err) {
+          console.error('Error al cargar historial de puntos:', err);
+        } finally {
+          setIsLoadingPuntos(false);
+        }
+      };
+      fetchPuntos();
+    }
+  }, [activeTab, comisionId, historialPuntos]);
 
   // Abrir modal de puntos - cargar acciones del backend
   const openPuntosModal = async (student: EstudianteComision) => {
@@ -539,6 +564,129 @@ export const StudentList: React.FC<StudentListProps> = ({
                   </span>
                 </div>
               ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render del tab de Puntos (historial de XP)
+  const renderPuntosTab = () => {
+    if (isLoadingPuntos) {
+      return (
+        <div className="h-full flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+        </div>
+      );
+    }
+
+    if (!historialPuntos || historialPuntos.puntos.length === 0) {
+      return (
+        <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-4">
+          <Trophy size={48} className="opacity-20" />
+          <p>No hay puntos otorgados aún</p>
+        </div>
+      );
+    }
+
+    // Agrupar puntos por tipo de acción para el mini gráfico
+    const puntosPorTipo = historialPuntos.puntos.reduce(
+      (acc, p) => {
+        acc[p.tipo_accion] = (acc[p.tipo_accion] || 0) + p.puntos;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+    const tiposOrdenados = Object.entries(puntosPorTipo).sort((a, b) => b[1] - a[1]);
+    const maxPuntosTipo = Math.max(...Object.values(puntosPorTipo));
+
+    return (
+      <div className="p-6 space-y-6">
+        {/* Stats cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-slate-900/50 border border-amber-500/20 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Zap size={18} className="text-amber-400" />
+              <span className="text-xs font-semibold text-slate-400 uppercase">Total XP</span>
+            </div>
+            <span className="text-3xl font-bold text-amber-400">
+              {historialPuntos.totalPuntos.toLocaleString()}
+            </span>
+          </div>
+          <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Award size={18} className="text-purple-400" />
+              <span className="text-xs font-semibold text-slate-400 uppercase">Acciones</span>
+            </div>
+            <span className="text-3xl font-bold text-white">{historialPuntos.totalRegistros}</span>
+          </div>
+        </div>
+
+        {/* Mini gráfico de barras por tipo */}
+        <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-4">
+          <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+            <TrendingUp size={16} className="text-cyan-400" />
+            XP por Tipo de Acción
+          </h3>
+          <div className="space-y-3">
+            {tiposOrdenados.map(([tipo, puntos]) => {
+              const porcentaje = (puntos / maxPuntosTipo) * 100;
+              const emoji = ACCION_EMOJIS[tipo] || '⭐';
+              return (
+                <div key={tipo} className="flex items-center gap-3">
+                  <span className="text-lg">{emoji}</span>
+                  <span className="text-xs text-slate-400 w-28 truncate">{tipo}</span>
+                  <div className="flex-1 h-6 bg-slate-800 rounded-lg overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-500/80 to-amber-400 rounded-lg transition-all duration-500"
+                      style={{ width: `${porcentaje}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-bold text-amber-400 w-16 text-right">
+                    {puntos} XP
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Historial de puntos recientes */}
+        <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-4">
+          <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+            <Clock size={16} className="text-slate-400" />
+            Últimos Puntos Otorgados
+          </h3>
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {historialPuntos.puntos.slice(0, 20).map((punto) => {
+              const fecha = new Date(punto.fecha_otorgado);
+              const emoji = ACCION_EMOJIS[punto.tipo_accion] || '⭐';
+              return (
+                <div
+                  key={punto.id}
+                  className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-800/50"
+                >
+                  <span className="text-xl">{emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-white truncate">
+                        {punto.estudiante_nombre}
+                      </span>
+                      <span className="text-xs text-slate-500">{punto.tipo_accion}</span>
+                    </div>
+                    {punto.contexto && (
+                      <p className="text-xs text-slate-500 truncate">{punto.contexto}</p>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-bold text-amber-400">+{punto.puntos} XP</span>
+                    <p className="text-xs text-slate-500">
+                      {fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -1017,6 +1165,7 @@ export const StudentList: React.FC<StudentListProps> = ({
             { id: 'students', label: 'Estudiantes', icon: Users },
             { id: 'attendance', label: 'Asistencia', icon: Calendar },
             { id: 'observations', label: 'Observaciones', icon: MessageSquare },
+            { id: 'puntos', label: 'Puntos', icon: Zap },
             { id: 'metrics', label: 'Métricas', icon: TrendingUp },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -1173,6 +1322,8 @@ export const StudentList: React.FC<StudentListProps> = ({
         )}
 
         {activeTab === 'attendance' && renderAttendanceTab()}
+
+        {activeTab === 'puntos' && renderPuntosTab()}
 
         {activeTab === 'metrics' && renderMetricsTab()}
 

@@ -6,6 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { TokenBlacklistService } from '../token-blacklist.service';
 
@@ -47,6 +48,7 @@ export class TokenBlacklistGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private tokenBlacklistService: TokenBlacklistService,
+    private jwtService: JwtService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -90,8 +92,28 @@ export class TokenBlacklistGuard implements CanActivate {
     const user = (request as Request & { user?: { id: string } }).user;
 
     if (user && user.id) {
+      // Extraer el timestamp 'iat' (issued at) del token para comparar
+      // con el timestamp del blacklist masivo
+      let tokenIssuedAt: number | undefined;
+      try {
+        const decoded: unknown = this.jwtService.decode(token);
+        if (
+          decoded &&
+          typeof decoded === 'object' &&
+          'iat' in decoded &&
+          typeof (decoded as { iat: unknown }).iat === 'number'
+        ) {
+          tokenIssuedAt = (decoded as { iat: number }).iat;
+        }
+      } catch {
+        // Si no se puede decodificar, continuar sin iat
+      }
+
       const isUserBlacklisted =
-        await this.tokenBlacklistService.isUserBlacklisted(user.id);
+        await this.tokenBlacklistService.isUserBlacklisted(
+          user.id,
+          tokenIssuedAt,
+        );
 
       if (isUserBlacklisted) {
         this.logger.warn(

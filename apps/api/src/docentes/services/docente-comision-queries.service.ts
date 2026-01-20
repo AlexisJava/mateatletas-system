@@ -107,6 +107,22 @@ export interface HistorialAsistenciaResponse {
   fechas: AsistenciaFechaResponse[];
 }
 
+export interface PuntoOtorgadoResponse {
+  id: string;
+  estudiante_id: string;
+  estudiante_nombre: string;
+  tipo_accion: string;
+  puntos: number;
+  contexto: string | null;
+  fecha_otorgado: Date;
+}
+
+export interface HistorialPuntosComisionResponse {
+  puntos: PuntoOtorgadoResponse[];
+  totalPuntos: number;
+  totalRegistros: number;
+}
+
 @Injectable()
 export class DocenteComisionQueriesService {
   constructor(
@@ -344,6 +360,95 @@ export class DocenteComisionQueriesService {
 
     return {
       fechas: Array.from(fechasMap.values()),
+    };
+  }
+
+  /**
+   * Obtiene historial de puntos otorgados en una comisión
+   * @param comisionId - ID de la comisión
+   * @param docenteId - ID del docente (para verificar ownership)
+   * @param desde - Fecha desde (opcional)
+   * @param hasta - Fecha hasta (opcional)
+   * @returns Historial de puntos con total
+   */
+  async getHistorialPuntosComision(
+    comisionId: string,
+    docenteId: string,
+    desde?: Date,
+    hasta?: Date,
+  ): Promise<HistorialPuntosComisionResponse> {
+    // Verificar que el docente existe
+    await this.validator.validarDocenteExiste(docenteId);
+
+    // Verificar ownership
+    await this.verificarOwnershipComision(comisionId, docenteId);
+
+    // Obtener IDs de estudiantes de esta comisión (de ambas fuentes)
+    const [inscripcionesManuales, inscripcionesSuscripcion] = await Promise.all(
+      [
+        this.prisma.inscripcionComision.findMany({
+          where: { comision_id: comisionId, estado: { not: 'Cancelada' } },
+          select: { estudiante_id: true },
+        }),
+        this.prisma.inscripcionActividad.findMany({
+          where: { comision_id: comisionId, estado: 'ACTIVA' },
+          select: { estudiante_id: true },
+        }),
+      ],
+    );
+
+    const estudianteIds = [
+      ...new Set([
+        ...inscripcionesManuales.map((i) => i.estudiante_id),
+        ...inscripcionesSuscripcion.map((i) => i.estudiante_id),
+      ]),
+    ];
+
+    if (estudianteIds.length === 0) {
+      return { puntos: [], totalPuntos: 0, totalRegistros: 0 };
+    }
+
+    // Construir filtro de fechas
+    const whereClause: {
+      estudiante_id: { in: string[] };
+      fecha_otorgado?: { gte?: Date; lte?: Date };
+    } = {
+      estudiante_id: { in: estudianteIds },
+    };
+
+    if (desde || hasta) {
+      whereClause.fecha_otorgado = {};
+      if (desde) whereClause.fecha_otorgado.gte = desde;
+      if (hasta) whereClause.fecha_otorgado.lte = hasta;
+    }
+
+    // Obtener puntos otorgados
+    const puntosOtorgados = await this.prisma.puntoObtenido.findMany({
+      where: whereClause,
+      include: {
+        estudiante: {
+          select: { id: true, nombre: true, apellido: true },
+        },
+      },
+      orderBy: { fecha_otorgado: 'desc' },
+      take: 100, // Limitar a los últimos 100 registros
+    });
+
+    // Calcular total de puntos
+    const totalPuntos = puntosOtorgados.reduce((sum, p) => sum + p.puntos, 0);
+
+    return {
+      puntos: puntosOtorgados.map((p) => ({
+        id: p.id,
+        estudiante_id: p.estudiante.id,
+        estudiante_nombre: `${p.estudiante.nombre} ${p.estudiante.apellido}`,
+        tipo_accion: p.tipo_accion,
+        puntos: p.puntos,
+        contexto: p.contexto,
+        fecha_otorgado: p.fecha_otorgado,
+      })),
+      totalPuntos,
+      totalRegistros: puntosOtorgados.length,
     };
   }
 

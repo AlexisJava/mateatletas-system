@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  LayoutDashboard,
-  Calendar,
-  BellRing,
-  ClipboardList,
-  LayoutGrid,
-  Radio,
-} from 'lucide-react';
+import { Sun, Users, Calendar } from 'lucide-react';
 
 interface SidebarProps {
   currentView: string;
@@ -15,12 +8,9 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate }) => {
   const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { id: 'live', icon: Radio, label: 'En Vivo' },
-    { id: 'alerts', icon: BellRing, label: 'Alertas' },
-    { id: 'comisiones', icon: LayoutGrid, label: 'Comisiones' },
-    { id: 'calendar', icon: Calendar, label: 'Calendario' },
-    { id: 'plannings', icon: ClipboardList, label: 'Planificaciones' },
+    { id: 'hoy', icon: Sun, label: 'Hoy' },
+    { id: 'grupos', icon: Users, label: 'Mis Grupos' },
+    { id: 'calendario', icon: Calendar, label: 'Calendario' },
   ];
 
   return (
@@ -41,17 +31,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate }) => 
               className={`${currentView === item.id ? 'text-white' : 'text-slate-500'}`}
             />
             <span>{item.label}</span>
-            {item.id === 'live' && (
-              <span className="flex h-2 w-2 relative ml-1">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-              </span>
-            )}
-            {item.id === 'alerts' && (
-              <span className="bg-amber-500 text-slate-950 text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                3
-              </span>
-            )}
           </button>
         ))}
       </nav>

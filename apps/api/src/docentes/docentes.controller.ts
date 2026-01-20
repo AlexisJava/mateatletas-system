@@ -272,6 +272,32 @@ export class DocentesController {
     );
   }
 
+  /**
+   * GET /docentes/me/comisiones/:id/historial-puntos - Historial de puntos otorgados
+   * @param id - ID de la comisión
+   * @param user - Usuario autenticado (del JWT)
+   * @param desde - Fecha desde (YYYY-MM-DD), opcional
+   * @param hasta - Fecha hasta (YYYY-MM-DD), opcional
+   * @returns Historial de puntos con total
+   */
+  @Get('me/comisiones/:id/historial-puntos')
+  @Roles(Role.DOCENTE)
+  async getHistorialPuntosComision(
+    @Param('id', ParseIdPipe) id: string,
+    @GetUser() user: AuthUser,
+    @Query('desde') desde?: string,
+    @Query('hasta') hasta?: string,
+  ) {
+    const desdeDate = desde ? new Date(desde) : undefined;
+    const hastaDate = hasta ? new Date(hasta) : undefined;
+    return this.docentesService.getHistorialPuntosComision(
+      id,
+      user.id,
+      desdeDate,
+      hastaDate,
+    );
+  }
+
   // ============================================================================
   // PLANIFICACIONES - Endpoints para gestión de planificaciones docente
   // ============================================================================
