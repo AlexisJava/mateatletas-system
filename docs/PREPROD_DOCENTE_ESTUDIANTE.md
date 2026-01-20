@@ -735,6 +735,260 @@ export class GamificacionLiveService {
 
 ---
 
+### Sprint 4: Contenido Sincronizado y Analytics
+
+#### 4.1 Compartir Teoría (Contenido Sincronizado)
+
+| Campo           | Valor                    |
+| --------------- | ------------------------ |
+| **Prioridad**   | P0 CRÍTICO               |
+| **Complejidad** | 🔴 DIFÍCIL               |
+| **Archivos**    | `teoria-sync.service.ts` |
+
+**Propósito:** Docente comparte contenido teórico y todos ven lo mismo en tiempo real
+
+**Eventos**:
+
+| Evento                | Dirección      | Payload                                | Roles     |
+| --------------------- | -------------- | -------------------------------------- | --------- |
+| `compartir-teoria`    | Client→Server  | `{ salaId, contenidoId, titulo }`      | DOCENTE   |
+| `teoria-compartida`   | Server→Clients | `{ contenidoId, titulo, tipo, datos }` | Broadcast |
+| `cambiar-slide`       | Client→Server  | `{ salaId, slideIndex }`               | DOCENTE   |
+| `slide-cambiado`      | Server→Clients | `{ slideIndex }`                       | Broadcast |
+| `scroll-teoria`       | Client→Server  | `{ salaId, scrollPosition }`           | DOCENTE   |
+| `scroll-sincronizado` | Server→Clients | `{ scrollPosition }`                   | Broadcast |
+| `cerrar-teoria`       | Client→Server  | `{ salaId }`                           | DOCENTE   |
+| `teoria-cerrada`      | Server→Clients | `{}`                                   | Broadcast |
+
+**Tipos de contenido teórico**:
+
+```typescript
+type TipoTeoria = 'slides' | 'video' | 'documento' | 'interactivo' | 'pizarra';
+
+interface ContenidoTeoria {
+  id: string;
+  tipo: TipoTeoria;
+  titulo: string;
+  datos: SlideData[] | VideoData | DocumentoData | InteractivoData | PizarraData;
+}
+
+interface SlideData {
+  index: number;
+  contenido: string; // markdown o HTML
+  imagenUrl?: string;
+  notas?: string; // solo visible para docente
+}
+
+interface VideoData {
+  url: string;
+  duracionSeg: number;
+  timestampActual?: number;
+}
+```
+
+**Reglas de negocio**:
+
+- Solo un contenido teórico activo a la vez
+- Scroll/slide sincronizado opcional (docente puede activar/desactivar)
+- Estudiantes pueden tener "vista libre" si docente lo permite
+- El contenido se carga desde el sistema de planificaciones
+
+**Checklist TDD**:
+
+- [ ] Test: compartir teoría inicia sincronización
+- [ ] Test: cambio de slide se broadcast
+- [ ] Test: scroll se sincroniza con throttle
+- [ ] Test: cerrar teoría limpia estado
+- [ ] Implementar `TeoriaSyncService`
+- [ ] Implementar handlers en gateway
+
+---
+
+#### 4.2 Práctica en Vivo (Ejercicios Sincronizados)
+
+| Campo           | Valor                      |
+| --------------- | -------------------------- |
+| **Prioridad**   | P0 CRÍTICO                 |
+| **Complejidad** | 🔴 MUY DIFÍCIL             |
+| **Archivos**    | `practica-live.service.ts` |
+
+**Propósito:** Docente habilita ejercicios y ve progreso en tiempo real
+
+**Eventos**:
+
+| Evento                   | Dirección      | Payload                                                 | Roles              |
+| ------------------------ | -------------- | ------------------------------------------------------- | ------------------ |
+| `habilitar-practica`     | Client→Server  | `{ salaId, practicaId, tiempoLimiteSeg? }`              | DOCENTE            |
+| `practica-habilitada`    | Server→Clients | `{ practicaId, titulo, preguntas[], tiempoLimiteSeg? }` | Broadcast          |
+| `responder-pregunta`     | Client→Server  | `{ salaId, practicaId, preguntaIndex, respuesta }`      | ESTUDIANTE         |
+| `respuesta-registrada`   | Server→Client  | `{ correcta, feedback?, puntosGanados }`                | Solo al estudiante |
+| `progreso-estudiante`    | Server→Client  | `{ odooId, preguntaActual, correctas, tiempo }`         | Solo DOCENTE       |
+| `estudiante-completo`    | Server→Client  | `{ odooId, nombre, puntaje, tiempo, ranking }`          | Solo DOCENTE       |
+| `pausar-practica`        | Client→Server  | `{ salaId, practicaId }`                                | DOCENTE            |
+| `practica-pausada`       | Server→Clients | `{ tiempoRestante }`                                    | Broadcast          |
+| `reanudar-practica`      | Client→Server  | `{ salaId, practicaId }`                                | DOCENTE            |
+| `practica-reanudada`     | Server→Clients | `{}`                                                    | Broadcast          |
+| `cerrar-practica`        | Client→Server  | `{ salaId, practicaId, mostrarResultados }`             | DOCENTE            |
+| `practica-cerrada`       | Server→Clients | `{ resultadosGrupo?: ResultadoGrupo }`                  | Broadcast          |
+| `ver-detalle-estudiante` | Client→Server  | `{ salaId, odooIdEstudiante, practicaId }`              | DOCENTE            |
+| `detalle-estudiante`     | Server→Client  | `{ respuestas[], tiempos[], intentos[] }`               | Solo DOCENTE       |
+
+**Estructura de práctica**:
+
+```typescript
+interface Practica {
+  id: string;
+  titulo: string;
+  preguntas: Pregunta[];
+  tiempoLimiteSeg?: number; // null = sin límite
+  mostrarFeedbackInmediato: boolean;
+  permitirReintentos: boolean;
+  maxReintentos?: number;
+}
+
+interface Pregunta {
+  index: number;
+  tipo: 'opcion-multiple' | 'verdadero-falso' | 'respuesta-corta' | 'ordenar' | 'completar';
+  enunciado: string;
+  opciones?: string[];
+  respuestaCorrecta: string | string[];
+  puntaje: number;
+  pista?: string;
+}
+
+interface RespuestaEstudiante {
+  odooId: string;
+  practicaId: string;
+  preguntaIndex: number;
+  respuesta: string | string[];
+  correcta: boolean;
+  tiempoSeg: number;
+  intentos: number;
+  timestamp: Date;
+}
+
+interface ResultadoGrupo {
+  promedioCorrectas: number;
+  tiempoPromedio: number;
+  preguntaMasFallada: number;
+  ranking: { odooId: string; nombre: string; puntaje: number; tiempo: number }[];
+}
+```
+
+**Vista docente en tiempo real (Dashboard de práctica)**:
+
+```typescript
+interface DashboardPractica {
+  practicaId: string;
+  estudiantesTotal: number;
+  estudiantesActivos: number;
+  completaron: number;
+  progreso: {
+    odooId: string;
+    nombre: string;
+    estado: 'resolviendo' | 'completado' | 'trabado' | 'inactivo';
+    preguntaActual: number;
+    correctas: number;
+    tiempoTranscurrido: number;
+    ultimaActividad: Date;
+  }[];
+}
+```
+
+**Reglas de negocio**:
+
+- Solo una práctica activa a la vez por sala
+- El docente ve progreso en tiempo real de TODOS los estudiantes
+- Feedback inmediato configurable
+- Reintentos configurables por práctica
+- Las prácticas vienen del sistema de planificaciones
+
+**Checklist TDD**:
+
+- [ ] Test: habilitar práctica crea sesión
+- [ ] Test: respuesta se registra y evalúa
+- [ ] Test: progreso se envía solo al docente
+- [ ] Test: pausar/reanudar funciona con timer
+- [ ] Test: cerrar práctica calcula resultados
+- [ ] Test: detalle estudiante muestra historial
+- [ ] Implementar `PracticaLiveService`
+- [ ] Implementar handlers en gateway
+
+---
+
+#### 4.3 Analytics en Vivo
+
+| Campo           | Valor                       |
+| --------------- | --------------------------- |
+| **Prioridad**   | P1 ALTO                     |
+| **Complejidad** | 🟡 MEDIO                    |
+| **Archivos**    | `analytics-live.service.ts` |
+
+**Propósito:** Docente ve métricas de la clase en tiempo real
+
+**Eventos**:
+
+| Evento                | Dirección     | Payload        | Roles        |
+| --------------------- | ------------- | -------------- | ------------ |
+| `solicitar-analytics` | Client→Server | `{ salaId }`   | DOCENTE      |
+| `analytics-clase`     | Server→Client | `{ metricas }` | Solo DOCENTE |
+
+**Métricas disponibles**:
+
+```typescript
+interface AnalyticsClase {
+  asistencia: {
+    presentes: number;
+    ausentes: number; // basado en inscripción
+    llegaronTarde: number;
+    seRetiraron: number;
+  };
+  participacion: {
+    mensajesChat: number;
+    manosLevantadas: number;
+    reacciones: number;
+    participantesMasActivos: { odooId: string; nombre: string; acciones: number }[];
+  };
+  practicas: {
+    completadas: number;
+    promedioCorrectas: number;
+    tiempoPromedio: number;
+    estudiantesTrabados: { odooId: string; nombre: string; enPregunta: number }[];
+  };
+  atencion: {
+    ultimoPulso: { si: number; no: number; masOMenos: number };
+    tendencia: 'subiendo' | 'estable' | 'bajando';
+  };
+  tiempoClase: {
+    duracionMinutos: number;
+    tiempoTeoria: number;
+    tiempoPractica: number;
+    tiempoInteraccion: number;
+  };
+}
+```
+
+**Integración**:
+
+- Consume datos de todos los otros servicios (presencia, manos, reacciones, práctica, atención)
+- Se puede solicitar en cualquier momento
+- Auto-update cada 30 segundos si está activo
+
+**Checklist TDD**:
+
+- [ ] Test: analytics agrega datos de múltiples fuentes
+- [ ] Test: métricas de asistencia correctas
+- [ ] Test: participación cuenta acciones
+- [ ] Test: tendencia de atención se calcula
+- [ ] Implementar `AnalyticsLiveService`
+- [ ] Implementar handler en gateway
+
+---
+
+**NOTA IMPORTANTE**: Las funcionalidades de Compartir Teoría y Práctica en Vivo requieren integración con el sistema de **Planificaciones** del backend. Esto se documentará en `PLAN_CONSOLIDADO_PREPROD.md` una vez completado el MVP de Aula Viva.
+
+---
+
 ## Estructura de Archivos Final
 
 ```
@@ -752,7 +1006,10 @@ apps/api/src/aula-viva/
 │   ├── ranking.service.ts (NUEVO)
 │   ├── atencion.service.ts (NUEVO)
 │   ├── selector.service.ts (NUEVO)
-│   └── gamificacion-live.service.ts (NUEVO)
+│   ├── gamificacion-live.service.ts (NUEVO)
+│   ├── teoria-sync.service.ts (NUEVO - Sprint 4)
+│   ├── practica-live.service.ts (NUEVO - Sprint 4)
+│   └── analytics-live.service.ts (NUEVO - Sprint 4)
 ├── dto/
 │   ├── index.ts (existente - agregar exports)
 │   ├── unirse-sala.dto.ts (existente)
@@ -765,7 +1022,10 @@ apps/api/src/aula-viva/
 │   ├── contador.dto.ts (NUEVO)
 │   ├── ranking.dto.ts (NUEVO)
 │   ├── atencion.dto.ts (NUEVO)
-│   └── selector.dto.ts (NUEVO)
+│   ├── selector.dto.ts (NUEVO)
+│   ├── teoria.dto.ts (NUEVO - Sprint 4)
+│   ├── practica.dto.ts (NUEVO - Sprint 4)
+│   └── analytics.dto.ts (NUEVO - Sprint 4)
 ├── interfaces/
 │   ├── index.ts (existente)
 │   ├── authenticated-socket.interface.ts (existente)
@@ -782,6 +1042,9 @@ apps/api/src/aula-viva/
     ├── ranking.service.spec.ts (NUEVO)
     ├── atencion.service.spec.ts (NUEVO)
     ├── selector.service.spec.ts (NUEVO)
+    ├── teoria-sync.service.spec.ts (NUEVO - Sprint 4)
+    ├── practica-live.service.spec.ts (NUEVO - Sprint 4)
+    ├── analytics-live.service.spec.ts (NUEVO - Sprint 4)
     └── aula-viva.e2e.spec.ts (NUEVO)
 ```
 
@@ -1747,14 +2010,20 @@ Docente otorga puntos → PuntoObtenido (registro)
 - [ ] 3.4 XP y logros en vivo
 - [ ] 3.5 Puntos de casa en vivo
 
+#### Sprint 4: Contenido Sincronizado y Analytics
+
+- [ ] 4.1 Compartir Teoría (slides, video, documento)
+- [ ] 4.2 Práctica en Vivo (ejercicios sincronizados)
+- [ ] 4.3 Analytics en Vivo (métricas en tiempo real)
+
 ### Portal Docente
 
-- [x] 4.1 Recuperación de contraseña
-- [x] 4.2 Compartir pantalla
-- [x] 4.3 Historial de asistencia
-- [x] 4.4 Reportes de asistencia
-- [x] 4.5 Historial de puntos
-- [ ] Sistema de Anuncios → Grupo
+- [x] 5.1 Recuperación de contraseña
+- [x] 5.2 Compartir pantalla
+- [x] 5.3 Historial de asistencia
+- [x] 5.4 Reportes de asistencia
+- [x] 5.5 Historial de puntos
+- [ ] 5.6 Sistema de Anuncios → Grupo
 
 ### Portal Estudiante
 
@@ -1789,6 +2058,12 @@ WEBSOCKET SPRINT 3 (Gamificación Live):
   └── 3.3 Ranking en vivo
   └── 3.4 XP/Logros live
   └── 3.5 Puntos de casa
+
+WEBSOCKET SPRINT 4 (Contenido Sincronizado):
+  └── 4.1 Compartir Teoría
+  └── 4.2 Práctica en Vivo
+  └── 4.3 Analytics en Vivo
+  ⚠️  REQUIERE: Integración con Planificaciones (ver PLAN_CONSOLIDADO_PREPROD.md)
 
 POST-WEBSOCKET:
   └── Sistema de Anuncios Docente → Grupo
@@ -2378,14 +2653,20 @@ packages/lesson-engine/src/
 - [ ] 3.4 XP y logros en vivo
 - [ ] 3.5 Puntos de casa en vivo
 
+#### Sprint 4: Contenido Sincronizado y Analytics
+
+- [ ] 4.1 Compartir Teoría (slides, video, documento)
+- [ ] 4.2 Práctica en Vivo (ejercicios sincronizados)
+- [ ] 4.3 Analytics en Vivo (métricas en tiempo real)
+
 ### Portal Docente
 
-- [x] 4.1 Recuperación de contraseña
-- [x] 4.2 Compartir pantalla
-- [x] 4.3 Historial de asistencia
-- [x] 4.4 Reportes de asistencia
-- [x] 4.5 Historial de puntos
-- [ ] Sistema de Anuncios → Grupo
+- [x] 5.1 Recuperación de contraseña
+- [x] 5.2 Compartir pantalla
+- [x] 5.3 Historial de asistencia
+- [x] 5.4 Reportes de asistencia
+- [x] 5.5 Historial de puntos
+- [ ] 5.6 Sistema de Anuncios → Grupo
 
 ### Portal Estudiante
 
@@ -2443,16 +2724,18 @@ yarn test       # todos pasan
 
 ## Historial de Cambios
 
-| Fecha      | Cambio                                               | Autor  |
-| ---------- | ---------------------------------------------------- | ------ |
-| 2026-01-20 | Creación del documento                               | Claude |
-| 2026-01-20 | Documentados 3 bugs actuales                         | Claude |
-| 2026-01-20 | Agregado plan completo WebSocket Aula Viva (backend) | Claude |
-| 2026-01-20 | Investigación mejores prácticas 2025/2026            | Claude |
-| 2026-01-20 | Agregada sección UX/UI Frontend completa             | Claude |
-| 2026-01-20 | Especificados componentes React para ambos portales  | Claude |
-| 2026-01-20 | Definido hook `useAulaVivaWebSocket` unificado       | Claude |
-| 2026-01-20 | Agregada sección Optimización de Performance         | Claude |
-| 2026-01-20 | Agregada sección Notificaciones Push completa        | Claude |
-| 2026-01-20 | Agregada sección Integración Lesson-Engine           | Claude |
-| 2026-01-20 | Actualizado checklist con todos los ítems nuevos     | Claude |
+| Fecha      | Cambio                                                   | Autor  |
+| ---------- | -------------------------------------------------------- | ------ |
+| 2026-01-20 | Creación del documento                                   | Claude |
+| 2026-01-20 | Documentados 3 bugs actuales                             | Claude |
+| 2026-01-20 | Agregado plan completo WebSocket Aula Viva (backend)     | Claude |
+| 2026-01-20 | Investigación mejores prácticas 2025/2026                | Claude |
+| 2026-01-20 | Agregada sección UX/UI Frontend completa                 | Claude |
+| 2026-01-20 | Especificados componentes React para ambos portales      | Claude |
+| 2026-01-20 | Definido hook `useAulaVivaWebSocket` unificado           | Claude |
+| 2026-01-20 | Agregada sección Optimización de Performance             | Claude |
+| 2026-01-20 | Agregada sección Notificaciones Push completa            | Claude |
+| 2026-01-20 | Agregada sección Integración Lesson-Engine               | Claude |
+| 2026-01-20 | Actualizado checklist con todos los ítems nuevos         | Claude |
+| 2026-01-20 | Agregado Sprint 4: Compartir Teoría, Práctica, Analytics | Claude |
+| 2026-01-20 | NOTA: Sprint 4 requiere integración con Planificaciones  | Claude |
