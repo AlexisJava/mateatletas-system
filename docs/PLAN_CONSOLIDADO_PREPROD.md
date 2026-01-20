@@ -844,9 +844,9 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 
 ### FASE 3: Portal Admin
 
-- [ ] 3.1 CRUD de ClaseGrupos
-- [ ] 3.2 UI pausar/cancelar Suscripciones
-- [ ] 3.3 UI cambiar tier de inscripción
+- [x] 3.1 CRUD de ClaseGrupos ✅ (2026-01-20)
+- [x] 3.2 UI pausar/cancelar Suscripciones ✅ (2026-01-20)
+- [x] 3.3 UI cambiar tier de inscripción ✅ (2026-01-20)
 - [ ] 3.4 Dashboard de Monitoring (DLQ)
 - [ ] 3.5 Dashboard de Audit Logs
 - [ ] 3.6 UI para configurar MFA
@@ -977,8 +977,13 @@ Semana 4+: FASE 7 + FASE 9 (Mensajería + Contenido)
 
 ## Historial de Cambios
 
-| Fecha      | Cambio                                      | Autor  |
-| ---------- | ------------------------------------------- | ------ |
-| 2026-01-19 | Creación inicial del documento              | Claude |
-| 2026-01-19 | ✅ Completados Quick Wins 0.1 + 0.2         | Claude |
-| 2026-01-19 | 📝 Documentado BUG-001 (tier inconsistente) | Claude |
+| Fecha      | Cambio                                                                              | Autor  |
+| ---------- | ----------------------------------------------------------------------------------- | ------ |
+| 2026-01-19 | Creación inicial del documento                                                      | Claude |
+| 2026-01-19 | ✅ Completados Quick Wins 0.1 + 0.2                                                 | Claude |
+| 2026-01-19 | 📝 Documentado BUG-001 (tier inconsistente)                                         | Claude |
+| 2026-01-20 | ✅ FASE 3.1: CRUD completo de ClaseGrupos (crear, editar, soft delete, hard delete) | Claude |
+| 2026-01-20 | ✅ Planificación override por Comisión (Evento/Taller)                              | Claude |
+| 2026-01-20 | ✅ VentasSection para productos Físico/Digital                                      | Claude |
+| 2026-01-20 | ✅ FASE 3.2+3.3: Admin pausar/reactivar/cancelar suscripciones + cambiar tier       | Claude |
+| 2026-01-20 | ✅ Tests de integración BBT (28 tests) para endpoints admin suscripciones           | Claude |
