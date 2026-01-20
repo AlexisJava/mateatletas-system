@@ -219,12 +219,12 @@ export class AdminStatsService {
         Array<{ year: number; month: number; count: bigint }>
       >`
         SELECT
-          EXTRACT(YEAR FROM "created_at")::int as year,
-          EXTRACT(MONTH FROM "created_at")::int as month,
+          EXTRACT(YEAR FROM "createdAt")::int as year,
+          EXTRACT(MONTH FROM "createdAt")::int as month,
           COUNT(*)::bigint as count
-        FROM "Estudiante"
-        WHERE "created_at" >= ${fechaMinima}
-        GROUP BY EXTRACT(YEAR FROM "created_at"), EXTRACT(MONTH FROM "created_at")
+        FROM "estudiantes"
+        WHERE "createdAt" >= ${fechaMinima}
+        GROUP BY EXTRACT(YEAR FROM "createdAt"), EXTRACT(MONTH FROM "createdAt")
       `,
 
       // Query 2: Inscripciones activas por período
@@ -448,7 +448,7 @@ export class AdminStatsService {
         EXTRACT(YEAR FROM "fecha_completitud")::int as year,
         EXTRACT(MONTH FROM "fecha_completitud")::int as month,
         COUNT(*)::bigint as count
-      FROM "ProgresoContenido"
+      FROM "progreso_contenidos"
       WHERE completado = true
         AND "fecha_completitud" >= ${fechaMinima}
         AND "fecha_completitud" IS NOT NULL
