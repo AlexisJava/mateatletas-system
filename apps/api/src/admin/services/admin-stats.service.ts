@@ -94,6 +94,7 @@ export class AdminStatsService {
       totalClases,
       clasesActivas,
       totalProductos,
+      inscripcionesActivas,
     ] = await Promise.all([
       this.prisma.tutor.count(),
       this.prisma.docente.count(),
@@ -108,6 +109,11 @@ export class AdminStatsService {
       }),
       this.prisma.producto.count({
         where: { activo: true },
+      }),
+      // Inscripciones activas: estudiantes realmente inscriptos en grupos
+      // Usa vista unificada que combina inscripciones manuales y por suscripción
+      this.prisma.inscripcionUnificada.count({
+        where: { estado: 'ACTIVA' },
       }),
     ]);
 
@@ -142,8 +148,6 @@ export class AdminStatsService {
         pagosPendientes += monto;
       }
     });
-
-    const inscripcionesActivas = inscripcionesDelMes.length;
 
     // Formato compatible con el frontend (SystemStats interface)
     return {

@@ -29,6 +29,7 @@
     "db:migrate:dev": "npx prisma migrate dev",
     "db:seed": "npx prisma db seed",
     "db:seed:prod": "NODE_ENV=production npx prisma db seed",
+    "db:seed:clean": "npx ts-node prisma/seeds/clean-seed.ts",
     "db:reset": "npx prisma migrate reset --force",
     "db:studio": "npx prisma studio"
   },

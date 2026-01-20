@@ -62,7 +62,7 @@ const proximaClaseSchema = z.union([
         descripcion: z.string().optional(),
       })
       .optional(),
-    link_meet: z.string().optional(),
+    link_meet: z.string().nullish(), // Acepta string, null, o undefined
   }),
   z.null(),
 ]);
