@@ -341,3 +341,71 @@ export class AdminFiltrosDto {
   @IsOptional()
   limit?: number;
 }
+
+// ============================================================================
+// ADMIN: ACCIONES SOBRE SUSCRIPCIONES
+// ============================================================================
+
+/**
+ * DTO para pausar una suscripción (Admin)
+ */
+export class AdminPausarSuscripcionDto {
+  @ApiProperty({
+    description: 'Motivo de la pausa',
+    example: 'Fallo en el cobro - período de gracia',
+  })
+  @IsString({ message: 'motivo debe ser un string' })
+  @IsNotEmpty({ message: 'motivo es requerido' })
+  motivo!: string;
+}
+
+/**
+ * DTO para cancelar una suscripción (Admin)
+ */
+export class AdminCancelarSuscripcionDto {
+  @ApiProperty({
+    description: 'Motivo de la cancelación',
+    example: 'Solicitud del tutor vía email',
+  })
+  @IsString({ message: 'motivo debe ser un string' })
+  @IsNotEmpty({ message: 'motivo es requerido' })
+  motivo!: string;
+}
+
+/**
+ * DTO para reactivar una suscripción pausada (Admin)
+ */
+export class AdminReactivarSuscripcionDto {
+  @ApiPropertyOptional({
+    description: 'Motivo de la reactivación',
+    example: 'Pago regularizado',
+  })
+  @IsString({ message: 'motivo debe ser un string' })
+  @IsOptional()
+  motivo?: string;
+}
+
+/**
+ * DTO para cambiar tier de una inscripción (Admin)
+ */
+export class AdminCambiarTierInscripcionDto {
+  @ApiProperty({
+    description: 'Nuevo tier para esta inscripción',
+    enum: TierNombre,
+    example: 'STEAM_SINCRONICO',
+  })
+  @IsEnum(TierNombre, {
+    message:
+      'El tier debe ser: STEAM_LIBROS, STEAM_ASINCRONICO o STEAM_SINCRONICO',
+  })
+  @IsNotEmpty({ message: 'El nuevoTier es requerido' })
+  nuevoTier!: TierNombre;
+
+  @ApiPropertyOptional({
+    description: 'Motivo del cambio de tier',
+    example: 'Upgrade solicitado por el tutor',
+  })
+  @IsString({ message: 'motivo debe ser un string' })
+  @IsOptional()
+  motivo?: string;
+}

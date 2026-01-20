@@ -100,6 +100,10 @@ export function SuscripcionesView() {
       <SuscripcionDetailModal
         suscripcion={selectedSuscripcion}
         onClose={() => setSelectedSuscripcion(null)}
+        onUpdate={() => {
+          refetch();
+          setSelectedSuscripcion(null);
+        }}
       />
     </div>
   );

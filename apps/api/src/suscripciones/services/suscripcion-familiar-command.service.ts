@@ -45,6 +45,12 @@ import {
   CambiarTierResult,
   CambiarTierInscripcionInput,
   CambiarTierInscripcionResult,
+  PausarSuscripcionInput,
+  PausarSuscripcionResult,
+  ReactivarSuscripcionInput,
+  ReactivarSuscripcionResult,
+  AdminCambiarTierInscripcionInput,
+  AdminCambiarTierResult,
   SuscripcionFamiliarError,
   SuscripcionFamiliarErrorCode,
 } from '../types';
@@ -1086,6 +1092,252 @@ export class SuscripcionFamiliarCommandService {
       estudianteNombre,
     };
   }
+
+  // ============================================================================
+  // ADMIN OPERATIONS
+  // ============================================================================
+
+  /**
+   * Pausa una suscripción familiar (Admin)
+   *
+   * Cambia el estado a PAUSED y pausa el PreApproval en MercadoPago.
+   * Solo puede pausar suscripciones que estén AUTHORIZED.
+   */
+  async pausar(
+    input: PausarSuscripcionInput,
+  ): Promise<PausarSuscripcionResult> {
+    const { suscripcionFamiliarId, motivo } = input;
+
+    const suscripcion = await this.prisma.suscripcionFamiliar.findUnique({
+      where: { id: suscripcionFamiliarId },
+    });
+
+    if (!suscripcion) {
+      throw new SuscripcionFamiliarError(
+        'Suscripción no encontrada',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    if (suscripcion.estado !== EstadoSuscripcionFamiliar.AUTHORIZED) {
+      throw new SuscripcionFamiliarError(
+        `No se puede pausar una suscripción en estado ${suscripcion.estado}. Solo se pueden pausar suscripciones activas (AUTHORIZED).`,
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    const estadoAnterior = suscripcion.estado;
+
+    // Pausar en MercadoPago si está configurado
+    if (suscripcion.preapproval_id && this.mpClient.isConfigured()) {
+      await this.circuitBreaker.execute(async () => {
+        return await this.mpClient.pause(suscripcion.preapproval_id as string);
+      });
+    }
+
+    // Actualizar estado en DB
+    await this.prisma.suscripcionFamiliar.update({
+      where: { id: suscripcionFamiliarId },
+      data: { estado: EstadoSuscripcionFamiliar.PAUSED },
+    });
+
+    this.logger.log(
+      `Suscripción ${suscripcionFamiliarId} pausada por admin. Motivo: ${motivo}`,
+    );
+
+    return {
+      suscripcionId: suscripcionFamiliarId,
+      estadoAnterior,
+      mensaje: `Suscripción pausada exitosamente. Motivo: ${motivo}`,
+    };
+  }
+
+  /**
+   * Reactiva una suscripción pausada (Admin)
+   *
+   * Cambia el estado de PAUSED a AUTHORIZED y reactiva el PreApproval en MercadoPago.
+   */
+  async reactivar(
+    input: ReactivarSuscripcionInput,
+  ): Promise<ReactivarSuscripcionResult> {
+    const { suscripcionFamiliarId, motivo } = input;
+
+    const suscripcion = await this.prisma.suscripcionFamiliar.findUnique({
+      where: { id: suscripcionFamiliarId },
+    });
+
+    if (!suscripcion) {
+      throw new SuscripcionFamiliarError(
+        'Suscripción no encontrada',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    if (suscripcion.estado !== EstadoSuscripcionFamiliar.PAUSED) {
+      throw new SuscripcionFamiliarError(
+        `No se puede reactivar una suscripción en estado ${suscripcion.estado}. Solo se pueden reactivar suscripciones pausadas (PAUSED).`,
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    const estadoAnterior = suscripcion.estado;
+
+    // Reactivar en MercadoPago si está configurado
+    if (suscripcion.preapproval_id && this.mpClient.isConfigured()) {
+      await this.circuitBreaker.execute(async () => {
+        return await this.mpClient.reactivate(
+          suscripcion.preapproval_id as string,
+        );
+      });
+    }
+
+    // Actualizar estado en DB
+    await this.prisma.suscripcionFamiliar.update({
+      where: { id: suscripcionFamiliarId },
+      data: { estado: EstadoSuscripcionFamiliar.AUTHORIZED },
+    });
+
+    this.logger.log(
+      `Suscripción ${suscripcionFamiliarId} reactivada por admin. Motivo: ${motivo ?? 'No especificado'}`,
+    );
+
+    return {
+      suscripcionId: suscripcionFamiliarId,
+      estadoAnterior,
+      mensaje: `Suscripción reactivada exitosamente${motivo ? `. Motivo: ${motivo}` : ''}`,
+    };
+  }
+
+  /**
+   * Cambia el tier de una inscripción específica (Admin)
+   *
+   * Similar a cambiarTierInscripcion pero sin validación de ownership (admin puede cambiar cualquiera).
+   */
+  async adminCambiarTierInscripcion(
+    input: AdminCambiarTierInscripcionInput,
+  ): Promise<AdminCambiarTierResult> {
+    const { inscripcionId, nuevoTier, motivo } = input;
+
+    // 1. Obtener inscripción con su suscripción
+    const inscripcion = await this.prisma.inscripcionActividad.findUnique({
+      where: { id: inscripcionId },
+      include: {
+        suscripcion_familiar: {
+          include: {
+            inscripciones: {
+              where: { estado: EstadoInscripcionActividad.ACTIVA },
+            },
+          },
+        },
+      },
+    });
+
+    if (!inscripcion) {
+      throw new SuscripcionFamiliarError(
+        'Inscripción no encontrada',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    // 2. Validar estado de inscripción
+    if (inscripcion.estado !== EstadoInscripcionActividad.ACTIVA) {
+      throw new SuscripcionFamiliarError(
+        'Solo se puede cambiar el tier de inscripciones activas',
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    // 3. Validar estado de suscripción
+    if (
+      inscripcion.suscripcion_familiar.estado ===
+      EstadoSuscripcionFamiliar.CANCELLED
+    ) {
+      throw new SuscripcionFamiliarError(
+        'No se puede modificar una suscripción cancelada',
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    const tierAnterior = inscripcion.tier;
+    const montoAnterior = inscripcion.suscripcion_familiar.monto_mensual;
+    const suscripcionId = inscripcion.suscripcion_familiar_id;
+
+    // 4. Calcular nuevo monto con la nueva lógica (tier por inscripción)
+    const inscripcionesParaCalculo: InscripcionConTier[] =
+      inscripcion.suscripcion_familiar.inscripciones.map((insc) => ({
+        id: insc.id,
+        tier:
+          insc.id === inscripcionId
+            ? nuevoTier
+            : (insc.tier ?? inscripcion.suscripcion_familiar.tier),
+      }));
+
+    const calculoNuevo = calcularMontoMensualConTiers(inscripcionesParaCalculo);
+    const nuevoMontoMensual = calculoNuevo.montoConDescuento;
+
+    // 5. Actualizar en transacción
+    await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
+      // Actualizar tier de la inscripción
+      await tx.inscripcionActividad.update({
+        where: { id: inscripcionId },
+        data: { tier: nuevoTier },
+      });
+
+      // Actualizar monto de la suscripción
+      await tx.suscripcionFamiliar.update({
+        where: { id: suscripcionId },
+        data: { monto_mensual: nuevoMontoMensual },
+      });
+
+      // Registrar cambio
+      await tx.cambioInscripcion.create({
+        data: {
+          suscripcion_familiar_id: suscripcionId,
+          tipo: TipoCambioInscripcion.CAMBIO_TIER,
+          inscripcion_anterior_id: inscripcionId,
+          aplica_desde: new Date(),
+          monto_anterior: montoAnterior,
+          monto_nuevo: nuevoMontoMensual,
+          detalle: {
+            tierAnterior,
+            nuevoTier,
+            inscripcionId,
+            cambiadoPor: 'admin',
+            motivo: motivo ?? null,
+          },
+        },
+      });
+    });
+
+    // 6. Actualizar monto en MercadoPago si cambió
+    if (
+      montoAnterior !== nuevoMontoMensual &&
+      inscripcion.suscripcion_familiar.preapproval_id &&
+      this.mpClient.isConfigured()
+    ) {
+      await this.actualizarMontoEnMercadoPago(
+        inscripcion.suscripcion_familiar.preapproval_id,
+        nuevoMontoMensual,
+      );
+    }
+
+    this.logger.log(
+      `Admin cambió tier inscripción ${inscripcionId}: ${tierAnterior} → ${nuevoTier}. Motivo: ${motivo ?? 'No especificado'}`,
+    );
+
+    return {
+      inscripcionId,
+      tierAnterior,
+      nuevoTier,
+      montoAnterior,
+      nuevoMontoMensual,
+      diferenciaMonto: nuevoMontoMensual - montoAnterior,
+    };
+  }
+
+  // ============================================================================
+  // PRIVATE METHODS
+  // ============================================================================
 
   /**
    * Actualiza el monto mensual del PreApproval en MercadoPago

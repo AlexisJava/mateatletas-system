@@ -422,6 +422,95 @@ export interface AdminSuscripcionDetalleResponse {
   readonly data: SuscripcionFamiliarDetalle;
 }
 
+// ============================================================================
+// ADMIN: TIPOS DE REQUEST PARA ACCIONES
+// ============================================================================
+
+/**
+ * Request para pausar una suscripción (Admin)
+ */
+export interface AdminPausarSuscripcionRequest {
+  /** Motivo de la pausa */
+  readonly motivo: string;
+}
+
+/**
+ * Request para reactivar una suscripción (Admin)
+ */
+export interface AdminReactivarSuscripcionRequest {
+  /** Motivo de la reactivación (opcional) */
+  readonly motivo?: string;
+}
+
+/**
+ * Request para cancelar una suscripción (Admin)
+ */
+export interface AdminCancelarSuscripcionRequest {
+  /** Motivo de la cancelación */
+  readonly motivo: string;
+}
+
+/**
+ * Request para cambiar tier de una inscripción (Admin)
+ */
+export interface AdminCambiarTierInscripcionRequest {
+  /** Nuevo tier para la inscripción */
+  readonly nuevoTier: TierNombre;
+  /** Motivo del cambio (opcional) */
+  readonly motivo?: string;
+}
+
+// ============================================================================
+// ADMIN: TIPOS DE RESPONSE PARA ACCIONES
+// ============================================================================
+
+/**
+ * Response de pausar suscripción
+ */
+export interface AdminPausarSuscripcionResponse {
+  readonly success: boolean;
+  readonly data: {
+    readonly suscripcionId: string;
+    readonly estadoAnterior: EstadoSuscripcionFamiliar;
+    readonly mensaje: string;
+  };
+}
+
+/**
+ * Response de reactivar suscripción
+ */
+export interface AdminReactivarSuscripcionResponse {
+  readonly success: boolean;
+  readonly data: {
+    readonly suscripcionId: string;
+    readonly estadoAnterior: EstadoSuscripcionFamiliar;
+    readonly mensaje: string;
+  };
+}
+
+/**
+ * Response de cancelar suscripción (admin)
+ */
+export interface AdminCancelarSuscripcionResponse {
+  readonly success: boolean;
+  readonly message: string;
+}
+
+/**
+ * Response de cambiar tier de inscripción (admin)
+ */
+export interface AdminCambiarTierInscripcionResponse {
+  readonly success: boolean;
+  readonly data: {
+    readonly inscripcionId: string;
+    readonly tierAnterior: TierNombre | null;
+    readonly nuevoTier: TierNombre;
+    readonly montoAnterior: number;
+    readonly nuevoMontoMensual: number;
+    readonly diferenciaMonto: number;
+  };
+}
+
 /**
  * API Client para Admin - Suscripciones Familiares
  */
@@ -454,6 +543,90 @@ export const suscripcionFamiliarAdminApi = {
    */
   obtenerDetalle: async (id: string): Promise<AdminSuscripcionDetalleResponse> => {
     return apiClient.get<AdminSuscripcionDetalleResponse>(`/suscripciones/familiar/admin/${id}`);
+  },
+
+  /**
+   * POST /suscripciones/familiar/admin/:id/pausar
+   * Pausa una suscripción activa (AUTHORIZED → PAUSED)
+   *
+   * Cambia el estado a PAUSED y pausa el cobro automático en MercadoPago.
+   * Solo funciona con suscripciones en estado AUTHORIZED.
+   *
+   * @param id - ID de la suscripción familiar
+   * @param data - Motivo de la pausa
+   * @returns Resultado con estado anterior y mensaje
+   */
+  pausar: async (
+    id: string,
+    data: AdminPausarSuscripcionRequest,
+  ): Promise<AdminPausarSuscripcionResponse> => {
+    return apiClient.post<AdminPausarSuscripcionResponse>(
+      `/suscripciones/familiar/admin/${id}/pausar`,
+      data,
+    );
+  },
+
+  /**
+   * POST /suscripciones/familiar/admin/:id/reactivar
+   * Reactiva una suscripción pausada (PAUSED → AUTHORIZED)
+   *
+   * Cambia el estado a AUTHORIZED y reactiva el cobro automático en MercadoPago.
+   * Solo funciona con suscripciones en estado PAUSED.
+   *
+   * @param id - ID de la suscripción familiar
+   * @param data - Motivo opcional de la reactivación
+   * @returns Resultado con estado anterior y mensaje
+   */
+  reactivar: async (
+    id: string,
+    data: AdminReactivarSuscripcionRequest,
+  ): Promise<AdminReactivarSuscripcionResponse> => {
+    return apiClient.post<AdminReactivarSuscripcionResponse>(
+      `/suscripciones/familiar/admin/${id}/reactivar`,
+      data,
+    );
+  },
+
+  /**
+   * POST /suscripciones/familiar/admin/:id/cancelar
+   * Cancela una suscripción familiar (irreversible)
+   *
+   * Cancela la suscripción y el cobro automático en MercadoPago.
+   * Esta acción es irreversible.
+   *
+   * @param id - ID de la suscripción familiar
+   * @param data - Motivo de la cancelación
+   * @returns Mensaje de confirmación
+   */
+  cancelar: async (
+    id: string,
+    data: AdminCancelarSuscripcionRequest,
+  ): Promise<AdminCancelarSuscripcionResponse> => {
+    return apiClient.post<AdminCancelarSuscripcionResponse>(
+      `/suscripciones/familiar/admin/${id}/cancelar`,
+      data,
+    );
+  },
+
+  /**
+   * PATCH /suscripciones/familiar/admin/inscripciones/:inscripcionId/tier
+   * Cambia el tier de una inscripción específica (Admin)
+   *
+   * Permite al admin cambiar el tier de cualquier inscripción sin
+   * validación de ownership. El monto mensual se recalcula automáticamente.
+   *
+   * @param inscripcionId - ID de la inscripción a modificar
+   * @param data - Nuevo tier y motivo opcional
+   * @returns Resultado con comparación de montos
+   */
+  cambiarTierInscripcion: async (
+    inscripcionId: string,
+    data: AdminCambiarTierInscripcionRequest,
+  ): Promise<AdminCambiarTierInscripcionResponse> => {
+    return apiClient.patch<AdminCambiarTierInscripcionResponse>(
+      `/suscripciones/familiar/admin/inscripciones/${inscripcionId}/tier`,
+      data,
+    );
   },
 } as const;
 

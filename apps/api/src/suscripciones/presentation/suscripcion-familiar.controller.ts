@@ -60,6 +60,10 @@ import {
   CambiarTierInscripcionDto,
   SimularMontoQueryDto,
   AdminFiltrosDto,
+  AdminPausarSuscripcionDto,
+  AdminCancelarSuscripcionDto,
+  AdminReactivarSuscripcionDto,
+  AdminCambiarTierInscripcionDto,
 } from '../dto/suscripcion-familiar.dto';
 
 @ApiTags('Suscripciones Familiares 2026')
@@ -492,6 +496,151 @@ export class SuscripcionFamiliarController {
       return {
         success: true,
         data: suscripcion,
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
+  }
+
+  @Post('admin/:id/pausar')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Pausar una suscripción familiar (Admin)',
+    description:
+      'Cambia el estado a PAUSED y pausa el cobro automático en MercadoPago. Solo funciona con suscripciones AUTHORIZED.',
+  })
+  async adminPausar(
+    @Param('id', ParseIdPipe) id: string,
+    @Body() dto: AdminPausarSuscripcionDto,
+  ) {
+    try {
+      const result = await this.commandService.pausar({
+        suscripcionFamiliarId: id,
+        motivo: dto.motivo,
+      });
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
+  }
+
+  @Post('admin/:id/reactivar')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Reactivar una suscripción pausada (Admin)',
+    description:
+      'Cambia el estado de PAUSED a AUTHORIZED y reactiva el cobro automático en MercadoPago.',
+  })
+  async adminReactivar(
+    @Param('id', ParseIdPipe) id: string,
+    @Body() dto: AdminReactivarSuscripcionDto,
+  ) {
+    try {
+      const result = await this.commandService.reactivar({
+        suscripcionFamiliarId: id,
+        motivo: dto.motivo,
+      });
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
+  }
+
+  @Post('admin/:id/cancelar')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Cancelar una suscripción familiar (Admin)',
+    description:
+      'Cancela la suscripción y el cobro automático en MercadoPago. Esta acción es irreversible.',
+  })
+  async adminCancelar(
+    @Param('id', ParseIdPipe) id: string,
+    @Body() dto: AdminCancelarSuscripcionDto,
+  ) {
+    try {
+      // Obtener el tutor_id de la suscripción para reusar el método cancelar existente
+      const suscripcion = await this.queryService.obtenerPorId(id);
+
+      await this.commandService.cancelar({
+        suscripcionFamiliarId: id,
+        tutorId: suscripcion.tutorId,
+        motivo: dto.motivo,
+        canceladoPor: 'admin',
+      });
+
+      return {
+        success: true,
+        message: 'Suscripción cancelada exitosamente por admin',
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
+  }
+
+  @Patch('admin/inscripciones/:inscripcionId/tier')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Cambiar tier de una inscripción (Admin)',
+    description:
+      'Permite al admin cambiar el tier de cualquier inscripción sin validación de ownership. Recalcula el monto mensual.',
+  })
+  async adminCambiarTierInscripcion(
+    @Param('inscripcionId', ParseIdPipe) inscripcionId: string,
+    @Body() dto: AdminCambiarTierInscripcionDto,
+  ) {
+    try {
+      const result = await this.commandService.adminCambiarTierInscripcion({
+        inscripcionId,
+        nuevoTier: dto.nuevoTier,
+        motivo: dto.motivo,
+      });
+
+      return {
+        success: true,
+        data: result,
       };
     } catch (error) {
       if (error instanceof SuscripcionFamiliarError) {

@@ -195,6 +195,46 @@ export interface CambiarTierInscripcionInput {
 }
 
 // ============================================================================
+// TIPOS DE INPUT - ADMIN
+// ============================================================================
+
+/**
+ * Input para pausar una suscripción (Admin)
+ */
+export interface PausarSuscripcionInput {
+  /** ID de la suscripción familiar */
+  readonly suscripcionFamiliarId: string;
+
+  /** Motivo de la pausa */
+  readonly motivo: string;
+}
+
+/**
+ * Input para reactivar una suscripción pausada (Admin)
+ */
+export interface ReactivarSuscripcionInput {
+  /** ID de la suscripción familiar */
+  readonly suscripcionFamiliarId: string;
+
+  /** Motivo de la reactivación (opcional) */
+  readonly motivo?: string;
+}
+
+/**
+ * Input para cambiar tier de una inscripción por admin
+ */
+export interface AdminCambiarTierInscripcionInput {
+  /** ID de la inscripción a modificar */
+  readonly inscripcionId: string;
+
+  /** Nuevo tier para esta inscripción */
+  readonly nuevoTier: TierNombre;
+
+  /** Motivo del cambio (opcional) */
+  readonly motivo?: string;
+}
+
+// ============================================================================
 // TIPOS DE OUTPUT
 // ============================================================================
 
@@ -340,6 +380,61 @@ export interface CambiarTierInscripcionResult {
 
   /** Nombre del estudiante */
   readonly estudianteNombre: string;
+}
+
+// ============================================================================
+// TIPOS DE OUTPUT - ADMIN
+// ============================================================================
+
+/**
+ * Resultado de pausar una suscripción
+ */
+export interface PausarSuscripcionResult {
+  /** ID de la suscripción pausada */
+  readonly suscripcionId: string;
+
+  /** Estado anterior */
+  readonly estadoAnterior: EstadoSuscripcionFamiliar;
+
+  /** Mensaje descriptivo */
+  readonly mensaje: string;
+}
+
+/**
+ * Resultado de reactivar una suscripción
+ */
+export interface ReactivarSuscripcionResult {
+  /** ID de la suscripción reactivada */
+  readonly suscripcionId: string;
+
+  /** Estado anterior */
+  readonly estadoAnterior: EstadoSuscripcionFamiliar;
+
+  /** Mensaje descriptivo */
+  readonly mensaje: string;
+}
+
+/**
+ * Resultado de cambiar tier por admin
+ */
+export interface AdminCambiarTierResult {
+  /** ID de la inscripción modificada */
+  readonly inscripcionId: string;
+
+  /** Tier anterior de la inscripción */
+  readonly tierAnterior: TierNombre | null;
+
+  /** Nuevo tier de la inscripción */
+  readonly nuevoTier: TierNombre;
+
+  /** Monto mensual anterior de la suscripción */
+  readonly montoAnterior: number;
+
+  /** Nuevo monto mensual de la suscripción */
+  readonly nuevoMontoMensual: number;
+
+  /** Diferencia de monto */
+  readonly diferenciaMonto: number;
 }
 
 /**

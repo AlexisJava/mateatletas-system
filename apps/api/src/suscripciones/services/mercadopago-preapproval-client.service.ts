@@ -195,6 +195,66 @@ export class MercadoPagoPreApprovalClientService {
   }
 
   /**
+   * Pausa un preapproval existente en MercadoPago
+   *
+   * @param preapprovalId ID del preapproval a pausar
+   * @returns true si se pausó correctamente
+   * @throws Error si el cliente no está configurado o falla la API
+   */
+  async pause(preapprovalId: string): Promise<boolean> {
+    if (!this.client) {
+      throw new Error('Cliente MercadoPago no configurado');
+    }
+
+    try {
+      await this.client.update({
+        id: preapprovalId,
+        body: { status: 'paused' },
+      });
+
+      this.logger.log(`PreApproval pausado: ${preapprovalId}`);
+      return true;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Error pausando preapproval ${preapprovalId}: ${errorMessage}`,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Reactiva un preapproval pausado en MercadoPago
+   *
+   * @param preapprovalId ID del preapproval a reactivar
+   * @returns true si se reactivó correctamente
+   * @throws Error si el cliente no está configurado o falla la API
+   */
+  async reactivate(preapprovalId: string): Promise<boolean> {
+    if (!this.client) {
+      throw new Error('Cliente MercadoPago no configurado');
+    }
+
+    try {
+      await this.client.update({
+        id: preapprovalId,
+        body: { status: 'authorized' },
+      });
+
+      this.logger.log(`PreApproval reactivado: ${preapprovalId}`);
+      return true;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Error reactivando preapproval ${preapprovalId}: ${errorMessage}`,
+      );
+      throw error;
+    }
+  }
+
+  /**
    * Obtiene el detalle de un preapproval desde la API de MercadoPago
    *
    * @param preapprovalId ID del preapproval en MercadoPago
