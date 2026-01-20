@@ -163,17 +163,10 @@ export class AdminStatsService {
   /**
    * Obtener datos históricos de retención de estudiantes
    * Devuelve nuevos, activos y bajas por mes (últimos 6 meses)
+   * OPTIMIZADO: 3 queries en paralelo en vez de 18 secuenciales
    */
   async getRetentionStats(meses = 6) {
     const now = new Date();
-    const result: Array<{
-      month: string;
-      nuevos: number;
-      activos: number;
-      bajas: number;
-    }> = [];
-
-    // Nombres de meses en español abreviados
     const nombresMeses = [
       'Ene',
       'Feb',
@@ -189,68 +182,111 @@ export class AdminStatsService {
       'Dic',
     ];
 
+    // Calcular fecha mínima para el rango completo
+    const fechaMinima = new Date(
+      now.getFullYear(),
+      now.getMonth() - (meses - 1),
+      1,
+    );
+
+    // Generar períodos y mapeos
+    const periodos: string[] = [];
+    const periodoToMonth: Map<string, string> = new Map();
+    const monthRanges: Array<{
+      periodo: string;
+      month: string;
+      inicio: Date;
+      fin: Date;
+    }> = [];
+
     for (let i = meses - 1; i >= 0; i--) {
       const fecha = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const inicioMes = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
-      const finMes = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
-      finMes.setHours(23, 59, 59, 999);
-
-      // Estudiantes nuevos (creados en este mes)
-      const nuevos = await this.prisma.estudiante.count({
-        where: {
-          createdAt: {
-            gte: inicioMes,
-            lte: finMes,
-          },
-        },
-      });
-
-      // Estudiantes activos (tienen inscripción activa en este mes)
-      // Usamos InscripcionMensual para determinar actividad
       const periodo = `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}`;
-      const inscripcionesActivasMes =
-        await this.prisma.inscripcionMensual.count({
-          where: {
-            periodo,
-            estado_pago: { in: ['Pagado', 'Pendiente'] },
-          },
-        });
+      const inicio = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
+      const fin = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
+      fin.setHours(23, 59, 59, 999);
 
-      // Bajas: inscripciones que fueron dadas de baja en este mes
-      // Usa vista unificada para contar bajas de ambas fuentes
-      const bajas = await this.prisma.inscripcionUnificada.count({
-        where: {
-          estado: 'CANCELADA',
-          fecha_baja: {
-            gte: inicioMes,
-            lte: finMes,
-          },
-        },
-      });
-
-      result.push({
-        month: nombresMeses[fecha.getMonth()] ?? 'N/A',
-        nuevos,
-        activos: inscripcionesActivasMes,
-        bajas,
-      });
+      periodos.push(periodo);
+      const monthName = nombresMeses[fecha.getMonth()] ?? 'N/A';
+      periodoToMonth.set(periodo, monthName);
+      monthRanges.push({ periodo, month: monthName, inicio, fin });
     }
 
-    return result;
+    // 3 QUERIES EN PARALELO (en vez de 18 secuenciales)
+    const [nuevosData, activosData, bajasData] = await Promise.all([
+      // Query 1: Estudiantes nuevos (agrupados por mes de creación)
+      this.prisma.$queryRaw<
+        Array<{ year: number; month: number; count: bigint }>
+      >`
+        SELECT
+          EXTRACT(YEAR FROM "created_at")::int as year,
+          EXTRACT(MONTH FROM "created_at")::int as month,
+          COUNT(*)::bigint as count
+        FROM "Estudiante"
+        WHERE "created_at" >= ${fechaMinima}
+        GROUP BY EXTRACT(YEAR FROM "created_at"), EXTRACT(MONTH FROM "created_at")
+      `,
+
+      // Query 2: Inscripciones activas por período
+      this.prisma.inscripcionMensual.groupBy({
+        by: ['periodo'],
+        where: {
+          periodo: { in: periodos },
+          estado_pago: { in: ['Pagado', 'Pendiente'] },
+        },
+        _count: { id: true },
+      }),
+
+      // Query 3: Bajas por mes (usando raw query para agrupar por fecha_baja)
+      this.prisma.$queryRaw<
+        Array<{ year: number; month: number; count: bigint }>
+      >`
+        SELECT
+          EXTRACT(YEAR FROM "fecha_baja")::int as year,
+          EXTRACT(MONTH FROM "fecha_baja")::int as month,
+          COUNT(*)::bigint as count
+        FROM "inscripciones_unificadas"
+        WHERE estado = 'CANCELADA'
+          AND "fecha_baja" >= ${fechaMinima}
+          AND "fecha_baja" IS NOT NULL
+        GROUP BY EXTRACT(YEAR FROM "fecha_baja"), EXTRACT(MONTH FROM "fecha_baja")
+      `,
+    ]);
+
+    // Construir mapas para lookup rápido
+    const nuevosMap = new Map<string, number>();
+    for (const row of nuevosData) {
+      const key = `${row.year}-${row.month.toString().padStart(2, '0')}`;
+      nuevosMap.set(key, Number(row.count));
+    }
+
+    const activosMap = new Map<string, number>();
+    for (const row of activosData) {
+      activosMap.set(row.periodo, row._count.id);
+    }
+
+    const bajasMap = new Map<string, number>();
+    for (const row of bajasData) {
+      const key = `${row.year}-${row.month.toString().padStart(2, '0')}`;
+      bajasMap.set(key, Number(row.count));
+    }
+
+    // Construir resultado final
+    return monthRanges.map(({ periodo, month }) => ({
+      month,
+      nuevos: nuevosMap.get(periodo) ?? 0,
+      activos: activosMap.get(periodo) ?? 0,
+      bajas: bajasMap.get(periodo) ?? 0,
+    }));
   }
 
   /**
    * Obtener histórico mensual de ingresos y pagos pendientes
    * Usado por RevenueChart y RevenueEvolutionChart
+   * OPTIMIZADO: Una sola query con groupBy en vez de N queries secuenciales
    */
   async getHistoricoMensual(meses = 6) {
     const now = new Date();
-    const result: Array<{
-      month: string;
-      ingresos: number;
-      pendientes: number;
-    }> = [];
-
     const nombresMeses = [
       'Ene',
       'Feb',
@@ -266,38 +302,57 @@ export class AdminStatsService {
       'Dic',
     ];
 
+    // Generar lista de períodos a consultar
+    const periodos: string[] = [];
+    const periodoToMonth: Map<string, string> = new Map();
+
     for (let i = meses - 1; i >= 0; i--) {
       const fecha = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const periodo = `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}`;
-
-      const inscripcionesMes = await this.prisma.inscripcionMensual.findMany({
-        where: { periodo },
-        select: { precio_final: true, estado_pago: true },
-      });
-
-      let ingresos = 0;
-      let pendientes = 0;
-
-      inscripcionesMes.forEach((ins) => {
-        const monto = ins.precio_final.toNumber();
-        if (ins.estado_pago === 'Pagado') {
-          ingresos += monto;
-        } else if (
-          ins.estado_pago === 'Pendiente' ||
-          ins.estado_pago === 'Vencido'
-        ) {
-          pendientes += monto;
-        }
-      });
-
-      result.push({
-        month: nombresMeses[fecha.getMonth()] ?? 'N/A',
-        ingresos,
-        pendientes,
-      });
+      periodos.push(periodo);
+      periodoToMonth.set(periodo, nombresMeses[fecha.getMonth()] ?? 'N/A');
     }
 
-    return result;
+    // UNA SOLA QUERY: Obtener todos los datos agrupados por período y estado
+    const aggregations = await this.prisma.inscripcionMensual.groupBy({
+      by: ['periodo', 'estado_pago'],
+      where: {
+        periodo: { in: periodos },
+      },
+      _sum: { precio_final: true },
+    });
+
+    // Construir mapa de resultados
+    const dataByPeriodo = new Map<
+      string,
+      { ingresos: number; pendientes: number }
+    >();
+
+    for (const agg of aggregations) {
+      const current = dataByPeriodo.get(agg.periodo) ?? {
+        ingresos: 0,
+        pendientes: 0,
+      };
+      const monto = agg._sum.precio_final?.toNumber() ?? 0;
+
+      if (agg.estado_pago === 'Pagado') {
+        current.ingresos += monto;
+      } else if (
+        agg.estado_pago === 'Pendiente' ||
+        agg.estado_pago === 'Vencido'
+      ) {
+        current.pendientes += monto;
+      }
+
+      dataByPeriodo.set(agg.periodo, current);
+    }
+
+    // Construir resultado ordenado por período
+    return periodos.map((periodo) => ({
+      month: periodoToMonth.get(periodo) ?? 'N/A',
+      ingresos: dataByPeriodo.get(periodo)?.ingresos ?? 0,
+      pendientes: dataByPeriodo.get(periodo)?.pendientes ?? 0,
+    }));
   }
 
   /**
@@ -347,12 +402,11 @@ export class AdminStatsService {
 
   /**
    * Obtener tendencia mensual de contenidos completados
+   * OPTIMIZADO: Una query en vez de N secuenciales
    * @param meses - Cantidad de meses hacia atrás
    */
   private async getContenidosTendencia(meses = 6) {
     const now = new Date();
-    const result: Array<{ month: string; completados: number }> = [];
-
     const nombresMeses = [
       'Ene',
       'Feb',
@@ -368,29 +422,51 @@ export class AdminStatsService {
       'Dic',
     ];
 
+    // Calcular fecha mínima
+    const fechaMinima = new Date(
+      now.getFullYear(),
+      now.getMonth() - (meses - 1),
+      1,
+    );
+
+    // Generar lista de períodos esperados
+    const periodos: Array<{ periodo: string; month: string }> = [];
     for (let i = meses - 1; i >= 0; i--) {
       const fecha = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const inicioMes = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
-      const finMes = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0);
-      finMes.setHours(23, 59, 59, 999);
-
-      const completados = await this.prisma.progresoContenido.count({
-        where: {
-          completado: true,
-          fechaCompletitud: {
-            gte: inicioMes,
-            lte: finMes,
-          },
-        },
-      });
-
-      result.push({
+      const periodo = `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}`;
+      periodos.push({
+        periodo,
         month: nombresMeses[fecha.getMonth()] ?? 'N/A',
-        completados,
       });
     }
 
-    return result;
+    // UNA SOLA QUERY: Obtener contenidos completados agrupados por mes
+    const data = await this.prisma.$queryRaw<
+      Array<{ year: number; month: number; count: bigint }>
+    >`
+      SELECT
+        EXTRACT(YEAR FROM "fecha_completitud")::int as year,
+        EXTRACT(MONTH FROM "fecha_completitud")::int as month,
+        COUNT(*)::bigint as count
+      FROM "ProgresoContenido"
+      WHERE completado = true
+        AND "fecha_completitud" >= ${fechaMinima}
+        AND "fecha_completitud" IS NOT NULL
+      GROUP BY EXTRACT(YEAR FROM "fecha_completitud"), EXTRACT(MONTH FROM "fecha_completitud")
+    `;
+
+    // Construir mapa para lookup rápido
+    const dataMap = new Map<string, number>();
+    for (const row of data) {
+      const key = `${row.year}-${row.month.toString().padStart(2, '0')}`;
+      dataMap.set(key, Number(row.count));
+    }
+
+    // Construir resultado ordenado
+    return periodos.map(({ periodo, month }) => ({
+      month,
+      completados: dataMap.get(periodo) ?? 0,
+    }));
   }
 
   /**

@@ -3154,6 +3154,11 @@ model Comision {
   /// Independiente del tier del tutor - el tutor elige al comprar el producto
   modalidad TipoAccesoInscripcion @default(SINCRONICO)
 
+  /// Planificación específica de esta comisión (override de la planificación del producto)
+  /// Si es null, se usa la planificación del producto padre
+  planificacion_id String?
+  planificacion    Planificacion? @relation(fields: [planificacion_id], references: [id])
+
   // ========== LIVEKIT - Clases en vivo ==========
 
   /// Nombre único de la sala en LiveKit (generado automáticamente)
@@ -3196,6 +3201,7 @@ model Comision {
   @@index([docente_id])
   @@index([casa_id])
   @@index([grupo_id])
+  @@index([planificacion_id])
   @@index([activo])
   @@index([estado_clase])
   @@index([livekit_room_name])
@@ -3349,6 +3355,8 @@ model Planificacion {
   asignaciones    AsignacionPlanificacion[]
   /// Productos que usan esta planificación (Clubs)
   productos       Producto[]
+  /// Comisiones que usan esta planificación (override de la del producto)
+  comisiones      Comision[]
 
   @@index([casa_tipo, mundo_tipo])
   @@index([estado])

@@ -140,4 +140,13 @@ export class CrearClaseGrupoDto {
   @IsArray()
   @IsString({ each: true })
   estudiantesIds!: string[];
+
+  @ApiPropertyOptional({
+    description:
+      'ID del producto (Club) al que pertenece este horario. Permite vincular ClaseGrupo con Producto tipo Club.',
+    example: 'clt5prod123',
+  })
+  @IsOptional()
+  @IsString()
+  productoId?: string;
 }

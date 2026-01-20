@@ -43,6 +43,7 @@ export function ClaseGruposSection({ productoId, productoNombre }: ClaseGruposSe
   // Delete confirmation state
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteMode, setDeleteMode] = useState<'soft' | 'permanent'>('soft');
 
   // Para evitar race conditions
   const requestIdRef = useRef(0);
@@ -107,20 +108,32 @@ export function ClaseGruposSection({ productoId, productoNombre }: ClaseGruposSe
 
   const handleCancelDelete = () => {
     setDeletingId(null);
+    setDeleteMode('soft');
   };
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = async (permanent: boolean) => {
     if (!deletingId) return;
 
     setIsDeleting(true);
     try {
-      await eliminarClaseGrupo(deletingId);
-      toast.success('Horario eliminado');
+      await eliminarClaseGrupo(deletingId, permanent);
+      toast.success(permanent ? 'Horario eliminado permanentemente' : 'Horario desactivado');
       setDeletingId(null);
+      setDeleteMode('soft');
       fetchClaseGrupos();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error al eliminar:', err);
-      toast.error('Error al eliminar el horario');
+      // Extraer mensaje de error de Axios o Error genérico
+      let errorMessage = 'Error al eliminar el horario';
+      if (err && typeof err === 'object') {
+        const axiosError = err as { response?: { data?: { message?: string } }; message?: string };
+        if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message;
+        } else if (axiosError.message) {
+          errorMessage = axiosError.message;
+        }
+      }
+      toast.error(errorMessage);
     } finally {
       setIsDeleting(false);
     }
@@ -203,9 +216,17 @@ export function ClaseGruposSection({ productoId, productoNombre }: ClaseGruposSe
                 className="bg-[var(--admin-surface-2)] rounded-xl border border-[var(--admin-border)] overflow-hidden"
               >
                 {/* Header del horario - clickeable para expandir */}
-                <button
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => toggleExpand(grupo.id)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-[var(--admin-surface-1)] transition-colors text-left"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleExpand(grupo.id);
+                    }
+                  }}
+                  className="w-full flex items-center justify-between p-4 hover:bg-[var(--admin-surface-1)] transition-colors text-left cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
                     {/* Día y hora */}
@@ -280,7 +301,7 @@ export function ClaseGruposSection({ productoId, productoNombre }: ClaseGruposSe
                       <ChevronDown className="w-4 h-4 text-[var(--admin-text-muted)]" />
                     )}
                   </div>
-                </button>
+                </div>
 
                 {/* Contenido expandido */}
                 {isExpanded && (
@@ -384,17 +405,78 @@ export function ClaseGruposSection({ productoId, productoNombre }: ClaseGruposSe
       {/* Modal de confirmación de borrado */}
       {deletingId && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-2xl max-w-sm w-full p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-2xl max-w-md w-full p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center">
                 <Trash2 className="w-5 h-5 text-red-400" />
               </div>
-              <h3 className="text-lg font-semibold text-[var(--admin-text)]">Eliminar Horario</h3>
+              <h3 className="text-lg font-semibold text-[var(--admin-text)]">
+                ¿Qué deseas hacer con este horario?
+              </h3>
             </div>
-            <p className="text-[var(--admin-text-muted)] text-sm mb-6">
-              ¿Estás seguro de eliminar este horario? Esta acción no se puede deshacer. Los
-              estudiantes inscriptos perderán su inscripción.
-            </p>
+
+            {/* Opción 1: Desactivar */}
+            <div className="space-y-3 mb-6">
+              <button
+                onClick={() => setDeleteMode('soft')}
+                disabled={isDeleting}
+                className={`w-full p-4 rounded-xl border text-left transition-all ${
+                  deleteMode === 'soft'
+                    ? 'border-amber-500/50 bg-amber-500/10'
+                    : 'border-[var(--admin-border)] bg-[var(--admin-surface-2)] hover:bg-[var(--admin-surface-1)]'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      deleteMode === 'soft'
+                        ? 'border-amber-500'
+                        : 'border-[var(--admin-text-muted)]'
+                    }`}
+                  >
+                    {deleteMode === 'soft' && <div className="w-2 h-2 rounded-full bg-amber-500" />}
+                  </div>
+                  <div>
+                    <p className="font-medium text-[var(--admin-text)]">Desactivar</p>
+                    <p className="text-xs text-[var(--admin-text-muted)]">
+                      El horario se oculta pero se conservan los datos históricos
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Opción 2: Eliminar permanentemente */}
+              <button
+                onClick={() => setDeleteMode('permanent')}
+                disabled={isDeleting}
+                className={`w-full p-4 rounded-xl border text-left transition-all ${
+                  deleteMode === 'permanent'
+                    ? 'border-red-500/50 bg-red-500/10'
+                    : 'border-[var(--admin-border)] bg-[var(--admin-surface-2)] hover:bg-[var(--admin-surface-1)]'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      deleteMode === 'permanent'
+                        ? 'border-red-500'
+                        : 'border-[var(--admin-text-muted)]'
+                    }`}
+                  >
+                    {deleteMode === 'permanent' && (
+                      <div className="w-2 h-2 rounded-full bg-red-500" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-medium text-[var(--admin-text)]">Eliminar permanentemente</p>
+                    <p className="text-xs text-[var(--admin-text-muted)]">
+                      Se borra completamente. Solo si no tiene inscripciones activas.
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
+
             <div className="flex gap-3">
               <button
                 onClick={handleCancelDelete}
@@ -404,17 +486,23 @@ export function ClaseGruposSection({ productoId, productoNombre }: ClaseGruposSe
                 Cancelar
               </button>
               <button
-                onClick={handleConfirmDelete}
+                onClick={() => handleConfirmDelete(deleteMode === 'permanent')}
                 disabled={isDeleting}
-                className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className={`flex-1 px-4 py-2.5 text-white rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${
+                  deleteMode === 'permanent'
+                    ? 'bg-red-500 hover:bg-red-600'
+                    : 'bg-amber-500 hover:bg-amber-600'
+                }`}
               >
                 {isDeleting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Eliminando...
+                    {deleteMode === 'permanent' ? 'Eliminando...' : 'Desactivando...'}
                   </>
-                ) : (
+                ) : deleteMode === 'permanent' ? (
                   'Eliminar'
+                ) : (
+                  'Desactivar'
                 )}
               </button>
             </div>

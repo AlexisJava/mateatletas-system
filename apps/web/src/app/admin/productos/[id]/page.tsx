@@ -19,6 +19,7 @@ import {
   ComisionesSection,
   ClaseGruposSection,
   PlanificacionSection,
+  VentasSection,
 } from '@/components/admin/views/productos/components';
 import type { Producto } from '@/types/catalogo.types';
 
@@ -194,8 +195,14 @@ export default function ProductoDetailPage() {
     );
   }
 
+  // Comisiones para: Curso, Evento (eventos incluyen talleres, colonias, workshops)
   const showComisiones = producto.tipo === 'Curso' || producto.tipo === 'Evento';
+  // Horarios (ClaseGrupos) solo para Club
   const showClaseGrupos = producto.tipo === 'Club';
+  // Planificación para: Club, Evento (productos educativos con clases)
+  const showPlanificacion = producto.tipo === 'Club' || producto.tipo === 'Evento';
+  // Ventas para: Físico, Digital (productos comercializables sin comisiones)
+  const showVentas = producto.tipo === 'Fisico' || producto.tipo === 'Digital';
 
   return (
     <div className="space-y-6 pb-8">
@@ -382,28 +389,45 @@ export default function ProductoDetailPage() {
           </div>
         </div>
 
-        {/* Right: Comisiones o Horarios según tipo */}
-        <div className="col-span-2">
+        {/* Right: Planificación + Comisiones/Horarios según tipo */}
+        <div className="col-span-2 space-y-6">
+          {/* Planificación: para Club, Evento, Taller */}
+          {showPlanificacion && (
+            <PlanificacionSection
+              productoId={productoId}
+              productoNombre={producto.nombre}
+              onPlanificacionChange={fetchProducto}
+            />
+          )}
+
+          {/* Comisiones: para Curso, Evento, Taller */}
           {showComisiones && (
             <div className="p-5 bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-xl">
               <ComisionesSection productoId={productoId} productoNombre={producto.nombre} />
             </div>
           )}
+
+          {/* Horarios (ClaseGrupos): solo para Club */}
           {showClaseGrupos && (
-            <>
-              <PlanificacionSection
-                productoId={productoId}
-                productoNombre={producto.nombre}
-                onPlanificacionChange={fetchProducto}
-              />
-              <ClaseGruposSection productoId={productoId} productoNombre={producto.nombre} />
-            </>
+            <ClaseGruposSection productoId={productoId} productoNombre={producto.nombre} />
           )}
-          {!showComisiones && !showClaseGrupos && (
+
+          {/* Ventas: para Físico y Digital */}
+          {showVentas && (
+            <VentasSection
+              productoId={productoId}
+              productoNombre={producto.nombre}
+              productoTipo={producto.tipo}
+              productoPrecio={Number(producto.precio)}
+            />
+          )}
+
+          {/* Productos sin secciones especiales (Servicio, Bundle, Certificacion) */}
+          {!showComisiones && !showClaseGrupos && !showPlanificacion && !showVentas && (
             <div className="p-8 bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-xl text-center">
               <Package className="w-12 h-12 text-[var(--admin-text-muted)] mx-auto mb-3" />
               <p className="text-[var(--admin-text-muted)]">
-                Este tipo de producto no tiene horarios ni comisiones asociadas
+                Este tipo de producto no tiene configuración adicional disponible
               </p>
             </div>
           )}

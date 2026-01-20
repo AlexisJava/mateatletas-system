@@ -1114,6 +1114,8 @@ export interface Comision {
   fecha_inicio: string | null;
   fecha_fin: string | null;
   activo: boolean;
+  /** Override de planificación específica para esta comisión */
+  planificacion_id: string | null;
   createdAt: string;
   updatedAt: string;
   producto?: {
@@ -1132,6 +1134,12 @@ export interface Comision {
     nombre: string;
     apellido: string;
     email?: string;
+  } | null;
+  /** Planificación asignada (si tiene override) */
+  planificacion?: {
+    id: string;
+    titulo: string;
+    cantidad_clases: number;
   } | null;
   total_inscriptos?: number;
   cupos_disponibles?: number | null;
@@ -1170,6 +1178,8 @@ export interface CreateComisionDto {
   fecha_inicio?: string | null;
   fecha_fin?: string | null;
   activo?: boolean;
+  /** Override de planificación específica para esta comisión */
+  planificacion_id?: string | null;
 }
 
 /** DTO para inscribir estudiantes */

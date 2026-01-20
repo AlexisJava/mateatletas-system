@@ -13,7 +13,7 @@ import {
   Trash2,
   ChevronDown,
   ChevronRight,
-  X,
+  BookOpen,
 } from 'lucide-react';
 import {
   getComisionesByProducto,
@@ -25,6 +25,7 @@ import {
   type CreateComisionDto,
   type InscripcionComision,
 } from '@/lib/api/admin.api';
+import { listarPlanificaciones, type Planificacion } from '@/lib/api/planificaciones-admin.api';
 import { DocenteComisionSection, InscripcionesComisionSection } from '@/components/admin/shared';
 
 interface ComisionesSectionProps {
@@ -274,6 +275,13 @@ export function ComisionesSection({ productoId, productoNombre }: ComisionesSect
                             {comision.docente.nombre} {comision.docente.apellido}
                           </span>
                         )}
+                        {comision.planificacion && (
+                          <span className="flex items-center gap-1 text-[var(--admin-accent)]">
+                            <BookOpen className="w-3.5 h-3.5" />
+                            {comision.planificacion.titulo} (
+                            {comision.planificacion.cantidad_clases} clases)
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-3 mt-2 ml-6">
@@ -381,6 +389,8 @@ function ComisionFormModal({
   onSave,
 }: ComisionFormModalProps) {
   const [loading, setLoading] = useState(false);
+  const [planificaciones, setPlanificaciones] = useState<Planificacion[]>([]);
+  const [loadingPlanificaciones, setLoadingPlanificaciones] = useState(true);
   const [formData, setFormData] = useState<CreateComisionDto>({
     nombre: comision?.nombre ?? '',
     descripcion: comision?.descripcion ?? '',
@@ -392,7 +402,24 @@ function ComisionFormModal({
     fecha_inicio: comision?.fecha_inicio?.split('T')[0] ?? '',
     fecha_fin: comision?.fecha_fin?.split('T')[0] ?? '',
     activo: comision?.activo ?? true,
+    planificacion_id: comision?.planificacion_id ?? undefined,
   });
+
+  // Cargar planificaciones disponibles
+  useEffect(() => {
+    const fetchPlanificaciones = async () => {
+      try {
+        setLoadingPlanificaciones(true);
+        const response = await listarPlanificaciones({ estado: 'PUBLICADO', limit: 100 });
+        setPlanificaciones(response.data);
+      } catch (err) {
+        console.error('Error al cargar planificaciones:', err);
+      } finally {
+        setLoadingPlanificaciones(false);
+      }
+    };
+    fetchPlanificaciones();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -496,6 +523,39 @@ function ComisionFormModal({
                 className="w-full px-3 py-2.5 bg-[var(--admin-surface-2)] border border-[var(--admin-border)] rounded-xl text-[var(--admin-text)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)] focus:border-transparent"
               />
             </div>
+          </div>
+
+          {/* Planificación (override) */}
+          <div>
+            <label className="block text-sm font-medium text-[var(--admin-text)] mb-1.5">
+              <span className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-[var(--admin-accent)]" />
+                Planificación (override)
+              </span>
+            </label>
+            <select
+              value={formData.planificacion_id ?? ''}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  planificacion_id: e.target.value || undefined,
+                })
+              }
+              disabled={loadingPlanificaciones}
+              className="w-full px-3 py-2.5 bg-[var(--admin-surface-2)] border border-[var(--admin-border)] rounded-xl text-[var(--admin-text)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)] focus:border-transparent disabled:opacity-50"
+            >
+              <option value="">Sin override (usa la del producto)</option>
+              {planificaciones.map((planificacion) => (
+                <option key={planificacion.id} value={planificacion.id}>
+                  {planificacion.titulo} ({planificacion.cantidad_clases} clases) -{' '}
+                  {planificacion.casa_tipo}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-[var(--admin-text-muted)] mt-1">
+              Solo se muestran planificaciones publicadas. Si se deja vacío, usa la planificación
+              del producto.
+            </p>
           </div>
 
           {/* Descripción */}

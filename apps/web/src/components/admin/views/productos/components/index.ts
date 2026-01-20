@@ -11,3 +11,4 @@ export { ProductsStatsGrid } from './ProductsStatsGrid';
 export { ComisionesSection } from './ComisionesSection';
 export { ClaseGruposSection } from './ClaseGruposSection';
 export { PlanificacionSection } from './PlanificacionSection';
+export { VentasSection } from './VentasSection';

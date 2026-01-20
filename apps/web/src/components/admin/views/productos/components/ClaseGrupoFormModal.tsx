@@ -245,6 +245,7 @@ export function ClaseGrupoFormModal({
             cupoMaximo: parseInt(formData.cupoMaximo, 10),
             docenteId: formData.docenteId,
             estudiantesIds: [],
+            productoId, // FASE 3: Vincular horario con producto (Club)
           });
           toast.success('Horario creado. El docente será notificado.');
         }

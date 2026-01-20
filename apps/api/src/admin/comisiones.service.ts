@@ -78,6 +78,18 @@ export class ComisionesService {
       }
     }
 
+    // Validar planificación si se especifica
+    if (dto.planificacion_id) {
+      const planificacion = await this.prisma.planificacion.findUnique({
+        where: { id: dto.planificacion_id },
+      });
+      if (!planificacion) {
+        throw new NotFoundException(
+          `No se encontró la planificación con ID ${dto.planificacion_id}`,
+        );
+      }
+    }
+
     // Crear la comisión
     const comision = await this.prisma.comision.create({
       data: {
@@ -91,6 +103,7 @@ export class ComisionesService {
         fecha_inicio: dto.fecha_inicio ? new Date(dto.fecha_inicio) : undefined,
         fecha_fin: dto.fecha_fin ? new Date(dto.fecha_fin) : undefined,
         activo: dto.activo ?? true,
+        planificacion_id: dto.planificacion_id,
       },
       include: {
         producto: {
@@ -112,6 +125,13 @@ export class ComisionesService {
             id: true,
             nombre: true,
             apellido: true,
+          },
+        },
+        planificacion: {
+          select: {
+            id: true,
+            titulo: true,
+            cantidad_clases: true,
           },
         },
       },
@@ -171,6 +191,13 @@ export class ComisionesService {
             apellido: true,
           },
         },
+        planificacion: {
+          select: {
+            id: true,
+            titulo: true,
+            cantidad_clases: true,
+          },
+        },
         _count: {
           select: {
             inscripciones: true,
@@ -225,6 +252,13 @@ export class ComisionesService {
             apellido: true,
             email: true,
             telefono: true,
+          },
+        },
+        planificacion: {
+          select: {
+            id: true,
+            titulo: true,
+            cantidad_clases: true,
           },
         },
         inscripciones: {
@@ -333,6 +367,17 @@ export class ComisionesService {
         );
       }
     }
+
+    if (dto.planificacion_id) {
+      const planificacion = await this.prisma.planificacion.findUnique({
+        where: { id: dto.planificacion_id },
+      });
+      if (!planificacion) {
+        throw new NotFoundException(
+          `No se encontró la planificación con ID ${dto.planificacion_id}`,
+        );
+      }
+    }
   }
 
   /**
@@ -357,41 +402,44 @@ export class ComisionesService {
   }
 
   /**
+   * Helper para construir relación connect/disconnect
+   */
+  private buildRelationUpdate(id: string | null | undefined) {
+    if (id === undefined) return undefined;
+    return id ? { connect: { id } } : { disconnect: true };
+  }
+
+  /**
    * Construye el objeto de actualización para Comision
    */
   private buildComisionUpdateData(
     dto: UpdateComisionDto,
   ): Prisma.ComisionUpdateInput {
-    const updateData: Prisma.ComisionUpdateInput = {};
-
-    if (dto.nombre !== undefined) updateData.nombre = dto.nombre;
-    if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion;
-    if (dto.producto_id !== undefined) {
-      updateData.producto = { connect: { id: dto.producto_id } };
-    }
-    if (dto.casa_id !== undefined) {
-      updateData.casa = dto.casa_id
-        ? { connect: { id: dto.casa_id } }
-        : { disconnect: true };
-    }
-    if (dto.docente_id !== undefined) {
-      updateData.docente = dto.docente_id
-        ? { connect: { id: dto.docente_id } }
-        : { disconnect: true };
-    }
-    if (dto.cupo_maximo !== undefined) updateData.cupo_maximo = dto.cupo_maximo;
-    if (dto.horario !== undefined) updateData.horario = dto.horario;
-    if (dto.fecha_inicio !== undefined) {
-      updateData.fecha_inicio = dto.fecha_inicio
-        ? new Date(dto.fecha_inicio)
-        : null;
-    }
-    if (dto.fecha_fin !== undefined) {
-      updateData.fecha_fin = dto.fecha_fin ? new Date(dto.fecha_fin) : null;
-    }
-    if (dto.activo !== undefined) updateData.activo = dto.activo;
-
-    return updateData;
+    return {
+      ...(dto.nombre !== undefined && { nombre: dto.nombre }),
+      ...(dto.descripcion !== undefined && { descripcion: dto.descripcion }),
+      ...(dto.producto_id !== undefined && {
+        producto: { connect: { id: dto.producto_id } },
+      }),
+      ...(dto.casa_id !== undefined && {
+        casa: this.buildRelationUpdate(dto.casa_id),
+      }),
+      ...(dto.docente_id !== undefined && {
+        docente: this.buildRelationUpdate(dto.docente_id),
+      }),
+      ...(dto.planificacion_id !== undefined && {
+        planificacion: this.buildRelationUpdate(dto.planificacion_id),
+      }),
+      ...(dto.cupo_maximo !== undefined && { cupo_maximo: dto.cupo_maximo }),
+      ...(dto.horario !== undefined && { horario: dto.horario }),
+      ...(dto.fecha_inicio !== undefined && {
+        fecha_inicio: dto.fecha_inicio ? new Date(dto.fecha_inicio) : null,
+      }),
+      ...(dto.fecha_fin !== undefined && {
+        fecha_fin: dto.fecha_fin ? new Date(dto.fecha_fin) : null,
+      }),
+      ...(dto.activo !== undefined && { activo: dto.activo }),
+    };
   }
 
   /**
@@ -407,6 +455,9 @@ export class ComisionesService {
       },
       docente: {
         select: { id: true, nombre: true, apellido: true },
+      },
+      planificacion: {
+        select: { id: true, titulo: true, cantidad_clases: true },
       },
       _count: {
         select: { inscripciones: true },

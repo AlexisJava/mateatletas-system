@@ -100,6 +100,16 @@ export class CreateComisionDto {
   @IsBoolean()
   @IsOptional()
   activo?: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      'ID de la planificación específica para esta comisión (override de la del producto). Enviar null para usar la del producto.',
+    example: 'clxyzplanif123',
+  })
+  @IsString()
+  @ValidateIf((o: CreateComisionDto) => o.planificacion_id !== null)
+  @IsOptional()
+  planificacion_id?: string | null;
 }
 
 /**

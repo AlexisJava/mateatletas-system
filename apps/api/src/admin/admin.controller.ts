@@ -680,16 +680,24 @@ export class AdminController {
   }
 
   /**
-   * Eliminar un grupo de clases (soft delete)
+   * Eliminar un grupo de clases
    * DELETE /api/admin/clase-grupos/:id
+   * DELETE /api/admin/clase-grupos/:id?permanent=true (hard delete)
    * Rol: Admin
    */
   @Delete('clase-grupos/:id')
   @ApiOperation({
     summary: 'Eliminar un grupo de clases',
-    description: 'Desactiva un ClaseGrupo (soft delete)',
+    description:
+      'Desactiva un ClaseGrupo (soft delete). Con ?permanent=true elimina permanentemente (solo si no tiene inscripciones activas).',
   })
-  async eliminarClaseGrupo(@Param('id', ParseIdPipe) id: string) {
+  async eliminarClaseGrupo(
+    @Param('id', ParseIdPipe) id: string,
+    @Query('permanent') permanent?: string,
+  ) {
+    if (permanent === 'true') {
+      return this.claseGruposService.eliminarClaseGrupoPermanente(id);
+    }
     return this.claseGruposService.eliminarClaseGrupo(id);
   }
 

@@ -82,11 +82,19 @@ export class ClaseGruposService {
 
     // Calcular fecha_fin automática para GRUPO_REGULAR
     let fechaFin: Date;
-    if (dto.tipo === TipoClaseGrupo.GRUPO_REGULAR && !dto.fechaFin) {
+    // Usar comparación de string para evitar problemas de enum
+    const esGrupoRegular =
+      dto.tipo === TipoClaseGrupo.GRUPO_REGULAR ||
+      (dto.tipo as string) === 'GRUPO_REGULAR';
+
+    if (esGrupoRegular && !dto.fechaFin) {
       // Siempre 15 de diciembre del año lectivo
       fechaFin = new Date(dto.anioLectivo, 11, 15); // Mes 11 = diciembre (0-indexed)
+    } else if (dto.fechaFin) {
+      fechaFin = new Date(dto.fechaFin);
     } else {
-      fechaFin = new Date(dto.fechaFin!);
+      // Fallback: Si no es GRUPO_REGULAR y no hay fechaFin, usar 15/dic del año lectivo
+      fechaFin = new Date(dto.anioLectivo, 11, 15);
     }
 
     const fechaInicio = new Date(dto.fechaInicio);
@@ -101,7 +109,6 @@ export class ClaseGruposService {
     // Crear el ClaseGrupo con las inscripciones en una transacción
     const claseGrupo = await this.prisma.$transaction(
       async (tx: Prisma.TransactionClient) => {
-        // Crear el grupo
         const grupo = await tx.claseGrupo.create({
           data: {
             grupo_id: dto.grupoId,
@@ -118,6 +125,7 @@ export class ClaseGruposService {
             docente_id: dto.docenteId,
             sector_id: dto.sectorId,
             nivel: dto.nivel,
+            producto_id: dto.productoId, // FASE 3: Vincular con producto (Club)
             activo: true,
           },
           include: {
@@ -572,7 +580,59 @@ export class ClaseGruposService {
 
     return {
       success: true,
-      message: `Horario eliminado exitosamente. ${grupoExistente._count.inscripcionesUnificadas} inscripciones fueron desactivadas.`,
+      message: `Horario desactivado exitosamente. ${grupoExistente._count.inscripcionesUnificadas} inscripciones fueron desactivadas.`,
+    };
+  }
+
+  /**
+   * Eliminar un ClaseGrupo permanentemente (hard delete)
+   * Solo permitido si no tiene inscripciones activas
+   */
+  async eliminarClaseGrupoPermanente(id: string) {
+    // Verificar que el grupo existe
+    const grupoExistente = await this.prisma.claseGrupo.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            inscripcionesUnificadas: {
+              where: { estado: 'ACTIVA' },
+            },
+          },
+        },
+      },
+    });
+
+    if (!grupoExistente) {
+      throw new NotFoundException(`No se encontró el grupo con ID ${id}`);
+    }
+
+    // No permitir hard delete si tiene inscripciones activas
+    if (grupoExistente._count.inscripcionesUnificadas > 0) {
+      throw new BadRequestException(
+        `No se puede eliminar permanentemente un horario con ${grupoExistente._count.inscripcionesUnificadas} inscripciones activas. ` +
+          `Desactívelo primero o elimine las inscripciones.`,
+      );
+    }
+
+    // Eliminar inscripciones manuales inactivas asociadas
+    await this.prisma.inscripcionClaseGrupo.deleteMany({
+      where: { clase_grupo_id: id },
+    });
+
+    // Eliminar registros de asistencia asociados
+    await this.prisma.asistenciaClaseGrupo.deleteMany({
+      where: { clase_grupo_id: id },
+    });
+
+    // Hard delete del ClaseGrupo
+    await this.prisma.claseGrupo.delete({
+      where: { id },
+    });
+
+    return {
+      success: true,
+      message: `Horario eliminado permanentemente.`,
     };
   }
 

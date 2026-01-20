@@ -121,6 +121,7 @@ export interface CrearClaseGrupoDto {
   sectorId?: string;
   nivel?: string;
   estudiantesIds: string[];
+  productoId?: string; // FASE 3: Vincular con Producto tipo Club
 }
 
 export interface ListarClaseGruposParams {

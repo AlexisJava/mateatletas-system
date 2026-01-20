@@ -7,6 +7,7 @@ import { createProduct, updateProduct } from '@/lib/api/admin.api';
 import type { AdminProducto } from '../types/productos.types';
 
 type TipoProducto =
+  | 'Club'
   | 'Evento'
   | 'Digital'
   | 'Fisico'
@@ -17,6 +18,9 @@ type TipoProducto =
 
 /** Tipos que requieren fecha y cupo */
 const TIPOS_CON_FECHA = ['Evento', 'Curso'];
+
+/** Tipos que requieren solo cupo (sin fechas) - se gestionan con ClaseGrupos */
+const TIPOS_SOLO_CUPO = ['Club'];
 
 interface ProductoFormData {
   nombre: string;
@@ -295,6 +299,7 @@ export function ProductoFormModal({
                 }`}
               >
                 <option value="">Seleccionar...</option>
+                <option value="Club">Club (Actividad recurrente)</option>
                 <option value="Evento">Evento (Colonia, Taller)</option>
                 <option value="Curso">Curso Online</option>
                 <option value="Digital">Recurso Digital</option>

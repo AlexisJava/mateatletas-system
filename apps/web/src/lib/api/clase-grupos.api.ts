@@ -24,6 +24,10 @@ export async function crearClaseGrupo(data: CrearClaseGrupoDto): Promise<ClaseGr
 
 /**
  * Listar ClaseGrupos con filtros opcionales
+ *
+ * NOTA: El interceptor de axios hace unwrap de { data: ... } automáticamente.
+ * El backend retorna { success, data: [...], total } pero el interceptor
+ * extrae solo el contenido de "data", así que recibimos el array directamente.
  */
 export async function listarClaseGrupos(params?: ListarClaseGruposParams): Promise<{
   success: boolean;
@@ -55,15 +59,18 @@ export async function listarClaseGrupos(params?: ListarClaseGruposParams): Promi
   const queryString = queryParams.toString();
   const url = `/admin/clase-grupos${queryString ? `?${queryString}` : ''}`;
 
-  // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get<{
-      success: boolean;
-      data: ClaseGrupo[];
-      total: number;
-    }>(url);
+    // El interceptor de axios hace unwrap de { data: ... }
+    // Por lo que recibimos el array de ClaseGrupo directamente
+    const response = await axios.get<ClaseGrupo[]>(url);
 
-    return response;
+    // Envolver en el formato esperado por los consumidores
+    const claseGrupos = Array.isArray(response) ? response : [];
+    return {
+      success: true,
+      data: claseGrupos,
+      total: claseGrupos.length,
+    };
   } catch (error) {
     console.error('Error al listar los grupos de clases:', error);
     throw error;
@@ -126,16 +133,22 @@ export async function actualizarClaseGrupo(
 }
 
 /**
- * Eliminar un ClaseGrupo (soft delete)
- * DELETE /admin/clase-grupos/:id
+ * Eliminar/Desactivar un ClaseGrupo
+ * DELETE /admin/clase-grupos/:id - soft delete (desactiva)
+ * DELETE /admin/clase-grupos/:id?permanent=true - hard delete (elimina permanentemente)
+ *
+ * @param id - ID del ClaseGrupo
+ * @param permanent - Si true, elimina permanentemente (solo si no tiene inscripciones activas)
  */
 export async function eliminarClaseGrupo(
   id: string,
+  permanent: boolean = false,
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const response = await axios.delete<{ success: boolean; message: string }>(
-      `/admin/clase-grupos/${id}`,
-    );
+    const url = permanent
+      ? `/admin/clase-grupos/${id}?permanent=true`
+      : `/admin/clase-grupos/${id}`;
+    const response = await axios.delete<{ success: boolean; message: string }>(url);
     return response;
   } catch (error) {
     console.error('Error al eliminar el grupo de clases:', error);
