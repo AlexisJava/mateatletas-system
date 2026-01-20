@@ -383,6 +383,16 @@ export default function LoginPage() {
                           </motion.div>
                         )}
 
+                        {/* Forgot Password Link */}
+                        <div className="text-right">
+                          <Link
+                            href="/forgot-password"
+                            className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
+                          >
+                            ¿Olvidaste tu contraseña?
+                          </Link>
+                        </div>
+
                         {/* Login Button */}
                         <button
                           type="submit"

@@ -847,13 +847,18 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 - [x] 3.1 CRUD de ClaseGrupos ✅ (2026-01-20)
 - [x] 3.2 UI pausar/cancelar Suscripciones ✅ (2026-01-20)
 - [x] 3.3 UI cambiar tier de inscripción ✅ (2026-01-20)
-- [ ] 3.4 Dashboard de Monitoring (DLQ)
-- [ ] 3.5 Dashboard de Audit Logs
-- [ ] 3.6 UI para configurar MFA
+- [x] 3.7 Dashboard refactor: 5 tabs con glassmorphism ✅ (2026-01-20)
+- [x] 3.8 Dashboard: tiempoPromedioMinutos endpoint ✅ (2026-01-20)
+- [x] 3.9 Dashboard: crecimientoMensual calculado real ✅ (2026-01-20)
+- [ ] 3.4 Dashboard de Monitoring (DLQ) ⏸️ DIFERIDO
+- [ ] 3.5 Dashboard de Audit Logs ⏸️ DIFERIDO
+- [ ] 3.6 UI para configurar MFA ⏸️ DIFERIDO
+
+> **Nota**: Items 3.4-3.6 diferidos para priorizar fases de usuarios finales (4, 5, 6)
 
 ### FASE 4: Portal Docente
 
-- [ ] 4.1 Recuperación de contraseña
+- [x] 4.1 Recuperación de contraseña ✅ (2026-01-20) - Compartido con Tutor
 - [ ] 4.2 Compartir pantalla
 - [ ] 4.3 Historial detallado de asistencia
 - [ ] 4.4 Reportes gráficos de asistencia
@@ -862,7 +867,7 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 
 ### FASE 5: Portal Tutor
 
-- [ ] 5.1 Recuperación de contraseña
+- [x] 5.1 Recuperación de contraseña ✅ (2026-01-20) - Compartido con Docente
 - [ ] 5.2 Editar datos de estudiante
 - [ ] 5.3 Pausar suscripción
 - [ ] 5.4 UI cambiar horario de inscripción
@@ -870,7 +875,7 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 
 ### FASE 6: Portal Estudiante
 
-- [ ] 6.1 Recuperación de contraseña
+- [x] 6.1 Recuperación de contraseña ✅ (2026-01-20) - Mensaje: "Contactá a tu tutor"
 - [ ] 6.2 Restricción por tier (MODELO 2026)
 - [ ] 6.3 Animación de logro desbloqueado
 - [ ] 6.4 Intent de juegos Phaser
@@ -977,13 +982,18 @@ Semana 4+: FASE 7 + FASE 9 (Mensajería + Contenido)
 
 ## Historial de Cambios
 
-| Fecha      | Cambio                                                                              | Autor  |
-| ---------- | ----------------------------------------------------------------------------------- | ------ |
-| 2026-01-19 | Creación inicial del documento                                                      | Claude |
-| 2026-01-19 | ✅ Completados Quick Wins 0.1 + 0.2                                                 | Claude |
-| 2026-01-19 | 📝 Documentado BUG-001 (tier inconsistente)                                         | Claude |
-| 2026-01-20 | ✅ FASE 3.1: CRUD completo de ClaseGrupos (crear, editar, soft delete, hard delete) | Claude |
-| 2026-01-20 | ✅ Planificación override por Comisión (Evento/Taller)                              | Claude |
-| 2026-01-20 | ✅ VentasSection para productos Físico/Digital                                      | Claude |
-| 2026-01-20 | ✅ FASE 3.2+3.3: Admin pausar/reactivar/cancelar suscripciones + cambiar tier       | Claude |
-| 2026-01-20 | ✅ Tests de integración BBT (28 tests) para endpoints admin suscripciones           | Claude |
+| Fecha      | Cambio                                                                                                       | Autor  |
+| ---------- | ------------------------------------------------------------------------------------------------------------ | ------ |
+| 2026-01-19 | Creación inicial del documento                                                                               | Claude |
+| 2026-01-19 | ✅ Completados Quick Wins 0.1 + 0.2                                                                          | Claude |
+| 2026-01-19 | 📝 Documentado BUG-001 (tier inconsistente)                                                                  | Claude |
+| 2026-01-20 | ✅ FASE 3.1: CRUD completo de ClaseGrupos (crear, editar, soft delete, hard delete)                          | Claude |
+| 2026-01-20 | ✅ Planificación override por Comisión (Evento/Taller)                                                       | Claude |
+| 2026-01-20 | ✅ VentasSection para productos Físico/Digital                                                               | Claude |
+| 2026-01-20 | ✅ FASE 3.2+3.3: Admin pausar/reactivar/cancelar suscripciones + cambiar tier                                | Claude |
+| 2026-01-20 | ✅ Tests de integración BBT (28 tests) para endpoints admin suscripciones                                    | Claude |
+| 2026-01-20 | ✅ Dashboard Admin refactor: 5 tabs (Resumen, Estudiantes, Finanzas, Retención, Contenido) con glassmorphism | Claude |
+| 2026-01-20 | ✅ Eliminados TODOS los mocks del dashboard - datos reales del backend                                       | Claude |
+| 2026-01-20 | ✅ Endpoint tiempoPromedioMinutos en admin-stats.service.ts                                                  | Claude |
+| 2026-01-20 | ✅ crecimientoMensual calculado desde retention data (no hardcodeado)                                        | Claude |
+| 2026-01-20 | ✅ FASE 4.1+5.1+6.1: Recuperación de contraseña - páginas /forgot-password y /reset-password                 | Claude |
