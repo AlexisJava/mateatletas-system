@@ -8,10 +8,10 @@ interface AlertasBannerProps {
 }
 
 const ALERTA_CONFIG: Record<TipoAlerta, { icon: typeof AlertTriangle; color: string }> = {
-  pago_vencido: { icon: AlertTriangle, color: 'text-red-400' },
-  pago_por_vencer: { icon: Clock, color: 'text-amber-400' },
-  clase_hoy: { icon: BookOpen, color: 'text-cyan-400' },
-  asistencia_baja: { icon: TrendingDown, color: 'text-orange-400' },
+  pagoVencido: { icon: AlertTriangle, color: 'text-red-400' },
+  pagoPorVencer: { icon: Clock, color: 'text-amber-400' },
+  claseHoy: { icon: BookOpen, color: 'text-cyan-400' },
+  asistenciaBaja: { icon: TrendingDown, color: 'text-orange-400' },
 };
 
 /**
@@ -67,13 +67,13 @@ export function AlertasBanner({ alertas }: AlertasBannerProps) {
 
 function getAlertaLabel(tipo: TipoAlerta, count: number): string {
   switch (tipo) {
-    case 'pago_vencido':
+    case 'pagoVencido':
       return `${count} pago${count > 1 ? 's' : ''} vencido${count > 1 ? 's' : ''}`;
-    case 'pago_por_vencer':
+    case 'pagoPorVencer':
       return `${count} pago${count > 1 ? 's' : ''} por vencer`;
-    case 'clase_hoy':
+    case 'claseHoy':
       return `${count} clase${count > 1 ? 's' : ''} hoy`;
-    case 'asistencia_baja':
+    case 'asistenciaBaja':
       return `Asistencia baja`;
     default:
       return `${count} alerta${count > 1 ? 's' : ''}`;

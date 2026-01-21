@@ -142,7 +142,7 @@ const claseEstudianteSchema = z.object({
   linkMeet: z.string().nullable(),
   fechaInscripcion: z.string(),
   // Nuevos campos para distinguir tipo de clase
-  tipo: z.enum(['clase_grupal', 'comision']).optional(),
+  tipo: z.enum(['claseGrupal', 'comision']).optional(),
   comisionId: z.string().optional(),
   // LiveKit: estado de clase en vivo
   estadoClase: estadoClaseEnum.optional().default('Programada'),

@@ -7,10 +7,10 @@
  * Tipo de alerta para el dashboard
  */
 export type TipoAlerta =
-  | 'pago_vencido'
-  | 'pago_por_vencer'
-  | 'clase_hoy'
-  | 'asistencia_baja';
+  | 'pagoVencido'
+  | 'pagoPorVencer'
+  | 'claseHoy'
+  | 'asistenciaBaja';
 
 /**
  * Prioridad de alerta (para ordenamiento)

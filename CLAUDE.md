@@ -18,7 +18,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Código
 
 - PROHIBIDO: `any`, `unknown`, `@ts-ignore`, `as`, `!`, `?.` sin justificación documentada
-- PROHIBIDO: Archivos de más de 300 líneas (God Components/Services)
+- PROHIBIDO: Archivos de **lógica de negocio** de más de 300 líneas (God Components/Services)
+  - **Excepción permitida:** Types/DTOs, API clients, test files, game scenes, y schemas Zod pueden exceder el límite si están bien organizados internamente
 - PROHIBIDO: Código duplicado - extraer a función/componente compartido
 - OBLIGATORIO: Tipos explícitos en parámetros y retornos
 - OBLIGATORIO: Clean Architecture - separar responsabilidades

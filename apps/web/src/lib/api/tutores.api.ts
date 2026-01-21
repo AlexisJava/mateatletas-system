@@ -4,7 +4,7 @@ import apiClient from '../axios';
 // TIPOS DE RESPUESTA - Basados en /apps/api/src/tutor/types/tutor-dashboard.types.ts
 // ============================================================================
 
-export type TipoAlerta = 'pago_vencido' | 'pago_por_vencer' | 'clase_hoy' | 'asistencia_baja';
+export type TipoAlerta = 'pagoVencido' | 'pagoPorVencer' | 'claseHoy' | 'asistenciaBaja';
 export type PrioridadAlerta = 'alta' | 'media' | 'baja';
 
 export interface AlertaDashboard {

@@ -701,7 +701,7 @@ export class EstudianteQueryService {
           sector: cg.sector,
           link_meet: cg.grupo?.link_meet || null,
           fecha_inscripcion: inscripcion.fecha_inscripcion,
-          tipo: 'clase_grupal' as const,
+          tipo: 'claseGrupal' as const,
           // LiveKit: estado de clase en vivo
           estado_clase: cg.estado_clase,
           iniciada_en: cg.iniciada_en,

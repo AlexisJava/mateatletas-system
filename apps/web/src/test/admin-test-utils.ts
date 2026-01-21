@@ -145,12 +145,12 @@ export const createMockComision = (overrides: Record<string, unknown> = {}) => (
   id: `comision-${Math.random().toString(36).substr(2, 9)}`,
   nombre: 'Comisión Test',
   descripcion: 'Descripción de prueba',
-  producto_id: 'producto-1',
-  cupo_maximo: 20,
+  productoId: 'producto-1',
+  cupoMaximo: 20,
   horario: 'Lun-Vie 9:00-12:00',
   activo: true,
-  total_inscriptos: 0,
-  cupos_disponibles: 20,
+  totalInscriptos: 0,
+  cuposDisponibles: 20,
   ...overrides,
 });
 

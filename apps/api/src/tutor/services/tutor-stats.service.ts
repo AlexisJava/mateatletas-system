@@ -457,7 +457,7 @@ export class TutorStatsService {
     if (pago.estaVencido) {
       return {
         id: `pago-vencido-${pago.id}`,
-        tipo: 'pago_vencido',
+        tipo: 'pagoVencido',
         prioridad: 'alta',
         titulo: 'Pago Vencido',
         mensaje: `Tenés $${pago.monto.toLocaleString('es-AR')} vencido (${Math.abs(pago.diasParaVencer)} días de atraso)`,
@@ -473,7 +473,7 @@ export class TutorStatsService {
       const diasLabel = pago.diasParaVencer === 1 ? 'día' : 'días';
       return {
         id: `pago-por-vencer-${pago.id}`,
-        tipo: 'pago_por_vencer',
+        tipo: 'pagoPorVencer',
         prioridad: pago.diasParaVencer <= 3 ? 'alta' : 'media',
         titulo: 'Pago Próximo a Vencer',
         mensaje: `Tenés $${pago.monto.toLocaleString('es-AR')} pendiente. Vence en ${pago.diasParaVencer} ${diasLabel}`,
@@ -503,7 +503,7 @@ export class TutorStatsService {
 
     alertas.push({
       id: 'clases-hoy',
-      tipo: 'clase_hoy',
+      tipo: 'claseHoy',
       prioridad: 'media',
       titulo: `${clasesHoy.length} ${claseLabel} Hoy`,
       mensaje: `Tenés ${clasesHoy.length} ${programadaLabel} para hoy`,
@@ -528,7 +528,7 @@ export class TutorStatsService {
       if (porcentaje !== null && porcentaje < 70) {
         alertas.push({
           id: `asistencia-baja-${estudiante.id}`,
-          tipo: 'asistencia_baja',
+          tipo: 'asistenciaBaja',
           prioridad: porcentaje < 50 ? 'alta' : 'media',
           titulo: 'Asistencia Baja',
           mensaje: `${estudiante.nombre} ${estudiante.apellido} tiene ${porcentaje}% de asistencia`,
