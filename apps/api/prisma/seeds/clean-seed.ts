@@ -483,14 +483,90 @@ async function seedGruposYClases(prisma: PrismaClient, docenteId: string) {
     },
   });
 
-  console.log(`   ✓ Grupo Quantum: ${claseQuantum.nombre}`);
-  console.log(`   ✓ Grupo Vertex: ${claseVertex.nombre}`);
-  console.log(`   ✓ Grupo Pulsar: ${clasePulsar.nombre}`);
+  console.log(`   ✓ ClaseGrupo Quantum: ${claseQuantum.nombre}`);
+  console.log(`   ✓ ClaseGrupo Vertex: ${claseVertex.nombre}`);
+  console.log(`   ✓ ClaseGrupo Pulsar: ${clasePulsar.nombre}`);
+
+  // Crear Comisiones (para el portal de docente que usa este modelo)
+  // Las comisiones están vinculadas a un Producto
+  const producto = await prisma.producto.upsert({
+    where: { id: 'producto-matematica-steam' },
+    update: {},
+    create: {
+      id: 'producto-matematica-steam',
+      nombre: 'Matemática STEAM',
+      descripcion: 'Clases de matemática para todas las casas',
+      precio: 95000,
+      tipo: 'Club',
+      activo: true,
+    },
+  });
+
+  const comisionQuantum = await prisma.comision.create({
+    data: {
+      nombre: 'Matemática Quantum - Lunes 18:00',
+      descripcion: 'Clase de matemática para Casa Quantum',
+      producto_id: producto.id,
+      casa_id: casaQuantum.id,
+      grupo_id: grupoQuantum.id,
+      docente_id: docenteId,
+      cupo_maximo: 15,
+      horario: 'Lunes 18:00 - 19:30',
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin,
+      activo: true,
+      modalidad: TipoAccesoInscripcion.SINCRONICO,
+      livekit_room_name: `comision_quantum_${Date.now()}`,
+    },
+  });
+
+  const comisionVertex = await prisma.comision.create({
+    data: {
+      nombre: 'Matemática Vertex - Martes 19:00',
+      descripcion: 'Clase de matemática para Casa Vertex',
+      producto_id: producto.id,
+      casa_id: casaVertex.id,
+      grupo_id: grupoVertex.id,
+      docente_id: docenteId,
+      cupo_maximo: 15,
+      horario: 'Martes 19:00 - 20:30',
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin,
+      activo: true,
+      modalidad: TipoAccesoInscripcion.SINCRONICO,
+      livekit_room_name: `comision_vertex_${Date.now()}`,
+    },
+  });
+
+  const comisionPulsar = await prisma.comision.create({
+    data: {
+      nombre: 'Matemática Pulsar - Miércoles 20:00',
+      descripcion: 'Clase de matemática para Casa Pulsar',
+      producto_id: producto.id,
+      casa_id: casaPulsar.id,
+      grupo_id: grupoPulsar.id,
+      docente_id: docenteId,
+      cupo_maximo: 15,
+      horario: 'Miércoles 20:00 - 21:30',
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin,
+      activo: true,
+      modalidad: TipoAccesoInscripcion.SINCRONICO,
+      livekit_room_name: `comision_pulsar_${Date.now()}`,
+    },
+  });
+
+  console.log(`   ✓ Comisión Quantum: ${comisionQuantum.nombre}`);
+  console.log(`   ✓ Comisión Vertex: ${comisionVertex.nombre}`);
+  console.log(`   ✓ Comisión Pulsar: ${comisionPulsar.nombre}`);
 
   return {
     claseQuantum,
     claseVertex,
     clasePulsar,
+    comisionQuantum,
+    comisionVertex,
+    comisionPulsar,
     casaQuantum,
     casaVertex,
     casaPulsar,
@@ -506,6 +582,9 @@ async function seedTutorYFamilia(
     casaQuantum: { id: string };
     casaVertex: { id: string };
     casaPulsar: { id: string };
+    comisionQuantum: { id: string };
+    comisionVertex: { id: string };
+    comisionPulsar: { id: string };
   },
 ) {
   console.log('👨‍👩‍👧‍👦 Creando tutor y familia...');
@@ -528,6 +607,13 @@ async function seedTutorYFamilia(
   });
 
   console.log(`   ✓ Tutor: ${tutor.nombre} ${tutor.apellido} (${tutor.email})`);
+
+  // Mapeo de casa a comision para inscribir estudiantes
+  const casaToComision: Record<string, string> = {
+    [clases.casaQuantum.id]: clases.comisionQuantum.id,
+    [clases.casaVertex.id]: clases.comisionVertex.id,
+    [clases.casaPulsar.id]: clases.comisionPulsar.id,
+  };
 
   // Definición de los 3 hijos - TODOS SINCRÓNICOS para testing completo
   const hijos = [
@@ -581,9 +667,19 @@ async function seedTutorYFamilia(
 
   for (const hijo of hijos) {
     // Crear estudiante
+    // IMPORTANTE: update incluye plan_id para que re-ejecutar el seed actualice estudiantes existentes
     const estudiante = await prisma.estudiante.upsert({
       where: { username: hijo.username },
-      update: {},
+      update: {
+        nombre: hijo.nombre,
+        apellido: hijo.apellido,
+        edad: hijo.edad,
+        nivelEscolar: hijo.nivelEscolar,
+        password_hash: passwordHash,
+        tutor_id: tutor.id,
+        casaId: hijo.casaId,
+        plan_id: hijo.planId, // CRÍTICO: actualizar plan para acceso sincrónico
+      },
       create: {
         username: hijo.username,
         nombre: hijo.nombre,
@@ -620,6 +716,12 @@ async function seedTutorYFamilia(
     });
 
     // Crear inscripción a ClaseGrupo (manual - para docente)
+    // IMPORTANTE: update incluye tipo_acceso para garantizar acceso sincrónico
+    const tipoAccesoInscripcion =
+      hijo.tier === TierNombre.STEAM_SINCRONICO
+        ? TipoAccesoInscripcion.SINCRONICO
+        : TipoAccesoInscripcion.ASINCRONICO;
+
     await prisma.inscripcionClaseGrupo.upsert({
       where: {
         clase_grupo_id_estudiante_id: {
@@ -627,17 +729,36 @@ async function seedTutorYFamilia(
           estudiante_id: estudiante.id,
         },
       },
-      update: {},
+      update: {
+        tutor_id: tutor.id,
+        tipo_acceso: tipoAccesoInscripcion,
+      },
       create: {
         clase_grupo_id: hijo.claseGrupoId,
         estudiante_id: estudiante.id,
         tutor_id: tutor.id,
-        tipo_acceso:
-          hijo.tier === TierNombre.STEAM_SINCRONICO
-            ? TipoAccesoInscripcion.SINCRONICO
-            : TipoAccesoInscripcion.ASINCRONICO,
+        tipo_acceso: tipoAccesoInscripcion,
       },
     });
+
+    // Crear inscripción a Comision (para portal docente)
+    const comisionId = casaToComision[hijo.casaId];
+    if (comisionId) {
+      await prisma.inscripcionComision.upsert({
+        where: {
+          comision_id_estudiante_id: {
+            comision_id: comisionId,
+            estudiante_id: estudiante.id,
+          },
+        },
+        update: {},
+        create: {
+          comision_id: comisionId,
+          estudiante_id: estudiante.id,
+          estado: 'Confirmada',
+        },
+      });
+    }
 
     // Crear inscripción de actividad (sistema 2026)
     await prisma.inscripcionActividad

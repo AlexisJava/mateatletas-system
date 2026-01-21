@@ -103,8 +103,11 @@ apiClient.interceptors.response.use(
       // Las respuestas paginadas tienen: { data: [...], metadata: { total, page, limit, totalPages } }
       // Las respuestas normales tienen: { data: {...}, metadata: { timestamp } } - solo timestamp
       const metadata = axiosData.metadata as Record<string, unknown> | undefined;
+      // Detectar paginación: puede estar en metadata O en el root level
       const isPaginatedResponse =
         'meta' in axiosData ||
+        'total' in axiosData ||
+        'offset' in axiosData ||
         (metadata && ('total' in metadata || 'page' in metadata || 'totalPages' in metadata));
 
       if (isPaginatedResponse) {

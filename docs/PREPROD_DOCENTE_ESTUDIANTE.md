@@ -1984,9 +1984,9 @@ Docente otorga puntos → PuntoObtenido (registro)
 
 ### Bugs Actuales
 
-- [ ] BUG-001: Asignar Puntos (DTO mismatch)
-- [ ] BUG-002: Observaciones
-- [ ] BUG-003: Inconsistencia XP
+- [x] BUG-001: Asignar Puntos (DTO mismatch) ✅
+- [x] BUG-002: Observaciones ✅
+- [x] BUG-003: Inconsistencia XP ✅
 
 ### WebSocket Aula Viva
 
@@ -2627,9 +2627,9 @@ packages/lesson-engine/src/
 
 ### Bugs Actuales
 
-- [ ] BUG-001: Asignar Puntos (DTO mismatch)
-- [ ] BUG-002: Observaciones
-- [ ] BUG-003: Inconsistencia XP
+- [x] BUG-001: Asignar Puntos (DTO mismatch) ✅
+- [x] BUG-002: Observaciones ✅
+- [x] BUG-003: Inconsistencia XP ✅
 
 ### WebSocket Aula Viva
 

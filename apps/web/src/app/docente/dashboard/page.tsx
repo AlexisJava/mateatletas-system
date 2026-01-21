@@ -214,11 +214,14 @@ export default function DocenteDashboard() {
         <div className="flex items-center gap-4">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className={`relative p-2.5 rounded-full transition-colors group ${showNotifications ? 'bg-slate-800 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
+            className={`relative p-2.5 rounded-full transition-all duration-300 group ${showNotifications ? 'bg-slate-800 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'} active:scale-90`}
           >
-            <Bell size={22} />
-            {alertas.length > 0 && (
-              <span className="absolute top-2 right-2 w-2 h-2 bg-amber-500 rounded-full ring-2 ring-[#020617] animate-pulse"></span>
+            <Bell
+              size={22}
+              className="transition-transform duration-300 group-active:rotate-12 group-hover:scale-110"
+            />
+            {alertas.filter((a) => !a.leida).length > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-amber-500 rounded-full ring-2 ring-[#020617] animate-pulse" />
             )}
           </button>
 
@@ -227,6 +230,10 @@ export default function DocenteDashboard() {
               alertas={alertas}
               onClose={() => setShowNotifications(false)}
               onViewAll={() => setShowNotifications(false)}
+              onMarkAsRead={(id) =>
+                setAlertas((prev) => prev.map((a) => (a.id === id ? { ...a, leida: true } : a)))
+              }
+              onMarkAllAsRead={() => setAlertas((prev) => prev.map((a) => ({ ...a, leida: true })))}
             />
           )}
 

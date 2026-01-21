@@ -18,6 +18,7 @@ export interface Alerta {
   mensaje: string;
   estudiante: string;
   comision_id: string;
+  leida?: boolean;
 }
 
 // =============================================================================

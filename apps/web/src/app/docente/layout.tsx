@@ -31,11 +31,10 @@ function DocenteLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="fixed inset-0 bg-[#020617] flex flex-col overflow-hidden" data-docente="true">
-      {/* Modal de cambio de password obligatorio */}
-      <ModalCambioPasswordObligatorio isOpen={mustChangePassword} />
-
-      {/* Main Content - Full height */}
-      {children}
+      <ModalCambioPasswordObligatorio key="password-modal" isOpen={mustChangePassword} />
+      <main key="main-content" className="flex-1 min-h-0">
+        {children}
+      </main>
     </div>
   );
 }

@@ -14,19 +14,31 @@ import { Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { createWsJwtMiddleware } from './middleware/ws-jwt.middleware';
 import type { AuthenticatedSocket } from './interfaces';
 import { PresenciaService, Participante } from './services/presencia.service';
+import { ManosService } from './services/manos.service';
+import { ModeracionService, TipoMuteo } from './services/moderacion.service';
 import {
   UnirseSalaDto,
   SalirSalaDto,
   EnviarMensajeDto,
   ToggleChatDto,
+  LevantarManoDto,
+  BajarManoDto,
+  DarPalabraDto,
+  MutearParticipanteDto,
+  DesmutearParticipanteDto,
+  MutearTodosDto,
+  DesmutearTodosDto,
+  ExpulsarParticipanteDto,
+  HablandoDto,
 } from './dto';
 import { randomUUID } from 'crypto';
 
 /** Respuesta al unirse a una sala */
 interface UnirseSalaResponse {
   exito: boolean;
-  salaId: string;
-  participantes: Participante[];
+  salaId?: string;
+  participantes?: Participante[];
+  error?: string;
 }
 
 /** Datos emitidos cuando un participante entra/sale */
@@ -85,6 +97,8 @@ export class AulaVivaGateway
   constructor(
     private readonly jwtService: JwtService,
     private readonly presenciaService: PresenciaService,
+    private readonly manosService: ManosService,
+    private readonly moderacionService: ModeracionService,
   ) {}
 
   afterInit(server: Server): void {
@@ -100,6 +114,12 @@ export class AulaVivaGateway
   handleDisconnect(client: AuthenticatedSocket): void {
     const userId = client.data?.userId ?? 'desconocido';
     const nombre = client.data?.nombre ?? 'desconocido';
+
+    // Remover manos levantadas del usuario y notificar
+    const salasConManoBajada = this.manosService.removerManosPorUsuario(userId);
+    for (const salaId of salasConManoBajada) {
+      this.server.to(salaId).emit('mano-bajada', { odooId: userId });
+    }
 
     // Remover de todas las salas y notificar
     const salasAfectadas = this.presenciaService.removerParticipante(client.id);
@@ -131,6 +151,23 @@ export class AulaVivaGateway
     const salaId = payload.claseGrupoId
       ? `clase:${payload.claseGrupoId}`
       : `comision:${payload.comisionId}`;
+
+    // Verificar si el usuario está expulsado de esta sala
+    if (this.moderacionService.estaExpulsado(salaId, client.data.userId)) {
+      const motivo = this.moderacionService.getMotivoExpulsion(
+        salaId,
+        client.data.userId,
+      );
+      this.logger.warn(
+        `Usuario ${client.data.nombre} intentó unirse a sala ${salaId} pero está expulsado`,
+      );
+      return {
+        exito: false,
+        error:
+          motivo ??
+          'Has sido expulsado de esta sala. Podrás volver en 24 horas.',
+      };
+    }
 
     // Crear participante
     const participante: Participante = {
@@ -301,5 +338,439 @@ export class AulaVivaGateway
     );
 
     return { exito: true, habilitado };
+  }
+
+  // ============================================================================
+  // HANDLERS: LEVANTAR LA MANO
+  // ============================================================================
+
+  /**
+   * Permite a un estudiante levantar la mano en una sala
+   * Solo usuarios con rol ESTUDIANTE pueden usar este evento
+   *
+   * Evento emitido: mano-levantada (broadcast a toda la sala)
+   */
+  @SubscribeMessage('levantar-mano')
+  handleLevantarMano(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: LevantarManoDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId } = payload;
+
+    // Solo estudiantes pueden levantar la mano
+    if (client.data.rol !== 'ESTUDIANTE') {
+      return {
+        exito: false,
+        error: 'Solo estudiantes pueden levantar la mano',
+      };
+    }
+
+    // Verificar que el estudiante está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Levantar la mano
+    const mano = this.manosService.levantarMano(
+      salaId,
+      client.data.userId,
+      client.data.nombre,
+    );
+
+    // Notificar a todos en la sala
+    this.server.to(salaId).emit('mano-levantada', {
+      odooId: mano.odooId,
+      nombre: mano.nombre,
+      timestamp: mano.timestamp.toISOString(),
+    });
+
+    this.logger.log(`${client.data.nombre} levantó la mano en sala ${salaId}`);
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite a un estudiante bajar la mano en una sala
+   * Solo usuarios con rol ESTUDIANTE pueden usar este evento
+   *
+   * Evento emitido: mano-bajada (broadcast a toda la sala)
+   */
+  @SubscribeMessage('bajar-mano')
+  handleBajarMano(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: BajarManoDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId } = payload;
+
+    // Solo estudiantes pueden bajar la mano
+    if (client.data.rol !== 'ESTUDIANTE') {
+      return { exito: false, error: 'Solo estudiantes pueden bajar la mano' };
+    }
+
+    // Verificar que el estudiante está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Bajar la mano
+    const bajada = this.manosService.bajarMano(salaId, client.data.userId);
+
+    if (!bajada) {
+      return { exito: false, error: 'No tenías la mano levantada' };
+    }
+
+    // Notificar a todos en la sala
+    this.server.to(salaId).emit('mano-bajada', {
+      odooId: client.data.userId,
+    });
+
+    this.logger.log(`${client.data.nombre} bajó la mano en sala ${salaId}`);
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente dar la palabra a un estudiante
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   * La mano del estudiante baja automáticamente al darle la palabra
+   *
+   * Evento emitido: palabra-otorgada (broadcast a toda la sala)
+   */
+  @SubscribeMessage('dar-palabra')
+  handleDarPalabra(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: DarPalabraDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId, odooIdEstudiante } = payload;
+
+    // Solo docentes pueden dar la palabra
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo el docente puede dar la palabra' };
+    }
+
+    // Verificar que el docente está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Dar la palabra (baja la mano automáticamente)
+    const mano = this.manosService.darPalabra(salaId, odooIdEstudiante);
+
+    if (!mano) {
+      return {
+        exito: false,
+        error: 'El estudiante no tiene la mano levantada',
+      };
+    }
+
+    // Notificar a todos en la sala
+    this.server.to(salaId).emit('palabra-otorgada', {
+      odooId: mano.odooId,
+      nombre: mano.nombre,
+    });
+
+    this.logger.log(
+      `Palabra otorgada a ${mano.nombre} en sala ${salaId} por ${client.data.nombre}`,
+    );
+
+    return { exito: true };
+  }
+
+  // ============================================================================
+  // HANDLERS: MODERACIÓN (MUTEAR/EXPULSAR)
+  // ============================================================================
+
+  /**
+   * Permite al docente mutear a un participante
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   *
+   * Evento emitido: participante-muteado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('mutear-participante')
+  handleMutearParticipante(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: MutearParticipanteDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId, odooIdEstudiante, tipo } = payload;
+
+    // Solo docentes pueden mutear
+    if (client.data.rol !== 'DOCENTE') {
+      return {
+        exito: false,
+        error: 'Solo el docente puede mutear participantes',
+      };
+    }
+
+    // Verificar que el docente está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Mutear al participante
+    this.moderacionService.mutear(salaId, odooIdEstudiante, tipo as TipoMuteo);
+
+    // Notificar a todos en la sala
+    this.server.to(salaId).emit('participante-muteado', {
+      odooId: odooIdEstudiante,
+      tipo,
+    });
+
+    this.logger.log(
+      `${odooIdEstudiante} muteado (${tipo}) en sala ${salaId} por ${client.data.nombre}`,
+    );
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente desmutear a un participante
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   *
+   * Evento emitido: participante-desmuteado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('desmutear-participante')
+  handleDesmutearParticipante(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: DesmutearParticipanteDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId, odooIdEstudiante } = payload;
+
+    // Solo docentes pueden desmutear
+    if (client.data.rol !== 'DOCENTE') {
+      return {
+        exito: false,
+        error: 'Solo el docente puede desmutear participantes',
+      };
+    }
+
+    // Verificar que el docente está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Desmutear al participante
+    const estabaMuteado = this.moderacionService.desmutear(
+      salaId,
+      odooIdEstudiante,
+    );
+
+    if (!estabaMuteado) {
+      return { exito: false, error: 'El participante no estaba muteado' };
+    }
+
+    // Notificar a todos en la sala
+    this.server.to(salaId).emit('participante-desmuteado', {
+      odooId: odooIdEstudiante,
+    });
+
+    this.logger.log(
+      `${odooIdEstudiante} desmuteado en sala ${salaId} por ${client.data.nombre}`,
+    );
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente mutear a todos los participantes
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   *
+   * Evento emitido: todos-muteados (broadcast a toda la sala)
+   */
+  @SubscribeMessage('mutear-todos')
+  handleMutearTodos(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: MutearTodosDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId, tipo, excepto = [] } = payload;
+
+    // Solo docentes pueden mutear
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo el docente puede mutear a todos' };
+    }
+
+    // Verificar que el docente está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Obtener lista de participantes en la sala
+    const participantes = this.presenciaService.getParticipantesDeSala(salaId);
+    const odooIds = participantes.map((p) => p.odidentidadUsuario);
+
+    // El docente siempre se excluye automáticamente
+    const exceptoConDocente = [...new Set([...excepto, client.data.userId])];
+
+    // Mutear a todos
+    const muteados = this.moderacionService.mutearTodos(
+      salaId,
+      tipo as TipoMuteo,
+      exceptoConDocente,
+      odooIds,
+    );
+
+    // Notificar a todos en la sala
+    this.server.to(salaId).emit('todos-muteados', {
+      tipo,
+      excepto: exceptoConDocente,
+      muteados,
+    });
+
+    this.logger.log(
+      `Todos muteados (${tipo}) en sala ${salaId} por ${client.data.nombre}, excepto: ${exceptoConDocente.join(', ')}`,
+    );
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente desmutear a todos los participantes
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   *
+   * Evento emitido: todos-desmuteados (broadcast a toda la sala)
+   */
+  @SubscribeMessage('desmutear-todos')
+  handleDesmutearTodos(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: DesmutearTodosDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId } = payload;
+
+    // Solo docentes pueden desmutear
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo el docente puede desmutear a todos' };
+    }
+
+    // Verificar que el docente está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Desmutear a todos
+    const desmuteados = this.moderacionService.desmutearTodos(salaId);
+
+    // Notificar a todos en la sala
+    this.server.to(salaId).emit('todos-desmuteados', {
+      desmuteados,
+    });
+
+    this.logger.log(
+      `Todos desmuteados en sala ${salaId} por ${client.data.nombre}`,
+    );
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente expulsar a un participante
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   * El participante expulsado no puede volver a unirse por 24 horas
+   *
+   * Eventos emitidos:
+   * - participante-expulsado (solo al expulsado, con motivo)
+   * - alguien-expulsado (broadcast a toda la sala, sin motivo)
+   */
+  @SubscribeMessage('expulsar-participante')
+  handleExpulsarParticipante(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: ExpulsarParticipanteDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId, odooIdEstudiante, motivo } = payload;
+
+    // Solo docentes pueden expulsar
+    if (client.data.rol !== 'DOCENTE') {
+      return {
+        exito: false,
+        error: 'Solo el docente puede expulsar participantes',
+      };
+    }
+
+    // Verificar que el docente está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Buscar el socket del estudiante a expulsar
+    const participantes = this.presenciaService.getParticipantesDeSala(salaId);
+    const participanteExpulsado = participantes.find(
+      (p) => p.odidentidadUsuario === odooIdEstudiante,
+    );
+
+    if (!participanteExpulsado) {
+      return { exito: false, error: 'El participante no está en la sala' };
+    }
+
+    // Registrar la expulsión
+    this.moderacionService.expulsar(salaId, odooIdEstudiante, motivo);
+
+    // Bajar la mano si la tenía levantada
+    this.manosService.bajarMano(salaId, odooIdEstudiante);
+
+    // Notificar al expulsado (con motivo privado)
+    const socketExpulsado = this.server.sockets.sockets.get(
+      participanteExpulsado.socketId,
+    );
+    if (socketExpulsado) {
+      socketExpulsado.emit('participante-expulsado', {
+        motivo: motivo ?? 'Has sido expulsado de la clase',
+      });
+
+      // Forzar desconexión del socket
+      socketExpulsado.disconnect(true);
+    }
+
+    // Notificar a todos en la sala (sin motivo por privacidad)
+    this.server.to(salaId).emit('alguien-expulsado', {
+      odooId: odooIdEstudiante,
+      nombre: participanteExpulsado.nombre,
+    });
+
+    this.logger.log(
+      `${participanteExpulsado.nombre} expulsado de sala ${salaId} por ${client.data.nombre}${motivo ? `: ${motivo}` : ''}`,
+    );
+
+    return { exito: true };
+  }
+
+  // ============================================================================
+  // HANDLERS: INDICADOR "ESTÁ HABLANDO"
+  // ============================================================================
+
+  /**
+   * Relay del indicador de actividad de voz
+   * Se integra con Voice Activity Detection (VAD) de LiveKit en el frontend
+   *
+   * El cliente envía este evento cuando detecta inicio/fin de habla,
+   * y el servidor lo retransmite a todos los demás en la sala
+   *
+   * Evento emitido: usuario-hablando (broadcast a toda la sala excepto el sender)
+   */
+  @SubscribeMessage('hablando')
+  handleHablando(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: HablandoDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId, activo } = payload;
+
+    // Verificar que el usuario está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Broadcast a todos en la sala excepto el sender
+    client.to(salaId).emit('usuario-hablando', {
+      odooId: client.data.userId,
+      activo,
+    });
+
+    return { exito: true };
   }
 }
