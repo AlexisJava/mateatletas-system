@@ -18,14 +18,14 @@ export const estudianteSchema = z.object({
   apellido: z.string(),
   email: z.string().email().nullable().optional(),
   edad: z.number().int().positive('La edad debe ser un número positivo'),
-  nivel_escolar: nivelEscolarEnum,
-  foto_url: z.string().nullable().optional(),
-  avatar_gradient: z.number().int().min(0).max(9).default(0),
-  tutor_id: z.string(),
-  sector_id: z.string().nullable().optional(),
-  equipo_id: z.string().nullable().optional(),
-  puntos_totales: z.number().int().nonnegative().default(0),
-  nivel_actual: z.number().int().positive().default(1),
+  nivelEscolar: nivelEscolarEnum,
+  fotoUrl: z.string().nullable().optional(),
+  avatarGradient: z.number().int().min(0).max(9).default(0),
+  tutorId: z.string(),
+  sectorId: z.string().nullable().optional(),
+  equipoId: z.string().nullable().optional(),
+  puntosTotales: z.number().int().nonnegative().default(0),
+  nivelActual: z.number().int().positive().default(1),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   // Relaciones opcionales
@@ -33,10 +33,10 @@ export const estudianteSchema = z.object({
     .object({
       id: z.string(),
       nombre: z.string(),
-      color_primario: z.string(),
-      color_secundario: z.string(),
-      icono_url: z.string().nullable().optional(),
-      puntos_totales: z.number(),
+      colorPrimario: z.string(),
+      colorSecundario: z.string(),
+      iconoUrl: z.string().nullable().optional(),
+      puntosTotales: z.number(),
     })
     .optional(),
 });
@@ -51,9 +51,9 @@ export const createEstudianteSchema = z.object({
   apellido: z.string().min(2, 'El apellido debe tener al menos 2 caracteres'),
   email: z.string().email('Email inválido').nullable().optional(),
   edad: z.number().int().positive('La edad debe ser un número positivo'),
-  nivel_escolar: nivelEscolarEnum,
-  foto_url: z.string().optional(),
-  equipo_id: z.string().optional(),
+  nivelEscolar: nivelEscolarEnum,
+  fotoUrl: z.string().optional(),
+  equipoId: z.string().optional(),
 });
 
 export type CreateEstudianteDto = z.infer<typeof createEstudianteSchema>;
@@ -92,9 +92,9 @@ export type EstudiantesResponse = z.infer<typeof estudiantesResponseSchema>;
  */
 export const estadisticasEstudiantesSchema = z.object({
   total: z.number(),
-  por_nivel: z.record(z.number()),
-  por_equipo: z.record(z.number()),
-  puntos_totales: z.number(),
+  porNivel: z.record(z.number()),
+  porEquipo: z.record(z.number()),
+  puntosTotales: z.number(),
 });
 
 export type EstadisticasEstudiantes = z.infer<typeof estadisticasEstudiantesSchema>;

@@ -7741,6 +7741,7 @@ __metadata:
     bull: "npm:^4.16.5"
     bullmq: "npm:^5.66.2"
     cache-manager: "npm:^7.2.4"
+    camelcase-keys: "npm:^10.0.1"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:^0.14.2"
     cookie-parser: "npm:^1.4.7"
@@ -8576,6 +8577,18 @@ __metadata:
   version: 3.1.0
   resolution: "callsites@npm:3.1.0"
   checksum: 10c0/fff92277400eb06c3079f9e74f3af120db9f8ea03bad0e84d9aede54bbe2d44a56cccb5f6cf12211f93f52306df87077ecec5b712794c5a9b5dac6d615a3f301
+  languageName: node
+  linkType: hard
+
+"camelcase-keys@npm:^10.0.1":
+  version: 10.0.1
+  resolution: "camelcase-keys@npm:10.0.1"
+  dependencies:
+    camelcase: "npm:^8.0.0"
+    map-obj: "npm:5.0.2"
+    quick-lru: "npm:^7.1.0"
+    type-fest: "npm:^4.41.0"
+  checksum: 10c0/f48204c0809ba82e2862dd39ae04db8a35938c9670c3f6b525c9ed8e46136a69c80e052bd5c76711844e248d530aced5e42d25b21e5d701ae5bfddf18152a57b
   languageName: node
   linkType: hard
 
@@ -14410,6 +14423,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"map-obj@npm:5.0.2":
+  version: 5.0.2
+  resolution: "map-obj@npm:5.0.2"
+  checksum: 10c0/033f56d93ba08bb389be421819119765bb722ab9742a97b68688fde0d6d4dcbf79a665da9ee3273aef3987e0eb2ba6dab8dcd4ee883163b4a77b4d64e50d63c9
+  languageName: node
+  linkType: hard
+
 "marked@npm:14.0.0":
   version: 14.0.0
   resolution: "marked@npm:14.0.0"
@@ -16248,6 +16268,13 @@ __metadata:
   version: 6.1.2
   resolution: "quick-lru@npm:6.1.2"
   checksum: 10c0/f499f07bd276eec460c4d7d2ee286c519f3bd189cbbb5ddf3eb929e2182e4997f66b951ea8d24b3f3cee8ed5ac9f0006bf40636f082acd1b38c050a4cbf07ed3
+  languageName: node
+  linkType: hard
+
+"quick-lru@npm:^7.1.0":
+  version: 7.3.0
+  resolution: "quick-lru@npm:7.3.0"
+  checksum: 10c0/28dc8eaadcd489d26917f238ad27a6b09f8fe3a609152b0a4f399d5805094e07b56fe1e8c0d7ade0c11463c31bef329803672effc559601daf160a85f578fd05
   languageName: node
   linkType: hard
 

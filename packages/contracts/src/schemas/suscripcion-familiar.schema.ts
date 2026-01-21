@@ -23,24 +23,24 @@ export type EstadoSuscripcionFamiliar = z.infer<typeof estadoSuscripcionFamiliar
  */
 export const suscripcionFamiliarSchema = z.object({
   id: z.string(),
-  tutor_id: z.string(),
+  tutorId: z.string(),
 
   // MercadoPago
-  preapproval_id: z.string().nullable().optional(),
-  preapproval_plan_id: z.string().nullable().optional(),
+  preapprovalId: z.string().nullable().optional(),
+  preapprovalPlanId: z.string().nullable().optional(),
 
   // Estado
   estado: estadoSuscripcionFamiliarEnum,
 
   // Facturación
   tier: tierNombreEnum,
-  monto_mensual: z.number().int().nonnegative(),
-  fecha_proximo_cobro: z.string().datetime().nullable().optional(),
-  fecha_gracia: z.string().datetime().nullable().optional(),
+  montoMensual: z.number().int().nonnegative(),
+  fechaProximoCobro: z.string().datetime().nullable().optional(),
+  fechaGracia: z.string().datetime().nullable().optional(),
 
   // Timestamps
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
 });
 
 export type SuscripcionFamiliar = z.infer<typeof suscripcionFamiliarSchema>;
@@ -80,8 +80,8 @@ export const suscripcionFamiliarWithRelationsSchema = suscripcionFamiliarSchema.
     .array(
       z.object({
         id: z.string(),
-        estudiante_id: z.string(),
-        producto_id: z.string(),
+        estudianteId: z.string(),
+        productoId: z.string(),
         estado: z.string(),
       }),
     )
@@ -89,7 +89,7 @@ export const suscripcionFamiliarWithRelationsSchema = suscripcionFamiliarSchema.
   _count: z
     .object({
       inscripciones: z.number(),
-      historial_cambios: z.number(),
+      historialCambios: z.number(),
     })
     .optional(),
 });
@@ -105,10 +105,10 @@ export const suscripcionFamiliarResumenSchema = z.object({
   id: z.string(),
   estado: estadoSuscripcionFamiliarEnum,
   tier: tierNombreEnum,
-  monto_mensual: z.number(),
-  fecha_proximo_cobro: z.string().datetime().nullable(),
-  cantidad_estudiantes: z.number(),
-  cantidad_inscripciones: z.number(),
+  montoMensual: z.number(),
+  fechaProximoCobro: z.string().datetime().nullable(),
+  cantidadEstudiantes: z.number(),
+  cantidadInscripciones: z.number(),
 });
 
 export type SuscripcionFamiliarResumen = z.infer<typeof suscripcionFamiliarResumenSchema>;

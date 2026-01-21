@@ -45,7 +45,7 @@ export type JwtPayload = z.infer<typeof jwtPayloadSchema>;
  * Schema para auth response
  */
 export const authResponseSchema = z.object({
-  access_token: z.string(),
+  accessToken: z.string(),
   user: z.object({
     id: z.string(),
     email: z.string().email(),

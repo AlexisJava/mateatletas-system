@@ -40,26 +40,26 @@ export type TipoAcceso = z.infer<typeof tipoAccesoEnum>;
  */
 export const inscripcionUnificadaSchema = z.object({
   id: z.string(),
-  estudiante_id: z.string(),
-  clase_grupo_id: z.string(),
-  tutor_id: z.string(),
+  estudianteId: z.string(),
+  claseGrupoId: z.string(),
+  tutorId: z.string(),
 
   // Fechas
-  fecha_inscripcion: z.string().datetime(),
-  fecha_baja: z.string().datetime().nullable().optional(),
+  fechaInscripcion: z.string().datetime(),
+  fechaBaja: z.string().datetime().nullable().optional(),
 
   // Tipo de acceso
-  tipo_acceso: tipoAccesoEnum,
+  tipoAcceso: tipoAccesoEnum,
   observaciones: z.string().nullable().optional(),
 
   // Timestamps
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
 
   // Campos que indican la fuente
   fuente: fuenteInscripcionEnum,
-  suscripcion_familiar_id: z.string().nullable().optional(), // Solo para SUSCRIPCION_2026
-  producto_id: z.string().nullable().optional(), // Solo para SUSCRIPCION_2026
+  suscripcionFamiliarId: z.string().nullable().optional(), // Solo para SUSCRIPCION_2026
+  productoId: z.string().nullable().optional(), // Solo para SUSCRIPCION_2026
   tier: tierNombreEnum.nullable().optional(), // Solo para SUSCRIPCION_2026
   estado: estadoInscripcionUnificadaEnum,
 });
@@ -76,7 +76,7 @@ export const inscripcionUnificadaWithRelationsSchema = inscripcionUnificadaSchem
       nombre: z.string(),
       apellido: z.string(),
       edad: z.number(),
-      nivel_escolar: z.string(),
+      nivelEscolar: z.string(),
     })
     .optional(),
   claseGrupo: z
@@ -84,7 +84,7 @@ export const inscripcionUnificadaWithRelationsSchema = inscripcionUnificadaSchem
       id: z.string(),
       nombre: z.string(),
       horario: z.string().nullable().optional(),
-      docente_id: z.string().nullable().optional(),
+      docenteId: z.string().nullable().optional(),
     })
     .optional(),
   tutor: z
@@ -112,15 +112,15 @@ export type InscripcionesUnificadasList = z.infer<typeof inscripcionesUnificadas
  * Schema para filtros de consulta
  */
 export const inscripcionUnificadaFilterSchema = z.object({
-  estudiante_id: z.string().optional(),
-  clase_grupo_id: z.string().optional(),
-  tutor_id: z.string().optional(),
+  estudianteId: z.string().optional(),
+  claseGrupoId: z.string().optional(),
+  tutorId: z.string().optional(),
   fuente: fuenteInscripcionEnum.optional(),
   estado: estadoInscripcionUnificadaEnum.optional(),
-  tipo_acceso: tipoAccesoEnum.optional(),
+  tipoAcceso: tipoAccesoEnum.optional(),
   tier: tierNombreEnum.optional(),
-  fecha_desde: z.string().datetime().optional(),
-  fecha_hasta: z.string().datetime().optional(),
+  fechaDesde: z.string().datetime().optional(),
+  fechaHasta: z.string().datetime().optional(),
 });
 
 export type InscripcionUnificadaFilter = z.infer<typeof inscripcionUnificadaFilterSchema>;
@@ -130,20 +130,20 @@ export type InscripcionUnificadaFilter = z.infer<typeof inscripcionUnificadaFilt
  */
 export const inscripcionesEstadisticasSchema = z.object({
   total: z.number(),
-  por_fuente: z.object({
+  porFuente: z.object({
     MANUAL: z.number(),
     SUSCRIPCION_2026: z.number(),
   }),
-  por_estado: z.object({
+  porEstado: z.object({
     ACTIVA: z.number(),
     CANCELADA: z.number(),
     PAUSADA: z.number(),
   }),
-  por_tipo_acceso: z.object({
+  porTipoAcceso: z.object({
     SINCRONICO: z.number(),
     ASINCRONICO: z.number(),
   }),
-  por_tier: z.object({
+  porTier: z.object({
     STEAM_LIBROS: z.number(),
     STEAM_ASINCRONICO: z.number(),
     STEAM_SINCRONICO: z.number(),

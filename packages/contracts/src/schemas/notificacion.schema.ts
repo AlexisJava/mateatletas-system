@@ -38,7 +38,7 @@ export const TIPO_NOTIFICACION = {
  */
 export const notificacionSchema = z.object({
   id: z.string(),
-  usuario_id: z.string(),
+  usuarioId: z.string(),
   tipo: tipoNotificacionEnum,
   titulo: z.string(),
   mensaje: z.string(),

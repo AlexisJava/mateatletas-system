@@ -13,6 +13,7 @@ import {
 } from './common/filters';
 import { LoggerService } from './common/logger/logger.service';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
+import { CamelCaseResponseInterceptor } from './common/interceptors/camel-case-response.interceptor';
 
 /**
  * Extended Express Request interface with rawBody property
@@ -215,9 +216,13 @@ async function bootstrap() {
   app.useGlobalFilters(new PrismaExceptionFilter(logger));
 
   // Global interceptors (aplicar DESPUÉS de ValidationPipe y filters)
-  // TransformResponseInterceptor - Estandariza formato de respuestas
-  // Todas las respuestas seguirán el formato: { data, metadata, message? }
-  app.useGlobalInterceptors(new TransformResponseInterceptor());
+  // ORDEN IMPORTANTE: Los interceptors se ejecutan en orden de registro
+  // 1. CamelCaseResponseInterceptor - Transforma snake_case → camelCase
+  // 2. TransformResponseInterceptor - Envuelve en formato {data, metadata}
+  app.useGlobalInterceptors(
+    new CamelCaseResponseInterceptor(),
+    new TransformResponseInterceptor(),
+  );
 
   // Swagger API Documentation
   const config = new DocumentBuilder()

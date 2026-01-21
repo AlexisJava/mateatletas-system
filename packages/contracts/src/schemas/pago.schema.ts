@@ -24,12 +24,12 @@ export const productoPagoSchema = z.object({
  */
 export const membresiaSchema = z.object({
   id: z.string(),
-  tutor_id: z.string(),
-  producto_id: z.string(),
+  tutorId: z.string(),
+  productoId: z.string(),
   estado: estadoMembresiaEnum,
-  fecha_inicio: isoDate.nullable(),
-  fecha_vencimiento: isoDate.nullable(),
-  pago_id: z.string(),
+  fechaInicio: isoDate.nullable(),
+  fechaVencimiento: isoDate.nullable(),
+  pagoId: z.string(),
   createdAt: isoDate,
   updatedAt: isoDate,
   producto: productoPagoSchema.optional(),
@@ -42,8 +42,8 @@ export type Membresia = z.infer<typeof membresiaSchema>;
  */
 export const preferenciaPagoSchema = z.object({
   id: z.string(),
-  init_point: z.string().url(),
-  sandbox_init_point: z.string().url().optional(),
+  initPoint: z.string().url(),
+  sandboxInitPoint: z.string().url().optional(),
 });
 
 export type PreferenciaPago = z.infer<typeof preferenciaPagoSchema>;
@@ -52,7 +52,7 @@ export type PreferenciaPago = z.infer<typeof preferenciaPagoSchema>;
  * Request para crear preferencia de suscripción mensual.
  */
 export const crearPreferenciaSuscripcionSchema = z.object({
-  producto_id: z.string(),
+  productoId: z.string(),
 });
 
 export type CrearPreferenciaSuscripcionRequest = z.infer<typeof crearPreferenciaSuscripcionSchema>;
@@ -61,7 +61,7 @@ export type CrearPreferenciaSuscripcionRequest = z.infer<typeof crearPreferencia
  * Estado actual de la membresía de un tutor.
  */
 export const estadoMembresiaResponseSchema = z.object({
-  tiene_membresia: z.boolean(),
+  tieneMembresia: z.boolean(),
   membresia: membresiaSchema.nullable(),
 });
 

@@ -42,12 +42,12 @@ export const productoSchema = z.object({
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   // Campos específicos para Evento/Curso
-  fecha_inicio: z.string().datetime().nullable().optional(),
-  fecha_fin: z.string().datetime().nullable().optional(),
-  cupo_maximo: z.number().int().positive().nullable().optional(),
+  fechaInicio: z.string().datetime().nullable().optional(),
+  fechaFin: z.string().datetime().nullable().optional(),
+  cupoMaximo: z.number().int().positive().nullable().optional(),
   // Campos específicos para Servicio
-  duracion_meses: z.number().int().positive().nullable().optional(),
-  duracion_dias: z.number().int().positive().nullable().optional(),
+  duracionMeses: z.number().int().positive().nullable().optional(),
+  duracionDias: z.number().int().positive().nullable().optional(),
 });
 
 export type Producto = z.infer<typeof productoSchema>;
@@ -80,11 +80,11 @@ export const createProductoSchema = z.object({
   subcategoria: z.string().optional(),
   activo: z.boolean(),
   // Campos opcionales según tipo
-  fecha_inicio: z.string().optional(),
-  fecha_fin: z.string().optional(),
-  cupo_maximo: z.number().int().positive().optional(),
-  duracion_meses: z.number().int().positive().optional(),
-  duracion_dias: z.number().int().positive().optional(),
+  fechaInicio: z.string().optional(),
+  fechaFin: z.string().optional(),
+  cupoMaximo: z.number().int().positive().optional(),
+  duracionMeses: z.number().int().positive().optional(),
+  duracionDias: z.number().int().positive().optional(),
 });
 
 export type CreateProductoDto = z.infer<typeof createProductoSchema>;

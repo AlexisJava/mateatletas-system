@@ -23,25 +23,25 @@ export const inscripcionActividadSchema = z.object({
   id: z.string(),
 
   // Relaciones principales
-  suscripcion_familiar_id: z.string(),
-  estudiante_id: z.string(),
-  producto_id: z.string(),
+  suscripcionFamiliarId: z.string(),
+  estudianteId: z.string(),
+  productoId: z.string(),
 
   // Asignación específica (XOR: uno u otro)
-  clase_grupo_id: z.string().nullable().optional(),
-  comision_id: z.string().nullable().optional(),
+  claseGrupoId: z.string().nullable().optional(),
+  comisionId: z.string().nullable().optional(),
 
   // Tier y estado
   tier: tierNombreEnum.nullable().optional(),
   estado: estadoInscripcionActividadEnum,
 
   // Fechas
-  fecha_inicio: z.string().datetime(),
-  fecha_fin: z.string().datetime().nullable().optional(),
+  fechaInicio: z.string().datetime(),
+  fechaFin: z.string().datetime().nullable().optional(),
 
   // Timestamps
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
 });
 
 export type InscripcionActividad = z.infer<typeof inscripcionActividadSchema>;
@@ -51,21 +51,21 @@ export type InscripcionActividad = z.infer<typeof inscripcionActividadSchema>;
  */
 export const createInscripcionActividadSchema = z
   .object({
-    estudiante_id: z.string(),
-    producto_id: z.string(),
-    clase_grupo_id: z.string().nullable().optional(),
-    comision_id: z.string().nullable().optional(),
+    estudianteId: z.string(),
+    productoId: z.string(),
+    claseGrupoId: z.string().nullable().optional(),
+    comisionId: z.string().nullable().optional(),
     tier: tierNombreEnum.nullable().optional(),
   })
   .refine(
     (data) => {
-      // XOR validation: debe tener clase_grupo_id OR comision_id, pero no ambos ni ninguno
-      const hasClaseGrupo = data.clase_grupo_id !== null && data.clase_grupo_id !== undefined;
-      const hasComision = data.comision_id !== null && data.comision_id !== undefined;
+      // XOR validation: debe tener claseGrupoId OR comisionId, pero no ambos ni ninguno
+      const hasClaseGrupo = data.claseGrupoId !== null && data.claseGrupoId !== undefined;
+      const hasComision = data.comisionId !== null && data.comisionId !== undefined;
       return hasClaseGrupo !== hasComision; // XOR
     },
     {
-      message: 'Debe especificar clase_grupo_id O comision_id, pero no ambos',
+      message: 'Debe especificar claseGrupoId O comisionId, pero no ambos',
     },
   );
 
@@ -75,11 +75,11 @@ export type CreateInscripcionActividadDto = z.infer<typeof createInscripcionActi
  * Schema para actualizar inscripción a actividad
  */
 export const updateInscripcionActividadSchema = z.object({
-  clase_grupo_id: z.string().nullable().optional(),
-  comision_id: z.string().nullable().optional(),
+  claseGrupoId: z.string().nullable().optional(),
+  comisionId: z.string().nullable().optional(),
   tier: tierNombreEnum.nullable().optional(),
   estado: estadoInscripcionActividadEnum.optional(),
-  fecha_fin: z.string().datetime().nullable().optional(),
+  fechaFin: z.string().datetime().nullable().optional(),
 });
 
 export type UpdateInscripcionActividadDto = z.infer<typeof updateInscripcionActividadSchema>;
@@ -115,8 +115,8 @@ export const inscripcionActividadWithRelationsSchema = inscripcionActividadSchem
     .object({
       id: z.string(),
       nombre: z.string(),
-      fecha_inicio: z.string().datetime(),
-      fecha_fin: z.string().datetime(),
+      fechaInicio: z.string().datetime(),
+      fechaFin: z.string().datetime(),
     })
     .nullable()
     .optional(),
@@ -137,15 +137,15 @@ export type InscripcionesActividadList = z.infer<typeof inscripcionesActividadLi
  * Schema para resumen de inscripciones por estudiante
  */
 export const inscripcionesEstudianteResumenSchema = z.object({
-  estudiante_id: z.string(),
-  estudiante_nombre: z.string(),
-  total_inscripciones: z.number(),
-  inscripciones_activas: z.number(),
+  estudianteId: z.string(),
+  estudianteNombre: z.string(),
+  totalInscripciones: z.number(),
+  inscripcionesActivas: z.number(),
   inscripciones: z.array(
     z.object({
       id: z.string(),
-      producto_nombre: z.string(),
-      tipo_asignacion: z.enum(['CLASE_GRUPO', 'COMISION']),
+      productoNombre: z.string(),
+      tipoAsignacion: z.enum(['CLASE_GRUPO', 'COMISION']),
       estado: estadoInscripcionActividadEnum,
       tier: tierNombreEnum.nullable(),
     }),

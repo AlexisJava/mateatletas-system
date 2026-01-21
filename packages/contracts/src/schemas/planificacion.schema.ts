@@ -26,23 +26,23 @@ export type PlanificacionGrupo = z.infer<typeof planificacionGrupoSchema>;
  */
 export const planificacionListItemSchema = z.object({
   id: z.string(),
-  grupo_id: z.string(),
-  codigo_grupo: z.string().optional(),
+  grupoId: z.string(),
+  codigoGrupo: z.string().optional(),
   grupo: planificacionGrupoSchema.optional(),
   mes: z.number().int().min(1).max(12),
   anio: z.number().int().min(2020),
   titulo: z.string(),
   descripcion: z.string(),
-  tematica_principal: z.string(),
-  objetivos_aprendizaje: z.array(z.string()),
+  tematicaPrincipal: z.string(),
+  objetivosAprendizaje: z.array(z.string()),
   estado: estadoPlanificacionEnum,
-  created_by_admin_id: z.string(),
-  notas_docentes: z.string().nullable(),
-  fecha_publicacion: isoDate.nullable(),
-  created_at: isoDate,
-  updated_at: isoDate,
-  total_actividades: z.number().int().nonnegative(),
-  total_asignaciones: z.number().int().nonnegative(),
+  createdByAdminId: z.string(),
+  notasDocentes: z.string().nullable(),
+  fechaPublicacion: isoDate.nullable(),
+  createdAt: isoDate,
+  updatedAt: isoDate,
+  totalActividades: z.number().int().nonnegative(),
+  totalAsignaciones: z.number().int().nonnegative(),
 });
 
 export type PlanificacionListItem = z.infer<typeof planificacionListItemSchema>;
@@ -55,7 +55,7 @@ export const planificacionListResponseSchema = z.object({
   total: z.number().int().nonnegative(),
   page: z.number().int().positive(),
   limit: z.number().int().positive(),
-  total_pages: z.number().int().nonnegative(),
+  totalPages: z.number().int().nonnegative(),
 });
 
 export type PlanificacionListResponse = z.infer<typeof planificacionListResponseSchema>;
@@ -72,7 +72,7 @@ export type ComponenteActividad = z.infer<typeof componenteActividadEnum>;
  */
 export const planificacionActividadSchema = z.object({
   id: z.string(),
-  planificacion_id: z.string(),
+  planificacionId: z.string(),
   semana: z.number().int().min(1),
   componente: componenteActividadEnum,
   descripcion: z.string(),
@@ -97,14 +97,14 @@ export type PlanificacionDetalle = z.infer<typeof planificacionDetalleSchema>;
  * Entrada para crear una planificación mensual.
  */
 export const createPlanificacionSchema = z.object({
-  grupo_id: z.string(),
+  grupoId: z.string(),
   mes: z.number().int().min(1).max(12),
   anio: z.number().int().min(2020),
   titulo: z.string().min(3),
   descripcion: z.string().optional(),
-  tematica_principal: z.string().min(3),
-  objetivos_aprendizaje: z.array(z.string()).optional(),
-  notas_docentes: z.string().optional(),
+  tematicaPrincipal: z.string().min(3),
+  objetivosAprendizaje: z.array(z.string()).optional(),
+  notasDocentes: z.string().optional(),
 });
 
 export type CreatePlanificacionInput = z.infer<typeof createPlanificacionSchema>;
@@ -117,9 +117,9 @@ export const updatePlanificacionSchema = z
     titulo: z.string().min(3).optional(),
     descripcion: z.string().optional(),
     estado: estadoPlanificacionEnum.optional(),
-    tematica_principal: z.string().min(3).optional(),
-    objetivos_aprendizaje: z.array(z.string()).optional(),
-    notas_docentes: z.string().optional(),
+    tematicaPrincipal: z.string().min(3).optional(),
+    objetivosAprendizaje: z.array(z.string()).optional(),
+    notasDocentes: z.string().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: 'Debe enviar al menos un campo para actualizar la planificación',
@@ -136,7 +136,7 @@ export const createActividadSchema = z.object({
   descripcion: z.string(),
   props: z.record(z.unknown()),
   orden: z.number().int().nonnegative(),
-  planificacion_id: z.string().optional(),
+  planificacionId: z.string().optional(),
 });
 
 export type CreateActividadInput = z.infer<typeof createActividadSchema>;

@@ -34,34 +34,34 @@ export const pagoCursoSchema = z.object({
   id: z.string(),
 
   // Relaciones
-  tutor_id: z.string(),
-  estudiante_id: z.string(),
-  comision_id: z.string(),
-  producto_id: z.string(),
+  tutorId: z.string(),
+  estudianteId: z.string(),
+  comisionId: z.string(),
+  productoId: z.string(),
 
   // Modalidad de pago
   modalidad: modalidadPagoCursoEnum,
 
   // Montos
-  monto_total: z.number().int().positive('El monto total debe ser positivo'),
-  monto_por_cuota: z.number().int().positive().nullable().optional(),
-  cantidad_cuotas: z.number().int().positive().nullable().optional(),
-  cuotas_pagadas: z.number().int().nonnegative().default(0),
+  montoTotal: z.number().int().positive('El monto total debe ser positivo'),
+  montoPorCuota: z.number().int().positive().nullable().optional(),
+  cantidadCuotas: z.number().int().positive().nullable().optional(),
+  cuotasPagadas: z.number().int().nonnegative().default(0),
 
   // MercadoPago
-  payment_id: z.string().nullable().optional(),
-  preapproval_id: z.string().nullable().optional(),
+  paymentId: z.string().nullable().optional(),
+  preapprovalId: z.string().nullable().optional(),
 
   // Estado
   estado: estadoPagoCursoEnum,
 
   // Fechas
-  fecha_pago: z.string().datetime().nullable().optional(),
-  fecha_proximo_cobro: z.string().datetime().nullable().optional(),
+  fechaPago: z.string().datetime().nullable().optional(),
+  fechaProximoCobro: z.string().datetime().nullable().optional(),
 
   // Timestamps
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
 });
 
 export type PagoCurso = z.infer<typeof pagoCursoSchema>;
@@ -70,11 +70,11 @@ export type PagoCurso = z.infer<typeof pagoCursoSchema>;
  * Schema para crear pago de curso (contado)
  */
 export const createPagoCursoContadoSchema = z.object({
-  estudiante_id: z.string(),
-  comision_id: z.string(),
-  producto_id: z.string(),
+  estudianteId: z.string(),
+  comisionId: z.string(),
+  productoId: z.string(),
   modalidad: z.literal('CONTADO'),
-  monto_total: z.number().int().positive('El monto total debe ser positivo'),
+  montoTotal: z.number().int().positive('El monto total debe ser positivo'),
 });
 
 export type CreatePagoCursoContadoDto = z.infer<typeof createPagoCursoContadoSchema>;
@@ -83,13 +83,13 @@ export type CreatePagoCursoContadoDto = z.infer<typeof createPagoCursoContadoSch
  * Schema para crear pago de curso (cuotas)
  */
 export const createPagoCursoCuotasSchema = z.object({
-  estudiante_id: z.string(),
-  comision_id: z.string(),
-  producto_id: z.string(),
+  estudianteId: z.string(),
+  comisionId: z.string(),
+  productoId: z.string(),
   modalidad: z.literal('CUOTAS'),
-  monto_total: z.number().int().positive('El monto total debe ser positivo'),
-  monto_por_cuota: z.number().int().positive('El monto por cuota debe ser positivo'),
-  cantidad_cuotas: z.number().int().min(2, 'Mínimo 2 cuotas').max(12, 'Máximo 12 cuotas'),
+  montoTotal: z.number().int().positive('El monto total debe ser positivo'),
+  montoPorCuota: z.number().int().positive('El monto por cuota debe ser positivo'),
+  cantidadCuotas: z.number().int().min(2, 'Mínimo 2 cuotas').max(12, 'Máximo 12 cuotas'),
 });
 
 export type CreatePagoCursoCuotasDto = z.infer<typeof createPagoCursoCuotasSchema>;
@@ -109,11 +109,11 @@ export type CreatePagoCursoDto = z.infer<typeof createPagoCursoSchema>;
  */
 export const updatePagoCursoSchema = z.object({
   estado: estadoPagoCursoEnum.optional(),
-  payment_id: z.string().nullable().optional(),
-  preapproval_id: z.string().nullable().optional(),
-  fecha_pago: z.string().datetime().nullable().optional(),
-  fecha_proximo_cobro: z.string().datetime().nullable().optional(),
-  cuotas_pagadas: z.number().int().nonnegative().optional(),
+  paymentId: z.string().nullable().optional(),
+  preapprovalId: z.string().nullable().optional(),
+  fechaPago: z.string().datetime().nullable().optional(),
+  fechaProximoCobro: z.string().datetime().nullable().optional(),
+  cuotasPagadas: z.number().int().nonnegative().optional(),
 });
 
 export type UpdatePagoCursoDto = z.infer<typeof updatePagoCursoSchema>;
@@ -141,8 +141,8 @@ export const pagoCursoWithRelationsSchema = pagoCursoSchema.extend({
     .object({
       id: z.string(),
       nombre: z.string(),
-      fecha_inicio: z.string().datetime(),
-      fecha_fin: z.string().datetime(),
+      fechaInicio: z.string().datetime(),
+      fechaFin: z.string().datetime(),
     })
     .optional(),
   producto: z
@@ -167,17 +167,17 @@ export type PagosCursoList = z.infer<typeof pagosCursoListSchema>;
  * Schema para resumen de pagos (dashboard tutor)
  */
 export const pagosCursoResumenSchema = z.object({
-  total_pagos: z.number(),
-  monto_total_pagado: z.number(),
-  pagos_pendientes: z.number(),
-  proximos_cobros: z.array(
+  totalPagos: z.number(),
+  montoTotalPagado: z.number(),
+  pagosPendientes: z.number(),
+  proximosCobros: z.array(
     z.object({
       id: z.string(),
-      producto_nombre: z.string(),
+      productoNombre: z.string(),
       monto: z.number(),
       fecha: z.string().datetime(),
-      cuota_numero: z.number(),
-      cuotas_total: z.number(),
+      cuotaNumero: z.number(),
+      cuotasTotal: z.number(),
     }),
   ),
 });

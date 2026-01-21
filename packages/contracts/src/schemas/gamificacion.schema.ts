@@ -21,8 +21,8 @@ const equipoResumenSchema = z
     id: z.string(),
     nombre: z.string(),
     color: z.string().optional(),
-    color_primario: z.string().optional(),
-    color_secundario: z.string().optional(),
+    colorPrimario: z.string().optional(),
+    colorSecundario: z.string().optional(),
   })
   .passthrough();
 
@@ -45,9 +45,9 @@ export type CasaResumen = z.infer<typeof casaResumenSchema>;
 
 export const proximaClaseSchema = z.object({
   id: z.string(),
-  fecha_hora_inicio: z.string(),
-  duracion_minutos: z.number().int().nonnegative(),
-  ruta_curricular: z
+  fechaHoraInicio: z.string(),
+  duracionMinutos: z.number().int().nonnegative(),
+  rutaCurricular: z
     .object({
       nombre: z.string(),
       color: z.string(),
@@ -68,8 +68,8 @@ const siguienteNivelSchema = z
 
 export const dashboardGamificacionSchema = z.object({
   estudiante: personaBaseSchema.extend({
-    avatar_gradient: z.number().int().min(0).max(9).default(0),
-    foto_url: z.string().url().optional(),
+    avatarGradient: z.number().int().min(0).max(9).default(0),
+    fotoUrl: z.string().url().optional(),
     equipo: equipoSchema,
   }),
   stats: z.object({
@@ -107,18 +107,18 @@ export const logroSchema = z.object({
   categoria: z.string(),
   rareza: z.string().optional(),
   desbloqueado: z.boolean(),
-  fecha_desbloqueo: z.union([z.string(), z.date()]).optional(),
+  fechaDesbloqueo: z.union([z.string(), z.date()]).optional(),
 
   // CAMPOS DE RECOMPENSAS (del backend)
-  monedas_recompensa: z.number().int().nonnegative().default(0),
-  xp_recompensa: z.number().int().nonnegative().default(0),
+  monedasRecompensa: z.number().int().nonnegative().default(0),
+  xpRecompensa: z.number().int().nonnegative().default(0),
   secreto: z.boolean().default(false),
 
   // CAMPOS ADICIONALES del backend
   codigo: z.string().optional(),
   titulo: z.string().optional(), // Título especial para logros desbloqueados
-  criterio_tipo: z.string().optional(),
-  criterio_valor: z.string().optional(),
+  criterioTipo: z.string().optional(),
+  criterioValor: z.string().optional(),
   extras: z.record(z.string(), z.unknown()).optional(), // Metadata adicional
 });
 
@@ -190,13 +190,13 @@ export const puntoObtenidoSchema = z.object({
   id: z.string(),
   puntos: z.number().int(),
   contexto: z.string().optional(),
-  fecha_otorgado: z.string(),
+  fechaOtorgado: z.string(),
   accion: accionPuntuableSchema,
   docente: personaBaseSchema.pick({ nombre: true, apellido: true }),
   clase: z
     .object({
       id: z.string(),
-      fecha_hora_inicio: z.string(),
+      fechaHoraInicio: z.string(),
       rutaCurricular: z
         .object({
           nombre: z.string(),

@@ -45,16 +45,16 @@ export const ESTADO_ASISTENCIA = {
 export const claseSchema = z.object({
   id: z.string(),
   nombre: z.string(),
-  ruta_curricular_id: z.string().nullable().optional(),
-  docente_id: z.string(),
-  sector_id: z.string().nullable().optional(),
-  fecha_hora_inicio: z.string().datetime(),
-  duracion_minutos: z.number().int().positive('La duración debe ser positiva'),
+  rutaCurricularId: z.string().nullable().optional(),
+  docenteId: z.string(),
+  sectorId: z.string().nullable().optional(),
+  fechaHoraInicio: z.string().datetime(),
+  duracionMinutos: z.number().int().positive('La duración debe ser positiva'),
   descripcion: z.string().nullable().optional(),
   estado: estadoClaseEnum,
-  cupos_maximo: z.number().int().positive(),
-  cupos_ocupados: z.number().int().nonnegative(),
-  producto_id: z.string().nullable().optional(),
+  cuposMaximo: z.number().int().positive(),
+  cuposOcupados: z.number().int().nonnegative(),
+  productoId: z.string().nullable().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -66,14 +66,14 @@ export type Clase = z.infer<typeof claseSchema>;
  */
 export const createClaseSchema = z.object({
   nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  ruta_curricular_id: z.string().optional(),
-  docente_id: z.string(),
-  sector_id: z.string().optional(),
-  fecha_hora_inicio: z.string().datetime(),
-  duracion_minutos: z.number().int().positive('La duración debe ser positiva'),
+  rutaCurricularId: z.string().optional(),
+  docenteId: z.string(),
+  sectorId: z.string().optional(),
+  fechaHoraInicio: z.string().datetime(),
+  duracionMinutos: z.number().int().positive('La duración debe ser positiva'),
   descripcion: z.string().optional(),
-  cupos_maximo: z.number().int().positive('El cupo máximo debe ser positivo'),
-  producto_id: z.string().optional(),
+  cuposMaximo: z.number().int().positive('El cupo máximo debe ser positivo'),
+  productoId: z.string().optional(),
 });
 
 export type CreateClaseDto = z.infer<typeof createClaseSchema>;
@@ -90,12 +90,12 @@ export type UpdateClaseDto = z.infer<typeof updateClaseSchema>;
  */
 export const asistenciaSchema = z.object({
   id: z.string(),
-  clase_id: z.string(),
-  estudiante_id: z.string(),
+  claseId: z.string(),
+  estudianteId: z.string(),
   estado: estadoAsistenciaEnum,
   observaciones: z.string().nullable().optional(),
-  puntos_otorgados: z.number().int().nonnegative(),
-  fecha_registro: z.string().datetime(),
+  puntosOtorgados: z.number().int().nonnegative(),
+  fechaRegistro: z.string().datetime(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -114,11 +114,11 @@ export type ClasesList = z.infer<typeof clasesListSchema>;
  */
 export const inscripcionClaseSchema = z.object({
   id: z.string(),
-  clase_id: z.string(),
-  estudiante_id: z.string(),
-  tutor_id: z.string(),
+  claseId: z.string(),
+  estudianteId: z.string(),
+  tutorId: z.string(),
   observaciones: z.string().nullable().optional(),
-  fecha_inscripcion: z.union([z.string().datetime(), z.date()]),
+  fechaInscripcion: z.union([z.string().datetime(), z.date()]),
   createdAt: z.union([z.string().datetime(), z.date()]),
   updatedAt: z.union([z.string().datetime(), z.date()]),
   clase: claseSchema.optional(),

@@ -23,8 +23,8 @@ export type DashboardStats = z.infer<typeof dashboardStatsSchema>;
  */
 export const alertaSchema = z.object({
   id: z.string(),
-  estudiante_id: z.string(),
-  clase_id: z.string(),
+  estudianteId: z.string(),
+  claseId: z.string(),
   descripcion: z.string(),
   fecha: z.string().datetime(),
   resuelta: z.boolean(),

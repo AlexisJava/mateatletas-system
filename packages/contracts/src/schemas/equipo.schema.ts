@@ -11,8 +11,8 @@ export const estudianteEnEquipoSchema = z.object({
   id: z.string(),
   nombre: z.string(),
   apellido: z.string(),
-  puntos_totales: z.number(),
-  nivel_actual: z.number().optional(),
+  puntosTotales: z.number(),
+  nivelActual: z.number().optional(),
 });
 
 export type EstudianteEnEquipo = z.infer<typeof estudianteEnEquipoSchema>;
@@ -23,10 +23,10 @@ export type EstudianteEnEquipo = z.infer<typeof estudianteEnEquipoSchema>;
 export const equipoSchema = z.object({
   id: z.string(),
   nombre: z.string(),
-  color_primario: z.string(),
-  color_secundario: z.string(),
-  icono_url: z.string().nullable().optional(),
-  puntos_totales: z.number().int().nonnegative(),
+  colorPrimario: z.string(),
+  colorSecundario: z.string(),
+  iconoUrl: z.string().nullable().optional(),
+  puntosTotales: z.number().int().nonnegative(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   estudiantes: z.array(estudianteEnEquipoSchema).optional(),
@@ -39,11 +39,9 @@ export type Equipo = z.infer<typeof equipoSchema>;
  */
 export const createEquipoSchema = z.object({
   nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  color_primario: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color primario debe ser un hex válido'),
-  color_secundario: z
-    .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/, 'Color secundario debe ser un hex válido'),
-  icono_url: z.string().optional(),
+  colorPrimario: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color primario debe ser un hex válido'),
+  colorSecundario: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color secundario debe ser un hex válido'),
+  iconoUrl: z.string().optional(),
 });
 
 export type CreateEquipoDto = z.infer<typeof createEquipoSchema>;
@@ -84,8 +82,8 @@ export const equipoRankingSchema = z.object({
   posicion: z.number(),
   id: z.string(),
   nombre: z.string(),
-  puntos_totales: z.number(),
-  cantidad_estudiantes: z.number(),
+  puntosTotales: z.number(),
+  cantidadEstudiantes: z.number(),
 });
 
 export type EquipoRanking = z.infer<typeof equipoRankingSchema>;
