@@ -77,3 +77,8 @@ logs/
 # Audit artifacts con datos sensibles
 docs/audit_artifacts/sys/
 dump.rdb
+
+
+
+.nx/cache
+.nx/workspace-data
