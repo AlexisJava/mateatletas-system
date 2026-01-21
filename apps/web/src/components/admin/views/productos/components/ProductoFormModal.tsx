@@ -16,11 +16,14 @@ type TipoProducto =
   | 'Bundle'
   | 'Certificacion';
 
+type CasaTipo = 'QUANTUM' | 'VERTEX' | 'PULSAR';
+type MundoTipo = 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
+
 /** Tipos que requieren fecha y cupo */
 const TIPOS_CON_FECHA = ['Evento', 'Curso'];
 
-/** Tipos que requieren solo cupo (sin fechas) - se gestionan con ClaseGrupos */
-const TIPOS_SOLO_CUPO = ['Club'];
+/** Tipos que requieren Casa y Mundo (suscripciones familiares) */
+const TIPOS_CON_CASA_MUNDO = ['Club'];
 
 interface ProductoFormData {
   nombre: string;
@@ -32,6 +35,9 @@ interface ProductoFormData {
   fecha_inicio: string;
   fecha_fin: string;
   cupo_maximo: string;
+  // Campos para tipo Club (suscripciones familiares)
+  casa: CasaTipo | '';
+  mundo: MundoTipo | '';
 }
 
 interface FormErrors {
@@ -42,6 +48,8 @@ interface FormErrors {
   fecha_inicio?: string;
   fecha_fin?: string;
   cupo_maximo?: string;
+  casa?: string;
+  mundo?: string;
 }
 
 interface ProductoFormModalProps {
@@ -61,6 +69,8 @@ const INITIAL_FORM_DATA: ProductoFormData = {
   fecha_inicio: '',
   fecha_fin: '',
   cupo_maximo: '',
+  casa: '',
+  mundo: '',
 };
 
 /** Extrae la parte de fecha de un datetime string ISO */
@@ -88,6 +98,7 @@ export function ProductoFormModal({
 
   useEffect(() => {
     if (isOpen && producto) {
+      const prod = producto as AdminProducto & { casa?: CasaTipo; mundo?: MundoTipo };
       setFormData({
         nombre: producto.nombre,
         descripcion: producto.descripcion || '',
@@ -98,6 +109,8 @@ export function ProductoFormModal({
         fecha_inicio: extractDatePart(producto.fecha_inicio),
         fecha_fin: extractDatePart(producto.fecha_fin),
         cupo_maximo: producto.cupo_maximo ? String(producto.cupo_maximo) : '',
+        casa: prod.casa || '',
+        mundo: prod.mundo || '',
       });
       setErrors({});
     } else if (isOpen && !producto) {
@@ -159,6 +172,16 @@ export function ProductoFormModal({
       }
     }
 
+    // Validación para tipo Club (requiere Casa y Mundo)
+    if (TIPOS_CON_CASA_MUNDO.includes(formData.tipo)) {
+      if (!formData.casa) {
+        newErrors.casa = 'Selecciona una casa';
+      }
+      if (!formData.mundo) {
+        newErrors.mundo = 'Selecciona un mundo';
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }, [formData]);
@@ -181,6 +204,11 @@ export function ProductoFormModal({
             fecha_inicio: formData.fecha_inicio,
             fecha_fin: formData.fecha_fin,
             cupo_maximo: parseInt(formData.cupo_maximo, 10),
+          }),
+          // Campos para tipo Club (suscripciones familiares)
+          ...(TIPOS_CON_CASA_MUNDO.includes(formData.tipo) && {
+            casa: formData.casa as CasaTipo,
+            mundo: formData.mundo as MundoTipo,
           }),
         };
 
@@ -328,6 +356,55 @@ export function ProductoFormModal({
               className="w-full px-4 py-2.5 bg-[var(--admin-surface-2)] border border-[var(--admin-border)] rounded-xl text-[var(--admin-text)] placeholder:text-[var(--admin-text-muted)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)]/50 transition-all"
             />
           </div>
+
+          {/* Campos condicionales para Club (Casa y Mundo) */}
+          {TIPOS_CON_CASA_MUNDO.includes(formData.tipo) && (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-[var(--admin-text-muted)] mb-1.5">
+                  Casa <span className="text-[var(--status-error)]">*</span>
+                </label>
+                <select
+                  value={formData.casa}
+                  onChange={(e) => handleChange('casa', e.target.value)}
+                  disabled={isSubmitting}
+                  className={`w-full px-4 py-2.5 bg-[var(--admin-surface-2)] border rounded-xl text-[var(--admin-text)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)]/50 transition-all ${
+                    errors.casa ? 'border-[var(--status-error)]' : 'border-[var(--admin-border)]'
+                  }`}
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="QUANTUM">Quantum (6-9 años)</option>
+                  <option value="VERTEX">Vertex (10-12 años)</option>
+                  <option value="PULSAR">Pulsar (13-17 años)</option>
+                </select>
+                {errors.casa && (
+                  <p className="mt-1 text-xs text-[var(--status-error)]">{errors.casa}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--admin-text-muted)] mb-1.5">
+                  Mundo <span className="text-[var(--status-error)]">*</span>
+                </label>
+                <select
+                  value={formData.mundo}
+                  onChange={(e) => handleChange('mundo', e.target.value)}
+                  disabled={isSubmitting}
+                  className={`w-full px-4 py-2.5 bg-[var(--admin-surface-2)] border rounded-xl text-[var(--admin-text)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)]/50 transition-all ${
+                    errors.mundo ? 'border-[var(--status-error)]' : 'border-[var(--admin-border)]'
+                  }`}
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="MATEMATICA">Matemática</option>
+                  <option value="PROGRAMACION">Programación</option>
+                  <option value="CIENCIAS">Ciencias</option>
+                </select>
+                {errors.mundo && (
+                  <p className="mt-1 text-xs text-[var(--status-error)]">{errors.mundo}</p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Campos condicionales para Evento/Curso */}
           {TIPOS_CON_FECHA.includes(formData.tipo) && (

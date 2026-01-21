@@ -12,25 +12,21 @@ export class RachaService {
 
   /**
    * Obtener racha actual del estudiante
+   * Usa upsert para evitar race conditions (P2002)
    */
   async obtenerRacha(estudianteId: string) {
-    let racha = await this.prisma.rachaEstudiante.findUnique({
+    // Upsert atómico evita TOCTOU race condition
+    // Si dos requests llegan simultáneamente, PostgreSQL maneja el conflicto
+    return this.prisma.rachaEstudiante.upsert({
       where: { estudiante_id: estudianteId },
+      create: {
+        estudiante_id: estudianteId,
+        racha_actual: 0,
+        racha_maxima: 0,
+        total_dias_activos: 0,
+      },
+      update: {}, // No actualizar nada, solo retornar existente
     });
-
-    // Si no existe, crear registro inicial
-    if (!racha) {
-      racha = await this.prisma.rachaEstudiante.create({
-        data: {
-          estudiante_id: estudianteId,
-          racha_actual: 0,
-          racha_maxima: 0,
-          total_dias_activos: 0,
-        },
-      });
-    }
-
-    return racha;
   }
 
   /**
