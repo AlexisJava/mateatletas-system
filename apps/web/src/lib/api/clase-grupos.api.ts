@@ -9,6 +9,43 @@ import type { ClaseGrupo, CrearClaseGrupoDto, ListarClaseGruposParams } from '@/
 export type { ClaseGrupo, CrearClaseGrupoDto, ListarClaseGruposParams };
 
 /**
+ * Transforma un objeto ClaseGrupo del backend (snake_case) al formato frontend (camelCase)
+ */
+function transformClaseGrupo(raw: Record<string, unknown>): ClaseGrupo {
+  return {
+    id: raw.id as string,
+    codigo: raw.codigo as string,
+    nombre: raw.nombre as string,
+    tipo: raw.tipo as ClaseGrupo['tipo'],
+    diaSemana: (raw.dia_semana || raw.diaSemana) as ClaseGrupo['diaSemana'],
+    horaInicio: (raw.hora_inicio || raw.horaInicio) as string,
+    horaFin: (raw.hora_fin || raw.horaFin) as string,
+    fechaInicio: (raw.fecha_inicio || raw.fechaInicio) as string,
+    fechaFin: (raw.fecha_fin || raw.fechaFin) as string,
+    anioLectivo: (raw.anio_lectivo || raw.anioLectivo) as number,
+    cupoMaximo: (raw.cupo_maximo || raw.cupoMaximo) as number,
+    activo: raw.activo as boolean,
+    docenteId: (raw.docente_id || raw.docenteId) as string,
+    productoId: (raw.producto_id || raw.productoId) as string | undefined,
+    grupoId: (raw.grupo_id || raw.grupoId) as string | undefined,
+    rutaCurricularId: (raw.ruta_curricular_id || raw.rutaCurricularId) as string | undefined,
+    sectorId: (raw.sector_id || raw.sectorId) as string | undefined,
+    nivel: raw.nivel as string | undefined,
+    created_at: (raw.createdAt || raw.created_at) as string,
+    updated_at: (raw.updatedAt || raw.updated_at) as string,
+    // Relations
+    docente: raw.docente as ClaseGrupo['docente'],
+    rutaCurricular: raw.rutaCurricular as ClaseGrupo['rutaCurricular'],
+    sector: raw.sector as ClaseGrupo['sector'],
+    inscripciones: raw.inscripciones as ClaseGrupo['inscripciones'],
+    // Computed fields
+    totalInscriptos: (raw.total_inscriptos || raw.totalInscriptos) as number | undefined,
+    totalAsistencias: (raw.total_asistencias || raw.totalAsistencias) as number | undefined,
+    cuposDisponibles: (raw.cupos_disponibles || raw.cuposDisponibles) as number | undefined,
+  };
+}
+
+/**
  * Crear un nuevo ClaseGrupo
  */
 export async function crearClaseGrupo(data: CrearClaseGrupoDto): Promise<ClaseGrupo> {
@@ -60,12 +97,17 @@ export async function listarClaseGrupos(params?: ListarClaseGruposParams): Promi
   const url = `/admin/clase-grupos${queryString ? `?${queryString}` : ''}`;
 
   try {
-    // El interceptor de axios hace unwrap de { data: ... }
-    // Por lo que recibimos el array de ClaseGrupo directamente
-    const response = await axios.get<ClaseGrupo[]>(url);
+    // El backend retorna { success, data: [...], total }
+    const response = await axios.get<{
+      success: boolean;
+      data: Record<string, unknown>[];
+      total: number;
+    }>(url);
 
-    // Envolver en el formato esperado por los consumidores
-    const claseGrupos = Array.isArray(response) ? response : [];
+    // Transformar snake_case a camelCase
+    const rawData = Array.isArray(response) ? response : response?.data || [];
+    const claseGrupos = rawData.map(transformClaseGrupo);
+
     return {
       success: true,
       data: claseGrupos,

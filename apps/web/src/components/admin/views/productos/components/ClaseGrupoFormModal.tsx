@@ -253,7 +253,15 @@ export function ClaseGrupoFormModal({
         onSuccess();
         onClose();
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Error al guardar';
+        // Extraer mensaje de error del backend (AxiosError)
+        let message = 'Error al guardar';
+        if (error && typeof error === 'object') {
+          const axiosError = error as {
+            response?: { data?: { message?: string } };
+            message?: string;
+          };
+          message = axiosError.response?.data?.message || axiosError.message || message;
+        }
         toast.error(message);
       } finally {
         setIsSubmitting(false);

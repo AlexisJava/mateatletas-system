@@ -777,6 +777,44 @@ console.log(`[DEBUG] ${controller}.${handler}`);
 
 Si el controller/handler es diferente al esperado, hay conflicto de rutas.
 
+### Datos del backend no se muestran en el frontend (snake_case vs camelCase)
+
+**Síntoma:** El backend retorna datos correctamente (verificado en Network tab), pero el frontend no los muestra o muestra campos vacíos/undefined.
+
+**Causa común:** El backend (Prisma) retorna campos en **snake_case** (`dia_semana`, `hora_inicio`, `cupo_maximo`), pero los tipos del frontend esperan **camelCase** (`diaSemana`, `horaInicio`, `cupoMaximo`).
+
+**Diagnóstico:**
+
+1. Abrir Network tab en DevTools
+2. Ver el response JSON del endpoint
+3. Comparar nombres de campos con los tipos TypeScript del frontend
+4. Si no coinciden → problema de transformación
+
+**Solución:** Agregar función de transformación en el API client del frontend:
+
+```typescript
+// apps/web/src/lib/api/ejemplo.api.ts
+function transformEntity(raw: Record<string, unknown>): MiEntidad {
+  return {
+    id: raw.id as string,
+    diaSemana: (raw.dia_semana || raw.diaSemana) as string, // Acepta ambos
+    horaInicio: (raw.hora_inicio || raw.horaInicio) as string,
+    // ... mapear todos los campos snake_case a camelCase
+  };
+}
+
+// Aplicar en la función que consume el endpoint:
+const rawData = response.data || [];
+const entities = rawData.map(transformEntity);
+```
+
+**Referencia:** Ver `apps/web/src/lib/api/clase-grupos.api.ts` → `transformClaseGrupo()`
+
+**Prevención:** Al crear nuevos endpoints, decidir una convención y mantenerla:
+
+- Backend retorna snake_case (Prisma default) → Frontend transforma
+- O usar `@ApiProperty()` con transformación en NestJS
+
 ---
 
 ## SCRIPTS DE CALIDAD
