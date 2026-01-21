@@ -30,9 +30,9 @@ export const DOCENTE_ASIGNACIONES_KEY = ['admin', 'docente-asignaciones'] as con
 
 /** Filtros para la vista de asignaciones */
 export interface FiltrosAsignaciones {
-  casa_tipo?: CasaTipo;
-  mundo_tipo?: MundoTipo;
-  tipo_asignacion?: TipoAsignacionDocente;
+  casaTipo?: CasaTipo;
+  mundoTipo?: MundoTipo;
+  tipoAsignacion?: TipoAsignacionDocente;
   busqueda?: string;
 }
 
@@ -135,9 +135,9 @@ export function useDocenteAsignaciones(): UseDocenteAsignacionesReturn {
 
   // Filtros del servidor
   const serverFiltros = {
-    casa_tipo: filtros.casa_tipo,
-    mundo_tipo: filtros.mundo_tipo,
-    tipo_asignacion: filtros.tipo_asignacion,
+    casaTipo: filtros.casaTipo,
+    mundoTipo: filtros.mundoTipo,
+    tipoAsignacion: filtros.tipoAsignacion,
   };
 
   const {
@@ -167,9 +167,9 @@ export function useDocenteAsignaciones(): UseDocenteAsignacionesReturn {
     const conMundo = docentes.filter((d) => d.mundos.length > 0).length;
 
     const porTipo = {
-      CLASE_GRUPOS: docentes.filter((d) => d.tipo_asignacion === 'CLASE_GRUPOS').length,
-      COMISIONES: docentes.filter((d) => d.tipo_asignacion === 'COMISIONES').length,
-      AMBOS: docentes.filter((d) => d.tipo_asignacion === 'AMBOS').length,
+      CLASE_GRUPOS: docentes.filter((d) => d.tipoAsignacion === 'CLASE_GRUPOS').length,
+      COMISIONES: docentes.filter((d) => d.tipoAsignacion === 'COMISIONES').length,
+      AMBOS: docentes.filter((d) => d.tipoAsignacion === 'AMBOS').length,
     };
 
     return {

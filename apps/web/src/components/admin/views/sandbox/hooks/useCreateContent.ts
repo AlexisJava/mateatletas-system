@@ -58,9 +58,9 @@ export function useCreateContent() {
       try {
         const dto: CrearPlanificacionDto = {
           titulo: params.titulo,
-          casa_tipo: params.casaTipo,
-          mundo_tipo: params.mundoTipo,
-          cantidad_clases: params.cantidadClases,
+          casaTipo: params.casaTipo,
+          mundoTipo: params.mundoTipo,
+          cantidadClases: params.cantidadClases,
         };
         if (params.descripcion) {
           dto.descripcion = params.descripcion;

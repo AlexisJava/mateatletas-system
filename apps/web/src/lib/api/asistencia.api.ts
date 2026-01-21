@@ -123,8 +123,8 @@ export const getResumenDocente = async (): Promise<ResumenDocenteAsistencia> => 
  */
 export interface Observacion {
   id: string;
-  estudiante_id: string;
-  clase_id: string;
+  estudianteId: string;
+  claseId: string;
   estado: string;
   observaciones: string | null;
   createdAt: string;
@@ -132,11 +132,11 @@ export interface Observacion {
     id: string;
     nombre: string;
     apellido: string;
-    foto_url?: string;
+    fotoUrl?: string;
   };
   clase: {
     id: string;
-    fecha_hora_inicio: string;
+    fechaHoraInicio: string;
     rutaCurricular: {
       nombre: string;
       color: string;
@@ -182,20 +182,20 @@ export const getObservacionesDocente = async (filtros?: {
  * GET /api/asistencia/docente/reportes
  */
 export interface ReportesDocente {
-  estadisticas_globales: {
-    total_registros: number;
-    total_presentes: number;
-    total_ausentes: number;
-    total_justificados: number;
-    porcentaje_asistencia: number;
+  estadisticasGlobales: {
+    totalRegistros: number;
+    totalPresentes: number;
+    totalAusentes: number;
+    totalJustificados: number;
+    porcentajeAsistencia: number;
   };
-  asistencia_semanal: Record<string, { presentes: number; ausentes: number; total: number }>;
-  top_estudiantes: Array<{
+  asistenciaSemanal: Record<string, { presentes: number; ausentes: number; total: number }>;
+  topEstudiantes: Array<{
     nombre: string;
-    foto_url: string | null;
+    fotoUrl: string | null;
     asistencias: number;
   }>;
-  por_ruta_curricular: Array<{
+  porRutaCurricular: Array<{
     ruta: string;
     color: string;
     presentes: number;
@@ -224,13 +224,13 @@ export const getReportesDocente = async (): Promise<ReportesDocente> => {
 export type EstadoAsistencia = 'Presente' | 'Ausente' | 'Justificado';
 
 export interface AsistenciaEstudianteItem {
-  estudiante_id: string;
+  estudianteId: string;
   estado: EstadoAsistencia;
   observaciones?: string;
 }
 
 export interface TomarAsistenciaBatchDto {
-  clase_grupo_id: string;
+  claseGrupoId: string;
   fecha: string; // YYYY-MM-DD
   asistencias: AsistenciaEstudianteItem[];
 }
@@ -240,7 +240,7 @@ export interface AsistenciaBatchResponse {
   registrosCreados: number;
   registrosActualizados: number;
   estudiantes: Array<{
-    estudiante_id: string;
+    estudianteId: string;
     nombre: string;
     apellido: string;
     estado: EstadoAsistencia;

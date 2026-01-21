@@ -3,11 +3,12 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { GlassCard } from '../GlassCard';
 
-interface PieDataPoint {
+type PieDataPoint = {
   name: string;
   value: number;
   color: string;
-}
+  [key: string]: string | number;
+};
 
 interface GlowingPieChartProps {
   data: PieDataPoint[];
@@ -39,7 +40,7 @@ export function GlowingPieChart({
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <defs>
-              {data.map((entry, index) => (
+              {data.map((_entry, index) => (
                 <filter
                   key={`glow-${index}`}
                   id={`pie-glow-${index}`}

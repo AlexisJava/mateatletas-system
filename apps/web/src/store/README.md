@@ -406,7 +406,7 @@ export default function UserProfile() {
       <p>DNI: {user.dni || 'No especificado'}</p>
       <p>Teléfono: {user.telefono || 'No especificado'}</p>
       <p>
-        Onboarding: {user.ha_completado_onboarding ? 'Completado' : 'Pendiente'}
+        Onboarding: {user.haCompletadoOnboarding ? 'Completado' : 'Pendiente'}
       </p>
     </div>
   );

@@ -168,7 +168,7 @@ export function ComisionesSection({ productoId, productoNombre }: ComisionesSect
       if (editingComision) {
         await updateComision(editingComision.id, data);
       } else {
-        await createComision({ ...data, producto_id: productoId });
+        await createComision({ ...data, productoId: productoId });
       }
       setIsFormOpen(false);
       refreshComisiones();
@@ -278,27 +278,27 @@ export function ComisionesSection({ productoId, productoNombre }: ComisionesSect
                         {comision.planificacion && (
                           <span className="flex items-center gap-1 text-[var(--admin-accent)]">
                             <BookOpen className="w-3.5 h-3.5" />
-                            {comision.planificacion.titulo} (
-                            {comision.planificacion.cantidad_clases} clases)
+                            {comision.planificacion.titulo} ({comision.planificacion.cantidadClases}{' '}
+                            clases)
                           </span>
                         )}
                       </div>
 
                       <div className="flex items-center gap-3 mt-2 ml-6">
                         <span className="text-xs font-medium text-[var(--status-info)]">
-                          {comision.total_inscriptos ?? 0} inscriptos
+                          {comision.totalInscriptos ?? 0} inscriptos
                         </span>
-                        {comision.cupo_maximo && (
+                        {comision.cupoMaximo && (
                           <span className="text-xs text-[var(--admin-text-muted)]">
-                            / {comision.cupo_maximo} cupos
+                            / {comision.cupoMaximo} cupos
                           </span>
                         )}
-                        {comision.cupos_disponibles !== null &&
-                          comision.cupos_disponibles !== undefined && (
+                        {comision.cuposDisponibles !== null &&
+                          comision.cuposDisponibles !== undefined && (
                             <span
-                              className={`text-xs ${comision.cupos_disponibles > 0 ? 'text-[var(--status-success)]' : 'text-[var(--status-error)]'}`}
+                              className={`text-xs ${comision.cuposDisponibles > 0 ? 'text-[var(--status-success)]' : 'text-[var(--status-error)]'}`}
                             >
-                              ({comision.cupos_disponibles} disponibles)
+                              ({comision.cuposDisponibles} disponibles)
                             </span>
                           )}
                       </div>
@@ -394,15 +394,15 @@ function ComisionFormModal({
   const [formData, setFormData] = useState<CreateComisionDto>({
     nombre: comision?.nombre ?? '',
     descripcion: comision?.descripcion ?? '',
-    producto_id: productoId,
-    casa_id: comision?.casa_id ?? undefined,
-    docente_id: comision?.docente_id ?? undefined,
-    cupo_maximo: comision?.cupo_maximo ?? undefined,
+    productoId: productoId,
+    casaId: comision?.casaId ?? undefined,
+    docenteId: comision?.docenteId ?? undefined,
+    cupoMaximo: comision?.cupoMaximo ?? undefined,
     horario: comision?.horario ?? '',
-    fecha_inicio: comision?.fecha_inicio?.split('T')[0] ?? '',
-    fecha_fin: comision?.fecha_fin?.split('T')[0] ?? '',
+    fechaInicio: comision?.fechaInicio?.split('T')[0] ?? '',
+    fechaFin: comision?.fechaFin?.split('T')[0] ?? '',
     activo: comision?.activo ?? true,
-    planificacion_id: comision?.planificacion_id ?? undefined,
+    planificacionId: comision?.planificacionId ?? undefined,
   });
 
   // Cargar planificaciones disponibles
@@ -486,11 +486,11 @@ function ComisionFormModal({
             </label>
             <input
               type="number"
-              value={formData.cupo_maximo ?? ''}
+              value={formData.cupoMaximo ?? ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  cupo_maximo: e.target.value ? parseInt(e.target.value) : undefined,
+                  cupoMaximo: e.target.value ? parseInt(e.target.value) : undefined,
                 })
               }
               placeholder="Sin límite"
@@ -507,8 +507,8 @@ function ComisionFormModal({
               </label>
               <input
                 type="date"
-                value={formData.fecha_inicio ?? ''}
-                onChange={(e) => setFormData({ ...formData, fecha_inicio: e.target.value })}
+                value={formData.fechaInicio ?? ''}
+                onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
                 className="w-full px-3 py-2.5 bg-[var(--admin-surface-2)] border border-[var(--admin-border)] rounded-xl text-[var(--admin-text)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)] focus:border-transparent"
               />
             </div>
@@ -518,8 +518,8 @@ function ComisionFormModal({
               </label>
               <input
                 type="date"
-                value={formData.fecha_fin ?? ''}
-                onChange={(e) => setFormData({ ...formData, fecha_fin: e.target.value })}
+                value={formData.fechaFin ?? ''}
+                onChange={(e) => setFormData({ ...formData, fechaFin: e.target.value })}
                 className="w-full px-3 py-2.5 bg-[var(--admin-surface-2)] border border-[var(--admin-border)] rounded-xl text-[var(--admin-text)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)] focus:border-transparent"
               />
             </div>
@@ -534,11 +534,11 @@ function ComisionFormModal({
               </span>
             </label>
             <select
-              value={formData.planificacion_id ?? ''}
+              value={formData.planificacionId ?? ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  planificacion_id: e.target.value || undefined,
+                  planificacionId: e.target.value || undefined,
                 })
               }
               disabled={loadingPlanificaciones}
@@ -547,8 +547,8 @@ function ComisionFormModal({
               <option value="">Sin override (usa la del producto)</option>
               {planificaciones.map((planificacion) => (
                 <option key={planificacion.id} value={planificacion.id}>
-                  {planificacion.titulo} ({planificacion.cantidad_clases} clases) -{' '}
-                  {planificacion.casa_tipo}
+                  {planificacion.titulo} ({planificacion.cantidadClases} clases) -{' '}
+                  {planificacion.casaTipo}
                 </option>
               ))}
             </select>

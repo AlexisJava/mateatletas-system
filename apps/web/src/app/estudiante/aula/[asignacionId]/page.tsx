@@ -404,7 +404,7 @@ function ClaseCard({ clase, asignacionId }: ClaseCardProps) {
               return (
                 <Link
                   key={tarea.id}
-                  href={`/estudiante/aula/tareas/${tarea.tarea_asignada_id}`}
+                  href={`/estudiante/aula/tareas/${tarea.tareaAsignadaId}`}
                   className="flex items-center gap-3 p-2 rounded-lg transition-all hover:bg-white/5"
                 >
                   {completada ? (

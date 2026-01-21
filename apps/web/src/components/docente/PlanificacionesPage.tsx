@@ -70,12 +70,12 @@ export const PlanificacionesPage: React.FC = () => {
 
   // Helper para obtener el estado de una clase
   const getEstadoClase = (asignacion: Asignacion, claseId: string) => {
-    const estado = asignacion.estados_clases.find((e) => e.clase.id === claseId);
+    const estado = asignacion.estadosClases.find((e) => e.clase.id === claseId);
     return {
-      teoria_activa: estado?.teoria_activa ?? false,
-      practica_activa: estado?.practica_activa ?? false,
-      activa: (estado?.teoria_activa || estado?.practica_activa) ?? false,
-      ambas_activas: (estado?.teoria_activa && estado?.practica_activa) ?? false,
+      teoriaActiva: estado?.teoriaActiva ?? false,
+      practicaActiva: estado?.practicaActiva ?? false,
+      activa: (estado?.teoriaActiva || estado?.practicaActiva) ?? false,
+      ambasActivas: (estado?.teoriaActiva && estado?.practicaActiva) ?? false,
     };
   };
 
@@ -85,8 +85,8 @@ export const PlanificacionesPage: React.FC = () => {
     let activos = 0;
     asignacion.clases.forEach((clase) => {
       const estado = getEstadoClase(asignacion, clase.id);
-      if (estado.teoria_activa) activos++;
-      if (estado.practica_activa) activos++;
+      if (estado.teoriaActiva) activos++;
+      if (estado.practicaActiva) activos++;
     });
     return Math.round((activos / totalItems) * 100);
   };
@@ -401,7 +401,7 @@ export const PlanificacionesPage: React.FC = () => {
                   <div className="flex items-center gap-4 flex-1">
                     <div
                       className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${
-                        estado.ambas_activas
+                        estado.ambasActivas
                           ? 'bg-emerald-600 text-white border-emerald-500'
                           : estado.activa
                             ? 'bg-indigo-600 text-white border-indigo-500'
@@ -418,7 +418,7 @@ export const PlanificacionesPage: React.FC = () => {
                         >
                           {clase.titulo}
                         </h4>
-                        {estado.ambas_activas && (
+                        {estado.ambasActivas && (
                           <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30 font-bold uppercase">
                             Completa
                           </span>
@@ -428,17 +428,17 @@ export const PlanificacionesPage: React.FC = () => {
                         <span className="flex items-center gap-1">
                           <BookOpen
                             size={12}
-                            className={estado.teoria_activa ? 'text-blue-400' : ''}
+                            className={estado.teoriaActiva ? 'text-blue-400' : ''}
                           />
-                          Teoría: {estado.teoria_activa ? 'Activa' : 'Inactiva'}
+                          Teoría: {estado.teoriaActiva ? 'Activa' : 'Inactiva'}
                         </span>
                         <span className="w-1 h-1 rounded-full bg-slate-700"></span>
                         <span className="flex items-center gap-1">
                           <FlaskConical
                             size={12}
-                            className={estado.practica_activa ? 'text-purple-400' : ''}
+                            className={estado.practicaActiva ? 'text-purple-400' : ''}
                           />
-                          Práctica: {estado.practica_activa ? 'Activa' : 'Inactiva'}
+                          Práctica: {estado.practicaActiva ? 'Activa' : 'Inactiva'}
                         </span>
                       </div>
                     </div>
@@ -449,13 +449,13 @@ export const PlanificacionesPage: React.FC = () => {
                     {/* Toggle Teoría */}
                     <button
                       onClick={() =>
-                        handleToggleTeoria(selectedAsignacion.id, clase.id, estado.teoria_activa)
+                        handleToggleTeoria(selectedAsignacion.id, clase.id, estado.teoriaActiva)
                       }
                       disabled={isLoadingTeoria}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold border transition-all ${
                         isLoadingTeoria
                           ? 'opacity-50 cursor-not-allowed'
-                          : estado.teoria_activa
+                          : estado.teoriaActiva
                             ? 'bg-blue-500/20 border-blue-500/30 text-blue-300 hover:bg-blue-500/30'
                             : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-300'
                       }`}
@@ -466,7 +466,7 @@ export const PlanificacionesPage: React.FC = () => {
                         <BookOpen size={14} />
                       )}
                       Teoría
-                      {estado.teoria_activa && !isLoadingTeoria && (
+                      {estado.teoriaActiva && !isLoadingTeoria && (
                         <CheckCircle size={12} className="ml-1" />
                       )}
                     </button>
@@ -474,17 +474,13 @@ export const PlanificacionesPage: React.FC = () => {
                     {/* Toggle Práctica */}
                     <button
                       onClick={() =>
-                        handleTogglePractica(
-                          selectedAsignacion.id,
-                          clase.id,
-                          estado.practica_activa,
-                        )
+                        handleTogglePractica(selectedAsignacion.id, clase.id, estado.practicaActiva)
                       }
                       disabled={isLoadingPractica}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold border transition-all ${
                         isLoadingPractica
                           ? 'opacity-50 cursor-not-allowed'
-                          : estado.practica_activa
+                          : estado.practicaActiva
                             ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
                             : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-300'
                       }`}
@@ -495,7 +491,7 @@ export const PlanificacionesPage: React.FC = () => {
                         <FlaskConical size={14} />
                       )}
                       Práctica
-                      {estado.practica_activa && !isLoadingPractica && (
+                      {estado.practicaActiva && !isLoadingPractica && (
                         <CheckCircle size={12} className="ml-1" />
                       )}
                     </button>
@@ -505,25 +501,25 @@ export const PlanificacionesPage: React.FC = () => {
                     {/* Toggle Todo */}
                     <button
                       onClick={() =>
-                        handleToggleClase(selectedAsignacion.id, clase.id, estado.ambas_activas)
+                        handleToggleClase(selectedAsignacion.id, clase.id, estado.ambasActivas)
                       }
                       disabled={isLoadingClase}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold border transition-all ${
                         isLoadingClase
                           ? 'opacity-50 cursor-not-allowed'
-                          : estado.ambas_activas
+                          : estado.ambasActivas
                             ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/30'
                             : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-300'
                       }`}
                     >
                       {isLoadingClase ? (
                         <Loader2 size={14} className="animate-spin" />
-                      ) : estado.ambas_activas ? (
+                      ) : estado.ambasActivas ? (
                         <CheckCircle size={14} />
                       ) : (
                         <XCircle size={14} />
                       )}
-                      {estado.ambas_activas ? 'Todo Activo' : 'Activar Todo'}
+                      {estado.ambasActivas ? 'Todo Activo' : 'Activar Todo'}
                     </button>
 
                     <div className="h-6 w-[1px] bg-slate-800 mx-1 hidden md:block"></div>
@@ -616,20 +612,20 @@ export const PlanificacionesPage: React.FC = () => {
                         <td className="px-4 py-3">
                           <p className="text-white">
                             <span className="font-bold text-emerald-400">
-                              {progreso.clase_numero}.
+                              {progreso.claseNumero}.
                             </span>{' '}
-                            <span className="text-slate-300">{progreso.clase_titulo}</span>
+                            <span className="text-slate-300">{progreso.claseTitulo}</span>
                           </p>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          {progreso.teoria_completada ? (
+                          {progreso.teoriaCompletada ? (
                             <CheckCircle className="w-5 h-5 text-blue-400 mx-auto" />
                           ) : (
                             <XCircle className="w-5 h-5 text-slate-500 mx-auto" />
                           )}
                         </td>
                         <td className="px-4 py-3 text-center">
-                          {progreso.practica_completada ? (
+                          {progreso.practicaCompletada ? (
                             <CheckCircle className="w-5 h-5 text-purple-400 mx-auto" />
                           ) : (
                             <XCircle className="w-5 h-5 text-slate-500 mx-auto" />
@@ -638,8 +634,7 @@ export const PlanificacionesPage: React.FC = () => {
                         <td className="px-4 py-3 text-center">
                           <span className="text-slate-300 text-sm font-mono">
                             {Math.round(
-                              (progreso.tiempo_teoria_segundos +
-                                progreso.tiempo_practica_segundos) /
+                              (progreso.tiempoTeoriaSegundos + progreso.tiempoPracticaSegundos) /
                                 60,
                             )}{' '}
                             min
@@ -707,18 +702,18 @@ export const PlanificacionesPage: React.FC = () => {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-bold text-white">{tarea.contenido_titulo}</h4>
+                            <h4 className="font-bold text-white">{tarea.contenidoTitulo}</h4>
                             {tarea.obligatoria && (
                               <span className="text-[10px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded border border-red-500/30 font-bold uppercase">
                                 Obligatoria
                               </span>
                             )}
                           </div>
-                          {tarea.fecha_limite && (
+                          {tarea.fechaLimite && (
                             <p className="text-xs text-slate-400 flex items-center gap-1">
                               <Calendar size={12} />
                               Fecha límite:{' '}
-                              {new Date(tarea.fecha_limite).toLocaleDateString('es-AR')}
+                              {new Date(tarea.fechaLimite).toLocaleDateString('es-AR')}
                             </p>
                           )}
                         </div>

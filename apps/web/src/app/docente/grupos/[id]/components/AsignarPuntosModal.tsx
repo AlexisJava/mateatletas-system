@@ -189,7 +189,7 @@ export default function AsignarPuntosModal({
                         <StudentAvatar
                           nombre={estudiante.nombre}
                           apellido={estudiante.apellido}
-                          avatar_url={estudiante.avatar_url}
+                          avatarUrl={estudiante.avatarUrl}
                           size="md"
                           className="border-2 border-yellow-400/50"
                         />
@@ -284,7 +284,7 @@ export default function AsignarPuntosModal({
                       <StudentAvatar
                         nombre={estudianteSelected.nombre}
                         apellido={estudianteSelected.apellido}
-                        avatar_url={estudianteSelected.avatar_url}
+                        avatarUrl={estudianteSelected.avatarUrl}
                         size="lg"
                         className="border-2 border-yellow-400/50"
                       />

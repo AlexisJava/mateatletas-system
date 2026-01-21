@@ -309,8 +309,8 @@ interface Tutor {
   apellido: string;
   dni: string | null;
   telefono: string | null;
-  fecha_registro: string;
-  ha_completado_onboarding: boolean;
+  fechaRegistro: string;
+  haCompletadoOnboarding: boolean;
   createdAt: string;
   updatedAt: string;
 }

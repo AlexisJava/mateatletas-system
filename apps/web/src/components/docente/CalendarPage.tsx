@@ -54,8 +54,8 @@ export const CalendarPage: React.FC = () => {
       // Transformar clases del backend al formato de CalendarEvent
       const transformedEvents: CalendarEvent[] = response.clases.map((clase: ClaseCalendario) => {
         const fechaClase = new Date(clase.fecha);
-        const horaInicio = clase.hora_inicio.slice(0, 5); // "HH:MM"
-        const horaFin = clase.hora_fin.slice(0, 5);
+        const horaInicio = clase.horaInicio.slice(0, 5); // "HH:MM"
+        const horaFin = clase.horaFin.slice(0, 5);
 
         // Calcular duración
         const partesInicio = horaInicio.split(':').map(Number);
@@ -78,7 +78,7 @@ export const CalendarPage: React.FC = () => {
           duration: duracion,
           date: fechaClase.getDate(),
           month: fechaClase.getMonth(),
-          grupoId: clase.grupo_id,
+          grupoId: clase.grupoId,
           estudiantesCount: clase.estudiantesCount,
         };
       });

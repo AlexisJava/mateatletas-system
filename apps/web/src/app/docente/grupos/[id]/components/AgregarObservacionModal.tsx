@@ -51,11 +51,11 @@ export default function AgregarObservacionModal({
       // Llamar al endpoint de asistencia batch con solo este estudiante
       // Esto actualizará la asistencia del día con las observaciones
       await axios.post('/asistencia/clase-grupo/batch', {
-        clase_grupo_id: claseGrupoId,
+        claseGrupoId: claseGrupoId,
         fecha: fechaHoy,
         asistencias: [
           {
-            estudiante_id: estudianteSeleccionado,
+            estudianteId: estudianteSeleccionado,
             estado: 'Presente', // Default, no afecta si ya existe
             observaciones: observaciones.trim(),
           },
@@ -220,7 +220,7 @@ export default function AgregarObservacionModal({
                         <StudentAvatar
                           nombre={estudiante.nombre}
                           apellido={estudiante.apellido}
-                          avatar_url={estudiante.avatar_url}
+                          avatarUrl={estudiante.avatarUrl}
                           size="md"
                           className="border-2 border-purple-400/50"
                         />
@@ -271,7 +271,7 @@ export default function AgregarObservacionModal({
                       <StudentAvatar
                         nombre={estudianteSelected.nombre}
                         apellido={estudianteSelected.apellido}
-                        avatar_url={estudianteSelected.avatar_url}
+                        avatarUrl={estudianteSelected.avatarUrl}
                         size="md"
                         className="border-2 border-purple-400/50"
                       />

@@ -30,8 +30,8 @@ interface TopEstudiante {
   nombre: string;
   apellido: string;
   fotoUrl: string | null;
-  xp_total: number;
-  porcentaje_asistencia: number;
+  xpTotal: number;
+  porcentajeAsistencia: number;
 }
 
 const COLORS = ['#6366f1', '#a855f7', '#06b6d4', '#ec4899', '#f43f5e', '#84cc16'];
@@ -72,9 +72,9 @@ export const DashboardModal: React.FC<DashboardModalProps> = ({ type, onClose })
         id: e.id,
         nombre: e.nombre,
         apellido: e.apellido,
-        fotoUrl: e.foto_url,
-        xp_total: e.puntos_totales,
-        porcentaje_asistencia: e.porcentaje_asistencia,
+        fotoUrl: e.fotoUrl,
+        xpTotal: e.puntosTotales,
+        porcentajeAsistencia: e.porcentajeAsistencia,
       }));
       setTopStudents(mapped);
     } catch (error) {
@@ -359,7 +359,7 @@ export const DashboardModal: React.FC<DashboardModalProps> = ({ type, onClose })
       case 'points': {
         // Calcular max puntos para la barra de progreso
         const maxPoints =
-          topStudents.length > 0 ? Math.max(...topStudents.map((s) => s.xp_total)) : 100;
+          topStudents.length > 0 ? Math.max(...topStudents.map((s) => s.xpTotal)) : 100;
 
         return (
           <>
@@ -421,12 +421,12 @@ export const DashboardModal: React.FC<DashboardModalProps> = ({ type, onClose })
                       <div className="w-full bg-slate-900 h-1.5 rounded-full mt-1.5 overflow-hidden">
                         <div
                           className="h-full bg-amber-500 rounded-full"
-                          style={{ width: `${(student.xp_total / maxPoints) * 100}%` }}
+                          style={{ width: `${(student.xpTotal / maxPoints) * 100}%` }}
                         />
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-amber-400">{student.xp_total}</p>
+                      <p className="text-sm font-bold text-amber-400">{student.xpTotal}</p>
                       <p className="text-[10px] text-slate-500">XP</p>
                     </div>
                   </div>

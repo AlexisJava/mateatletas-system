@@ -80,10 +80,10 @@ const createMockInscripcion = (
   overrides: Partial<InscripcionComision> = {},
 ): InscripcionComision => ({
   id: 'inscripcion-1',
-  comision_id: 'comision-1',
-  estudiante_id: 'estudiante-1',
+  comisionId: 'comision-1',
+  estudianteId: 'estudiante-1',
   estado: 'Confirmada',
-  fecha_inscripcion: '2024-01-01',
+  fechaInscripcion: '2024-01-01',
   notas: null,
   estudiante: {
     id: 'estudiante-1',
@@ -102,13 +102,13 @@ const createMockComision = (
   id: 'comision-1',
   nombre: 'Comisión Test',
   descripcion: 'Descripción test',
-  producto_id: 'producto-1',
-  casa_id: null,
-  docente_id: null,
-  cupo_maximo: 20,
+  productoId: 'producto-1',
+  casaId: null,
+  docenteId: null,
+  cupoMaximo: 20,
   horario: 'Lun-Vie 9:00-12:00',
-  fecha_inicio: '2024-01-01',
-  fecha_fin: '2024-12-31',
+  fechaInicio: '2024-01-01',
+  fechaFin: '2024-12-31',
   activo: true,
   createdAt: '2024-01-01',
   updatedAt: '2024-01-01',
@@ -172,7 +172,7 @@ describe('InscripcionesComisionSection', () => {
     });
 
     it('muestra indicador de cupos disponibles', () => {
-      const comision = createMockComision({ cupo_maximo: 20 });
+      const comision = createMockComision({ cupoMaximo: 20 });
 
       render(<InscripcionesComisionSection comision={comision} onRefresh={vi.fn()} />);
 
@@ -181,7 +181,7 @@ describe('InscripcionesComisionSection', () => {
 
     it('muestra "Sin cupos" cuando no hay disponibilidad', () => {
       const comision = createMockComision({
-        cupo_maximo: 1,
+        cupoMaximo: 1,
         inscripciones: [createMockInscripcion()],
       });
 
@@ -192,7 +192,7 @@ describe('InscripcionesComisionSection', () => {
 
     it('deshabilita botones cuando no hay cupos', () => {
       const comision = createMockComision({
-        cupo_maximo: 1,
+        cupoMaximo: 1,
         inscripciones: [createMockInscripcion()],
       });
 
@@ -246,7 +246,7 @@ describe('InscripcionesComisionSection', () => {
 
       await waitFor(() => {
         expect(mockInscribirEstudiantesComision).toHaveBeenCalledWith('comision-1', {
-          estudiantes_ids: ['estudiante-existente'],
+          estudiantesIds: ['estudiante-existente'],
         });
       });
 

@@ -6,12 +6,12 @@ import type { Logro as ContractsLogro } from '@mateatletas/contracts';
  */
 
 export interface RecursosEstudiante {
-  xp_actual: number;
-  xp_siguiente_nivel: number;
-  nivel_actual: number;
+  xpActual: number;
+  xpSiguienteNivel: number;
+  nivelActual: number;
   monedas: number;
   gemas: number;
-  puntos_totales: number;
+  puntosTotales: number;
 }
 
 export interface TransaccionRecurso {
@@ -20,33 +20,33 @@ export interface TransaccionRecurso {
   cantidad: number;
   motivo: string;
   fecha: string;
-  balance_anterior: number;
-  balance_nuevo: number;
+  balanceAnterior: number;
+  balanceNuevo: number;
 }
 
 export interface RachaEstudiante {
-  dias_consecutivos: number;
-  mejor_racha: number;
-  ultima_actividad: string;
-  activo_hoy: boolean;
+  diasConsecutivos: number;
+  mejorRacha: number;
+  ultimaActividad: string;
+  activoHoy: boolean;
 }
 
 export interface LogroEstudiante {
   id: string;
   logro: ContractsLogro;
   desbloqueado: boolean;
-  fecha_desbloqueo?: string;
-  progreso_actual?: number;
-  progreso_objetivo?: number;
+  fechaDesbloqueo?: string;
+  progresoActual?: number;
+  progresoObjetivo?: number;
 }
 
 export interface ProgresoLogros {
   total: number;
   desbloqueados: number;
   porcentaje: number;
-  total_logros: number;
-  logros_desbloqueados: number;
-  por_categoria: Record<
+  totalLogros: number;
+  logrosDesbloqueados: number;
+  porCategoria: Record<
     string,
     {
       total: number;
@@ -64,8 +64,8 @@ export function normalizarLogros<T extends ContractsLogro>(logros: T[]): T[] {
     ...logro,
     // Asegurar que los campos opcionales tengan valores por defecto
     icono: logro.icono || '🏆',
-    xp_recompensa: logro.xp_recompensa || 0,
-    monedas_recompensa: logro.monedas_recompensa || 0,
+    xpRecompensa: logro.xpRecompensa || 0,
+    monedasRecompensa: logro.monedasRecompensa || 0,
   }));
 }
 
@@ -80,9 +80,9 @@ export function mapLogrosToEstudiante(
     id: logro.id,
     logro,
     desbloqueado: logro.desbloqueado ?? false,
-    fecha_desbloqueo:
-      typeof logro.fecha_desbloqueo === 'string'
-        ? logro.fecha_desbloqueo
-        : logro.fecha_desbloqueo?.toISOString(),
+    fechaDesbloqueo:
+      typeof logro.fechaDesbloqueo === 'string'
+        ? logro.fechaDesbloqueo
+        : logro.fechaDesbloqueo?.toISOString(),
   }));
 }

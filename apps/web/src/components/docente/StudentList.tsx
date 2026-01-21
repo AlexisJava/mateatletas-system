@@ -175,7 +175,7 @@ export const StudentList: React.FC<StudentListProps> = ({
           casa: detalleRes.casa?.nombre || 'Sin casa',
           horario: detalleRes.horario || 'Sin horario',
           inscritos: detalleRes.estudiantes?.length || 0,
-          cupoMaximo: detalleRes.cupo_maximo || 20,
+          cupoMaximo: detalleRes.cupoMaximo || 20,
         });
 
         setEstudiantes(estudiantesRes.estudiantes || []);
@@ -318,7 +318,7 @@ export const StudentList: React.FC<StudentListProps> = ({
       setEstudiantes((prev) =>
         prev.map((s) =>
           s.id === currentStudentForPuntos.id
-            ? { ...s, stats: { ...s.stats, xp_total: s.stats.xp_total + accion.puntos } }
+            ? { ...s, stats: { ...s.stats, xpTotal: s.stats.xpTotal + accion.puntos } }
             : s,
         ),
       );
@@ -536,7 +536,7 @@ export const StudentList: React.FC<StudentListProps> = ({
           </h3>
           <div className="space-y-2">
             {[...estudiantes]
-              .sort((a, b) => b.stats.xp_total - a.stats.xp_total)
+              .sort((a, b) => b.stats.xpTotal - a.stats.xpTotal)
               .slice(0, 5)
               .map((student, idx) => (
                 <div
@@ -560,7 +560,7 @@ export const StudentList: React.FC<StudentListProps> = ({
                     {student.nombre} {student.apellido}
                   </span>
                   <span className="text-sm font-bold text-amber-400">
-                    {student.stats.xp_total} XP
+                    {student.stats.xpTotal} XP
                   </span>
                 </div>
               ))}
@@ -592,7 +592,7 @@ export const StudentList: React.FC<StudentListProps> = ({
     // Agrupar puntos por tipo de acción para el mini gráfico
     const puntosPorTipo = historialPuntos.puntos.reduce(
       (acc, p) => {
-        acc[p.tipo_accion] = (acc[p.tipo_accion] || 0) + p.puntos;
+        acc[p.tipoAccion] = (acc[p.tipoAccion] || 0) + p.puntos;
         return acc;
       },
       {} as Record<string, number>,
@@ -659,8 +659,8 @@ export const StudentList: React.FC<StudentListProps> = ({
           </h3>
           <div className="space-y-2 max-h-80 overflow-y-auto">
             {historialPuntos.puntos.slice(0, 20).map((punto) => {
-              const fecha = new Date(punto.fecha_otorgado);
-              const emoji = ACCION_EMOJIS[punto.tipo_accion] || '⭐';
+              const fecha = new Date(punto.fechaOtorgado);
+              const emoji = ACCION_EMOJIS[punto.tipoAccion] || '⭐';
               return (
                 <div
                   key={punto.id}
@@ -670,9 +670,9 @@ export const StudentList: React.FC<StudentListProps> = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-white truncate">
-                        {punto.estudiante_nombre}
+                        {punto.estudianteNombre}
                       </span>
-                      <span className="text-xs text-slate-500">{punto.tipo_accion}</span>
+                      <span className="text-xs text-slate-500">{punto.tipoAccion}</span>
                     </div>
                     {punto.contexto && (
                       <p className="text-xs text-slate-500 truncate">{punto.contexto}</p>
@@ -755,7 +755,7 @@ export const StudentList: React.FC<StudentListProps> = ({
     return (
       <div className="p-4 space-y-3 overflow-y-auto h-full">
         {observacionesData.map((obs) => {
-          const fecha = new Date(obs.fecha_evento);
+          const fecha = new Date(obs.fechaEvento);
           const estudiantesNombres = obs.estudiantes
             .map((e) => `${e.estudiante.nombre} ${e.estudiante.apellido}`)
             .join(', ');
@@ -1086,7 +1086,7 @@ export const StudentList: React.FC<StudentListProps> = ({
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                   {fechaData.asistencias.map((asistencia) => (
                     <div
-                      key={asistencia.estudiante_id}
+                      key={asistencia.estudianteId}
                       className={`flex items-center gap-2 p-2 rounded-lg text-xs ${
                         asistencia.estado === 'Presente'
                           ? 'bg-emerald-500/10 border border-emerald-500/20'
@@ -1232,9 +1232,9 @@ export const StudentList: React.FC<StudentListProps> = ({
                     <div className="flex items-center gap-4">
                       {/* Avatar */}
                       <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                        {student.avatar_url ? (
+                        {student.avatarUrl ? (
                           <img
-                            src={student.avatar_url}
+                            src={student.avatarUrl}
                             alt={student.nombre}
                             className="w-full h-full object-cover"
                           />
@@ -1262,16 +1262,16 @@ export const StudentList: React.FC<StudentListProps> = ({
                         </div>
                         <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
                           <span className="flex items-center gap-1 text-emerald-400 font-bold">
-                            {student.stats.asistencia_porcentaje}% Asist.
+                            {student.stats.asistenciaPorcentaje}% Asist.
                           </span>
                           <span className="w-1 h-1 rounded-full bg-slate-700"></span>
                           <span className="flex items-center gap-1 text-amber-400 font-bold">
-                            {student.stats.xp_total} XP
+                            {student.stats.xpTotal} XP
                           </span>
                           <span className="w-1 h-1 rounded-full bg-slate-700"></span>
                           <span>
-                            Racha: {student.stats.racha_actual}{' '}
-                            {student.stats.racha_actual > 0 && (
+                            Racha: {student.stats.rachaActual}{' '}
+                            {student.stats.rachaActual > 0 && (
                               <span className="text-orange-500">🔥</span>
                             )}
                           </span>
@@ -1529,7 +1529,7 @@ export const StudentList: React.FC<StudentListProps> = ({
                 <div>
                   <h3 className="text-lg font-bold text-white">Detalle de Observación</h3>
                   <p className="text-xs text-slate-400">
-                    {new Date(selectedObservacion.fecha_evento).toLocaleDateString('es-AR')}
+                    {new Date(selectedObservacion.fechaEvento).toLocaleDateString('es-AR')}
                   </p>
                 </div>
               </div>
@@ -1624,7 +1624,7 @@ export const StudentList: React.FC<StudentListProps> = ({
                       <div key={seg.id} className="border-l-2 border-indigo-500 pl-3 py-1">
                         <p className="text-sm text-white">{seg.contenido}</p>
                         <p className="text-xs text-slate-500 mt-1">
-                          {new Date(seg.created_at).toLocaleString('es-AR', {
+                          {new Date(seg.createdAt).toLocaleString('es-AR', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',

@@ -31,10 +31,10 @@ export type EstadoClase = 'Programada' | 'EnVivo' | 'Finalizada' | 'Cancelada';
 export interface ClaseEnVivoResponse {
   id: string;
   nombre: string;
-  estado_clase: EstadoClase;
-  iniciada_en: string | null;
-  finalizada_en: string | null;
-  livekit_room_name: string | null;
+  estadoClase: EstadoClase;
+  iniciadaEn: string | null;
+  finalizadaEn: string | null;
+  livekitRoomName: string | null;
 }
 
 export interface IniciarClaseResponse extends ClaseEnVivoResponse {
@@ -43,7 +43,7 @@ export interface IniciarClaseResponse extends ClaseEnVivoResponse {
 
 export interface FinalizarClaseResponse extends ClaseEnVivoResponse {
   mensaje: string;
-  duracion_minutos: number;
+  duracionMinutos: number;
 }
 
 export interface ControlPalabraDto extends TokenRequestDto {

@@ -27,7 +27,7 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
 
 function DocenteLayoutContent({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((state) => state.user);
-  const mustChangePassword = user?.debe_cambiar_password === true;
+  const mustChangePassword = user?.debeCambiarPassword === true;
 
   return (
     <div className="fixed inset-0 bg-[#020617] flex flex-col overflow-hidden" data-docente="true">

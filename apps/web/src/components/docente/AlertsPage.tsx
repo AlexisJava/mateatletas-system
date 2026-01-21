@@ -23,7 +23,7 @@ const detailedAlerts: (Alerta & { date: string; status: 'pending' | 'resolved' }
     severidad: 'alta',
     mensaje: 'Tiene menos del 60% de asistencia. Riesgo de quedar libre.',
     estudiante: 'Miguel Ángel',
-    comision_id: '101',
+    comisionId: '101',
     date: 'Hace 2 horas',
     status: 'pending',
   },
@@ -33,7 +33,7 @@ const detailedAlerts: (Alerta & { date: string; status: 'pending' | 'resolved' }
     severidad: 'media',
     mensaje: 'No ha entregado el TP2 y faltó 2 clases seguidas.',
     estudiante: 'Juan Pérez',
-    comision_id: '102',
+    comisionId: '102',
     date: 'Ayer',
     status: 'pending',
   },
@@ -43,7 +43,7 @@ const detailedAlerts: (Alerta & { date: string; status: 'pending' | 'resolved' }
     severidad: 'media',
     mensaje: 'Requiere seguimiento en lógica de programación.',
     estudiante: 'Ana García',
-    comision_id: '101',
+    comisionId: '101',
     date: 'Hace 2 días',
     status: 'pending',
   },
@@ -53,7 +53,7 @@ const detailedAlerts: (Alerta & { date: string; status: 'pending' | 'resolved' }
     severidad: 'alta',
     mensaje: '3 ausencias consecutivas sin aviso.',
     estudiante: 'Carlos Ruiz',
-    comision_id: '103',
+    comisionId: '103',
     date: 'Hace 3 días',
     status: 'resolved',
   },
@@ -154,7 +154,7 @@ export const AlertsPage: React.FC = () => {
                       {alerta.tipo}
                     </span>
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-950 border border-slate-800 text-slate-400">
-                      Comisión {alerta.comision_id}
+                      Comisión {alerta.comisionId}
                     </span>
                   </div>
                 </div>

@@ -62,9 +62,9 @@ const estudianteEnInscripcionSchema = z.object({
  */
 export const inscripcionClaseSchema = z.object({
   id: z.string(),
-  clase_id: z.string().nullish(),
-  estudiante_id: z.string().nullish(),
-  tutor_id: z.string().nullish(),
+  claseId: z.string().nullish(),
+  estudianteId: z.string().nullish(),
+  tutorId: z.string().nullish(),
   createdAt: z.string().nullish(),
 
   // Relaciones opcionales
@@ -77,17 +77,17 @@ export const inscripcionClaseSchema = z.object({
  */
 export const claseSchema = z.object({
   id: z.string(),
-  docente_id: z.string().nullish(),
-  ruta_curricular_id: z.string().nullish(),
+  docenteId: z.string().nullish(),
+  rutaCurricularId: z.string().nullish(),
 
   // Fecha y hora
-  fecha_hora_inicio: z.string(), // ISO 8601 DateTime
-  duracion_minutos: z.number().int().positive(),
+  fechaHoraInicio: z.string(), // ISO 8601 DateTime
+  duracionMinutos: z.number().int().positive(),
 
   // Capacidad
-  cupo_maximo: z.number().int().positive().nullish(),
-  cupo_disponible: z.number().int().nonnegative().nullish(),
-  cupos_ocupados: z.number().int().nonnegative().nullish(),
+  cupoMaximo: z.number().int().positive().nullish(),
+  cupoDisponible: z.number().int().nonnegative().nullish(),
+  cuposOcupados: z.number().int().nonnegative().nullish(),
 
   // Estado
   estado: estadoClaseSchema.nullish(),
@@ -103,7 +103,6 @@ export const claseSchema = z.object({
 
   // Relaciones opcionales (cuando se incluyen en el response)
   docente: docenteEnClaseSchema,
-  ruta_curricular: rutaCurricularEnClaseSchema.nullish(),
   rutaCurricular: rutaCurricularEnClaseSchema.nullish(),
   sector: sectorEnClaseSchema,
   inscripciones: z.array(inscripcionClaseSchema).nullish(),
@@ -142,29 +141,16 @@ export const clasesResponseSchema = z
     metadata: paginationSchema.optional(),
   })
   .transform((payload) => ({
-    data: payload.data.map((clase) => ({
-      ...clase,
-      ruta_curricular: clase.ruta_curricular ?? clase.rutaCurricular ?? undefined,
-    })),
+    data: payload.data,
     meta: payload.meta ?? payload.metadata,
   }));
 
-export const calendarioResponseSchema = z
-  .object({
-    mes: z.number().int(),
-    anio: z.number().int(),
-    clases: z.array(claseSchema),
-    total: z.number().int(),
-  })
-  .transform((payload) => ({
-    mes: payload.mes,
-    anio: payload.anio,
-    total: payload.total,
-    clases: payload.clases.map((clase) => ({
-      ...clase,
-      ruta_curricular: clase.ruta_curricular ?? clase.rutaCurricular ?? undefined,
-    })),
-  }));
+export const calendarioResponseSchema = z.object({
+  mes: z.number().int(),
+  anio: z.number().int(),
+  clases: z.array(claseSchema),
+  total: z.number().int(),
+});
 
 /**
  * Schema para crear una clase (sin id, sin timestamps)
@@ -175,11 +161,11 @@ export const createClaseSchema = claseSchema
     createdAt: true,
     updatedAt: true,
     docente: true,
-    ruta_curricular: true,
+    rutaCurricular: true,
     inscripciones: true,
   })
   .extend({
-    cupo_disponible: z.number().int().nonnegative().optional(),
+    cupoDisponible: z.number().int().nonnegative().optional(),
   });
 
 /**
@@ -191,7 +177,7 @@ export const updateClaseSchema = claseSchema.partial().required({ id: true });
  * Schema para filtros de clases
  */
 export const filtroClasesSchema = z.object({
-  ruta_curricular_id: z.string().optional(),
+  rutaCurricularId: z.string().optional(),
   fechaDesde: z.string().optional(),
   fechaHasta: z.string().optional(),
   soloDisponibles: z.boolean().optional(),

@@ -161,7 +161,7 @@ export const ProximaClaseCard: React.FC<ProximaClaseProps> = ({ comision, onStar
   }
 
   const isUrgent = isLiveish || timeLeft === 'EN CURSO';
-  const capacityPercent = Math.round((comision.inscripciones / comision.cupo_maximo) * 100);
+  const capacityPercent = Math.round((comision.inscripciones / comision.cupoMaximo) * 100);
 
   return (
     <div className="relative w-full h-full min-h-0 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col group">
@@ -227,7 +227,7 @@ export const ProximaClaseCard: React.FC<ProximaClaseProps> = ({ comision, onStar
             <span className="flex items-center gap-2 text-sm font-medium bg-slate-900/60 px-4 py-2 rounded-lg backdrop-blur-sm border border-slate-700/50">
               <Users size={16} className="text-emerald-400" />
               <span className="text-white">
-                {comision.inscripciones}/{comision.cupo_maximo} Alumnos
+                {comision.inscripciones}/{comision.cupoMaximo} Alumnos
               </span>
             </span>
           </div>

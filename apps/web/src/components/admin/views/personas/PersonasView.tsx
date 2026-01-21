@@ -95,11 +95,11 @@ function AsignacionesTab({ docenteAsignaciones, onSelectDocente }: AsignacionesT
 
         {/* Filtro por Casa */}
         <select
-          value={filtros.casa_tipo || ''}
+          value={filtros.casaTipo || ''}
           onChange={(e) =>
             setFiltros({
               ...filtros,
-              casa_tipo: (e.target.value || undefined) as typeof filtros.casa_tipo,
+              casaTipo: (e.target.value || undefined) as typeof filtros.casaTipo,
             })
           }
           className="px-3 py-2 bg-[var(--admin-surface-2)] border border-[var(--admin-border)] rounded-lg text-[var(--admin-text)] focus:outline-none focus:border-[var(--admin-accent)]"
@@ -114,11 +114,11 @@ function AsignacionesTab({ docenteAsignaciones, onSelectDocente }: AsignacionesT
 
         {/* Filtro por Mundo */}
         <select
-          value={filtros.mundo_tipo || ''}
+          value={filtros.mundoTipo || ''}
           onChange={(e) =>
             setFiltros({
               ...filtros,
-              mundo_tipo: (e.target.value || undefined) as typeof filtros.mundo_tipo,
+              mundoTipo: (e.target.value || undefined) as typeof filtros.mundoTipo,
             })
           }
           className="px-3 py-2 bg-[var(--admin-surface-2)] border border-[var(--admin-border)] rounded-lg text-[var(--admin-text)] focus:outline-none focus:border-[var(--admin-accent)]"

@@ -36,7 +36,7 @@ export type TierNombre = 'STEAM_LIBROS' | 'STEAM_ASINCRONICO' | 'STEAM_SINCRONIC
  */
 export type EstadoSuscripcionFamiliar = 'PENDING' | 'AUTHORIZED' | 'PAUSED' | 'CANCELLED';
 
-export type EstadoInscripcionActividad = 'ACTIVA' | 'PENDIENTE_BAJA' | 'BAJA' | 'CONGELADA';
+export type EstadoInscripcionActividad = 'ACTIVA' | 'PAUSADA' | 'CANCELADA';
 
 // ============================================================================
 // TIPOS DE REQUEST (DTOs)

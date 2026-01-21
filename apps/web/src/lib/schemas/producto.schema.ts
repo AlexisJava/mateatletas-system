@@ -22,15 +22,15 @@ export const productoSchema = z.object({
     'Certificacion',
   ]),
   subcategoria: z.string().nullable().optional(),
-  duracion_dias: z.coerce.number().nullable().optional(), // Campo legacy, puede no existir
+  duracionDias: z.coerce.number().nullable().optional(), // Campo legacy, puede no existir
   activo: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
   // Campos opcionales según tipo (Evento, Curso)
-  fecha_inicio: z.string().nullable().optional(),
-  fecha_fin: z.string().nullable().optional(),
-  cupo_maximo: z.coerce.number().nullable().optional(),
-  duracion_meses: z.coerce.number().nullable().optional(), // Campo real de Prisma
+  fechaInicio: z.string().nullable().optional(),
+  fechaFin: z.string().nullable().optional(),
+  cupoMaximo: z.coerce.number().nullable().optional(),
+  duracionMeses: z.coerce.number().nullable().optional(), // Campo real de Prisma
 });
 
 /**

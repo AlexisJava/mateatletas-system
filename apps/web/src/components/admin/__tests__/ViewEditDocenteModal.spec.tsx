@@ -29,11 +29,11 @@ const createMockDocente = (overrides = {}) => ({
   titulo: 'Licenciado en Matemática',
   sectores: [{ nombre: 'Primaria', icono: '📚', color: '#3B82F6' }],
   especialidades: ['Álgebra', 'Geometría'],
-  disponibilidad_horaria: {
+  disponibilidadHoraria: {
     lunes: ['09:00-12:00', '14:00-18:00'],
     miércoles: ['09:00-12:00'],
   },
-  nivel_educativo: ['Primaria', 'Secundaria'],
+  nivelEducativo: ['Primaria', 'Secundaria'],
   estado: 'activo',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-15T00:00:00Z',
@@ -131,7 +131,7 @@ describe('ViewEditDocenteModal', () => {
     });
 
     it('muestra mensaje cuando no hay disponibilidad horaria', () => {
-      const docente = createMockDocente({ disponibilidad_horaria: {} });
+      const docente = createMockDocente({ disponibilidadHoraria: {} });
 
       render(<ViewEditDocenteModal {...defaultProps} docente={docente} />);
 

@@ -197,7 +197,7 @@ export default function ProgresoPage() {
     );
   }
 
-  const { gamificacion, racha, logros, actividad_reciente } = data;
+  const { gamificacion, racha, logros, actividadReciente } = data;
 
   return (
     <div className="min-h-screen bg-[var(--estudiante-bg)] text-white relative overflow-hidden">
@@ -243,13 +243,13 @@ export default function ProgresoPage() {
             <div className="flex flex-wrap gap-3 mb-6">
               <StatPill
                 icon={<Flame className="w-4 h-4" />}
-                value={`${racha.racha_actual}d`}
+                value={`${racha.rachaActual}d`}
                 label="Racha"
                 colors={['#f43f5e', '#ec4899', '#db2777']}
               />
               <StatPill
                 icon={<Zap className="w-4 h-4" />}
-                value={gamificacion.xp_total.toLocaleString()}
+                value={gamificacion.xpTotal.toLocaleString()}
                 label="XP"
                 colors={['#a855f7', '#7c3aed', '#6366f1']}
               />
@@ -272,7 +272,7 @@ export default function ProgresoPage() {
               <div className="flex items-center justify-between text-sm mb-2">
                 <span className="text-white/80 font-bold">Nivel {gamificacion.nivel}</span>
                 <span className="text-white/50">
-                  {gamificacion.xp_progreso} / {gamificacion.xp_necesario} XP para Nivel{' '}
+                  {gamificacion.xpProgreso} / {gamificacion.xpNecesario} XP para Nivel{' '}
                   {gamificacion.nivel + 1}
                 </span>
               </div>
@@ -280,7 +280,7 @@ export default function ProgresoPage() {
                 <div
                   className="h-full rounded-full transition-all duration-1000"
                   style={{
-                    width: `${gamificacion.porcentaje_nivel}%`,
+                    width: `${gamificacion.porcentajeNivel}%`,
                     background: 'linear-gradient(90deg, #10b981, var(--color-correct), #84cc16)',
                     boxShadow: '0 0 20px rgba(16,185,129,0.5)',
                   }}
@@ -291,11 +291,11 @@ export default function ProgresoPage() {
             {/* Stats adicionales */}
             <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/10">
               <div className="text-center">
-                <p className="text-2xl font-black text-emerald-400">{racha.racha_maxima}d</p>
+                <p className="text-2xl font-black text-emerald-400">{racha.rachaMaxima}d</p>
                 <p className="text-sm text-white/50">Racha máxima</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-black text-emerald-400">{racha.total_dias_activos}</p>
+                <p className="text-2xl font-black text-emerald-400">{racha.totalDiasActivos}</p>
                 <p className="text-sm text-white/50">Días activos</p>
               </div>
             </div>
@@ -307,7 +307,7 @@ export default function ProgresoPage() {
             <LogrosCard logros={logros} />
 
             {/* Card Actividad Reciente */}
-            <ActividadCard actividades={actividad_reciente} />
+            <ActividadCard actividades={actividadReciente} />
           </div>
         </div>
       </div>
@@ -495,9 +495,9 @@ function ActividadItem({ actividad }: { actividad: ActividadReciente }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm text-white/90 line-clamp-2">{actividad.mensaje}</p>
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs text-white/40">{formatFechaRelativa(actividad.creado_en)}</span>
-          {actividad.xp_ganado > 0 && (
-            <span className="text-xs text-emerald-400 font-bold">+{actividad.xp_ganado} XP</span>
+          <span className="text-xs text-white/40">{formatFechaRelativa(actividad.creadoEn)}</span>
+          {actividad.xpGanado > 0 && (
+            <span className="text-xs text-emerald-400 font-bold">+{actividad.xpGanado} XP</span>
           )}
         </div>
       </div>

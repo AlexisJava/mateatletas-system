@@ -51,10 +51,10 @@ export default function AsistenciaPage() {
    * Manejar marcación de asistencia
    */
   const handleMarcarAsistencia = async (
-    estudiante_id: string,
+    estudianteId: string,
     data: MarcarAsistenciaDto,
   ): Promise<boolean> => {
-    const success = await marcarAsistencia(claseId, estudiante_id, data);
+    const success = await marcarAsistencia(claseId, estudianteId, data);
 
     if (success) {
       // Mostrar mensaje de éxito temporal
@@ -104,10 +104,9 @@ export default function AsistenciaPage() {
       ) : claseActual ? (
         (() => {
           const rutaCurricular =
-            claseActual.ruta_curricular ?? claseActual.rutaCurricular ?? undefined;
-          const cupoMaximo = claseActual.cupos_maximo ?? 0;
-          const cuposOcupados =
-            claseActual.cupos_ocupados ?? claseActual._count?.inscripciones ?? 0;
+            claseActual.rutaCurricular ?? claseActual.rutaCurricular ?? undefined;
+          const cupoMaximo = claseActual.cuposMaximo ?? 0;
+          const cuposOcupados = claseActual.cuposOcupados ?? claseActual._count?.inscripciones ?? 0;
           const cuposDisponibles = Math.max(cupoMaximo - cuposOcupados, 0);
 
           return (
@@ -128,11 +127,11 @@ export default function AsistenciaPage() {
                   <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-gray-600">
                     <span className="flex items-center gap-2">
                       <span>📅</span>
-                      {formatFecha(claseActual.fecha_hora_inicio)}
+                      {formatFecha(claseActual.fechaHoraInicio)}
                     </span>
                     <span className="flex items-center gap-2">
                       <span>⏱️</span>
-                      {claseActual.duracion_minutos} minutos
+                      {claseActual.duracionMinutos} minutos
                     </span>
                     <span className="flex items-center gap-2">
                       <span>👥</span>

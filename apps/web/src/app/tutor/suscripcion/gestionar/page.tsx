@@ -233,7 +233,7 @@ export default function GestionarSuscripcionPage(): React.ReactElement {
                 </h2>
                 <p
                   className={`text-sm ${
-                    suscripcion.estado === 'ACTIVA' ? 'text-green-400' : 'text-amber-400'
+                    suscripcion.estado === 'AUTHORIZED' ? 'text-green-400' : 'text-amber-400'
                   }`}
                 >
                   {formatEstadoSuscripcion(suscripcion.estado)}

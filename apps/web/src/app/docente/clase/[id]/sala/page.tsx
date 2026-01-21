@@ -15,18 +15,14 @@ import { ArrowLeft, Users, Clock, Video, CheckCircle, Calendar } from 'lucide-re
 
 interface ClaseData {
   id: string;
-  ruta_curricular?: {
-    nombre: string;
-    color: string;
-  } | null;
   rutaCurricular?: {
     nombre: string;
     color: string;
   } | null;
-  fecha_hora_inicio: string;
-  duracion_minutos: number;
-  cupos_ocupados: number;
-  cupos_maximo: number;
+  fechaHoraInicio: string;
+  duracionMinutos: number;
+  cuposOcupados: number;
+  cuposMaximo: number;
 }
 
 interface Estudiante {
@@ -96,9 +92,9 @@ export default function SalaClaseDocentePage() {
     );
   }
 
-  const rutaCurricular = clase.ruta_curricular ?? clase.rutaCurricular;
+  const rutaCurricular = clase.rutaCurricular;
   const rutaNombre = rutaCurricular?.nombre ?? 'Sin ruta';
-  const cuposDisponibles = Math.max(clase.cupos_maximo - clase.cupos_ocupados, 0);
+  const cuposDisponibles = Math.max(clase.cuposMaximo - clase.cuposOcupados, 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -117,12 +113,12 @@ export default function SalaClaseDocentePage() {
             <div className="flex items-center space-x-6">
               <div className="flex items-center text-gray-600">
                 <Clock className="w-5 h-5 mr-2" />
-                <span>{clase.duracion_minutos} min</span>
+                <span>{clase.duracionMinutos} min</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <Users className="w-5 h-5 mr-2" />
                 <span>
-                  {clase.cupos_ocupados}/{clase.cupos_maximo} estudiantes
+                  {clase.cuposOcupados}/{clase.cuposMaximo} estudiantes
                   {` (${cuposDisponibles} disponibles)`}
                 </span>
               </div>
@@ -157,11 +153,10 @@ export default function SalaClaseDocentePage() {
                       <span className="font-medium">Curso:</span> {rutaNombre}
                     </p>
                     <p>
-                      <span className="font-medium">Duración:</span> {clase.duracion_minutos}{' '}
-                      minutos
+                      <span className="font-medium">Duración:</span> {clase.duracionMinutos} minutos
                     </p>
                     <p>
-                      <span className="font-medium">Estudiantes:</span> {clase.cupos_ocupados}{' '}
+                      <span className="font-medium">Estudiantes:</span> {clase.cuposOcupados}{' '}
                       inscritos
                     </p>
                   </div>

@@ -53,8 +53,8 @@ export interface ClaseGrupo {
   rutaCurricularId?: string;
   sectorId?: string;
   nivel?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 
   // Relations (populated in includes)
   docente?: {

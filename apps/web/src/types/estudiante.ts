@@ -36,8 +36,8 @@ export type UpdateEstudianteData = UpdateEstudianteDto;
  * Parámetros de query para filtrar estudiantes
  */
 export interface QueryEstudiantesParams {
-  casa_id?: string;
-  nivel_escolar?: string;
+  casaId?: string;
+  nivelEscolar?: string;
   page?: number;
   limit?: number;
 }

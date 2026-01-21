@@ -108,7 +108,7 @@ export default function DocenteDashboard() {
           horario: c.horario || 'Sin horario',
           casa: c.casa?.nombre || 'VERTEX',
           inscripciones: c.estudiantesInscritos || 0,
-          cupo_maximo: c.cupo_maximo || 20,
+          cupoMaximo: c.cupoMaximo || 20,
           thumbnail: `https://picsum.photos/seed/${c.id}/800/600`,
           proximaClase: undefined,
         }),
@@ -127,10 +127,10 @@ export default function DocenteDashboard() {
         .map((e: EstudianteConFalta, i: number) => ({
           id: `alert-${i}`,
           tipo: 'asistencia',
-          severidad: e.faltas_consecutivas >= 3 ? 'alta' : ('media' as 'alta' | 'media'),
-          mensaje: `Tiene ${e.faltas_consecutivas} faltas consecutivas en ${e.ultimo_grupo}`,
+          severidad: e.faltasConsecutivas >= 3 ? 'alta' : ('media' as 'alta' | 'media'),
+          mensaje: `Tiene ${e.faltasConsecutivas} faltas consecutivas en ${e.ultimoGrupo}`,
           estudiante: `${e.nombre} ${e.apellido}`,
-          comision_id: e.id,
+          comisionId: e.id,
         }));
 
       setComisiones(transformedComisiones);

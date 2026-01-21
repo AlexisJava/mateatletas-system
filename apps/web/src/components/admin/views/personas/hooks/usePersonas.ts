@@ -106,11 +106,11 @@ async function fetchAllPersonas(): Promise<AdminPerson[]> {
       status: 'active',
       createdAt: est.createdAt,
       casa: est.casa?.nombre ?? est.equipo?.nombre,
-      puntos: est.xp_total ?? est.puntos_totales ?? 0,
+      puntos: est.xpTotal ?? est.puntosTotales ?? 0,
       edad: est.edad,
-      nivelEscolar: est.nivelEscolar ?? est.nivel_escolar,
+      nivelEscolar: est.nivelEscolar ?? est.nivelEscolar,
       planNombre: est.plan?.nombre ?? undefined,
-      estadoAcceso: est.estado_acceso ?? undefined,
+      estadoAcceso: est.estadoAcceso ?? undefined,
       username: est.username ?? undefined,
     });
   });
@@ -146,15 +146,11 @@ async function fetchAllPersonas(): Promise<AdminPerson[]> {
   const asignacionesData = docentesConAsignaciones ?? [];
   asignacionesData.forEach((docAsig) => {
     asignacionesMap.set(docAsig.id, {
-      casas: (docAsig.casas ?? []).map((c) => c.casa_tipo as 'QUANTUM' | 'VERTEX' | 'PULSAR'),
+      casas: (docAsig.casas ?? []).map((c) => c.casaTipo as 'QUANTUM' | 'VERTEX' | 'PULSAR'),
       mundos: (docAsig.mundos ?? []).map(
-        (m) => m.mundo_tipo as 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS',
+        (m) => m.mundoTipo as 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS',
       ),
-      tipoAsignacion: docAsig.tipo_asignacion as
-        | 'CLASE_GRUPOS'
-        | 'COMISIONES'
-        | 'AMBOS'
-        | undefined,
+      tipoAsignacion: docAsig.tipoAsignacion as 'CLASE_GRUPOS' | 'COMISIONES' | 'AMBOS' | undefined,
     });
   });
 
@@ -171,7 +167,7 @@ async function fetchAllPersonas(): Promise<AdminPerson[]> {
       role: 'docente' as UserRole,
       status: 'active',
       createdAt: doc.createdAt ?? new Date().toISOString(),
-      titulo: doc.titulo ?? doc.titulo_profesional ?? undefined,
+      titulo: doc.titulo ?? doc.tituloProfesional ?? undefined,
       telefono: doc.telefono ?? undefined,
       casasAsignadas: asignaciones?.casas,
       mundosAsignados: asignaciones?.mundos,
@@ -232,12 +228,12 @@ export function usePersonas(): UsePersonasReturn {
           tutorApellido: data.tutorApellido,
           tutorEmail: data.tutorEmail,
           tutorTelefono: data.tutorTelefono,
-          plan_id: data.planId ?? undefined,
-          estado_acceso: data.estadoAcceso,
+          planId: data.planId ?? undefined,
+          estadoAcceso: data.estadoAcceso,
         })) as unknown as {
           success: boolean;
           estudiante: { id: string; username?: string };
-          tutor_creado: boolean;
+          tutorCreado: boolean;
         };
         return { type: 'estudiante' as const, response, data };
       } else if (data.role === 'docente') {

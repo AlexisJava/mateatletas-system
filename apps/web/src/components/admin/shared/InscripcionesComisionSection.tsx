@@ -45,7 +45,7 @@ export function InscripcionesComisionSection({
 
   const inscripciones = comision.inscripciones || [];
   const totalInscriptos = inscripciones.length;
-  const cupoMaximo = comision.cupo_maximo || null;
+  const cupoMaximo = comision.cupoMaximo || null;
   const cuposDisponibles = cupoMaximo ? cupoMaximo - totalInscriptos : null;
   const hayCupo = cuposDisponibles === null || cuposDisponibles > 0;
 
@@ -72,7 +72,7 @@ export function InscripcionesComisionSection({
   const handleInscribirExistente = useCallback(
     async (estudianteId: string) => {
       try {
-        await inscribirEstudiantesComision(comision.id, { estudiantes_ids: [estudianteId] });
+        await inscribirEstudiantesComision(comision.id, { estudiantesIds: [estudianteId] });
         setIsBuscarModalOpen(false);
         onRefresh();
         toast.success('Estudiante inscripto exitosamente');

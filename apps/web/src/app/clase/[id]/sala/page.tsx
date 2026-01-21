@@ -17,7 +17,7 @@ import { ArrowLeft, Users, Clock, Video } from 'lucide-react';
 
 interface ClaseData {
   id: string;
-  ruta_curricular: {
+  rutaCurricular: {
     nombre: string;
     color: string;
   };
@@ -25,8 +25,8 @@ interface ClaseData {
     nombre: string;
     apellido: string;
   };
-  fecha_hora_inicio: string;
-  duracion_minutos: number;
+  fechaHoraInicio: string;
+  duracionMinutos: number;
 }
 
 export default function SalaClasePage() {
@@ -46,8 +46,8 @@ export default function SalaClasePage() {
     const claseValue = value as Partial<ClaseData>;
     return (
       typeof claseValue.id === 'string' &&
-      typeof claseValue.fecha_hora_inicio === 'string' &&
-      typeof claseValue.duracion_minutos === 'number'
+      typeof claseValue.fechaHoraInicio === 'string' &&
+      typeof claseValue.duracionMinutos === 'number'
     );
   };
 
@@ -103,8 +103,8 @@ export default function SalaClasePage() {
   const handleSalir = async () => {
     // Simular finalización de clase con datos de ejemplo
     const resumen: ResumenClase = {
-      claseNombre: (clase?.ruta_curricular ?? clase?.ruta_curricular)?.nombre || 'Clase',
-      duracionMinutos: clase?.duracion_minutos || 60,
+      claseNombre: (clase?.rutaCurricular ?? clase?.rutaCurricular)?.nombre || 'Clase',
+      duracionMinutos: clase?.duracionMinutos || 60,
       puntosGanados: 10,
       insigniasDesbloqueadas: [],
       estadisticas: {
@@ -165,7 +165,7 @@ export default function SalaClasePage() {
             <div className="flex items-center space-x-6">
               <div className="flex items-center text-gray-600">
                 <Clock className="w-5 h-5 mr-2" />
-                <span>{clase.duracion_minutos} min</span>
+                <span>{clase.duracionMinutos} min</span>
               </div>
               <div className="flex items-center text-gray-600">
                 <Users className="w-5 h-5 mr-2" />
@@ -197,14 +197,14 @@ export default function SalaClasePage() {
               <h3 className="font-semibold text-blue-900 mb-2">Información de la Clase</h3>
               <div className="text-left space-y-2 text-sm">
                 <p>
-                  <span className="font-medium">Curso:</span> {clase.ruta_curricular.nombre}
+                  <span className="font-medium">Curso:</span> {clase.rutaCurricular.nombre}
                 </p>
                 <p>
                   <span className="font-medium">Docente:</span> {clase.docente.nombre}{' '}
                   {clase.docente.apellido}
                 </p>
                 <p>
-                  <span className="font-medium">Duración:</span> {clase.duracion_minutos} minutos
+                  <span className="font-medium">Duración:</span> {clase.duracionMinutos} minutos
                 </p>
                 {asistenciaRegistrada && (
                   <p className="text-green-600 font-medium">✓ Tu asistencia ha sido registrada</p>

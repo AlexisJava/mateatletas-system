@@ -17,31 +17,31 @@ function transformClaseGrupo(raw: Record<string, unknown>): ClaseGrupo {
     codigo: raw.codigo as string,
     nombre: raw.nombre as string,
     tipo: raw.tipo as ClaseGrupo['tipo'],
-    diaSemana: (raw.dia_semana || raw.diaSemana) as ClaseGrupo['diaSemana'],
-    horaInicio: (raw.hora_inicio || raw.horaInicio) as string,
-    horaFin: (raw.hora_fin || raw.horaFin) as string,
-    fechaInicio: (raw.fecha_inicio || raw.fechaInicio) as string,
-    fechaFin: (raw.fecha_fin || raw.fechaFin) as string,
-    anioLectivo: (raw.anio_lectivo || raw.anioLectivo) as number,
-    cupoMaximo: (raw.cupo_maximo || raw.cupoMaximo) as number,
+    diaSemana: (raw.diaSemana || raw.diaSemana) as ClaseGrupo['diaSemana'],
+    horaInicio: (raw.horaInicio || raw.horaInicio) as string,
+    horaFin: (raw.horaFin || raw.horaFin) as string,
+    fechaInicio: (raw.fechaInicio || raw.fechaInicio) as string,
+    fechaFin: (raw.fechaFin || raw.fechaFin) as string,
+    anioLectivo: (raw.anioLectivo || raw.anioLectivo) as number,
+    cupoMaximo: (raw.cupoMaximo || raw.cupoMaximo) as number,
     activo: raw.activo as boolean,
-    docenteId: (raw.docente_id || raw.docenteId) as string,
-    productoId: (raw.producto_id || raw.productoId) as string | undefined,
-    grupoId: (raw.grupo_id || raw.grupoId) as string | undefined,
-    rutaCurricularId: (raw.ruta_curricular_id || raw.rutaCurricularId) as string | undefined,
-    sectorId: (raw.sector_id || raw.sectorId) as string | undefined,
+    docenteId: (raw.docenteId || raw.docenteId) as string,
+    productoId: (raw.productoId || raw.productoId) as string | undefined,
+    grupoId: (raw.grupoId || raw.grupoId) as string | undefined,
+    rutaCurricularId: (raw.rutaCurricularId || raw.rutaCurricularId) as string | undefined,
+    sectorId: (raw.sectorId || raw.sectorId) as string | undefined,
     nivel: raw.nivel as string | undefined,
-    created_at: (raw.createdAt || raw.created_at) as string,
-    updated_at: (raw.updatedAt || raw.updated_at) as string,
+    createdAt: (raw.createdAt || raw.createdAt) as string,
+    updatedAt: (raw.updatedAt || raw.updatedAt) as string,
     // Relations
     docente: raw.docente as ClaseGrupo['docente'],
     rutaCurricular: raw.rutaCurricular as ClaseGrupo['rutaCurricular'],
     sector: raw.sector as ClaseGrupo['sector'],
     inscripciones: raw.inscripciones as ClaseGrupo['inscripciones'],
     // Computed fields
-    totalInscriptos: (raw.total_inscriptos || raw.totalInscriptos) as number | undefined,
-    totalAsistencias: (raw.total_asistencias || raw.totalAsistencias) as number | undefined,
-    cuposDisponibles: (raw.cupos_disponibles || raw.cuposDisponibles) as number | undefined,
+    totalInscriptos: (raw.totalInscriptos || raw.totalInscriptos) as number | undefined,
+    totalAsistencias: (raw.totalAsistencias || raw.totalAsistencias) as number | undefined,
+    cuposDisponibles: (raw.cuposDisponibles || raw.cuposDisponibles) as number | undefined,
   };
 }
 
@@ -74,23 +74,23 @@ export async function listarClaseGrupos(params?: ListarClaseGruposParams): Promi
   const queryParams = new URLSearchParams();
 
   if (params?.anioLectivo) {
-    queryParams.append('anio_lectivo', params.anioLectivo.toString());
+    queryParams.append('anioLectivo', params.anioLectivo.toString());
   }
   if (params?.activo !== undefined) {
     queryParams.append('activo', params.activo.toString());
   }
   if (params?.docenteId) {
-    queryParams.append('docente_id', params.docenteId);
+    queryParams.append('docenteId', params.docenteId);
   }
   if (params?.tipo) {
     queryParams.append('tipo', params.tipo);
   }
   // FASE 3: Filtro por producto (para listar horarios de un Club)
   if (params?.productoId) {
-    queryParams.append('producto_id', params.productoId);
+    queryParams.append('productoId', params.productoId);
   }
   if (params?.grupoId) {
-    queryParams.append('grupo_id', params.grupoId);
+    queryParams.append('grupoId', params.grupoId);
   }
 
   const queryString = queryParams.toString();
@@ -231,7 +231,7 @@ export interface EstudianteConStatsDto {
   id: string;
   nombre: string;
   apellido: string;
-  avatar_url: string | null;
+  avatarUrl: string | null;
   equipo: EquipoDto | null;
   stats: EstadisticasEstudianteDto;
 }
@@ -263,7 +263,7 @@ export interface ObservacionRecienteDto {
     id: string;
     nombre: string;
     apellido: string;
-    avatar_url?: string | null;
+    avatarUrl?: string | null;
   };
   observacion: string;
   fecha: string;
@@ -306,10 +306,10 @@ export interface GrupoDetalleCompletoDto {
   id: string;
   nombre: string;
   codigo: string;
-  dia_semana: string;
-  hora_inicio: string;
-  hora_fin: string;
-  cupo_maximo: number;
+  diaSemana: string;
+  horaInicio: string;
+  horaFin: string;
+  cupoMaximo: number;
   rutaCurricular: RutaCurricularDto | null;
   estudiantes: EstudianteConStatsDto[];
   tareas: TareaGrupoDto[];

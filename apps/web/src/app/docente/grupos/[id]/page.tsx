@@ -154,7 +154,7 @@ export default function GrupoDetalleCompletoPage() {
               <h1 className="text-4xl font-black text-white mb-2">{grupo.nombre}</h1>
               <div className="flex items-center gap-4">
                 <p className="text-purple-300 font-bold text-lg">
-                  {grupo.dia_semana} • {grupo.hora_inicio} - {grupo.hora_fin}
+                  {grupo.diaSemana} • {grupo.horaInicio} - {grupo.horaFin}
                 </p>
                 {grupo.rutaCurricular && (
                   <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ export default function GrupoDetalleCompletoPage() {
               </div>
               <div className="text-4xl font-black text-white">
                 {grupo.estudiantes.length}
-                <span className="text-lg text-purple-400">/{grupo.cupo_maximo}</span>
+                <span className="text-lg text-purple-400">/{grupo.cupoMaximo}</span>
               </div>
             </div>
           </div>
@@ -298,7 +298,7 @@ export default function GrupoDetalleCompletoPage() {
                         <StudentAvatar
                           nombre={obs.estudiante.nombre}
                           apellido={obs.estudiante.apellido}
-                          avatar_url={obs.estudiante.avatar_url}
+                          avatarUrl={obs.estudiante.avatarUrl}
                           size="sm"
                           className="flex-shrink-0"
                         />
@@ -332,7 +332,7 @@ export default function GrupoDetalleCompletoPage() {
                         <StudentAvatar
                           nombre={obs.estudiante.nombre}
                           apellido={obs.estudiante.apellido}
-                          avatar_url={obs.estudiante.avatar_url}
+                          avatarUrl={obs.estudiante.avatarUrl}
                           size="sm"
                           className="flex-shrink-0"
                         />
@@ -433,7 +433,7 @@ export default function GrupoDetalleCompletoPage() {
                         <StudentAvatar
                           nombre={estudiante.nombre}
                           apellido={estudiante.apellido}
-                          avatar_url={estudiante.avatar_url}
+                          avatarUrl={estudiante.avatarUrl}
                           size="lg"
                           className="border-2 border-purple-400/50"
                         />

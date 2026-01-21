@@ -432,7 +432,7 @@ describe.skip('CreateDocenteForm - Mejoras (TDD)', () => {
             titulo: 'Licenciada en Matemática',
             password: undefined, // Auto-generar
             estado: 'activo',
-            disponibilidad_horaria: expect.any(Object),
+            disponibilidadHoraria: expect.any(Object),
           },
           expect.arrayContaining([
             expect.objectContaining({

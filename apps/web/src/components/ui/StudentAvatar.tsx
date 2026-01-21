@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 interface StudentAvatarProps {
   nombre: string;
   apellido?: string;
-  avatar_url?: string | null;
+  avatarUrl?: string | null;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
@@ -28,7 +28,7 @@ const sizeClasses = {
 export function StudentAvatar({
   nombre,
   apellido,
-  avatar_url,
+  avatarUrl,
   size = 'md',
   className = '',
 }: StudentAvatarProps) {
@@ -57,7 +57,7 @@ export function StudentAvatar({
 
   const colorClass = getColorFromName(nombre + (apellido || ''));
 
-  const showFallback = !avatar_url || imageError;
+  const showFallback = !avatarUrl || imageError;
 
   return (
     <div className={`${sizeClasses[size]} rounded-full overflow-hidden flex-shrink-0 ${className}`}>
@@ -69,7 +69,7 @@ export function StudentAvatar({
         </div>
       ) : (
         <img
-          src={avatar_url}
+          src={avatarUrl}
           alt={`${nombre} ${apellido || ''}`}
           className="w-full h-full object-cover"
           onError={() => setImageError(true)}

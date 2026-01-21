@@ -126,10 +126,10 @@ export function PersonaEditModal({ person, onClose, onSubmit }: PersonaEditModal
     setIsSavingPlan(true);
     try {
       const dto: AsignarPlanEstudianteDto = {
-        plan_id: planId,
-        estado_acceso: estadoAcceso,
-        fecha_vencimiento_plan: fechaVencimiento || null,
-        notas_plan: notasPlan || null,
+        planId: planId,
+        estadoAcceso: estadoAcceso,
+        fechaVencimientoPlan: fechaVencimiento || null,
+        notasPlan: notasPlan || null,
       };
 
       await asignarPlanEstudiante(person.id, dto);

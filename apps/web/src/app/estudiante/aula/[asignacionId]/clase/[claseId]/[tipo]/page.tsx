@@ -81,13 +81,13 @@ export default function ContenidoLeccionPage({ params }: PageProps) {
       });
 
       if (result.success) {
-        setXpGanado(result.xp_ganado);
+        setXpGanado(result.xpGanado);
         setData({
           ...data,
           progreso: {
             ...data.progreso,
             completada: true,
-            completada_en: new Date().toISOString(),
+            completadaEn: new Date().toISOString(),
           },
         });
       }

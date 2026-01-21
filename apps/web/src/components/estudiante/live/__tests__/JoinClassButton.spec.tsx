@@ -45,9 +45,9 @@ describe('JoinClassButton', () => {
     vi.clearAllMocks();
     // Por defecto, el plan permite clases en vivo
     mockGetMiPlan.mockResolvedValue({
-      tiene_plan: true,
+      tienePlan: true,
       plan: { nombre: 'STEAM_SINCRONICO' },
-      acceso_clases_vivo: true,
+      accesoClasesVivo: true,
       mensaje: 'Acceso completo a clases en vivo',
     });
   });
@@ -292,9 +292,9 @@ describe('JoinClassButton', () => {
   describe('Validación de plan de suscripción', () => {
     it('should_show_disabled_state_when_plan_is_LIBROS', async () => {
       mockGetMiPlan.mockResolvedValue({
-        tiene_plan: true,
+        tienePlan: true,
         plan: { nombre: 'STEAM_LIBROS' },
-        acceso_clases_vivo: false,
+        accesoClasesVivo: false,
         mensaje: 'Tu plan no incluye clases en vivo. Actualiza a STEAM Sincrónico para acceder.',
       });
 
@@ -308,9 +308,9 @@ describe('JoinClassButton', () => {
 
     it('should_show_disabled_state_when_plan_is_ASINCRONICO', async () => {
       mockGetMiPlan.mockResolvedValue({
-        tiene_plan: true,
+        tienePlan: true,
         plan: { nombre: 'STEAM_ASINCRONICO' },
-        acceso_clases_vivo: false,
+        accesoClasesVivo: false,
         mensaje: 'Tu plan no incluye clases en vivo. Actualiza a STEAM Sincrónico para acceder.',
       });
 
@@ -324,9 +324,9 @@ describe('JoinClassButton', () => {
 
     it('should_show_upgrade_message_when_plan_not_allowed', async () => {
       mockGetMiPlan.mockResolvedValue({
-        tiene_plan: true,
+        tienePlan: true,
         plan: { nombre: 'STEAM_LIBROS' },
-        acceso_clases_vivo: false,
+        accesoClasesVivo: false,
         mensaje: 'Tu plan no incluye clases en vivo. Actualiza a STEAM Sincrónico para acceder.',
       });
 
@@ -339,9 +339,9 @@ describe('JoinClassButton', () => {
 
     it('should_be_enabled_when_plan_is_SINCRONICO', async () => {
       mockGetMiPlan.mockResolvedValue({
-        tiene_plan: true,
+        tienePlan: true,
         plan: { nombre: 'STEAM_SINCRONICO' },
-        acceso_clases_vivo: true,
+        accesoClasesVivo: true,
         mensaje: 'Acceso completo a clases en vivo',
       });
 
@@ -355,9 +355,9 @@ describe('JoinClassButton', () => {
 
     it('should_show_no_subscription_message_when_plan_is_missing', async () => {
       mockGetMiPlan.mockResolvedValue({
-        tiene_plan: false,
+        tienePlan: false,
         plan: null,
-        acceso_clases_vivo: false,
+        accesoClasesVivo: false,
         mensaje: 'Sin suscripción activa',
       });
 

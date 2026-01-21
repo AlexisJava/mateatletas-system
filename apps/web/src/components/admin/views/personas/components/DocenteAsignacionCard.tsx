@@ -34,12 +34,12 @@ export function DocenteAsignacionCard({
   onRemoverMundo,
   onSelect,
 }: DocenteAsignacionCardProps) {
-  const casasAsignadas = docente.casas.map((c) => c.casa_tipo);
-  const mundosAsignados = docente.mundos.map((m) => m.mundo_tipo);
+  const casasAsignadas = docente.casas.map((c) => c.casaTipo);
+  const mundosAsignados = docente.mundos.map((m) => m.mundoTipo);
   const casasDisponibles = ALL_CASAS.filter((c) => !casasAsignadas.includes(c));
   const mundosDisponibles = ALL_MUNDOS.filter((m) => !mundosAsignados.includes(m));
 
-  const tipoConfig = TIPO_ASIGNACION_CONFIG[docente.tipo_asignacion];
+  const tipoConfig = TIPO_ASIGNACION_CONFIG[docente.tipoAsignacion];
 
   return (
     <div className="bg-[var(--admin-surface-1)] rounded-xl border border-[var(--admin-border)] hover:border-[var(--admin-accent)]/30 transition-all">
@@ -76,7 +76,7 @@ export function DocenteAsignacionCard({
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {/* Casas asignadas */}
           {docente.casas.map((casa) => {
-            const config = CASA_CONFIG[casa.casa_tipo];
+            const config = CASA_CONFIG[casa.casaTipo];
             return (
               <span
                 key={casa.id}
@@ -84,7 +84,7 @@ export function DocenteAsignacionCard({
               >
                 {config.label.split(' ')[0]}
                 <button
-                  onClick={() => onRemoverCasa(casa.casa_tipo)}
+                  onClick={() => onRemoverCasa(casa.casaTipo)}
                   className="p-0.5 hover:bg-black/20 rounded"
                   title="Remover casa"
                 >
@@ -133,7 +133,7 @@ export function DocenteAsignacionCard({
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {/* Mundos asignados */}
           {docente.mundos.map((mundo) => {
-            const config = MUNDO_CONFIG[mundo.mundo_tipo];
+            const config = MUNDO_CONFIG[mundo.mundoTipo];
             return (
               <span
                 key={mundo.id}
@@ -141,7 +141,7 @@ export function DocenteAsignacionCard({
               >
                 {config.label}
                 <button
-                  onClick={() => onRemoverMundo(mundo.mundo_tipo)}
+                  onClick={() => onRemoverMundo(mundo.mundoTipo)}
                   className="p-0.5 hover:bg-black/20 rounded"
                   title="Remover mundo"
                 >

@@ -144,7 +144,7 @@ export default function MisTareasPage() {
             />
             <StatPill
               label="Pendientes"
-              value={data.resumen.pendientes + data.resumen.en_progreso}
+              value={data.resumen.pendientes + data.resumen.enProgreso}
               color="#f59e0b"
               active={filtroActivo === 'pendientes'}
               onClick={() => handleFiltroChange('pendientes')}
@@ -201,7 +201,7 @@ export default function MisTareasPage() {
         ) : (
           <div className="space-y-4">
             {data?.tareas.map((tarea) => (
-              <TareaCard key={tarea.tarea_asignada_id} tarea={tarea} />
+              <TareaCard key={tarea.tareaAsignadaId} tarea={tarea} />
             ))}
           </div>
         )}
@@ -268,11 +268,11 @@ function TareaCard({ tarea }: TareaCardProps) {
     }
   };
 
-  const fechaLimiteText = formatFechaLimite(tarea.fecha_limite);
+  const fechaLimiteText = formatFechaLimite(tarea.fechaLimite);
 
   return (
     <Link
-      href={`/estudiante/aula/tareas/${tarea.tarea_asignada_id}`}
+      href={`/estudiante/aula/tareas/${tarea.tareaAsignadaId}`}
       className={`block p-5 rounded-2xl transition-all hover:scale-[1.02] ${completada ? 'opacity-70' : ''}`}
       style={{
         background: completada

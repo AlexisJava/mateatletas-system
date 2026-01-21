@@ -92,20 +92,20 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
       try {
         const recursos = await gamificacionApi.obtenerRecursos(user.id).catch(() => null);
         setStats({
-          nivel: recursos?.nivel_actual ?? user.nivel_actual ?? 1,
-          xp: recursos?.xp_actual ?? user.puntos_totales ?? 0,
-          racha: recursos?.racha?.dias_consecutivos ?? 0,
+          nivel: recursos?.nivelActual ?? user.nivelActual ?? 1,
+          xp: recursos?.xpActual ?? user.puntosTotales ?? 0,
+          racha: recursos?.racha?.diasConsecutivos ?? 0,
         });
       } catch {
         setStats({
-          nivel: user.nivel_actual ?? 1,
-          xp: user.puntos_totales ?? 0,
+          nivel: user.nivelActual ?? 1,
+          xp: user.puntosTotales ?? 0,
           racha: 0,
         });
       }
     }
     fetchStats();
-  }, [user?.id, user?.nivel_actual, user?.puntos_totales]);
+  }, [user?.id, user?.nivelActual, user?.puntosTotales]);
 
   const handleLogout = async () => {
     await logout();

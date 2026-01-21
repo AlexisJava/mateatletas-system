@@ -105,7 +105,7 @@ export default function DocenteCalendarioPage() {
         id: clase.id,
         tipo: 'clase',
         titulo: clase.codigo || clase.nombre,
-        hora: clase.hora_inicio.slice(0, 5),
+        hora: clase.horaInicio.slice(0, 5),
         color: 'purple',
       });
     });

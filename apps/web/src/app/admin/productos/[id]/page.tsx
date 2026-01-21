@@ -44,9 +44,9 @@ export default function ProductoDetailPage() {
     precio: 0,
     tipo: 'Evento' as string,
     activo: true,
-    fecha_inicio: '',
-    fecha_fin: '',
-    cupo_maximo: undefined as number | undefined,
+    fechaInicio: '',
+    fechaFin: '',
+    cupoMaximo: undefined as number | undefined,
   });
 
   // Ref para controlar el request actual y evitar race conditions
@@ -74,9 +74,9 @@ export default function ProductoDetailPage() {
           precio: Number(data.precio),
           tipo: data.tipo,
           activo: data.activo,
-          fecha_inicio: data.fecha_inicio?.split('T')[0] || '',
-          fecha_fin: data.fecha_fin?.split('T')[0] || '',
-          cupo_maximo: data.cupo_maximo ?? undefined,
+          fechaInicio: data.fechaInicio?.split('T')[0] || '',
+          fechaFin: data.fechaFin?.split('T')[0] || '',
+          cupoMaximo: data.cupoMaximo ?? undefined,
         });
         setError(null);
       })
@@ -120,9 +120,9 @@ export default function ProductoDetailPage() {
         precio: Number(data.precio),
         tipo: data.tipo,
         activo: data.activo,
-        fecha_inicio: data.fecha_inicio?.split('T')[0] || '',
-        fecha_fin: data.fecha_fin?.split('T')[0] || '',
-        cupo_maximo: data.cupo_maximo ?? undefined,
+        fechaInicio: data.fechaInicio?.split('T')[0] || '',
+        fechaFin: data.fechaFin?.split('T')[0] || '',
+        cupoMaximo: data.cupoMaximo ?? undefined,
       });
       setError(null);
     } catch (err) {
@@ -144,9 +144,9 @@ export default function ProductoDetailPage() {
         descripcion: formData.descripcion,
         precio: formData.precio,
         activo: formData.activo,
-        fecha_inicio: formData.fecha_inicio || undefined,
-        fecha_fin: formData.fecha_fin || undefined,
-        cupo_maximo: formData.cupo_maximo,
+        fechaInicio: formData.fechaInicio || undefined,
+        fechaFin: formData.fechaFin || undefined,
+        cupoMaximo: formData.cupoMaximo,
       });
       toast.success('Producto actualizado');
       fetchProducto();
@@ -265,7 +265,7 @@ export default function ProductoDetailPage() {
             <span className="text-xs">Cupo</span>
           </div>
           <p className="text-xl font-bold text-[var(--admin-text)]">
-            {producto.cupo_maximo ?? 'Sin limite'}
+            {producto.cupoMaximo ?? 'Sin limite'}
           </p>
         </div>
         <div className="p-4 bg-[var(--admin-surface-1)] border border-[var(--admin-border)] rounded-xl">
@@ -274,8 +274,8 @@ export default function ProductoDetailPage() {
             <span className="text-xs">Periodo</span>
           </div>
           <p className="text-sm font-medium text-[var(--admin-text)]">
-            {producto.fecha_inicio
-              ? new Date(producto.fecha_inicio).toLocaleDateString('es-AR')
+            {producto.fechaInicio
+              ? new Date(producto.fechaInicio).toLocaleDateString('es-AR')
               : 'Sin fecha'}
           </p>
         </div>
@@ -337,11 +337,11 @@ export default function ProductoDetailPage() {
                 </label>
                 <input
                   type="number"
-                  value={formData.cupo_maximo ?? ''}
+                  value={formData.cupoMaximo ?? ''}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      cupo_maximo: e.target.value ? Number(e.target.value) : undefined,
+                      cupoMaximo: e.target.value ? Number(e.target.value) : undefined,
                     })
                   }
                   placeholder="Sin limite"
@@ -357,8 +357,8 @@ export default function ProductoDetailPage() {
                   </label>
                   <input
                     type="date"
-                    value={formData.fecha_inicio}
-                    onChange={(e) => setFormData({ ...formData, fecha_inicio: e.target.value })}
+                    value={formData.fechaInicio}
+                    onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
                     className="w-full px-3 py-2.5 bg-[var(--admin-surface-2)] border border-[var(--admin-border)] rounded-lg text-[var(--admin-text)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)]"
                   />
                 </div>
@@ -368,8 +368,8 @@ export default function ProductoDetailPage() {
                   </label>
                   <input
                     type="date"
-                    value={formData.fecha_fin}
-                    onChange={(e) => setFormData({ ...formData, fecha_fin: e.target.value })}
+                    value={formData.fechaFin}
+                    onChange={(e) => setFormData({ ...formData, fechaFin: e.target.value })}
                     className="w-full px-3 py-2.5 bg-[var(--admin-surface-2)] border border-[var(--admin-border)] rounded-lg text-[var(--admin-text)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)]"
                   />
                 </div>

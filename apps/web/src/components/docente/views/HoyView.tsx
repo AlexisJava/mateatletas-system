@@ -141,7 +141,7 @@ export function HoyView({
                   <div className="flex items-center gap-1.5">
                     <Users size={14} />
                     <span>
-                      {proximaClase.inscripciones}/{proximaClase.cupo_maximo} estudiantes
+                      {proximaClase.inscripciones}/{proximaClase.cupoMaximo} estudiantes
                     </span>
                   </div>
                 </div>

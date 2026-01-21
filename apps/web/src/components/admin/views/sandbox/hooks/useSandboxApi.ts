@@ -73,8 +73,8 @@ function mapClaseBackendToFrontend(clase: ClaseBackend): ClasePlanificacion {
     numero: clase.numero,
     titulo: clase.titulo,
     descripcion: clase.descripcion,
-    teoriaId: clase.teoria_id,
-    practicaId: clase.practica_id,
+    teoriaId: clase.teoriaId,
+    practicaId: clase.practicaId,
   };
 }
 
@@ -94,9 +94,9 @@ function mapPlanificacionBackendToFrontend(backend: PlanificacionBackend): Plani
     id: backend.id,
     titulo: backend.titulo,
     descripcion: backend.descripcion,
-    cantidadClases: backend.cantidad_clases,
-    house: houseMap[backend.casa_tipo] || 'QUANTUM',
-    subject: subjectMap[backend.mundo_tipo] || 'MATH',
+    cantidadClases: backend.cantidadClases,
+    house: houseMap[backend.casaTipo] || 'QUANTUM',
+    subject: subjectMap[backend.mundoTipo] || 'MATH',
     clases: (backend.clases ?? []).map(mapClaseBackendToFrontend),
   };
 }
@@ -224,8 +224,8 @@ export function useSandboxApi() {
             data: {
               titulo: data.titulo,
               descripcion: data.descripcion,
-              teoriaId: data.teoria_id,
-              practicaId: data.practica_id,
+              teoriaId: data.teoriaId,
+              practicaId: data.practicaId,
             },
           },
         });

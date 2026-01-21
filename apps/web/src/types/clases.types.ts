@@ -43,7 +43,7 @@ export type CrearReservaDto = ReservarClaseInput;
 export type ClasesListResponse = ClasesList;
 
 export interface FiltroClases {
-  ruta_curricular_id?: string;
+  rutaCurricularId?: string;
   fechaDesde?: string;
   fechaHasta?: string;
   soloDisponibles?: boolean;
@@ -63,13 +63,12 @@ export interface ClaseConRelaciones extends SharedClase {
     inscripciones?: number;
     asistencias?: number;
   };
-  ruta_curricular?: RutaCurricular;
   rutaCurricular?: RutaCurricular;
   docente?: {
     id: string;
     nombre: string;
     apellido: string;
-    avatar_url?: string | null;
+    avatarUrl?: string | null;
   };
   modalidad?: string | null;
   ubicacion?: string | null;

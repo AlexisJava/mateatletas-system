@@ -25,7 +25,7 @@ export function DocenteComisionSection({ comision, onRefresh }: DocenteComisionS
     async (docenteId: string | null) => {
       setIsUpdating(true);
       try {
-        await updateComision(comision.id, { docente_id: docenteId });
+        await updateComision(comision.id, { docenteId: docenteId });
         onRefresh();
         toast.success(docenteId ? 'Docente asignado exitosamente' : 'Docente removido');
       } catch (error) {

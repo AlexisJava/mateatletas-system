@@ -22,7 +22,7 @@ const CASA_COLORS: Record<string, { bg: string; text: string; glow: string }> = 
 
 function getCasaStyle(casa: string): { bg: string; text: string; glow: string } {
   const key = casa?.toUpperCase() || 'VERTEX';
-  return CASA_COLORS[key] || CASA_COLORS.VERTEX;
+  return CASA_COLORS[key] ?? CASA_COLORS.VERTEX!;
 }
 
 export function GruposView({
@@ -118,7 +118,7 @@ export function GruposView({
                         <div className="flex items-center gap-1.5">
                           <Users size={14} className="text-slate-500" />
                           <span>
-                            {comision.inscripciones}/{comision.cupo_maximo}
+                            {comision.inscripciones}/{comision.cupoMaximo}
                           </span>
                         </div>
                       </div>
@@ -129,7 +129,7 @@ export function GruposView({
                           <div
                             className="h-full rounded-full transition-all"
                             style={{
-                              width: `${Math.min((comision.inscripciones / comision.cupo_maximo) * 100, 100)}%`,
+                              width: `${Math.min((comision.inscripciones / comision.cupoMaximo) * 100, 100)}%`,
                               background: `linear-gradient(90deg, ${casaStyle.glow.replace('40', '')} 0%, ${casaStyle.glow.replace('40', '')}80 100%)`,
                             }}
                           />

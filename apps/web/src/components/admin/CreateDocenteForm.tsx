@@ -28,7 +28,7 @@ export default function CreateDocenteForm({
     apellido: '',
     titulo: '',
     telefono: '',
-    disponibilidad_horaria: {},
+    disponibilidadHoraria: {},
     estado: 'activo',
   });
 
@@ -88,7 +88,7 @@ export default function CreateDocenteForm({
     if (!horaInicio || !horaFin) return;
 
     const rangoHorario = `${horaInicio}-${horaFin}`;
-    const disponibilidad = { ...(form.disponibilidad_horaria || {}) };
+    const disponibilidad = { ...(form.disponibilidadHoraria || {}) };
 
     if (!disponibilidad[selectedDia]) {
       disponibilidad[selectedDia] = [];
@@ -96,7 +96,7 @@ export default function CreateDocenteForm({
 
     if (!disponibilidad[selectedDia].includes(rangoHorario)) {
       disponibilidad[selectedDia] = [...disponibilidad[selectedDia], rangoHorario];
-      setForm({ ...form, disponibilidad_horaria: disponibilidad });
+      setForm({ ...form, disponibilidadHoraria: disponibilidad });
     }
   };
 
@@ -104,7 +104,7 @@ export default function CreateDocenteForm({
     if (!horaInicio || !horaFin) return;
 
     const rangoHorario = `${horaInicio}-${horaFin}`;
-    const disponibilidadActual = form.disponibilidad_horaria || {};
+    const disponibilidadActual = form.disponibilidadHoraria || {};
 
     // Verificar si ya están todos los días laborables con este horario
     const yaExisten = DIAS_LABORABLES.every((dia) =>
@@ -128,14 +128,14 @@ export default function CreateDocenteForm({
       }
     });
 
-    setForm({ ...form, disponibilidad_horaria: disponibilidad });
+    setForm({ ...form, disponibilidadHoraria: disponibilidad });
   };
 
   const seleccionarTodos = () => {
     if (!horaInicio || !horaFin) return;
 
     const rangoHorario = `${horaInicio}-${horaFin}`;
-    const disponibilidadActual = form.disponibilidad_horaria || {};
+    const disponibilidadActual = form.disponibilidadHoraria || {};
 
     // Verificar si ya están todos los días con este horario
     const yaExisten = DIAS_SEMANA.every((dia) => disponibilidadActual[dia]?.includes(rangoHorario));
@@ -157,17 +157,17 @@ export default function CreateDocenteForm({
       }
     });
 
-    setForm({ ...form, disponibilidad_horaria: disponibilidad });
+    setForm({ ...form, disponibilidadHoraria: disponibilidad });
   };
 
   const eliminarHorario = (dia: string, horario: string) => {
-    const disponibilidad = { ...(form.disponibilidad_horaria || {}) };
+    const disponibilidad = { ...(form.disponibilidadHoraria || {}) };
     if (disponibilidad[dia]) {
       disponibilidad[dia] = disponibilidad[dia].filter((h) => h !== horario);
       if (disponibilidad[dia].length === 0) {
         delete disponibilidad[dia];
       }
-      setForm({ ...form, disponibilidad_horaria: disponibilidad });
+      setForm({ ...form, disponibilidadHoraria: disponibilidad });
     }
   };
 
@@ -405,7 +405,7 @@ export default function CreateDocenteForm({
                 </button>
 
                 <div className="space-y-2">
-                  {Object.entries(form.disponibilidad_horaria || {}).map(([dia, horarios]) => (
+                  {Object.entries(form.disponibilidadHoraria || {}).map(([dia, horarios]) => (
                     <div
                       key={dia}
                       className="backdrop-blur-xl bg-black/40 rounded-lg p-2.5 border border-emerald-500/20"

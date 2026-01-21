@@ -50,19 +50,19 @@ const proximaClaseSchema = z.union([
   z.object({
     tipo: z.enum(['grupo', 'individual']),
     id: z.string(),
-    fecha_hora_inicio: z.string().datetime(),
-    duracion_minutos: z.number(),
+    fechaHoraInicio: z.string().datetime(),
+    duracionMinutos: z.number(),
     docente: z.object({
       nombre: z.string(),
       apellido: z.string(),
     }),
-    ruta_curricular: z
+    rutaCurricular: z
       .object({
         nombre: z.string(),
         descripcion: z.string().optional(),
       })
       .optional(),
-    link_meet: z.string().nullish(), // Acepta string, null, o undefined
+    linkMeet: z.string().nullish(), // Acepta string, null, o undefined
   }),
   z.null(),
 ]);
@@ -93,7 +93,7 @@ const sectorSchema = z.object({
       id: z.string(),
       codigo: z.string(),
       nombre: z.string(),
-      link_meet: z.string().nullable(),
+      linkMeet: z.string().nullable(),
     }),
   ),
 });
@@ -108,12 +108,12 @@ const claseEstudianteSchema = z.object({
   nombre: z.string(),
   codigo: z.string(),
   nivel: z.string().nullable(),
-  dia_semana: z.string().nullable(), // Nullable para comisiones
-  dia_nombre: z.string(),
-  hora_inicio: z.string(),
-  hora_fin: z.string(),
-  duracion_minutos: z.number(),
-  fecha_proxima: z.string(),
+  diaSemana: z.string().nullable(), // Nullable para comisiones
+  diaNombre: z.string(),
+  horaInicio: z.string(),
+  horaFin: z.string(),
+  duracionMinutos: z.number(),
+  fechaProxima: z.string(),
   docente: z.object({
     id: z.string(),
     nombre: z.string(),
@@ -121,14 +121,14 @@ const claseEstudianteSchema = z.object({
     titulo: z.string().nullable().optional(),
     bio: z.string().nullable().optional(),
     especialidades: z.array(z.string()).nullable().optional(),
-    experiencia_anos: z.number().nullable().optional(),
+    experienciaAnos: z.number().nullable().optional(),
   }),
   grupo: z
     .object({
       id: z.string(),
       codigo: z.string(),
       nombre: z.string(),
-      link_meet: z.string().nullable(),
+      linkMeet: z.string().nullable(),
     })
     .nullable(),
   sector: z
@@ -139,14 +139,14 @@ const claseEstudianteSchema = z.object({
       icono: z.string(),
     })
     .nullable(),
-  link_meet: z.string().nullable(),
-  fecha_inscripcion: z.string(),
+  linkMeet: z.string().nullable(),
+  fechaInscripcion: z.string(),
   // Nuevos campos para distinguir tipo de clase
   tipo: z.enum(['clase_grupal', 'comision']).optional(),
-  comision_id: z.string().optional(),
+  comisionId: z.string().optional(),
   // LiveKit: estado de clase en vivo
-  estado_clase: estadoClaseEnum.optional().default('Programada'),
-  iniciada_en: z.string().datetime().nullable().optional(),
+  estadoClase: estadoClaseEnum.optional().default('Programada'),
+  iniciadaEn: z.string().datetime().nullable().optional(),
 });
 
 const clasesEstudianteList = z.array(claseEstudianteSchema);
@@ -156,21 +156,21 @@ const clasesEstudianteList = z.array(claseEstudianteSchema);
  * Soporta tanto plan directo del estudiante como heredado del tutor
  */
 const miPlanSchema = z.object({
-  tiene_plan: z.boolean(),
+  tienePlan: z.boolean(),
   plan: z
     .object({
       id: z.string(),
       nombre: z.string(),
       descripcion: z.string().nullable(),
-      precio_base: z.union([z.string(), z.number()]),
+      precioBase: z.union([z.string(), z.number()]),
     })
     .nullable(),
-  estado_suscripcion: z.string().optional(),
-  estado_acceso: z.string().optional(), // ACTIVO, SUSPENDIDO, VENCIDO, BECA
-  acceso_clases_vivo: z.boolean(),
-  es_plan_directo: z.boolean().optional(), // true si el plan es asignado directamente al estudiante
-  notas_plan: z.string().nullable().optional(), // Notas admin (ej: "Beca olimpiada")
-  fecha_vencimiento: z.string().nullable().optional(), // Fecha de vencimiento del plan
+  estadoSuscripcion: z.string().optional(),
+  estadoAcceso: z.string().optional(), // ACTIVO, SUSPENDIDO, VENCIDO, BECA
+  accesoClasesVivo: z.boolean(),
+  esPlanDirecto: z.boolean().optional(), // true si el plan es asignado directamente al estudiante
+  notasPlan: z.string().nullable().optional(), // Notas admin (ej: "Beca olimpiada")
+  fechaVencimiento: z.string().nullable().optional(), // Fecha de vencimiento del plan
   mensaje: z.string(),
 });
 
@@ -258,14 +258,14 @@ const logroRecienteSchema = z.object({
   nombre: z.string(),
   icono: z.string(),
   rareza: z.string(),
-  fecha_desbloqueo: z.coerce.date(),
+  fechaDesbloqueo: z.coerce.date(),
 });
 
 const actividadRecienteSchema = z.object({
   tipo: z.string(),
   mensaje: z.string(),
-  xp_ganado: z.number(),
-  creado_en: z.coerce.date(),
+  xpGanado: z.number(),
+  creadoEn: z.coerce.date(),
 });
 
 const miProgresoSchema = z.object({
@@ -277,24 +277,24 @@ const miProgresoSchema = z.object({
     casa: z.string().nullable(),
   }),
   gamificacion: z.object({
-    xp_total: z.number(),
+    xpTotal: z.number(),
     nivel: z.number(),
-    xp_progreso: z.number(),
-    xp_necesario: z.number(),
-    porcentaje_nivel: z.number(),
+    xpProgreso: z.number(),
+    xpNecesario: z.number(),
+    porcentajeNivel: z.number(),
   }),
   racha: z.object({
-    racha_actual: z.number(),
-    racha_maxima: z.number(),
-    total_dias_activos: z.number(),
-    ultima_actividad: z.coerce.date().nullable(),
+    rachaActual: z.number(),
+    rachaMaxima: z.number(),
+    totalDiasActivos: z.number(),
+    ultimaActividad: z.coerce.date().nullable(),
   }),
   logros: z.object({
     desbloqueados: z.number(),
     totales: z.number(),
     recientes: z.array(logroRecienteSchema),
   }),
-  actividad_reciente: z.array(actividadRecienteSchema),
+  actividadReciente: z.array(actividadRecienteSchema),
 });
 
 export type MiProgreso = z.infer<typeof miProgresoSchema>;
@@ -437,13 +437,13 @@ export const estudiantesApi = {
 
   /**
    * Actualizar la animación idle del estudiante autenticado
-   * @param animacion_idle_url - URL de la animación .glb
+   * @param animacionIdleUrl - URL de la animación .glb
    * @returns Estudiante actualizado
    */
-  updateAnimacion: async (animacion_idle_url: string): Promise<Estudiante> => {
+  updateAnimacion: async (animacionIdleUrl: string): Promise<Estudiante> => {
     try {
       const response = await apiClient.patch<Estudiante>('/estudiantes/animacion', {
-        animacion_idle_url,
+        animacionIdleUrl,
       });
       const validado = estudianteSchema.parse(response);
       return normalizarEstudiante(validado);

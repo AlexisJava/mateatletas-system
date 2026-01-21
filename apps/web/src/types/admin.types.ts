@@ -71,7 +71,7 @@ export interface AdminUser {
   role: 'tutor' | 'docente' | 'admin'; // Rol principal (primer rol)
   roles?: ('tutor' | 'docente' | 'admin' | 'estudiante')[]; // Múltiples roles
   activo: boolean;
-  password_temporal?: string; // Contraseña temporal mostrada al admin
+  passwordTemporal?: string; // Contraseña temporal mostrada al admin
   createdAt: string;
   updatedAt: string;
   _count?: {

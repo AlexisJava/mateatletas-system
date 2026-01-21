@@ -28,8 +28,8 @@ interface Docente {
   titulo?: string;
   sectores?: Array<{ nombre: string; icono: string; color: string }>;
   especialidades?: string[];
-  disponibilidad_horaria?: Record<string, string[]>;
-  nivel_educativo?: string[];
+  disponibilidadHoraria?: Record<string, string[]>;
+  nivelEducativo?: string[];
   estado?: string;
   createdAt: string;
   updatedAt: string;
@@ -69,8 +69,8 @@ export default function ViewEditDocenteModal({
     telefono: docente.telefono || '',
     titulo: docente.titulo || '',
     especialidades: docente.especialidades || [],
-    disponibilidad_horaria: docente.disponibilidad_horaria || {},
-    nivel_educativo: docente.nivel_educativo || [],
+    disponibilidadHoraria: docente.disponibilidadHoraria || {},
+    nivelEducativo: docente.nivelEducativo || [],
     estado: docente.estado || 'activo',
   });
 
@@ -93,9 +93,9 @@ export default function ViewEditDocenteModal({
   const toggleNivelEducativo = (nivel: string) => {
     setForm((prev) => ({
       ...prev,
-      nivel_educativo: prev.nivel_educativo?.includes(nivel)
-        ? prev.nivel_educativo.filter((n) => n !== nivel)
-        : [...(prev.nivel_educativo || []), nivel],
+      nivelEducativo: prev.nivelEducativo?.includes(nivel)
+        ? prev.nivelEducativo.filter((n) => n !== nivel)
+        : [...(prev.nivelEducativo || []), nivel],
     }));
   };
 
@@ -116,12 +116,12 @@ export default function ViewEditDocenteModal({
   const agregarHorario = () => {
     if (!horaInicio || !horaFin) return;
     const nuevoHorario = `${horaInicio}-${horaFin}`;
-    const horarios = form.disponibilidad_horaria?.[selectedDia] || [];
+    const horarios = form.disponibilidadHoraria?.[selectedDia] || [];
 
     setForm({
       ...form,
-      disponibilidad_horaria: {
-        ...form.disponibilidad_horaria,
+      disponibilidadHoraria: {
+        ...form.disponibilidadHoraria,
         [selectedDia]: [...horarios, nuevoHorario],
       },
     });
@@ -131,18 +131,18 @@ export default function ViewEditDocenteModal({
   };
 
   const eliminarHorario = (dia: string, horario: string) => {
-    const horarios = form.disponibilidad_horaria?.[dia] || [];
+    const horarios = form.disponibilidadHoraria?.[dia] || [];
     const nuevosHorarios = horarios.filter((h) => h !== horario);
 
     if (nuevosHorarios.length === 0) {
-      const updatedDisponibilidad = { ...(form.disponibilidad_horaria || {}) };
+      const updatedDisponibilidad = { ...(form.disponibilidadHoraria || {}) };
       delete updatedDisponibilidad[dia];
-      setForm({ ...form, disponibilidad_horaria: updatedDisponibilidad });
+      setForm({ ...form, disponibilidadHoraria: updatedDisponibilidad });
     } else {
       setForm({
         ...form,
-        disponibilidad_horaria: {
-          ...form.disponibilidad_horaria,
+        disponibilidadHoraria: {
+          ...form.disponibilidadHoraria,
           [dia]: nuevosHorarios,
         },
       });
@@ -343,7 +343,7 @@ export default function ViewEditDocenteModal({
                           type="button"
                           onClick={() => toggleNivelEducativo(nivel)}
                           className={`px-3 py-1.5 rounded-lg font-semibold transition-all text-sm ${
-                            form.nivel_educativo?.includes(nivel)
+                            form.nivelEducativo?.includes(nivel)
                               ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30'
                               : 'bg-emerald-500/[0.08]/60 text-gray-700 dark:text-gray-300 border-2 border-emerald-500/20 hover:bg-emerald-500/10'
                           }`}
@@ -433,13 +433,13 @@ export default function ViewEditDocenteModal({
                     </div>
                   )}
 
-                  {docente.nivel_educativo && docente.nivel_educativo.length > 0 && (
+                  {docente.nivelEducativo && docente.nivelEducativo.length > 0 && (
                     <div>
                       <div className="text-sm font-black text-white/70 uppercase tracking-wider mb-3 flex items-center gap-2">
                         <GraduationCap className="w-4 h-4" /> Niveles Educativos
                       </div>
                       <div className="flex flex-wrap gap-3">
-                        {docente.nivel_educativo.map((nivel) => (
+                        {docente.nivelEducativo.map((nivel) => (
                           <span
                             key={nivel}
                             className="px-5 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl shadow-2xl shadow-blue-500/30 text-base font-black"
@@ -533,7 +533,7 @@ export default function ViewEditDocenteModal({
                   </div>
 
                   <div className="space-y-2">
-                    {Object.entries(form.disponibilidad_horaria || {}).map(([dia, horarios]) => (
+                    {Object.entries(form.disponibilidadHoraria || {}).map(([dia, horarios]) => (
                       <div
                         key={dia}
                         className="backdrop-blur-xl bg-emerald-500/[0.05]/60 dark:bg-black/60 rounded-lg p-2.5 border border-emerald-500/20"
@@ -565,10 +565,10 @@ export default function ViewEditDocenteModal({
                 </div>
               ) : (
                 <div>
-                  {docente.disponibilidad_horaria &&
-                  Object.keys(docente.disponibilidad_horaria).length > 0 ? (
+                  {docente.disponibilidadHoraria &&
+                  Object.keys(docente.disponibilidadHoraria).length > 0 ? (
                     <div className="space-y-3">
-                      {Object.entries(docente.disponibilidad_horaria).map(([dia, horarios]) => (
+                      {Object.entries(docente.disponibilidadHoraria).map(([dia, horarios]) => (
                         <div
                           key={dia}
                           className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 border border-white/10"

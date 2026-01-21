@@ -19,9 +19,9 @@ export interface PlanificacionInfo {
   id: string;
   titulo: string;
   descripcion: string | null;
-  cantidad_clases: number;
-  mundo_tipo: string;
-  casa_tipo: string;
+  cantidadClases: number;
+  mundoTipo: string;
+  casaTipo: string;
 }
 
 export interface GrupoInfo {
@@ -31,19 +31,19 @@ export interface GrupoInfo {
 }
 
 export interface ProgresoResumen {
-  clases_activas: number;
-  clases_completadas: number;
-  tareas_total: number;
-  tareas_completadas: number;
+  clasesActivas: number;
+  clasesCompletadas: number;
+  tareasTotal: number;
+  tareasCompletadas: number;
   porcentaje: number;
 }
 
 export interface PlanificacionConProgreso {
-  asignacion_id: string;
+  asignacionId: string;
   planificacion: PlanificacionInfo;
   grupo: GrupoInfo;
   docente: DocenteInfo;
-  fecha_inicio: string;
+  fechaInicio: string;
   progreso: ProgresoResumen;
 }
 
@@ -54,11 +54,11 @@ export interface SectorConPlanificaciones extends SectorInfo {
 export interface MiAulaResponse {
   sectores: SectorConPlanificaciones[];
   resumen: {
-    total_planificaciones: number;
-    total_clases_activas: number;
-    total_clases_completadas: number;
-    total_tareas: number;
-    total_tareas_completadas: number;
+    totalPlanificaciones: number;
+    totalClasesActivas: number;
+    totalClasesCompletadas: number;
+    totalTareas: number;
+    totalTareasCompletadas: number;
   };
 }
 
@@ -83,12 +83,12 @@ export interface TareaClaseInfo {
   orden: number;
   obligatoria: boolean;
   asignada: boolean;
-  tarea_asignada_id: string | null;
-  fecha_limite: string | null;
+  tareaAsignadaId: string | null;
+  fechaLimite: string | null;
   progreso: {
     estado: string;
-    iniciada_en: string | null;
-    completada_en: string | null;
+    iniciadaEn: string | null;
+    completadaEn: string | null;
     calificacion: number | null;
   } | null;
 }
@@ -101,28 +101,28 @@ export interface ClaseDetalle {
   teoria:
     | (ContenidoInfo & {
         completada: boolean;
-        completada_en: string | null;
-        tiempo_segundos: number;
+        completadaEn: string | null;
+        tiempoSegundos: number;
       })
     | null;
   practica:
     | (ContenidoInfo & {
         completada: boolean;
-        completada_en: string | null;
-        tiempo_segundos: number;
+        completadaEn: string | null;
+        tiempoSegundos: number;
       })
     | null;
   activada: boolean;
-  activada_en: string | null;
+  activadaEn: string | null;
   tareas: TareaClaseInfo[];
 }
 
 export interface PlanificacionDetalleResponse {
-  asignacion_id: string;
+  asignacionId: string;
   planificacion: PlanificacionInfo;
   grupo: GrupoInfo;
   docente: DocenteInfo;
-  fecha_inicio: string;
+  fechaInicio: string;
   clases: ClaseDetalle[];
 }
 
@@ -149,8 +149,8 @@ export interface ContenidoClaseResponse {
   contenido: ContenidoCompleto;
   progreso: {
     completada: boolean;
-    completada_en: string | null;
-    tiempo_segundos: number;
+    completadaEn: string | null;
+    tiempoSegundos: number;
   };
 }
 
@@ -165,10 +165,10 @@ export interface CompletarLeccionRequest {
 export interface CompletarLeccionResponse {
   success: boolean;
   progreso: {
-    teoria_completada: boolean;
-    practica_completada: boolean;
+    teoriaCompletada: boolean;
+    practicaCompletada: boolean;
   };
-  xp_ganado: number;
+  xpGanado: number;
   mensaje: string;
 }
 
@@ -177,15 +177,15 @@ export type EstadoTarea = 'PENDIENTE' | 'EN_PROGRESO' | 'COMPLETADA' | 'CANCELAD
 
 export interface ProgresoTarea {
   estado: EstadoTarea;
-  iniciada_en: string | null;
-  completada_en: string | null;
-  tiempo_total_segundos: number;
+  iniciadaEn: string | null;
+  completadaEn: string | null;
+  tiempoTotalSegundos: number;
   intentos: number;
   calificacion: number | null;
 }
 
 export interface TareaAsignada {
-  tarea_asignada_id: string;
+  tareaAsignadaId: string;
   contenido: ContenidoInfo;
   clase: {
     id: string;
@@ -197,12 +197,12 @@ export interface TareaAsignada {
     };
   };
   obligatoria: boolean;
-  fecha_asignacion: string;
-  fecha_limite: string | null;
+  fechaAsignacion: string;
+  fechaLimite: string | null;
   vencida: boolean;
   grupo: GrupoInfo;
   docente: DocenteInfo;
-  asignacion_id: string;
+  asignacionId: string;
   progreso: ProgresoTarea;
 }
 
@@ -211,7 +211,7 @@ export interface MisTareasResponse {
   resumen: {
     total: number;
     pendientes: number;
-    en_progreso: number;
+    enProgreso: number;
     completadas: number;
     vencidas: number;
   };
@@ -222,7 +222,7 @@ export interface IniciarTareaResponse {
   progreso: {
     id: string;
     estado: EstadoTarea;
-    iniciada_en: string;
+    iniciadaEn: string;
     intentos: number;
   };
   contenido: ContenidoCompleto;
@@ -238,15 +238,15 @@ export interface CompletarTareaResponse {
   progreso: {
     id: string;
     estado: EstadoTarea;
-    completada_en: string;
+    completadaEn: string;
     calificacion: number | null;
   };
-  xp_ganado: number;
+  xpGanado: number;
   mensaje: string;
-  desglose_xp: {
+  desgloseXp: {
     base: number;
-    bonus_calificacion: number;
-    bonus_tiempo: number;
+    bonusCalificacion: number;
+    bonusTiempo: number;
   };
 }
 
@@ -258,31 +258,31 @@ export interface LeaderboardEntry {
     nombre: string;
     apellido: string;
     avatar: string | null;
-    xp_total: number;
+    xpTotal: number;
   };
   progreso: {
-    clases_completadas: number;
-    clases_totales: number;
-    tareas_completadas: number;
-    tareas_totales: number;
+    clasesCompletadas: number;
+    clasesTotales: number;
+    tareasCompletadas: number;
+    tareasTotales: number;
     porcentaje: number;
   };
-  puntos_planificacion: number;
-  es_yo: boolean;
+  puntosPlanificacion: number;
+  esYo: boolean;
 }
 
 export interface LeaderboardResponse {
   planificacion: {
     id: string;
     titulo: string;
-    cantidad_clases: number;
+    cantidadClases: number;
   };
   grupo: {
     id: string;
     nombre: string;
   };
-  mi_posicion: number;
-  total_participantes: number;
+  miPosicion: number;
+  totalParticipantes: number;
   leaderboard: LeaderboardEntry[];
 }
 

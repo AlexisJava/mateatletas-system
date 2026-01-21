@@ -35,9 +35,9 @@ interface EstudianteConFalta {
   id: string;
   nombre: string;
   apellido: string;
-  faltas_consecutivas: number;
-  ultimo_grupo: string;
-  tutor_email: string | null;
+  faltasConsecutivas: number;
+  ultimoGrupo: string;
+  tutorEmail: string | null;
 }
 
 export default function DocenteObservacionesPage() {
@@ -114,7 +114,7 @@ export default function DocenteObservacionesPage() {
       observacion.includes(search) ||
       rutaNombre.includes(search);
 
-    const fechaClase = parseISO(obs.clase.fecha_hora_inicio);
+    const fechaClase = parseISO(obs.clase.fechaHoraInicio);
     const matchFechaDesde = filtroFechaDesde ? fechaClase >= parseISO(filtroFechaDesde) : true;
     const matchFechaHasta = filtroFechaHasta ? fechaClase <= parseISO(filtroFechaHasta) : true;
 
@@ -210,7 +210,7 @@ export default function DocenteObservacionesPage() {
                 >
                   {/* Avatar */}
                   <StudentAvatar
-                    avatar_url={est.foto_url}
+                    avatarUrl={est.fotoUrl}
                     nombre={est.nombre}
                     apellido={est.apellido}
                     className="w-16 h-16 mx-auto mb-3 border-3 border-yellow-400"
@@ -228,12 +228,12 @@ export default function DocenteObservacionesPage() {
                   <div className="space-y-1">
                     <div className="flex items-center justify-center gap-1 text-xs">
                       <Star className="w-4 h-4 text-yellow-300" />
-                      <span className="text-white font-semibold">{est.puntos_totales} pts</span>
+                      <span className="text-white font-semibold">{est.puntosTotales} pts</span>
                     </div>
                     <div className="flex items-center justify-center gap-1 text-xs">
                       <CheckCircle className="w-4 h-4 text-green-300" />
                       <span className="text-white font-semibold">
-                        {est.porcentaje_asistencia}% asist.
+                        {est.porcentajeAsistencia}% asist.
                       </span>
                     </div>
                   </div>
@@ -258,11 +258,11 @@ export default function DocenteObservacionesPage() {
             <div className="grid grid-cols-5 gap-4">
               {estudiantesAsistenciaPerfecta.map((est) => (
                 <div
-                  key={est.estudiante_id}
+                  key={est.estudianteId}
                   className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10 shadow-lg hover:bg-white/10 transition-all text-center"
                 >
                   <StudentAvatar
-                    avatar_url={est.foto_url}
+                    avatarUrl={est.fotoUrl}
                     nombre={est.nombre}
                     apellido={est.apellido}
                     className="w-16 h-16 mx-auto mb-3 border-3 border-green-400"
@@ -276,7 +276,7 @@ export default function DocenteObservacionesPage() {
                     <div className="flex items-center justify-center gap-1 text-xs">
                       <CheckCircle className="w-4 h-4 text-green-300" />
                       <span className="text-white font-semibold">
-                        {est.presentes}/{est.total_asistencias} clases
+                        {est.presentes}/{est.totalAsistencias} clases
                       </span>
                     </div>
                     <div className="text-xs text-purple-300">
@@ -308,7 +308,7 @@ export default function DocenteObservacionesPage() {
                   className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10 shadow-lg hover:bg-white/10 transition-all text-center"
                 >
                   <StudentAvatar
-                    avatar_url={est.foto_url}
+                    avatarUrl={est.fotoUrl}
                     nombre={est.nombre}
                     apellido={est.apellido}
                     className="w-14 h-14 mx-auto mb-2 border-2 border-orange-400"
@@ -355,7 +355,7 @@ export default function DocenteObservacionesPage() {
                 <tbody>
                   {rankingGrupos.map((grupo, idx) => (
                     <tr
-                      key={grupo.grupo_id}
+                      key={grupo.grupoId}
                       className="border-t border-white/10 hover:bg-white/5 transition-colors"
                     >
                       <td className="px-4 py-3">
@@ -373,25 +373,25 @@ export default function DocenteObservacionesPage() {
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className="text-white font-semibold text-sm">
-                          {grupo.estudiantes_activos}/{grupo.cupo_maximo}
+                          {grupo.estudiantesActivos}/{grupo.cupoMaximo}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className="bg-purple-600 text-white px-3 py-1 rounded-full font-black text-sm">
-                          {grupo.puntos_totales} pts
+                          {grupo.puntosTotales} pts
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span
                           className={`px-3 py-1 rounded-full font-bold text-sm ${
-                            grupo.asistencia_promedio >= 80
+                            grupo.asistenciaPromedio >= 80
                               ? 'bg-green-600 text-white'
-                              : grupo.asistencia_promedio >= 60
+                              : grupo.asistenciaPromedio >= 60
                                 ? 'bg-yellow-600 text-white'
                                 : 'bg-red-600 text-white'
                           }`}
                         >
-                          {grupo.asistencia_promedio}%
+                          {grupo.asistenciaPromedio}%
                         </span>
                       </td>
                     </tr>
@@ -436,16 +436,16 @@ export default function DocenteObservacionesPage() {
                         <td className="px-4 py-3 text-white font-semibold text-sm">
                           {est.nombre} {est.apellido}
                         </td>
-                        <td className="px-4 py-3 text-purple-300 text-sm">{est.ultimo_grupo}</td>
+                        <td className="px-4 py-3 text-purple-300 text-sm">{est.ultimoGrupo}</td>
                         <td className="px-4 py-3">
                           <span className="bg-red-500 text-white px-3 py-1 rounded-full font-bold text-xs">
-                            {est.faltas_consecutivas} faltas
+                            {est.faltasConsecutivas} faltas
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          {est.tutor_email ? (
+                          {est.tutorEmail ? (
                             <button
-                              onClick={() => window.open(`mailto:${est.tutor_email}`)}
+                              onClick={() => window.open(`mailto:${est.tutorEmail}`)}
                               className="flex items-center gap-2 text-blue-300 hover:text-blue-200 font-semibold transition-colors"
                             >
                               <Mail className="w-4 h-4" />
@@ -575,7 +575,7 @@ export default function DocenteObservacionesPage() {
                       <div className="flex items-center gap-4 mb-3">
                         {/* Avatar */}
                         <StudentAvatar
-                          avatar_url={obs.estudiante.foto_url}
+                          avatarUrl={obs.estudiante.fotoUrl}
                           nombre={obs.estudiante.nombre}
                           apellido={obs.estudiante.apellido}
                           className="w-12 h-12 border-2 border-yellow-400"
@@ -589,7 +589,7 @@ export default function DocenteObservacionesPage() {
                           <div className="flex items-center gap-3 text-xs text-purple-300 font-semibold mt-1">
                             <span>
                               📅{' '}
-                              {format(parseISO(obs.clase.fecha_hora_inicio), 'dd MMM yyyy', {
+                              {format(parseISO(obs.clase.fechaHoraInicio), 'dd MMM yyyy', {
                                 locale: es,
                               })}
                             </span>

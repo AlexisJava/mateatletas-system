@@ -17,7 +17,7 @@ export interface Alerta {
   severidad: 'alta' | 'media' | 'baja';
   mensaje: string;
   estudiante: string;
-  comision_id: string;
+  comisionId: string;
   leida?: boolean;
 }
 
@@ -31,7 +31,7 @@ export interface Comision {
   horario: string;
   casa: 'QUANTUM' | 'VERTEX' | 'PULSAR' | string;
   inscripciones: number;
-  cupo_maximo: number;
+  cupoMaximo: number;
   thumbnail?: string;
   proximaClase?: string;
 }
@@ -44,7 +44,7 @@ export interface Student {
   id: string;
   name: string;
   avatar: string;
-  comision_id: string;
+  comisionId: string;
   attendance: 'present' | 'absent' | 'late' | 'none';
   points: number;
   observations: string[];

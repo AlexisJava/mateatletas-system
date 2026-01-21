@@ -21,14 +21,14 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
   const router = useRouter();
   const [isConnecting, setIsConnecting] = useState(false);
   const [errorAcceso, setErrorAcceso] = useState<string | null>(null);
-  const [estadoClase, setEstadoClase] = useState<EstadoClase>(clase?.estado_clase || 'Programada');
+  const [estadoClase, setEstadoClase] = useState<EstadoClase>(clase?.estadoClase || 'Programada');
 
   // Sincronizar estado cuando cambia la clase
   useEffect(() => {
-    if (clase?.estado_clase) {
-      setEstadoClase(clase.estado_clase);
+    if (clase?.estadoClase) {
+      setEstadoClase(clase.estadoClase);
     }
-  }, [clase?.estado_clase]);
+  }, [clase?.estadoClase]);
 
   // Polling para detectar cuando la clase pasa a EnVivo
   // Siempre activo si el estado es Programada (el docente puede iniciar cuando quiera)
@@ -45,7 +45,7 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
       'estadoLocal:',
       estadoClase,
       'estadoClase:',
-      clase.estado_clase,
+      clase.estadoClase,
     );
 
     if (estadoClase !== 'Programada') {
@@ -67,9 +67,9 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
 
         console.log('[LiveKit Polling] Respuesta:', estado);
 
-        if (estado.estado_clase !== estadoClase) {
-          console.log('[LiveKit Polling] ¡Estado cambió!', estadoClase, '->', estado.estado_clase);
-          setEstadoClase(estado.estado_clase);
+        if (estado.estadoClase !== estadoClase) {
+          console.log('[LiveKit Polling] ¡Estado cambió!', estadoClase, '->', estado.estadoClase);
+          setEstadoClase(estado.estadoClase);
         }
       } catch (e) {
         console.error('[LiveKit Polling] Error:', e);
@@ -162,8 +162,8 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
     );
   }
 
-  const claseEsHoy = esHoy(clase.fecha_proxima);
-  const hora = clase.hora_inicio.slice(0, 5);
+  const claseEsHoy = esHoy(clase.fechaProxima);
+  const hora = clase.horaInicio.slice(0, 5);
   const esEnVivo = estadoClase === 'EnVivo';
   const esFinalizada = estadoClase === 'Finalizada';
   const esComision = clase.tipo === 'comision';
@@ -336,11 +336,11 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
           <div className="flex items-center gap-4 mb-6 text-white/70 text-sm">
             <span className="flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-cyan-400" />
-              {clase.dia_nombre} • {hora}
+              {clase.diaNombre} • {hora}
             </span>
             <span className="flex items-center gap-1.5">
               <Video className="w-4 h-4 text-violet-400" />
-              {clase.duracion_minutos} min
+              {clase.duracionMinutos} min
             </span>
           </div>
 
@@ -425,7 +425,7 @@ export function ProximaClaseHero({ clase }: ProximaClaseHeroProps) {
               >
                 <span className="text-[9px] text-white/50 font-bold uppercase mb-1">Próxima</span>
                 <span className="text-sm font-black font-mono tracking-wider text-white">
-                  {clase.dia_nombre}
+                  {clase.diaNombre}
                 </span>
               </div>
             )}

@@ -72,7 +72,7 @@ export interface ProgresoLogroV2 {
       total: number;
       desbloqueados: number;
       logros?: Array<
-        Logro & { desbloqueado: boolean; fecha_desbloqueo: string | null; secreto?: boolean }
+        Logro & { desbloqueado: boolean; fechaDesbloqueo: string | null; secreto?: boolean }
       >;
     }
   >;
@@ -82,13 +82,13 @@ export interface RecursosResponse {
   xp: number;
   monedas: number;
   nivel: number;
-  xp_siguiente_nivel: number;
+  xpSiguienteNivel: number;
 }
 
 export interface RachaResponse {
-  dias_consecutivos: number;
-  ultima_actividad: string;
-  record_personal: number;
+  diasConsecutivos: number;
+  ultimaActividad: string;
+  recordPersonal: number;
 }
 
 export interface DesbloquearLogroResponse {
@@ -116,7 +116,7 @@ export const gamificacionApi = {
             id: estudianteId,
             nombre: 'Estudiante',
             apellido: 'Test',
-            avatar_gradient: 0,
+            avatarGradient: 0,
             equipo: { id: '', nombre: 'Sin equipo', color: '#cccccc' },
           },
           stats: { puntosToales: 0, clasesAsistidas: 0, clasesTotales: 0, racha: 0 },
@@ -379,9 +379,9 @@ export const gamificacionApi = {
       const isProgresoLogros = (value: unknown): value is ProgresoLogros =>
         typeof value === 'object' &&
         value !== null &&
-        'total_logros' in value &&
-        'logros_desbloqueados' in value &&
-        'por_categoria' in value;
+        'totalLogros' in value &&
+        'logrosDesbloqueados' in value &&
+        'porCategoria' in value;
 
       if (isProgresoLogros(response)) {
         return response;
@@ -390,7 +390,7 @@ export const gamificacionApi = {
       const data = response as ProgresoLogroV2;
 
       const porCategoria = Object.entries(data.categorias ?? {}).reduce<
-        ProgresoLogros['por_categoria']
+        ProgresoLogros['porCategoria']
       >((acc, [categoria, valores]) => {
         const logrosNormalizados = normalizarLogros(valores.logros ?? []);
         acc[categoria] = {
@@ -408,9 +408,9 @@ export const gamificacionApi = {
         total,
         desbloqueados,
         porcentaje: data.porcentaje ?? 0,
-        total_logros: total,
-        logros_desbloqueados: desbloqueados,
-        por_categoria: porCategoria,
+        totalLogros: total,
+        logrosDesbloqueados: desbloqueados,
+        porCategoria: porCategoria,
       };
     } catch (error) {
       console.error('Error al obtener progreso V2:', error);

@@ -101,7 +101,7 @@ export function TareasActivas() {
 
             return (
               <div
-                key={tarea.tarea_asignada_id}
+                key={tarea.tareaAsignadaId}
                 className={`rounded-xl p-4 cursor-pointer transition border ${
                   isCompleted
                     ? 'bg-white/[0.01] border-white/[0.03] opacity-60 hover:opacity-100'
@@ -152,7 +152,7 @@ export function TareasActivas() {
                 {/* Bottom row */}
                 <div className="flex justify-between items-center pt-2 border-t border-white/5">
                   <span className="text-[10px] text-white/40 flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {formatFechaCorta(tarea.fecha_limite)}
+                    <Clock className="w-3 h-3" /> {formatFechaCorta(tarea.fechaLimite)}
                   </span>
                   {isCompleted ? (
                     <span className="flex items-center gap-1 text-[10px] text-emerald-400">

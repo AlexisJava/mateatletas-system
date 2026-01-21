@@ -162,12 +162,12 @@ export default function DocentePlanificacionesPage() {
 
   // Helper para obtener el estado de una clase
   const getEstadoClase = (asignacion: Asignacion, claseId: string) => {
-    const estado = asignacion.estados_clases.find((e) => e.clase.id === claseId);
+    const estado = asignacion.estadosClases.find((e) => e.clase.id === claseId);
     return {
-      teoria_activa: estado?.teoria_activa ?? false,
-      practica_activa: estado?.practica_activa ?? false,
-      activa: (estado?.teoria_activa || estado?.practica_activa) ?? false,
-      ambas_activas: (estado?.teoria_activa && estado?.practica_activa) ?? false,
+      teoriaActiva: estado?.teoriaActiva ?? false,
+      practicaActiva: estado?.practicaActiva ?? false,
+      activa: (estado?.teoriaActiva || estado?.practicaActiva) ?? false,
+      ambasActivas: (estado?.teoriaActiva && estado?.practicaActiva) ?? false,
     };
   };
 
@@ -179,9 +179,9 @@ export default function DocentePlanificacionesPage() {
 
     asignacion.clases.forEach((clase) => {
       const estado = getEstadoClase(asignacion, clase.id);
-      if (estado.teoria_activa || estado.practica_activa) clasesActivas++;
-      if (estado.teoria_activa) teoriaActivas++;
-      if (estado.practica_activa) practicaActivas++;
+      if (estado.teoriaActiva || estado.practicaActiva) clasesActivas++;
+      if (estado.teoriaActiva) teoriaActivas++;
+      if (estado.practicaActiva) practicaActivas++;
     });
 
     return { clasesActivas, teoriaActivas, practicaActivas };
@@ -371,7 +371,7 @@ export default function DocentePlanificacionesPage() {
                               <div className="flex items-center gap-3">
                                 <div
                                   className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg ${
-                                    estado.ambas_activas
+                                    estado.ambasActivas
                                       ? 'bg-emerald-500 text-white'
                                       : estado.activa
                                         ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/50'
@@ -395,15 +395,15 @@ export default function DocentePlanificacionesPage() {
                                 className={`p-1.5 rounded-lg transition-all ${
                                   isLoadingClase
                                     ? 'opacity-50 cursor-not-allowed'
-                                    : estado.ambas_activas
+                                    : estado.ambasActivas
                                       ? 'bg-emerald-500/30 text-emerald-300 hover:bg-emerald-500/40'
                                       : 'bg-slate-700/50 text-slate-500 hover:bg-slate-700'
                                 }`}
-                                title={estado.ambas_activas ? 'Desactivar todo' : 'Activar todo'}
+                                title={estado.ambasActivas ? 'Desactivar todo' : 'Activar todo'}
                               >
                                 {isLoadingClase ? (
                                   <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                ) : estado.ambas_activas ? (
+                                ) : estado.ambasActivas ? (
                                   <CheckCircle className="w-4 h-4" />
                                 ) : (
                                   <XCircle className="w-4 h-4" />
@@ -416,13 +416,13 @@ export default function DocentePlanificacionesPage() {
                               {/* Toggle Teoría */}
                               <button
                                 onClick={() =>
-                                  handleToggleTeoria(asignacion.id, clase.id, estado.teoria_activa)
+                                  handleToggleTeoria(asignacion.id, clase.id, estado.teoriaActiva)
                                 }
                                 disabled={isLoadingTeoria}
                                 className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-bold text-sm transition-all ${
                                   isLoadingTeoria
                                     ? 'opacity-50 cursor-not-allowed'
-                                    : estado.teoria_activa
+                                    : estado.teoriaActiva
                                       ? 'bg-blue-500/30 text-blue-300 border border-blue-500/50 hover:bg-blue-500/40'
                                       : 'bg-slate-700/50 text-slate-400 border border-slate-600/50 hover:bg-slate-700 hover:text-slate-300'
                                 }`}
@@ -433,7 +433,7 @@ export default function DocentePlanificacionesPage() {
                                   <BookOpen className="w-4 h-4" />
                                 )}
                                 <span>Teoría</span>
-                                {estado.teoria_activa && !isLoadingTeoria && (
+                                {estado.teoriaActiva && !isLoadingTeoria && (
                                   <CheckCircle className="w-3.5 h-3.5 ml-auto" />
                                 )}
                               </button>
@@ -444,14 +444,14 @@ export default function DocentePlanificacionesPage() {
                                   handleTogglePractica(
                                     asignacion.id,
                                     clase.id,
-                                    estado.practica_activa,
+                                    estado.practicaActiva,
                                   )
                                 }
                                 disabled={isLoadingPractica}
                                 className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-bold text-sm transition-all ${
                                   isLoadingPractica
                                     ? 'opacity-50 cursor-not-allowed'
-                                    : estado.practica_activa
+                                    : estado.practicaActiva
                                       ? 'bg-purple-500/30 text-purple-300 border border-purple-500/50 hover:bg-purple-500/40'
                                       : 'bg-slate-700/50 text-slate-400 border border-slate-600/50 hover:bg-slate-700 hover:text-slate-300'
                                 }`}
@@ -462,7 +462,7 @@ export default function DocentePlanificacionesPage() {
                                   <FlaskConical className="w-4 h-4" />
                                 )}
                                 <span>Práctica</span>
-                                {estado.practica_activa && !isLoadingPractica && (
+                                {estado.practicaActiva && !isLoadingPractica && (
                                   <CheckCircle className="w-3.5 h-3.5 ml-auto" />
                                 )}
                               </button>
@@ -550,20 +550,20 @@ export default function DocentePlanificacionesPage() {
                         <td className="px-4 py-3">
                           <p className="text-white">
                             <span className="font-bold text-emerald-400">
-                              {progreso.clase_numero}.
+                              {progreso.claseNumero}.
                             </span>{' '}
-                            <span className="text-slate-300">{progreso.clase_titulo}</span>
+                            <span className="text-slate-300">{progreso.claseTitulo}</span>
                           </p>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          {progreso.teoria_completada ? (
+                          {progreso.teoriaCompletada ? (
                             <CheckCircle className="w-5 h-5 text-blue-400 mx-auto" />
                           ) : (
                             <XCircle className="w-5 h-5 text-slate-500 mx-auto" />
                           )}
                         </td>
                         <td className="px-4 py-3 text-center">
-                          {progreso.practica_completada ? (
+                          {progreso.practicaCompletada ? (
                             <CheckCircle className="w-5 h-5 text-purple-400 mx-auto" />
                           ) : (
                             <XCircle className="w-5 h-5 text-slate-500 mx-auto" />
@@ -572,8 +572,7 @@ export default function DocentePlanificacionesPage() {
                         <td className="px-4 py-3 text-center">
                           <span className="text-slate-300 text-sm font-mono">
                             {Math.round(
-                              (progreso.tiempo_teoria_segundos +
-                                progreso.tiempo_practica_segundos) /
+                              (progreso.tiempoTeoriaSegundos + progreso.tiempoPracticaSegundos) /
                                 60,
                             )}{' '}
                             min

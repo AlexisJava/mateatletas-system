@@ -58,9 +58,9 @@ export function JoinClassButton({
         setPlanInfo(plan);
       } catch {
         setPlanInfo({
-          tiene_plan: false,
+          tienePlan: false,
           plan: null,
-          acceso_clases_vivo: false,
+          accesoClasesVivo: false,
           mensaje: 'Error al verificar plan',
         });
       } finally {
@@ -73,13 +73,13 @@ export function JoinClassButton({
 
   // Determinar estado del botón
   const esEnVivo = estadoClase === 'EnVivo';
-  const planPermite = planInfo?.acceso_clases_vivo ?? false;
+  const planPermite = planInfo?.accesoClasesVivo ?? false;
   const puedeUnirse = esEnVivo && planPermite && !isLoading && !isPlanLoading;
 
   // Texto según estado de clase
   const getTextoEstado = (): string => {
     if (isPlanLoading) return 'Verificando...';
-    if (!planInfo?.tiene_plan) return 'Sin suscripción';
+    if (!planInfo?.tienePlan) return 'Sin suscripción';
     if (!planPermite) return 'Plan no permite';
 
     switch (estadoClase) {
@@ -135,7 +135,7 @@ export function JoinClassButton({
   const renderUpgradeMessage = () => {
     if (isPlanLoading) return null;
 
-    if (!planInfo?.tiene_plan) {
+    if (!planInfo?.tienePlan) {
       return <p className="text-xs text-muted-foreground mt-1">Sin suscripción activa</p>;
     }
 

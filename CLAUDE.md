@@ -174,6 +174,51 @@ Una tarea **NO** está terminada hasta que:
 PROHIBIDO: Hacer build/commit con errores pendientes
 PROHIBIDO: Decir "listo" sin verificar funcionamiento real
 
+### Refactors Masivos y Cambios Repetitivos
+
+Cuando hay que hacer cambios repetitivos en múltiples archivos (renombrar propiedades, migrar convenciones, etc.):
+
+**PROHIBIDO:**
+
+- Editar archivo por archivo manualmente
+- Ejecutar sin antes tener visibilidad completa del problema
+- Empezar a corregir sin agrupar las ocurrencias
+
+**OBLIGATORIO - Ciclo de Refactor Masivo:**
+
+```
+1. AUDITAR      → Grep/búsqueda para listar TODAS las ocurrencias
+2. AGRUPAR      → Extraer propiedades únicas y archivos afectados
+3. SCRIPT       → Armar script con sed/replace para batch processing
+4. EJECUTAR     → Correr script por grupo (ej: por portal/módulo)
+5. VERIFICAR    → Grep para confirmar 0 ocurrencias restantes
+6. BUILD        → Verificar que compila sin errores
+7. SIGUIENTE    → Pasar al próximo grupo
+```
+
+**Ejemplo práctico (migración snake_case → camelCase):**
+
+```bash
+# 1. Auditar
+grep -rn '\.[a-z]+_[a-z]+' apps/web/src/components/docente
+
+# 2. Agrupar - extraer propiedades únicas
+# cupo_maximo → cupoMaximo (aparece en 5 archivos)
+# xp_total → xpTotal (aparece en 3 archivos)
+
+# 3. Script
+sed -i 's/cupo_maximo/cupoMaximo/g' archivo1.tsx archivo2.tsx
+sed -i 's/xp_total/xpTotal/g' archivo1.tsx archivo3.tsx
+
+# 4-5. Ejecutar y verificar
+grep -c 'cupo_maximo' apps/web/src/components/docente  # debe dar 0
+
+# 6. Build
+yarn workspace web build
+```
+
+**Señal de alerta:** Si estás editando manualmente lo mismo más de 3 veces, FRENÁ y armá un script.
+
 ---
 
 ## STACK TECNOLÓGICO

@@ -55,21 +55,21 @@ export interface AuthUser {
   role: AuthRole;
   dni?: string | null;
   telefono?: string | null;
-  fecha_registro?: string;
-  ha_completado_onboarding?: boolean;
+  fechaRegistro?: string;
+  haCompletadoOnboarding?: boolean;
   titulo?: string | null;
   bio?: string | null;
   edad?: number;
-  nivel_escolar?: string;
-  foto_url?: string | null;
-  puntos_totales?: number;
-  nivel_actual?: number;
-  debe_cambiar_password?: boolean;
+  nivelEscolar?: string;
+  fotoUrl?: string | null;
+  puntosTotales?: number;
+  nivelActual?: number;
+  debeCambiarPassword?: boolean;
   /** @deprecated Usar casa en su lugar */
   equipo?: {
     id: string;
     nombre: string;
-    color_primario: string;
+    colorPrimario: string;
   } | null;
   /** Casa del estudiante (sistema 2026) - solo para rol estudiante */
   casa?: AuthUserCasa | null;
@@ -100,8 +100,8 @@ export interface LoginSuccessResponse {
  * Response cuando MFA es requerido
  */
 export interface LoginMfaRequiredResponse {
-  requires_mfa: true;
-  mfa_token: string;
+  requiresMfa: true;
+  mfaToken: string;
   message: string;
 }
 
@@ -114,14 +114,14 @@ export type LoginResponse = LoginSuccessResponse | LoginMfaRequiredResponse;
  * Type guard para verificar si la respuesta requiere MFA
  */
 export function isLoginMfaRequired(response: LoginResponse): response is LoginMfaRequiredResponse {
-  return 'requires_mfa' in response && response.requires_mfa === true;
+  return 'requiresMfa' in response && response.requiresMfa === true;
 }
 
 /**
  * Type guard para verificar si el login fue exitoso
  */
 export function isLoginSuccess(response: LoginResponse): response is LoginSuccessResponse {
-  return 'user' in response && !('requires_mfa' in response);
+  return 'user' in response && !('requiresMfa' in response);
 }
 
 export interface LogoutResponse {

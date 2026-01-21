@@ -24,9 +24,9 @@ export interface EstudianteObservacion {
 export interface SeguimientoObservacion {
   id: string;
   contenido: string;
-  autor_id: string;
-  autor_tipo: 'Docente' | 'Admin';
-  created_at: string;
+  autorId: string;
+  autorTipo: 'Docente' | 'Admin';
+  createdAt: string;
 }
 
 /**
@@ -35,18 +35,18 @@ export interface SeguimientoObservacion {
 export interface Observacion {
   id: string;
   contenido: string;
-  fecha_evento: string;
+  fechaEvento: string;
   tipo: TipoObservacion;
   prioridad: PrioridadObservacion;
   estado: EstadoObservacion;
-  requiere_seguimiento: boolean;
-  notificar_admin: boolean;
-  notificar_pedagogia: boolean;
-  docente_id: string;
-  comision_id: string | null;
-  created_at: string;
-  updated_at: string;
-  fecha_resolucion: string | null;
+  requiereSeguimiento: boolean;
+  notificarAdmin: boolean;
+  notificarPedagogia: boolean;
+  docenteId: string;
+  comisionId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  fechaResolucion: string | null;
   estudiantes: Array<{
     estudiante: EstudianteObservacion;
   }>;

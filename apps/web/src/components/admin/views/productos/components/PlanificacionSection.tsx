@@ -141,9 +141,9 @@ export function PlanificacionSection({
             <div className="flex-1">
               <h3 className="font-medium text-[var(--admin-text)]">{planificacionActual.titulo}</h3>
               <p className="text-sm text-[var(--admin-text-muted)] mt-1">
-                {planificacionActual.cantidad_clases} clases -{' '}
-                {CASA_LABELS[planificacionActual.casa_tipo] || 'Sin casa'} /{' '}
-                {MUNDO_LABELS[planificacionActual.mundo_tipo] || 'Sin mundo'}
+                {planificacionActual.cantidadClases} clases -{' '}
+                {CASA_LABELS[planificacionActual.casaTipo] || 'Sin casa'} /{' '}
+                {MUNDO_LABELS[planificacionActual.mundoTipo] || 'Sin mundo'}
               </p>
               {planificacionActual.descripcion && (
                 <p className="text-sm text-[var(--admin-text-muted)] mt-2">
@@ -223,9 +223,8 @@ export function PlanificacionSection({
                   <div>
                     <p className="font-medium text-[var(--admin-text)]">{plan.titulo}</p>
                     <p className="text-sm text-[var(--admin-text-muted)]">
-                      {plan.cantidad_clases} clases -{' '}
-                      {CASA_LABELS[plan.casa_tipo] || plan.casa_tipo} /{' '}
-                      {MUNDO_LABELS[plan.mundo_tipo] || plan.mundo_tipo}
+                      {plan.cantidadClases} clases - {CASA_LABELS[plan.casaTipo] || plan.casaTipo} /{' '}
+                      {MUNDO_LABELS[plan.mundoTipo] || plan.mundoTipo}
                     </p>
                   </div>
                   {plan.id === planificacionActual?.id && (

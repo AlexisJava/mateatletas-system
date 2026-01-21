@@ -87,10 +87,10 @@ export type MundoTipo = 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
 export interface ClaseGrupoInfo {
   id: string;
   nombre: string;
-  dia_semana: string;
-  hora_inicio: string;
-  hora_fin: string;
-  cupo_maximo: number;
+  diaSemana: string;
+  horaInicio: string;
+  horaFin: string;
+  cupoMaximo: number;
   docente?: {
     nombre: string;
     apellido: string;

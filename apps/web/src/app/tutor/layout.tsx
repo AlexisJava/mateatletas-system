@@ -26,7 +26,7 @@ export default function TutorLayout({ children }: { children: React.ReactNode })
 
 function TutorLayoutContent({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((state) => state.user);
-  const mustChangePassword = user?.debe_cambiar_password === true;
+  const mustChangePassword = user?.debeCambiarPassword === true;
 
   return (
     <TutorErrorBoundary>

@@ -29,18 +29,18 @@ export interface User {
   apellido: string;
   role: UserRole;
   roles?: UserRole[]; // Array de roles para multi-rol
-  debe_cambiar_password?: boolean; // Flag para forzar cambio de contraseña
+  debeCambiarPassword?: boolean; // Flag para forzar cambio de contraseña
   dni?: string | null;
   telefono?: string | null;
-  fecha_registro?: string;
-  ha_completado_onboarding?: boolean;
+  fechaRegistro?: string;
+  haCompletadoOnboarding?: boolean;
   titulo?: string | null;
   bio?: string | null;
   // Campos adicionales para estudiantes
-  equipo_id?: string | null;
-  puntos_totales?: number;
-  nivel_actual?: number;
-  avatar_url?: string | null;
+  equipoId?: string | null;
+  puntosTotales?: number;
+  nivelActual?: number;
+  avatarUrl?: string | null;
   /** Casa del estudiante (sistema 2026) - solo para rol estudiante */
   casa?: AuthUserCasa | null;
 }
@@ -127,7 +127,7 @@ export const useAuthStore = create<AuthState>()(
             return {
               success: false,
               mfaRequired: true,
-              mfaToken: response.mfa_token,
+              mfaToken: response.mfaToken,
               message: response.message,
             };
           }
@@ -139,10 +139,10 @@ export const useAuthStore = create<AuthState>()(
             const roles = response.roles.map((r) => r.toLowerCase()) as UserRole[];
 
             // Mapear AuthUser a User del store
-            // NOTA: El backend envía must_change_password, lo mapeamos a debe_cambiar_password
+            // NOTA: El backend envía mustChangePassword, lo mapeamos a debeCambiarPassword
             const mustChangePassword =
-              (response as unknown as { must_change_password?: boolean }).must_change_password ??
-              authUser.debe_cambiar_password;
+              (response as unknown as { mustChangePassword?: boolean }).mustChangePassword ??
+              authUser.debeCambiarPassword;
 
             const user: User = {
               id: authUser.id,
@@ -151,15 +151,15 @@ export const useAuthStore = create<AuthState>()(
               apellido: authUser.apellido,
               role: authUser.role.toLowerCase() as UserRole,
               roles: roles,
-              debe_cambiar_password: mustChangePassword,
+              debeCambiarPassword: mustChangePassword,
               dni: authUser.dni,
               telefono: authUser.telefono,
-              fecha_registro: authUser.fecha_registro,
-              ha_completado_onboarding: authUser.ha_completado_onboarding,
+              fechaRegistro: authUser.fechaRegistro,
+              haCompletadoOnboarding: authUser.haCompletadoOnboarding,
               titulo: authUser.titulo,
               bio: authUser.bio,
-              puntos_totales: authUser.puntos_totales,
-              nivel_actual: authUser.nivel_actual,
+              puntosTotales: authUser.puntosTotales,
+              nivelActual: authUser.nivelActual,
               casa: authUser.casa,
             };
 
@@ -213,10 +213,10 @@ export const useAuthStore = create<AuthState>()(
             apellido: authUser.apellido,
             role: 'estudiante',
             roles: ['estudiante'],
-            debe_cambiar_password: authUser.debe_cambiar_password,
-            puntos_totales: authUser.puntos_totales,
-            nivel_actual: authUser.nivel_actual,
-            avatar_url: authUser.foto_url,
+            debeCambiarPassword: authUser.debeCambiarPassword,
+            puntosTotales: authUser.puntosTotales,
+            nivelActual: authUser.nivelActual,
+            avatarUrl: authUser.fotoUrl,
             casa: authUser.casa,
           };
 
@@ -306,15 +306,15 @@ export const useAuthStore = create<AuthState>()(
             nombre: profile.nombre,
             apellido: profile.apellido,
             role: profile.role as UserRole,
-            debe_cambiar_password: profile.debe_cambiar_password,
+            debeCambiarPassword: profile.debeCambiarPassword,
             dni: profile.dni,
             telefono: profile.telefono,
-            fecha_registro: profile.fecha_registro,
-            ha_completado_onboarding: profile.ha_completado_onboarding,
+            fechaRegistro: profile.fechaRegistro,
+            haCompletadoOnboarding: profile.haCompletadoOnboarding,
             titulo: profile.titulo,
             bio: profile.bio,
-            puntos_totales: profile.puntos_totales,
-            nivel_actual: profile.nivel_actual,
+            puntosTotales: profile.puntosTotales,
+            nivelActual: profile.nivelActual,
             casa: profile.casa,
           };
 
@@ -369,13 +369,13 @@ export const useAuthStore = create<AuthState>()(
         try {
           await authApi.cambiarPassword(passwordActual, nuevaPassword);
 
-          // Actualizar flag debe_cambiar_password a false
+          // Actualizar flag debeCambiarPassword a false
           const currentUser = get().user;
           if (currentUser) {
             set({
               user: {
                 ...currentUser,
-                debe_cambiar_password: false,
+                debeCambiarPassword: false,
               },
               isLoading: false,
             });

@@ -7,13 +7,13 @@ export interface Docente {
   email: string;
   telefono?: string;
   titulo?: string;
-  titulo_profesional?: string;
+  tituloProfesional?: string;
   bio?: string;
   biografia?: string;
   especialidades?: string[];
-  experiencia_anos?: number;
-  disponibilidad_horaria?: Record<string, string[]>;
-  nivel_educativo?: string[];
+  experienciaAnos?: number;
+  disponibilidadHoraria?: Record<string, string[]>;
+  nivelEducativo?: string[];
   estado?: string;
   createdAt: string;
   updatedAt: string;
@@ -24,13 +24,13 @@ export interface UpdateDocenteData {
   apellido?: string;
   telefono?: string;
   titulo?: string;
-  titulo_profesional?: string;
+  tituloProfesional?: string;
   bio?: string;
   biografia?: string;
   especialidades?: string[];
-  experiencia_anos?: number;
-  disponibilidad_horaria?: Record<string, string[]>;
-  nivel_educativo?: string[];
+  experienciaAnos?: number;
+  disponibilidadHoraria?: Record<string, string[]>;
+  nivelEducativo?: string[];
   estado?: string;
 }
 
@@ -41,7 +41,7 @@ export interface CreateDocenteData {
   apellido: string;
   titulo?: string;
   telefono?: string;
-  disponibilidad_horaria?: Record<string, string[]>;
+  disponibilidadHoraria?: Record<string, string[]>;
   estado?: string;
 }
 
@@ -61,10 +61,10 @@ export interface ClaseInminente {
   titulo: string;
   grupoNombre: string;
   grupoId: string;
-  fecha_hora: string;
+  fechaHora: string;
   duracion: number;
   estudiantesInscritos: number;
-  cupo_maximo: number;
+  cupoMaximo: number;
   minutosParaEmpezar: number;
 }
 
@@ -72,30 +72,30 @@ export interface EstudianteInscrito {
   id: string;
   nombre: string;
   apellido: string;
-  avatar_url: string | null;
+  avatarUrl: string | null;
 }
 
 export interface ClaseDelDia {
   id: string;
   nombre: string;
   codigo: string;
-  dia_semana: string;
-  hora_inicio: string;
-  hora_fin: string;
+  diaSemana: string;
+  horaInicio: string;
+  horaFin: string;
   estudiantes: EstudianteInscrito[];
-  cupo_maximo: number;
-  grupo_id: string;
+  cupoMaximo: number;
+  grupoId: string;
 }
 
 export interface GrupoResumen {
   id: string;
   nombre: string;
   codigo: string;
-  dia_semana: string;
-  hora_inicio: string;
-  hora_fin: string;
+  diaSemana: string;
+  horaInicio: string;
+  horaFin: string;
   estudiantesActivos: number;
-  cupo_maximo: number;
+  cupoMaximo: number;
   nivel: string | null;
 }
 
@@ -117,9 +117,9 @@ export interface ComisionResumen {
     emoji: string;
   } | null;
   horario: string | null;
-  fecha_inicio: string | null;
-  fecha_fin: string | null;
-  cupo_maximo: number | null;
+  fechaInicio: string | null;
+  fechaFin: string | null;
+  cupoMaximo: number | null;
   estudiantesInscritos: number;
   activo: boolean;
 }
@@ -128,9 +128,9 @@ export interface EstudianteConFalta {
   id: string;
   nombre: string;
   apellido: string;
-  faltas_consecutivas: number;
-  ultimo_grupo: string;
-  tutor_email: string | null;
+  faltasConsecutivas: number;
+  ultimoGrupo: string;
+  tutorEmail: string | null;
 }
 
 export type TipoAlerta = 'warning' | 'info' | 'urgent';
@@ -176,19 +176,19 @@ export interface EstudianteTopPuntos {
   id: string;
   nombre: string;
   apellido: string;
-  foto_url: string | null;
-  puntos_totales: number;
-  porcentaje_asistencia: number;
+  fotoUrl: string | null;
+  puntosTotales: number;
+  porcentajeAsistencia: number;
 }
 
 export interface EstudianteAsistenciaPerfecta {
-  estudiante_id: string;
+  estudianteId: string;
   nombre: string;
   apellido: string;
-  foto_url: string | null;
-  total_asistencias: number;
+  fotoUrl: string | null;
+  totalAsistencias: number;
   presentes: number;
-  porcentaje_asistencia: number;
+  porcentajeAsistencia: number;
   grupos: { id: string; nombre: string; codigo: string }[];
 }
 
@@ -196,17 +196,17 @@ export interface EstudianteSinTareas {
   id: string;
   nombre: string;
   apellido: string;
-  foto_url: string | null;
+  fotoUrl: string | null;
 }
 
 export interface GrupoRanking {
-  grupo_id: string;
+  grupoId: string;
   nombre: string;
   codigo: string;
-  estudiantes_activos: number;
-  cupo_maximo: number;
-  puntos_totales: number;
-  asistencia_promedio: number;
+  estudiantesActivos: number;
+  cupoMaximo: number;
+  puntosTotales: number;
+  asistenciaPromedio: number;
 }
 
 export interface EstadisticasCompletasResponse {
@@ -224,11 +224,11 @@ export interface ClaseCalendario {
   fecha: string;
   nombre: string;
   codigo: string;
-  hora_inicio: string;
-  hora_fin: string;
+  horaInicio: string;
+  horaFin: string;
   estudiantesCount: number;
-  cupo_maximo: number;
-  grupo_id: string;
+  cupoMaximo: number;
+  grupoId: string;
 }
 
 /**
@@ -254,7 +254,7 @@ export interface EstudianteComision {
   id: string;
   nombre: string;
   apellido: string;
-  avatar_url: string | null;
+  avatarUrl: string | null;
   edad: number;
   casa: {
     id: string;
@@ -263,11 +263,11 @@ export interface EstudianteComision {
     colorPrimario: string;
   } | null;
   stats: {
-    xp_total: number;
+    xpTotal: number;
     nivel: number;
-    racha_actual: number;
-    asistencia_porcentaje: number;
-    ultima_asistencia: {
+    rachaActual: number;
+    asistenciaPorcentaje: number;
+    ultimaAsistencia: {
       fecha: string;
       estado: string;
     } | null;
@@ -279,8 +279,8 @@ export interface EstudianteComision {
     email: string | null;
     telefono: string | null;
   } | null;
-  estado_inscripcion: string;
-  inscripcion_fecha: string;
+  estadoInscripcion: string;
+  inscripcionFecha: string;
 }
 
 /**
@@ -301,9 +301,9 @@ export interface ComisionDetalleResponse {
     emoji: string;
   } | null;
   horario: string | null;
-  fecha_inicio: string | null;
-  fecha_fin: string | null;
-  cupo_maximo: number | null;
+  fechaInicio: string | null;
+  fechaFin: string | null;
+  cupoMaximo: number | null;
   activo: boolean;
   estudiantes: Array<{
     id: string;
@@ -318,7 +318,7 @@ export interface ComisionDetalleResponse {
  * Asistencia de un estudiante en una fecha
  */
 export interface AsistenciaEstudianteFecha {
-  estudiante_id: string;
+  estudianteId: string;
   nombre: string;
   estado: 'Presente' | 'Ausente' | 'Justificado';
   observacion: string | null;
@@ -344,12 +344,12 @@ export interface HistorialAsistenciaResponse {
  */
 export interface PuntoOtorgado {
   id: string;
-  estudiante_id: string;
-  estudiante_nombre: string;
-  tipo_accion: string;
+  estudianteId: string;
+  estudianteNombre: string;
+  tipoAccion: string;
   puntos: number;
   contexto: string | null;
-  fecha_otorgado: string;
+  fechaOtorgado: string;
 }
 
 /**
@@ -771,7 +771,7 @@ export const getDashboardDocente = docentesApi.getDashboard;
 export interface PlanificacionSimple {
   id: string;
   titulo: string;
-  cantidad_clases: number;
+  cantidadClases: number;
 }
 
 export interface ClaseInfo {
@@ -782,8 +782,8 @@ export interface ClaseInfo {
 
 export interface EstadoClase {
   clase: ClaseInfo;
-  teoria_activa: boolean;
-  practica_activa: boolean;
+  teoriaActiva: boolean;
+  practicaActiva: boolean;
 }
 
 export interface ClaseGrupoSimple {
@@ -796,37 +796,37 @@ export interface Asignacion {
   planificacion: PlanificacionSimple;
   claseGrupo: ClaseGrupoSimple;
   clases: ClaseInfo[];
-  estados_clases: EstadoClase[];
+  estadosClases: EstadoClase[];
 }
 
 export interface ProgresoEstudianteClase {
   id: string;
   estudiante: { nombre: string; apellido: string } | null;
-  clase_numero: number;
-  clase_titulo: string;
-  teoria_completada: boolean;
-  practica_completada: boolean;
-  tiempo_teoria_segundos: number;
-  tiempo_practica_segundos: number;
+  claseNumero: number;
+  claseTitulo: string;
+  teoriaCompletada: boolean;
+  practicaCompletada: boolean;
+  tiempoTeoriaSegundos: number;
+  tiempoPracticaSegundos: number;
 }
 
 export interface TareaClaseInfo {
   id: string;
-  contenido_id: string;
-  contenido_titulo: string;
+  contenidoId: string;
+  contenidoTitulo: string;
   orden: number;
   obligatoria: boolean;
   asignada: boolean;
-  tarea_asignada_id: string | null;
-  fecha_limite: string | null;
+  tareaAsignadaId: string | null;
+  fechaLimite: string | null;
 }
 
 export interface ProgresoTareaEstudiante {
-  estudiante_id: string;
-  estudiante_nombre: string;
-  tarea_titulo: string;
+  estudianteId: string;
+  estudianteNombre: string;
+  tareaTitulo: string;
   completada: boolean;
-  fecha_completado: string | null;
+  fechaCompletado: string | null;
   calificacion: number | null;
 }
 
@@ -1010,10 +1010,10 @@ export const planificacionesApi = {
     asignacionId: string,
     tareaClaseId: string,
     fechaLimite?: string,
-  ): Promise<{ success: boolean; tarea_asignada_id: string }> => {
-    return apiClient.post<{ success: boolean; tarea_asignada_id: string }>(
+  ): Promise<{ success: boolean; tareaAsignadaId: string }> => {
+    return apiClient.post<{ success: boolean; tareaAsignadaId: string }>(
       `/docentes/asignaciones/${asignacionId}/tareas/${tareaClaseId}/asignar`,
-      { fecha_limite: fechaLimite },
+      { fechaLimite },
     );
   },
 

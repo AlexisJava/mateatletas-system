@@ -43,13 +43,13 @@ interface ComisionDetalle {
     emoji: string;
   } | null;
   horario: string | null;
-  fecha_inicio: string | null;
-  fecha_fin: string | null;
-  cupo_maximo: number | null;
+  fechaInicio: string | null;
+  fechaFin: string | null;
+  cupoMaximo: number | null;
   activo: boolean;
   estudiantes: EstudianteInscrito[];
   // LiveKit
-  estado_clase?: EstadoClase;
+  estadoClase?: EstadoClase;
 }
 
 export default function ComisionDetallePage() {
@@ -72,7 +72,7 @@ export default function ComisionDetallePage() {
   const fetchEstadoClase = async () => {
     try {
       const estado = await livekitApi.obtenerEstadoComision(comisionId);
-      setEstadoClase(estado.estado_clase);
+      setEstadoClase(estado.estadoClase);
     } catch (error) {
       console.error('Error al obtener estado de clase:', error);
     }
@@ -305,7 +305,7 @@ export default function ComisionDetallePage() {
             <Users className="w-6 h-6 text-blue-400 mb-2" />
             <p className="text-2xl font-black text-white">
               {comision.estudiantes.length}
-              {comision.cupo_maximo && `/${comision.cupo_maximo}`}
+              {comision.cupoMaximo && `/${comision.cupoMaximo}`}
             </p>
             <p className="text-purple-300 text-sm">Estudiantes</p>
           </motion.div>
@@ -317,7 +317,7 @@ export default function ComisionDetallePage() {
             className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10"
           >
             <Calendar className="w-6 h-6 text-green-400 mb-2" />
-            <p className="text-sm font-bold text-white">{formatDate(comision.fecha_inicio)}</p>
+            <p className="text-sm font-bold text-white">{formatDate(comision.fechaInicio)}</p>
             <p className="text-purple-300 text-sm">Fecha Inicio</p>
           </motion.div>
 
@@ -328,7 +328,7 @@ export default function ComisionDetallePage() {
             className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10"
           >
             <Calendar className="w-6 h-6 text-red-400 mb-2" />
-            <p className="text-sm font-bold text-white">{formatDate(comision.fecha_fin)}</p>
+            <p className="text-sm font-bold text-white">{formatDate(comision.fechaFin)}</p>
             <p className="text-purple-300 text-sm">Fecha Fin</p>
           </motion.div>
 

@@ -57,19 +57,19 @@ const createMockComision = (overrides: Partial<Comision> = {}): Comision => ({
   id: 'comision-1',
   nombre: 'Comisión Test',
   descripcion: 'Descripción test',
-  producto_id: 'producto-1',
-  casa_id: null,
-  docente_id: null,
-  cupo_maximo: 20,
+  productoId: 'producto-1',
+  casaId: null,
+  docenteId: null,
+  cupoMaximo: 20,
   horario: 'Lun-Vie 9:00-12:00',
-  fecha_inicio: '2024-01-01',
-  fecha_fin: '2024-12-31',
+  fechaInicio: '2024-01-01',
+  fechaFin: '2024-12-31',
   activo: true,
   createdAt: '2024-01-01',
   updatedAt: '2024-01-01',
   docente: null,
-  total_inscriptos: 0,
-  cupos_disponibles: 20,
+  totalInscriptos: 0,
+  cuposDisponibles: 20,
   ...overrides,
 });
 
@@ -107,7 +107,7 @@ describe('DocenteComisionSection', () => {
 
     it('muestra el nombre del docente cuando está asignado', () => {
       const comisionConDocente = createMockComision({
-        docente_id: 'docente-1',
+        docenteId: 'docente-1',
         docente: {
           id: 'docente-1',
           nombre: 'Juan',
@@ -124,7 +124,7 @@ describe('DocenteComisionSection', () => {
 
     it('muestra botón "Cambiar" cuando hay docente asignado', () => {
       const comisionConDocente = createMockComision({
-        docente_id: 'docente-1',
+        docenteId: 'docente-1',
         docente: {
           id: 'docente-1',
           nombre: 'Juan',
@@ -181,7 +181,7 @@ describe('DocenteComisionSection', () => {
 
       await waitFor(() => {
         expect(mockUpdateComision).toHaveBeenCalledWith('comision-1', {
-          docente_id: 'docente-nuevo',
+          docenteId: 'docente-nuevo',
         });
       });
 

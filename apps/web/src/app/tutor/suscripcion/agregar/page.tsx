@@ -252,7 +252,7 @@ export default function AgregarActividadPage(): React.ReactElement {
       productoNombre: selectedClub.nombre,
       claseGrupoId: selectedGrupo?.id,
       claseGrupoNombre: selectedGrupo
-        ? `${selectedGrupo.dia_semana} ${selectedGrupo.hora_inicio}`
+        ? `${selectedGrupo.diaSemana} ${selectedGrupo.horaInicio}`
         : undefined,
       tier: selectedTier,
       precio: tierInfo?.precio ?? 0,
@@ -593,7 +593,7 @@ export default function AgregarActividadPage(): React.ReactElement {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-white font-medium">
-                            {grupo.dia_semana} {grupo.hora_inicio} - {grupo.hora_fin}
+                            {grupo.diaSemana} {grupo.horaInicio} - {grupo.horaFin}
                           </p>
                           {grupo.docente && (
                             <p className="text-slate-400 text-sm">
@@ -603,7 +603,7 @@ export default function AgregarActividadPage(): React.ReactElement {
                         </div>
                         <div className="flex items-center gap-2 text-slate-400 text-sm">
                           <UsersIcon className="w-4 h-4" />
-                          {grupo.cupo_maximo} cupos
+                          {grupo.cupoMaximo} cupos
                         </div>
                       </div>
                     </button>

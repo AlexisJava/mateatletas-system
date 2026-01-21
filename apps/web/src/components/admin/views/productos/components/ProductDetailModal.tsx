@@ -111,19 +111,19 @@ export function ProductDetailModal({
           </div>
 
           {/* Dates for Cursos */}
-          {product.tipo === 'Curso' && product.fecha_inicio && (
+          {product.tipo === 'Curso' && product.fechaInicio && (
             <div className="p-4 bg-[var(--admin-surface-2)] rounded-xl">
               <div className="flex items-center gap-2 text-[var(--admin-text-muted)] mb-2">
                 <Calendar className="w-4 h-4" />
                 <span className="text-xs">Periodo</span>
               </div>
               <p className="text-sm font-medium text-[var(--admin-text)]">
-                {formatDate(product.fecha_inicio)}
-                {product.fecha_fin && ` - ${formatDate(product.fecha_fin)}`}
+                {formatDate(product.fechaInicio)}
+                {product.fechaFin && ` - ${formatDate(product.fechaFin)}`}
               </p>
-              {product.cupo_maximo && (
+              {product.cupoMaximo && (
                 <p className="text-xs text-[var(--admin-text-muted)] mt-1">
-                  Cupo: {product.cupo_maximo} estudiantes
+                  Cupo: {product.cupoMaximo} estudiantes
                 </p>
               )}
             </div>

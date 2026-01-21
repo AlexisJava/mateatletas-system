@@ -23,7 +23,7 @@ export interface ContenidoSimple {
 
 export interface TareaClase {
   id: string;
-  contenido_id: string;
+  contenidoId: string;
   orden: number;
   obligatoria: boolean;
   contenido: {
@@ -37,8 +37,8 @@ export interface ClasePlanificacion {
   numero: number;
   titulo: string;
   descripcion: string | null;
-  teoria_id: string;
-  practica_id: string;
+  teoriaId: string;
+  practicaId: string;
   teoria?: ContenidoSimple;
   practica?: ContenidoSimple;
   tareas?: TareaClase[];
@@ -48,12 +48,12 @@ export interface Planificacion {
   id: string;
   titulo: string;
   descripcion: string | null;
-  cantidad_clases: number;
-  casa_tipo: CasaTipo;
-  mundo_tipo: MundoTipo;
+  cantidadClases: number;
+  casaTipo: CasaTipo;
+  mundoTipo: MundoTipo;
   estado: EstadoContenido;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
   clases: ClasePlanificacion[];
 }
 
@@ -74,9 +74,9 @@ export interface PlanificacionesListResponse {
 export interface CrearPlanificacionDto {
   titulo: string;
   descripcion?: string;
-  cantidad_clases: number;
-  casa_tipo: CasaTipo;
-  mundo_tipo: MundoTipo;
+  cantidadClases: number;
+  casaTipo: CasaTipo;
+  mundoTipo: MundoTipo;
 }
 
 export interface ActualizarPlanificacionDto {
@@ -87,12 +87,12 @@ export interface ActualizarPlanificacionDto {
 export interface ActualizarClaseDto {
   titulo?: string;
   descripcion?: string;
-  teoria_id?: string;
-  practica_id?: string;
+  teoriaId?: string;
+  practicaId?: string;
 }
 
 export interface AgregarTareaDto {
-  contenido_id: string;
+  contenidoId: string;
   orden?: number;
   obligatoria?: boolean;
 }
@@ -101,8 +101,8 @@ export interface QueryPlanificacionesParams {
   page?: number;
   limit?: number;
   estado?: EstadoContenido;
-  casa_tipo?: CasaTipo;
-  mundo_tipo?: MundoTipo;
+  casaTipo?: CasaTipo;
+  mundoTipo?: MundoTipo;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -126,8 +126,8 @@ export const listarPlanificaciones = async (
   if (params?.page) searchParams.append('page', params.page.toString());
   if (params?.limit) searchParams.append('limit', params.limit.toString());
   if (params?.estado) searchParams.append('estado', params.estado);
-  if (params?.casa_tipo) searchParams.append('casa_tipo', params.casa_tipo);
-  if (params?.mundo_tipo) searchParams.append('mundo_tipo', params.mundo_tipo);
+  if (params?.casaTipo) searchParams.append('casaTipo', params.casaTipo);
+  if (params?.mundoTipo) searchParams.append('mundoTipo', params.mundoTipo);
 
   const query = searchParams.toString();
   return axios.get<PlanificacionesListResponse>(

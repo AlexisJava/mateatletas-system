@@ -67,11 +67,10 @@ export interface EstudianteAdmin {
   nombre: string;
   apellido: string;
   edad: number;
-  nivel_escolar?: string;
   nivelEscolar?: string;
-  nivel_actual: string | null;
-  puntos_totales?: number;
-  xp_total?: number;
+  nivelActual: string | null;
+  puntosTotales?: number;
+  xpTotal?: number;
   tutor: {
     id: string;
     nombre: string;
@@ -80,7 +79,7 @@ export interface EstudianteAdmin {
   } | null;
   equipo?: {
     nombre: string;
-    color_primario: string;
+    colorPrimario: string;
   } | null;
   casa?: {
     nombre: string;
@@ -90,7 +89,7 @@ export interface EstudianteAdmin {
     id: string;
     nombre: string;
   } | null;
-  estado_acceso?: string | null;
+  estadoAcceso?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -112,7 +111,7 @@ export interface DocenteAdmin {
   email: string;
   telefono?: string | null;
   titulo?: string | null;
-  titulo_profesional?: string | null;
+  tituloProfesional?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -215,8 +214,8 @@ export interface CrearEstudianteDto {
   tutorEmail?: string;
   tutorTelefono?: string;
   // Plan de suscripción (opcional)
-  plan_id?: string;
-  estado_acceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
+  planId?: string;
+  estadoAcceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
 }
 
 export interface CrearDocenteDto {
@@ -348,17 +347,17 @@ export interface PlanSuscripcion {
   id: string;
   nombre: string;
   descripcion: string | null;
-  precio_base: number | string;
+  precioBase: number | string;
 }
 
 /**
  * DTO para asignar plan a un estudiante
  */
 export interface AsignarPlanEstudianteDto {
-  plan_id?: string | null;
-  estado_acceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
-  fecha_vencimiento_plan?: string | null;
-  notas_plan?: string | null;
+  planId?: string | null;
+  estadoAcceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
+  fechaVencimientoPlan?: string | null;
+  notasPlan?: string | null;
 }
 
 /**
@@ -372,9 +371,9 @@ export interface AsignarPlanResponse {
     nombre: string;
     apellido: string;
     plan: PlanSuscripcion | null;
-    estado_acceso: string;
-    fecha_vencimiento_plan: string | null;
-    notas_plan: string | null;
+    estadoAcceso: string;
+    fechaVencimientoPlan: string | null;
+    notasPlan: string | null;
     tutor: {
       id: string;
       nombre: string;
@@ -428,7 +427,7 @@ export const getAllClasses = async (): Promise<ClasesResponse> => {
     if (Array.isArray(response)) {
       const list = clasesListSchema.parse(response).map((clase) => ({
         ...clase,
-        ruta_curricular: clase.ruta_curricular ?? clase.rutaCurricular ?? undefined,
+        rutaCurricular: clase.rutaCurricular ?? clase.rutaCurricular ?? undefined,
       }));
       return { data: list, meta: undefined };
     }
@@ -442,7 +441,7 @@ export const getAllClasses = async (): Promise<ClasesResponse> => {
     ) {
       const list = clasesListSchema.parse(response.data).map((clase) => ({
         ...clase,
-        ruta_curricular: clase.ruta_curricular ?? clase.rutaCurricular ?? undefined,
+        rutaCurricular: clase.rutaCurricular ?? clase.rutaCurricular ?? undefined,
       }));
       return { data: list, meta: undefined };
     }
@@ -1076,7 +1075,7 @@ export const getCombinedDashboardStats = async (): Promise<DashboardStats> => {
   if (retention.length >= 2) {
     const mesActual = retention[retention.length - 1];
     const mesAnterior = retention[retention.length - 2];
-    if (mesAnterior.activos > 0) {
+    if (mesActual && mesAnterior && mesAnterior.activos > 0) {
       crecimientoMensual = Math.round(
         ((mesActual.activos - mesAnterior.activos) / mesAnterior.activos) * 100,
       );
@@ -1120,16 +1119,16 @@ export interface Comision {
   id: string;
   nombre: string;
   descripcion: string | null;
-  producto_id: string;
-  casa_id: string | null;
-  docente_id: string | null;
-  cupo_maximo: number | null;
+  productoId: string;
+  casaId: string | null;
+  docenteId: string | null;
+  cupoMaximo: number | null;
   horario: string | null;
-  fecha_inicio: string | null;
-  fecha_fin: string | null;
+  fechaInicio: string | null;
+  fechaFin: string | null;
   activo: boolean;
   /** Override de planificación específica para esta comisión */
-  planificacion_id: string | null;
+  planificacionId: string | null;
   createdAt: string;
   updatedAt: string;
   producto?: {
@@ -1153,19 +1152,19 @@ export interface Comision {
   planificacion?: {
     id: string;
     titulo: string;
-    cantidad_clases: number;
+    cantidadClases: number;
   } | null;
-  total_inscriptos?: number;
-  cupos_disponibles?: number | null;
+  totalInscriptos?: number;
+  cuposDisponibles?: number | null;
 }
 
 /** Inscripción en comisión */
 export interface InscripcionComision {
   id: string;
-  comision_id: string;
-  estudiante_id: string;
+  comisionId: string;
+  estudianteId: string;
   estado: EstadoInscripcionComision;
-  fecha_inscripcion: string;
+  fechaInscripcion: string;
   notas: string | null;
   estudiante?: {
     id: string;
@@ -1184,21 +1183,21 @@ export interface InscripcionComision {
 export interface CreateComisionDto {
   nombre: string;
   descripcion?: string;
-  producto_id: string;
-  casa_id?: string | null;
-  docente_id?: string | null;
-  cupo_maximo?: number | null;
+  productoId: string;
+  casaId?: string | null;
+  docenteId?: string | null;
+  cupoMaximo?: number | null;
   horario?: string | null;
-  fecha_inicio?: string | null;
-  fecha_fin?: string | null;
+  fechaInicio?: string | null;
+  fechaFin?: string | null;
   activo?: boolean;
   /** Override de planificación específica para esta comisión */
-  planificacion_id?: string | null;
+  planificacionId?: string | null;
 }
 
 /** DTO para inscribir estudiantes */
 export interface InscribirEstudiantesDto {
-  estudiantes_ids: string[];
+  estudiantesIds: string[];
   estado?: EstadoInscripcionComision;
 }
 
@@ -1221,16 +1220,16 @@ export interface ComisionResponse {
  * GET /admin/comisiones
  */
 export const getComisiones = async (params?: {
-  producto_id?: string;
-  casa_id?: string;
-  docente_id?: string;
+  productoId?: string;
+  casaId?: string;
+  docenteId?: string;
   activo?: boolean;
 }): Promise<Comision[]> => {
   try {
     const queryParams = new URLSearchParams();
-    if (params?.producto_id) queryParams.append('producto_id', params.producto_id);
-    if (params?.casa_id) queryParams.append('casa_id', params.casa_id);
-    if (params?.docente_id) queryParams.append('docente_id', params.docente_id);
+    if (params?.productoId) queryParams.append('productoId', params.productoId);
+    if (params?.casaId) queryParams.append('casaId', params.casaId);
+    if (params?.docenteId) queryParams.append('docenteId', params.docenteId);
     if (params?.activo !== undefined) queryParams.append('activo', String(params.activo));
 
     const url = queryParams.toString()
@@ -1249,10 +1248,10 @@ export const getComisiones = async (params?: {
 
 /**
  * Obtener comisiones por producto
- * GET /admin/comisiones?producto_id=xxx
+ * GET /admin/comisiones?productoId=xxx
  */
 export const getComisionesByProducto = async (productoId: string): Promise<Comision[]> => {
-  return getComisiones({ producto_id: productoId });
+  return getComisiones({ productoId: productoId });
 };
 
 /**
@@ -1413,7 +1412,7 @@ export interface CrearEstudianteEInscribirResponse {
       nombre: string;
     };
     estado: EstadoInscripcionComision;
-    fecha_inscripcion: string;
+    fechaInscripcion: string;
   };
 }
 
@@ -1478,30 +1477,30 @@ export type TipoAsignacionDocente = 'CLASE_GRUPOS' | 'COMISIONES' | 'AMBOS';
 /** Asignación de docente a casa */
 export interface DocenteCasa {
   id: string;
-  docente_id: string;
-  casa_tipo: CasaTipo;
-  asignado_en: string;
+  docenteId: string;
+  casaTipo: CasaTipo;
+  asignadoEn: string;
   docente?: {
     id: string;
     nombre: string;
     apellido: string;
     email: string;
-    tipo_asignacion: TipoAsignacionDocente;
+    tipoAsignacion: TipoAsignacionDocente;
   };
 }
 
 /** Asignación de docente a mundo */
 export interface DocenteMundo {
   id: string;
-  docente_id: string;
-  mundo_tipo: MundoTipo;
-  asignado_en: string;
+  docenteId: string;
+  mundoTipo: MundoTipo;
+  asignadoEn: string;
   docente?: {
     id: string;
     nombre: string;
     apellido: string;
     email: string;
-    tipo_asignacion: TipoAsignacionDocente;
+    tipoAsignacion: TipoAsignacionDocente;
   };
 }
 
@@ -1510,16 +1509,16 @@ export interface DocenteAsignacionesPerfil {
   id: string;
   nombre: string;
   apellido: string;
-  tipo_asignacion: TipoAsignacionDocente;
+  tipoAsignacion: TipoAsignacionDocente;
   casas: DocenteCasa[];
   mundos: DocenteMundo[];
 }
 
 /** Filtros para listar docentes */
 export interface FiltrosDocentes {
-  casa_tipo?: CasaTipo;
-  mundo_tipo?: MundoTipo;
-  tipo_asignacion?: TipoAsignacionDocente;
+  casaTipo?: CasaTipo;
+  mundoTipo?: MundoTipo;
+  tipoAsignacion?: TipoAsignacionDocente;
 }
 
 /**
@@ -1531,7 +1530,7 @@ export const asignarCasaDocente = async (
   casaTipo: CasaTipo,
 ): Promise<DocenteCasa> => {
   try {
-    return await axios.post(`/admin/docentes/${docenteId}/casas`, { casa_tipo: casaTipo });
+    return await axios.post(`/admin/docentes/${docenteId}/casas`, { casaTipo: casaTipo });
   } catch (error) {
     console.error('Error al asignar casa a docente:', error);
     throw error;
@@ -1589,7 +1588,7 @@ export const asignarMundoDocente = async (
   mundoTipo: MundoTipo,
 ): Promise<DocenteMundo> => {
   try {
-    return await axios.post(`/admin/docentes/${docenteId}/mundos`, { mundo_tipo: mundoTipo });
+    return await axios.post(`/admin/docentes/${docenteId}/mundos`, { mundoTipo: mundoTipo });
   } catch (error) {
     console.error('Error al asignar mundo a docente:', error);
     throw error;
@@ -1649,11 +1648,11 @@ export const actualizarTipoAsignacionDocente = async (
   id: string;
   nombre: string;
   apellido: string;
-  tipo_asignacion: TipoAsignacionDocente;
+  tipoAsignacion: TipoAsignacionDocente;
 }> => {
   try {
     return await axios.patch(`/admin/docentes/${docenteId}/tipo-asignacion`, {
-      tipo_asignacion: tipoAsignacion,
+      tipoAsignacion: tipoAsignacion,
     });
   } catch (error) {
     console.error('Error al actualizar tipo de asignación:', error);
@@ -1685,9 +1684,9 @@ export const listarDocentesFiltrados = async (
 ): Promise<DocenteAsignacionesPerfil[]> => {
   try {
     const params = new URLSearchParams();
-    if (filtros.casa_tipo) params.append('casa_tipo', filtros.casa_tipo);
-    if (filtros.mundo_tipo) params.append('mundo_tipo', filtros.mundo_tipo);
-    if (filtros.tipo_asignacion) params.append('tipo_asignacion', filtros.tipo_asignacion);
+    if (filtros.casaTipo) params.append('casaTipo', filtros.casaTipo);
+    if (filtros.mundoTipo) params.append('mundoTipo', filtros.mundoTipo);
+    if (filtros.tipoAsignacion) params.append('tipoAsignacion', filtros.tipoAsignacion);
 
     const url = params.toString()
       ? `/admin/docentes/filtrados?${params}`
@@ -1709,11 +1708,11 @@ export interface GrupoPedagogico {
   codigo: string;
   nombre: string | null;
   descripcion: string | null;
-  casa_tipo: CasaTipo | null;
-  mundo_tipo: MundoTipo | null;
+  casaTipo: CasaTipo | null;
+  mundoTipo: MundoTipo | null;
   activo: boolean;
-  edad_minima: number | null;
-  edad_maxima: number | null;
+  edadMinima: number | null;
+  edadMaxima: number | null;
   _count?: {
     claseGrupos: number;
     comisionesProducto: number;
@@ -1722,24 +1721,24 @@ export interface GrupoPedagogico {
 
 /** Filtros para grupos pedagógicos */
 export interface FiltrosGrupoPedagogico {
-  casa_tipo?: CasaTipo;
-  mundo_tipo?: MundoTipo;
+  casaTipo?: CasaTipo;
+  mundoTipo?: MundoTipo;
   activo?: boolean;
 }
 
 /** DTO para actualizar grupo pedagógico */
 export interface ActualizarGrupoPedagogicoDto {
-  casa_tipo?: CasaTipo;
-  mundo_tipo?: MundoTipo;
+  casaTipo?: CasaTipo;
+  mundoTipo?: MundoTipo;
   nombre?: string;
   descripcion?: string;
 }
 
 /** Estadísticas de grupos */
 export interface EstadisticasGrupos {
-  total_grupos: number;
-  por_casa: Array<{ casa: string; cantidad: number }>;
-  por_mundo: Array<{ mundo: string; cantidad: number }>;
+  totalGrupos: number;
+  porCasa: Array<{ casa: string; cantidad: number }>;
+  porMundo: Array<{ mundo: string; cantidad: number }>;
 }
 
 /**
@@ -1751,8 +1750,8 @@ export const listarGruposPedagogicos = async (
 ): Promise<GrupoPedagogico[]> => {
   try {
     const params = new URLSearchParams();
-    if (filtros?.casa_tipo) params.append('casa_tipo', filtros.casa_tipo);
-    if (filtros?.mundo_tipo) params.append('mundo_tipo', filtros.mundo_tipo);
+    if (filtros?.casaTipo) params.append('casaTipo', filtros.casaTipo);
+    if (filtros?.mundoTipo) params.append('mundoTipo', filtros.mundoTipo);
     if (filtros?.activo !== undefined) params.append('activo', String(filtros.activo));
 
     const url = params.toString()
@@ -1804,8 +1803,8 @@ export const migrarGruposLegacy = async (): Promise<{
   detalles?: Array<{
     id: string;
     codigo: string;
-    casa_tipo: CasaTipo | null;
-    mundo_tipo: MundoTipo | null;
+    casaTipo: CasaTipo | null;
+    mundoTipo: MundoTipo | null;
   }>;
 }> => {
   try {
@@ -2247,8 +2246,8 @@ export interface AlertaAdmin {
   clase: {
     id: string;
     nombre: string;
-    fecha_hora_inicio: string;
-    duracion_minutos: number;
+    fechaHoraInicio: string;
+    duracionMinutos: number;
   };
   createdAt: string;
 }
@@ -2311,12 +2310,12 @@ export interface Planificacion {
   id: string;
   titulo: string;
   descripcion: string | null;
-  cantidad_clases: number;
-  casa_tipo: 'QUANTUM' | 'VERTEX' | 'PULSAR';
-  mundo_tipo: 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
+  cantidadClases: number;
+  casaTipo: 'QUANTUM' | 'VERTEX' | 'PULSAR';
+  mundoTipo: 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
   estado: 'BORRADOR' | 'PUBLICADO' | 'ARCHIVADO';
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PlanificacionesResponse {
@@ -2337,16 +2336,16 @@ export const getPlanificaciones = async (params?: {
   page?: number;
   limit?: number;
   estado?: 'BORRADOR' | 'PUBLICADO' | 'ARCHIVADO';
-  casa_tipo?: 'QUANTUM' | 'VERTEX' | 'PULSAR';
-  mundo_tipo?: 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
+  casaTipo?: 'QUANTUM' | 'VERTEX' | 'PULSAR';
+  mundoTipo?: 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
 }): Promise<PlanificacionesResponse> => {
   try {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', String(params.page));
     if (params?.limit) queryParams.append('limit', String(params.limit));
     if (params?.estado) queryParams.append('estado', params.estado);
-    if (params?.casa_tipo) queryParams.append('casa_tipo', params.casa_tipo);
-    if (params?.mundo_tipo) queryParams.append('mundo_tipo', params.mundo_tipo);
+    if (params?.casaTipo) queryParams.append('casaTipo', params.casaTipo);
+    if (params?.mundoTipo) queryParams.append('mundoTipo', params.mundoTipo);
 
     const url = queryParams.toString()
       ? `/admin/planificaciones?${queryParams.toString()}`
@@ -2424,9 +2423,9 @@ export interface ProductoConPlanificacion extends Producto {
   claseGrupos?: Array<{
     id: string;
     nombre: string;
-    dia_semana: string;
-    hora_inicio: string;
-    hora_fin: string;
+    diaSemana: string;
+    horaInicio: string;
+    horaFin: string;
     docente?: {
       id: string;
       nombre: string;

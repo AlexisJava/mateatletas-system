@@ -82,7 +82,7 @@ export default function TomarAsistenciaModal({
       setIsSubmitting(true);
 
       const asistencias: AsistenciaEstudianteItem[] = estadosEstudiantes.map((est) => ({
-        estudiante_id: est.estudiante.id,
+        estudianteId: est.estudiante.id,
         estado: est.estado!,
         observaciones: est.observaciones || undefined,
       }));
@@ -90,7 +90,7 @@ export default function TomarAsistenciaModal({
       const fechaHoy = new Date().toISOString().split('T')[0] as string; // YYYY-MM-DD
 
       const response = await tomarAsistenciaBatch({
-        clase_grupo_id: claseGrupoId,
+        claseGrupoId: claseGrupoId,
         fecha: fechaHoy,
         asistencias,
       });
@@ -218,7 +218,7 @@ export default function TomarAsistenciaModal({
                       <StudentAvatar
                         nombre={item.estudiante.nombre}
                         apellido={item.estudiante.apellido}
-                        avatar_url={item.estudiante.avatar_url}
+                        avatarUrl={item.estudiante.avatarUrl}
                         size="lg"
                         className="border-2 border-purple-400/50"
                       />

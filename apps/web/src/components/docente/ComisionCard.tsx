@@ -7,7 +7,7 @@ interface ComisionCardProps {
 }
 
 export const ComisionCard: React.FC<ComisionCardProps> = ({ comision }) => {
-  const percentage = Math.round((comision.inscripciones / comision.cupo_maximo) * 100);
+  const percentage = Math.round((comision.inscripciones / comision.cupoMaximo) * 100);
 
   const getCasaColor = (casa: string) => {
     switch (casa) {
@@ -73,7 +73,7 @@ export const ComisionCard: React.FC<ComisionCardProps> = ({ comision }) => {
           <span
             className={`font-semibold ${percentage >= 90 ? 'text-amber-400' : 'text-slate-300'}`}
           >
-            {comision.inscripciones}/{comision.cupo_maximo} alumnos
+            {comision.inscripciones}/{comision.cupoMaximo} alumnos
           </span>
         </div>
       </div>

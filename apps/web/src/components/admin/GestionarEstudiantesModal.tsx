@@ -70,11 +70,11 @@ export default function GestionarEstudiantesModal({
     nombre: '',
     apellido: '',
     edad: '',
-    nivel_escolar: 'Primaria' as 'Primaria' | 'Secundaria' | 'Universidad',
-    tutor_nombre: '',
-    tutor_apellido: '',
-    tutor_email: '',
-    tutor_telefono: '',
+    nivelEscolar: 'Primaria' as 'Primaria' | 'Secundaria' | 'Universidad',
+    tutorNombre: '',
+    tutorApellido: '',
+    tutorEmail: '',
+    tutorTelefono: '',
   });
 
   // Ref para controlar el request actual y evitar race conditions
@@ -172,10 +172,10 @@ export default function GestionarEstudiantesModal({
     setError(null);
 
     try {
-      // Agregar el sector_id del docente de la clase al formulario
+      // Agregar el sectorId del docente de la clase al formulario
       const dataToSend = {
         ...createForm,
-        sector_id: claseData?.docente?.sector?.id || undefined,
+        sectorId: claseData?.docente?.sector?.id || undefined,
       };
 
       const nuevoEstudiante = await axios.post<Estudiante>('/admin/estudiantes', dataToSend);
@@ -197,11 +197,11 @@ export default function GestionarEstudiantesModal({
         nombre: '',
         apellido: '',
         edad: '',
-        nivel_escolar: 'Primaria',
-        tutor_nombre: '',
-        tutor_apellido: '',
-        tutor_email: '',
-        tutor_telefono: '',
+        nivelEscolar: 'Primaria',
+        tutorNombre: '',
+        tutorApellido: '',
+        tutorEmail: '',
+        tutorTelefono: '',
       });
 
       setShowCreateForm(false);
@@ -382,11 +382,11 @@ export default function GestionarEstudiantesModal({
                       </label>
                       <select
                         required
-                        value={createForm.nivel_escolar}
+                        value={createForm.nivelEscolar}
                         onChange={(e) =>
                           setCreateForm({
                             ...createForm,
-                            nivel_escolar: e.target.value as
+                            nivelEscolar: e.target.value as
                               | 'Primaria'
                               | 'Secundaria'
                               | 'Universidad',
@@ -410,9 +410,9 @@ export default function GestionarEstudiantesModal({
                         </label>
                         <input
                           type="text"
-                          value={createForm.tutor_nombre}
+                          value={createForm.tutorNombre}
                           onChange={(e) =>
-                            setCreateForm({ ...createForm, tutor_nombre: e.target.value })
+                            setCreateForm({ ...createForm, tutorNombre: e.target.value })
                           }
                           className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
                         />
@@ -423,9 +423,9 @@ export default function GestionarEstudiantesModal({
                         </label>
                         <input
                           type="text"
-                          value={createForm.tutor_apellido}
+                          value={createForm.tutorApellido}
                           onChange={(e) =>
-                            setCreateForm({ ...createForm, tutor_apellido: e.target.value })
+                            setCreateForm({ ...createForm, tutorApellido: e.target.value })
                           }
                           className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
                         />

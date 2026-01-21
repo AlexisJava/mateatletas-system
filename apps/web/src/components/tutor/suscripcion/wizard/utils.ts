@@ -132,11 +132,11 @@ export function mapClubToProducto(club: ClubConClaseGrupos): ProductoConCasa {
     claseGrupos: club.claseGrupos.map((cg) => ({
       id: cg.id,
       nombre: cg.nombre,
-      diaSemana: DIAS_SEMANA[cg.dia_semana] ?? cg.dia_semana,
-      horaInicio: cg.hora_inicio,
-      horaFin: cg.hora_fin,
+      diaSemana: DIAS_SEMANA[cg.diaSemana] ?? cg.diaSemana,
+      horaInicio: cg.horaInicio,
+      horaFin: cg.horaFin,
       docente: cg.docente ?? undefined,
-      cupoDisponible: cg.cupo_maximo,
+      cupoDisponible: cg.cupoMaximo,
     })),
   };
 }

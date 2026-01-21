@@ -32,9 +32,9 @@ interface DashboardData {
   racha: number;
   proximaClase: {
     tipo: string;
-    fecha_hora_inicio: string;
+    fechaHoraInicio: string;
     docente: { nombre: string; apellido: string };
-    link_meet?: string | null;
+    linkMeet?: string | null;
   } | null;
   plan: MiPlan | null;
 }
@@ -62,18 +62,18 @@ export default function EstudianteDashboard() {
         ]);
 
         setData({
-          nivel: recursos?.nivel_actual ?? user.nivel_actual ?? 1,
-          xp: recursos?.xp_actual ?? user.puntos_totales ?? 0,
-          xpSiguienteNivel: recursos?.xp_siguiente_nivel ?? 100,
-          racha: recursos?.racha?.dias_consecutivos ?? 0,
+          nivel: recursos?.nivelActual ?? user.nivelActual ?? 1,
+          xp: recursos?.xpActual ?? user.puntosTotales ?? 0,
+          xpSiguienteNivel: recursos?.xpSiguienteNivel ?? 100,
+          racha: recursos?.racha?.diasConsecutivos ?? 0,
           proximaClase,
           plan: miPlan,
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         setData({
-          nivel: user.nivel_actual ?? 1,
-          xp: user.puntos_totales ?? 0,
+          nivel: user.nivelActual ?? 1,
+          xp: user.puntosTotales ?? 0,
           xpSiguienteNivel: 100,
           racha: 0,
           proximaClase: null,
@@ -85,9 +85,9 @@ export default function EstudianteDashboard() {
     }
 
     fetchData();
-  }, [user?.id, user?.nivel_actual, user?.puntos_totales]);
+  }, [user?.id, user?.nivelActual, user?.puntosTotales]);
 
-  const tieneAccesoClases = data?.plan?.acceso_clases_vivo ?? false;
+  const tieneAccesoClases = data?.plan?.accesoClasesVivo ?? false;
 
   if (isLoading) {
     return (
@@ -239,10 +239,7 @@ export default function EstudianteDashboard() {
         <div className="max-w-7xl w-full space-y-4 relative z-10">
           {/* Live Class Banner */}
           {tieneAccesoClases && data?.proximaClase && (
-            <LiveBanner
-              docente={data.proximaClase.docente}
-              linkMeet={data.proximaClase.link_meet}
-            />
+            <LiveBanner docente={data.proximaClase.docente} linkMeet={data.proximaClase.linkMeet} />
           )}
 
           {/* Bento Grid - Simétrico */}

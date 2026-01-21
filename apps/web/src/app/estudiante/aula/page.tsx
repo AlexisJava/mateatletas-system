@@ -124,25 +124,25 @@ export default function AulaEstudiantePage() {
             <StatCard
               icon={<BookOpen className="w-5 h-5" />}
               label="Planificaciones"
-              value={data.resumen.total_planificaciones}
+              value={data.resumen.totalPlanificaciones}
               colors={['#06b6d4', '#0891b2']}
             />
             <StatCard
               icon={<Target className="w-5 h-5" />}
               label="Clases Activas"
-              value={data.resumen.total_clases_activas}
+              value={data.resumen.totalClasesActivas}
               colors={['#a855f7', '#7c3aed']}
             />
             <StatCard
               icon={<CheckCircle2 className="w-5 h-5" />}
               label="Completadas"
-              value={data.resumen.total_clases_completadas}
+              value={data.resumen.totalClasesCompletadas}
               colors={['#10b981', '#059669']}
             />
             <StatCard
               icon={<ListTodo className="w-5 h-5" />}
               label="Tareas"
-              value={`${data.resumen.total_tareas_completadas}/${data.resumen.total_tareas}`}
+              value={`${data.resumen.totalTareasCompletadas}/${data.resumen.totalTareas}`}
               colors={['#f59e0b', '#d97706']}
             />
           </div>
@@ -281,7 +281,7 @@ function SectorSection({ sector }: SectorSectionProps) {
       {/* Grid de planificaciones */}
       <div className="grid gap-4 sm:grid-cols-2">
         {sector.planificaciones.map((plan) => (
-          <PlanificacionCard key={plan.asignacion_id} plan={plan} sectorColor={sector.color} />
+          <PlanificacionCard key={plan.asignacionId} plan={plan} sectorColor={sector.color} />
         ))}
       </div>
     </div>
@@ -298,7 +298,7 @@ function PlanificacionCard({ plan, sectorColor }: PlanificacionCardProps) {
 
   return (
     <Link
-      href={`/estudiante/aula/${plan.asignacion_id}`}
+      href={`/estudiante/aula/${plan.asignacionId}`}
       className="block p-5 rounded-2xl transition-all hover:scale-[1.02] group"
       style={{
         background:
@@ -350,14 +350,14 @@ function PlanificacionCard({ plan, sectorColor }: PlanificacionCardProps) {
         <div className="flex items-center gap-1.5">
           <BookOpen className="w-4 h-4 text-cyan-400" />
           <span className="text-white/70">
-            {plan.progreso.clases_completadas}/{plan.progreso.clases_activas} clases
+            {plan.progreso.clasesCompletadas}/{plan.progreso.clasesActivas} clases
           </span>
         </div>
-        {plan.progreso.tareas_total > 0 && (
+        {plan.progreso.tareasTotal > 0 && (
           <div className="flex items-center gap-1.5">
             <ListTodo className="w-4 h-4 text-amber-400" />
             <span className="text-white/70">
-              {plan.progreso.tareas_completadas}/{plan.progreso.tareas_total} tareas
+              {plan.progreso.tareasCompletadas}/{plan.progreso.tareasTotal} tareas
             </span>
           </div>
         )}

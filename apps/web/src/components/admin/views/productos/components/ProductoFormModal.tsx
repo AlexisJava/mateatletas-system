@@ -32,9 +32,9 @@ interface ProductoFormData {
   tipo: TipoProducto | '';
   subcategoria: string;
   activo: boolean;
-  fecha_inicio: string;
-  fecha_fin: string;
-  cupo_maximo: string;
+  fechaInicio: string;
+  fechaFin: string;
+  cupoMaximo: string;
   // Campos para tipo Club (suscripciones familiares)
   casa: CasaTipo | '';
   mundo: MundoTipo | '';
@@ -45,9 +45,9 @@ interface FormErrors {
   descripcion?: string;
   precio?: string;
   tipo?: string;
-  fecha_inicio?: string;
-  fecha_fin?: string;
-  cupo_maximo?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  cupoMaximo?: string;
   casa?: string;
   mundo?: string;
 }
@@ -66,9 +66,9 @@ const INITIAL_FORM_DATA: ProductoFormData = {
   tipo: '',
   subcategoria: '',
   activo: true,
-  fecha_inicio: '',
-  fecha_fin: '',
-  cupo_maximo: '',
+  fechaInicio: '',
+  fechaFin: '',
+  cupoMaximo: '',
   casa: '',
   mundo: '',
 };
@@ -106,9 +106,9 @@ export function ProductoFormModal({
         tipo: producto.tipo as TipoProducto,
         subcategoria: (producto as { subcategoria?: string }).subcategoria || '',
         activo: producto.activo,
-        fecha_inicio: extractDatePart(producto.fecha_inicio),
-        fecha_fin: extractDatePart(producto.fecha_fin),
-        cupo_maximo: producto.cupo_maximo ? String(producto.cupo_maximo) : '',
+        fechaInicio: extractDatePart(producto.fechaInicio),
+        fechaFin: extractDatePart(producto.fechaFin),
+        cupoMaximo: producto.cupoMaximo ? String(producto.cupoMaximo) : '',
         casa: prod.casa || '',
         mundo: prod.mundo || '',
       });
@@ -151,23 +151,23 @@ export function ProductoFormModal({
 
     // Validación para tipos con fecha y cupo (Evento, Curso)
     if (TIPOS_CON_FECHA.includes(formData.tipo)) {
-      if (!formData.fecha_inicio) {
-        newErrors.fecha_inicio = 'Requerido';
+      if (!formData.fechaInicio) {
+        newErrors.fechaInicio = 'Requerido';
       }
-      if (!formData.fecha_fin) {
-        newErrors.fecha_fin = 'Requerido';
+      if (!formData.fechaFin) {
+        newErrors.fechaFin = 'Requerido';
       }
-      if (formData.fecha_inicio && formData.fecha_fin) {
-        if (new Date(formData.fecha_fin) <= new Date(formData.fecha_inicio)) {
-          newErrors.fecha_fin = 'Debe ser posterior al inicio';
+      if (formData.fechaInicio && formData.fechaFin) {
+        if (new Date(formData.fechaFin) <= new Date(formData.fechaInicio)) {
+          newErrors.fechaFin = 'Debe ser posterior al inicio';
         }
       }
-      if (!formData.cupo_maximo) {
-        newErrors.cupo_maximo = 'Requerido';
+      if (!formData.cupoMaximo) {
+        newErrors.cupoMaximo = 'Requerido';
       } else {
-        const cupo = parseInt(formData.cupo_maximo, 10);
+        const cupo = parseInt(formData.cupoMaximo, 10);
         if (isNaN(cupo) || cupo < 1) {
-          newErrors.cupo_maximo = 'Mínimo 1';
+          newErrors.cupoMaximo = 'Mínimo 1';
         }
       }
     }
@@ -201,9 +201,9 @@ export function ProductoFormModal({
           subcategoria: formData.subcategoria.trim() || undefined,
           activo: formData.activo,
           ...(TIPOS_CON_FECHA.includes(formData.tipo) && {
-            fecha_inicio: formData.fecha_inicio,
-            fecha_fin: formData.fecha_fin,
-            cupo_maximo: parseInt(formData.cupo_maximo, 10),
+            fechaInicio: formData.fechaInicio,
+            fechaFin: formData.fechaFin,
+            cupoMaximo: parseInt(formData.cupoMaximo, 10),
           }),
           // Campos para tipo Club (suscripciones familiares)
           ...(TIPOS_CON_CASA_MUNDO.includes(formData.tipo) && {
@@ -416,17 +416,17 @@ export function ProductoFormModal({
                   </label>
                   <input
                     type="date"
-                    value={formData.fecha_inicio}
-                    onChange={(e) => handleChange('fecha_inicio', e.target.value)}
+                    value={formData.fechaInicio}
+                    onChange={(e) => handleChange('fechaInicio', e.target.value)}
                     disabled={isSubmitting}
                     className={`w-full px-4 py-2.5 bg-[var(--admin-surface-2)] border rounded-xl text-[var(--admin-text)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)]/50 transition-all ${
-                      errors.fecha_inicio
+                      errors.fechaInicio
                         ? 'border-[var(--status-error)]'
                         : 'border-[var(--admin-border)]'
                     }`}
                   />
-                  {errors.fecha_inicio && (
-                    <p className="mt-1 text-xs text-[var(--status-error)]">{errors.fecha_inicio}</p>
+                  {errors.fechaInicio && (
+                    <p className="mt-1 text-xs text-[var(--status-error)]">{errors.fechaInicio}</p>
                   )}
                 </div>
 
@@ -436,17 +436,17 @@ export function ProductoFormModal({
                   </label>
                   <input
                     type="date"
-                    value={formData.fecha_fin}
-                    onChange={(e) => handleChange('fecha_fin', e.target.value)}
+                    value={formData.fechaFin}
+                    onChange={(e) => handleChange('fechaFin', e.target.value)}
                     disabled={isSubmitting}
                     className={`w-full px-4 py-2.5 bg-[var(--admin-surface-2)] border rounded-xl text-[var(--admin-text)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)]/50 transition-all ${
-                      errors.fecha_fin
+                      errors.fechaFin
                         ? 'border-[var(--status-error)]'
                         : 'border-[var(--admin-border)]'
                     }`}
                   />
-                  {errors.fecha_fin && (
-                    <p className="mt-1 text-xs text-[var(--status-error)]">{errors.fecha_fin}</p>
+                  {errors.fechaFin && (
+                    <p className="mt-1 text-xs text-[var(--status-error)]">{errors.fechaFin}</p>
                   )}
                 </div>
               </div>
@@ -457,19 +457,19 @@ export function ProductoFormModal({
                 </label>
                 <input
                   type="number"
-                  value={formData.cupo_maximo}
-                  onChange={(e) => handleChange('cupo_maximo', e.target.value)}
+                  value={formData.cupoMaximo}
+                  onChange={(e) => handleChange('cupoMaximo', e.target.value)}
                   placeholder="50"
                   min="1"
                   disabled={isSubmitting}
                   className={`w-full px-4 py-2.5 bg-[var(--admin-surface-2)] border rounded-xl text-[var(--admin-text)] placeholder:text-[var(--admin-text-muted)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)]/50 transition-all ${
-                    errors.cupo_maximo
+                    errors.cupoMaximo
                       ? 'border-[var(--status-error)]'
                       : 'border-[var(--admin-border)]'
                   }`}
                 />
-                {errors.cupo_maximo && (
-                  <p className="mt-1 text-xs text-[var(--status-error)]">{errors.cupo_maximo}</p>
+                {errors.cupoMaximo && (
+                  <p className="mt-1 text-xs text-[var(--status-error)]">{errors.cupoMaximo}</p>
                 )}
               </div>
             </>
