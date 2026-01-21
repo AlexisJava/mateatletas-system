@@ -121,33 +121,38 @@ export class AdminStatsService {
     // Nota: Algunos usuarios pueden tener múltiples roles
     const totalUsuarios = totalTutores + totalDocentes + totalAdmins;
 
-    // Calcular ingresos del mes actual desde InscripcionMensual
+    // Calcular ingresos del mes actual desde FacturacionUnificada (SSOT)
+    // Combina: PagoSuscripcion (MercadoPago) + InscripcionMensual (pagos manuales)
     const now = new Date();
     const mesActual = now.getMonth() + 1; // 1-12
     const anioActual = now.getFullYear();
     const periodoActual = `${anioActual}-${mesActual.toString().padStart(2, '0')}`;
 
-    const inscripcionesDelMes = await this.prisma.inscripcionMensual.findMany({
-      where: {
-        periodo: periodoActual,
-      },
-    });
+    // Usar raw query porque Prisma views no soportan findMany con tipos
+    const facturacionAgregada = await this.prisma.$queryRaw<
+      Array<{ estado_pago: string; total: string }>
+    >`
+      SELECT estado_pago, SUM(monto)::text as total
+      FROM facturacion_unificada
+      WHERE periodo = ${periodoActual}
+      GROUP BY estado_pago
+    `;
 
     // Calcular ingresos y pagos pendientes por estado
     let ingresosTotal = 0;
     let pagosPendientes = 0;
 
-    inscripcionesDelMes.forEach((ins) => {
-      const monto = ins.precio_final.toNumber();
-      if (ins.estado_pago === 'Pagado') {
+    for (const row of facturacionAgregada) {
+      const monto = parseFloat(row.total) || 0;
+      if (row.estado_pago === 'Pagado') {
         ingresosTotal += monto;
       } else if (
-        ins.estado_pago === 'Pendiente' ||
-        ins.estado_pago === 'Vencido'
+        row.estado_pago === 'Pendiente' ||
+        row.estado_pago === 'Vencido'
       ) {
         pagosPendientes += monto;
       }
-    });
+    }
 
     // Formato compatible con el frontend (SystemStats interface)
     return {
@@ -231,15 +236,14 @@ export class AdminStatsService {
         GROUP BY EXTRACT(YEAR FROM "createdAt"), EXTRACT(MONTH FROM "createdAt")
       `,
 
-      // Query 2: Inscripciones activas por período
-      this.prisma.inscripcionMensual.groupBy({
-        by: ['periodo'],
-        where: {
-          periodo: { in: periodos },
-          estado_pago: { in: ['Pagado', 'Pendiente'] },
-        },
-        _count: { id: true },
-      }),
+      // Query 2: Pagos activos por período (usa vista unificada SSOT)
+      this.prisma.$queryRaw<Array<{ periodo: string; count: bigint }>>`
+        SELECT periodo, COUNT(*)::bigint as count
+        FROM facturacion_unificada
+        WHERE periodo = ANY(${periodos})
+          AND estado_pago IN ('Pagado', 'Pendiente')
+        GROUP BY periodo
+      `,
 
       // Query 3: Bajas por mes (usando raw query para agrupar por fecha_baja)
       this.prisma.$queryRaw<
@@ -266,7 +270,7 @@ export class AdminStatsService {
 
     const activosMap = new Map<string, number>();
     for (const row of activosData) {
-      activosMap.set(row.periodo, row._count.id);
+      activosMap.set(row.periodo, Number(row.count));
     }
 
     const bajasMap = new Map<string, number>();
@@ -317,14 +321,15 @@ export class AdminStatsService {
       periodoToMonth.set(periodo, nombresMeses[fecha.getMonth()] ?? 'N/A');
     }
 
-    // UNA SOLA QUERY: Obtener todos los datos agrupados por período y estado
-    const aggregations = await this.prisma.inscripcionMensual.groupBy({
-      by: ['periodo', 'estado_pago'],
-      where: {
-        periodo: { in: periodos },
-      },
-      _sum: { precio_final: true },
-    });
+    // UNA SOLA QUERY: Obtener todos los datos agrupados por período y estado (SSOT)
+    const aggregations = await this.prisma.$queryRaw<
+      Array<{ periodo: string; estado_pago: string; total: string }>
+    >`
+      SELECT periodo, estado_pago, SUM(monto)::text as total
+      FROM facturacion_unificada
+      WHERE periodo = ANY(${periodos})
+      GROUP BY periodo, estado_pago
+    `;
 
     // Construir mapa de resultados
     const dataByPeriodo = new Map<
@@ -337,7 +342,7 @@ export class AdminStatsService {
         ingresos: 0,
         pendientes: 0,
       };
-      const monto = agg._sum.precio_final?.toNumber() ?? 0;
+      const monto = parseFloat(agg.total) || 0;
 
       if (agg.estado_pago === 'Pagado') {
         current.ingresos += monto;

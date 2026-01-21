@@ -67,6 +67,9 @@ model Tutor {
   /// Vista unificada: todas las inscripciones de los hijos del tutor
   inscripcionesUnificadas InscripcionUnificada[] @relation("InscripcionUnificadaTutor")
 
+  /// Vista unificada: historial de facturación/pagos del tutor
+  facturacionUnificada FacturacionUnificada[] @relation("FacturacionUnificadaTutor")
+
   /// NOTIFICACIONES: Notificaciones del tutor
   notificaciones Notificacion[]
 
@@ -203,6 +206,9 @@ model Estudiante {
 
   /// Vista unificada: todas las inscripciones (manual + suscripción)
   inscripcionesUnificadas InscripcionUnificada[] @relation("InscripcionUnificadaEstudiante")
+
+  /// Vista unificada: historial de facturación/pagos del estudiante (para pagos manuales)
+  facturacionUnificada FacturacionUnificada[] @relation("FacturacionUnificadaEstudiante")
 
   /// NOTIFICACIONES: Notificaciones del estudiante
   notificaciones Notificacion[]
@@ -4070,4 +4076,44 @@ view InscripcionUnificada {
   tutor      Tutor      @relation("InscripcionUnificadaTutor", fields: [tutor_id], references: [id])
 
   @@map("inscripciones_unificadas")
+}
+
+// ============================================================================
+// VISTA: FACTURACIÓN UNIFICADA (SSOT FINANCIERO)
+// ============================================================================
+/// Vista que unifica todas las fuentes de facturación:
+/// - PagoSuscripcion: Pagos automáticos vía MercadoPago
+/// - InscripcionMensual: Pagos manuales registrados por admin
+///
+/// USO:
+/// - Dashboard financiero: métricas de ingresos consolidadas
+/// - Reportes: sin duplicación de datos
+/// - Historial de pagos: visión completa por tutor/familia
+///
+/// NOTA: Esta es una vista de SOLO LECTURA.
+/// Para escribir, usar las tablas fuente correspondientes.
+view FacturacionUnificada {
+  id                      String    @unique
+  fuente                  String // 'SUSCRIPCION' | 'MANUAL'
+  tutor_id                String
+  estudiante_id           String? // NULL para pagos de suscripción (nivel familia)
+  periodo                 String // "2026-01"
+  anio                    Int
+  mes                     Int
+  monto                   Decimal   @db.Decimal(10, 2)
+  estado_pago             String // 'Pagado' | 'Pendiente' | 'Vencido' | 'Parcial' | 'Anulado'
+  metodo_pago             String // 'MercadoPago' | 'Efectivo' | 'Transferencia' | 'Manual'
+  referencia_externa      String? // mp_payment_id para MercadoPago
+  comprobante_url         String?
+  observaciones           String?
+  fecha_creacion          DateTime
+  fecha_pago              DateTime?
+  suscripcion_familiar_id String? // Solo para fuente SUSCRIPCION
+  inscripcion_mensual_id  String? // Solo para fuente MANUAL
+
+  // Relaciones (read-only)
+  tutor      Tutor       @relation("FacturacionUnificadaTutor", fields: [tutor_id], references: [id])
+  estudiante Estudiante? @relation("FacturacionUnificadaEstudiante", fields: [estudiante_id], references: [id])
+
+  @@map("facturacion_unificada")
 }

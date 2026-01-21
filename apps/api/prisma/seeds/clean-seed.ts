@@ -691,7 +691,7 @@ async function seedInscripcionesMensuales(
       nombre: 'Membresía STEAM',
       descripcion: 'Membresía mensual STEAM con clases en vivo',
       precio: 95000,
-      categoria: 'membresia',
+      tipo: 'Club', // Actividad recurrente mensual
       activo: true,
     },
   });
@@ -710,12 +710,13 @@ async function seedInscripcionesMensuales(
   };
 
   // Descuento por posición de hermano (12% segundo, 20% tercero+)
-  const descuentos = [0, 0.12, 0.2]; // Primer hijo 0%, segundo 12%, tercero 20%
+  const descuentos: number[] = [0, 0.12, 0.2]; // Primer hijo 0%, segundo 12%, tercero 20%
 
   for (let i = 0; i < estudiantesCreados.length; i++) {
-    const { estudiante, hijo } = estudiantesCreados[i];
+    const item = estudiantesCreados[i]!;
+    const { estudiante, hijo } = item;
     const precioBase = preciosPorTier[hijo.tier];
-    const descuentoPorcentaje = descuentos[Math.min(i, 2)];
+    const descuentoPorcentaje = descuentos[Math.min(i, 2)] ?? 0;
     const descuentoMonto = precioBase * descuentoPorcentaje;
     const precioFinal = precioBase - descuentoMonto;
 
@@ -761,7 +762,7 @@ async function seedInscripcionesMensuales(
   // Calcular total por cobrar
   const totalPorCobrar = estudiantesCreados.reduce((acc, { hijo }, i) => {
     const precio = preciosPorTier[hijo.tier];
-    const descuento = descuentos[Math.min(i, 2)];
+    const descuento = descuentos[Math.min(i, 2)] ?? 0;
     return acc + precio * (1 - descuento);
   }, 0);
 
@@ -856,9 +857,15 @@ async function main() {
     const clases = await seedGruposYClases(prisma, docente.id);
 
     // 5. Crear tutor y familia
-    await seedTutorYFamilia(prisma, clases);
+    const { tutor, estudiantesCreados } = await seedTutorYFamilia(
+      prisma,
+      clases,
+    );
 
-    // 6. Mostrar credenciales
+    // 6. Crear inscripciones mensuales (facturación) - para que el dashboard muestre "Por Cobrar"
+    await seedInscripcionesMensuales(prisma, tutor.id, estudiantesCreados);
+
+    // 7. Mostrar credenciales
     await printCredentials();
 
     console.log('🎉 ¡Seed completado exitosamente!\n');
