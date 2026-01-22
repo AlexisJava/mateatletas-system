@@ -4,7 +4,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bell, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
-import { docentesApi, ComisionResumen, EstudianteConFalta } from '@/lib/api/docentes.api';
+import {
+  docentesApi,
+  ComisionResumen,
+  GrupoResumen,
+  EstudianteConFalta,
+} from '@/lib/api/docentes.api';
 import { toast } from '@/components/ui/Toast';
 import { LoadingSpinner } from '@/components/ui';
 
@@ -100,7 +105,7 @@ export default function DocenteDashboard() {
       setIsLoading(true);
       const response = await docentesApi.getDashboard();
 
-      // Transform API data to component format
+      // Transform misComisiones (cursos, colonias, etc.)
       const transformedComisiones: Comision[] = (response.misComisiones || []).map(
         (c: ComisionResumen) => ({
           id: c.id,
@@ -113,6 +118,22 @@ export default function DocenteDashboard() {
           proximaClase: undefined,
         }),
       );
+
+      // Transform misGrupos (ClaseGrupos con día/hora fija)
+      const transformedGrupos: Comision[] = (response.misGrupos || []).map((g: GrupoResumen) => ({
+        id: g.id,
+        producto: g.nombre || g.codigo || 'Sin nombre',
+        horario:
+          `${g.diaSemana || ''} ${g.horaInicio || ''} - ${g.horaFin || ''}`.trim() || 'Sin horario',
+        casa: 'VERTEX', // Default casa for grupos
+        inscripciones: g.estudiantesActivos || 0,
+        cupoMaximo: g.cupoMaximo || 20,
+        thumbnail: `https://picsum.photos/seed/${g.id}/800/600`,
+        proximaClase: undefined,
+      }));
+
+      // Merge both: grupos primero (tienen horario fijo), luego comisiones
+      const allClases = [...transformedGrupos, ...transformedComisiones];
 
       const transformedStats: DashboardStats = {
         clasesSemana: response.stats?.clasesEstaSemana || 0,
@@ -133,7 +154,7 @@ export default function DocenteDashboard() {
           comisionId: e.id,
         }));
 
-      setComisiones(transformedComisiones);
+      setComisiones(allClases);
       setStats(transformedStats);
       setAlertas(transformedAlertas);
     } catch (error) {

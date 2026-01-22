@@ -13,7 +13,7 @@ import {
 } from './common/filters';
 import { LoggerService } from './common/logger/logger.service';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
-import { CamelCaseResponseInterceptor } from './common/interceptors/camel-case-response.interceptor';
+import { DecimalResponseInterceptor } from './common/interceptors/camel-case-response.interceptor';
 
 /**
  * Extended Express Request interface with rawBody property
@@ -219,13 +219,15 @@ async function bootstrap() {
   // ORDEN IMPORTANTE: Los interceptors se ejecutan en orden de registro
   //
   // RESPONSE FLOW (después del controller):
-  // 1. CamelCaseResponseInterceptor - Transforma snake_case → camelCase
+  // 1. DecimalResponseInterceptor - Convierte Prisma Decimal a números JavaScript
   // 2. TransformResponseInterceptor - Envuelve en formato {data, metadata}
   //
-  // NOTA: No usamos SnakeCaseRequestInterceptor porque los DTOs deben usar camelCase
-  // consistentemente. Los DTOs que aún usan snake_case deben migrarse individualmente.
+  // NOTA: Ya no necesitamos transformar snake_case → camelCase porque:
+  // - Prisma Schema usa @map para mapear camelCase a snake_case en DB
+  // - Prisma Client genera propiedades en camelCase automáticamente
+  // - Los services retornan camelCase nativo
   app.useGlobalInterceptors(
-    new CamelCaseResponseInterceptor(),
+    new DecimalResponseInterceptor(),
     new TransformResponseInterceptor(),
   );
 

@@ -45,7 +45,7 @@ export interface TareaGrupoDto {
   id: string;
   titulo: string;
   descripcion: string;
-  fecha_entrega: string;
+  fechaEntrega: string;
   estado: string;
   estudiantesCompletaron: string[]; // IDs de estudiantes
   estudiantesPendientes: string[]; // IDs de estudiantes

@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import camelcaseKeys from 'camelcase-keys';
 import { Decimal } from '@prisma/client/runtime/library';
 
 /**
@@ -79,33 +78,31 @@ function convertDecimals(data: unknown): unknown {
 }
 
 /**
- * CamelCaseResponseInterceptor
+ * DecimalResponseInterceptor
  *
- * Interceptor global que:
- * 1. Convierte todos los Decimals de Prisma a números JavaScript
- * 2. Transforma todas las keys de snake_case a camelCase
+ * Interceptor global que convierte todos los Decimals de Prisma a números JavaScript.
  *
  * Motivación:
- * - Prisma devuelve Decimal como objeto {s, e, d} que no es parseable en frontend
- * - Prisma (con PostgreSQL) retorna campos en snake_case (nivelEscolar, foto_url, etc.)
- * - El frontend (Next.js/React) espera números y camelCase según convención JavaScript
+ * - Prisma serializa campos Decimal como objeto {s, e, d} que no es parseable en frontend
+ * - El frontend espera números JavaScript nativos
+ *
+ * NOTA: Ya no transforma snake_case → camelCase porque:
+ * - Prisma Schema usa @map para mapear campos camelCase a columnas snake_case
+ * - Prisma Client genera propiedades en camelCase automáticamente
+ * - Los services ya retornan camelCase nativo
  *
  * IMPORTANTE: Este interceptor debe ejecutarse ANTES de TransformResponseInterceptor
  * para que los datos se transformen antes de ser envueltos en el formato estándar {data, metadata}.
  *
- * Orden de ejecución en main.ts:
- * 1. CamelCaseResponseInterceptor - Convierte Decimals + Transforma snake_case → camelCase
- * 2. TransformResponseInterceptor - Envuelve en {data, metadata}
- *
  * @example
  * // Antes del interceptor (de Prisma):
- * { id: '123', nivelEscolar: 'PRIMARIA', precio: { s: 1, e: 4, d: [15000] } }
+ * { id: '123', precio: { s: 1, e: 4, d: [15000] } }
  *
  * // Después del interceptor:
- * { id: '123', nivelEscolar: 'PRIMARIA', precio: 15000 }
+ * { id: '123', precio: 15000 }
  */
 @Injectable()
-export class CamelCaseResponseInterceptor implements NestInterceptor {
+export class DecimalResponseInterceptor implements NestInterceptor {
   intercept(
     _context: ExecutionContext,
     next: CallHandler,
@@ -122,14 +119,15 @@ export class CamelCaseResponseInterceptor implements NestInterceptor {
           return data as string | number | boolean;
         }
 
-        // 1. Convertir Decimals de Prisma a números
-        const withConvertedDecimals = convertDecimals(data);
-
-        // 2. Transformar recursivamente todas las keys a camelCase
-        return camelcaseKeys(withConvertedDecimals as Record<string, unknown>, {
-          deep: true,
-        });
+        // Convertir Decimals de Prisma a números
+        return convertDecimals(data);
       }),
     );
   }
 }
+
+/**
+ * @deprecated Use DecimalResponseInterceptor instead
+ * Alias mantenido para compatibilidad durante migración
+ */
+export const CamelCaseResponseInterceptor = DecimalResponseInterceptor;
