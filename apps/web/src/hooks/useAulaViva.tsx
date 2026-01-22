@@ -23,6 +23,8 @@ import type {
   TipoReaccion,
   PulsoCreadoEvent,
   PulsoStats,
+  EstudianteSeleccionadoEvent,
+  SelectorReseteadoEvent,
 } from '@mateatletas/contracts';
 
 // ============================================================================
@@ -51,6 +53,10 @@ interface AulaVivaState {
   reaccionesRecientes: ReaccionAgregada[];
   /** Pulso activo (encuesta rápida) */
   pulsoActivo: PulsoStats | null;
+  /** Último estudiante seleccionado aleatoriamente */
+  estudianteSeleccionado: EstudianteSeleccionadoEvent | null;
+  /** Ronda actual del selector */
+  selectorRonda: number;
 }
 
 interface AulaVivaContextValue extends AulaVivaState {
@@ -97,6 +103,8 @@ export function AulaVivaProvider({
     motivoExpulsion: null,
     reaccionesRecientes: [],
     pulsoActivo: null,
+    estudianteSeleccionado: null,
+    selectorRonda: 1,
   });
 
   const socketRef = useRef<Socket | null>(null);
@@ -361,6 +369,22 @@ export function AulaVivaProvider({
           pulsoActivo: { ...data, activo: false },
         }));
       });
+
+      // --- Selector Aleatorio Events ---
+      socket.on('estudiante-seleccionado', (data: EstudianteSeleccionadoEvent) => {
+        setState((prev) => ({
+          ...prev,
+          estudianteSeleccionado: data,
+        }));
+      });
+
+      socket.on('selector-reseteado', (data: SelectorReseteadoEvent) => {
+        setState((prev) => ({
+          ...prev,
+          estudianteSeleccionado: null,
+          selectorRonda: data.ronda,
+        }));
+      });
     } catch (err) {
       setState((prev) => ({
         ...prev,
@@ -393,6 +417,8 @@ export function AulaVivaProvider({
       motivoExpulsion: null,
       reaccionesRecientes: [],
       pulsoActivo: null,
+      estudianteSeleccionado: null,
+      selectorRonda: 1,
     });
   }, []);
 
@@ -718,5 +744,41 @@ export function useAulaVivaPulso() {
     crearPulso,
     responderPulso,
     cerrarPulso,
+  };
+}
+
+/**
+ * Hook para selector aleatorio de estudiantes
+ * Solo el docente puede seleccionar/resetear
+ * Selección justa: evita repetir hasta que todos hayan sido seleccionados
+ */
+export function useAulaVivaSelector() {
+  const { socket, salaId, estudianteSeleccionado, selectorRonda } = useAulaViva();
+
+  const seleccionarAleatorio = useCallback(() => {
+    if (!socket?.connected || !salaId) {
+      return Promise.resolve({ exito: false, error: 'No conectado' });
+    }
+
+    return new Promise<{ exito: boolean; error?: string }>((resolve) => {
+      socket.emit('seleccionar-aleatorio', { salaId }, resolve);
+    });
+  }, [socket, salaId]);
+
+  const resetearSelector = useCallback(() => {
+    if (!socket?.connected || !salaId) {
+      return Promise.resolve({ exito: false, error: 'No conectado' });
+    }
+
+    return new Promise<{ exito: boolean; error?: string }>((resolve) => {
+      socket.emit('resetear-selector', { salaId }, resolve);
+    });
+  }, [socket, salaId]);
+
+  return {
+    estudianteSeleccionado,
+    selectorRonda,
+    seleccionarAleatorio,
+    resetearSelector,
   };
 }

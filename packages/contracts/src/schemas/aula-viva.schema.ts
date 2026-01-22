@@ -207,6 +207,50 @@ export type ResponderPulsoPayload = z.infer<typeof responderPulsoPayloadSchema>;
 export type CerrarPulsoPayload = z.infer<typeof cerrarPulsoPayloadSchema>;
 
 // ----------------------------------------------------------------------------
+// SELECTOR ALEATORIO
+// ----------------------------------------------------------------------------
+
+/**
+ * Estudiante seleccionado aleatoriamente
+ * Emitido cuando el docente usa el selector
+ */
+export const estudianteSeleccionadoEventSchema = z.object({
+  odooId: z.string(),
+  nombre: z.string(),
+  timestamp: z.string().datetime(),
+  /** Cuántos estudiantes quedan por seleccionar en esta ronda */
+  restantes: z.number().int().nonnegative(),
+  /** Si se completó la ronda (todos fueron seleccionados) */
+  rondaCompletada: z.boolean(),
+});
+
+export type EstudianteSeleccionadoEvent = z.infer<typeof estudianteSeleccionadoEventSchema>;
+
+/**
+ * Selector reseteado
+ * Emitido cuando el docente reinicia la ronda
+ */
+export const selectorReseteadoEventSchema = z.object({
+  ronda: z.number().int().positive(),
+});
+
+export type SelectorReseteadoEvent = z.infer<typeof selectorReseteadoEventSchema>;
+
+/**
+ * Payloads para operaciones del selector
+ */
+export const seleccionarAleatorioPayloadSchema = z.object({
+  salaId: z.string().min(1),
+});
+
+export const resetearSelectorPayloadSchema = z.object({
+  salaId: z.string().min(1),
+});
+
+export type SeleccionarAleatorioPayload = z.infer<typeof seleccionarAleatorioPayloadSchema>;
+export type ResetearSelectorPayload = z.infer<typeof resetearSelectorPayloadSchema>;
+
+// ----------------------------------------------------------------------------
 // CHAT
 // ----------------------------------------------------------------------------
 

@@ -18,6 +18,7 @@ import { ManosService } from './services/manos.service';
 import { ModeracionService, TipoMuteo } from './services/moderacion.service';
 import { ReaccionesService } from './services/reacciones.service';
 import { PulsoService } from './services/pulso.service';
+import { SelectorService } from './services/selector.service';
 import {
   UnirseSalaDto,
   SalirSalaDto,
@@ -36,6 +37,8 @@ import {
   CrearPulsoDto,
   ResponderPulsoDto,
   CerrarPulsoDto,
+  SeleccionarAleatorioDto,
+  ResetearSelectorDto,
 } from './dto';
 import { randomUUID } from 'crypto';
 
@@ -107,6 +110,7 @@ export class AulaVivaGateway
     private readonly moderacionService: ModeracionService,
     private readonly reaccionesService: ReaccionesService,
     private readonly pulsoService: PulsoService,
+    private readonly selectorService: SelectorService,
   ) {}
 
   afterInit(server: Server): void {
@@ -957,6 +961,114 @@ export class AulaVivaGateway
 
     this.logger.log(
       `Pulso cerrado en sala ${salaId} por ${client.data.nombre}`,
+    );
+
+    return { exito: true };
+  }
+
+  // ============================================================================
+  // HANDLERS: SELECTOR ALEATORIO
+  // ============================================================================
+
+  /**
+   * Permite al docente seleccionar un estudiante aleatorio
+   * Selección justa: evita repetir hasta que todos hayan sido seleccionados
+   *
+   * Evento emitido: estudiante-seleccionado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('seleccionar-aleatorio')
+  handleSeleccionarAleatorio(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: SeleccionarAleatorioDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId } = payload;
+
+    // Solo docentes pueden usar el selector
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo el docente puede usar el selector' };
+    }
+
+    // Verificar que el docente está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Obtener estudiantes conectados (excluir docentes)
+    const participantes = this.presenciaService.getParticipantesDeSala(salaId);
+    const estudiantes = participantes
+      .filter((p: Participante) => p.rol === 'ESTUDIANTE')
+      .map((p: Participante) => ({
+        odooId: p.odidentidadUsuario,
+        nombre: p.nombre,
+      }));
+
+    // Seleccionar aleatorio
+    const result = this.selectorService.seleccionarAleatorio(
+      salaId,
+      estudiantes,
+    );
+
+    if (!result.exito) {
+      return { exito: false, error: result.error };
+    }
+
+    // Broadcast a toda la sala
+    this.server.to(salaId).emit('estudiante-seleccionado', {
+      odooId: result.seleccionado?.odooId,
+      nombre: result.seleccionado?.nombre,
+      timestamp: result.seleccionado?.timestamp,
+      restantes: result.restantes,
+      rondaCompletada: result.rondaCompletada,
+    });
+
+    this.logger.log(
+      `Estudiante seleccionado en sala ${salaId}: ${result.seleccionado?.nombre}`,
+    );
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente resetear el selector (nueva ronda)
+   *
+   * Evento emitido: selector-reseteado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('resetear-selector')
+  handleResetearSelector(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: ResetearSelectorDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId } = payload;
+
+    // Solo docentes pueden resetear
+    if (client.data.rol !== 'DOCENTE') {
+      return {
+        exito: false,
+        error: 'Solo el docente puede resetear el selector',
+      };
+    }
+
+    // Verificar que el docente está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Resetear selector
+    const result = this.selectorService.resetearSelector(salaId);
+
+    if (!result.exito) {
+      return { exito: false, error: result.error };
+    }
+
+    // Broadcast a toda la sala
+    this.server.to(salaId).emit('selector-reseteado', {
+      ronda: result.ronda,
+    });
+
+    this.logger.log(
+      `Selector reseteado en sala ${salaId}, ronda ${result.ronda}`,
     );
 
     return { exito: true };
