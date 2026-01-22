@@ -17,6 +17,7 @@ import { PresenciaService, Participante } from './services/presencia.service';
 import { ManosService } from './services/manos.service';
 import { ModeracionService, TipoMuteo } from './services/moderacion.service';
 import { ReaccionesService } from './services/reacciones.service';
+import { PulsoService } from './services/pulso.service';
 import {
   UnirseSalaDto,
   SalirSalaDto,
@@ -32,6 +33,9 @@ import {
   ExpulsarParticipanteDto,
   HablandoDto,
   EnviarReaccionDto,
+  CrearPulsoDto,
+  ResponderPulsoDto,
+  CerrarPulsoDto,
 } from './dto';
 import { randomUUID } from 'crypto';
 
@@ -102,6 +106,7 @@ export class AulaVivaGateway
     private readonly manosService: ManosService,
     private readonly moderacionService: ModeracionService,
     private readonly reaccionesService: ReaccionesService,
+    private readonly pulsoService: PulsoService,
   ) {}
 
   afterInit(server: Server): void {
@@ -815,6 +820,144 @@ export class AulaVivaGateway
 
     // Broadcast la reacción agregada a toda la sala
     this.server.to(salaId).emit('reaccion', result.reaccion);
+
+    return { exito: true };
+  }
+
+  // ============================================================================
+  // HANDLERS: PULSO DE ATENCIÓN (ENCUESTAS RÁPIDAS)
+  // ============================================================================
+
+  /**
+   * Permite al docente crear un pulso/encuesta rápida
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   *
+   * Evento emitido: pulso-creado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('crear-pulso')
+  handleCrearPulso(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: CrearPulsoDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId, pregunta, opciones } = payload;
+
+    // Solo docentes pueden crear pulsos
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo el docente puede crear pulsos' };
+    }
+
+    // Verificar que el docente está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Crear el pulso
+    const result = this.pulsoService.crearPulso(
+      salaId,
+      client.data.userId,
+      pregunta,
+      opciones,
+    );
+
+    if (!result.exito) {
+      return { exito: false, error: result.error };
+    }
+
+    // Broadcast a toda la sala
+    this.server.to(salaId).emit('pulso-creado', result.pulso);
+
+    this.logger.log(`Pulso creado en sala ${salaId} por ${client.data.nombre}`);
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite a un estudiante responder a un pulso activo
+   * Solo usuarios con rol ESTUDIANTE pueden usar este evento
+   *
+   * Evento emitido: pulso-actualizado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('responder-pulso')
+  handleResponderPulso(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: ResponderPulsoDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId, pulsoId, opcionIndex } = payload;
+
+    // Solo estudiantes pueden responder
+    if (client.data.rol !== 'ESTUDIANTE') {
+      return {
+        exito: false,
+        error: 'Solo estudiantes pueden responder pulsos',
+      };
+    }
+
+    // Verificar que el estudiante está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Responder al pulso
+    const result = this.pulsoService.responderPulso(
+      salaId,
+      pulsoId,
+      client.data.userId,
+      opcionIndex,
+    );
+
+    if (!result.exito) {
+      return { exito: false, error: result.error };
+    }
+
+    // Broadcast estadísticas actualizadas a toda la sala
+    this.server.to(salaId).emit('pulso-actualizado', result.stats);
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente cerrar un pulso activo
+   * Solo el docente que creó el pulso puede cerrarlo
+   *
+   * Evento emitido: pulso-cerrado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('cerrar-pulso')
+  handleCerrarPulso(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: CerrarPulsoDto,
+  ): { exito: boolean; error?: string } {
+    const { salaId, pulsoId } = payload;
+
+    // Solo docentes pueden cerrar pulsos
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo el docente puede cerrar pulsos' };
+    }
+
+    // Verificar que el docente está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Cerrar el pulso
+    const result = this.pulsoService.cerrarPulso(
+      salaId,
+      pulsoId,
+      client.data.userId,
+    );
+
+    if (!result.exito) {
+      return { exito: false, error: result.error };
+    }
+
+    // Broadcast resultados finales a toda la sala
+    this.server.to(salaId).emit('pulso-cerrado', result.resultadosFinales);
+
+    this.logger.log(
+      `Pulso cerrado en sala ${salaId} por ${client.data.nombre}`,
+    );
 
     return { exito: true };
   }

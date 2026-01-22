@@ -21,6 +21,8 @@ import type {
   ChatToggleEvent,
   ReaccionAgregada,
   TipoReaccion,
+  PulsoCreadoEvent,
+  PulsoStats,
 } from '@mateatletas/contracts';
 
 // ============================================================================
@@ -47,6 +49,8 @@ interface AulaVivaState {
   motivoExpulsion: string | null;
   /** Reacciones recientes (últimos 5 segundos por tipo) */
   reaccionesRecientes: ReaccionAgregada[];
+  /** Pulso activo (encuesta rápida) */
+  pulsoActivo: PulsoStats | null;
 }
 
 interface AulaVivaContextValue extends AulaVivaState {
@@ -92,6 +96,7 @@ export function AulaVivaProvider({
     expulsado: false,
     motivoExpulsion: null,
     reaccionesRecientes: [],
+    pulsoActivo: null,
   });
 
   const socketRef = useRef<Socket | null>(null);
@@ -326,6 +331,36 @@ export function AulaVivaProvider({
           return { ...prev, reaccionesRecientes: newReacciones };
         });
       });
+
+      // --- Pulso Events ---
+      socket.on('pulso-creado', (data: PulsoCreadoEvent) => {
+        setState((prev) => ({
+          ...prev,
+          pulsoActivo: {
+            id: data.id,
+            pregunta: data.pregunta,
+            opciones: data.opciones,
+            activo: true,
+            conteos: new Array(data.opciones.length).fill(0),
+            totalRespuestas: 0,
+            porcentajes: new Array(data.opciones.length).fill(0),
+          },
+        }));
+      });
+
+      socket.on('pulso-actualizado', (data: PulsoStats) => {
+        setState((prev) => ({
+          ...prev,
+          pulsoActivo: data,
+        }));
+      });
+
+      socket.on('pulso-cerrado', (data: PulsoStats) => {
+        setState((prev) => ({
+          ...prev,
+          pulsoActivo: { ...data, activo: false },
+        }));
+      });
     } catch (err) {
       setState((prev) => ({
         ...prev,
@@ -357,6 +392,7 @@ export function AulaVivaProvider({
       expulsado: false,
       motivoExpulsion: null,
       reaccionesRecientes: [],
+      pulsoActivo: null,
     });
   }, []);
 
@@ -627,5 +663,60 @@ export function useAulaVivaReacciones() {
   return {
     reaccionesRecientes,
     enviarReaccion,
+  };
+}
+
+/**
+ * Hook para pulsos de atención (encuestas rápidas)
+ * Solo el docente puede crear/cerrar pulsos
+ * Los estudiantes pueden responder
+ */
+export function useAulaVivaPulso() {
+  const { socket, salaId, pulsoActivo } = useAulaViva();
+
+  const crearPulso = useCallback(
+    (pregunta: string, opciones: string[]) => {
+      if (!socket?.connected || !salaId) {
+        return Promise.resolve({ exito: false, error: 'No conectado' });
+      }
+
+      return new Promise<{ exito: boolean; error?: string }>((resolve) => {
+        socket.emit('crear-pulso', { salaId, pregunta, opciones }, resolve);
+      });
+    },
+    [socket, salaId],
+  );
+
+  const responderPulso = useCallback(
+    (pulsoId: string, opcionIndex: number) => {
+      if (!socket?.connected || !salaId) {
+        return Promise.resolve({ exito: false, error: 'No conectado' });
+      }
+
+      return new Promise<{ exito: boolean; error?: string }>((resolve) => {
+        socket.emit('responder-pulso', { salaId, pulsoId, opcionIndex }, resolve);
+      });
+    },
+    [socket, salaId],
+  );
+
+  const cerrarPulso = useCallback(
+    (pulsoId: string) => {
+      if (!socket?.connected || !salaId) {
+        return Promise.resolve({ exito: false, error: 'No conectado' });
+      }
+
+      return new Promise<{ exito: boolean; error?: string }>((resolve) => {
+        socket.emit('cerrar-pulso', { salaId, pulsoId }, resolve);
+      });
+    },
+    [socket, salaId],
+  );
+
+  return {
+    pulsoActivo,
+    crearPulso,
+    responderPulso,
+    cerrarPulso,
   };
 }

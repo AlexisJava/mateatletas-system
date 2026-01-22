@@ -6,6 +6,7 @@ import { PresenciaService } from './services/presencia.service';
 import { ManosService } from './services/manos.service';
 import { ModeracionService } from './services/moderacion.service';
 import { ReaccionesService } from './services/reacciones.service';
+import { PulsoService } from './services/pulso.service';
 
 /**
  * Módulo de Aula Virtual en Vivo
@@ -29,12 +30,14 @@ import { ReaccionesService } from './services/reacciones.service';
     ManosService,
     ModeracionService,
     ReaccionesService,
+    PulsoService,
   ],
   exports: [
     PresenciaService,
     ManosService,
     ModeracionService,
     ReaccionesService,
+    PulsoService,
   ],
 })
 export class AulaVivaModule {}

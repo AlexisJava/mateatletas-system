@@ -151,6 +151,62 @@ export const enviarReaccionPayloadSchema = z.object({
 export type EnviarReaccionPayload = z.infer<typeof enviarReaccionPayloadSchema>;
 
 // ----------------------------------------------------------------------------
+// PULSO DE ATENCIÓN (ENCUESTAS RÁPIDAS)
+// ----------------------------------------------------------------------------
+
+/**
+ * Pulso creado por el docente
+ * Emitido cuando se crea un nuevo pulso
+ */
+export const pulsoCreadoEventSchema = z.object({
+  id: z.string(),
+  pregunta: z.string(),
+  opciones: z.array(z.string()),
+});
+
+export type PulsoCreadoEvent = z.infer<typeof pulsoCreadoEventSchema>;
+
+/**
+ * Estadísticas actualizadas de un pulso
+ * Emitido cuando hay nuevas respuestas
+ */
+export const pulsoStatsSchema = z.object({
+  id: z.string(),
+  pregunta: z.string(),
+  opciones: z.array(z.string()),
+  activo: z.boolean(),
+  conteos: z.array(z.number().int().nonnegative()),
+  totalRespuestas: z.number().int().nonnegative(),
+  porcentajes: z.array(z.number().int().min(0).max(100)),
+});
+
+export type PulsoStats = z.infer<typeof pulsoStatsSchema>;
+
+/**
+ * Payloads para operaciones de pulso
+ */
+export const crearPulsoPayloadSchema = z.object({
+  salaId: z.string().min(1),
+  pregunta: z.string().min(1).max(200),
+  opciones: z.array(z.string().min(1).max(100)).min(2).max(6),
+});
+
+export const responderPulsoPayloadSchema = z.object({
+  salaId: z.string().min(1),
+  pulsoId: z.string().min(1),
+  opcionIndex: z.number().int().nonnegative(),
+});
+
+export const cerrarPulsoPayloadSchema = z.object({
+  salaId: z.string().min(1),
+  pulsoId: z.string().min(1),
+});
+
+export type CrearPulsoPayload = z.infer<typeof crearPulsoPayloadSchema>;
+export type ResponderPulsoPayload = z.infer<typeof responderPulsoPayloadSchema>;
+export type CerrarPulsoPayload = z.infer<typeof cerrarPulsoPayloadSchema>;
+
+// ----------------------------------------------------------------------------
 // CHAT
 // ----------------------------------------------------------------------------
 

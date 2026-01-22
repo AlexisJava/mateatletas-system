@@ -12,3 +12,4 @@ export {
 } from './moderacion.dto';
 export { HablandoDto } from './hablando.dto';
 export { EnviarReaccionDto } from './reacciones.dto';
+export { CrearPulsoDto, ResponderPulsoDto, CerrarPulsoDto } from './pulso.dto';
