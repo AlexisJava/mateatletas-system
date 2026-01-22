@@ -254,6 +254,157 @@ Para saltear en emergencias (NO recomendado): `git commit --no-verify`
 
 ---
 
+## CONVENCIÓN DE NAMING (Enero 2026)
+
+> **REGLA DE ORO:** Una sola convención en todo el código TypeScript/JavaScript: **camelCase**
+
+### Arquitectura Actual
+
+| Capa                  | Convención         | Ejemplo                                      |
+| --------------------- | ------------------ | -------------------------------------------- |
+| PostgreSQL (columnas) | snake_case         | `dia_semana`, `hora_inicio`                  |
+| Prisma Schema         | camelCase + `@map` | `diaSemana @map("dia_semana")`               |
+| Prisma Client         | camelCase nativo   | `claseGrupo.diaSemana`                       |
+| Backend Services      | camelCase          | `{ diaSemana: 'LUNES' }`                     |
+| API Response          | camelCase          | `{ "diaSemana": "LUNES" }`                   |
+| Frontend Types        | camelCase          | `interface ClaseGrupo { diaSemana: string }` |
+
+### Cómo Agregar Nuevos Campos
+
+**1. En Prisma Schema:**
+
+```prisma
+model ClaseGrupo {
+  // Siempre camelCase + @map a snake_case
+  campoNuevo    String   @map("campo_nuevo")
+  fechaCreacion DateTime @map("fecha_creacion")
+}
+```
+
+**2. Regenerar cliente:**
+
+```bash
+cd apps/api && npx prisma generate
+```
+
+**3. Usar en código:**
+
+```typescript
+// Backend - acceso directo en camelCase
+const grupo = await this.prisma.claseGrupo.findFirst();
+console.log(grupo.campoNuevo); // ✅ camelCase
+
+// Frontend - tipos coinciden exactamente
+interface ClaseGrupo {
+  campoNuevo: string; // ✅ Mismo nombre que backend
+}
+```
+
+### Campos Semánticamente Diferentes (NO son inconsistencias)
+
+| Campo           | Contexto           | Uso                               |
+| --------------- | ------------------ | --------------------------------- |
+| `xpTotal`       | RecursosEstudiante | XP individual del estudiante      |
+| `puntosTotales` | Casa/Equipo        | Suma agregada de puntos del grupo |
+
+### El Interceptor Solo Maneja Decimals
+
+```typescript
+// DecimalResponseInterceptor convierte:
+// Prisma Decimal { s: 1, e: 2, d: [15000] } → JavaScript number 15000
+// NO hace transformación de naming (ya no es necesario)
+```
+
+### PROHIBIDO
+
+- ❌ Crear campos sin `@map()` en Prisma
+- ❌ Usar snake_case en código TypeScript
+- ❌ Transformar manualmente en frontend (`data.dia_semana || data.diaSemana`)
+- ❌ Fallbacks innecesarios por "compatibilidad"
+
+---
+
+## PREVENCIÓN DE BUGS COMUNES
+
+### 1. Errores de Integración Frontend ↔ Backend
+
+| Error                   | Causa Común                | Prevención                          |
+| ----------------------- | -------------------------- | ----------------------------------- |
+| `undefined` en frontend | Campo con nombre diferente | Verificar que Prisma tiene `@map()` |
+| 400 Bad Request         | Tipo de dato incorrecto    | Usar Zod en ambos lados             |
+| 401 después de rato     | Token expirado sin refresh | Interceptor con refresh automático  |
+| CORS errors             | Origen no permitido        | Configurar `cors` en `main.ts`      |
+
+### 2. Reglas ESLint Recomendadas
+
+```javascript
+// eslint.config.mjs - Reglas que previenen bugs
+{
+  '@typescript-eslint/no-explicit-any': 'error',
+  '@typescript-eslint/no-unused-vars': 'error',
+  '@typescript-eslint/strict-boolean-expressions': 'warn',
+  '@typescript-eslint/no-floating-promises': 'error',
+  'no-console': ['warn', { allow: ['warn', 'error'] }],
+}
+```
+
+### 3. Patrones de Error Handling
+
+```typescript
+// ✅ CORRECTO - Error handling explícito
+try {
+  const data = await api.getData();
+  return data;
+} catch (error) {
+  if (error instanceof AxiosError) {
+    if (error.response?.status === 401) {
+      // Manejar auth
+    }
+    throw new ApiError(error.response?.data?.message || 'Error desconocido');
+  }
+  throw error;
+}
+
+// ❌ INCORRECTO - Silenciar errores
+try {
+  const data = await api.getData();
+  return data;
+} catch {
+  return null; // Bug silencioso
+}
+```
+
+### 4. Validación en Boundaries
+
+```typescript
+// ✅ Validar en entrada del sistema (API endpoints)
+@Post()
+async create(@Body() dto: CreateEstudianteDto) {
+  // dto ya validado por class-validator
+}
+
+// ✅ Validar en salida hacia usuario (frontend)
+const parsed = estudianteSchema.safeParse(response.data);
+if (!parsed.success) {
+  console.error('Response inválido:', parsed.error);
+}
+
+// ❌ NO validar en cada función interna (over-engineering)
+```
+
+### 5. Checklist Pre-Commit
+
+Antes de commitear, verificar:
+
+- [ ] `yarn build` pasa sin errores
+- [ ] `yarn lint` pasa sin warnings
+- [ ] Nuevos campos Prisma tienen `@map()`
+- [ ] Types del frontend coinciden con response del backend
+- [ ] No hay `console.log` en código de producción
+- [ ] No hay `any` sin justificación documentada
+
+---
+
 ## ESTRUCTURA DEL PROYECTO
 
 ```
@@ -823,43 +974,13 @@ console.log(`[DEBUG] ${controller}.${handler}`);
 
 Si el controller/handler es diferente al esperado, hay conflicto de rutas.
 
-### Datos del backend no se muestran en el frontend (snake_case vs camelCase)
+### Datos del backend no se muestran en el frontend
 
-**Síntoma:** El backend retorna datos correctamente (verificado en Network tab), pero el frontend no los muestra o muestra campos vacíos/undefined.
+> **NOTA (Enero 2026):** Este problema ya fue resuelto con la migración a camelCase nativo.
+> Ver sección "CONVENCIÓN DE NAMING" para la arquitectura actual.
 
-**Causa común:** El backend (Prisma) retorna campos en **snake_case** (`dia_semana`, `hora_inicio`, `cupo_maximo`), pero los tipos del frontend esperan **camelCase** (`diaSemana`, `horaInicio`, `cupoMaximo`).
-
-**Diagnóstico:**
-
-1. Abrir Network tab en DevTools
-2. Ver el response JSON del endpoint
-3. Comparar nombres de campos con los tipos TypeScript del frontend
-4. Si no coinciden → problema de transformación
-
-**Solución:** Agregar función de transformación en el API client del frontend:
-
-```typescript
-// apps/web/src/lib/api/ejemplo.api.ts
-function transformEntity(raw: Record<string, unknown>): MiEntidad {
-  return {
-    id: raw.id as string,
-    diaSemana: (raw.dia_semana || raw.diaSemana) as string, // Acepta ambos
-    horaInicio: (raw.hora_inicio || raw.horaInicio) as string,
-    // ... mapear todos los campos snake_case a camelCase
-  };
-}
-
-// Aplicar en la función que consume el endpoint:
-const rawData = response.data || [];
-const entities = rawData.map(transformEntity);
-```
-
-**Referencia:** Ver `apps/web/src/lib/api/clase-grupos.api.ts` → `transformClaseGrupo()`
-
-**Prevención:** Al crear nuevos endpoints, decidir una convención y mantenerla:
-
-- Backend retorna snake_case (Prisma default) → Frontend transforma
-- O usar `@ApiProperty()` con transformación en NestJS
+**Si ves este problema ahora**, probablemente es un campo nuevo que no sigue la convención.
+Verificar que el campo en Prisma schema tenga `@map("snake_case_column")`.
 
 ---
 
