@@ -68,20 +68,15 @@ export interface EstudianteAdmin {
   apellido: string;
   edad: number;
   nivelEscolar?: string;
-  nivelActual: string | null;
-  puntosTotales?: number;
-  xpTotal?: number;
+  nivelActual: number | null;
+  xpTotal: number;
   tutor: {
     id: string;
     nombre: string;
     apellido: string;
     email: string;
   } | null;
-  equipo?: {
-    nombre: string;
-    colorPrimario: string;
-  } | null;
-  casa?: {
+  casa: {
     nombre: string;
     colorPrimary: string;
   } | null;
@@ -111,7 +106,6 @@ export interface DocenteAdmin {
   email: string;
   telefono?: string | null;
   titulo?: string | null;
-  tituloProfesional?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

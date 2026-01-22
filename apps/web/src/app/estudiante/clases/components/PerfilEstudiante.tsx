@@ -16,7 +16,7 @@ interface PerfilEstudianteProps {
 
 export function PerfilEstudiante({ user }: PerfilEstudianteProps) {
   const nivel = user?.nivelActual ?? 1;
-  const xp = user?.puntosTotales ?? 0;
+  const xp = user?.xpTotal ?? 0;
   const xpParaSiguiente = nivel * 100;
   const progreso = Math.min((xp / xpParaSiguiente) * 100, 100);
 

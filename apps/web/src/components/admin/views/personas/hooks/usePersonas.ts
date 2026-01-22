@@ -106,7 +106,7 @@ async function fetchAllPersonas(): Promise<AdminPerson[]> {
       status: 'active',
       createdAt: est.createdAt,
       casa: est.casa?.nombre ?? est.equipo?.nombre,
-      puntos: est.xpTotal ?? est.puntosTotales ?? 0,
+      puntos: est.xpTotal ?? 0,
       edad: est.edad,
       nivelEscolar: est.nivelEscolar ?? est.nivelEscolar,
       planNombre: est.plan?.nombre ?? undefined,

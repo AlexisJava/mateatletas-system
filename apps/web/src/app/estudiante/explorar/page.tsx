@@ -24,7 +24,7 @@ interface Categoria {
   gradiente: string;
   bgSidebar: string;
   descripcion: string;
-  colorPrimario: string;
+  colorPrimary: string;
   mundoNombre: string;
 }
 
@@ -38,7 +38,7 @@ const CATEGORIAS_BASE: Categoria[] = [
     gradiente: 'from-blue-500 to-blue-700',
     bgSidebar: 'bg-blue-600',
     descripcion: 'Números, álgebra, geometría y más',
-    colorPrimario: '#3b82f6',
+    colorPrimary: '#3b82f6',
     mundoNombre: 'MUNDO MATEMÁTICA',
   },
   {
@@ -49,7 +49,7 @@ const CATEGORIAS_BASE: Categoria[] = [
     gradiente: 'from-green-500 to-emerald-600',
     bgSidebar: 'bg-green-600',
     descripcion: 'Lógica, Scratch, Python y más',
-    colorPrimario: 'var(--color-correct)',
+    colorPrimary: 'var(--color-correct)',
     mundoNombre: 'MUNDO PROGRAMACIÓN',
   },
   {
@@ -60,7 +60,7 @@ const CATEGORIAS_BASE: Categoria[] = [
     gradiente: 'from-purple-500 to-violet-600',
     bgSidebar: 'bg-purple-600',
     descripcion: 'Universo, biología, química y más',
-    colorPrimario: '#a855f7',
+    colorPrimary: '#a855f7',
     mundoNombre: 'MUNDO CIENCIAS',
   },
 ];
@@ -235,7 +235,7 @@ export default function ExplorarPage() {
 
     // Crear partículas decorativas
     setTimeout(() => {
-      createFloatingParticles(categoria.colorPrimario);
+      createFloatingParticles(categoria.colorPrimary);
     }, 600);
 
     // Después de mostrar el título, hacer la transición hacia el sidebar
@@ -342,7 +342,7 @@ export default function ExplorarPage() {
         className="fixed inset-0 z-50 items-center justify-center hidden"
         style={{
           background: selectedCategoria
-            ? `radial-gradient(circle at center, ${selectedCategoria.colorPrimario}40 0%, #030014 70%)`
+            ? `radial-gradient(circle at center, ${selectedCategoria.colorPrimary}40 0%, #030014 70%)`
             : '#030014',
         }}
       >
@@ -364,7 +364,7 @@ export default function ExplorarPage() {
                 style={{
                   opacity: 0,
                   color: letter === ' ' ? 'transparent' : 'white',
-                  textShadow: `0 0 20px ${selectedCategoria?.colorPrimario}, 0 0 40px ${selectedCategoria?.colorPrimario}50`,
+                  textShadow: `0 0 20px ${selectedCategoria?.colorPrimary}, 0 0 40px ${selectedCategoria?.colorPrimary}50`,
                   minWidth: letter === ' ' ? '0.5em' : 'auto',
                 }}
               >
@@ -377,7 +377,7 @@ export default function ExplorarPage() {
           <div
             className="mt-6 h-1 rounded-full"
             style={{
-              background: `linear-gradient(90deg, transparent, ${selectedCategoria?.colorPrimario}, transparent)`,
+              background: `linear-gradient(90deg, transparent, ${selectedCategoria?.colorPrimary}, transparent)`,
               width: '200px',
             }}
           />

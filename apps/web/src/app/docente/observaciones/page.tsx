@@ -228,7 +228,7 @@ export default function DocenteObservacionesPage() {
                   <div className="space-y-1">
                     <div className="flex items-center justify-center gap-1 text-xs">
                       <Star className="w-4 h-4 text-yellow-300" />
-                      <span className="text-white font-semibold">{est.puntosTotales} pts</span>
+                      <span className="text-white font-semibold">{est.xpTotal} pts</span>
                     </div>
                     <div className="flex items-center justify-center gap-1 text-xs">
                       <CheckCircle className="w-4 h-4 text-green-300" />
@@ -378,7 +378,7 @@ export default function DocenteObservacionesPage() {
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className="bg-purple-600 text-white px-3 py-1 rounded-full font-black text-sm">
-                          {grupo.puntosTotales} pts
+                          {grupo.xpTotal} pts
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">

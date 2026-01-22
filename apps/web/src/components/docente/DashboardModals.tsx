@@ -73,7 +73,7 @@ export const DashboardModal: React.FC<DashboardModalProps> = ({ type, onClose })
         nombre: e.nombre,
         apellido: e.apellido,
         fotoUrl: e.fotoUrl,
-        xpTotal: e.puntosTotales,
+        xpTotal: e.xpTotal,
         porcentajeAsistencia: e.porcentajeAsistencia,
       }));
       setTopStudents(mapped);

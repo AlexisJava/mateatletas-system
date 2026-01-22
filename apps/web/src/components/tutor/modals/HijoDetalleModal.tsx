@@ -82,7 +82,7 @@ export function HijoDetalleModal({ hijo, onClose }: HijoDetalleModalProps) {
             <StatBox
               icon={Star}
               label="Puntos"
-              value={hijo.puntosTotales.toString()}
+              value={hijo.xpTotal.toString()}
               color="text-amber-400"
               bgColor="bg-amber-500/10"
             />

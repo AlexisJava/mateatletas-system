@@ -260,7 +260,7 @@ export interface EstudianteComision {
     id: string;
     tipo: string;
     nombre: string;
-    colorPrimario: string;
+    colorPrimary: string;
   } | null;
   stats: {
     xpTotal: number;

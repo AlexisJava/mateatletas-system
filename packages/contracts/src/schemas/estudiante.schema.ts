@@ -24,7 +24,7 @@ export const estudianteSchema = z.object({
   tutorId: z.string(),
   sectorId: z.string().nullable().optional(),
   equipoId: z.string().nullable().optional(),
-  puntosTotales: z.number().int().nonnegative().default(0),
+  xpTotal: z.number().int().nonnegative().default(0),
   nivelActual: z.number().int().positive().default(1),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -33,8 +33,8 @@ export const estudianteSchema = z.object({
     .object({
       id: z.string(),
       nombre: z.string(),
-      colorPrimario: z.string(),
-      colorSecundario: z.string(),
+      colorPrimary: z.string(),
+      colorSecundary: z.string(),
       iconoUrl: z.string().nullable().optional(),
       puntosTotales: z.number(),
     })

@@ -108,7 +108,7 @@ export function CarouselIntent({
   category = 'Galería',
   showCounter = true,
   showDots = true,
-  _autoAdvance = 0,
+  autoAdvance: _autoAdvance = 0,
   showContinue = true,
   ctaText = 'Continuar',
   onContinue,

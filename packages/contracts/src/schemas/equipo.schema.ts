@@ -23,8 +23,8 @@ export type EstudianteEnEquipo = z.infer<typeof estudianteEnEquipoSchema>;
 export const equipoSchema = z.object({
   id: z.string(),
   nombre: z.string(),
-  colorPrimario: z.string(),
-  colorSecundario: z.string(),
+  colorPrimary: z.string(),
+  colorSecondary: z.string(),
   iconoUrl: z.string().nullable().optional(),
   puntosTotales: z.number().int().nonnegative(),
   createdAt: z.string().datetime(),
@@ -39,8 +39,8 @@ export type Equipo = z.infer<typeof equipoSchema>;
  */
 export const createEquipoSchema = z.object({
   nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  colorPrimario: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color primario debe ser un hex válido'),
-  colorSecundario: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color secundario debe ser un hex válido'),
+  colorPrimary: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color primario debe ser un hex válido'),
+  colorSecondary: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color secundario debe ser un hex válido'),
   iconoUrl: z.string().optional(),
 });
 

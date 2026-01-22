@@ -61,7 +61,7 @@ export interface EstudianteComisionResponse {
     id: string;
     tipo: string;
     nombre: string;
-    colorPrimario: string;
+    colorPrimary: string;
   } | null;
   stats: {
     xpTotal: number;
@@ -560,7 +560,7 @@ export class DocenteComisionQueriesService {
             id: est.casa.id,
             tipo: est.casa.tipo,
             nombre: est.casa.nombre,
-            colorPrimario: est.casa.colorPrimary,
+            colorPrimary: est.casa.colorPrimary,
           }
         : null,
       stats: {

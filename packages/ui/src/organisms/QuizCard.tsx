@@ -70,7 +70,7 @@ export function QuizCard({
   onAnswer,
   onContinue,
   combo,
-  _timeLimit,
+  timeLimit: _timeLimit,
   showMascot = true,
   feedback: feedbackMessages,
   className,

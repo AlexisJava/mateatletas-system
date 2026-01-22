@@ -21,8 +21,8 @@ const equipoResumenSchema = z
     id: z.string(),
     nombre: z.string(),
     color: z.string().optional(),
-    colorPrimario: z.string().optional(),
-    colorSecundario: z.string().optional(),
+    colorPrimary: z.string().optional(),
+    colorSecondary: z.string().optional(),
   })
   .passthrough();
 

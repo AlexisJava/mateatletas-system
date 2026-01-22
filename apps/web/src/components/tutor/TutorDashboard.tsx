@@ -286,7 +286,7 @@ export function TutorDashboard() {
                         <div className="flex items-center gap-4 mt-1">
                           <span className="flex items-center gap-1 text-sm text-amber-400">
                             <Star className="w-3.5 h-3.5" />
-                            {hijo.puntosTotales}
+                            {hijo.xpTotal}
                           </span>
                           <span className="flex items-center gap-1 text-sm text-cyan-400">
                             <BarChart3 className="w-3.5 h-3.5" />

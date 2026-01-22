@@ -62,15 +62,9 @@ export interface AuthUser {
   edad?: number;
   nivelEscolar?: string;
   fotoUrl?: string | null;
-  puntosTotales?: number;
+  xpTotal?: number;
   nivelActual?: number;
   debeCambiarPassword?: boolean;
-  /** @deprecated Usar casa en su lugar */
-  equipo?: {
-    id: string;
-    nombre: string;
-    colorPrimario: string;
-  } | null;
   /** Casa del estudiante (sistema 2026) - solo para rol estudiante */
   casa?: AuthUserCasa | null;
   tutor?: {

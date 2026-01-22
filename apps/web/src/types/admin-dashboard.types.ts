@@ -131,7 +131,7 @@ export function fromEstudiante(estudiante: Estudiante, extra?: { tier?: TierSTEA
     createdAt: estudiante.createdAt,
     casa: estudiante.equipo?.nombre,
     tier: extra?.tier,
-    puntos: estudiante.puntosTotales,
+    puntos: estudiante.xpTotal,
   };
 }
 

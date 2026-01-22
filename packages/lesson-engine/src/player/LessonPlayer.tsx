@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { backgrounds } from '@mateatletas/ui/tokens';
 import { IntentRegistry } from '../renderer/IntentRegistry';
 import { LessonProvider, useLessonContext, type LessonMetadata } from '../context/LessonContext';
 import { registerAllIntents, areIntentsRegistered } from '../intents/registerIntents';
@@ -211,7 +212,7 @@ export function LessonPlayer({
   lesson,
   onComplete,
   onSlideComplete,
-  _onExit,
+  onExit: _onExit,
   houseColors = { primary: '#00d4ff', secondary: '#0066ff' },
 }: LessonPlayerProps) {
   const [startTime] = useState(() => Date.now());

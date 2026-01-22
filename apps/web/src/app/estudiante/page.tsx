@@ -63,7 +63,7 @@ export default function EstudianteDashboard() {
 
         setData({
           nivel: recursos?.nivelActual ?? user.nivelActual ?? 1,
-          xp: recursos?.xpActual ?? user.puntosTotales ?? 0,
+          xp: recursos?.xpActual ?? user.xpTotal ?? 0,
           xpSiguienteNivel: recursos?.xpSiguienteNivel ?? 100,
           racha: recursos?.racha?.diasConsecutivos ?? 0,
           proximaClase,
@@ -73,7 +73,7 @@ export default function EstudianteDashboard() {
         console.error('Error fetching dashboard data:', error);
         setData({
           nivel: user.nivelActual ?? 1,
-          xp: user.puntosTotales ?? 0,
+          xp: user.xpTotal ?? 0,
           xpSiguienteNivel: 100,
           racha: 0,
           proximaClase: null,
@@ -85,7 +85,7 @@ export default function EstudianteDashboard() {
     }
 
     fetchData();
-  }, [user?.id, user?.nivelActual, user?.puntosTotales]);
+  }, [user?.id, user?.nivelActual, user?.xpTotal]);
 
   const tieneAccesoClases = data?.plan?.accesoClasesVivo ?? false;
 

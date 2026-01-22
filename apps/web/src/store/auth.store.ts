@@ -37,8 +37,7 @@ export interface User {
   titulo?: string | null;
   bio?: string | null;
   // Campos adicionales para estudiantes
-  equipoId?: string | null;
-  puntosTotales?: number;
+  xpTotal?: number;
   nivelActual?: number;
   avatarUrl?: string | null;
   /** Casa del estudiante (sistema 2026) - solo para rol estudiante */
@@ -158,7 +157,7 @@ export const useAuthStore = create<AuthState>()(
               haCompletadoOnboarding: authUser.haCompletadoOnboarding,
               titulo: authUser.titulo,
               bio: authUser.bio,
-              puntosTotales: authUser.puntosTotales,
+              xpTotal: authUser.xpTotal,
               nivelActual: authUser.nivelActual,
               casa: authUser.casa,
             };
@@ -214,7 +213,7 @@ export const useAuthStore = create<AuthState>()(
             role: 'estudiante',
             roles: ['estudiante'],
             debeCambiarPassword: authUser.debeCambiarPassword,
-            puntosTotales: authUser.puntosTotales,
+            xpTotal: authUser.xpTotal,
             nivelActual: authUser.nivelActual,
             avatarUrl: authUser.fotoUrl,
             casa: authUser.casa,
@@ -313,7 +312,7 @@ export const useAuthStore = create<AuthState>()(
             haCompletadoOnboarding: profile.haCompletadoOnboarding,
             titulo: profile.titulo,
             bio: profile.bio,
-            puntosTotales: profile.puntosTotales,
+            xpTotal: profile.xpTotal,
             nivelActual: profile.nivelActual,
             casa: profile.casa,
           };
