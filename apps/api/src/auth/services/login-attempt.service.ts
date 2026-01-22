@@ -30,8 +30,9 @@ export class LoginAttemptService {
     success: boolean,
   ): Promise<void> {
     // 1. Registrar intento en la base de datos
+    // NOTA: Raw SQL usa nombres de columna de PostgreSQL (snake_case)
     await this.prisma.$executeRaw`
-      INSERT INTO login_attempts (id, email, ip, success, createdAt)
+      INSERT INTO login_attempts (id, email, ip, success, created_at)
       VALUES (gen_random_uuid(), ${email}, ${ip}, ${success}, NOW())
     `;
 
@@ -42,11 +43,12 @@ export class LoginAttemptService {
     }
 
     // 3. Si fue fallido, verificar cantidad de intentos recientes
+    // NOTA: Raw SQL usa nombres de columna de PostgreSQL (snake_case)
     const recentFailures = await this.prisma.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(*) as count FROM login_attempts
       WHERE email = ${email}
       AND success = false
-      AND createdAt > NOW() - INTERVAL '15 minutes'
+      AND created_at > NOW() - INTERVAL '15 minutes'
     `;
 
     const failureCount = Number(recentFailures[0].count);
