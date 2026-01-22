@@ -7,7 +7,7 @@ interface User {
   nombre?: string;
   apellido?: string;
   nivelActual?: number;
-  puntosTotales?: number;
+  xpTotal?: number;
 }
 
 interface PerfilEstudianteProps {

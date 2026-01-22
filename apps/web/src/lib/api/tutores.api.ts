@@ -42,7 +42,7 @@ export interface HijoInfo {
   edad: number | null;
   nivelEscolar: string | null;
   casa: string | null;
-  puntosTotales: number;
+  xpTotal: number;
   asistenciaPromedio: number;
   avatarUrl: string | null;
 }

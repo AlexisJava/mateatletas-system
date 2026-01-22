@@ -177,7 +177,7 @@ export interface EstudianteTopPuntos {
   nombre: string;
   apellido: string;
   fotoUrl: string | null;
-  puntosTotales: number;
+  xpTotal: number;
   porcentajeAsistencia: number;
 }
 

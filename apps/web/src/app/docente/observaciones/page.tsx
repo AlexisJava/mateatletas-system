@@ -378,7 +378,7 @@ export default function DocenteObservacionesPage() {
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className="bg-purple-600 text-white px-3 py-1 rounded-full font-black text-sm">
-                          {grupo.xpTotal} pts
+                          {grupo.puntosTotales} pts
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
