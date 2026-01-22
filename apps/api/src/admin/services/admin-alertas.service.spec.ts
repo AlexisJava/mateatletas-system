@@ -13,8 +13,8 @@ describe('AdminAlertasService', () => {
     fecha: new Date('2025-10-15'),
     resuelta: false,
     createdAt: new Date('2025-10-15'),
-    estudiante_id: 'est-1',
-    clase_id: 'clase-1',
+    estudianteId: 'est-1',
+    claseId: 'clase-1',
     estudiante: {
       id: 'est-1',
       nombre: 'Juan',
@@ -24,8 +24,8 @@ describe('AdminAlertasService', () => {
     clase: {
       id: 'clase-1',
       nombre: 'Álgebra Básica',
-      fecha_hora_inicio: new Date('2025-10-15T10:00:00Z'),
-      duracion_minutos: 60,
+      fechaHoraInicio: new Date('2025-10-15T10:00:00Z'),
+      duracionMinutos: 60,
     },
   };
 
@@ -137,8 +137,8 @@ describe('AdminAlertasService', () => {
         clase: {
           id: 'clase-1',
           nombre: 'Álgebra Básica',
-          fecha_hora_inicio: expect.any(Date),
-          duracion_minutos: 60,
+          fechaHoraInicio: expect.any(Date),
+          duracionMinutos: 60,
         },
         createdAt: expect.any(Date),
       });
@@ -287,8 +287,8 @@ describe('AdminAlertasService', () => {
     it('should create new alert successfully', async () => {
       // Arrange
       const createDto = {
-        estudiante_id: 'est-1',
-        clase_id: 'clase-1',
+        estudianteId: 'est-1',
+        claseId: 'clase-1',
         descripcion: 'Nueva alerta de prueba',
       };
 
@@ -308,16 +308,16 @@ describe('AdminAlertasService', () => {
 
       // Act
       const result = await service.crearAlerta(
-        createDto.estudiante_id,
-        createDto.clase_id,
+        createDto.estudianteId,
+        createDto.claseId,
         createDto.descripcion,
       );
 
       // Assert
       expect(createSpy).toHaveBeenCalledWith({
         data: {
-          estudiante_id: 'est-1',
-          clase_id: 'clase-1',
+          estudianteId: 'est-1',
+          claseId: 'clase-1',
           descripcion: 'Nueva alerta de prueba',
         },
         include: expect.any(Object),
@@ -330,8 +330,8 @@ describe('AdminAlertasService', () => {
       // Arrange
       const createSpy = jest.spyOn(prisma.alerta, 'create').mockResolvedValue({
         id: 'new-alerta',
-        estudiante_id: 'est-1',
-        clase_id: 'clase-1',
+        estudianteId: 'est-1',
+        claseId: 'clase-1',
         descripcion: 'Test',
         fecha: new Date(),
         resuelta: false,

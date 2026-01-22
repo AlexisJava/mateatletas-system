@@ -63,8 +63,8 @@ describe('PaymentExpirationService', () => {
       jest.useFakeTimers().setSystemTime(dia13);
 
       const inscripcionesPendientes = [
-        { id: 'ins-1', periodo: '2025-01', precio_final: 10000 },
-        { id: 'ins-2', periodo: '2025-01', precio_final: 15000 },
+        { id: 'ins-1', periodo: '2025-01', precioFinal: 10000 },
+        { id: 'ins-2', periodo: '2025-01', precioFinal: 15000 },
       ];
 
       mockPrismaService.inscripcionMensual.findMany.mockResolvedValue(
@@ -81,7 +81,7 @@ describe('PaymentExpirationService', () => {
         mockPrismaService.inscripcionMensual.findMany,
       ).toHaveBeenCalledWith({
         where: {
-          estado_pago: {
+          estadoPago: {
             in: [EstadoPago.Pendiente, EstadoPago.Parcial],
           },
           periodo: {
@@ -91,7 +91,7 @@ describe('PaymentExpirationService', () => {
         select: {
           id: true,
           periodo: true,
-          precio_final: true,
+          precioFinal: true,
         },
       });
 
@@ -103,7 +103,7 @@ describe('PaymentExpirationService', () => {
           id: { in: ['ins-1', 'ins-2'] },
         },
         data: {
-          estado_pago: EstadoPago.Anulado,
+          estadoPago: EstadoPago.Anulado,
         },
       });
 
@@ -130,8 +130,8 @@ describe('PaymentExpirationService', () => {
       jest.useFakeTimers().setSystemTime(dia5);
 
       const inscripciones = [
-        { id: 'ins-1', periodo: '2025-01', precio_final: 10000 }, // VIGENTE (día 5 < 9)
-        { id: 'ins-2', periodo: '2025-01', precio_final: 15000 }, // VIGENTE
+        { id: 'ins-1', periodo: '2025-01', precioFinal: 10000 }, // VIGENTE (día 5 < 9)
+        { id: 'ins-2', periodo: '2025-01', precioFinal: 15000 }, // VIGENTE
       ];
 
       mockPrismaService.inscripcionMensual.findMany.mockResolvedValue(
@@ -154,7 +154,7 @@ describe('PaymentExpirationService', () => {
       jest.useFakeTimers().setSystemTime(dia11);
 
       const inscripciones = [
-        { id: 'ins-1', periodo: '2025-01', precio_final: 10000 }, // CON_RECARGO
+        { id: 'ins-1', periodo: '2025-01', precioFinal: 10000 }, // CON_RECARGO
       ];
 
       mockPrismaService.inscripcionMensual.findMany.mockResolvedValue(
@@ -180,7 +180,7 @@ describe('PaymentExpirationService', () => {
       jest.useFakeTimers().setSystemTime(dia14);
 
       const inscripciones = [
-        { id: 'ins-1', periodo: '2025-01', precio_final: 10000 }, // ANULABLE
+        { id: 'ins-1', periodo: '2025-01', precioFinal: 10000 }, // ANULABLE
       ];
 
       mockPrismaService.inscripcionMensual.findMany.mockResolvedValue(
@@ -202,7 +202,7 @@ describe('PaymentExpirationService', () => {
         mockPrismaService.inscripcionMensual.updateMany,
       ).toHaveBeenCalledWith({
         where: { id: { in: ['ins-1'] } },
-        data: { estado_pago: EstadoPago.Anulado },
+        data: { estadoPago: EstadoPago.Anulado },
       });
 
       jest.useRealTimers();
@@ -216,8 +216,8 @@ describe('PaymentExpirationService', () => {
 
       // getPendingStats solo consulta periodo actual, así que el mock solo retorna ese periodo
       const inscripciones = [
-        { id: 'ins-1', periodo: '2025-01', precio_final: 10000 }, // CON_RECARGO (día 10)
-        { id: 'ins-2', periodo: '2025-01', precio_final: 15000 }, // CON_RECARGO
+        { id: 'ins-1', periodo: '2025-01', precioFinal: 10000 }, // CON_RECARGO (día 10)
+        { id: 'ins-2', periodo: '2025-01', precioFinal: 15000 }, // CON_RECARGO
       ];
 
       mockPrismaService.inscripcionMensual.findMany.mockResolvedValue(
@@ -241,8 +241,8 @@ describe('PaymentExpirationService', () => {
       jest.useFakeTimers().setSystemTime(dia5);
 
       const inscripciones = [
-        { id: 'ins-1', periodo: '2025-01', precio_final: 10000 },
-        { id: 'ins-2', periodo: '2025-01', precio_final: 15000 },
+        { id: 'ins-1', periodo: '2025-01', precioFinal: 10000 },
+        { id: 'ins-2', periodo: '2025-01', precioFinal: 15000 },
       ];
 
       mockPrismaService.inscripcionMensual.findMany.mockResolvedValue(

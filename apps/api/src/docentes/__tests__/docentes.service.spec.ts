@@ -26,7 +26,7 @@ jest.mock('../../common/utils/password.utils');
  * - Happy paths
  * - Error cases (NotFoundException, ConflictException)
  * - Edge cases (auto-generated password, email validation)
- * - Security (password hashing, password_hash exclusion)
+ * - Security (password hashing, passwordHash exclusion)
  * - Business logic (sectores unique extraction)
  */
 describe('DocentesService', () => {
@@ -37,16 +37,16 @@ describe('DocentesService', () => {
   const mockDocente = {
     id: 'docente-123',
     email: 'docente@test.com',
-    password_hash: 'hashed_password_12345',
+    passwordHash: 'hashed_password_12345',
     nombre: 'Juan',
     apellido: 'Pérez',
     titulo: 'Ingeniero en Matemáticas',
     bio: 'Profesor experimentado',
     telefono: '+54123456789',
     especialidades: ['Álgebra', 'Cálculo'],
-    experiencia_anos: 10,
-    disponibilidad_horaria: { lunes: ['09:00-12:00'], martes: ['14:00-18:00'] },
-    nivel_educativo: ['Secundario', 'Universitario'],
+    experienciaAnos: 10,
+    disponibilidadHoraria: { lunes: ['09:00-12:00'], martes: ['14:00-18:00'] },
+    nivelEducativo: ['Secundario', 'Universitario'],
     estado: 'activo',
     createdAt: new Date('2025-01-01T10:00:00Z'),
     updatedAt: new Date('2025-01-01T10:00:00Z'),
@@ -71,9 +71,9 @@ describe('DocentesService', () => {
     bio: 'Docente apasionada',
     telefono: '+54987654321',
     especialidades: ['Física', 'Química'],
-    experiencia_anos: 5,
-    disponibilidad_horaria: { miercoles: ['10:00-14:00'] },
-    nivel_educativo: ['Secundario'],
+    experienciaAnos: 5,
+    disponibilidadHoraria: { miercoles: ['10:00-14:00'] },
+    nivelEducativo: ['Secundario'],
     estado: 'activo' as const,
   };
 
@@ -91,23 +91,23 @@ describe('DocentesService', () => {
 
         // Hash password
         const passwordToHash = dto.password || generateSecurePassword();
-        const password_hash = await bcrypt.hash(passwordToHash, 12);
+        const passwordHash = await bcrypt.hash(passwordToHash, 12);
 
         // Create docente
         const created = await prisma.docente.create({
           data: {
             ...dto,
-            password_hash,
+            passwordHash,
             especialidades: dto.especialidades || [],
-            disponibilidad_horaria: dto.disponibilidad_horaria || {},
-            nivel_educativo: dto.nivel_educativo || [],
+            disponibilidadHoraria: dto.disponibilidadHoraria || {},
+            nivelEducativo: dto.nivelEducativo || [],
             estado: dto.estado || 'activo',
             bio: dto.bio || (dto as any).biografia,
           },
         });
 
-        // Remove password_hash from response
-        const { password_hash: _, ...result } = created;
+        // Remove passwordHash from response
+        const { passwordHash: _, ...result } = created;
 
         // Return with generatedPassword if password was auto-generated
         if (!dto.password) {
@@ -127,8 +127,8 @@ describe('DocentesService', () => {
           prisma.docente.count(),
         ]);
 
-        // Remove password_hash
-        const cleanData = data.map(({ password_hash, ...rest }) => rest);
+        // Remove passwordHash
+        const cleanData = data.map(({ passwordHash, ...rest }) => rest);
 
         return {
           data: cleanData,
@@ -155,8 +155,8 @@ describe('DocentesService', () => {
           throw new NotFoundException('Docente no encontrado');
         }
 
-        // Remove password_hash
-        const { password_hash, rutasEspecialidad, ...rest } = docente;
+        // Remove passwordHash
+        const { passwordHash, rutasEspecialidad, ...rest } = docente;
 
         // Extract unique sectores
         const sectores = rutasEspecialidad
@@ -191,9 +191,9 @@ describe('DocentesService', () => {
         }
 
         // Hash password if provided
-        let password_hash = existing.password_hash;
+        let passwordHash = existing.passwordHash;
         if (dto.password) {
-          password_hash = await bcrypt.hash(dto.password, 12);
+          passwordHash = await bcrypt.hash(dto.password, 12);
         }
 
         // Update
@@ -201,13 +201,13 @@ describe('DocentesService', () => {
           where: { id },
           data: {
             ...dto,
-            password_hash: dto.password ? password_hash : undefined,
+            passwordHash: dto.password ? passwordHash : undefined,
             bio: dto.bio || (dto as any).biografia,
           },
         });
 
-        // Remove password_hash
-        const { password_hash: _, ...result } = updated;
+        // Remove passwordHash
+        const { passwordHash: _, ...result } = updated;
         return result;
       }),
 
@@ -288,14 +288,14 @@ describe('DocentesService', () => {
       const result = await service.create(createDto);
 
       // Assert
-      expect(result).not.toHaveProperty('password_hash'); // Security check
+      expect(result).not.toHaveProperty('passwordHash'); // Security check
       expect(result).not.toHaveProperty('generatedPassword'); // Password was provided, not generated
       expect(result.nombre).toBe('Juan');
       expect(bcrypt.hash).toHaveBeenCalledWith('SecurePass123!', 12); // BCRYPT_ROUNDS = 12 (NIST 2025)
       expect(prisma.docente.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           email: 'nuevo@test.com',
-          password_hash: 'hashed_password_12345',
+          passwordHash: 'hashed_password_12345',
         }),
       });
     });
@@ -319,7 +319,7 @@ describe('DocentesService', () => {
       expect(generateSecurePassword).toHaveBeenCalled();
       expect(bcrypt.hash).toHaveBeenCalledWith(generatedPassword, 12);
       expect(result).toHaveProperty('generatedPassword', generatedPassword); // Must return generated password
-      expect(result).not.toHaveProperty('password_hash'); // Security check
+      expect(result).not.toHaveProperty('passwordHash'); // Security check
     });
 
     it('should throw ConflictException if email already exists', async () => {
@@ -360,8 +360,8 @@ describe('DocentesService', () => {
       expect(prisma.docente.create).toHaveBeenCalled();
       const callArg = (prisma.docente.create as jest.Mock).mock.calls[0][0];
       expect(callArg.data.especialidades).toEqual([]);
-      expect(callArg.data.disponibilidad_horaria).toEqual({});
-      expect(callArg.data.nivel_educativo).toEqual([]);
+      expect(callArg.data.disponibilidadHoraria).toEqual({});
+      expect(callArg.data.nivelEducativo).toEqual([]);
       expect(callArg.data.estado).toBe('activo');
     });
 
@@ -409,7 +409,7 @@ describe('DocentesService', () => {
 
       // Assert
       expect(result.data).toHaveLength(2);
-      expect(result.data[0]).not.toHaveProperty('password_hash'); // Security check
+      expect(result.data[0]).not.toHaveProperty('passwordHash'); // Security check
       expect(result.meta).toEqual({
         total: 2,
         page: 1,
@@ -484,7 +484,7 @@ describe('DocentesService', () => {
    * =========================================
    */
   describe('findByEmail', () => {
-    it('should return docente WITH password_hash (for authentication)', async () => {
+    it('should return docente WITH passwordHash (for authentication)', async () => {
       // Arrange
       jest
         .spyOn(prisma.docente, 'findUnique')
@@ -494,7 +494,7 @@ describe('DocentesService', () => {
       const result = await service.findByEmail('docente@test.com');
 
       // Assert
-      expect(result).toHaveProperty('password_hash', 'hashed_password_12345'); // MUST include password_hash for auth
+      expect(result).toHaveProperty('passwordHash', 'hashed_password_12345'); // MUST include passwordHash for auth
       expect(result?.email).toBe('docente@test.com');
       expect(prisma.docente.findUnique).toHaveBeenCalledWith({
         where: { email: 'docente@test.com' },
@@ -544,7 +544,7 @@ describe('DocentesService', () => {
       const result = await service.findById('docente-123');
 
       // Assert
-      expect(result).not.toHaveProperty('password_hash'); // Security check
+      expect(result).not.toHaveProperty('passwordHash'); // Security check
       expect(result.sectores).toHaveLength(2); // Should deduplicate (Matemática appears twice)
       expect(result.sectores?.[0]).toEqual(mockSector);
       expect(result.sectores?.[1]?.nombre).toBe('Ciencias');
@@ -608,7 +608,7 @@ describe('DocentesService', () => {
       const result = await service.update('docente-123', updateDto);
 
       // Assert
-      expect(result).not.toHaveProperty('password_hash'); // Security check
+      expect(result).not.toHaveProperty('passwordHash'); // Security check
       expect(result.nombre).toBe('Juan Actualizado');
       expect(prisma.docente.update).toHaveBeenCalledWith({
         where: { id: 'docente-123' },
@@ -718,7 +718,7 @@ describe('DocentesService', () => {
       expect(prisma.docente.update).toHaveBeenCalledWith({
         where: { id: 'docente-123' },
         data: expect.objectContaining({
-          password_hash: 'hashed_password_12345',
+          passwordHash: 'hashed_password_12345',
         }),
       });
     });

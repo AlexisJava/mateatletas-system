@@ -241,7 +241,7 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
       const mockPayment = {
         id: 'pay-123',
         status: 'approved',
-        external_reference: 'membresia-1-tutor-2',
+        externalReference: 'membresia-1-tutor-2',
         status_detail: 'accredited',
         transaction_amount: 15000,
         date_approved: '2025-01-01T00:00:00Z',
@@ -269,7 +269,7 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
       expect(result).toEqual({
         id: 'pay-123',
         status: 'approved',
-        external_reference: 'membresia-1-tutor-2',
+        externalReference: 'membresia-1-tutor-2',
         status_detail: 'accredited',
         transaction_amount: 15000,
         date_approved: '2025-01-01T00:00:00Z',

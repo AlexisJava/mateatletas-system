@@ -166,7 +166,7 @@ export class PreapprovalService {
     }
 
     // 3. Calcular descuento
-    const precioBase = plan.precio_base.toNumber();
+    const precioBase = plan.precioBase.toNumber();
     const { precioFinal, descuentoPorcentaje } = calcularPrecioConDescuento(
       precioBase,
       numeroHijo,
@@ -182,13 +182,13 @@ export class PreapprovalService {
 
         const suscripcion = await tx.suscripcion.create({
           data: {
-            tutor_id: tutorId,
-            plan_id: planId,
+            tutorId: tutorId,
+            planId: planId,
             estado: estadoInicial,
-            precio_final: precioFinal,
-            descuento_porcentaje: descuentoPorcentaje,
-            // Si es Bricks, establecer fecha_inicio inmediatamente
-            ...(usarBricks && { fecha_inicio: new Date() }),
+            precioFinal: precioFinal,
+            descuentoPorcentaje: descuentoPorcentaje,
+            // Si es Bricks, establecer fechaInicio inmediatamente
+            ...(usarBricks && { fechaInicio: new Date() }),
           },
         });
 
@@ -207,9 +207,9 @@ export class PreapprovalService {
             payer_email: usarBricks ? payerEmail : tutorEmail,
             back_url: `${this.frontendUrl}/suscripcion/callback`,
             reason: `Suscripción Mateatletas - ${plan.nombre} (${tutorNombre})`,
-            external_reference: `suscripcion:${suscripcion.id}`,
+            externalReference: `suscripcion:${suscripcion.id}`,
             auto_recurring: {
-              frequency: plan.intervalo_cantidad,
+              frequency: plan.intervaloCantidad,
               frequency_type: frequencyType,
               transaction_amount: precioFinal,
               currency_id: 'ARS',
@@ -239,7 +239,7 @@ export class PreapprovalService {
         await tx.suscripcion.update({
           where: { id: suscripcion.id },
           data: {
-            mp_preapproval_id: mpResponse.id,
+            mpPreapprovalId: mpResponse.id,
           },
         });
 
@@ -305,7 +305,7 @@ export class PreapprovalService {
     }
 
     // 2. Validar ownership
-    if (suscripcion.tutor_id !== tutorId) {
+    if (suscripcion.tutorId !== tutorId) {
       throw new PreApprovalError(
         'No autorizado para cancelar esta suscripción',
         PreApprovalErrorCode.UNAUTHORIZED,
@@ -323,8 +323,8 @@ export class PreapprovalService {
     const estadoAnterior = suscripcion.estado;
     const currentVersion = suscripcion.version;
 
-    // Extraer mp_preapproval_id antes de la transacción para evitar narrowing issues
-    const mpPreapprovalId = suscripcion.mp_preapproval_id;
+    // Extraer mpPreapprovalId antes de la transacción para evitar narrowing issues
+    const mpPreapprovalId = suscripcion.mpPreapprovalId;
 
     // 4. TRANSACCIÓN: MP API + DB updates con Optimistic Locking
     try {
@@ -354,9 +354,9 @@ export class PreapprovalService {
           },
           data: {
             estado: EstadoSuscripcion.CANCELADA,
-            motivo_cancelacion: motivo,
-            cancelado_por: canceladoPor,
-            fecha_cancelacion: new Date(),
+            motivoCancelacion: motivo,
+            canceladoPor: canceladoPor,
+            fechaCancelacion: new Date(),
             version: { increment: 1 }, // Incrementar versión
           },
         });
@@ -364,11 +364,11 @@ export class PreapprovalService {
         // 4.3 Registrar en historial
         await tx.historialEstadoSuscripcion.create({
           data: {
-            suscripcion_id: suscripcionId,
-            estado_anterior: estadoAnterior,
-            estado_nuevo: EstadoSuscripcion.CANCELADA,
+            suscripcionId: suscripcionId,
+            estadoAnterior: estadoAnterior,
+            estadoNuevo: EstadoSuscripcion.CANCELADA,
             motivo,
-            realizado_por: canceladoPor,
+            realizadoPor: canceladoPor,
           },
         });
       });

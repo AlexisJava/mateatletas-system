@@ -38,21 +38,21 @@ describe('EstudianteStatsService', () => {
           id: 'est-1',
           nombre: 'Juan',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 100 },
+          recursos: { xpTotal: 100 },
           casa: { id: 'eq-1', nombre: 'Equipo Rojo' },
         },
         {
           id: 'est-2',
           nombre: 'María',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 150 },
+          recursos: { xpTotal: 150 },
           casa: { id: 'eq-1', nombre: 'Equipo Rojo' },
         },
         {
           id: 'est-3',
           nombre: 'Pedro',
           nivelEscolar: 'Secundaria',
-          recursos: { xp_total: 200 },
+          recursos: { xpTotal: 200 },
           casa: { id: 'eq-2', nombre: 'Equipo Azul' },
         },
       ];
@@ -65,15 +65,15 @@ describe('EstudianteStatsService', () => {
 
       expect(result).toEqual({
         total: 3,
-        por_nivel: {
+        porNivel: {
           Primaria: 2,
           Secundaria: 1,
         },
-        por_casa: {
+        porCasa: {
           'Equipo Rojo': 2,
           'Equipo Azul': 1,
         },
-        xp_total: 450,
+        xpTotal: 450,
       });
     });
 
@@ -83,21 +83,21 @@ describe('EstudianteStatsService', () => {
           id: 'est-1',
           nombre: 'Juan',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 100 },
+          recursos: { xpTotal: 100 },
           casa: { id: 'eq-1', nombre: 'Equipo Rojo' },
         },
         {
           id: 'est-2',
           nombre: 'María',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 50 },
+          recursos: { xpTotal: 50 },
           casa: null,
         },
         {
           id: 'est-3',
           nombre: 'Pedro',
           nivelEscolar: 'Secundaria',
-          recursos: { xp_total: 75 },
+          recursos: { xpTotal: 75 },
           casa: null,
         },
       ];
@@ -121,9 +121,9 @@ describe('EstudianteStatsService', () => {
 
       expect(result).toEqual({
         total: 0,
-        por_nivel: {},
-        por_casa: {},
-        xp_total: 0,
+        porNivel: {},
+        porCasa: {},
+        xpTotal: 0,
       });
     });
 
@@ -133,21 +133,21 @@ describe('EstudianteStatsService', () => {
           id: 'est-1',
           nombre: 'Juan',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 123 },
+          recursos: { xpTotal: 123 },
           casa: null,
         },
         {
           id: 'est-2',
           nombre: 'María',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 456 },
+          recursos: { xpTotal: 456 },
           casa: null,
         },
         {
           id: 'est-3',
           nombre: 'Pedro',
           nivelEscolar: 'Secundaria',
-          recursos: { xp_total: 789 },
+          recursos: { xpTotal: 789 },
           casa: null,
         },
       ];
@@ -158,7 +158,7 @@ describe('EstudianteStatsService', () => {
 
       const result = await service.getEstadisticas('tutor-1');
 
-      expect(result.xp_total).toBe(1368);
+      expect(result.xpTotal).toBe(1368);
     });
 
     it('debe agrupar correctamente múltiples niveles escolares', async () => {
@@ -166,43 +166,43 @@ describe('EstudianteStatsService', () => {
         {
           id: 'est-1',
           nivelEscolar: 'Preescolar',
-          recursos: { xp_total: 10 },
+          recursos: { xpTotal: 10 },
           casa: null,
         },
         {
           id: 'est-2',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 20 },
+          recursos: { xpTotal: 20 },
           casa: null,
         },
         {
           id: 'est-3',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 30 },
+          recursos: { xpTotal: 30 },
           casa: null,
         },
         {
           id: 'est-4',
           nivelEscolar: 'Secundaria',
-          recursos: { xp_total: 40 },
+          recursos: { xpTotal: 40 },
           casa: null,
         },
         {
           id: 'est-5',
           nivelEscolar: 'Secundaria',
-          recursos: { xp_total: 50 },
+          recursos: { xpTotal: 50 },
           casa: null,
         },
         {
           id: 'est-6',
           nivelEscolar: 'Secundaria',
-          recursos: { xp_total: 60 },
+          recursos: { xpTotal: 60 },
           casa: null,
         },
         {
           id: 'est-7',
           nivelEscolar: 'Universitario',
-          recursos: { xp_total: 70 },
+          recursos: { xpTotal: 70 },
           casa: null,
         },
       ];
@@ -226,37 +226,37 @@ describe('EstudianteStatsService', () => {
         {
           id: 'est-1',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 10 },
+          recursos: { xpTotal: 10 },
           casa: { nombre: 'Equipo A' },
         },
         {
           id: 'est-2',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 20 },
+          recursos: { xpTotal: 20 },
           casa: { nombre: 'Equipo A' },
         },
         {
           id: 'est-3',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 30 },
+          recursos: { xpTotal: 30 },
           casa: { nombre: 'Equipo B' },
         },
         {
           id: 'est-4',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 40 },
+          recursos: { xpTotal: 40 },
           casa: { nombre: 'Equipo C' },
         },
         {
           id: 'est-5',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 50 },
+          recursos: { xpTotal: 50 },
           casa: { nombre: 'Equipo C' },
         },
         {
           id: 'est-6',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 60 },
+          recursos: { xpTotal: 60 },
           casa: { nombre: 'Equipo C' },
         },
       ];
@@ -280,34 +280,34 @@ describe('EstudianteStatsService', () => {
       await service.getEstadisticas('tutor-123');
 
       expect(prisma.estudiante.findMany).toHaveBeenCalledWith({
-        where: { tutor_id: 'tutor-123' },
+        where: { tutorId: 'tutor-123' },
         include: {
           casa: true,
           recursos: {
-            select: { xp_total: true },
+            select: { xpTotal: true },
           },
         },
       });
     });
 
-    it('debe manejar estudiantes con xp_total en cero', async () => {
+    it('debe manejar estudiantes con xpTotal en cero', async () => {
       const mockEstudiantes = [
         {
           id: 'est-1',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 0 },
+          recursos: { xpTotal: 0 },
           casa: null,
         },
         {
           id: 'est-2',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 0 },
+          recursos: { xpTotal: 0 },
           casa: null,
         },
         {
           id: 'est-3',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 100 },
+          recursos: { xpTotal: 100 },
           casa: null,
         },
       ];
@@ -318,7 +318,7 @@ describe('EstudianteStatsService', () => {
 
       const result = await service.getEstadisticas('tutor-1');
 
-      expect(result.xp_total).toBe(100);
+      expect(result.xpTotal).toBe(100);
       expect(result.total).toBe(3);
     });
 
@@ -327,31 +327,31 @@ describe('EstudianteStatsService', () => {
         {
           id: 'est-1',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 10 },
+          recursos: { xpTotal: 10 },
           casa: { nombre: 'Equipo Rojo' },
         },
         {
           id: 'est-2',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 20 },
+          recursos: { xpTotal: 20 },
           casa: null,
         },
         {
           id: 'est-3',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 30 },
+          recursos: { xpTotal: 30 },
           casa: { nombre: 'Equipo Azul' },
         },
         {
           id: 'est-4',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 40 },
+          recursos: { xpTotal: 40 },
           casa: null,
         },
         {
           id: 'est-5',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 50 },
+          recursos: { xpTotal: 50 },
           casa: { nombre: 'Equipo Rojo' },
         },
       ];
@@ -380,7 +380,7 @@ describe('EstudianteStatsService', () => {
         {
           id: 'est-2',
           nivelEscolar: 'Primaria',
-          recursos: { xp_total: 100 },
+          recursos: { xpTotal: 100 },
           casa: null,
         },
       ];
@@ -391,7 +391,7 @@ describe('EstudianteStatsService', () => {
 
       const result = await service.getEstadisticas('tutor-1');
 
-      expect(result.xp_total).toBe(100);
+      expect(result.xpTotal).toBe(100);
       expect(result.total).toBe(2);
     });
   });

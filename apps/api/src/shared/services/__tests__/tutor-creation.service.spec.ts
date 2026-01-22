@@ -134,7 +134,7 @@ describe('TutorCreationService', () => {
         ...tutorData,
         email: tutorData.email.toLowerCase(),
         username: 'juan',
-        password_hash: '$2b$12$hashedPassword',
+        passwordHash: '$2b$12$hashedPassword',
         roles: ['TUTOR'],
       };
 
@@ -148,7 +148,7 @@ describe('TutorCreationService', () => {
           apellido: '',
           email: 'juan@example.com',
           username: 'juan',
-          password_hash: '$2b$12$hashedPassword',
+          passwordHash: '$2b$12$hashedPassword',
           telefono: '1234567890',
           cuil: '20123456789',
           dni: '12345678',
@@ -279,7 +279,7 @@ describe('TutorCreationService', () => {
         nombre: 'Juan Pérez',
         email: 'juan@example.com',
         username: 'juan',
-        password_hash: '$2b$12$hashedPassword',
+        passwordHash: '$2b$12$hashedPassword',
         telefono: '1234567890',
         cuil: '20123456789',
         rol: 'TUTOR',

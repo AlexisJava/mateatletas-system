@@ -25,7 +25,7 @@ export class EstudianteRepositoryAdapter implements IEstudianteRepository {
         id: true,
         nombre: true,
         apellido: true,
-        tutor_id: true,
+        tutorId: true,
       },
     });
 
@@ -37,7 +37,7 @@ export class EstudianteRepositoryAdapter implements IEstudianteRepository {
       id: estudiante.id,
       nombre: estudiante.nombre,
       apellido: estudiante.apellido,
-      tutorId: estudiante.tutor_id,
+      tutorId: estudiante.tutorId,
     };
   }
 
@@ -50,7 +50,7 @@ export class EstudianteRepositoryAdapter implements IEstudianteRepository {
         id: true,
         nombre: true,
         apellido: true,
-        tutor_id: true,
+        tutorId: true,
       },
     });
 
@@ -58,7 +58,7 @@ export class EstudianteRepositoryAdapter implements IEstudianteRepository {
       id: e.id,
       nombre: e.nombre,
       apellido: e.apellido,
-      tutorId: e.tutor_id,
+      tutorId: e.tutorId,
     }));
   }
 }

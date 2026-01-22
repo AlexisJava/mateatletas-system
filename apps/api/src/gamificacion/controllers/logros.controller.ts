@@ -63,8 +63,8 @@ export class LogrosController {
 
     return {
       general: progreso,
-      por_categoria: porCategoria,
-      por_rareza: porRareza,
+      porCategoria: porCategoria,
+      porRareza: porRareza,
     };
   }
 

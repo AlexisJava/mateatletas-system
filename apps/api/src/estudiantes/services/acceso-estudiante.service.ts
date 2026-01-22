@@ -146,8 +146,8 @@ export class AccesoEstudianteService {
    * Verifica el acceso de un estudiante a la plataforma
    *
    * Orden de prioridad:
-   * 1. Si estado_acceso = SUSPENDIDO → Sin acceso
-   * 2. Si acceso_override activo → Acceso por override
+   * 1. Si estadoAcceso = SUSPENDIDO → Sin acceso
+   * 2. Si accesoOverride activo → Acceso por override
    * 3. Si tiene plan directo vigente → Acceso por plan
    * 4. Si tutor tiene suscripción activa → Acceso heredado
    * 5. Si tiene comisión activa → Acceso por comisión
@@ -170,7 +170,7 @@ export class AccesoEstudianteService {
                 },
               },
               include: { plan: true },
-              orderBy: { created_at: 'desc' },
+              orderBy: { createdAt: 'desc' },
               take: 1,
             },
           },
@@ -189,14 +189,14 @@ export class AccesoEstudianteService {
     }
 
     // 1. Verificar si está suspendido
-    if (estudiante.estado_acceso === 'SUSPENDIDO') {
+    if (estudiante.estadoAcceso === 'SUSPENDIDO') {
       return this.sinAcceso('Acceso suspendido por administrador');
     }
 
     // 2. Verificar override
-    if (estudiante.acceso_override) {
+    if (estudiante.accesoOverride) {
       const overrideVigente = this.esOverrideVigente(
-        estudiante.acceso_override_hasta,
+        estudiante.accesoOverrideHasta,
       );
       if (overrideVigente) {
         return this.accesoOverride(estudiante);
@@ -208,9 +208,9 @@ export class AccesoEstudianteService {
     const comisionesActivas = estudiante.inscripcionesComision.filter(
       (inscripcion) => {
         const comision = inscripcion.comision;
-        // Si no tiene fecha_inicio, asumimos que está activa
-        const inicioOk = !comision.fecha_inicio || comision.fecha_inicio <= hoy;
-        const finOk = !comision.fecha_fin || comision.fecha_fin >= hoy;
+        // Si no tiene fechaInicio, asumimos que está activa
+        const inicioOk = !comision.fechaInicio || comision.fechaInicio <= hoy;
+        const finOk = !comision.fechaFin || comision.fechaFin >= hoy;
         return inicioOk && finOk && comision.activo !== false;
       },
     );
@@ -220,7 +220,7 @@ export class AccesoEstudianteService {
 
     // 3. Verificar plan directo
     if (estudiante.plan) {
-      const planVigente = this.esPlanVigente(estudiante.fecha_vencimiento_plan);
+      const planVigente = this.esPlanVigente(estudiante.fechaVencimientoPlan);
       if (planVigente) {
         return this.accesoPlanDirecto(estudiante, comisionesActivas);
       }
@@ -284,13 +284,13 @@ export class AccesoEstudianteService {
   ): Promise<void> {
     await this.prisma.historialAccesoEstudiante.create({
       data: {
-        estudiante_id: params.estudianteId,
+        estudianteId: params.estudianteId,
         accion: params.accion,
         origen: params.origen,
-        origen_id: params.origenId,
-        estado_anterior: params.estadoAnterior as Prisma.InputJsonValue,
-        estado_nuevo: params.estadoNuevo as Prisma.InputJsonValue,
-        ejecutado_por: params.ejecutadoPor,
+        origenId: params.origenId,
+        estadoAnterior: params.estadoAnterior as Prisma.InputJsonValue,
+        estadoNuevo: params.estadoNuevo as Prisma.InputJsonValue,
+        ejecutadoPor: params.ejecutadoPor,
         metadata: params.metadata as Prisma.InputJsonValue,
       },
     });
@@ -321,8 +321,8 @@ export class AccesoEstudianteService {
   }
 
   private accesoOverride(estudiante: {
-    acceso_override_motivo: string | null;
-    acceso_override_hasta: Date | null;
+    accesoOverrideMotivo: string | null;
+    accesoOverrideHasta: Date | null;
   }): ResultadoAccesoEstudiante {
     return {
       puedeAcceder: true,
@@ -335,12 +335,12 @@ export class AccesoEstudianteService {
       detalles: {
         comisionesActivas: [],
         override: {
-          motivo: estudiante.acceso_override_motivo,
-          hasta: estudiante.acceso_override_hasta,
+          motivo: estudiante.accesoOverrideMotivo,
+          hasta: estudiante.accesoOverrideHasta,
         },
       },
-      mensaje: estudiante.acceso_override_motivo
-        ? `Acceso por: ${estudiante.acceso_override_motivo}`
+      mensaje: estudiante.accesoOverrideMotivo
+        ? `Acceso por: ${estudiante.accesoOverrideMotivo}`
         : 'Acceso por override administrativo',
     };
   }
@@ -348,14 +348,14 @@ export class AccesoEstudianteService {
   private accesoPlanDirecto(
     estudiante: {
       plan: { id: string; nombre: string } | null;
-      fecha_vencimiento_plan: Date | null;
+      fechaVencimientoPlan: Date | null;
     },
     comisionesActivas: Array<{
       comision: {
         id: string;
         nombre: string;
-        fecha_inicio: Date | null;
-        fecha_fin: Date | null;
+        fechaInicio: Date | null;
+        fechaFin: Date | null;
       };
     }>,
   ): ResultadoAccesoEstudiante {
@@ -379,13 +379,13 @@ export class AccesoEstudianteService {
         planDirecto: {
           id: plan.id,
           nombre: plan.nombre,
-          fechaVencimiento: estudiante.fecha_vencimiento_plan ?? undefined,
+          fechaVencimiento: estudiante.fechaVencimientoPlan ?? undefined,
         },
         comisionesActivas: comisionesActivas.map((ic) => ({
           comisionId: ic.comision.id,
           nombre: ic.comision.nombre,
-          fechaInicio: ic.comision.fecha_inicio,
-          fechaFin: ic.comision.fecha_fin,
+          fechaInicio: ic.comision.fechaInicio,
+          fechaFin: ic.comision.fechaFin,
         })),
       },
       mensaje: `Acceso por plan ${plan.nombre}`,
@@ -395,7 +395,7 @@ export class AccesoEstudianteService {
   private accesoSuscripcionTutor(
     estudiante: {
       plan: { id: string; nombre: string } | null;
-      fecha_vencimiento_plan: Date | null;
+      fechaVencimientoPlan: Date | null;
     },
     suscripcion: {
       id: string;
@@ -406,8 +406,8 @@ export class AccesoEstudianteService {
       comision: {
         id: string;
         nombre: string;
-        fecha_inicio: Date | null;
-        fecha_fin: Date | null;
+        fechaInicio: Date | null;
+        fechaFin: Date | null;
       };
     }>,
   ): ResultadoAccesoEstudiante {
@@ -436,8 +436,8 @@ export class AccesoEstudianteService {
         comisionesActivas: comisionesActivas.map((ic) => ({
           comisionId: ic.comision.id,
           nombre: ic.comision.nombre,
-          fechaInicio: ic.comision.fecha_inicio,
-          fechaFin: ic.comision.fecha_fin,
+          fechaInicio: ic.comision.fechaInicio,
+          fechaFin: ic.comision.fechaFin,
         })),
       },
       mensaje: `Acceso heredado por suscripción del tutor (${plan.nombre})`,
@@ -449,8 +449,8 @@ export class AccesoEstudianteService {
       comision: {
         id: string;
         nombre: string;
-        fecha_inicio: Date | null;
-        fecha_fin: Date | null;
+        fechaInicio: Date | null;
+        fechaFin: Date | null;
         modalidad: 'SINCRONICO' | 'ASINCRONICO';
       };
     }>,
@@ -474,8 +474,8 @@ export class AccesoEstudianteService {
         comisionesActivas: comisionesActivas.map((ic) => ({
           comisionId: ic.comision.id,
           nombre: ic.comision.nombre,
-          fechaInicio: ic.comision.fecha_inicio,
-          fechaFin: ic.comision.fecha_fin,
+          fechaInicio: ic.comision.fechaInicio,
+          fechaFin: ic.comision.fechaFin,
           modalidad: ic.comision.modalidad,
         })),
       },
@@ -506,7 +506,7 @@ export class AccesoEstudianteService {
 
     // Verificar si la comisión está vencida
     const hoy = new Date();
-    if (comision.fecha_fin && comision.fecha_fin < hoy) {
+    if (comision.fechaFin && comision.fechaFin < hoy) {
       return {
         puedeEntrar: false,
         motivo: 'COMISION_VENCIDA',
@@ -517,8 +517,8 @@ export class AccesoEstudianteService {
     // Verificar inscripción confirmada
     const inscripcion = await this.prisma.inscripcionComision.findFirst({
       where: {
-        estudiante_id: estudianteId,
-        comision_id: comisionId,
+        estudianteId: estudianteId,
+        comisionId: comisionId,
         estado: 'Confirmada',
       },
     });
@@ -546,8 +546,8 @@ export class AccesoEstudianteService {
     // Incluye inscripciones manuales (admin/becas) y via suscripción (tutor 2026)
     const inscripcion = await this.prisma.inscripcionUnificada.findFirst({
       where: {
-        estudiante_id: estudianteId,
-        clase_grupo_id: claseGrupoId,
+        estudianteId: estudianteId,
+        claseGrupoId: claseGrupoId,
         estado: 'ACTIVA',
       },
     });
@@ -574,7 +574,7 @@ export class AccesoEstudianteService {
                 },
               },
               include: { plan: true },
-              orderBy: { created_at: 'desc' },
+              orderBy: { createdAt: 'desc' },
               take: 1,
             },
           },
@@ -592,7 +592,7 @@ export class AccesoEstudianteService {
 
     // Verificar plan directo
     if (estudiante.plan) {
-      const planVigente = this.esPlanVigente(estudiante.fecha_vencimiento_plan);
+      const planVigente = this.esPlanVigente(estudiante.fechaVencimientoPlan);
       if (
         planVigente &&
         PLANES_CON_CLASES_VIVO.includes(estudiante.plan.nombre)

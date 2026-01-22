@@ -45,8 +45,8 @@ export class SuscripcionNotificacionesListener {
       titulo: 'Suscripción creada',
       mensaje: `Tu suscripción fue creada exitosamente. Precio: $${event.precioFinal.toLocaleString('es-AR')}${event.descuentoPorcentaje > 0 ? ` (${event.descuentoPorcentaje}% de descuento)` : ''}`,
       metadata: {
-        suscripcion_id: event.suscripcionId,
-        precio_final: event.precioFinal,
+        suscripcionId: event.suscripcionId,
+        precioFinal: event.precioFinal,
       },
     });
   }
@@ -68,8 +68,8 @@ export class SuscripcionNotificacionesListener {
       mensaje:
         'Tu suscripción está activa. Ya podés acceder a todos los contenidos y clases.',
       metadata: {
-        suscripcion_id: event.suscripcionId,
-        mp_payment_id: event.mpPaymentId,
+        suscripcionId: event.suscripcionId,
+        mpPaymentId: event.mpPaymentId,
       },
     });
   }
@@ -98,9 +98,9 @@ export class SuscripcionNotificacionesListener {
       mensaje: `Tu suscripción fue cancelada ${canceladoPorTexto}. Motivo: ${event.motivo}`,
       prioridad: PrioridadNotificacion.ALTA,
       metadata: {
-        suscripcion_id: event.suscripcionId,
+        suscripcionId: event.suscripcionId,
         motivo: event.motivo,
-        cancelado_por: event.canceladoPor,
+        canceladoPor: event.canceladoPor,
       },
     });
   }
@@ -122,9 +122,9 @@ export class SuscripcionNotificacionesListener {
       mensaje: `Tu pago no pudo procesarse. Tenés ${event.diasRestantes} días para regularizar tu situación antes de perder el acceso.`,
       prioridad: PrioridadNotificacion.ALTA,
       metadata: {
-        suscripcion_id: event.suscripcionId,
-        dias_restantes: event.diasRestantes,
-        fecha_limite: event.fechaLimiteGracia,
+        suscripcionId: event.suscripcionId,
+        diasRestantes: event.diasRestantes,
+        fechaLimite: event.fechaLimiteGracia,
       },
     });
   }
@@ -144,8 +144,8 @@ export class SuscripcionNotificacionesListener {
       mensaje: `Tu suscripción fue suspendida por falta de pago después de ${event.diasGraciaUsados} días de gracia. Contactanos para reactivar tu cuenta.`,
       prioridad: PrioridadNotificacion.CRITICA,
       metadata: {
-        suscripcion_id: event.suscripcionId,
-        dias_gracia_usados: event.diasGraciaUsados,
+        suscripcionId: event.suscripcionId,
+        diasGraciaUsados: event.diasGraciaUsados,
       },
     });
   }

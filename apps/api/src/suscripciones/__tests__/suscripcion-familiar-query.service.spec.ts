@@ -35,33 +35,33 @@ describe('SuscripcionFamiliarQueryService', () => {
   // Mock de suscripción para reutilizar
   const createMockSuscripcion = (overrides = {}) => ({
     id: 'sus-fam-123',
-    tutor_id: 'tutor-123',
+    tutorId: 'tutor-123',
     tutor: { nombre: 'Juan', apellido: 'Pérez' },
     estado: 'ACTIVA',
     tier: 'STEAM_SINCRONICO',
-    monto_mensual: 95000,
-    fecha_proximo_cobro: new Date('2026-02-01'),
-    fecha_gracia: null,
-    created_at: new Date('2026-01-01'),
-    updated_at: new Date('2026-01-01'),
+    montoMensual: 95000,
+    fechaProximoCobro: new Date('2026-02-01'),
+    fechaGracia: null,
+    createdAt: new Date('2026-01-01'),
+    updatedAt: new Date('2026-01-01'),
     inscripciones: [
       {
         id: 'insc-1',
-        estudiante_id: 'est-1',
+        estudianteId: 'est-1',
         estudiante: { id: 'est-1', nombre: 'Lucas', apellido: 'Pérez' },
-        producto_id: 'prod-1',
+        productoId: 'prod-1',
         producto: {
           id: 'prod-1',
           nombre: 'Club Matemática',
           precio: { toNumber: () => 95000 },
         },
-        clase_grupo_id: 'cg-1',
-        clase_grupo: { id: 'cg-1', nombre: 'Lunes 18:00' },
-        comision_id: null,
+        claseGrupoId: 'cg-1',
+        claseGrupo: { id: 'cg-1', nombre: 'Lunes 18:00' },
+        comisionId: null,
         comision: null,
         estado: 'ACTIVA',
-        fecha_inicio: new Date('2026-01-01'),
-        fecha_fin: null,
+        fechaInicio: new Date('2026-01-01'),
+        fechaFin: null,
       },
     ],
     ...overrides,
@@ -104,7 +104,7 @@ describe('SuscripcionFamiliarQueryService', () => {
       expect(result?.tier).toBe('STEAM_SINCRONICO');
       expect(result?.inscripciones).toHaveLength(1);
       expect(mockPrisma.suscripcionFamiliar.findUnique).toHaveBeenCalledWith({
-        where: { tutor_id: 'tutor-123' },
+        where: { tutorId: 'tutor-123' },
         include: expect.any(Object),
       });
     });
@@ -122,39 +122,39 @@ describe('SuscripcionFamiliarQueryService', () => {
         inscripciones: [
           {
             id: 'insc-1',
-            estudiante_id: 'est-1',
+            estudianteId: 'est-1',
             estudiante: { id: 'est-1', nombre: 'Lucas', apellido: 'Pérez' },
-            producto_id: 'prod-1',
+            productoId: 'prod-1',
             producto: {
               id: 'prod-1',
               nombre: 'Club Matemática',
               precio: { toNumber: () => 95000 },
             },
-            clase_grupo_id: 'cg-1',
-            clase_grupo: { id: 'cg-1', nombre: 'Lunes 18:00' },
-            comision_id: null,
+            claseGrupoId: 'cg-1',
+            claseGrupo: { id: 'cg-1', nombre: 'Lunes 18:00' },
+            comisionId: null,
             comision: null,
             estado: 'ACTIVA',
-            fecha_inicio: new Date('2026-01-01'),
-            fecha_fin: null,
+            fechaInicio: new Date('2026-01-01'),
+            fechaFin: null,
           },
           {
             id: 'insc-2',
-            estudiante_id: 'est-2',
+            estudianteId: 'est-2',
             estudiante: { id: 'est-2', nombre: 'María', apellido: 'Pérez' },
-            producto_id: 'prod-2',
+            productoId: 'prod-2',
             producto: {
               id: 'prod-2',
               nombre: 'Club Programación',
               precio: { toNumber: () => 95000 },
             },
-            clase_grupo_id: 'cg-2',
-            clase_grupo: { id: 'cg-2', nombre: 'Martes 19:00' },
-            comision_id: null,
+            claseGrupoId: 'cg-2',
+            claseGrupo: { id: 'cg-2', nombre: 'Martes 19:00' },
+            comisionId: null,
             comision: null,
             estado: 'ACTIVA',
-            fecha_inicio: new Date('2026-01-01'),
-            fecha_fin: null,
+            fechaInicio: new Date('2026-01-01'),
+            fechaFin: null,
           },
         ],
       });
@@ -179,39 +179,39 @@ describe('SuscripcionFamiliarQueryService', () => {
         inscripciones: [
           {
             id: 'insc-1',
-            estudiante_id: 'est-1',
+            estudianteId: 'est-1',
             estudiante: { id: 'est-1', nombre: 'Lucas', apellido: 'Pérez' },
-            producto_id: 'prod-1',
+            productoId: 'prod-1',
             producto: {
               id: 'prod-1',
               nombre: 'Club A',
               precio: { toNumber: () => 95000 },
             },
-            clase_grupo_id: null,
-            clase_grupo: null,
-            comision_id: null,
+            claseGrupoId: null,
+            claseGrupo: null,
+            comisionId: null,
             comision: null,
             estado: 'ACTIVA',
-            fecha_inicio: new Date(),
-            fecha_fin: null,
+            fechaInicio: new Date(),
+            fechaFin: null,
           },
           {
             id: 'insc-2',
-            estudiante_id: 'est-1', // Mismo estudiante, otra actividad
+            estudianteId: 'est-1', // Mismo estudiante, otra actividad
             estudiante: { id: 'est-1', nombre: 'Lucas', apellido: 'Pérez' },
-            producto_id: 'prod-2',
+            productoId: 'prod-2',
             producto: {
               id: 'prod-2',
               nombre: 'Club B',
               precio: { toNumber: () => 95000 },
             },
-            clase_grupo_id: null,
-            clase_grupo: null,
-            comision_id: null,
+            claseGrupoId: null,
+            claseGrupo: null,
+            comisionId: null,
             comision: null,
             estado: 'ACTIVA',
-            fecha_inicio: new Date(),
-            fecha_fin: null,
+            fechaInicio: new Date(),
+            fechaFin: null,
           },
         ],
       });
@@ -262,7 +262,7 @@ describe('SuscripcionFamiliarQueryService', () => {
     });
 
     it('should_throw_unauthorized_when_tutor_not_owner', async () => {
-      const mockSuscripcion = createMockSuscripcion({ tutor_id: 'otro-tutor' });
+      const mockSuscripcion = createMockSuscripcion({ tutorId: 'otro-tutor' });
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue(
         mockSuscripcion,
       );
@@ -359,7 +359,7 @@ describe('SuscripcionFamiliarQueryService', () => {
     it('should_return_paginated_subscriptions', async () => {
       const mockSuscripciones = [
         createMockSuscripcion({ id: 'sus-1' }),
-        createMockSuscripcion({ id: 'sus-2', tutor_id: 'tutor-456' }),
+        createMockSuscripcion({ id: 'sus-2', tutorId: 'tutor-456' }),
       ];
 
       mockPrisma.suscripcionFamiliar.findMany.mockResolvedValue(

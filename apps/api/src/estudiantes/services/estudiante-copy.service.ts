@@ -74,10 +74,10 @@ export class EstudianteCopyService {
     // Verificar si ya existe un estudiante con el mismo tutor y nombre en ese sector
     const existeDuplicado = await this.prisma.estudiante.findFirst({
       where: {
-        tutor_id: estudiante.tutor_id,
+        tutorId: estudiante.tutorId,
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
-        sector_id: nuevoSectorId,
+        sectorId: nuevoSectorId,
       },
     });
 
@@ -100,11 +100,11 @@ export class EstudianteCopyService {
         edad: estudiante.edad,
         nivelEscolar: estudiante.nivelEscolar,
         email: estudiante.email,
-        tutor_id: estudiante.tutor_id,
-        sector_id: nuevoSectorId,
+        tutorId: estudiante.tutorId,
+        sectorId: nuevoSectorId,
         // Copiar datos de gamificación
-        nivel_actual: estudiante.nivel_actual,
-        avatar_gradient: estudiante.avatar_gradient,
+        nivelActual: estudiante.nivelActual,
+        avatarGradient: estudiante.avatarGradient,
         casaId: estudiante.casaId,
       },
       include: {

@@ -48,13 +48,13 @@ export class ClaseQueryService {
     const where: Prisma.ClaseWhereInput = {};
 
     if (filtros?.fechaDesde || filtros?.fechaHasta) {
-      where.fecha_hora_inicio = {};
-      if (filtros.fechaDesde) where.fecha_hora_inicio.gte = filtros.fechaDesde;
-      if (filtros.fechaHasta) where.fecha_hora_inicio.lte = filtros.fechaHasta;
+      where.fechaHoraInicio = {};
+      if (filtros.fechaDesde) where.fechaHoraInicio.gte = filtros.fechaDesde;
+      if (filtros.fechaHasta) where.fechaHoraInicio.lte = filtros.fechaHasta;
     }
 
     if (filtros?.estado) where.estado = filtros.estado;
-    if (filtros?.docenteId) where.docente_id = filtros.docenteId;
+    if (filtros?.docenteId) where.docenteId = filtros.docenteId;
 
     const skip = (page - 1) * limit;
 
@@ -78,13 +78,13 @@ export class ClaseQueryService {
           },
           producto: { select: { nombre: true, tipo: true } },
           inscripciones: {
-            select: { id: true, estudiante_id: true },
+            select: { id: true, estudianteId: true },
           },
           _count: {
             select: { inscripciones: true },
           },
         },
-        orderBy: { fecha_hora_inicio: 'asc' },
+        orderBy: { fechaHoraInicio: 'asc' },
         skip,
         take: limit,
       }),
@@ -95,8 +95,8 @@ export class ClaseQueryService {
     const clasesFormateadas = clases.map((clase) => ({
       ...clase,
       // Mapear campos con nombres diferentes
-      cupo_maximo: clase.cupos_maximo,
-      cupo_disponible: clase.cupos_maximo - clase.cupos_ocupados,
+      cupoMaximo: clase.cuposMaximo,
+      cupoDisponible: clase.cuposMaximo - clase.cuposOcupados,
       titulo: clase.nombre,
     }));
 
@@ -133,23 +133,23 @@ export class ClaseQueryService {
     const clases = await this.prisma.clase.findMany({
       where: {
         estado: 'Programada',
-        fecha_hora_inicio: { gte: now },
+        fechaHoraInicio: { gte: now },
       },
       include: {
         docente: { select: { nombre: true, apellido: true } },
         producto: { select: { nombre: true, tipo: true } },
         inscripciones: {
           where: {
-            tutor_id: tutorId,
+            tutorId: tutorId,
           },
           select: {
             id: true,
-            estudiante_id: true,
+            estudianteId: true,
             estudiante: { select: { nombre: true, apellido: true } },
           },
         },
       },
-      orderBy: { fecha_hora_inicio: 'asc' },
+      orderBy: { fechaHoraInicio: 'asc' },
     });
 
     return clases;
@@ -203,13 +203,13 @@ export class ClaseQueryService {
     // 5. Buscar clases donde los estudiantes del tutor están inscritos
     const clases = await this.prisma.clase.findMany({
       where: {
-        fecha_hora_inicio: {
+        fechaHoraInicio: {
           gte: fechaInicio,
           lte: fechaFin,
         },
         inscripciones: {
           some: {
-            estudiante_id: { in: estudiantesIds },
+            estudianteId: { in: estudiantesIds },
           },
         },
       },
@@ -222,7 +222,7 @@ export class ClaseQueryService {
         },
         inscripciones: {
           where: {
-            estudiante_id: { in: estudiantesIds },
+            estudianteId: { in: estudiantesIds },
           },
           include: {
             estudiante: {
@@ -230,24 +230,24 @@ export class ClaseQueryService {
                 id: true,
                 nombre: true,
                 apellido: true,
-                avatar_gradient: true,
+                avatarGradient: true,
               },
             },
           },
         },
         asistencias: {
           where: {
-            estudiante_id: { in: estudiantesIds },
+            estudianteId: { in: estudiantesIds },
           },
           select: {
             id: true,
-            estudiante_id: true,
+            estudianteId: true,
             estado: true,
           },
         },
       },
       orderBy: {
-        fecha_hora_inicio: 'asc',
+        fechaHoraInicio: 'asc',
       },
     });
 
@@ -264,11 +264,11 @@ export class ClaseQueryService {
    */
   async listarClasesDeDocente(docenteId: string, incluirPasadas = false) {
     const where: Prisma.ClaseWhereInput = {
-      docente_id: docenteId,
+      docenteId: docenteId,
     };
 
     if (!incluirPasadas) {
-      where.fecha_hora_inicio = { gte: new Date() };
+      where.fechaHoraInicio = { gte: new Date() };
     }
 
     return this.prisma.clase.findMany({
@@ -282,7 +282,7 @@ export class ClaseQueryService {
           },
         },
       },
-      orderBy: { fecha_hora_inicio: 'asc' },
+      orderBy: { fechaHoraInicio: 'asc' },
     });
   }
 
@@ -365,7 +365,7 @@ export class ClaseQueryService {
                 nombre: true,
                 apellido: true,
                 nivelEscolar: true,
-                avatar_gradient: true,
+                avatarGradient: true,
                 tutor: {
                   select: {
                     id: true,
@@ -378,7 +378,7 @@ export class ClaseQueryService {
             },
           },
           orderBy: {
-            fecha_inscripcion: 'asc',
+            fechaInscripcion: 'asc',
           },
         },
       },
@@ -391,9 +391,9 @@ export class ClaseQueryService {
     return {
       claseId: clase.id,
       nombre: clase.nombre,
-      cuposMaximo: clase.cupos_maximo,
-      cuposOcupados: clase.cupos_ocupados,
-      cuposDisponibles: clase.cupos_maximo - clase.cupos_ocupados,
+      cuposMaximo: clase.cuposMaximo,
+      cuposOcupados: clase.cuposOcupados,
+      cuposDisponibles: clase.cuposMaximo - clase.cuposOcupados,
       docente: {
         id: clase.docente.id,
         nombre: clase.docente.nombre,
@@ -406,8 +406,8 @@ export class ClaseQueryService {
         nombre: inscripcion.estudiante.nombre,
         apellido: inscripcion.estudiante.apellido,
         nivelEscolar: inscripcion.estudiante.nivelEscolar,
-        avatarUrl: inscripcion.estudiante.avatar_gradient,
-        fechaInscripcion: inscripcion.fecha_inscripcion,
+        avatarUrl: inscripcion.estudiante.avatarGradient,
+        fechaInscripcion: inscripcion.fechaInscripcion,
         tutor: inscripcion.estudiante.tutor,
       })),
     };

@@ -68,10 +68,10 @@ export class PaymentCommandService {
     const inscripcionesPendientes =
       await this.prisma.inscripcionMensual.findMany({
         where: {
-          estudiante_id: estudianteId,
-          tutor_id: tutorId,
+          estudianteId: estudianteId,
+          tutorId: tutorId,
           periodo,
-          estado_pago: EstadoPagoPrisma.Pendiente,
+          estadoPago: EstadoPagoPrisma.Pendiente,
         },
         include: {
           estudiante: {
@@ -95,7 +95,7 @@ export class PaymentCommandService {
 
     // Calcular total adeudado
     const totalAdeudado = inscripcionesPendientes.reduce(
-      (sum, insc) => sum + Number(insc.precio_final),
+      (sum, insc) => sum + Number(insc.precioFinal),
       0,
     );
 
@@ -107,16 +107,16 @@ export class PaymentCommandService {
 
     await this.prisma.inscripcionMensual.updateMany({
       where: {
-        estudiante_id: estudianteId,
-        tutor_id: tutorId,
+        estudianteId: estudianteId,
+        tutorId: tutorId,
         periodo,
-        estado_pago: EstadoPagoPrisma.Pendiente,
+        estadoPago: EstadoPagoPrisma.Pendiente,
       },
       data: {
-        estado_pago: EstadoPagoPrisma.Pagado,
-        fecha_pago: fechaPago,
-        metodo_pago: metodoPago,
-        comprobante_url: comprobanteUrl,
+        estadoPago: EstadoPagoPrisma.Pagado,
+        fechaPago: fechaPago,
+        metodoPago: metodoPago,
+        comprobanteUrl: comprobanteUrl,
         observaciones,
       },
     });
@@ -164,8 +164,8 @@ export class PaymentCommandService {
     const updated = await this.prisma.inscripcionMensual.update({
       where: { id: inscripcionId },
       data: {
-        estado_pago: estadoInscripcion,
-        fecha_pago: this.stateMapper.esPagoExitoso(estadoPago)
+        estadoPago: estadoInscripcion,
+        fechaPago: this.stateMapper.esPagoExitoso(estadoPago)
           ? new Date()
           : null,
       },

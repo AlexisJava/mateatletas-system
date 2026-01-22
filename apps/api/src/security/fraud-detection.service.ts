@@ -24,7 +24,7 @@ interface PaymentAmountValidation {
 }
 
 /**
- * Resultado de verificación de unicidad de payment_id
+ * Resultado de verificación de unicidad de paymentId
  */
 interface PaymentIdUniquenessResult {
   isUnique: boolean;
@@ -61,7 +61,7 @@ interface FraudRiskScore {
  * ESTRATEGIAS DE DETECCIÓN:
  * - Análisis de patrones de IP (múltiples pagos desde misma IP)
  * - Validación de montos contra pricing calculator
- * - Verificación de unicidad de payment_id
+ * - Verificación de unicidad de paymentId
  * - Detección de inscripciones duplicadas
  * - Score de riesgo multi-factor (0-100)
  *
@@ -99,7 +99,7 @@ export class FraudDetectionService {
 
     return {
       isSuspicious: false,
-      reason: 'IP tracking no implementado - se requiere campo ip_address',
+      reason: 'IP tracking no implementado - se requiere campo ipAddress',
       threshold: this.MULTIPLE_PAYMENTS_THRESHOLD,
       actualCount: 0,
       ipAddress,
@@ -158,11 +158,11 @@ export class FraudDetectionService {
   }
 
   /**
-   * Verifica que un payment_id de MercadoPago sea único
+   * Verifica que un paymentId de MercadoPago sea único
    *
-   * NOTA: Esta funcionalidad requiere tracking de payment_id en pagos.
+   * NOTA: Esta funcionalidad requiere tracking de paymentId en pagos.
    * Actualmente retorna siempre único hasta que se implemente
-   * tracking de mercadopago_payment_id en InscripcionMensual.
+   * tracking de mercadopagoPaymentId en InscripcionMensual.
    *
    * @param mercadopagoPaymentId - Payment ID de MercadoPago
    * @returns Resultado de verificación
@@ -170,10 +170,10 @@ export class FraudDetectionService {
   checkPaymentIdUniqueness(
     mercadopagoPaymentId: string,
   ): PaymentIdUniquenessResult {
-    // TODO: Implementar tracking de mercadopago_payment_id en InscripcionMensual
-    // Por ahora retornamos único ya que no hay tracking de payment_id
+    // TODO: Implementar tracking de mercadopagoPaymentId en InscripcionMensual
+    // Por ahora retornamos único ya que no hay tracking de paymentId
     this.logger.debug(
-      `Verificando payment_id ${mercadopagoPaymentId} - tracking no implementado`,
+      `Verificando paymentId ${mercadopagoPaymentId} - tracking no implementado`,
     );
 
     return {
@@ -230,7 +230,7 @@ export class FraudDetectionService {
     const paymentIdCheck = this.checkPaymentIdUniqueness(paymentData.paymentId);
     if (!paymentIdCheck.isUnique) {
       score += 60;
-      factors.push('duplicate_payment_id');
+      factors.push('duplicate_paymentId');
     }
 
     // Determinar recomendación basada en score

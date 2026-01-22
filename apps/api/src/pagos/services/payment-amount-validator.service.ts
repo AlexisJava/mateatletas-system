@@ -99,7 +99,7 @@ export class PaymentAmountValidatorService {
     const inscripcion = await this.prisma.inscripcionMensual.findUnique({
       where: { id: inscripcionId },
       select: {
-        precio_final: true,
+        precioFinal: true,
       },
     });
 
@@ -109,7 +109,7 @@ export class PaymentAmountValidatorService {
       );
     }
 
-    expectedAmount = Number(inscripcion.precio_final);
+    expectedAmount = Number(inscripcion.precioFinal);
 
     // 3. Guardar en cache
     try {
@@ -241,7 +241,7 @@ export class PaymentAmountValidatorService {
   /**
    * Valida monto según tipo de external reference (helper genérico)
    *
-   * Parsea el external_reference para determinar el tipo y extraer el ID,
+   * Parsea el externalReference para determinar el tipo y extraer el ID,
    * luego delega al método específico.
    *
    * @param externalRef - External reference del pago

@@ -19,7 +19,7 @@ type AuthenticatedUser = Tutor | Docente | AdminModel;
  * Type guards para detectar tipo de usuario
  */
 const isTutorUser = (user: AuthenticatedUser): user is Tutor =>
-  'ha_completado_onboarding' in user;
+  'haCompletadoOnboarding' in user;
 
 const isDocenteUser = (user: AuthenticatedUser): user is Docente =>
   'titulo' in user;
@@ -39,8 +39,8 @@ interface TutorLoginResult {
     apellido: string;
     dni: string | null;
     telefono: string | null;
-    fecha_registro: Date;
-    ha_completado_onboarding: boolean;
+    fechaRegistro: Date;
+    haCompletadoOnboarding: boolean;
     role: string;
     roles: string[];
   };
@@ -73,7 +73,7 @@ interface AdminLoginResult {
     email: string | null;
     nombre: string;
     apellido: string;
-    fecha_registro: Date;
+    fechaRegistro: Date;
     dni: string | null;
     telefono: string | null;
     role: string;
@@ -152,7 +152,7 @@ export class LoginUseCase {
 
     // 2. Protección contra timing attack: ejecutar bcrypt SIEMPRE
     const dummyHash = '$2b$12$dummyhashforunknownusers1234567890ab';
-    const hashToCompare = user?.password_hash || dummyHash;
+    const hashToCompare = user?.passwordHash || dummyHash;
     const isPasswordValid = await bcrypt.compare(password, hashToCompare);
 
     // 3. Verificar que el usuario exista y el password sea válido
@@ -168,7 +168,7 @@ export class LoginUseCase {
     await this.loginAttemptService.checkAndRecordAttempt(email, ip, true);
 
     // 5. Si es admin con MFA habilitado, retornar token temporal
-    if (adminUser && isAdminUser(user) && adminUser.mfa_enabled) {
+    if (adminUser && isAdminUser(user) && adminUser.mfaEnabled) {
       this.logger.log(`Admin ${user.email} requiere verificación MFA`);
       return this.buildMfaRequiredResponse(user);
     }
@@ -290,8 +290,8 @@ export class LoginUseCase {
           apellido: user.apellido,
           dni: user.dni ?? null,
           telefono: user.telefono ?? null,
-          fecha_registro: user.fecha_registro,
-          ha_completado_onboarding: user.ha_completado_onboarding,
+          fechaRegistro: user.fechaRegistro,
+          haCompletadoOnboarding: user.haCompletadoOnboarding,
           role: Role.TUTOR,
           roles: finalUserRoles,
         },
@@ -322,7 +322,7 @@ export class LoginUseCase {
         email: user.email,
         nombre: user.nombre,
         apellido: user.apellido,
-        fecha_registro: user.fecha_registro,
+        fechaRegistro: user.fechaRegistro,
         dni: isAdminUser(user) ? (user.dni ?? null) : null,
         telefono: isAdminUser(user) ? (user.telefono ?? null) : null,
         role: Role.ADMIN,

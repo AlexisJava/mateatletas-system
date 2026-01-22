@@ -566,15 +566,15 @@ export class AulaEventsListener {
       // Buscar el progreso actual del estudiante en esta clase
       const progreso = await this.prisma.progresoClaseEstudiante.findUnique({
         where: {
-          estudiante_id_clase_id: {
-            estudiante_id: event.estudianteId,
-            clase_id: event.claseId,
+          estudianteId_claseId: {
+            estudianteId: event.estudianteId,
+            claseId: event.claseId,
           },
         },
       });
 
       // Si ambas están completadas, emitir evento clase.completada
-      if (progreso?.teoria_completada && progreso?.practica_completada) {
+      if (progreso?.teoriaCompletada && progreso?.practicaCompletada) {
         // Obtener datos de la clase para el evento
         const clase = await this.prisma.clasePlanificacion.findUnique({
           where: { id: event.claseId },
@@ -587,20 +587,20 @@ export class AulaEventsListener {
 
         if (clase) {
           const tiempoTotal =
-            (progreso.tiempo_teoria_segundos || 0) +
-            (progreso.tiempo_practica_segundos || 0);
+            (progreso.tiempoTeoriaSegundos || 0) +
+            (progreso.tiempoPracticaSegundos || 0);
 
           // Buscar la asignación activa para este estudiante
           const asignacion =
             await this.prisma.asignacionPlanificacion.findFirst({
               where: {
-                planificacion_id: clase.planificacion.id,
+                planificacionId: clase.planificacion.id,
                 activa: true,
                 claseGrupo: {
                   inscripciones: {
                     some: {
-                      estudiante_id: event.estudianteId,
-                      fecha_baja: null,
+                      estudianteId: event.estudianteId,
+                      fechaBaja: null,
                     },
                   },
                 },
@@ -658,15 +658,15 @@ export class AulaEventsListener {
       // Obtener progresos del estudiante en todas las clases
       const progresos = await this.prisma.progresoClaseEstudiante.findMany({
         where: {
-          estudiante_id: event.estudianteId,
-          clase_id: { in: clasesIds },
+          estudianteId: event.estudianteId,
+          claseId: { in: clasesIds },
         },
       });
 
       // Verificar si TODAS las clases están completas (teoría + práctica)
       const todasCompletadas = clasesIds.every((claseId) => {
-        const progreso = progresos.find((p) => p.clase_id === claseId);
-        return progreso?.teoria_completada && progreso?.practica_completada;
+        const progreso = progresos.find((p) => p.claseId === claseId);
+        return progreso?.teoriaCompletada && progreso?.practicaCompletada;
       });
 
       if (todasCompletadas) {
@@ -674,8 +674,8 @@ export class AulaEventsListener {
         const tiempoTotal = progresos.reduce(
           (sum, p) =>
             sum +
-            (p.tiempo_teoria_segundos || 0) +
-            (p.tiempo_practica_segundos || 0),
+            (p.tiempoTeoriaSegundos || 0) +
+            (p.tiempoPracticaSegundos || 0),
           0,
         );
 
@@ -729,8 +729,8 @@ export class AulaEventsListener {
       // Contar lecciones completadas para logros de cantidad
       const totalCompletadas = await this.prisma.progresoClaseEstudiante.count({
         where: {
-          estudiante_id: estudianteId,
-          OR: [{ teoria_completada: true }, { practica_completada: true }],
+          estudianteId: estudianteId,
+          OR: [{ teoriaCompletada: true }, { practicaCompletada: true }],
         },
       });
 
@@ -797,7 +797,7 @@ export class AulaEventsListener {
       // Contar tareas completadas
       const totalTareas = await this.prisma.progresoTareaEstudiante.count({
         where: {
-          estudiante_id: estudianteId,
+          estudianteId: estudianteId,
           estado: 'COMPLETADA',
         },
       });
@@ -826,7 +826,7 @@ export class AulaEventsListener {
       // Contar tareas con calificación 100%
       const tareasPerfectas = await this.prisma.progresoTareaEstudiante.count({
         where: {
-          estudiante_id: estudianteId,
+          estudianteId: estudianteId,
           calificacion: { gte: 100 },
         },
       });
@@ -858,9 +858,9 @@ export class AulaEventsListener {
       // Contar clases completamente terminadas (teoría + práctica)
       const clasesCompletas = await this.prisma.progresoClaseEstudiante.count({
         where: {
-          estudiante_id: estudianteId,
-          teoria_completada: true,
-          practica_completada: true,
+          estudianteId: estudianteId,
+          teoriaCompletada: true,
+          practicaCompletada: true,
         },
       });
 
@@ -942,12 +942,12 @@ export class AulaEventsListener {
 
       await this.prisma.actividadFeed.create({
         data: {
-          estudiante_id: estudianteId,
+          estudianteId: estudianteId,
           tipo,
           mensaje,
-          xp_ganado: xpGanado,
+          xpGanado: xpGanado,
           metadata,
-          casa_id: estudiante?.casaId,
+          casaId: estudiante?.casaId,
         },
       });
 

@@ -29,7 +29,7 @@ describe('WebhookPaymentQueueService', () => {
     id: 123456789,
     live_mode: true,
     type: 'payment',
-    user_id: '123456',
+    userId: '123456',
   });
 
   beforeEach(async () => {

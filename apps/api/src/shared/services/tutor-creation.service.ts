@@ -154,7 +154,7 @@ export class TutorCreationService {
         apellido: '',
         email: data.email.toLowerCase(),
         username: username,
-        password_hash: passwordHash,
+        passwordHash: passwordHash,
         telefono: data.telefono,
         cuil: data.cuil,
         dni: data.dni,

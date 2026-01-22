@@ -11,8 +11,8 @@ import { PrismaService } from '../core/database/prisma.service';
  */
 interface PrecioFamiliarResult {
   subtotal: number;
-  descuento_porcentaje: number;
-  descuento_monto: number;
+  descuentoPorcentaje: number;
+  descuentoMonto: number;
   total: number;
 }
 
@@ -20,8 +20,8 @@ interface PrecioFamiliarResult {
  * Configuración de mundos por tier
  */
 interface MundosTierConfig {
-  mundos_async: number;
-  mundos_sync: number;
+  mundosAsync: number;
+  mundosSync: number;
 }
 
 /**
@@ -29,15 +29,15 @@ interface MundosTierConfig {
  */
 interface CambioTierResult {
   id: string;
-  tipo_cambio: 'upgrade' | 'downgrade';
-  aplicacion_inmediata: boolean;
-  fecha_efectiva: Date;
-  tier_actual: TierNombre;
-  tier_pendiente: TierNombre;
-  cambio_aplicado: boolean;
+  tipoCambio: 'upgrade' | 'downgrade';
+  aplicacionInmediata: boolean;
+  fechaEfectiva: Date;
+  tierActual: TierNombre;
+  tierPendiente: TierNombre;
+  cambioAplicado: boolean;
   estado: 'pendiente' | 'aplicado' | 'cancelado';
-  accesos_removidos?: string[];
-  mundos_async_permitidos?: number;
+  accesosRemovidos?: string[];
+  mundosAsyncPermitidos?: number;
 }
 
 /**
@@ -46,7 +46,7 @@ interface CambioTierResult {
 interface CancelacionResult {
   id: string;
   estado: 'cancelado';
-  cancelado_en: Date;
+  canceladoEn: Date;
 }
 
 /**
@@ -61,30 +61,30 @@ interface CancelacionResult {
 const TIER_CONFIG: Record<
   TierNombre,
   MundosTierConfig & {
-    tiene_docente: boolean;
-    precio_mensual: number;
+    tieneDocente: boolean;
+    precioMensual: number;
     orden: number;
   }
 > = {
   [TierNombre.STEAM_LIBROS]: {
-    mundos_async: 3, // Acceso a todos los mundos (Mate, Progra, Ciencias)
-    mundos_sync: 0,
-    tiene_docente: false,
-    precio_mensual: 40000,
+    mundosAsync: 3, // Acceso a todos los mundos (Mate, Progra, Ciencias)
+    mundosSync: 0,
+    tieneDocente: false,
+    precioMensual: 40000,
     orden: 1,
   },
   [TierNombre.STEAM_ASINCRONICO]: {
-    mundos_async: 3,
-    mundos_sync: 0,
-    tiene_docente: false,
-    precio_mensual: 65000,
+    mundosAsync: 3,
+    mundosSync: 0,
+    tieneDocente: false,
+    precioMensual: 65000,
     orden: 2,
   },
   [TierNombre.STEAM_SINCRONICO]: {
-    mundos_async: 3,
-    mundos_sync: 1,
-    tiene_docente: true,
-    precio_mensual: 95000,
+    mundosAsync: 3,
+    mundosSync: 1,
+    tieneDocente: true,
+    precioMensual: 95000,
     orden: 3,
   },
 };
@@ -114,7 +114,7 @@ export class TiersService {
   async findAll(): Promise<Tier[]> {
     return this.prisma.tier.findMany({
       where: { activo: true },
-      orderBy: { precio_mensual: 'asc' },
+      orderBy: { precioMensual: 'asc' },
     });
   }
 
@@ -161,43 +161,43 @@ export class TiersService {
    * no al primer estudiante.
    */
   calcularPrecioFamiliar(
-    tiers: Pick<Tier, 'precio_mensual'>[],
+    tiers: Pick<Tier, 'precioMensual'>[],
   ): PrecioFamiliarResult {
     if (tiers.length === 0) {
       return {
         subtotal: 0,
-        descuento_porcentaje: 0,
-        descuento_monto: 0,
+        descuentoPorcentaje: 0,
+        descuentoMonto: 0,
         total: 0,
       };
     }
 
-    const subtotal = tiers.reduce((acc, tier) => acc + tier.precio_mensual, 0);
+    const subtotal = tiers.reduce((acc, tier) => acc + tier.precioMensual, 0);
     const cantidadHijos = tiers.length;
 
     // Descuento solo aplica a partir del 2do hermano
     // El 10% se aplica al monto de los hermanos adicionales (no al primero)
-    let descuento_monto = 0;
+    let descuentoMonto = 0;
     if (cantidadHijos >= 2) {
       // Calcular el monto de los hermanos adicionales (todos menos el primero)
       const montoHermanosAdicionales = tiers
         .slice(1)
-        .reduce((acc, tier) => acc + tier.precio_mensual, 0);
-      descuento_monto = Math.round(
+        .reduce((acc, tier) => acc + tier.precioMensual, 0);
+      descuentoMonto = Math.round(
         montoHermanosAdicionales * (DESCUENTO_SEGUNDO_HERMANO / 100),
       );
     }
 
-    const total = subtotal - descuento_monto;
+    const total = subtotal - descuentoMonto;
 
     // Calcular porcentaje efectivo sobre el subtotal
-    const descuento_porcentaje =
-      subtotal > 0 ? Math.round((descuento_monto / subtotal) * 100) : 0;
+    const descuentoPorcentaje =
+      subtotal > 0 ? Math.round((descuentoMonto / subtotal) * 100) : 0;
 
     return {
       subtotal,
-      descuento_porcentaje,
-      descuento_monto,
+      descuentoPorcentaje,
+      descuentoMonto,
       total,
     };
   }
@@ -221,9 +221,9 @@ export class TiersService {
 
     switch (tierNombre) {
       case TierNombre.STEAM_LIBROS:
-        if (mundosAsync.length > config.mundos_async) {
+        if (mundosAsync.length > config.mundosAsync) {
           throw new BadRequestException(
-            `STEAM_LIBROS permite máximo ${config.mundos_async} mundos async`,
+            `STEAM_LIBROS permite máximo ${config.mundosAsync} mundos async`,
           );
         }
         if (mundosSync.length > 0) {
@@ -234,9 +234,9 @@ export class TiersService {
         break;
 
       case TierNombre.STEAM_ASINCRONICO:
-        if (mundosAsync.length > config.mundos_async) {
+        if (mundosAsync.length > config.mundosAsync) {
           throw new BadRequestException(
-            `STEAM_ASINCRONICO permite máximo ${config.mundos_async} mundos async`,
+            `STEAM_ASINCRONICO permite máximo ${config.mundosAsync} mundos async`,
           );
         }
         if (mundosSync.length > 0) {
@@ -247,14 +247,14 @@ export class TiersService {
         break;
 
       case TierNombre.STEAM_SINCRONICO:
-        if (mundosAsync.length > config.mundos_async) {
+        if (mundosAsync.length > config.mundosAsync) {
           throw new BadRequestException(
-            `STEAM_SINCRONICO permite máximo ${config.mundos_async} mundos async`,
+            `STEAM_SINCRONICO permite máximo ${config.mundosAsync} mundos async`,
           );
         }
-        if (mundosSync.length > config.mundos_sync) {
+        if (mundosSync.length > config.mundosSync) {
           throw new BadRequestException(
-            `STEAM_SINCRONICO permite máximo ${config.mundos_sync} mundo sync`,
+            `STEAM_SINCRONICO permite máximo ${config.mundosSync} mundo sync`,
           );
         }
         break;
@@ -268,8 +268,8 @@ export class TiersService {
   getCantidadMundosPorTier(tierNombre: TierNombre): MundosTierConfig {
     const config = TIER_CONFIG[tierNombre];
     return {
-      mundos_async: config.mundos_async,
-      mundos_sync: config.mundos_sync,
+      mundosAsync: config.mundosAsync,
+      mundosSync: config.mundosSync,
     };
   }
 
@@ -277,7 +277,7 @@ export class TiersService {
    * Indica si un tier incluye acceso a docente
    */
   tieneDocente(tierNombre: TierNombre): boolean {
-    return TIER_CONFIG[tierNombre].tiene_docente;
+    return TIER_CONFIG[tierNombre].tieneDocente;
   }
 
   /**
@@ -327,12 +327,12 @@ export class TiersService {
     // Preparar resultado base
     const result: CambioTierResult = {
       id: this.generateCambioTierId(),
-      tipo_cambio: tipoCambio,
-      aplicacion_inmediata: aplicacionInmediata,
-      fecha_efectiva: fechaEfectiva,
-      tier_actual: tierActual,
-      tier_pendiente: tierNuevo,
-      cambio_aplicado: cambioAplicado,
+      tipoCambio: tipoCambio,
+      aplicacionInmediata: aplicacionInmediata,
+      fechaEfectiva: fechaEfectiva,
+      tierActual: tierActual,
+      tierPendiente: tierNuevo,
+      cambioAplicado: cambioAplicado,
       estado: cambioAplicado ? 'aplicado' : 'pendiente',
     };
 
@@ -341,17 +341,17 @@ export class TiersService {
       const accesosRemovidos: string[] = [];
 
       // Si el tier actual tiene docente y el nuevo no, se remueve
-      if (configActual.tiene_docente && !configNuevo.tiene_docente) {
+      if (configActual.tieneDocente && !configNuevo.tieneDocente) {
         accesosRemovidos.push('docente');
       }
 
       // Si el tier actual tiene mundos sync y el nuevo no, se remueven
-      if (configActual.mundos_sync > 0 && configNuevo.mundos_sync === 0) {
+      if (configActual.mundosSync > 0 && configNuevo.mundosSync === 0) {
         accesosRemovidos.push('mundo_sync');
       }
 
-      result.accesos_removidos = accesosRemovidos;
-      result.mundos_async_permitidos = configNuevo.mundos_async;
+      result.accesosRemovidos = accesosRemovidos;
+      result.mundosAsyncPermitidos = configNuevo.mundosAsync;
     }
 
     return result;
@@ -366,7 +366,7 @@ export class TiersService {
     return {
       id: cambioTierId,
       estado: 'cancelado',
-      cancelado_en: new Date(),
+      canceladoEn: new Date(),
     };
   }
 

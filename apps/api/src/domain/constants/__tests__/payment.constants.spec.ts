@@ -236,7 +236,7 @@ describe('Payment Constants', () => {
     });
   });
 
-  describe('Integración: generar y parsear external_reference', () => {
+  describe('Integración: generar y parsear externalReference', () => {
     it('debe generar y parsear CLASE_INSCRIPCION correctamente', () => {
       const claseId = 'clase123';
       const estudianteId = 'estudiante456';

@@ -74,9 +74,9 @@ function IsCuidArray(validationOptions?: ValidationOptions) {
  * DTO para crear una nueva suscripción
  *
  * Validaciones:
- * - plan_id: CUID requerido del plan de suscripción (formato Prisma)
- * - estudiante_ids: Array de CUIDs, mínimo 1 estudiante
- * - clase_grupo_id: Opcional, requerido solo si el plan es ASYNC o SYNC
+ * - planId: CUID requerido del plan de suscripción (formato Prisma)
+ * - estudianteIds: Array de CUIDs, mínimo 1 estudiante
+ * - claseGrupoId: Opcional, requerido solo si el plan es ASYNC o SYNC
  *
  * Campos opcionales para MercadoPago Bricks (cobro inmediato):
  * - card_token_id: Token generado por Bricks (uso único, no persistir)
@@ -87,18 +87,18 @@ function IsCuidArray(validationOptions?: ValidationOptions) {
  * 2. Con card_token_id + payer_email → Cobro inmediato con Bricks
  */
 export class CrearSuscripcionDto {
-  @IsCuidLocal({ message: 'plan_id debe ser un CUID válido' })
+  @IsCuidLocal({ message: 'planId debe ser un CUID válido' })
   @IsString()
-  plan_id: string;
+  planId: string;
 
   @IsArray()
   @ArrayMinSize(1, { message: 'Debe seleccionar al menos un estudiante' })
-  @IsCuidArray({ message: 'estudiante_ids debe contener CUIDs válidos' })
-  estudiante_ids: string[];
+  @IsCuidArray({ message: 'estudianteIds debe contener CUIDs válidos' })
+  estudianteIds: string[];
 
   @IsOptional()
-  @IsCuidLocal({ message: 'clase_grupo_id debe ser un CUID válido' })
-  clase_grupo_id?: string;
+  @IsCuidLocal({ message: 'claseGrupoId debe ser un CUID válido' })
+  claseGrupoId?: string;
 
   /**
    * Token de tarjeta generado por MercadoPago Bricks

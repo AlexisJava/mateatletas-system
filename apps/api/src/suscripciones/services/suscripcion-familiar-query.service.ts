@@ -35,7 +35,7 @@ export class SuscripcionFamiliarQueryService {
     tutorId: string,
   ): Promise<SuscripcionFamiliarDetalle | null> {
     const suscripcion = await this.prisma.suscripcionFamiliar.findUnique({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
       include: {
         tutor: {
           select: { nombre: true, apellido: true },
@@ -44,20 +44,20 @@ export class SuscripcionFamiliarQueryService {
           where: { estado: EstadoInscripcionActividad.ACTIVA },
           select: {
             id: true,
-            estudiante_id: true,
-            producto_id: true,
-            clase_grupo_id: true,
-            comision_id: true,
+            estudianteId: true,
+            productoId: true,
+            claseGrupoId: true,
+            comisionId: true,
             estado: true,
             tier: true, // MODELO 2026: tier por inscripción
-            fecha_inicio: true,
-            fecha_fin: true,
+            fechaInicio: true,
+            fechaFin: true,
             estudiante: { select: { id: true, nombre: true, apellido: true } },
             producto: { select: { id: true, nombre: true, precio: true } },
-            clase_grupo: { select: { id: true, nombre: true } },
+            claseGrupo: { select: { id: true, nombre: true } },
             comision: { select: { id: true, nombre: true } },
           },
-          orderBy: { created_at: 'asc' },
+          orderBy: { createdAt: 'asc' },
         },
       },
     });
@@ -86,20 +86,20 @@ export class SuscripcionFamiliarQueryService {
           where: { estado: EstadoInscripcionActividad.ACTIVA },
           select: {
             id: true,
-            estudiante_id: true,
-            producto_id: true,
-            clase_grupo_id: true,
-            comision_id: true,
+            estudianteId: true,
+            productoId: true,
+            claseGrupoId: true,
+            comisionId: true,
             estado: true,
             tier: true, // MODELO 2026: tier por inscripción
-            fecha_inicio: true,
-            fecha_fin: true,
+            fechaInicio: true,
+            fechaFin: true,
             estudiante: { select: { id: true, nombre: true, apellido: true } },
             producto: { select: { id: true, nombre: true, precio: true } },
-            clase_grupo: { select: { id: true, nombre: true } },
+            claseGrupo: { select: { id: true, nombre: true } },
             comision: { select: { id: true, nombre: true } },
           },
-          orderBy: { created_at: 'asc' },
+          orderBy: { createdAt: 'asc' },
         },
       },
     });
@@ -112,7 +112,7 @@ export class SuscripcionFamiliarQueryService {
     }
 
     // Verificar ownership si se proporciona tutorId
-    if (tutorId && suscripcion.tutor_id !== tutorId) {
+    if (tutorId && suscripcion.tutorId !== tutorId) {
       throw new SuscripcionFamiliarError(
         'No autorizado',
         SuscripcionFamiliarErrorCode.UNAUTHORIZED,
@@ -132,7 +132,7 @@ export class SuscripcionFamiliarQueryService {
   ): Promise<CalculoMontoMensualResult> {
     // Obtener suscripción actual si existe
     const suscripcion = await this.prisma.suscripcionFamiliar.findUnique({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
       include: {
         inscripciones: {
           where: { estado: EstadoInscripcionActividad.ACTIVA },
@@ -222,26 +222,26 @@ export class SuscripcionFamiliarQueryService {
             where: { estado: EstadoInscripcionActividad.ACTIVA },
             select: {
               id: true,
-              estudiante_id: true,
-              producto_id: true,
-              clase_grupo_id: true,
-              comision_id: true,
+              estudianteId: true,
+              productoId: true,
+              claseGrupoId: true,
+              comisionId: true,
               estado: true,
               tier: true, // MODELO 2026: tier por inscripción
-              fecha_inicio: true,
-              fecha_fin: true,
+              fechaInicio: true,
+              fechaFin: true,
               estudiante: {
                 select: { id: true, nombre: true, apellido: true },
               },
               producto: { select: { id: true, nombre: true, precio: true } },
-              clase_grupo: { select: { id: true, nombre: true } },
+              claseGrupo: { select: { id: true, nombre: true } },
               comision: { select: { id: true, nombre: true } },
             },
           },
         },
         skip,
         take: limit,
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
       }),
       this.prisma.suscripcionFamiliar.count({ where }),
     ]);
@@ -263,34 +263,34 @@ export class SuscripcionFamiliarQueryService {
    */
   private mapToDetalle(suscripcion: {
     id: string;
-    tutor_id: string;
+    tutorId: string;
     tutor: { nombre: string; apellido: string };
     estado: string;
     tier: string;
-    monto_mensual: number;
-    fecha_proximo_cobro: Date | null;
-    fecha_gracia: Date | null;
-    created_at: Date;
-    updated_at: Date;
+    montoMensual: number;
+    fechaProximoCobro: Date | null;
+    fechaGracia: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
     inscripciones: Array<{
       id: string;
-      estudiante_id: string;
+      estudianteId: string;
       estudiante: { id: string; nombre: string; apellido: string };
-      producto_id: string;
+      productoId: string;
       producto: {
         id: string;
         nombre: string;
         precio: { toNumber: () => number } | null;
       };
-      clase_grupo_id: string | null;
-      clase_grupo: { id: string; nombre: string } | null;
-      comision_id: string | null;
+      claseGrupoId: string | null;
+      claseGrupo: { id: string; nombre: string } | null;
+      comisionId: string | null;
       comision: { id: string; nombre: string } | null;
       estado: string;
       /** Tier específico de esta inscripción (MODELO 2026) */
       tier: string | null;
-      fecha_inicio: Date;
-      fecha_fin: Date | null;
+      fechaInicio: Date;
+      fechaFin: Date | null;
     }>;
   }): SuscripcionFamiliarDetalle {
     const tierSuscripcion =
@@ -336,13 +336,13 @@ export class SuscripcionFamiliarQueryService {
 
         return {
           id: insc.id,
-          estudianteId: insc.estudiante_id,
+          estudianteId: insc.estudianteId,
           estudianteNombre: `${insc.estudiante.nombre} ${insc.estudiante.apellido}`,
-          productoId: insc.producto_id,
+          productoId: insc.productoId,
           productoNombre: insc.producto.nombre,
-          claseGrupoId: insc.clase_grupo_id,
-          claseGrupoNombre: insc.clase_grupo?.nombre ?? null,
-          comisionId: insc.comision_id,
+          claseGrupoId: insc.claseGrupoId,
+          claseGrupoNombre: insc.claseGrupo?.nombre ?? null,
+          comisionId: insc.comisionId,
           comisionNombre: insc.comision?.nombre ?? null,
           estado: insc.estado,
           tier: tierInsc,
@@ -351,14 +351,14 @@ export class SuscripcionFamiliarQueryService {
           descuentoAplicado,
           esMasCara,
           ordenInscripcion: index + 1,
-          fechaInicio: insc.fecha_inicio,
-          fechaFin: insc.fecha_fin,
+          fechaInicio: insc.fechaInicio,
+          fechaFin: insc.fechaFin,
         };
       });
 
     // Contar estudiantes únicos
     const estudiantesUnicos = new Set(
-      suscripcion.inscripciones.map((i) => i.estudiante_id),
+      suscripcion.inscripciones.map((i) => i.estudianteId),
     );
 
     // MODELO 2026: El monto mensual se calcula dinámicamente basado en
@@ -367,18 +367,18 @@ export class SuscripcionFamiliarQueryService {
 
     return {
       id: suscripcion.id,
-      tutorId: suscripcion.tutor_id,
+      tutorId: suscripcion.tutorId,
       tutorNombre: `${suscripcion.tutor.nombre} ${suscripcion.tutor.apellido}`,
       estado: suscripcion.estado as SuscripcionFamiliarDetalle['estado'],
       tier: tierSuscripcion,
       montoMensual: montoMensualCalculado,
-      fechaProximoCobro: suscripcion.fecha_proximo_cobro,
-      fechaGracia: suscripcion.fecha_gracia,
+      fechaProximoCobro: suscripcion.fechaProximoCobro,
+      fechaGracia: suscripcion.fechaGracia,
       inscripciones: inscripcionesDetalle,
       cantidadEstudiantes: estudiantesUnicos.size,
       cantidadActividades: suscripcion.inscripciones.length,
-      createdAt: suscripcion.created_at,
-      updatedAt: suscripcion.updated_at,
+      createdAt: suscripcion.createdAt,
+      updatedAt: suscripcion.updatedAt,
     };
   }
 }

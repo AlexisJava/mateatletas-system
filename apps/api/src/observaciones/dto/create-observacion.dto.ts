@@ -16,10 +16,10 @@ import { TipoObservacion, PrioridadObservacion } from '@prisma/client';
  *
  * Reglas de negocio:
  * - RN-002: Debe incluir al menos 1 estudiante
- * - RN-003: fecha_evento no puede ser futura
+ * - RN-003: fechaEvento no puede ser futura
  * - RN-004: contenido mínimo 10 caracteres, máximo 2000
- * - RN-005: Si prioridad=Urgente, auto-setear notificar_admin=true (en service)
- * - RN-006: Si tipo=Incidente, auto-setear requiere_seguimiento=true (en service)
+ * - RN-005: Si prioridad=Urgente, auto-setear notificarAdmin=true (en service)
+ * - RN-006: Si tipo=Incidente, auto-setear requiereSeguimiento=true (en service)
  */
 export class CreateObservacionDto {
   @IsArray({ message: 'estudianteIds debe ser un array' })

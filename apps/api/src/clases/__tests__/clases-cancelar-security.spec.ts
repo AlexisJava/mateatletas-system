@@ -13,11 +13,11 @@ describe('ClaseCommandService - Cancelar Clase Security', () => {
     id: 'clase-123',
     nombre: 'Matemáticas Avanzadas',
     estado: 'Programada',
-    docente_id: 'docente-123',
-    fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
+    docenteId: 'docente-123',
+    fechaHoraInicio: new Date('2025-12-01T10:00:00Z'),
     inscripciones: [
-      { id: 'insc-1', estudiante_id: 'est-1' },
-      { id: 'insc-2', estudiante_id: 'est-2' },
+      { id: 'insc-1', estudianteId: 'est-1' },
+      { id: 'insc-2', estudianteId: 'est-2' },
     ],
   };
 
@@ -61,7 +61,7 @@ describe('ClaseCommandService - Cancelar Clase Security', () => {
       jest.spyOn(prisma.clase, 'update').mockResolvedValue({
         ...mockClaseProgramada,
         estado: 'Cancelada',
-        cupos_ocupados: 0,
+        cuposOcupados: 0,
       } as any);
 
       // Verificar que funciona con los 3 parámetros obligatorios
@@ -96,7 +96,7 @@ describe('ClaseCommandService - Cancelar Clase Security', () => {
       jest.spyOn(prisma.clase, 'update').mockResolvedValue({
         ...mockClaseProgramada,
         estado: 'Cancelada',
-        cupos_ocupados: 0,
+        cuposOcupados: 0,
         docente: { nombre: 'Juan', apellido: 'Perez' },
       } as any);
 
@@ -111,7 +111,7 @@ describe('ClaseCommandService - Cancelar Clase Security', () => {
         where: { id: 'clase-123' },
         data: {
           estado: 'Cancelada',
-          cupos_ocupados: 0,
+          cuposOcupados: 0,
         },
         include: {
           docente: { select: { nombre: true, apellido: true } },
@@ -127,7 +127,7 @@ describe('ClaseCommandService - Cancelar Clase Security', () => {
       jest.spyOn(prisma.clase, 'update').mockResolvedValue({
         ...mockClaseProgramada,
         estado: 'Cancelada',
-        cupos_ocupados: 0,
+        cuposOcupados: 0,
         docente: { nombre: 'Juan', apellido: 'Perez' },
       } as any);
 
@@ -184,17 +184,17 @@ describe('ClaseCommandService - Cancelar Clase Security', () => {
       ).rejects.toThrow('La clase ya está cancelada');
     });
 
-    it('should update clase estado and reset cupos_ocupados', async () => {
+    it('should update clase estado and reset cuposOcupados', async () => {
       // ✅ Test de regresión: funcionalidad existente
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue({
         ...mockClaseProgramada,
-        cupos_ocupados: 15,
+        cuposOcupados: 15,
       } as any);
 
       jest.spyOn(prisma.clase, 'update').mockResolvedValue({
         ...mockClaseProgramada,
         estado: 'Cancelada',
-        cupos_ocupados: 0,
+        cuposOcupados: 0,
         docente: { nombre: 'Juan', apellido: 'Perez' },
       } as any);
 
@@ -204,7 +204,7 @@ describe('ClaseCommandService - Cancelar Clase Security', () => {
         'admin',
       );
 
-      expect(result.cupos_ocupados).toBe(0);
+      expect(result.cuposOcupados).toBe(0);
       expect(result.estado).toBe('Cancelada');
     });
   });

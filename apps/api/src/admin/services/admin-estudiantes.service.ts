@@ -118,21 +118,21 @@ export class AdminEstudiantesService {
               icono: true,
             },
           },
-          inscripciones_clase_grupo: {
+          inscripcionesClaseGrupo: {
             where: {
-              fecha_baja: null, // Solo inscripciones activas
+              fechaBaja: null, // Solo inscripciones activas
             },
             select: {
               id: true,
-              fecha_inscripcion: true,
+              fechaInscripcion: true,
               claseGrupo: {
                 select: {
                   id: true,
                   codigo: true,
                   nombre: true,
-                  dia_semana: true,
-                  hora_inicio: true,
-                  hora_fin: true,
+                  diaSemana: true,
+                  horaInicio: true,
+                  horaFin: true,
                   activo: true,
                   grupo: {
                     select: {
@@ -147,7 +147,7 @@ export class AdminEstudiantesService {
             },
           },
           recursos: {
-            select: { xp_total: true },
+            select: { xpTotal: true },
           },
           plan: {
             select: {
@@ -170,22 +170,22 @@ export class AdminEstudiantesService {
       username: est.username, // Para credenciales en admin
       edad: est.edad,
       nivelEscolar: est.nivelEscolar, // Convertir a camelCase para el frontend
-      nivel_actual: est.nivel_actual,
-      xp_total: est.recursos?.xp_total ?? 0,
+      nivelActual: est.nivelActual,
+      xpTotal: est.recursos?.xpTotal ?? 0,
       tutor: est.tutor,
       casa: est.casa,
       sector: est.sector,
       // GRUPOS: Inscripciones activas en grupos
-      inscripciones_grupos: est.inscripciones_clase_grupo.map((insc) => ({
+      inscripcionesGrupos: est.inscripcionesClaseGrupo.map((insc) => ({
         id: insc.id,
-        fecha_inscripcion: insc.fecha_inscripcion,
-        clase_grupo: {
+        fechaInscripcion: insc.fechaInscripcion,
+        claseGrupo: {
           id: insc.claseGrupo.id,
           codigo: insc.claseGrupo.codigo,
           nombre: insc.claseGrupo.nombre,
-          dia_semana: insc.claseGrupo.dia_semana,
-          hora_inicio: insc.claseGrupo.hora_inicio,
-          hora_fin: insc.claseGrupo.hora_fin,
+          diaSemana: insc.claseGrupo.diaSemana,
+          horaInicio: insc.claseGrupo.horaInicio,
+          horaFin: insc.claseGrupo.horaFin,
           activo: insc.claseGrupo.activo,
         },
         grupo: insc.claseGrupo.grupo,
@@ -194,7 +194,7 @@ export class AdminEstudiantesService {
       updatedAt: est.updatedAt,
       // Plan de suscripción
       plan: est.plan,
-      estado_acceso: est.estado_acceso,
+      estadoAcceso: est.estadoAcceso,
     }));
 
     return {
@@ -222,8 +222,8 @@ export class AdminEstudiantesService {
     tutorEmail?: string;
     tutorTelefono?: string;
     // Plan de suscripción (opcional)
-    plan_id?: string | null;
-    estado_acceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
+    planId?: string | null;
+    estadoAcceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
   }) {
     // Validar datos del estudiante
     if (!data.nombre || !data.apellido) {
@@ -265,7 +265,7 @@ export class AdminEstudiantesService {
       tutor = await this.prisma.tutor.create({
         data: {
           email: tutorEmail,
-          password_hash: passwordHash,
+          passwordHash: passwordHash,
           nombre: tutorNombre,
           apellido: tutorApellido,
           telefono: data.tutorTelefono || null,
@@ -286,11 +286,11 @@ export class AdminEstudiantesService {
           username: await this.generarUsernameUnico(data.nombre, data.apellido),
           edad: data.edad,
           nivelEscolar: data.nivelEscolar,
-          tutor_id: tutor.id,
-          nivel_actual: 1,
+          tutorId: tutor.id,
+          nivelActual: 1,
           // Plan de suscripción (opcional)
-          ...(data.plan_id && { plan_id: data.plan_id }),
-          ...(data.estado_acceso && { estado_acceso: data.estado_acceso }),
+          ...(data.planId && { planId: data.planId }),
+          ...(data.estadoAcceso && { estadoAcceso: data.estadoAcceso }),
         },
         include: {
           tutor: {
@@ -313,8 +313,8 @@ export class AdminEstudiantesService {
       // Auto-crear RecursosEstudiante para evitar FK violations en queries de XP
       await tx.recursosEstudiante.create({
         data: {
-          estudiante_id: est.id,
-          xp_total: 0,
+          estudianteId: est.id,
+          xpTotal: 0,
         },
       });
 
@@ -325,7 +325,7 @@ export class AdminEstudiantesService {
       success: true,
       message: 'Estudiante creado exitosamente',
       estudiante,
-      tutor_creado: !data.tutorExistenteId, // Indica si se creó un tutor nuevo
+      tutorCreado: !data.tutorExistenteId, // Indica si se creó un tutor nuevo
     };
   }
 
@@ -338,8 +338,8 @@ export class AdminEstudiantesService {
       nombre?: string;
       apellido?: string;
       edad?: number;
-      nivel_escolar?: 'Primaria' | 'Secundaria' | 'Universidad';
-      tutor_id?: string;
+      nivelEscolar?: 'Primaria' | 'Secundaria' | 'Universidad';
+      tutorId?: string;
     },
   ) {
     // Verificar que el estudiante existe
@@ -352,14 +352,14 @@ export class AdminEstudiantesService {
     }
 
     // Si se cambia el tutor, verificar que existe
-    if (data.tutor_id) {
+    if (data.tutorId) {
       const tutorExiste = await this.prisma.tutor.findUnique({
-        where: { id: data.tutor_id },
+        where: { id: data.tutorId },
       });
 
       if (!tutorExiste) {
         throw new NotFoundException(
-          `Tutor con ID ${data.tutor_id} no encontrado`,
+          `Tutor con ID ${data.tutorId} no encontrado`,
         );
       }
     }
@@ -371,8 +371,8 @@ export class AdminEstudiantesService {
         ...(data.nombre && { nombre: data.nombre }),
         ...(data.apellido && { apellido: data.apellido }),
         ...(data.edad && { edad: data.edad }),
-        ...(data.nivel_escolar && { nivelEscolar: data.nivel_escolar }),
-        ...(data.tutor_id && { tutor_id: data.tutor_id }),
+        ...(data.nivelEscolar && { nivelEscolar: data.nivelEscolar }),
+        ...(data.tutorId && { tutorId: data.tutorId }),
       },
       include: {
         tutor: {
@@ -419,10 +419,10 @@ export class AdminEstudiantesService {
    * Obtener estadísticas de un estudiante
    *
    * OPTIMIZACIÓN SELECT:
-   * - ANTES: Cargaba tutor completo (incluía password_hash!)
+   * - ANTES: Cargaba tutor completo (incluía passwordHash!)
    * - ANTES: Cargaba clase completa en cada inscripción
    * - AHORA: Select solo campos necesarios
-   * - SECURITY: Excluye password_hash del tutor
+   * - SECURITY: Excluye passwordHash del tutor
    * - Reducción: ~70% del payload size
    */
   async obtenerEstadisticasEstudiante(id: string) {
@@ -433,9 +433,9 @@ export class AdminEstudiantesService {
         nombre: true,
         apellido: true,
         edad: true,
-        nivel_actual: true,
+        nivelActual: true,
         recursos: {
-          select: { xp_total: true },
+          select: { xpTotal: true },
         },
         tutor: {
           select: {
@@ -444,7 +444,7 @@ export class AdminEstudiantesService {
             apellido: true,
             email: true,
             telefono: true,
-            // SECURITY: Excluye password_hash
+            // SECURITY: Excluye passwordHash
           },
         },
         casa: {
@@ -455,7 +455,7 @@ export class AdminEstudiantesService {
             colorSecondary: true,
           },
         },
-        inscripciones_clase: {
+        inscripcionesClase: {
           select: {
             id: true,
             clase: {
@@ -463,7 +463,7 @@ export class AdminEstudiantesService {
                 id: true,
                 nombre: true,
                 estado: true,
-                fecha_hora_inicio: true,
+                fechaHoraInicio: true,
               },
             },
           },
@@ -481,22 +481,22 @@ export class AdminEstudiantesService {
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
         edad: estudiante.edad,
-        nivel_actual: estudiante.nivel_actual,
-        xp_total: estudiante.recursos?.xp_total ?? 0,
+        nivelActual: estudiante.nivelActual,
+        xpTotal: estudiante.recursos?.xpTotal ?? 0,
       },
       tutor: estudiante.tutor,
       casa: estudiante.casa,
       estadisticas: {
-        clases_inscritas: estudiante.inscripciones_clase.length,
-        clases_completadas: estudiante.inscripciones_clase.filter(
+        clasesInscritas: estudiante.inscripcionesClase.length,
+        clasesCompletadas: estudiante.inscripcionesClase.filter(
           (insc) =>
             insc.clase.estado === 'Programada' &&
-            new Date(insc.clase.fecha_hora_inicio) < new Date(),
+            new Date(insc.clase.fechaHoraInicio) < new Date(),
         ).length,
-        clases_pendientes: estudiante.inscripciones_clase.filter(
+        clasesPendientes: estudiante.inscripcionesClase.filter(
           (insc) =>
             insc.clase.estado === 'Programada' &&
-            new Date(insc.clase.fecha_hora_inicio) >= new Date(),
+            new Date(insc.clase.fechaHoraInicio) >= new Date(),
         ).length,
       },
     };
@@ -597,8 +597,8 @@ export class AdminEstudiantesService {
             email: dto.emailTutor,
             telefono: dto.telefonoTutor,
             dni: dto.dniTutor,
-            password_hash: tutorPasswordHash,
-            debe_completar_perfil: false,
+            passwordHash: tutorPasswordHash,
+            debeCompletarPerfil: false,
             roles: ['tutor'],
           },
         });
@@ -617,12 +617,12 @@ export class AdminEstudiantesService {
           username: estudianteUsername,
           edad: dto.edadEstudiante,
           nivelEscolar: dto.nivelEscolar,
-          tutor_id: tutor.id,
-          password_hash: estudiantePinHash,
-          sector_id: dto.sectorId,
+          tutorId: tutor.id,
+          passwordHash: estudiantePinHash,
+          sectorId: dto.sectorId,
           casaId: dto.casaId || null,
-          nivel_actual: dto.nivelInicial ?? 1,
-          avatar_gradient: 0,
+          nivelActual: dto.nivelInicial ?? 1,
+          avatarGradient: 0,
           fotoUrl: null,
         },
       });
@@ -630,8 +630,8 @@ export class AdminEstudiantesService {
       // Auto-crear RecursosEstudiante para evitar FK violations en queries de XP
       await tx.recursosEstudiante.create({
         data: {
-          estudiante_id: estudiante.id,
-          xp_total: 0,
+          estudianteId: estudiante.id,
+          xpTotal: 0,
         },
       });
 
@@ -660,10 +660,10 @@ export class AdminEstudiantesService {
   async asignarPlan(
     estudianteId: string,
     data: {
-      plan_id?: string | null;
-      estado_acceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
-      fecha_vencimiento_plan?: string | null;
-      notas_plan?: string | null;
+      planId?: string | null;
+      estadoAcceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
+      fechaVencimientoPlan?: string | null;
+      notasPlan?: string | null;
     },
   ) {
     // Verificar que el estudiante existe
@@ -678,16 +678,14 @@ export class AdminEstudiantesService {
       );
     }
 
-    // Si se proporciona plan_id, verificar que el plan existe
-    if (data.plan_id) {
+    // Si se proporciona planId, verificar que el plan existe
+    if (data.planId) {
       const planExiste = await this.prisma.planSuscripcion.findUnique({
-        where: { id: data.plan_id },
+        where: { id: data.planId },
       });
 
       if (!planExiste) {
-        throw new NotFoundException(
-          `Plan con ID ${data.plan_id} no encontrado`,
-        );
+        throw new NotFoundException(`Plan con ID ${data.planId} no encontrado`);
       }
     }
 
@@ -695,14 +693,14 @@ export class AdminEstudiantesService {
     const estudianteActualizado = await this.prisma.estudiante.update({
       where: { id: estudianteId },
       data: {
-        plan_id: data.plan_id === null ? null : data.plan_id,
-        estado_acceso: data.estado_acceso,
-        fecha_vencimiento_plan: data.fecha_vencimiento_plan
-          ? new Date(data.fecha_vencimiento_plan)
-          : data.fecha_vencimiento_plan === null
+        planId: data.planId === null ? null : data.planId,
+        estadoAcceso: data.estadoAcceso,
+        fechaVencimientoPlan: data.fechaVencimientoPlan
+          ? new Date(data.fechaVencimientoPlan)
+          : data.fechaVencimientoPlan === null
             ? null
             : undefined,
-        notas_plan: data.notas_plan === null ? null : data.notas_plan,
+        notasPlan: data.notasPlan === null ? null : data.notasPlan,
       },
       include: {
         plan: true,
@@ -717,12 +715,12 @@ export class AdminEstudiantesService {
     });
 
     this.logger.log(
-      `Plan asignado a estudiante ${estudiante.nombre} ${estudiante.apellido}: ${data.plan_id ?? 'heredado del tutor'}`,
+      `Plan asignado a estudiante ${estudiante.nombre} ${estudiante.apellido}: ${data.planId ?? 'heredado del tutor'}`,
     );
 
     return {
       success: true,
-      message: data.plan_id
+      message: data.planId
         ? `Plan asignado exitosamente a ${estudiante.nombre} ${estudiante.apellido}`
         : `Plan removido - ${estudiante.nombre} ${estudiante.apellido} ahora hereda del tutor`,
       estudiante: {
@@ -730,9 +728,9 @@ export class AdminEstudiantesService {
         nombre: estudianteActualizado.nombre,
         apellido: estudianteActualizado.apellido,
         plan: estudianteActualizado.plan,
-        estado_acceso: estudianteActualizado.estado_acceso,
-        fecha_vencimiento_plan: estudianteActualizado.fecha_vencimiento_plan,
-        notas_plan: estudianteActualizado.notas_plan,
+        estadoAcceso: estudianteActualizado.estadoAcceso,
+        fechaVencimientoPlan: estudianteActualizado.fechaVencimientoPlan,
+        notasPlan: estudianteActualizado.notasPlan,
         tutor: estudianteActualizado.tutor,
       },
     };
@@ -745,12 +743,12 @@ export class AdminEstudiantesService {
   async obtenerPlanesDisponibles() {
     const planes = await this.prisma.planSuscripcion.findMany({
       where: { activo: true },
-      orderBy: { precio_base: 'asc' },
+      orderBy: { precioBase: 'asc' },
       select: {
         id: true,
         nombre: true,
         descripcion: true,
-        precio_base: true,
+        precioBase: true,
       },
     });
 

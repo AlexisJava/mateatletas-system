@@ -40,17 +40,17 @@ export class InscripcionMensualRepository
   async crear(datos: CrearInscripcionMensualDTO): Promise<InscripcionMensual> {
     const inscripcion = await this.prisma.inscripcionMensual.create({
       data: {
-        estudiante_id: datos.estudianteId,
-        producto_id: datos.productoId,
-        tutor_id: datos.tutorId,
+        estudianteId: datos.estudianteId,
+        productoId: datos.productoId,
+        tutorId: datos.tutorId,
         anio: datos.anio,
         mes: datos.mes,
         periodo: datos.periodo,
-        precio_base: datos.precioBase,
-        descuento_aplicado: datos.descuentoAplicado,
-        precio_final: datos.precioFinal,
-        tipo_descuento: datos.tipoDescuento,
-        detalle_calculo: datos.detalleCalculo,
+        precioBase: datos.precioBase,
+        descuentoAplicado: datos.descuentoAplicado,
+        precioFinal: datos.precioFinal,
+        tipoDescuento: datos.tipoDescuento,
+        detalleCalculo: datos.detalleCalculo,
       },
     });
 
@@ -66,7 +66,7 @@ export class InscripcionMensualRepository
   ): Promise<InscripcionMensual[]> {
     const inscripciones = await this.prisma.inscripcionMensual.findMany({
       where: {
-        estudiante_id: estudianteId,
+        estudianteId: estudianteId,
         periodo,
       },
       orderBy: { createdAt: 'desc' },
@@ -84,7 +84,7 @@ export class InscripcionMensualRepository
   ): Promise<InscripcionMensual[]> {
     const inscripciones = await this.prisma.inscripcionMensual.findMany({
       where: {
-        tutor_id: tutorId,
+        tutorId: tutorId,
         periodo,
       },
       orderBy: { createdAt: 'desc' },
@@ -101,7 +101,7 @@ export class InscripcionMensualRepository
     periodo?: string,
   ): Promise<InscripcionMensual[]> {
     const where: Prisma.InscripcionMensualWhereInput = {
-      estado_pago: estado as PrismaEstadoPago,
+      estadoPago: estado as PrismaEstadoPago,
     };
 
     if (periodo) {
@@ -126,10 +126,10 @@ export class InscripcionMensualRepository
     const inscripcion = await this.prisma.inscripcionMensual.update({
       where: { id: inscripcionId },
       data: {
-        estado_pago: datos.estadoPago,
-        fecha_pago: datos.fechaPago || null,
-        metodo_pago: datos.metodoPago || null,
-        comprobante_url: datos.comprobanteUrl || null,
+        estadoPago: datos.estadoPago,
+        fechaPago: datos.fechaPago || null,
+        metodoPago: datos.metodoPago || null,
+        comprobanteUrl: datos.comprobanteUrl || null,
         observaciones: datos.observaciones || null,
       },
     });
@@ -146,7 +146,7 @@ export class InscripcionMensualRepository
   ): Promise<TotalMensual> {
     const inscripciones = await this.prisma.inscripcionMensual.findMany({
       where: {
-        tutor_id: tutorId,
+        tutorId: tutorId,
         periodo,
       },
     });
@@ -156,11 +156,11 @@ export class InscripcionMensualRepository
     let totalPagado = new Decimal(0);
 
     for (const inscripcion of inscripciones) {
-      const precioFinal = new Decimal(inscripcion.precio_final.toString());
+      const precioFinal = new Decimal(inscripcion.precioFinal.toString());
 
-      if (inscripcion.estado_pago === PrismaEstadoPago.Pagado) {
+      if (inscripcion.estadoPago === PrismaEstadoPago.Pagado) {
         totalPagado = totalPagado.plus(precioFinal);
-      } else if (inscripcion.estado_pago === PrismaEstadoPago.Pendiente) {
+      } else if (inscripcion.estadoPago === PrismaEstadoPago.Pendiente) {
         totalPendiente = totalPendiente.plus(precioFinal);
       }
     }
@@ -187,8 +187,8 @@ export class InscripcionMensualRepository
   ): Promise<boolean> {
     const count = await this.prisma.inscripcionMensual.count({
       where: {
-        estudiante_id: estudianteId,
-        producto_id: productoId,
+        estudianteId: estudianteId,
+        productoId: productoId,
         periodo,
       },
     });
@@ -205,7 +205,7 @@ export class InscripcionMensualRepository
   ): Promise<MetricasPeriodo> {
     const where: Prisma.InscripcionMensualWhereInput = { periodo };
     if (tutorId) {
-      where.tutor_id = tutorId;
+      where.tutorId = tutorId;
     }
 
     const inscripciones = await this.prisma.inscripcionMensual.findMany({
@@ -221,15 +221,15 @@ export class InscripcionMensualRepository
     let cantidadVencidas = 0;
 
     for (const inscripcion of inscripciones) {
-      const precioFinal = new Decimal(inscripcion.precio_final.toString());
+      const precioFinal = new Decimal(inscripcion.precioFinal.toString());
 
-      if (inscripcion.estado_pago === PrismaEstadoPago.Pagado) {
+      if (inscripcion.estadoPago === PrismaEstadoPago.Pagado) {
         totalIngresos = totalIngresos.plus(precioFinal);
         cantidadPagadas++;
-      } else if (inscripcion.estado_pago === PrismaEstadoPago.Pendiente) {
+      } else if (inscripcion.estadoPago === PrismaEstadoPago.Pendiente) {
         totalPendientes = totalPendientes.plus(precioFinal);
         cantidadPendientes++;
-      } else if (inscripcion.estado_pago === PrismaEstadoPago.Vencido) {
+      } else if (inscripcion.estadoPago === PrismaEstadoPago.Vencido) {
         totalVencidos = totalVencidos.plus(precioFinal);
         cantidadVencidas++;
       }
@@ -256,7 +256,7 @@ export class InscripcionMensualRepository
   ): Promise<InscripcionMensualConRelaciones[]> {
     const where: Prisma.InscripcionMensualWhereInput = { periodo };
     if (tutorId) {
-      where.tutor_id = tutorId;
+      where.tutorId = tutorId;
     }
 
     const inscripciones = await this.prisma.inscripcionMensual.findMany({
@@ -302,13 +302,13 @@ export class InscripcionMensualRepository
   ): Promise<EstudianteConDescuento[]> {
     const where: Prisma.InscripcionMensualWhereInput = { periodo };
     if (tutorId) {
-      where.tutor_id = tutorId;
+      where.tutorId = tutorId;
     }
 
     const inscripciones = await this.prisma.inscripcionMensual.findMany({
       where: {
         ...where,
-        tipo_descuento: {
+        tipoDescuento: {
           not: 'NINGUNO',
         },
       },
@@ -327,10 +327,10 @@ export class InscripcionMensualRepository
     const estudiantesMap = new Map<string, EstudianteConDescuento>();
 
     for (const inscripcion of inscripciones) {
-      const estudianteId = inscripcion.estudiante_id;
-      const precioBase = new Decimal(inscripcion.precio_base.toString());
-      const descuento = new Decimal(inscripcion.descuento_aplicado.toString());
-      const precioFinal = new Decimal(inscripcion.precio_final.toString());
+      const estudianteId = inscripcion.estudianteId;
+      const precioBase = new Decimal(inscripcion.precioBase.toString());
+      const descuento = new Decimal(inscripcion.descuentoAplicado.toString());
+      const precioFinal = new Decimal(inscripcion.precioFinal.toString());
 
       if (estudiantesMap.has(estudianteId)) {
         const existing = estudiantesMap.get(estudianteId)!;
@@ -345,8 +345,8 @@ export class InscripcionMensualRepository
         estudiantesMap.set(estudianteId, {
           estudianteId,
           estudianteNombre: `${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido}`,
-          tutorId: inscripcion.tutor_id,
-          tipoDescuento: this.mapearTipoDescuento(inscripcion.tipo_descuento),
+          tutorId: inscripcion.tutorId,
+          tipoDescuento: this.mapearTipoDescuento(inscripcion.tipoDescuento),
           totalDescuento: descuento,
           cantidadInscripciones: 1,
           precioOriginal: precioBase,
@@ -397,21 +397,21 @@ export class InscripcionMensualRepository
   ): InscripcionMensual {
     return {
       id: inscripcion.id,
-      estudianteId: inscripcion.estudiante_id,
-      productoId: inscripcion.producto_id,
-      tutorId: inscripcion.tutor_id,
+      estudianteId: inscripcion.estudianteId,
+      productoId: inscripcion.productoId,
+      tutorId: inscripcion.tutorId,
       anio: inscripcion.anio,
       mes: inscripcion.mes,
       periodo: inscripcion.periodo,
-      precioBase: new Decimal(inscripcion.precio_base.toString()),
-      descuentoAplicado: new Decimal(inscripcion.descuento_aplicado.toString()),
-      precioFinal: new Decimal(inscripcion.precio_final.toString()),
-      tipoDescuento: this.mapearTipoDescuento(inscripcion.tipo_descuento),
-      detalleCalculo: inscripcion.detalle_calculo,
-      estadoPago: this.mapearEstadoPago(inscripcion.estado_pago),
-      fechaPago: inscripcion.fecha_pago,
-      metodoPago: inscripcion.metodo_pago,
-      comprobanteUrl: inscripcion.comprobante_url,
+      precioBase: new Decimal(inscripcion.precioBase.toString()),
+      descuentoAplicado: new Decimal(inscripcion.descuentoAplicado.toString()),
+      precioFinal: new Decimal(inscripcion.precioFinal.toString()),
+      tipoDescuento: this.mapearTipoDescuento(inscripcion.tipoDescuento),
+      detalleCalculo: inscripcion.detalleCalculo,
+      estadoPago: this.mapearEstadoPago(inscripcion.estadoPago),
+      fechaPago: inscripcion.fechaPago,
+      metodoPago: inscripcion.metodoPago,
+      comprobanteUrl: inscripcion.comprobanteUrl,
       observaciones: inscripcion.observaciones,
       createdAt: inscripcion.createdAt,
       updatedAt: inscripcion.updatedAt,
@@ -429,7 +429,7 @@ export class InscripcionMensualRepository
   ): Promise<InscripcionMensual[]> {
     // Construir filtros dinámicamente
     const where: Prisma.InscripcionMensualWhereInput = {
-      tutor_id: tutorId,
+      tutorId: tutorId,
     };
 
     if (periodo) {
@@ -437,7 +437,7 @@ export class InscripcionMensualRepository
     }
 
     if (estadoPago) {
-      where.estado_pago = estadoPago as PrismaEstadoPago;
+      where.estadoPago = estadoPago as PrismaEstadoPago;
     }
 
     // Ejecutar query con filtros

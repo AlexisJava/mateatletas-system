@@ -27,12 +27,12 @@ export interface WebhookProcessedRecord {
  * - Corrupción de datos
  *
  * SOLUCIÓN:
- * - Guardar cada payment_id que procesamos en la tabla webhooks_processed
+ * - Guardar cada paymentId que procesamos en la tabla webhooks_processed
  * - Antes de procesar, verificar si ya existe
  * - Si existe, retornar 200 OK sin hacer nada
  *
  * GARANTÍA:
- * - UNIQUE constraint en payment_id previene doble procesamiento incluso en race conditions
+ * - UNIQUE constraint en paymentId previene doble procesamiento incluso en race conditions
  *
  * @injectable
  */
@@ -84,7 +84,7 @@ export class WebhookIdempotencyService {
 
     // 3. Consultar DB
     const existing = await this.prisma.webhookProcessed.findUnique({
-      where: { payment_id: paymentId },
+      where: { paymentId: paymentId },
     });
 
     // 4. Guardar resultado en cache
@@ -107,7 +107,7 @@ export class WebhookIdempotencyService {
     // 5. Retornar resultado
     if (existing) {
       this.logger.warn(
-        `⏭️ Webhook duplicado detectado: payment_id=${paymentId}, procesado originalmente en ${existing.processed_at.toISOString()}`,
+        `⏭️ Webhook duplicado detectado: paymentId=${paymentId}, procesado originalmente en ${existing.processedAt.toISOString()}`,
       );
       return true;
     }
@@ -134,15 +134,15 @@ export class WebhookIdempotencyService {
     try {
       await this.prisma.webhookProcessed.create({
         data: {
-          payment_id: data.paymentId,
-          webhook_type: data.webhookType,
+          paymentId: data.paymentId,
+          webhookType: data.webhookType,
           status: data.status,
-          external_reference: data.externalReference,
+          externalReference: data.externalReference,
         },
       });
 
       this.logger.log(
-        `✅ Webhook marcado como procesado: payment_id=${data.paymentId}, type=${data.webhookType}, status=${data.status}`,
+        `✅ Webhook marcado como procesado: paymentId=${data.paymentId}, type=${data.webhookType}, status=${data.status}`,
       );
 
       // Actualizar cache a 'true' (evitar cache stale)
@@ -164,7 +164,7 @@ export class WebhookIdempotencyService {
         error.code === 'P2002'
       ) {
         this.logger.warn(
-          `⚠️ Race condition detectada al marcar webhook: payment_id=${data.paymentId}. Otro proceso ya lo procesó.`,
+          `⚠️ Race condition detectada al marcar webhook: paymentId=${data.paymentId}. Otro proceso ya lo procesó.`,
         );
 
         // Aún así, actualizar cache a 'true' porque sabemos que existe
@@ -201,7 +201,7 @@ export class WebhookIdempotencyService {
 
     const result = await this.prisma.webhookProcessed.deleteMany({
       where: {
-        processed_at: {
+        processedAt: {
           lt: thirtyDaysAgo,
         },
       },
@@ -222,7 +222,7 @@ export class WebhookIdempotencyService {
    */
   async getProcessedInfo(paymentId: string) {
     return this.prisma.webhookProcessed.findUnique({
-      where: { payment_id: paymentId },
+      where: { paymentId: paymentId },
     });
   }
 
@@ -240,7 +240,7 @@ export class WebhookIdempotencyService {
 
       // Agrupados por tipo
       this.prisma.webhookProcessed.groupBy({
-        by: ['webhook_type'],
+        by: ['webhookType'],
         _count: true,
       }),
 
@@ -253,7 +253,7 @@ export class WebhookIdempotencyService {
       // Procesados en las últimas 24 horas
       this.prisma.webhookProcessed.count({
         where: {
-          processed_at: {
+          processedAt: {
             gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
           },
         },

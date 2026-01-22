@@ -66,11 +66,11 @@ describe('PaymentCommandService', () => {
       const mockInscripciones = [
         {
           id: 'INS001',
-          estudiante_id: 'EST001',
-          tutor_id: 'TUT001',
+          estudianteId: 'EST001',
+          tutorId: 'TUT001',
           periodo: '2025-01',
-          estado_pago: 'Pendiente',
-          precio_final: 100,
+          estadoPago: 'Pendiente',
+          precioFinal: 100,
           estudiante: {
             nombre: 'Juan',
             apellido: 'Pérez',
@@ -78,11 +78,11 @@ describe('PaymentCommandService', () => {
         },
         {
           id: 'INS002',
-          estudiante_id: 'EST001',
-          tutor_id: 'TUT001',
+          estudianteId: 'EST001',
+          tutorId: 'TUT001',
           periodo: '2025-01',
-          estado_pago: 'Pendiente',
-          precio_final: 150,
+          estadoPago: 'Pendiente',
+          precioFinal: 150,
           estudiante: {
             nombre: 'Juan',
             apellido: 'Pérez',
@@ -135,11 +135,11 @@ describe('PaymentCommandService', () => {
       const mockInscripciones = [
         {
           id: 'INS001',
-          estudiante_id: 'EST001',
-          tutor_id: 'TUT001',
+          estudianteId: 'EST001',
+          tutorId: 'TUT001',
           periodo: '2025-01',
-          estado_pago: 'Pendiente',
-          precio_final: 100,
+          estadoPago: 'Pendiente',
+          precioFinal: 100,
           estudiante: {
             nombre: 'María',
             apellido: 'López',
@@ -176,8 +176,8 @@ describe('PaymentCommandService', () => {
 
       const mockInscripcion = {
         id: inscripcionId,
-        estado_pago: 'Pagado',
-        fecha_pago: new Date(),
+        estadoPago: 'Pagado',
+        fechaPago: new Date(),
       };
 
       prismaService.inscripcionMensual.update.mockResolvedValue(
@@ -189,7 +189,7 @@ describe('PaymentCommandService', () => {
         estadoPago,
       );
 
-      expect(result.estado_pago).toBe('Pagado');
+      expect(result.estadoPago).toBe('Pagado');
       expect(stateMapper.mapearEstadoInscripcion).toHaveBeenCalledWith(
         estadoPago,
       );
@@ -212,8 +212,8 @@ describe('PaymentCommandService', () => {
 
       const mockInscripcion = {
         id: inscripcionId,
-        estado_pago: 'Pendiente',
-        fecha_pago: null,
+        estadoPago: 'Pendiente',
+        fechaPago: null,
       };
 
       prismaService.inscripcionMensual.update.mockResolvedValue(
@@ -225,8 +225,8 @@ describe('PaymentCommandService', () => {
         estadoPago,
       );
 
-      expect(result.estado_pago).toBe('Pendiente');
-      expect(result.fecha_pago).toBeNull();
+      expect(result.estadoPago).toBe('Pendiente');
+      expect(result.fechaPago).toBeNull();
     });
   });
 

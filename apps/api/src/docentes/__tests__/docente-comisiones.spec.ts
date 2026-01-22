@@ -89,8 +89,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Turno Mañana',
           horario: 'Lun-Vie 9:00-12:00',
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: mockCasa,
           inscripciones: [],
@@ -113,8 +113,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Turno Mañana',
           horario: 'Lunes 9:00',
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -123,8 +123,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-2',
           nombre: 'Turno Tarde',
           horario: 'Lunes 14:00',
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -133,8 +133,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-3',
           nombre: 'Turno Noche',
           horario: 'Lunes 19:00',
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -148,7 +148,7 @@ describe('DocenteStatsService - getMisComisiones', () => {
       expect(result).toHaveLength(3);
     });
 
-    it('1.3 Cada comisión incluye: id, nombre, producto, casa, horario, cupo_maximo', async () => {
+    it('1.3 Cada comisión incluye: id, nombre, producto, casa, horario, cupoMaximo', async () => {
       // Arrange
       validator.validarDocenteExiste.mockResolvedValue(undefined);
       (prisma.comision.findMany as jest.Mock).mockResolvedValue([
@@ -156,8 +156,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'QUANTUM Mañana',
           horario: 'Lunes 14:30',
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: mockCasa,
           inscripciones: [],
@@ -174,7 +174,7 @@ describe('DocenteStatsService - getMisComisiones', () => {
       expect(comision).toHaveProperty('producto');
       expect(comision).toHaveProperty('casa');
       expect(comision).toHaveProperty('horario', 'Lunes 14:30');
-      expect(comision).toHaveProperty('cupo_maximo', 20);
+      expect(comision).toHaveProperty('cupoMaximo', 20);
     });
 
     it('1.4 Cada comisión incluye inscripciones_count (conteo real)', async () => {
@@ -185,8 +185,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Comisión A',
           horario: 'Lunes 14:30',
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [{ id: 'insc-1' }, { id: 'insc-2' }],
@@ -208,8 +208,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Comisión Lunes',
           horario: 'Lunes 14:30',
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -222,8 +222,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
       // Assert
       expect(result[0]).toHaveProperty('proxima_clase');
       // proxima_clase debe ser una fecha ISO o null
-      if (result[0].proxima_clase) {
-        expect(new Date(result[0].proxima_clase).toString()).not.toBe(
+      if (result[0].proximaClase) {
+        expect(new Date(result[0].proximaClase).toString()).not.toBe(
           'Invalid Date',
         );
       }
@@ -237,8 +237,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Comisión con Thumbnail',
           horario: null,
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: {
             id: 'prod-1',
             nombre: 'Curso con Imagen',
@@ -268,8 +268,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Comisión QUANTUM',
           horario: null,
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: mockCasa,
           inscripciones: [],
@@ -296,8 +296,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Comisión Test',
           horario: null,
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: {
             id: 'prod-1',
             nombre: 'Curso Completo',
@@ -335,8 +335,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-viernes',
           nombre: 'Comisión Viernes',
           horario: 'Viernes 18:00',
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -345,8 +345,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-lunes',
           nombre: 'Comisión Lunes',
           horario: 'Lunes 9:00',
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -402,8 +402,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Comisión sin casa',
           horario: null,
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -425,8 +425,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Comisión Vacía',
           horario: null,
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -448,8 +448,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Comisión sin horario',
           horario: null,
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -460,7 +460,7 @@ describe('DocenteStatsService - getMisComisiones', () => {
       const result = await service.getMisComisiones(mockDocenteId);
 
       // Assert
-      expect(result[0].proxima_clase).toBeNull();
+      expect(result[0].proximaClase).toBeNull();
     });
 
     it('1.15 Comisión con horario inválido: proxima_clase = null', async () => {
@@ -471,8 +471,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Comisión horario inválido',
           horario: 'horario-invalido-sin-formato',
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -483,7 +483,7 @@ describe('DocenteStatsService - getMisComisiones', () => {
       const result = await service.getMisComisiones(mockDocenteId);
 
       // Assert
-      expect(result[0].proxima_clase).toBeNull();
+      expect(result[0].proximaClase).toBeNull();
     });
 
     // Tests 1.16-1.18 se refieren a autenticación/autorización que se manejan a nivel controller
@@ -519,8 +519,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Comisión Test',
           horario: null,
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [{ id: 'insc-1' }, { id: 'insc-2' }], // Solo las confirmadas
@@ -534,17 +534,17 @@ describe('DocenteStatsService - getMisComisiones', () => {
       expect(result[0].inscripciones_count).toBe(2);
     });
 
-    it('1.20 Filtra comisiones con fecha_fin pasada', async () => {
+    it('1.20 Filtra comisiones con fechaFin pasada', async () => {
       // Arrange
       validator.validarDocenteExiste.mockResolvedValue(undefined);
-      // La query ya filtra por fecha_fin, mock solo devuelve las activas
+      // La query ya filtra por fechaFin, mock solo devuelve las activas
       (prisma.comision.findMany as jest.Mock).mockResolvedValue([
         {
           id: 'comision-activa',
           nombre: 'Comisión Activa',
           horario: null,
-          cupo_maximo: 20,
-          fecha_fin: new Date('2030-12-31'),
+          cupoMaximo: 20,
+          fechaFin: new Date('2030-12-31'),
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -567,8 +567,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Comisión Lunes',
           horario: 'Lunes 14:30',
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -579,7 +579,7 @@ describe('DocenteStatsService - getMisComisiones', () => {
       const result = await service.getMisComisiones(mockDocenteId);
 
       // Assert
-      const proximaClase = result[0].proxima_clase;
+      const proximaClase = result[0].proximaClase;
       expect(proximaClase).not.toBeNull();
       if (proximaClase) {
         const fecha = new Date(proximaClase);
@@ -597,8 +597,8 @@ describe('DocenteStatsService - getMisComisiones', () => {
           id: 'comision-1',
           nombre: 'Comisión Lun/Mie',
           horario: 'Lun y Mie 19:00',
-          cupo_maximo: 20,
-          fecha_fin: null,
+          cupoMaximo: 20,
+          fechaFin: null,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -609,7 +609,7 @@ describe('DocenteStatsService - getMisComisiones', () => {
       const result = await service.getMisComisiones(mockDocenteId);
 
       // Assert
-      const proximaClase = result[0].proxima_clase;
+      const proximaClase = result[0].proximaClase;
       expect(proximaClase).not.toBeNull();
       if (proximaClase) {
         const fecha = new Date(proximaClase);
@@ -620,19 +620,19 @@ describe('DocenteStatsService - getMisComisiones', () => {
       }
     });
 
-    it('1.23 proxima_clase es null si fecha_fin ya pasó', async () => {
+    it('1.23 proxima_clase es null si fechaFin ya pasó', async () => {
       // Arrange
       validator.validarDocenteExiste.mockResolvedValue(undefined);
       // Simular que la query devuelve la comisión (por algún edge case)
-      // pero la fecha_fin ya pasó
+      // pero la fechaFin ya pasó
       const fechaPasada = new Date('2020-01-01');
       (prisma.comision.findMany as jest.Mock).mockResolvedValue([
         {
           id: 'comision-1',
           nombre: 'Comisión Finalizada',
           horario: 'Lunes 14:30',
-          cupo_maximo: 20,
-          fecha_fin: fechaPasada,
+          cupoMaximo: 20,
+          fechaFin: fechaPasada,
           producto: mockProducto,
           casa: null,
           inscripciones: [],
@@ -644,7 +644,7 @@ describe('DocenteStatsService - getMisComisiones', () => {
 
       // Assert
       // La comisión debería tener proxima_clase = null porque ya terminó
-      expect(result[0].proxima_clase).toBeNull();
+      expect(result[0].proximaClase).toBeNull();
     });
   });
 });

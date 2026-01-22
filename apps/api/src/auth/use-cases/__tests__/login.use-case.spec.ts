@@ -88,13 +88,13 @@ describe('LoginUseCase', () => {
       const mockTutor = {
         id: 'tutor-123',
         email: 'tutor@test.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Juan',
         apellido: 'Pérez',
         dni: '12345678',
         telefono: '1234567890',
-        fecha_registro: new Date(),
-        ha_completado_onboarding: true,
+        fechaRegistro: new Date(),
+        haCompletadoOnboarding: true,
         roles: '["tutor"]',
       };
 
@@ -152,7 +152,7 @@ describe('LoginUseCase', () => {
       const mockTutor = {
         id: 'tutor-123',
         email: 'tutor@test.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Juan',
         apellido: 'Pérez',
         roles: '["tutor"]',
@@ -182,7 +182,7 @@ describe('LoginUseCase', () => {
       const mockDocente = {
         id: 'docente-123',
         email: 'docente@test.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'María',
         apellido: 'González',
         titulo: 'Profesora de Matemáticas',
@@ -218,14 +218,14 @@ describe('LoginUseCase', () => {
       const mockAdmin = {
         id: 'admin-123',
         email: 'admin@test.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Carlos',
         apellido: 'Admin',
-        fecha_registro: new Date(),
+        fechaRegistro: new Date(),
         dni: '99999999',
         telefono: '9999999999',
         roles: '["admin"]',
-        mfa_enabled: false,
+        mfaEnabled: false,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(null);
@@ -245,19 +245,19 @@ describe('LoginUseCase', () => {
     });
 
     /**
-     * TEST 6: should_require_mfa_for_admin_with_mfa_enabled
+     * TEST 6: should_require_mfa_for_admin_with_mfaEnabled
      */
-    it('should_require_mfa_for_admin_with_mfa_enabled', async () => {
+    it('should_require_mfa_for_admin_with_mfaEnabled', async () => {
       const password = 'admin-password';
       const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
       const mockAdmin = {
         id: 'admin-mfa-123',
         email: 'admin-mfa@test.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Admin',
         apellido: 'MFA',
         roles: '["admin"]',
-        mfa_enabled: true,
+        mfaEnabled: true,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(null);
@@ -342,11 +342,11 @@ describe('LoginUseCase', () => {
       const mockTutor = {
         id: 'tutor-123',
         email: 'tutor@test.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Juan',
         apellido: 'Pérez',
         roles: '["tutor"]',
-        ha_completado_onboarding: true,
+        haCompletadoOnboarding: true,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(mockTutor);
@@ -379,11 +379,11 @@ describe('LoginUseCase', () => {
       const mockTutor = {
         id: 'tutor-event-123',
         email: 'tutor-event@test.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Event',
         apellido: 'User',
         roles: '["tutor"]',
-        ha_completado_onboarding: true,
+        haCompletadoOnboarding: true,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(mockTutor);
@@ -415,11 +415,11 @@ describe('LoginUseCase', () => {
       const mockAdmin = {
         id: 'admin-mfa-123',
         email: 'admin-mfa@test.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Admin',
         apellido: 'MFA',
         roles: '["admin"]',
-        mfa_enabled: true,
+        mfaEnabled: true,
       };
 
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(null);
@@ -449,13 +449,13 @@ describe('LoginUseCase', () => {
       const mockTutor = {
         id: 'tutor-structure',
         email: 'tutor@test.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Structure',
         apellido: 'Test',
         dni: '12345678',
         telefono: '1234567890',
-        fecha_registro: new Date(),
-        ha_completado_onboarding: false,
+        fechaRegistro: new Date(),
+        haCompletadoOnboarding: false,
         roles: '["tutor"]',
       };
 
@@ -476,7 +476,7 @@ describe('LoginUseCase', () => {
       expect(result.user).toHaveProperty('apellido');
       expect(result.user).toHaveProperty('dni');
       expect(result.user).toHaveProperty('telefono');
-      expect(result.user).toHaveProperty('ha_completado_onboarding');
+      expect(result.user).toHaveProperty('haCompletadoOnboarding');
       expect(result.user).toHaveProperty('role');
       expect(result.user).toHaveProperty('roles');
     });

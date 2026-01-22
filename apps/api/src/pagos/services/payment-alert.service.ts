@@ -273,16 +273,16 @@ export class PaymentAlertService {
       await this.prisma.auditLog.create({
         data: {
           action: `PAYMENT_ALERT:${alert.type}`,
-          entity_type: 'Payment',
-          entity_id: (alert.details.paymentId as string) || 'N/A',
-          user_id: null, // Sistema
-          user_type: 'system',
-          user_email: 'system@mateatletas.com',
+          entityType: 'Payment',
+          entityId: (alert.details.paymentId as string) || 'N/A',
+          userId: null, // Sistema
+          userType: 'system',
+          userEmail: 'system@mateatletas.com',
           category: 'SECURITY',
           severity:
             alert.severity === AlertSeverity.CRITICAL ? 'CRITICAL' : 'WARNING',
           timestamp: alert.timestamp,
-          ip_address: (alert.details.ip as string) || null,
+          ipAddress: (alert.details.ip as string) || null,
           description: alert.message,
           metadata: alert.details as object,
         },

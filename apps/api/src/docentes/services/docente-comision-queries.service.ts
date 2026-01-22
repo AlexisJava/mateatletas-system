@@ -31,7 +31,7 @@ const inscripcionManualInclude = {
 
 const inscripcionSuscripcionInclude = {
   estudiante: { include: estudianteInclude },
-  suscripcion_familiar: { select: { tutor: true } },
+  suscripcionFamiliar: { select: { tutor: true } },
 } satisfies Prisma.InscripcionActividadInclude;
 
 // ============================================================================
@@ -55,7 +55,7 @@ export interface EstudianteComisionResponse {
   id: string;
   nombre: string;
   apellido: string;
-  avatar_url: string | null;
+  avatarUrl: string | null;
   edad: number;
   casa: {
     id: string;
@@ -64,11 +64,11 @@ export interface EstudianteComisionResponse {
     colorPrimario: string;
   } | null;
   stats: {
-    xp_total: number;
+    xpTotal: number;
     nivel: number;
-    racha_actual: number;
-    asistencia_porcentaje: number;
-    ultima_asistencia: {
+    rachaActual: number;
+    asistenciaPorcentaje: number;
+    ultimaAsistencia: {
       fecha: Date;
       estado: string;
     } | null;
@@ -80,8 +80,8 @@ export interface EstudianteComisionResponse {
     email: string | null;
     telefono: string | null;
   } | null;
-  estado_inscripcion: string;
-  inscripcion_fecha: Date;
+  estadoInscripcion: string;
+  inscripcionFecha: Date;
   /** Fuente de la inscripción: 'MANUAL' (admin) o 'SUSCRIPCION_2026' (tutor via suscripción) */
   fuente: 'MANUAL' | 'SUSCRIPCION_2026';
 }
@@ -96,7 +96,7 @@ export interface MetricasComisionResponse {
 export interface AsistenciaFechaResponse {
   fecha: Date;
   asistencias: Array<{
-    estudiante_id: string;
+    estudianteId: string;
     nombre: string;
     estado: 'Presente' | 'Ausente' | 'Justificado';
     observacion: string | null;
@@ -109,12 +109,12 @@ export interface HistorialAsistenciaResponse {
 
 export interface PuntoOtorgadoResponse {
   id: string;
-  estudiante_id: string;
-  estudiante_nombre: string;
-  tipo_accion: string;
+  estudianteId: string;
+  estudianteNombre: string;
+  tipoAccion: string;
   puntos: number;
   contexto: string | null;
-  fecha_otorgado: Date;
+  fechaOtorgado: Date;
 }
 
 export interface HistorialPuntosComisionResponse {
@@ -163,7 +163,7 @@ export class DocenteComisionQueriesService {
         inscripcion.estudiante,
         comisionId,
         inscripcion.estado,
-        inscripcion.fecha_inscripcion,
+        inscripcion.fechaInscripcion,
         'MANUAL',
         inscripcion.estudiante.tutor,
       );
@@ -175,13 +175,13 @@ export class DocenteComisionQueriesService {
       if (estudiantesMap.has(inscripcion.estudiante.id)) continue;
       const tutorData =
         inscripcion.estudiante.tutor ??
-        inscripcion.suscripcion_familiar?.tutor ??
+        inscripcion.suscripcionFamiliar?.tutor ??
         null;
       const response = await this.mapEstudianteToResponse(
         inscripcion.estudiante,
         comisionId,
         inscripcion.estado,
-        inscripcion.fecha_inicio,
+        inscripcion.fechaInicio,
         'SUSCRIPCION_2026',
         tutorData,
       );
@@ -212,7 +212,7 @@ export class DocenteComisionQueriesService {
     const comision = await this.prisma.comision.findFirst({
       where: {
         id: comisionId,
-        docente_id: docenteId,
+        docenteId: docenteId,
       },
     });
 
@@ -225,14 +225,14 @@ export class DocenteComisionQueriesService {
       // FUENTE 1: InscripcionComision (manual/admin/becas)
       this.prisma.inscripcionComision.count({
         where: {
-          comision_id: comisionId,
+          comisionId: comisionId,
           estado: { not: 'Cancelada' },
         },
       }),
       // FUENTE 2: InscripcionActividad (suscripción 2026)
       this.prisma.inscripcionActividad.count({
         where: {
-          comision_id: comisionId,
+          comisionId: comisionId,
           estado: 'ACTIVA',
         },
       }),
@@ -242,7 +242,7 @@ export class DocenteComisionQueriesService {
     // Total de clases (fechas únicas con asistencias registradas)
     const clasesDistintas = await this.prisma.asistenciaComision.groupBy({
       by: ['fecha'],
-      where: { comision_id: comisionId },
+      where: { comisionId: comisionId },
     });
     const totalClasesDadas = clasesDistintas.length;
 
@@ -250,11 +250,11 @@ export class DocenteComisionQueriesService {
     let asistenciaPromedio = 0;
     if (totalClasesDadas > 0) {
       const totalAsistencias = await this.prisma.asistenciaComision.count({
-        where: { comision_id: comisionId },
+        where: { comisionId: comisionId },
       });
       const presentes = await this.prisma.asistenciaComision.count({
         where: {
-          comision_id: comisionId,
+          comisionId: comisionId,
           estado: 'Presente',
         },
       });
@@ -264,29 +264,29 @@ export class DocenteComisionQueriesService {
           : 0;
     }
 
-    // Total XP de estudiantes en esta comisión (suma de xp_total de cada estudiante)
+    // Total XP de estudiantes en esta comisión (suma de xpTotal de cada estudiante)
     const [xpManuales, xpSuscripcion] = await Promise.all([
       // FUENTE 1: XP de estudiantes con inscripción manual
       this.prisma.inscripcionComision.findMany({
         where: {
-          comision_id: comisionId,
+          comisionId: comisionId,
           estado: { not: 'Cancelada' },
         },
         select: {
           estudiante: {
-            select: { recursos: { select: { xp_total: true } } },
+            select: { recursos: { select: { xpTotal: true } } },
           },
         },
       }),
       // FUENTE 2: XP de estudiantes con suscripción
       this.prisma.inscripcionActividad.findMany({
         where: {
-          comision_id: comisionId,
+          comisionId: comisionId,
           estado: 'ACTIVA',
         },
         select: {
           estudiante: {
-            select: { recursos: { select: { xp_total: true } } },
+            select: { recursos: { select: { xpTotal: true } } },
           },
         },
       }),
@@ -294,11 +294,11 @@ export class DocenteComisionQueriesService {
 
     // Sumar XP de ambas fuentes
     const totalXpManuales = xpManuales.reduce(
-      (sum, insc) => sum + (insc.estudiante.recursos?.xp_total ?? 0),
+      (sum, insc) => sum + (insc.estudiante.recursos?.xpTotal ?? 0),
       0,
     );
     const totalXpSuscripcion = xpSuscripcion.reduce(
-      (sum, insc) => sum + (insc.estudiante.recursos?.xp_total ?? 0),
+      (sum, insc) => sum + (insc.estudiante.recursos?.xpTotal ?? 0),
       0,
     );
     const totalPuntosOtorgados = totalXpManuales + totalXpSuscripcion;
@@ -332,7 +332,7 @@ export class DocenteComisionQueriesService {
     const comision = await this.prisma.comision.findFirst({
       where: {
         id: comisionId,
-        docente_id: docenteId,
+        docenteId: docenteId,
       },
     });
 
@@ -342,10 +342,10 @@ export class DocenteComisionQueriesService {
 
     // Construir filtro de fechas
     const whereClause: {
-      comision_id: string;
+      comisionId: string;
       fecha?: { gte?: Date; lte?: Date };
     } = {
-      comision_id: comisionId,
+      comisionId: comisionId,
     };
 
     if (desde || hasta) {
@@ -385,7 +385,7 @@ export class DocenteComisionQueriesService {
       const fechaEntry = fechasMap.get(fechaKey);
       if (fechaEntry) {
         fechaEntry.asistencias.push({
-          estudiante_id: asistencia.estudiante.id,
+          estudianteId: asistencia.estudiante.id,
           nombre: `${asistencia.estudiante.nombre} ${asistencia.estudiante.apellido}`,
           estado: asistencia.estado as 'Presente' | 'Ausente' | 'Justificado',
           observacion: asistencia.observacion,
@@ -422,20 +422,20 @@ export class DocenteComisionQueriesService {
     const [inscripcionesManuales, inscripcionesSuscripcion] = await Promise.all(
       [
         this.prisma.inscripcionComision.findMany({
-          where: { comision_id: comisionId, estado: { not: 'Cancelada' } },
-          select: { estudiante_id: true },
+          where: { comisionId: comisionId, estado: { not: 'Cancelada' } },
+          select: { estudianteId: true },
         }),
         this.prisma.inscripcionActividad.findMany({
-          where: { comision_id: comisionId, estado: 'ACTIVA' },
-          select: { estudiante_id: true },
+          where: { comisionId: comisionId, estado: 'ACTIVA' },
+          select: { estudianteId: true },
         }),
       ],
     );
 
     const estudianteIds = [
       ...new Set([
-        ...inscripcionesManuales.map((i) => i.estudiante_id),
-        ...inscripcionesSuscripcion.map((i) => i.estudiante_id),
+        ...inscripcionesManuales.map((i) => i.estudianteId),
+        ...inscripcionesSuscripcion.map((i) => i.estudianteId),
       ]),
     ];
 
@@ -445,16 +445,16 @@ export class DocenteComisionQueriesService {
 
     // Construir filtro de fechas
     const whereClause: {
-      estudiante_id: { in: string[] };
-      fecha_otorgado?: { gte?: Date; lte?: Date };
+      estudianteId: { in: string[] };
+      fechaOtorgado?: { gte?: Date; lte?: Date };
     } = {
-      estudiante_id: { in: estudianteIds },
+      estudianteId: { in: estudianteIds },
     };
 
     if (desde || hasta) {
-      whereClause.fecha_otorgado = {};
-      if (desde) whereClause.fecha_otorgado.gte = desde;
-      if (hasta) whereClause.fecha_otorgado.lte = hasta;
+      whereClause.fechaOtorgado = {};
+      if (desde) whereClause.fechaOtorgado.gte = desde;
+      if (hasta) whereClause.fechaOtorgado.lte = hasta;
     }
 
     // Obtener puntos otorgados
@@ -465,7 +465,7 @@ export class DocenteComisionQueriesService {
           select: { id: true, nombre: true, apellido: true },
         },
       },
-      orderBy: { fecha_otorgado: 'desc' },
+      orderBy: { fechaOtorgado: 'desc' },
       take: 100, // Limitar a los últimos 100 registros
     });
 
@@ -475,12 +475,12 @@ export class DocenteComisionQueriesService {
     return {
       puntos: puntosOtorgados.map((p) => ({
         id: p.id,
-        estudiante_id: p.estudiante.id,
-        estudiante_nombre: `${p.estudiante.nombre} ${p.estudiante.apellido}`,
-        tipo_accion: p.tipo_accion,
+        estudianteId: p.estudiante.id,
+        estudianteNombre: `${p.estudiante.nombre} ${p.estudiante.apellido}`,
+        tipoAccion: p.tipoAccion,
         puntos: p.puntos,
         contexto: p.contexto,
-        fecha_otorgado: p.fecha_otorgado,
+        fechaOtorgado: p.fechaOtorgado,
       })),
       totalPuntos,
       totalRegistros: puntosOtorgados.length,
@@ -499,7 +499,7 @@ export class DocenteComisionQueriesService {
     docenteId: string,
   ): Promise<void> {
     const comision = await this.prisma.comision.findFirst({
-      where: { id: comisionId, docente_id: docenteId },
+      where: { id: comisionId, docenteId: docenteId },
     });
     if (!comision) {
       throw new Error('Comisión no encontrada o no tienes acceso');
@@ -513,7 +513,7 @@ export class DocenteComisionQueriesService {
     comisionId: string,
   ): Promise<InscripcionManualWithEstudiante[]> {
     return this.prisma.inscripcionComision.findMany({
-      where: { comision_id: comisionId, estado: { not: 'Cancelada' } },
+      where: { comisionId: comisionId, estado: { not: 'Cancelada' } },
       include: inscripcionManualInclude,
     });
   }
@@ -525,7 +525,7 @@ export class DocenteComisionQueriesService {
     comisionId: string,
   ): Promise<InscripcionSuscripcionWithEstudiante[]> {
     return this.prisma.inscripcionActividad.findMany({
-      where: { comision_id: comisionId, estado: 'ACTIVA' },
+      where: { comisionId: comisionId, estado: 'ACTIVA' },
       include: inscripcionSuscripcionInclude,
     });
   }
@@ -543,7 +543,7 @@ export class DocenteComisionQueriesService {
   ): Promise<EstudianteComisionResponse> {
     const [ultimaAsistencia, asistenciaPorcentaje] = await Promise.all([
       this.prisma.asistenciaComision.findFirst({
-        where: { estudiante_id: est.id, comision_id: comisionId },
+        where: { estudianteId: est.id, comisionId: comisionId },
         orderBy: { fecha: 'desc' },
       }),
       this.calcularAsistenciaPorcentaje(est.id, comisionId),
@@ -553,7 +553,7 @@ export class DocenteComisionQueriesService {
       id: est.id,
       nombre: est.nombre,
       apellido: est.apellido,
-      avatar_url: est.fotoUrl,
+      avatarUrl: est.fotoUrl,
       edad: est.edad ?? 0,
       casa: est.casa
         ? {
@@ -564,11 +564,11 @@ export class DocenteComisionQueriesService {
           }
         : null,
       stats: {
-        xp_total: est.recursos?.xp_total ?? 0,
-        nivel: est.nivel_actual ?? 1,
-        racha_actual: est.racha?.racha_actual ?? 0,
-        asistencia_porcentaje: asistenciaPorcentaje,
-        ultima_asistencia: ultimaAsistencia
+        xpTotal: est.recursos?.xpTotal ?? 0,
+        nivel: est.nivelActual ?? 1,
+        rachaActual: est.racha?.rachaActual ?? 0,
+        asistenciaPorcentaje: asistenciaPorcentaje,
+        ultimaAsistencia: ultimaAsistencia
           ? { fecha: ultimaAsistencia.fecha, estado: ultimaAsistencia.estado }
           : null,
       },
@@ -581,8 +581,8 @@ export class DocenteComisionQueriesService {
             telefono: tutorData.telefono,
           }
         : null,
-      estado_inscripcion: estadoInscripcion,
-      inscripcion_fecha: fechaInscripcion,
+      estadoInscripcion: estadoInscripcion,
+      inscripcionFecha: fechaInscripcion,
       fuente,
     };
   }
@@ -595,7 +595,7 @@ export class DocenteComisionQueriesService {
     comisionId: string,
   ): Promise<number> {
     const totalAsistencias = await this.prisma.asistenciaComision.count({
-      where: { estudiante_id: estudianteId, comision_id: comisionId },
+      where: { estudianteId: estudianteId, comisionId: comisionId },
     });
 
     if (totalAsistencias === 0) {
@@ -604,8 +604,8 @@ export class DocenteComisionQueriesService {
 
     const presentes = await this.prisma.asistenciaComision.count({
       where: {
-        estudiante_id: estudianteId,
-        comision_id: comisionId,
+        estudianteId: estudianteId,
+        comisionId: comisionId,
         estado: 'Presente',
       },
     });

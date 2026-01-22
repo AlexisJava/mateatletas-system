@@ -165,10 +165,10 @@ describe('AulaEventsListener', () => {
       (
         prisma.progresoClaseEstudiante.findUnique as jest.Mock
       ).mockResolvedValue({
-        teoria_completada: true,
-        practica_completada: false,
-        tiempo_teoria_segundos: 600,
-        tiempo_practica_segundos: 0,
+        teoriaCompletada: true,
+        practicaCompletada: false,
+        tiempoTeoriaSegundos: 600,
+        tiempoPracticaSegundos: 0,
       });
       (prisma.progresoClaseEstudiante.count as jest.Mock).mockResolvedValue(1);
     });
@@ -222,10 +222,10 @@ describe('AulaEventsListener', () => {
       (
         prisma.progresoClaseEstudiante.findUnique as jest.Mock
       ).mockResolvedValue({
-        teoria_completada: true,
-        practica_completada: true,
-        tiempo_teoria_segundos: 600,
-        tiempo_practica_segundos: 400,
+        teoriaCompletada: true,
+        practicaCompletada: true,
+        tiempoTeoriaSegundos: 600,
+        tiempoPracticaSegundos: 400,
       });
       (prisma.clasePlanificacion.findUnique as jest.Mock).mockResolvedValue({
         id: mockClaseId,
@@ -261,8 +261,8 @@ describe('AulaEventsListener', () => {
       (
         prisma.progresoClaseEstudiante.findUnique as jest.Mock
       ).mockResolvedValue({
-        teoria_completada: true,
-        practica_completada: false,
+        teoriaCompletada: true,
+        practicaCompletada: false,
       });
 
       // Act
@@ -373,9 +373,9 @@ describe('AulaEventsListener', () => {
       expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            estudiante_id: mockEstudianteId,
+            estudianteId: mockEstudianteId,
             tipo: TipoActividadFeed.TAREA_COMPLETADA,
-            xp_ganado: 45,
+            xpGanado: 45,
           }),
         }),
       );
@@ -587,18 +587,18 @@ describe('AulaEventsListener', () => {
         .fn()
         .mockResolvedValue([
           {
-            clase_id: 'clase-1',
-            teoria_completada: true,
-            practica_completada: true,
-            tiempo_teoria_segundos: 300,
-            tiempo_practica_segundos: 300,
+            claseId: 'clase-1',
+            teoriaCompletada: true,
+            practicaCompletada: true,
+            tiempoTeoriaSegundos: 300,
+            tiempoPracticaSegundos: 300,
           },
           {
-            clase_id: 'clase-2',
-            teoria_completada: true,
-            practica_completada: true,
-            tiempo_teoria_segundos: 300,
-            tiempo_practica_segundos: 300,
+            claseId: 'clase-2',
+            teoriaCompletada: true,
+            practicaCompletada: true,
+            tiempoTeoriaSegundos: 300,
+            tiempoPracticaSegundos: 300,
           },
         ]);
 
@@ -626,9 +626,9 @@ describe('AulaEventsListener', () => {
         .fn()
         .mockResolvedValue([
           {
-            clase_id: 'clase-1',
-            teoria_completada: true,
-            practica_completada: true,
+            claseId: 'clase-1',
+            teoriaCompletada: true,
+            practicaCompletada: true,
           },
           // clase-2 no tiene progreso
         ]);
@@ -684,7 +684,7 @@ describe('AulaEventsListener', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             tipo: TipoActividadFeed.PLANIFICACION_COMPLETADA,
-            xp_ganado: 200,
+            xpGanado: 200,
           }),
         }),
       );
@@ -727,7 +727,7 @@ describe('AulaEventsListener', () => {
   // TESTS: crearEntradaFeed (método privado, testeado indirectamente)
   // ============================================================================
   describe('crearEntradaFeed', () => {
-    it('should_include_casa_id_from_estudiante', async () => {
+    it('should_include_casaId_from_estudiante', async () => {
       // Arrange
       (prisma.estudiante.findUnique as jest.Mock).mockResolvedValue({
         casaId: 'casa-especifica-123',
@@ -742,7 +742,7 @@ describe('AulaEventsListener', () => {
       expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            casa_id: 'casa-especifica-123',
+            casaId: 'casa-especifica-123',
           }),
         }),
       );
@@ -763,7 +763,7 @@ describe('AulaEventsListener', () => {
       expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            casa_id: null,
+            casaId: null,
           }),
         }),
       );
@@ -851,10 +851,10 @@ describe('AulaEventsListener', () => {
       expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            estudiante_id: mockEstudianteId,
+            estudianteId: mockEstudianteId,
             tipo: TipoActividadFeed.NIVEL_SUBIDO,
             mensaje: expect.stringContaining('nivel 6'),
-            xp_ganado: 0, // XP ya fue dado antes
+            xpGanado: 0, // XP ya fue dado antes
           }),
         }),
       );
@@ -1079,10 +1079,10 @@ describe('AulaEventsListener', () => {
       expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            estudiante_id: mockEstudianteId,
+            estudianteId: mockEstudianteId,
             tipo: TipoActividadFeed.LOGRO_DESBLOQUEADO,
             mensaje: expect.stringContaining('Primera Tarea'),
-            xp_ganado: 50,
+            xpGanado: 50,
           }),
         }),
       );
@@ -1116,7 +1116,7 @@ describe('AulaEventsListener', () => {
       expect(prisma.actividadFeed.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            xp_ganado: 0,
+            xpGanado: 0,
           }),
         }),
       );

@@ -16,15 +16,15 @@ export class RecursosService {
    */
   async obtenerRecursos(estudianteId: string) {
     let recursos = await this.prisma.recursosEstudiante.findUnique({
-      where: { estudiante_id: estudianteId },
+      where: { estudianteId: estudianteId },
     });
 
     // Si no existe, crear registro inicial
     if (!recursos) {
       recursos = await this.prisma.recursosEstudiante.create({
         data: {
-          estudiante_id: estudianteId,
-          xp_total: 0,
+          estudianteId: estudianteId,
+          xpTotal: 0,
         },
       });
     }
@@ -35,9 +35,9 @@ export class RecursosService {
   /**
    * Calcular nivel basado en XP
    */
-  calcularNivel(xp_total: number): number {
+  calcularNivel(xpTotal: number): number {
     // Fórmula: nivel = floor(sqrt(xp / 100)) + 1
-    return Math.floor(Math.sqrt(xp_total / 100)) + 1;
+    return Math.floor(Math.sqrt(xpTotal / 100)) + 1;
   }
 
   /**
@@ -59,21 +59,21 @@ export class RecursosService {
   ) {
     const recursos = await this.obtenerRecursos(estudianteId);
 
-    const nivelAnterior = this.calcularNivel(recursos.xp_total);
-    const nuevoTotalXP = recursos.xp_total + cantidad;
+    const nivelAnterior = this.calcularNivel(recursos.xpTotal);
+    const nuevoTotalXP = recursos.xpTotal + cantidad;
     const nivelNuevo = this.calcularNivel(nuevoTotalXP);
 
     // Actualizar recursos
     const recursosActualizados = await this.prisma.recursosEstudiante.update({
       where: { id: recursos.id },
-      data: { xp_total: nuevoTotalXP },
+      data: { xpTotal: nuevoTotalXP },
     });
 
     // Registrar transacción
     await this.prisma.transaccionRecurso.create({
       data: {
-        recursos_estudiante_id: recursos.id,
-        tipo_recurso: 'XP',
+        recursosEstudianteId: recursos.id,
+        tipoRecurso: 'XP',
         cantidad,
         razon,
         metadata: metadata || {},
@@ -104,9 +104,9 @@ export class RecursosService {
 
     return {
       recursos: recursosActualizados,
-      nivel_anterior: nivelAnterior,
-      nivel_nuevo: nivelNuevo,
-      subio_nivel: subioNivel,
+      nivelAnterior: nivelAnterior,
+      nivelNuevo: nivelNuevo,
+      subioNivel: subioNivel,
     };
   }
 
@@ -117,7 +117,7 @@ export class RecursosService {
     const recursos = await this.obtenerRecursos(estudianteId);
 
     return this.prisma.transaccionRecurso.findMany({
-      where: { recursos_estudiante_id: recursos.id },
+      where: { recursosEstudianteId: recursos.id },
       orderBy: { fecha: 'desc' },
       take: limite,
     });
@@ -128,18 +128,18 @@ export class RecursosService {
    */
   async obtenerRecursosConNivel(estudianteId: string) {
     const recursos = await this.obtenerRecursos(estudianteId);
-    const nivel = this.calcularNivel(recursos.xp_total);
+    const nivel = this.calcularNivel(recursos.xpTotal);
     const xpParaSiguienteNivel = this.xpParaNivel(nivel + 1);
     const xpNivelActual = this.xpParaNivel(nivel);
-    const xpProgreso = recursos.xp_total - xpNivelActual;
+    const xpProgreso = recursos.xpTotal - xpNivelActual;
     const xpNecesario = xpParaSiguienteNivel - xpNivelActual;
 
     return {
       ...recursos,
       nivel,
-      xp_progreso: xpProgreso,
-      xp_necesario: xpNecesario,
-      porcentaje_nivel: Math.floor((xpProgreso / xpNecesario) * 100),
+      xpProgreso: xpProgreso,
+      xpNecesario: xpNecesario,
+      porcentajeNivel: Math.floor((xpProgreso / xpNecesario) * 100),
     };
   }
 }

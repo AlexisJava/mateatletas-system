@@ -24,10 +24,10 @@ describe('TiersService', () => {
   const mockTierSteamLibros = {
     id: 'tier-steam-libros-id',
     nombre: TierNombre.STEAM_LIBROS,
-    precio_mensual: 40000,
-    mundos_async: 3,
-    mundos_sync: 0,
-    tiene_docente: false,
+    precioMensual: 40000,
+    mundosAsync: 3,
+    mundosSync: 0,
+    tieneDocente: false,
     descripcion: 'Plataforma completa STEAM',
     activo: true,
     orden: 1,
@@ -38,10 +38,10 @@ describe('TiersService', () => {
   const mockTierSteamAsincronico = {
     id: 'tier-steam-asincronico-id',
     nombre: TierNombre.STEAM_ASINCRONICO,
-    precio_mensual: 65000,
-    mundos_async: 3,
-    mundos_sync: 0,
-    tiene_docente: false,
+    precioMensual: 65000,
+    mundosAsync: 3,
+    mundosSync: 0,
+    tieneDocente: false,
     descripcion: 'STEAM + clases grabadas',
     activo: true,
     orden: 2,
@@ -52,10 +52,10 @@ describe('TiersService', () => {
   const mockTierSteamSincronico = {
     id: 'tier-steam-sincronico-id',
     nombre: TierNombre.STEAM_SINCRONICO,
-    precio_mensual: 95000,
-    mundos_async: 3,
-    mundos_sync: 1,
-    tiene_docente: true,
+    precioMensual: 95000,
+    mundosAsync: 3,
+    mundosSync: 1,
+    tieneDocente: true,
     descripcion: 'STEAM + clases en vivo',
     activo: true,
     orden: 3,
@@ -109,7 +109,7 @@ describe('TiersService', () => {
       expect(result[2].nombre).toBe(TierNombre.STEAM_SINCRONICO);
       expect(mockPrismaService.tier.findMany).toHaveBeenCalledWith({
         where: { activo: true },
-        orderBy: { precio_mensual: 'asc' },
+        orderBy: { precioMensual: 'asc' },
       });
     });
 
@@ -135,7 +135,7 @@ describe('TiersService', () => {
 
       // Assert
       expect(result).toEqual(mockTierSteamLibros);
-      expect(result.precio_mensual).toBe(40000);
+      expect(result.precioMensual).toBe(40000);
       expect(mockPrismaService.tier.findUnique).toHaveBeenCalledWith({
         where: { nombre: TierNombre.STEAM_LIBROS },
       });
@@ -193,7 +193,7 @@ describe('TiersService', () => {
 
       // Assert
       expect(result.subtotal).toBe(40000);
-      expect(result.descuento_porcentaje).toBe(0);
+      expect(result.descuentoPorcentaje).toBe(0);
       expect(result.descuento_monto).toBe(0);
       expect(result.total).toBe(40000);
     });
@@ -266,7 +266,7 @@ describe('TiersService', () => {
 
       // Assert
       expect(result.subtotal).toBe(0);
-      expect(result.descuento_porcentaje).toBe(0);
+      expect(result.descuentoPorcentaje).toBe(0);
       expect(result.total).toBe(0);
     });
   });
@@ -402,8 +402,8 @@ describe('TiersService', () => {
       const result = service.getCantidadMundosPorTier(TierNombre.STEAM_LIBROS);
 
       // Assert
-      expect(result.mundos_async).toBe(3);
-      expect(result.mundos_sync).toBe(0);
+      expect(result.mundosAsync).toBe(3);
+      expect(result.mundosSync).toBe(0);
     });
 
     it('should_return_3_async_0_sync_for_STEAM_ASINCRONICO', () => {
@@ -413,8 +413,8 @@ describe('TiersService', () => {
       );
 
       // Assert
-      expect(result.mundos_async).toBe(3);
-      expect(result.mundos_sync).toBe(0);
+      expect(result.mundosAsync).toBe(3);
+      expect(result.mundosSync).toBe(0);
     });
 
     it('should_return_3_async_1_sync_for_STEAM_SINCRONICO', () => {
@@ -424,8 +424,8 @@ describe('TiersService', () => {
       );
 
       // Assert
-      expect(result.mundos_async).toBe(3);
-      expect(result.mundos_sync).toBe(1);
+      expect(result.mundosAsync).toBe(3);
+      expect(result.mundosSync).toBe(1);
     });
   });
 
@@ -556,7 +556,7 @@ describe('TiersService', () => {
         );
 
         // Assert
-        expect(result.mundos_async_permitidos).toBe(3);
+        expect(result.mundosAsync_permitidos).toBe(3);
       });
     });
 

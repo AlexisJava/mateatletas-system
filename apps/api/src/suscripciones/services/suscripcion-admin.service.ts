@@ -13,7 +13,7 @@ import {
  */
 interface FiltrosSuscripcion {
   estado?: EstadoSuscripcion;
-  plan_id?: string;
+  planId?: string;
 }
 
 /**
@@ -51,8 +51,8 @@ export class SuscripcionAdminService {
     if (filtros.estado) {
       where.estado = filtros.estado;
     }
-    if (filtros.plan_id) {
-      where.plan_id = filtros.plan_id;
+    if (filtros.planId) {
+      where.planId = filtros.planId;
     }
 
     const [suscripciones, total] = await Promise.all([
@@ -76,7 +76,7 @@ export class SuscripcionAdminService {
         },
         skip,
         take: limit,
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
       }),
       this.prisma.suscripcion.count({ where }),
     ]);
@@ -116,7 +116,7 @@ export class SuscripcionAdminService {
           },
         },
       },
-      orderBy: [{ estado: 'asc' }, { dias_gracia_usados: 'desc' }],
+      orderBy: [{ estado: 'asc' }, { diasGraciaUsados: 'desc' }],
     });
 
     return {
@@ -156,15 +156,15 @@ export class SuscripcionAdminService {
     const canceladasMes = await this.prisma.suscripcion.count({
       where: {
         estado: EstadoSuscripcion.CANCELADA,
-        fecha_cancelacion: { gte: inicioMes },
+        fechaCancelacion: { gte: inicioMes },
       },
     });
 
     // Ingresos del mes
     const ingresosMes = await this.prisma.pagoSuscripcion.aggregate({
       where: {
-        mp_status: 'approved',
-        created_at: { gte: inicioMes },
+        mpStatus: 'approved',
+        createdAt: { gte: inicioMes },
       },
       _sum: { monto: true },
     });
@@ -177,12 +177,12 @@ export class SuscripcionAdminService {
         : 0;
 
     return {
-      total_activas: totalActivas,
-      total_morosas: totalMorosas,
+      totalActivas: totalActivas,
+      totalMorosas: totalMorosas,
       total_en_gracia: totalEnGracia,
       total_canceladas_mes: canceladasMes,
-      ingresos_mes: ingresosMes._sum.monto?.toNumber() || 0,
-      tasa_cancelacion: Math.round(tasaCancelacion * 100) / 100,
+      ingresosMes: ingresosMes._sum.monto?.toNumber() || 0,
+      tasaCancelacion: Math.round(tasaCancelacion * 100) / 100,
     };
   }
 
@@ -192,10 +192,10 @@ export class SuscripcionAdminService {
   private mapToAdminItem(sus: {
     id: string;
     estado: EstadoSuscripcion;
-    precio_final: { toNumber(): number };
-    fecha_inicio: Date | null;
-    fecha_proximo_cobro: Date | null;
-    dias_gracia_usados: number;
+    precioFinal: { toNumber(): number };
+    fechaInicio: Date | null;
+    fechaProximoCobro: Date | null;
+    diasGraciaUsados: number;
     tutor: {
       id: string;
       nombre: string;
@@ -213,11 +213,11 @@ export class SuscripcionAdminService {
       estado: sus.estado,
       tutor: sus.tutor,
       plan: sus.plan,
-      monto_final: sus.precio_final.toNumber(),
-      fecha_inicio: sus.fecha_inicio,
-      fecha_proximo_cobro: sus.fecha_proximo_cobro,
-      dias_gracia_usados: sus.dias_gracia_usados,
-      estudiantes_count: sus._count?.estudiantes || 0,
+      montoFinal: sus.precioFinal.toNumber(),
+      fechaInicio: sus.fechaInicio,
+      fechaProximoCobro: sus.fechaProximoCobro,
+      diasGraciaUsados: sus.diasGraciaUsados,
+      estudiantesCount: sus._count?.estudiantes || 0,
     };
   }
 }

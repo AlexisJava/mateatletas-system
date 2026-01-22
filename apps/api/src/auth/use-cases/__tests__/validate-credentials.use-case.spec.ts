@@ -6,7 +6,7 @@
  * RESPONSABILIDAD ÚNICA:
  * - Validar email + password contra la base de datos
  * - Migrar hashes de bcrypt con rounds antiguos (10 → 12)
- * - Retornar usuario sin password_hash si es válido
+ * - Retornar usuario sin passwordHash si es válido
  *
  * SEGURIDAD:
  * - NIST SP 800-63B 2025: bcrypt 12 rounds mínimo
@@ -72,7 +72,7 @@ describe('ValidateCredentialsUseCase', () => {
       const mockTutor = {
         id: 'tutor-123',
         email: 'test@email.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Juan',
         apellido: 'Pérez',
       };
@@ -85,20 +85,20 @@ describe('ValidateCredentialsUseCase', () => {
     });
 
     /**
-     * TEST 3: should_return_tutor_without_password_hash_when_valid
+     * TEST 3: should_return_tutor_without_passwordHash_when_valid
      */
-    it('should_return_tutor_without_password_hash_when_valid', async () => {
+    it('should_return_tutor_without_passwordHash_when_valid', async () => {
       const password = 'valid-password';
       const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
       const mockTutor = {
         id: 'tutor-123',
         email: 'test@email.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Juan',
         apellido: 'Pérez',
         dni: '12345678',
         telefono: '1234567890',
-        ha_completado_onboarding: false,
+        haCompletadoOnboarding: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -108,7 +108,7 @@ describe('ValidateCredentialsUseCase', () => {
       const result = await useCase.execute('test@email.com', password);
 
       expect(result).not.toBeNull();
-      expect(result).not.toHaveProperty('password_hash');
+      expect(result).not.toHaveProperty('passwordHash');
       expect(result?.id).toBe('tutor-123');
       expect(result?.email).toBe('test@email.com');
       expect(result?.nombre).toBe('Juan');
@@ -128,7 +128,7 @@ describe('ValidateCredentialsUseCase', () => {
       const mockTutor = {
         id: 'tutor-old-hash',
         email: 'old@email.com',
-        password_hash: oldHash,
+        passwordHash: oldHash,
         nombre: 'María',
         apellido: 'González',
       };
@@ -142,12 +142,12 @@ describe('ValidateCredentialsUseCase', () => {
       // Verificar que se intentó actualizar el hash
       expect(mockPrismaService.tutor.update).toHaveBeenCalledWith({
         where: { id: 'tutor-old-hash' },
-        data: { password_hash: expect.any(String) },
+        data: { passwordHash: expect.any(String) },
       });
 
       // Verificar que el nuevo hash tiene 12 rounds
       const updateCall = mockPrismaService.tutor.update.mock.calls[0][0];
-      const newHash = updateCall.data.password_hash;
+      const newHash = updateCall.data.passwordHash;
       const parts = newHash.split('$');
       const newRounds = parseInt(parts[2], 10);
       expect(newRounds).toBe(BCRYPT_ROUNDS);
@@ -163,7 +163,7 @@ describe('ValidateCredentialsUseCase', () => {
       const mockTutor = {
         id: 'tutor-current-hash',
         email: 'current@email.com',
-        password_hash: currentHash,
+        passwordHash: currentHash,
         nombre: 'Carlos',
         apellido: 'Rodríguez',
       };
@@ -188,7 +188,7 @@ describe('ValidateCredentialsUseCase', () => {
       const mockTutor = {
         id: 'tutor-rehash-error',
         email: 'error@email.com',
-        password_hash: oldHash,
+        passwordHash: oldHash,
         nombre: 'Error',
         apellido: 'User',
       };
@@ -265,7 +265,7 @@ describe('ValidateCredentialsUseCase', () => {
 
       const result = await useCase.execute('test@email.com', 'password');
 
-      // El tipo debe ser Tutor (sin password_hash) | null
+      // El tipo debe ser Tutor (sin passwordHash) | null
       expect(result === null || typeof result === 'object').toBe(true);
     });
   });

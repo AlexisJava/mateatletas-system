@@ -61,8 +61,8 @@ export type UpdatePaymentCallback<T extends PaymentWithId = PaymentWithId> = (
  * Responsabilidades:
  * - Validar tipo de webhook (solo 'payment')
  * - Consultar detalles del pago a MercadoPago API
- * - Parsear external_reference usando el parser centralizado
- * - Validar que el external_reference sea del tipo correcto
+ * - Parsear externalReference usando el parser centralizado
+ * - Validar que el externalReference sea del tipo correcto
  * - Delegar búsqueda y actualización a callbacks específicos del dominio
  *
  * @example
@@ -96,7 +96,7 @@ export class MercadoPagoWebhookProcessorService {
    * Procesa un webhook de MercadoPago de forma genérica
    *
    * @param webhookData - Datos del webhook recibido
-   * @param expectedType - Tipo de external_reference esperado
+   * @param expectedType - Tipo de externalReference esperado
    * @param findPayment - Callback para buscar el pago en la DB
    * @param updatePayment - Callback para actualizar el pago
    * @returns Resultado del procesamiento
@@ -127,21 +127,21 @@ export class MercadoPagoWebhookProcessorService {
 
       this.logger.log('Pago consultado', {
         status: payment.status,
-        externalReference: payment.external_reference,
+        externalReference: payment.externalReference,
       });
 
-      // 3. Validar y parsear external_reference
-      const externalRef = payment.external_reference;
+      // 3. Validar y parsear externalReference
+      const externalRef = payment.externalReference;
 
       if (!externalRef) {
-        this.logger.warn('Pago sin external_reference', { paymentId });
+        this.logger.warn('Pago sin externalReference', { paymentId });
         return {
           success: false,
-          message: 'Payment without external_reference',
+          message: 'Payment without externalReference',
         };
       }
 
-      // 4. Parsear external_reference usando parser centralizado
+      // 4. Parsear externalReference usando parser centralizado
       const parsed = parseLegacyExternalReference(externalRef);
 
       if (!parsed || parsed.tipo !== expectedType) {
@@ -150,7 +150,7 @@ export class MercadoPagoWebhookProcessorService {
           expectedType,
           actualType: parsed?.tipo,
         });
-        return { success: false, message: 'Invalid external_reference format' };
+        return { success: false, message: 'Invalid externalReference format' };
       }
 
       // 5. Crear contexto de pago

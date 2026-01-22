@@ -79,15 +79,15 @@ export class PreapprovalWebhookService {
     const suscripcion = await this.prisma.suscripcion.findFirst({
       where: {
         OR: [
-          { id: detail.external_reference },
-          { mp_preapproval_id: preapprovalId },
+          { id: detail.externalReference },
+          { mpPreapprovalId: preapprovalId },
         ],
       },
     });
 
     if (!suscripcion) {
       this.logger.error(
-        `❌ Suscripción no encontrada para preapproval: ${preapprovalId}, external_ref: ${detail.external_reference}`,
+        `❌ Suscripción no encontrada para preapproval: ${preapprovalId}, external_ref: ${detail.externalReference}`,
       );
       return {
         success: false,
@@ -149,7 +149,7 @@ export class PreapprovalWebhookService {
         paymentId: preapprovalId,
         webhookType: 'subscription_preapproval',
         status: mpStatus,
-        externalReference: detail.external_reference,
+        externalReference: detail.externalReference,
       });
 
       // DESPUÉS DEL COMMIT: Emitir evento pendiente

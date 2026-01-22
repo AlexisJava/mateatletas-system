@@ -428,12 +428,12 @@ export class AdminController {
       nivelEscolar?: string;
     },
   ) {
-    // Mapear nivelEscolar del frontend a nivel_escolar del servicio
+    // Mapear nivelEscolar del frontend a nivelEscolar del servicio
     const serviceDto = {
       nombre: dto.nombre,
       apellido: dto.apellido,
       edad: dto.edad,
-      nivel_escolar: dto.nivelEscolar as
+      nivelEscolar: dto.nivelEscolar as
         | 'Primaria'
         | 'Secundaria'
         | 'Universidad'
@@ -461,7 +461,7 @@ export class AdminController {
    *
    * Permite asignar un plan específico a un estudiante,
    * independiente de la suscripción del tutor.
-   * Si plan_id es null, el estudiante hereda el plan del tutor.
+   * Si planId es null, el estudiante hereda el plan del tutor.
    */
   @Patch('estudiantes/:id/plan')
   @ApiOperation({
@@ -474,7 +474,7 @@ export class AdminController {
       - Planes mixtos: Cada hijo con plan diferente
       - Suspensiones: Bloquear acceso temporalmente
 
-      Si plan_id es null, el estudiante hereda el plan del tutor (comportamiento legacy).
+      Si planId es null, el estudiante hereda el plan del tutor (comportamiento legacy).
     `,
   })
   async asignarPlanEstudiante(
@@ -657,9 +657,9 @@ export class AdminController {
   })
   async agregarEstudiantesAGrupo(
     @Param('id', ParseIdPipe) id: string,
-    @Body() body: { estudiantes_ids: string[] },
+    @Body() body: { estudiantesIds: string[] },
   ) {
-    return this.claseGruposService.agregarEstudiantes(id, body.estudiantes_ids);
+    return this.claseGruposService.agregarEstudiantes(id, body.estudiantesIds);
   }
 
   /**
@@ -802,9 +802,9 @@ export class AdminController {
    * Rol: Admin
    *
    * Query params opcionales:
-   * - producto_id: Filtrar por producto
-   * - casa_id: Filtrar por casa
-   * - docente_id: Filtrar por docente
+   * - productoId: Filtrar por producto
+   * - casaId: Filtrar por casa
+   * - docenteId: Filtrar por docente
    * - activo: Filtrar por estado activo/inactivo
    */
   @Get('comisiones')
@@ -1263,7 +1263,7 @@ export class AdminController {
   @Patch('grupos-pedagogicos/:id')
   @ApiOperation({
     summary: 'Actualizar grupo pedagógico',
-    description: 'Actualiza casa_tipo y mundo_tipo del grupo',
+    description: 'Actualiza casaTipo y mundoTipo del grupo',
   })
   async actualizarGrupoPedagogico(
     @Param('id', ParseIdPipe) id: string,
@@ -1280,7 +1280,7 @@ export class AdminController {
   @Post('grupos-pedagogicos/migrar-legacy')
   @ApiOperation({
     summary: 'Migrar grupos legacy',
-    description: 'Migra grupos con sector_id a casa_tipo/mundo_tipo',
+    description: 'Migra grupos con sectorId a casaTipo/mundoTipo',
   })
   async migrarGruposLegacy() {
     return this.grupoPedagogicoService.migrarGruposLegacy();

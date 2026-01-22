@@ -63,7 +63,7 @@ describe('CambiarPasswordUseCase', () => {
 
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
         id: 'est-123',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
       });
       mockPrismaService.estudiante.update.mockResolvedValueOnce({});
 
@@ -78,8 +78,8 @@ describe('CambiarPasswordUseCase', () => {
       expect(mockPrismaService.estudiante.update).toHaveBeenCalledWith({
         where: { id: 'est-123' },
         data: expect.objectContaining({
-          password_hash: expect.any(String),
-          fecha_ultimo_cambio: expect.any(Date),
+          passwordHash: expect.any(String),
+          fechaUltimoCambio: expect.any(Date),
         }),
       });
     });
@@ -95,7 +95,7 @@ describe('CambiarPasswordUseCase', () => {
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce(null);
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce({
         id: 'tutor-123',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
       });
       mockPrismaService.tutor.update.mockResolvedValueOnce({});
 
@@ -109,7 +109,7 @@ describe('CambiarPasswordUseCase', () => {
       expect(mockPrismaService.tutor.update).toHaveBeenCalledWith({
         where: { id: 'tutor-123' },
         data: expect.objectContaining({
-          password_hash: expect.any(String),
+          passwordHash: expect.any(String),
         }),
       });
     });
@@ -126,7 +126,7 @@ describe('CambiarPasswordUseCase', () => {
       mockPrismaService.tutor.findUnique.mockResolvedValueOnce(null);
       mockPrismaService.docente.findUnique.mockResolvedValueOnce({
         id: 'docente-123',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
       });
       mockPrismaService.docente.update.mockResolvedValueOnce({});
 
@@ -153,7 +153,7 @@ describe('CambiarPasswordUseCase', () => {
       mockPrismaService.docente.findUnique.mockResolvedValueOnce(null);
       mockPrismaService.admin.findUnique.mockResolvedValueOnce({
         id: 'admin-123',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
       });
       mockPrismaService.admin.update.mockResolvedValueOnce({});
 
@@ -194,7 +194,7 @@ describe('CambiarPasswordUseCase', () => {
 
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
         id: 'est-wrong',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
       });
 
       await expect(
@@ -203,12 +203,12 @@ describe('CambiarPasswordUseCase', () => {
     });
 
     /**
-     * TEST 7: should_throw_unauthorized_when_no_password_hash
+     * TEST 7: should_throw_unauthorized_when_no_passwordHash
      */
-    it('should_throw_unauthorized_when_no_password_hash', async () => {
+    it('should_throw_unauthorized_when_no_passwordHash', async () => {
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
         id: 'est-no-hash',
-        password_hash: null, // Sin password hash
+        passwordHash: null, // Sin password hash
       });
 
       await expect(
@@ -228,7 +228,7 @@ describe('CambiarPasswordUseCase', () => {
 
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
         id: 'est-rounds',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
       });
       mockPrismaService.estudiante.update.mockResolvedValueOnce({});
 
@@ -236,7 +236,7 @@ describe('CambiarPasswordUseCase', () => {
 
       // Verificar que el nuevo hash fue creado con 12 rounds
       const updateCall = mockPrismaService.estudiante.update.mock.calls[0][0];
-      const newHash = updateCall.data.password_hash;
+      const newHash = updateCall.data.passwordHash;
 
       // Verificar que se puede verificar con bcrypt
       const isValid = await bcrypt.compare(nuevaPassword, newHash);
@@ -255,7 +255,7 @@ describe('CambiarPasswordUseCase', () => {
 
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
         id: 'est-fecha',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
       });
       mockPrismaService.estudiante.update.mockResolvedValueOnce({});
 
@@ -264,7 +264,7 @@ describe('CambiarPasswordUseCase', () => {
       const afterCall = new Date();
 
       const updateCall = mockPrismaService.estudiante.update.mock.calls[0][0];
-      const fechaCambio = updateCall.data.fecha_ultimo_cambio;
+      const fechaCambio = updateCall.data.fechaUltimoCambio;
 
       expect(fechaCambio).toBeInstanceOf(Date);
       expect(fechaCambio.getTime()).toBeGreaterThanOrEqual(
@@ -284,7 +284,7 @@ describe('CambiarPasswordUseCase', () => {
 
       mockPrismaService.estudiante.findUnique.mockResolvedValueOnce({
         id: 'est-response',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
       });
       mockPrismaService.estudiante.update.mockResolvedValueOnce({});
 

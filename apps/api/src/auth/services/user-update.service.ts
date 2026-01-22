@@ -6,7 +6,7 @@ import { UserType } from './user-lookup.service';
  * UserUpdateService - Actualizaciones de datos de usuario
  *
  * Responsabilidades:
- * - Actualizar password_hash
+ * - Actualizar passwordHash
  * - Actualizar datos de password (hash + fecha)
  * - Actualizar códigos MFA de backup
  *
@@ -19,7 +19,7 @@ export class UserUpdateService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Actualiza el password_hash de un usuario
+   * Actualiza el passwordHash de un usuario
    * Usado después de verificación exitosa cuando needsRehash=true
    *
    * @param userId - ID del usuario
@@ -31,7 +31,7 @@ export class UserUpdateService {
     userType: UserType,
     newHash: string,
   ): Promise<void> {
-    const updateData = { password_hash: newHash };
+    const updateData = { passwordHash: newHash };
 
     switch (userType) {
       case 'estudiante':
@@ -75,8 +75,8 @@ export class UserUpdateService {
     userId: string,
     userType: UserType,
     data: {
-      password_hash: string;
-      fecha_ultimo_cambio: Date;
+      passwordHash: string;
+      fechaUltimoCambio: Date;
     },
   ): Promise<void> {
     switch (userType) {
@@ -122,7 +122,7 @@ export class UserUpdateService {
   ): Promise<void> {
     await this.prisma.admin.update({
       where: { id: userId },
-      data: { mfa_backup_codes: updatedCodes },
+      data: { mfaBackupCodes: updatedCodes },
     });
 
     this.logger.log(`MFA backup codes updated for admin ${userId}`);

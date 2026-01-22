@@ -4,7 +4,7 @@
 export interface UserWithPassword {
   id: string;
   email: string | null;
-  password_hash: string | null;
+  passwordHash: string | null;
   [key: string]: unknown;
 }
 

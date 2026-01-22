@@ -126,9 +126,9 @@ export class MfaService {
     await this.prisma.admin.update({
       where: { id: userId },
       data: {
-        mfa_secret: secret,
-        mfa_enabled: true,
-        mfa_backup_codes: backupCodes, // Array de codes hasheados
+        mfaSecret: secret,
+        mfaEnabled: true,
+        mfaBackupCodes: backupCodes, // Array de codes hasheados
       },
     });
 
@@ -149,9 +149,9 @@ export class MfaService {
     await this.prisma.admin.update({
       where: { id: userId },
       data: {
-        mfa_secret: null,
-        mfa_enabled: false,
-        mfa_backup_codes: [],
+        mfaSecret: null,
+        mfaEnabled: false,
+        mfaBackupCodes: [],
       },
     });
 
@@ -190,26 +190,24 @@ export class MfaService {
   async verifyBackupCode(userId: string, backupCode: string): Promise<boolean> {
     const admin = await this.prisma.admin.findUnique({
       where: { id: userId },
-      select: { mfa_backup_codes: true },
+      select: { mfaBackupCodes: true },
     });
 
-    if (!admin || !admin.mfa_backup_codes) {
+    if (!admin || !admin.mfaBackupCodes) {
       return false;
     }
 
     // Los backup codes se guardan hasheados (similar a passwords)
-    for (const [index, hashedCode] of admin.mfa_backup_codes.entries()) {
+    for (const [index, hashedCode] of admin.mfaBackupCodes.entries()) {
       const isValid = await bcrypt.compare(backupCode, hashedCode);
 
       if (isValid) {
         // ✅ Código válido - Eliminarlo de la lista (un solo uso)
-        const updatedCodes = admin.mfa_backup_codes.filter(
-          (_, i) => i !== index,
-        );
+        const updatedCodes = admin.mfaBackupCodes.filter((_, i) => i !== index);
 
         await this.prisma.admin.update({
           where: { id: userId },
-          data: { mfa_backup_codes: updatedCodes },
+          data: { mfaBackupCodes: updatedCodes },
         });
 
         this.logger.log(
@@ -294,10 +292,10 @@ export class MfaService {
   async isMfaEnabled(userId: string): Promise<boolean> {
     const admin = await this.prisma.admin.findUnique({
       where: { id: userId },
-      select: { mfa_enabled: true },
+      select: { mfaEnabled: true },
     });
 
-    return admin?.mfa_enabled ?? false;
+    return admin?.mfaEnabled ?? false;
   }
 
   /**
@@ -309,9 +307,9 @@ export class MfaService {
   async getMfaSecret(userId: string): Promise<string | null> {
     const admin = await this.prisma.admin.findUnique({
       where: { id: userId },
-      select: { mfa_secret: true },
+      select: { mfaSecret: true },
     });
 
-    return admin?.mfa_secret ?? null;
+    return admin?.mfaSecret ?? null;
   }
 }

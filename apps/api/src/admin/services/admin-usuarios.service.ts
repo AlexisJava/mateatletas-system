@@ -218,7 +218,7 @@ export class AdminUsuariosService {
       // Eliminar todos los estudiantes del tutor primero
       if (tutor.estudiantes.length > 0) {
         await this.prisma.estudiante.deleteMany({
-          where: { tutor_id: id },
+          where: { tutorId: id },
         });
       }
 
@@ -302,8 +302,8 @@ export class AdminUsuariosService {
       ]);
 
     return {
-      total_usuarios: totalTutores + totalDocentes + totalAdmins,
-      por_rol: {
+      totalUsuarios: totalTutores + totalDocentes + totalAdmins,
+      porRol: {
         tutores: totalTutores,
         docentes: totalDocentes,
         admins: totalAdmins,

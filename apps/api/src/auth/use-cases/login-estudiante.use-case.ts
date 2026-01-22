@@ -40,9 +40,9 @@ export interface LoginEstudianteResult {
     nivelEscolar: string | null;
     fotoUrl: string | null;
     avatarUrl: string | null;
-    animacion_idle_url: string | null;
-    xp_total: number;
-    nivel_actual: number;
+    animacionIdleUrl: string | null;
+    xpTotal: number;
+    nivelActual: number;
     casa: CasaData | null;
     tutor: TutorData | null;
     role: string;
@@ -108,7 +108,7 @@ export class LoginEstudianteUseCase {
         },
         recursos: {
           select: {
-            xp_total: true,
+            xpTotal: true,
           },
         },
       },
@@ -116,13 +116,13 @@ export class LoginEstudianteUseCase {
 
     // 2. Protección contra timing attack: ejecutar bcrypt SIEMPRE
     const dummyHash = '$2b$12$dummyhashforunknownusers1234567890ab';
-    const hashToCompare = estudiante?.password_hash || dummyHash;
+    const hashToCompare = estudiante?.passwordHash || dummyHash;
     const isPasswordValid = await bcrypt.compare(password, hashToCompare);
 
     // 3. Verificar que el estudiante exista, tenga credenciales y password válido
     if (
       !estudiante ||
-      !estudiante.password_hash ||
+      !estudiante.passwordHash ||
       !estudiante.username ||
       !isPasswordValid
     ) {
@@ -160,9 +160,9 @@ export class LoginEstudianteUseCase {
         nivelEscolar: estudiante.nivelEscolar,
         fotoUrl: estudiante.fotoUrl,
         avatarUrl: estudiante.avatarUrl,
-        animacion_idle_url: estudiante.animacion_idle_url,
-        xp_total: estudiante.recursos?.xp_total ?? 0,
-        nivel_actual: estudiante.nivel_actual,
+        animacionIdleUrl: estudiante.animacionIdleUrl,
+        xpTotal: estudiante.recursos?.xpTotal ?? 0,
+        nivelActual: estudiante.nivelActual,
         casa: estudiante.casa,
         tutor: estudiante.tutor,
         role: Role.ESTUDIANTE,

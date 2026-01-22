@@ -39,7 +39,7 @@ export class GamificacionService {
         nombre: true,
         apellido: true,
         fotoUrl: true,
-        avatar_gradient: true,
+        avatarGradient: true,
         casaId: true,
         casa: {
           select: {
@@ -54,14 +54,14 @@ export class GamificacionService {
             apellido: true,
           },
         },
-        inscripciones_clase: {
+        inscripcionesClase: {
           select: {
             id: true,
             clase: {
               select: {
                 id: true,
                 nombre: true,
-                fecha_hora_inicio: true,
+                fechaHoraInicio: true,
                 estado: true,
                 docente: {
                   select: {
@@ -84,7 +84,7 @@ export class GamificacionService {
               select: {
                 id: true,
                 nombre: true,
-                fecha_hora_inicio: true,
+                fechaHoraInicio: true,
               },
             },
           },
@@ -105,9 +105,9 @@ export class GamificacionService {
     const proximasClases = await this.prisma.clase.findMany({
       where: {
         inscripciones: {
-          some: { estudiante_id: estudianteId },
+          some: { estudianteId: estudianteId },
         },
-        fecha_hora_inicio: {
+        fechaHoraInicio: {
           gte: new Date(),
         },
         estado: 'Programada',
@@ -116,7 +116,7 @@ export class GamificacionService {
         id: true,
         nombre: true,
         descripcion: true,
-        fecha_hora_inicio: true,
+        fechaHoraInicio: true,
         estado: true,
         docente: {
           select: {
@@ -125,7 +125,7 @@ export class GamificacionService {
           },
         },
       },
-      orderBy: { fecha_hora_inicio: 'asc' },
+      orderBy: { fechaHoraInicio: 'asc' },
       take: 5,
     });
 
@@ -140,7 +140,7 @@ export class GamificacionService {
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
         fotoUrl: estudiante.fotoUrl,
-        avatar_gradient: estudiante.avatar_gradient,
+        avatarGradient: estudiante.avatarGradient,
         casa: estudiante.casa
           ? {
               id: estudiante.casa.id,
@@ -150,11 +150,11 @@ export class GamificacionService {
           : null,
       },
       stats: {
-        puntosToales: recursosConNivel.xp_total, // Ahora usa RecursosEstudiante.xp_total
+        puntosToales: recursosConNivel.xpTotal, // Ahora usa RecursosEstudiante.xpTotal
         clasesAsistidas: estudiante.asistencias.filter(
           (a) => a.estado === EstadoAsistencia.Presente,
         ).length,
-        clasesTotales: estudiante.inscripciones_clase.length,
+        clasesTotales: estudiante.inscripcionesClase.length,
         racha: await this.logrosService.calcularRacha(estudianteId),
       },
       nivel: nivelInfo,
@@ -169,11 +169,11 @@ export class GamificacionService {
    * Reemplaza getNivelInfo que usaba NivelConfig (modelo eliminado)
    */
   private formatNivelInfo(recursos: {
-    xp_total: number;
+    xpTotal: number;
     nivel: number;
-    xp_progreso: number;
-    xp_necesario: number;
-    porcentaje_nivel: number;
+    xpProgreso: number;
+    xpNecesario: number;
+    porcentajeNivel: number;
   }) {
     const nivelActual = recursos.nivel;
     const xpNivelActual = this.recursosService.xpParaNivel(nivelActual);
@@ -183,11 +183,11 @@ export class GamificacionService {
       nivelActual,
       nombre: this.getNombreNivel(nivelActual),
       descripcion: this.getDescripcionNivel(nivelActual),
-      puntosActuales: recursos.xp_total,
+      puntosActuales: recursos.xpTotal,
       puntosMinimos: xpNivelActual,
       puntosMaximos: xpSiguienteNivel - 1,
-      puntosParaSiguienteNivel: recursos.xp_necesario - recursos.xp_progreso,
-      porcentajeProgreso: recursos.porcentaje_nivel,
+      puntosParaSiguienteNivel: recursos.xpNecesario - recursos.xpProgreso,
+      porcentajeProgreso: recursos.porcentajeNivel,
       color: this.getColorNivel(nivelActual),
       icono: this.getIconoNivel(nivelActual),
       siguienteNivel: {
@@ -285,8 +285,8 @@ export class GamificacionService {
         nivel,
         nombre: this.getNombreNivel(nivel),
         descripcion: this.getDescripcionNivel(nivel),
-        puntos_minimos: this.recursosService.xpParaNivel(nivel),
-        puntos_maximos: this.recursosService.xpParaNivel(nivel + 1) - 1,
+        puntosMinimos: this.recursosService.xpParaNivel(nivel),
+        puntosMaximos: this.recursosService.xpParaNivel(nivel + 1) - 1,
         color: this.getColorNivel(nivel),
         icono: this.getIconoNivel(nivel),
       };

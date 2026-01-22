@@ -37,10 +37,10 @@ export class AdminHandler implements RoleHandler {
     user: UserWithPassword,
     password: string,
   ): Promise<boolean> {
-    if (!user.password_hash) {
+    if (!user.passwordHash) {
       return false; // Usuario sin password no puede autenticarse
     }
-    return bcrypt.compare(password, user.password_hash);
+    return bcrypt.compare(password, user.passwordHash);
   }
 
   async getProfile(userId: string): Promise<UserProfile | null> {

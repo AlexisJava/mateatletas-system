@@ -70,15 +70,15 @@ export class ProductosService {
     dto: CrearProductoDto,
   ): void {
     if (dto.tipo === 'Curso' || dto.tipo === 'Evento') {
-      const fechaInicio = dto.fecha_inicio || dto.fechaInicio;
-      const fechaFin = dto.fecha_fin || dto.fechaFin;
-      const cupoMaximo = dto.cupo_maximo || dto.cupoMaximo;
+      const fechaInicio = dto.fechaInicio || dto.fechaInicio;
+      const fechaFin = dto.fechaFin || dto.fechaFin;
+      const cupoMaximo = dto.cupoMaximo || dto.cupoMaximo;
 
-      data.fecha_inicio = fechaInicio ? new Date(fechaInicio) : undefined;
-      data.fecha_fin = fechaFin ? new Date(fechaFin) : undefined;
-      data.cupo_maximo = cupoMaximo;
+      data.fechaInicio = fechaInicio ? new Date(fechaInicio) : undefined;
+      data.fechaFin = fechaFin ? new Date(fechaFin) : undefined;
+      data.cupoMaximo = cupoMaximo;
     } else if (dto.tipo === 'Servicio') {
-      data.duracion_meses = dto.duracion_meses ?? 1;
+      data.duracionMeses = dto.duracionMeses ?? 1;
     }
   }
 
@@ -92,13 +92,13 @@ export class ProductosService {
     const casaMundoFields = [
       'casa',
       'mundo',
-      'subtipo_mundo',
-      'nivel_olimpiada',
-      'edad_minima',
-      'edad_maxima',
-      'permite_excepciones',
-      'visible_en_landing',
-      'orden_display',
+      'subtipoMundo',
+      'nivelOlimpiada',
+      'edadMinima',
+      'edadMaxima',
+      'permiteExcepciones',
+      'visibleEnLanding',
+      'ordenDisplay',
     ] as const;
 
     for (const field of casaMundoFields) {
@@ -181,12 +181,12 @@ export class ProductosService {
       where: {
         tipo: 'Curso',
         activo: true,
-        fecha_inicio: {
+        fechaInicio: {
           lte: new Date(ahora.getTime() + 90 * 24 * 60 * 60 * 1000), // Próximos 90 días
         },
       },
       orderBy: {
-        fecha_inicio: 'asc',
+        fechaInicio: 'asc',
       },
     });
   }
@@ -230,26 +230,26 @@ export class ProductosService {
     }
 
     // Campos de fecha (requieren conversión)
-    if (updateDto.fecha_inicio !== undefined) {
-      data.fecha_inicio = new Date(updateDto.fecha_inicio);
+    if (updateDto.fechaInicio !== undefined) {
+      data.fechaInicio = new Date(updateDto.fechaInicio);
     }
-    if (updateDto.fecha_fin !== undefined) {
-      data.fecha_fin = new Date(updateDto.fecha_fin);
+    if (updateDto.fechaFin !== undefined) {
+      data.fechaFin = new Date(updateDto.fechaFin);
     }
 
     // Campos adicionales (sin conversión)
     const additionalFields = [
-      'cupo_maximo',
-      'duracion_meses',
+      'cupoMaximo',
+      'duracionMeses',
       'casa',
       'mundo',
-      'subtipo_mundo',
-      'nivel_olimpiada',
-      'edad_minima',
-      'edad_maxima',
-      'permite_excepciones',
-      'visible_en_landing',
-      'orden_display',
+      'subtipoMundo',
+      'nivelOlimpiada',
+      'edadMinima',
+      'edadMaxima',
+      'permiteExcepciones',
+      'visibleEnLanding',
+      'ordenDisplay',
     ] as const;
 
     for (const field of additionalFields) {
@@ -351,12 +351,12 @@ export class ProductosService {
 
     const [total, pagadas] = await Promise.all([
       this.prisma.inscripcionMensual.count({
-        where: { producto_id: id },
+        where: { productoId: id },
       }),
       this.prisma.inscripcionMensual.count({
         where: {
-          producto_id: id,
-          estado_pago: 'Pagado',
+          productoId: id,
+          estadoPago: 'Pagado',
         },
       }),
     ]);
@@ -379,21 +379,21 @@ export class ProductosService {
     // Usar groupBy para obtener todos los conteos en una sola query
     const inscripcionesPorProducto =
       await this.prisma.inscripcionMensual.groupBy({
-        by: ['producto_id'],
+        by: ['productoId'],
         _count: { id: true },
       });
 
     const inscripcionesPagadasPorProducto =
       await this.prisma.inscripcionMensual.groupBy({
-        by: ['producto_id'],
-        where: { estado_pago: 'Pagado' },
+        by: ['productoId'],
+        where: { estadoPago: 'Pagado' },
         _count: { id: true },
       });
 
     // Crear mapa de pagadas para lookup rápido
     const pagadasMap = new Map(
       inscripcionesPagadasPorProducto.map((item) => [
-        item.producto_id,
+        item.productoId,
         item._count.id,
       ]),
     );
@@ -405,7 +405,7 @@ export class ProductosService {
     > = {};
 
     for (const item of inscripcionesPorProducto) {
-      const productoId = item.producto_id;
+      const productoId = item.productoId;
       const total = item._count.id;
       const pagadas = pagadasMap.get(productoId) ?? 0;
 
@@ -430,15 +430,15 @@ export class ProductosService {
   ) {
     if (dto.tipo === 'Curso') {
       // Validar que tenga los campos de curso
-      if (!dto.fecha_inicio || !dto.fecha_fin || !dto.cupo_maximo) {
+      if (!dto.fechaInicio || !dto.fechaFin || !dto.cupoMaximo) {
         throw new BadRequestException(
-          'Los cursos requieren fecha_inicio, fecha_fin y cupo_maximo',
+          'Los cursos requieren fechaInicio, fechaFin y cupoMaximo',
         );
       }
 
-      // Validar que fecha_fin sea posterior a fecha_inicio
-      const fechaInicio = new Date(dto.fecha_inicio);
-      const fechaFin = new Date(dto.fecha_fin);
+      // Validar que fechaFin sea posterior a fechaInicio
+      const fechaInicio = new Date(dto.fechaInicio);
+      const fechaFin = new Date(dto.fechaFin);
 
       if (fechaFin <= fechaInicio) {
         throw new BadRequestException(
@@ -463,7 +463,7 @@ export class ProductosService {
   }) {
     const where: Prisma.ProductoWhereInput = {
       activo: true,
-      visible_en_landing: true,
+      visibleEnLanding: true,
     };
 
     if (filtros.casa) {
@@ -478,20 +478,20 @@ export class ProductosService {
     if (filtros.edad !== undefined) {
       where.OR = [
         // Productos sin restricción de edad
-        { edad_minima: null, edad_maxima: null },
+        { edadMinima: null, edadMaxima: null },
         // Productos donde la edad está en rango
         {
-          edad_minima: { lte: filtros.edad },
-          edad_maxima: { gte: filtros.edad },
+          edadMinima: { lte: filtros.edad },
+          edadMaxima: { gte: filtros.edad },
         },
         // Productos que permiten excepciones
-        { permite_excepciones: true },
+        { permiteExcepciones: true },
       ];
     }
 
     return await this.prisma.producto.findMany({
       where,
-      orderBy: [{ orden_display: 'asc' }, { nombre: 'asc' }],
+      orderBy: [{ ordenDisplay: 'asc' }, { nombre: 'asc' }],
       select: {
         id: true,
         nombre: true,
@@ -500,12 +500,12 @@ export class ProductosService {
         tipo: true,
         casa: true,
         mundo: true,
-        subtipo_mundo: true,
-        nivel_olimpiada: true,
-        edad_minima: true,
-        edad_maxima: true,
-        permite_excepciones: true,
-        orden_display: true,
+        subtipoMundo: true,
+        nivelOlimpiada: true,
+        edadMinima: true,
+        edadMaxima: true,
+        permiteExcepciones: true,
+        ordenDisplay: true,
       },
     });
   }
@@ -518,9 +518,9 @@ export class ProductosService {
       where: {
         casa,
         activo: true,
-        visible_en_landing: true,
+        visibleEnLanding: true,
       },
-      orderBy: [{ orden_display: 'asc' }, { nombre: 'asc' }],
+      orderBy: [{ ordenDisplay: 'asc' }, { nombre: 'asc' }],
     });
   }
 
@@ -532,9 +532,9 @@ export class ProductosService {
       where: {
         mundo,
         activo: true,
-        visible_en_landing: true,
+        visibleEnLanding: true,
       },
-      orderBy: [{ orden_display: 'asc' }, { nombre: 'asc' }],
+      orderBy: [{ ordenDisplay: 'asc' }, { nombre: 'asc' }],
     });
   }
 
@@ -554,10 +554,10 @@ export class ProductosService {
           select: {
             id: true,
             nombre: true,
-            dia_semana: true,
-            hora_inicio: true,
-            hora_fin: true,
-            cupo_maximo: true,
+            diaSemana: true,
+            horaInicio: true,
+            horaFin: true,
+            cupoMaximo: true,
             docente: {
               select: {
                 nombre: true,
@@ -567,7 +567,7 @@ export class ProductosService {
           },
         },
       },
-      orderBy: [{ casa: 'asc' }, { mundo: 'asc' }, { orden_display: 'asc' }],
+      orderBy: [{ casa: 'asc' }, { mundo: 'asc' }, { ordenDisplay: 'asc' }],
     });
   }
 
@@ -576,7 +576,7 @@ export class ProductosService {
    */
   async getCatalogoResumen() {
     const productos = await this.prisma.producto.findMany({
-      where: { activo: true, visible_en_landing: true },
+      where: { activo: true, visibleEnLanding: true },
       select: {
         casa: true,
         mundo: true,
@@ -641,8 +641,8 @@ export class ProductosService {
         id: true,
         titulo: true,
         estado: true,
-        casa_tipo: true,
-        mundo_tipo: true,
+        casaTipo: true,
+        mundoTipo: true,
       },
     });
 
@@ -660,16 +660,16 @@ export class ProductosService {
     const productoActualizado = await this.prisma.producto.update({
       where: { id: productoId },
       data: {
-        planificacion_id: planificacionId,
+        planificacionId: planificacionId,
       },
       include: {
         planificacion: {
           select: {
             id: true,
             titulo: true,
-            cantidad_clases: true,
-            casa_tipo: true,
-            mundo_tipo: true,
+            cantidadClases: true,
+            casaTipo: true,
+            mundoTipo: true,
             estado: true,
           },
         },
@@ -709,7 +709,7 @@ export class ProductosService {
       throw new NotFoundException('Producto no encontrado');
     }
 
-    if (!producto.planificacion_id) {
+    if (!producto.planificacionId) {
       throw new BadRequestException(
         'El producto no tiene planificación asignada',
       );
@@ -721,7 +721,7 @@ export class ProductosService {
     const productoActualizado = await this.prisma.producto.update({
       where: { id: productoId },
       data: {
-        planificacion_id: null,
+        planificacionId: null,
       },
     });
 
@@ -751,9 +751,9 @@ export class ProductosService {
             id: true,
             titulo: true,
             descripcion: true,
-            cantidad_clases: true,
-            casa_tipo: true,
-            mundo_tipo: true,
+            cantidadClases: true,
+            casaTipo: true,
+            mundoTipo: true,
             estado: true,
           },
         },
@@ -762,9 +762,9 @@ export class ProductosService {
           select: {
             id: true,
             nombre: true,
-            dia_semana: true,
-            hora_inicio: true,
-            hora_fin: true,
+            diaSemana: true,
+            horaInicio: true,
+            horaFin: true,
             docente: {
               select: {
                 id: true,

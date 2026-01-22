@@ -11,7 +11,7 @@ import { PrismaService } from '../../core/database/prisma.service';
 export interface PlanificacionSimple {
   id: string;
   titulo: string;
-  cantidad_clases: number;
+  cantidadClases: number;
 }
 
 export interface ClaseGrupoSimple {
@@ -27,8 +27,8 @@ export interface ClaseInfo {
 
 export interface EstadoClase {
   clase: ClaseInfo;
-  teoria_activa: boolean;
-  practica_activa: boolean;
+  teoriaActiva: boolean;
+  practicaActiva: boolean;
 }
 
 export interface AsignacionResponse {
@@ -36,18 +36,18 @@ export interface AsignacionResponse {
   planificacion: PlanificacionSimple;
   claseGrupo: ClaseGrupoSimple;
   clases: ClaseInfo[];
-  estados_clases: EstadoClase[];
+  estadosClases: EstadoClase[];
 }
 
 export interface ProgresoEstudianteClase {
   id: string;
   estudiante: { nombre: string; apellido: string } | null;
-  clase_numero: number;
-  clase_titulo: string;
-  teoria_completada: boolean;
-  practica_completada: boolean;
-  tiempo_teoria_segundos: number;
-  tiempo_practica_segundos: number;
+  claseNumero: number;
+  claseTitulo: string;
+  teoriaCompletada: boolean;
+  practicaCompletada: boolean;
+  tiempoTeoriaSegundos: number;
+  tiempoPracticaSegundos: number;
 }
 
 /**
@@ -74,7 +74,7 @@ export class DocentePlanificacionesService {
    */
   async getMisAsignaciones(docenteId: string): Promise<AsignacionResponse[]> {
     const asignaciones = await this.prisma.asignacionPlanificacion.findMany({
-      where: { docente_id: docenteId },
+      where: { docenteId: docenteId },
       include: {
         planificacion: {
           include: {
@@ -114,7 +114,7 @@ export class DocentePlanificacionesService {
         },
       },
       orderBy: {
-        created_at: 'desc',
+        createdAt: 'desc',
       },
     });
 
@@ -123,7 +123,7 @@ export class DocentePlanificacionesService {
       planificacion: {
         id: asig.planificacion.id,
         titulo: asig.planificacion.titulo,
-        cantidad_clases: asig.planificacion.cantidad_clases,
+        cantidadClases: asig.planificacion.cantidadClases,
       },
       claseGrupo: {
         id: asig.claseGrupo.id,
@@ -134,14 +134,14 @@ export class DocentePlanificacionesService {
         numero: c.numero,
         titulo: c.titulo,
       })),
-      estados_clases: asig.estadosClases.map((e) => ({
+      estadosClases: asig.estadosClases.map((e) => ({
         clase: {
           id: e.clase.id,
           numero: e.clase.numero,
           titulo: e.clase.titulo,
         },
-        teoria_activa: e.teoria_activa,
-        practica_activa: e.practica_activa,
+        teoriaActiva: e.teoriaActiva,
+        practicaActiva: e.practicaActiva,
       })),
     }));
   }
@@ -162,21 +162,21 @@ export class DocentePlanificacionesService {
 
     await this.prisma.estadoClaseGrupo.upsert({
       where: {
-        asignacion_id_clase_id: {
-          asignacion_id: asignacionId,
-          clase_id: claseId,
+        asignacionId_claseId: {
+          asignacionId: asignacionId,
+          claseId: claseId,
         },
       },
       update: {
-        teoria_activa: true,
-        activada_en: new Date(),
+        teoriaActiva: true,
+        activadaEn: new Date(),
       },
       create: {
-        asignacion_id: asignacionId,
-        clase_id: claseId,
-        teoria_activa: true,
-        practica_activa: false,
-        activada_en: new Date(),
+        asignacionId: asignacionId,
+        claseId: claseId,
+        teoriaActiva: true,
+        practicaActiva: false,
+        activadaEn: new Date(),
       },
     });
   }
@@ -193,19 +193,19 @@ export class DocentePlanificacionesService {
 
     await this.prisma.estadoClaseGrupo.upsert({
       where: {
-        asignacion_id_clase_id: {
-          asignacion_id: asignacionId,
-          clase_id: claseId,
+        asignacionId_claseId: {
+          asignacionId: asignacionId,
+          claseId: claseId,
         },
       },
       update: {
-        teoria_activa: false,
+        teoriaActiva: false,
       },
       create: {
-        asignacion_id: asignacionId,
-        clase_id: claseId,
-        teoria_activa: false,
-        practica_activa: false,
+        asignacionId: asignacionId,
+        claseId: claseId,
+        teoriaActiva: false,
+        practicaActiva: false,
       },
     });
   }
@@ -223,21 +223,21 @@ export class DocentePlanificacionesService {
 
     await this.prisma.estadoClaseGrupo.upsert({
       where: {
-        asignacion_id_clase_id: {
-          asignacion_id: asignacionId,
-          clase_id: claseId,
+        asignacionId_claseId: {
+          asignacionId: asignacionId,
+          claseId: claseId,
         },
       },
       update: {
-        practica_activa: true,
-        activada_en: new Date(),
+        practicaActiva: true,
+        activadaEn: new Date(),
       },
       create: {
-        asignacion_id: asignacionId,
-        clase_id: claseId,
-        teoria_activa: false,
-        practica_activa: true,
-        activada_en: new Date(),
+        asignacionId: asignacionId,
+        claseId: claseId,
+        teoriaActiva: false,
+        practicaActiva: true,
+        activadaEn: new Date(),
       },
     });
   }
@@ -254,19 +254,19 @@ export class DocentePlanificacionesService {
 
     await this.prisma.estadoClaseGrupo.upsert({
       where: {
-        asignacion_id_clase_id: {
-          asignacion_id: asignacionId,
-          clase_id: claseId,
+        asignacionId_claseId: {
+          asignacionId: asignacionId,
+          claseId: claseId,
         },
       },
       update: {
-        practica_activa: false,
+        practicaActiva: false,
       },
       create: {
-        asignacion_id: asignacionId,
-        clase_id: claseId,
-        teoria_activa: false,
-        practica_activa: false,
+        asignacionId: asignacionId,
+        claseId: claseId,
+        teoriaActiva: false,
+        practicaActiva: false,
       },
     });
   }
@@ -284,22 +284,22 @@ export class DocentePlanificacionesService {
 
     await this.prisma.estadoClaseGrupo.upsert({
       where: {
-        asignacion_id_clase_id: {
-          asignacion_id: asignacionId,
-          clase_id: claseId,
+        asignacionId_claseId: {
+          asignacionId: asignacionId,
+          claseId: claseId,
         },
       },
       update: {
-        teoria_activa: true,
-        practica_activa: true,
-        activada_en: new Date(),
+        teoriaActiva: true,
+        practicaActiva: true,
+        activadaEn: new Date(),
       },
       create: {
-        asignacion_id: asignacionId,
-        clase_id: claseId,
-        teoria_activa: true,
-        practica_activa: true,
-        activada_en: new Date(),
+        asignacionId: asignacionId,
+        claseId: claseId,
+        teoriaActiva: true,
+        practicaActiva: true,
+        activadaEn: new Date(),
       },
     });
   }
@@ -316,20 +316,20 @@ export class DocentePlanificacionesService {
 
     await this.prisma.estadoClaseGrupo.upsert({
       where: {
-        asignacion_id_clase_id: {
-          asignacion_id: asignacionId,
-          clase_id: claseId,
+        asignacionId_claseId: {
+          asignacionId: asignacionId,
+          claseId: claseId,
         },
       },
       update: {
-        teoria_activa: false,
-        practica_activa: false,
+        teoriaActiva: false,
+        practicaActiva: false,
       },
       create: {
-        asignacion_id: asignacionId,
-        clase_id: claseId,
-        teoria_activa: false,
-        practica_activa: false,
+        asignacionId: asignacionId,
+        claseId: claseId,
+        teoriaActiva: false,
+        practicaActiva: false,
       },
     });
   }
@@ -360,7 +360,7 @@ export class DocentePlanificacionesService {
         claseGrupo: {
           include: {
             inscripciones: {
-              where: { fecha_baja: null },
+              where: { fechaBaja: null },
               include: {
                 estudiante: {
                   select: {
@@ -385,8 +385,8 @@ export class DocentePlanificacionesService {
 
     const progresos = await this.prisma.progresoClaseEstudiante.findMany({
       where: {
-        clase_id: { in: claseIds },
-        estudiante_id: {
+        claseId: { in: claseIds },
+        estudianteId: {
           in: asignacion.claseGrupo.inscripciones.map((i) => i.estudiante.id),
         },
       },
@@ -416,12 +416,12 @@ export class DocentePlanificacionesService {
         estudiante: p.estudiante
           ? { nombre: p.estudiante.nombre, apellido: p.estudiante.apellido }
           : null,
-        clase_numero: p.clase.numero,
-        clase_titulo: p.clase.titulo,
-        teoria_completada: p.teoria_completada,
-        practica_completada: p.practica_completada,
-        tiempo_teoria_segundos: p.tiempo_teoria_segundos,
-        tiempo_practica_segundos: p.tiempo_practica_segundos,
+        claseNumero: p.clase.numero,
+        claseTitulo: p.clase.titulo,
+        teoriaCompletada: p.teoriaCompletada,
+        practicaCompletada: p.practicaCompletada,
+        tiempoTeoriaSegundos: p.tiempoTeoriaSegundos,
+        tiempoPracticaSegundos: p.tiempoPracticaSegundos,
       })),
     };
   }
@@ -435,14 +435,14 @@ export class DocentePlanificacionesService {
   ): Promise<void> {
     const asignacion = await this.prisma.asignacionPlanificacion.findUnique({
       where: { id: asignacionId },
-      select: { docente_id: true },
+      select: { docenteId: true },
     });
 
     if (!asignacion) {
       throw new NotFoundException('Asignación no encontrada');
     }
 
-    if (asignacion.docente_id !== docenteId) {
+    if (asignacion.docenteId !== docenteId) {
       throw new ForbiddenException(
         'No tienes permisos para modificar esta asignación',
       );
@@ -492,13 +492,13 @@ export class DocentePlanificacionesService {
   ): Promise<{
     tareas: Array<{
       id: string;
-      contenido_id: string;
-      contenido_titulo: string;
+      contenidoId: string;
+      contenidoTitulo: string;
       orden: number;
       obligatoria: boolean;
       asignada: boolean;
-      tarea_asignada_id: string | null;
-      fecha_limite: Date | null;
+      tareaAsignadaId: string | null;
+      fechaLimite: Date | null;
     }>;
   }> {
     await this.validarOwnership(asignacionId, docenteId);
@@ -506,14 +506,14 @@ export class DocentePlanificacionesService {
 
     // Obtener todas las tareas de la clase
     const tareasClase = await this.prisma.tareaClase.findMany({
-      where: { clase_id: claseId },
+      where: { claseId: claseId },
       include: {
         contenido: {
           select: { id: true, titulo: true },
         },
         asignaciones: {
-          where: { asignacion_id: asignacionId },
-          select: { id: true, fecha_limite: true, activa: true },
+          where: { asignacionId: asignacionId },
+          select: { id: true, fechaLimite: true, activa: true },
         },
       },
       orderBy: { orden: 'asc' },
@@ -522,16 +522,16 @@ export class DocentePlanificacionesService {
     return {
       tareas: tareasClase.map((t) => ({
         id: t.id,
-        contenido_id: t.contenido_id,
-        contenido_titulo: t.contenido.titulo,
+        contenidoId: t.contenidoId,
+        contenidoTitulo: t.contenido.titulo,
         orden: t.orden,
         obligatoria: t.obligatoria,
         asignada:
           t.asignaciones.length > 0 && (t.asignaciones[0]?.activa ?? false),
-        tarea_asignada_id:
+        tareaAsignadaId:
           t.asignaciones.length > 0 ? t.asignaciones[0]!.id : null,
-        fecha_limite:
-          t.asignaciones.length > 0 ? t.asignaciones[0]!.fecha_limite : null,
+        fechaLimite:
+          t.asignaciones.length > 0 ? t.asignaciones[0]!.fechaLimite : null,
       })),
     };
   }
@@ -548,7 +548,7 @@ export class DocentePlanificacionesService {
     tareaClaseId: string,
     docenteId: string,
     fechaLimite?: Date,
-  ): Promise<{ success: boolean; tarea_asignada_id: string }> {
+  ): Promise<{ success: boolean; tareaAsignadaId: string }> {
     await this.validarOwnership(asignacionId, docenteId);
 
     // Verificar que la tarea existe
@@ -567,7 +567,7 @@ export class DocentePlanificacionesService {
       include: {
         planificacion: {
           include: {
-            clases: { where: { id: tareaClase.clase_id } },
+            clases: { where: { id: tareaClase.claseId } },
           },
         },
       },
@@ -580,25 +580,25 @@ export class DocentePlanificacionesService {
     // Crear o actualizar la asignación de tarea
     const tareaAsignada = await this.prisma.tareaAsignada.upsert({
       where: {
-        asignacion_id_tarea_clase_id: {
-          asignacion_id: asignacionId,
-          tarea_clase_id: tareaClaseId,
+        asignacionId_tareaClaseId: {
+          asignacionId: asignacionId,
+          tareaClaseId: tareaClaseId,
         },
       },
       update: {
         activa: true,
-        fecha_limite: fechaLimite ?? null,
-        fecha_asignacion: new Date(),
+        fechaLimite: fechaLimite ?? null,
+        fechaAsignacion: new Date(),
       },
       create: {
-        asignacion_id: asignacionId,
-        tarea_clase_id: tareaClaseId,
+        asignacionId: asignacionId,
+        tareaClaseId: tareaClaseId,
         activa: true,
-        fecha_limite: fechaLimite ?? null,
+        fechaLimite: fechaLimite ?? null,
       },
     });
 
-    return { success: true, tarea_asignada_id: tareaAsignada.id };
+    return { success: true, tareaAsignadaId: tareaAsignada.id };
   }
 
   /**
@@ -617,8 +617,8 @@ export class DocentePlanificacionesService {
     // Desactivar la tarea asignada
     await this.prisma.tareaAsignada.updateMany({
       where: {
-        asignacion_id: asignacionId,
-        tarea_clase_id: tareaClaseId,
+        asignacionId: asignacionId,
+        tareaClaseId: tareaClaseId,
       },
       data: { activa: false },
     });
@@ -643,10 +643,10 @@ export class DocentePlanificacionesService {
 
     await this.prisma.tareaAsignada.updateMany({
       where: {
-        asignacion_id: asignacionId,
-        tarea_clase_id: tareaClaseId,
+        asignacionId: asignacionId,
+        tareaClaseId: tareaClaseId,
       },
-      data: { fecha_limite: fechaLimite },
+      data: { fechaLimite: fechaLimite },
     });
 
     return { success: true };
@@ -663,11 +663,11 @@ export class DocentePlanificacionesService {
     docenteId: string,
   ): Promise<{
     progresos: Array<{
-      estudiante_id: string;
-      estudiante_nombre: string;
-      tarea_titulo: string;
+      estudianteId: string;
+      estudianteNombre: string;
+      tareaTitulo: string;
       completada: boolean;
-      fecha_completado: Date | null;
+      fechaCompletado: Date | null;
       calificacion: number | null;
     }>;
   }> {
@@ -680,7 +680,7 @@ export class DocentePlanificacionesService {
         claseGrupo: {
           include: {
             inscripciones: {
-              where: { fecha_baja: null },
+              where: { fechaBaja: null },
               include: {
                 estudiante: {
                   select: { id: true, nombre: true, apellido: true },
@@ -700,9 +700,9 @@ export class DocentePlanificacionesService {
     const progresos = await this.prisma.progresoTareaEstudiante.findMany({
       where: {
         tareaAsignada: {
-          asignacion_id: asignacionId,
+          asignacionId: asignacionId,
         },
-        estudiante_id: {
+        estudianteId: {
           in: asignacion.claseGrupo.inscripciones.map((i) => i.estudiante.id),
         },
       },
@@ -726,11 +726,11 @@ export class DocentePlanificacionesService {
 
     return {
       progresos: progresos.map((p) => ({
-        estudiante_id: p.estudiante_id,
-        estudiante_nombre: `${p.estudiante.nombre} ${p.estudiante.apellido}`,
-        tarea_titulo: p.tareaAsignada.tareaClase.contenido.titulo,
-        completada: p.completada_en !== null,
-        fecha_completado: p.completada_en,
+        estudianteId: p.estudianteId,
+        estudianteNombre: `${p.estudiante.nombre} ${p.estudiante.apellido}`,
+        tareaTitulo: p.tareaAsignada.tareaClase.contenido.titulo,
+        completada: p.completadaEn !== null,
+        fechaCompletado: p.completadaEn,
         calificacion: p.calificacion,
       })),
     };

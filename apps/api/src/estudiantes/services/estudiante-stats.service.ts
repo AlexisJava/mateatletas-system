@@ -16,11 +16,11 @@ export class EstudianteStatsService {
    */
   async getEstadisticas(tutorId: string) {
     const estudiantes = await this.prisma.estudiante.findMany({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
       include: {
         casa: true,
         recursos: {
-          select: { xp_total: true },
+          select: { xpTotal: true },
         },
       },
     });
@@ -49,15 +49,15 @@ export class EstudianteStatsService {
 
     // Suma de XP totales
     const puntosTotales = estudiantes.reduce(
-      (sum: number, est) => sum + (est.recursos?.xp_total ?? 0),
+      (sum: number, est) => sum + (est.recursos?.xpTotal ?? 0),
       0,
     );
 
     return {
       total: estudiantes.length,
-      por_nivel: porNivel,
-      por_casa: porCasa,
-      xp_total: puntosTotales,
+      porNivel: porNivel,
+      porCasa: porCasa,
+      xpTotal: puntosTotales,
     };
   }
 }

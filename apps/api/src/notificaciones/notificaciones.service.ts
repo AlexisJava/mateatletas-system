@@ -36,10 +36,10 @@ export class NotificacionesService {
         titulo: dto.titulo,
         mensaje: dto.mensaje,
         prioridad: dto.prioridad ?? PrioridadNotificacion.MEDIA,
-        tutor_id: dto.tutorId,
-        estudiante_id: dto.estudianteId,
-        docente_id: dto.docenteId,
-        admin_id: dto.adminId,
+        tutorId: dto.tutorId,
+        estudianteId: dto.estudianteId,
+        docenteId: dto.docenteId,
+        adminId: dto.adminId,
         metadata: dto.metadata,
         expiraEn: dto.expiraEn,
       },
@@ -253,7 +253,7 @@ export class NotificacionesService {
       tipo: TipoNotificacion.DOCENTE_CLASE_PROXIMA,
       titulo: 'Clase próxima',
       mensaje: `La clase "${claseTitulo}" comienza mañana a las ${fechaHora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`,
-      metadata: { clase_id: claseId },
+      metadata: { claseId: claseId },
     });
   }
 
@@ -266,7 +266,7 @@ export class NotificacionesService {
       tipo: TipoNotificacion.DOCENTE_ASISTENCIA_PENDIENTE,
       titulo: 'Asistencia pendiente',
       mensaje: `Recuerda registrar la asistencia de la clase "${claseTitulo}"`,
-      metadata: { clase_id: claseId },
+      metadata: { claseId: claseId },
     });
   }
 
@@ -281,7 +281,7 @@ export class NotificacionesService {
       titulo: 'Alerta de estudiante',
       mensaje: `${estudianteNombre}: ${razon}`,
       prioridad: PrioridadNotificacion.ALTA,
-      metadata: { estudiante_id: estudianteId },
+      metadata: { estudianteId: estudianteId },
     });
   }
 
@@ -295,7 +295,7 @@ export class NotificacionesService {
       tipo: TipoNotificacion.DOCENTE_CLASE_CANCELADA,
       titulo: 'Clase cancelada',
       mensaje: `La clase "${claseTitulo}" ha sido cancelada${motivo ? ': ' + motivo : ''}`,
-      metadata: { clase_id: claseId },
+      metadata: { claseId: claseId },
     });
   }
 
@@ -309,7 +309,7 @@ export class NotificacionesService {
       tipo: TipoNotificacion.DOCENTE_LOGRO_ESTUDIANTE,
       titulo: 'Logro desbloqueado',
       mensaje: `${estudianteNombre} ha desbloqueado: ${logroTitulo}`,
-      metadata: { estudiante_id: estudianteId },
+      metadata: { estudianteId: estudianteId },
     });
   }
 
@@ -329,10 +329,10 @@ export class NotificacionesService {
       titulo: 'Nueva clase asignada',
       mensaje: `Te asignaron el horario "${claseGrupoNombre}" - ${diaSemana} de ${horaInicio} a ${horaFin}`,
       metadata: {
-        clase_grupo_id: claseGrupoId,
-        dia_semana: diaSemana,
-        hora_inicio: horaInicio,
-        hora_fin: horaFin,
+        claseGrupoId: claseGrupoId,
+        diaSemana: diaSemana,
+        horaInicio: horaInicio,
+        horaFin: horaFin,
       },
     });
   }
@@ -376,7 +376,7 @@ export class NotificacionesService {
         diasRestantes <= 3
           ? PrioridadNotificacion.ALTA
           : PrioridadNotificacion.MEDIA,
-      metadata: { dias_restantes: diasRestantes },
+      metadata: { diasRestantes: diasRestantes },
     });
   }
 
@@ -390,7 +390,7 @@ export class NotificacionesService {
       tipo: TipoNotificacion.TUTOR_LOGRO_HIJO,
       titulo: `${hijoNombre} desbloqueó un logro`,
       mensaje: `${hijoNombre} ha desbloqueado: "${logroTitulo}"`,
-      metadata: { estudiante_id: hijoId, logro_titulo: logroTitulo },
+      metadata: { estudianteId: hijoId, logroTitulo: logroTitulo },
     });
   }
 
@@ -407,7 +407,7 @@ export class NotificacionesService {
       tipo: TipoNotificacion.ESTUDIANTE_LOGRO_DESBLOQUEADO,
       titulo: '¡Logro desbloqueado!',
       mensaje: `Desbloqueaste "${logroTitulo}" y ganaste ${xpGanado} XP`,
-      metadata: { logro_titulo: logroTitulo, xp_ganado: xpGanado },
+      metadata: { logroTitulo: logroTitulo, xpGanado: xpGanado },
     });
   }
 
@@ -417,7 +417,7 @@ export class NotificacionesService {
       titulo: '¡Subiste de nivel!',
       mensaje: `¡Felicitaciones! Ahora sos nivel ${nuevoNivel}`,
       prioridad: PrioridadNotificacion.ALTA,
-      metadata: { nuevo_nivel: nuevoNivel },
+      metadata: { nuevoNivel: nuevoNivel },
     });
   }
 
@@ -427,7 +427,7 @@ export class NotificacionesService {
       titulo: '¡Tu racha está en riesgo!',
       mensaje: `Entrá hoy para mantener tu racha de ${rachaActual} día${rachaActual > 1 ? 's' : ''}`,
       prioridad: PrioridadNotificacion.ALTA,
-      metadata: { racha_actual: rachaActual },
+      metadata: { rachaActual: rachaActual },
     });
   }
 
@@ -453,7 +453,7 @@ export class NotificacionesService {
       tipo: TipoNotificacion.ADMIN_NUEVO_PAGO,
       titulo: 'Nuevo pago recibido',
       mensaje: `${tutorNombre} realizó un pago de $${monto.toLocaleString('es-AR')}`,
-      metadata: { tutor_nombre: tutorNombre, monto },
+      metadata: { tutorNombre: tutorNombre, monto },
     });
   }
 
@@ -494,13 +494,13 @@ export class NotificacionesService {
   private buildWhereClause(tipo: TipoDestinatario, id: string) {
     switch (tipo) {
       case 'tutor':
-        return { tutor_id: id };
+        return { tutorId: id };
       case 'estudiante':
-        return { estudiante_id: id };
+        return { estudianteId: id };
       case 'docente':
-        return { docente_id: id };
+        return { docenteId: id };
       case 'admin':
-        return { admin_id: id };
+        return { adminId: id };
     }
   }
 

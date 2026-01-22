@@ -55,14 +55,14 @@ export class EstudianteOwnershipGuard implements CanActivate {
     if (user.role === Role.TUTOR) {
       const estudiante = await this.prisma.estudiante.findUnique({
         where: { id: estudianteId },
-        select: { tutor_id: true },
+        select: { tutorId: true },
       });
 
       if (!estudiante) {
         throw new NotFoundException('Estudiante no encontrado');
       }
 
-      if (estudiante.tutor_id !== user.id) {
+      if (estudiante.tutorId !== user.id) {
         throw new ForbiddenException(
           'No tienes permiso para acceder a este estudiante',
         );

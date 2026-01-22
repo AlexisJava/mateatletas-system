@@ -27,16 +27,16 @@ export class AsistenciaReportesService {
     // Optimized: Execute queries in parallel
     const [inscripciones, asistencias] = await Promise.all([
       this.prisma.inscripcionClase.findMany({
-        where: { clase_id: claseId },
+        where: { claseId: claseId },
       }),
       this.prisma.asistencia.findMany({
-        where: { clase_id: claseId },
+        where: { claseId: claseId },
       }),
     ]);
 
     // Create map of attendance by student_id
     const asistenciaMap = new Map<string, (typeof asistencias)[number]>(
-      asistencias.map((asistencia) => [asistencia.estudiante_id, asistencia]),
+      asistencias.map((asistencia) => [asistencia.estudianteId, asistencia]),
     );
 
     let presentes = 0;
@@ -45,7 +45,7 @@ export class AsistenciaReportesService {
     let pendientes = 0;
 
     inscripciones.forEach((insc) => {
-      const asistencia = asistenciaMap.get(insc.estudiante_id);
+      const asistencia = asistenciaMap.get(insc.estudianteId);
       if (!asistencia) {
         pendientes++;
       } else {
@@ -60,13 +60,13 @@ export class AsistenciaReportesService {
       total > 0 ? ((presentes / total) * 100).toFixed(2) : '0.00';
 
     return {
-      clase_id: claseId,
-      total_inscritos: total,
+      claseId: claseId,
+      totalInscritos: total,
       presentes,
       ausentes,
       justificados,
       pendientes,
-      porcentaje_asistencia: parseFloat(porcentajeAsistencia),
+      porcentajeAsistencia: parseFloat(porcentajeAsistencia),
     };
   }
 
@@ -88,20 +88,20 @@ export class AsistenciaReportesService {
 
     // Build filters for inscriptions
     const whereInscripcion: Prisma.InscripcionClaseWhereInput = {
-      estudiante_id: estudianteId,
+      estudianteId: estudianteId,
     };
 
     if (filtros.claseId) {
-      whereInscripcion.clase_id = filtros.claseId;
+      whereInscripcion.claseId = filtros.claseId;
     }
 
     // Optimized: Execute queries in parallel
     const whereAsistencia: Prisma.AsistenciaWhereInput = {
-      estudiante_id: estudianteId,
+      estudianteId: estudianteId,
     };
 
     if (filtros.claseId) {
-      whereAsistencia.clase_id = filtros.claseId;
+      whereAsistencia.claseId = filtros.claseId;
     }
 
     const [inscripciones, asistencias] = await Promise.all([
@@ -111,8 +111,8 @@ export class AsistenciaReportesService {
           clase: {
             select: {
               id: true,
-              fecha_hora_inicio: true,
-              duracion_minutos: true,
+              fechaHoraInicio: true,
+              duracionMinutos: true,
               estado: true,
             },
           },
@@ -128,33 +128,33 @@ export class AsistenciaReportesService {
 
     // Create map of attendance by class_id
     const asistenciaMapPorClase = new Map<string, (typeof asistencias)[number]>(
-      asistencias.map((asistencia) => [asistencia.clase_id, asistencia]),
+      asistencias.map((asistencia) => [asistencia.claseId, asistencia]),
     );
 
     const historial = inscripciones.map((insc) => {
-      const asistencia = asistenciaMapPorClase.get(insc.clase_id);
+      const asistencia = asistenciaMapPorClase.get(insc.claseId);
 
       return {
-        clase_id: insc.clase.id,
-        fecha_clase: insc.clase.fecha_hora_inicio,
-        duracion_minutos: insc.clase.duracion_minutos,
-        estado_clase: insc.clase.estado,
-        estado_asistencia: asistencia?.estado || 'Pendiente',
+        claseId: insc.clase.id,
+        fechaClase: insc.clase.fechaHoraInicio,
+        duracionMinutos: insc.clase.duracionMinutos,
+        estadoClase: insc.clase.estado,
+        estadoAsistencia: asistencia?.estado || 'Pendiente',
         observaciones: asistencia?.observaciones || null,
-        puntos_otorgados: asistencia?.puntos_otorgados || 0,
-        fecha_registro: asistencia?.createdAt || null,
+        puntosOtorgados: asistencia?.puntosOtorgados || 0,
+        fechaRegistro: asistencia?.createdAt || null,
       };
     });
 
     // Calculate statistics
     const presentes = historial.filter(
-      (h) => h.estado_asistencia === EstadoAsistencia.Presente,
+      (h) => h.estadoAsistencia === EstadoAsistencia.Presente,
     ).length;
     const ausentes = historial.filter(
-      (h) => h.estado_asistencia === EstadoAsistencia.Ausente,
+      (h) => h.estadoAsistencia === EstadoAsistencia.Ausente,
     ).length;
     const justificados = historial.filter(
-      (h) => h.estado_asistencia === EstadoAsistencia.Justificado,
+      (h) => h.estadoAsistencia === EstadoAsistencia.Justificado,
     ).length;
     const total = historial.length;
     const porcentajeAsistencia =
@@ -167,11 +167,11 @@ export class AsistenciaReportesService {
         apellido: estudiante.apellido,
       },
       estadisticas: {
-        total_clases: total,
+        totalClases: total,
         presentes,
         ausentes,
         justificados,
-        porcentaje_asistencia: parseFloat(porcentajeAsistencia),
+        porcentajeAsistencia: parseFloat(porcentajeAsistencia),
       },
       historial,
     };
@@ -184,13 +184,13 @@ export class AsistenciaReportesService {
   async obtenerResumenDocente(docenteId: string) {
     // Optimized: Get teacher's classes first, then attendance in parallel
     const clases = await this.prisma.clase.findMany({
-      where: { docente_id: docenteId },
+      where: { docenteId: docenteId },
       include: {
         inscripciones: true,
         asistencias: true, // Include attendance directly in the query
       },
       orderBy: {
-        fecha_hora_inicio: 'desc',
+        fechaHoraInicio: 'desc',
       },
     });
 
@@ -203,12 +203,12 @@ export class AsistenciaReportesService {
       Map<string, (typeof asistencias)[number]>
     >();
     asistencias.forEach((asistencia) => {
-      if (!asistenciaMap.has(asistencia.clase_id)) {
-        asistenciaMap.set(asistencia.clase_id, new Map());
+      if (!asistenciaMap.has(asistencia.claseId)) {
+        asistenciaMap.set(asistencia.claseId, new Map());
       }
       asistenciaMap
-        .get(asistencia.clase_id)
-        ?.set(asistencia.estudiante_id, asistencia);
+        .get(asistencia.claseId)
+        ?.set(asistencia.estudianteId, asistencia);
     });
 
     const resumen = clases.map((clase) => {
@@ -220,7 +220,7 @@ export class AsistenciaReportesService {
       const claseAsistencias = asistenciaMap.get(clase.id);
 
       clase.inscripciones.forEach((insc) => {
-        const asistencia = claseAsistencias?.get(insc.estudiante_id);
+        const asistencia = claseAsistencias?.get(insc.estudianteId);
         if (!asistencia) {
           pendientes++;
         } else {
@@ -236,16 +236,16 @@ export class AsistenciaReportesService {
         total > 0 ? ((presentes / total) * 100).toFixed(2) : '0.00';
 
       return {
-        clase_id: clase.id,
-        fecha_hora_inicio: clase.fecha_hora_inicio,
-        duracion_minutos: clase.duracion_minutos,
+        claseId: clase.id,
+        fechaHoraInicio: clase.fechaHoraInicio,
+        duracionMinutos: clase.duracionMinutos,
         estado: clase.estado,
-        total_inscritos: total,
+        totalInscritos: total,
         presentes,
         ausentes,
         justificados,
         pendientes,
-        porcentaje_asistencia: parseFloat(porcentaje),
+        porcentajeAsistencia: parseFloat(porcentaje),
       };
     });
 
@@ -257,7 +257,7 @@ export class AsistenciaReportesService {
       0,
     );
     const totalInscritos = resumen.reduce(
-      (sum, r) => sum + r.total_inscritos,
+      (sum, r) => sum + r.totalInscritos,
       0,
     );
     const porcentajeGlobal =
@@ -266,14 +266,14 @@ export class AsistenciaReportesService {
         : '0.00';
 
     return {
-      docente_id: docenteId,
-      total_clases: clases.length,
-      estadisticas_globales: {
-        total_estudiantes: totalInscritos,
-        total_presentes: totalPresentes,
-        total_ausentes: totalAusentes,
-        total_justificados: totalJustificados,
-        porcentaje_asistencia_global: parseFloat(porcentajeGlobal),
+      docenteId: docenteId,
+      totalClases: clases.length,
+      estadisticasGlobales: {
+        totalEstudiantes: totalInscritos,
+        totalPresentes: totalPresentes,
+        totalAusentes: totalAusentes,
+        totalJustificados: totalJustificados,
+        porcentajeAsistenciaGlobal: parseFloat(porcentajeGlobal),
       },
       clases: resumen,
     };
@@ -294,14 +294,14 @@ export class AsistenciaReportesService {
   ) {
     const where: Prisma.AsistenciaWhereInput = {
       clase: {
-        docente_id: docenteId, // Filter by teacher through class relationship
+        docenteId: docenteId, // Filter by teacher through class relationship
       },
       observaciones: { not: null }, // Only records with observations
     };
 
     // Filter by student if specified
     if (filtros.estudianteId) {
-      where.estudiante_id = filtros.estudianteId;
+      where.estudianteId = filtros.estudianteId;
     }
 
     // Filter by date range
@@ -333,7 +333,7 @@ export class AsistenciaReportesService {
           select: {
             id: true,
             nombre: true,
-            fecha_hora_inicio: true,
+            fechaHoraInicio: true,
           },
         },
       },
@@ -354,7 +354,7 @@ export class AsistenciaReportesService {
     const todasAsistencias = await this.prisma.asistencia.findMany({
       where: {
         clase: {
-          docente_id: docenteId, // Filter by teacher through class relationship
+          docenteId: docenteId, // Filter by teacher through class relationship
         },
       },
       include: {
@@ -369,7 +369,7 @@ export class AsistenciaReportesService {
         clase: {
           select: {
             nombre: true,
-            fecha_hora_inicio: true,
+            fechaHoraInicio: true,
           },
         },
       },
@@ -414,7 +414,7 @@ export class AsistenciaReportesService {
 
     todasAsistencias.forEach((asistencia) => {
       if (asistencia.estado === EstadoAsistencia.Presente) {
-        const key = asistencia.estudiante_id;
+        const key = asistencia.estudianteId;
         if (!porEstudiante[key]) {
           porEstudiante[key] = {
             nombre: `${asistencia.estudiante.nombre} ${asistencia.estudiante.apellido}`,
@@ -473,16 +473,16 @@ export class AsistenciaReportesService {
         : '0';
 
     return {
-      estadisticas_globales: {
-        total_registros: todasAsistencias.length,
-        total_presentes: totalPresentes,
-        total_ausentes: totalAusentes,
-        total_justificados: totalJustificados,
-        porcentaje_asistencia: parseFloat(porcentajeGlobal),
+      estadisticasGlobales: {
+        totalRegistros: todasAsistencias.length,
+        totalPresentes: totalPresentes,
+        totalAusentes: totalAusentes,
+        totalJustificados: totalJustificados,
+        porcentajeAsistencia: parseFloat(porcentajeGlobal),
       },
-      asistencia_semanal: porSemana,
-      top_estudiantes: topEstudiantes,
-      por_clase: porClaseArray,
+      asistenciaSemanal: porSemana,
+      topEstudiantes: topEstudiantes,
+      porClase: porClaseArray,
     };
   }
 }

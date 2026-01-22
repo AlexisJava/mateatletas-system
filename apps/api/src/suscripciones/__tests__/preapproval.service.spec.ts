@@ -89,9 +89,9 @@ describe('PreapprovalService', () => {
     const mockPlan = {
       id: 'plan-123',
       nombre: 'STEAM_LIBROS',
-      precio_base: { toNumber: () => 40000 },
+      precioBase: { toNumber: () => 40000 },
       intervalo: IntervaloSuscripcion.MENSUAL,
-      intervalo_cantidad: 1,
+      intervaloCantidad: 1,
       activo: true,
     };
 
@@ -110,10 +110,10 @@ describe('PreapprovalService', () => {
       prisma.suscripcion.count.mockResolvedValue(0); // primer hijo
       prisma.suscripcion.create.mockResolvedValue({
         id: 'suscripcion-123',
-        tutor_id: 'tutor-123',
-        plan_id: 'plan-123',
-        precio_final: { toNumber: () => 40000 },
-        descuento_porcentaje: 0,
+        tutorId: 'tutor-123',
+        planId: 'plan-123',
+        precioFinal: { toNumber: () => 40000 },
+        descuentoPorcentaje: 0,
         estado: EstadoSuscripcion.PENDIENTE,
       });
 
@@ -151,10 +151,10 @@ describe('PreapprovalService', () => {
       prisma.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
       prisma.suscripcion.create.mockResolvedValue({
         id: 'suscripcion-124',
-        tutor_id: 'tutor-123',
-        plan_id: 'plan-123',
-        precio_final: { toNumber: () => 36000 }, // 40000 * 0.9
-        descuento_porcentaje: 10,
+        tutorId: 'tutor-123',
+        planId: 'plan-123',
+        precioFinal: { toNumber: () => 36000 }, // 40000 * 0.9
+        descuentoPorcentaje: 10,
         estado: EstadoSuscripcion.PENDIENTE,
       });
 
@@ -216,10 +216,10 @@ describe('PreapprovalService', () => {
       prisma.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
       prisma.suscripcion.create.mockResolvedValue({
         id: 'suscripcion-123',
-        tutor_id: 'tutor-123',
-        plan_id: 'plan-123',
-        precio_final: { toNumber: () => 40000 },
-        descuento_porcentaje: 0,
+        tutorId: 'tutor-123',
+        planId: 'plan-123',
+        precioFinal: { toNumber: () => 40000 },
+        descuentoPorcentaje: 0,
         estado: EstadoSuscripcion.PENDIENTE,
       });
 
@@ -264,10 +264,10 @@ describe('PreapprovalService', () => {
         prisma.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
         prisma.suscripcion.create.mockResolvedValue({
           id: 'suscripcion-bricks-123',
-          tutor_id: 'tutor-123',
-          plan_id: 'plan-123',
-          precio_final: { toNumber: () => 40000 },
-          descuento_porcentaje: 0,
+          tutorId: 'tutor-123',
+          planId: 'plan-123',
+          precioFinal: { toNumber: () => 40000 },
+          descuentoPorcentaje: 0,
           estado: EstadoSuscripcion.ACTIVA, // ACTIVA inmediatamente
         });
 
@@ -292,10 +292,10 @@ describe('PreapprovalService', () => {
         prisma.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
         prisma.suscripcion.create.mockResolvedValue({
           id: 'suscripcion-bricks-123',
-          tutor_id: 'tutor-123',
-          plan_id: 'plan-123',
-          precio_final: { toNumber: () => 40000 },
-          descuento_porcentaje: 0,
+          tutorId: 'tutor-123',
+          planId: 'plan-123',
+          precioFinal: { toNumber: () => 40000 },
+          descuentoPorcentaje: 0,
           estado: EstadoSuscripcion.ACTIVA,
         });
 
@@ -324,10 +324,10 @@ describe('PreapprovalService', () => {
         prisma.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
         prisma.suscripcion.create.mockResolvedValue({
           id: 'suscripcion-redirect-123',
-          tutor_id: 'tutor-123',
-          plan_id: 'plan-123',
-          precio_final: { toNumber: () => 40000 },
-          descuento_porcentaje: 0,
+          tutorId: 'tutor-123',
+          planId: 'plan-123',
+          precioFinal: { toNumber: () => 40000 },
+          descuentoPorcentaje: 0,
           estado: EstadoSuscripcion.PENDIENTE,
         });
 
@@ -355,18 +355,18 @@ describe('PreapprovalService', () => {
         });
       });
 
-      it('should_set_fecha_inicio_when_using_bricks', async () => {
+      it('should_set_fechaInicio_when_using_bricks', async () => {
         // Arrange
         prisma.tutor.findUnique.mockResolvedValue(mockTutor);
         prisma.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
         prisma.suscripcion.create.mockResolvedValue({
           id: 'suscripcion-bricks-123',
-          tutor_id: 'tutor-123',
-          plan_id: 'plan-123',
-          precio_final: { toNumber: () => 40000 },
-          descuento_porcentaje: 0,
+          tutorId: 'tutor-123',
+          planId: 'plan-123',
+          precioFinal: { toNumber: () => 40000 },
+          descuentoPorcentaje: 0,
           estado: EstadoSuscripcion.ACTIVA,
-          fecha_inicio: new Date(),
+          fechaInicio: new Date(),
         });
 
         mockPreApprovalClient.create.mockResolvedValue({
@@ -378,11 +378,11 @@ describe('PreapprovalService', () => {
         // Act
         await service.crear(crearInputConBricks);
 
-        // Assert - Verificar que se crea con fecha_inicio
+        // Assert - Verificar que se crea con fechaInicio
         expect(prisma.suscripcion.create).toHaveBeenCalledWith({
           data: expect.objectContaining({
             estado: EstadoSuscripcion.ACTIVA,
-            fecha_inicio: expect.any(Date),
+            fechaInicio: expect.any(Date),
           }),
         });
       });
@@ -392,8 +392,8 @@ describe('PreapprovalService', () => {
   describe('cancelar', () => {
     const mockSuscripcion = {
       id: 'suscripcion-123',
-      tutor_id: 'tutor-123',
-      mp_preapproval_id: 'mp-preapproval-123',
+      tutorId: 'tutor-123',
+      mpPreapprovalId: 'mp-preapproval-123',
       estado: EstadoSuscripcion.ACTIVA,
       plan: { nombre: 'STEAM_LIBROS' },
     };
@@ -427,8 +427,8 @@ describe('PreapprovalService', () => {
         where: { id: 'suscripcion-123' },
         data: expect.objectContaining({
           estado: EstadoSuscripcion.CANCELADA,
-          motivo_cancelacion: 'Ya no necesito el servicio',
-          cancelado_por: 'tutor',
+          motivoCancelacion: 'Ya no necesito el servicio',
+          canceladoPor: 'tutor',
         }),
       });
 
@@ -452,7 +452,7 @@ describe('PreapprovalService', () => {
       // Arrange
       prisma.suscripcion.findUnique.mockResolvedValue({
         ...mockSuscripcion,
-        tutor_id: 'otro-tutor',
+        tutorId: 'otro-tutor',
       });
 
       // Act & Assert
@@ -525,12 +525,12 @@ describe('PreapprovalService', () => {
       });
       prisma.planSuscripcion.findUnique.mockResolvedValue({
         id: 'plan-123',
-        precio_base: { toNumber: () => 40000 },
+        precioBase: { toNumber: () => 40000 },
         activo: true,
       });
       prisma.suscripcion.create.mockResolvedValue({
         id: 'suscripcion-123',
-        precio_final: { toNumber: () => 40000 },
+        precioFinal: { toNumber: () => 40000 },
       });
 
       // Simular que el circuit breaker está abierto

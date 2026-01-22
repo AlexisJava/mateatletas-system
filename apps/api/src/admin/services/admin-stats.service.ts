@@ -59,7 +59,7 @@ export class AdminStatsService {
       this.prisma.clase.count({
         where: {
           estado: 'Programada',
-          fecha_hora_inicio: { gte: today },
+          fechaHoraInicio: { gte: today },
         },
       }),
       this.prisma.alerta.count({
@@ -130,12 +130,12 @@ export class AdminStatsService {
 
     // Usar raw query porque Prisma views no soportan findMany con tipos
     const facturacionAgregada = await this.prisma.$queryRaw<
-      Array<{ estado_pago: string; total: string }>
+      Array<{ estadoPago: string; total: string }>
     >`
-      SELECT estado_pago, SUM(monto)::text as total
+      SELECT estadoPago, SUM(monto)::text as total
       FROM facturacion_unificada
       WHERE periodo = ${periodoActual}
-      GROUP BY estado_pago
+      GROUP BY estadoPago
     `;
 
     // Calcular ingresos y pagos pendientes por estado
@@ -144,11 +144,11 @@ export class AdminStatsService {
 
     for (const row of facturacionAgregada) {
       const monto = parseFloat(row.total) || 0;
-      if (row.estado_pago === 'Pagado') {
+      if (row.estadoPago === 'Pagado') {
         ingresosTotal += monto;
       } else if (
-        row.estado_pago === 'Pendiente' ||
-        row.estado_pago === 'Vencido'
+        row.estadoPago === 'Pendiente' ||
+        row.estadoPago === 'Vencido'
       ) {
         pagosPendientes += monto;
       }
@@ -241,7 +241,7 @@ export class AdminStatsService {
         SELECT periodo, COUNT(*)::bigint as count
         FROM facturacion_unificada
         WHERE periodo = ANY(${periodos})
-          AND estado_pago IN ('Pagado', 'Pendiente')
+          AND estadoPago IN ('Pagado', 'Pendiente')
         GROUP BY periodo
       `,
 
@@ -323,12 +323,12 @@ export class AdminStatsService {
 
     // UNA SOLA QUERY: Obtener todos los datos agrupados por período y estado (SSOT)
     const aggregations = await this.prisma.$queryRaw<
-      Array<{ periodo: string; estado_pago: string; total: string }>
+      Array<{ periodo: string; estadoPago: string; total: string }>
     >`
-      SELECT periodo, estado_pago, SUM(monto)::text as total
+      SELECT periodo, estadoPago, SUM(monto)::text as total
       FROM facturacion_unificada
       WHERE periodo = ANY(${periodos})
-      GROUP BY periodo, estado_pago
+      GROUP BY periodo, estadoPago
     `;
 
     // Construir mapa de resultados
@@ -344,11 +344,11 @@ export class AdminStatsService {
       };
       const monto = parseFloat(agg.total) || 0;
 
-      if (agg.estado_pago === 'Pagado') {
+      if (agg.estadoPago === 'Pagado') {
         current.ingresos += monto;
       } else if (
-        agg.estado_pago === 'Pendiente' ||
-        agg.estado_pago === 'Vencido'
+        agg.estadoPago === 'Pendiente' ||
+        agg.estadoPago === 'Vencido'
       ) {
         current.pendientes += monto;
       }
@@ -528,12 +528,12 @@ export class AdminStatsService {
     const data: TransaccionReciente[] = inscripciones.map((ins) => ({
       id: ins.id,
       fecha: ins.createdAt,
-      monto: ins.precio_final.toNumber(),
-      estado: ins.estado_pago,
+      monto: ins.precioFinal.toNumber(),
+      estado: ins.estadoPago,
       concepto: ins.producto?.nombre ?? `Membresía ${ins.periodo}`,
       tutor: ins.tutor,
       estudiante: ins.estudiante,
-      metodoPago: ins.metodo_pago,
+      metodoPago: ins.metodoPago,
     }));
 
     return {
@@ -562,7 +562,7 @@ export class AdminStatsService {
     }
 
     if (filters?.estado) {
-      where.estado_pago = filters.estado;
+      where.estadoPago = filters.estado;
     }
 
     const inscripciones = await this.prisma.inscripcionMensual.findMany({
@@ -604,12 +604,12 @@ export class AdminStatsService {
       `${ins.tutor.nombre} ${ins.tutor.apellido}`,
       ins.tutor.email,
       ins.producto?.nombre ?? 'Membresía',
-      ins.precio_base.toNumber().toFixed(2),
-      ins.descuento_aplicado.toNumber().toFixed(2),
-      ins.precio_final.toNumber().toFixed(2),
-      ins.estado_pago,
-      ins.metodo_pago ?? '',
-      ins.fecha_pago ? ins.fecha_pago.toISOString().split('T')[0] : '',
+      ins.precioBase.toNumber().toFixed(2),
+      ins.descuentoAplicado.toNumber().toFixed(2),
+      ins.precioFinal.toNumber().toFixed(2),
+      ins.estadoPago,
+      ins.metodoPago ?? '',
+      ins.fechaPago ? ins.fechaPago.toISOString().split('T')[0] : '',
       (ins.observaciones ?? '').replace(/"/g, '""'),
     ]);
 
@@ -662,7 +662,7 @@ export class AdminStatsService {
     }
 
     if (filters?.estado) {
-      where.estado_pago = filters.estado;
+      where.estadoPago = filters.estado;
     }
 
     const inscripciones = await this.prisma.inscripcionMensual.findMany({
@@ -685,8 +685,8 @@ export class AdminStatsService {
     let totalIngresos = 0;
     let totalPendientes = 0;
     inscripciones.forEach((ins) => {
-      const monto = ins.precio_final.toNumber();
-      if (ins.estado_pago === 'Pagado') {
+      const monto = ins.precioFinal.toNumber();
+      if (ins.estadoPago === 'Pagado') {
         totalIngresos += monto;
       } else {
         totalPendientes += monto;
@@ -768,9 +768,9 @@ export class AdminStatsService {
         ins.periodo,
         `${ins.estudiante.nombre} ${ins.estudiante.apellido}`.substring(0, 18),
         `${ins.tutor.nombre} ${ins.tutor.apellido}`.substring(0, 18),
-        `$${ins.precio_final.toNumber().toFixed(0)}`,
-        ins.estado_pago,
-        ins.metodo_pago?.substring(0, 10) ?? '-',
+        `$${ins.precioFinal.toNumber().toFixed(0)}`,
+        ins.estadoPago,
+        ins.metodoPago?.substring(0, 10) ?? '-',
       ];
 
       for (let i = 0; i < row.length; i++) {
@@ -926,9 +926,9 @@ export class AdminStatsService {
 
     const planIdToNombre = new Map(planes.map((p) => [p.id, p.nombre]));
 
-    // Contar estudiantes agrupados por plan_id
+    // Contar estudiantes agrupados por planId
     const distribucion = await this.prisma.estudiante.groupBy({
-      by: ['plan_id'],
+      by: ['planId'],
       _count: { id: true },
     });
 
@@ -946,10 +946,10 @@ export class AdminStatsService {
       const count = item._count.id;
       result.total += count;
 
-      if (item.plan_id === null) {
+      if (item.planId === null) {
         result.SIN_PLAN += count;
       } else {
-        const nombrePlan = planIdToNombre.get(item.plan_id);
+        const nombrePlan = planIdToNombre.get(item.planId);
         if (nombrePlan === 'STEAM_LIBROS') {
           result.STEAM_LIBROS += count;
         } else if (nombrePlan === 'STEAM_ASINCRONICO') {

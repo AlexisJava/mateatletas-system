@@ -37,9 +37,7 @@ export class AsistenciasService {
     }
 
     // Validar que todos los estudiantes estén inscritos
-    const estudiantesInscritos = grupo.inscripciones.map(
-      (i) => i.estudiante_id,
-    );
+    const estudiantesInscritos = grupo.inscripciones.map((i) => i.estudianteId);
     const estudiantesNoInscritos = dto.asistencias.filter(
       (a) => !estudiantesInscritos.includes(a.estudianteId),
     );
@@ -58,8 +56,8 @@ export class AsistenciasService {
         // Buscar si ya existe asistencia para esta combinación
         const existente = await this.prisma.asistenciaClaseGrupo.findFirst({
           where: {
-            clase_grupo_id: claseGrupoId,
-            estudiante_id: asistencia.estudianteId,
+            claseGrupoId: claseGrupoId,
+            estudianteId: asistencia.estudianteId,
             fecha: fecha,
           },
         });
@@ -87,8 +85,8 @@ export class AsistenciasService {
           // Crear nuevo
           return this.prisma.asistenciaClaseGrupo.create({
             data: {
-              clase_grupo_id: claseGrupoId,
-              estudiante_id: asistencia.estudianteId,
+              claseGrupoId: claseGrupoId,
+              estudianteId: asistencia.estudianteId,
               fecha: fecha,
               estado: asistencia.estado,
               observaciones: asistencia.observaciones,
@@ -123,7 +121,7 @@ export class AsistenciasService {
 
     const asistencias = await this.prisma.asistenciaClaseGrupo.findMany({
       where: {
-        clase_grupo_id: claseGrupoId,
+        claseGrupoId: claseGrupoId,
         fecha: fechaDate,
       },
       include: {
@@ -159,11 +157,11 @@ export class AsistenciasService {
     filtros?: FiltrosHistorialAsistenciasDto,
   ) {
     const where: {
-      clase_grupo_id: string;
+      claseGrupoId: string;
       fecha?: { gte?: Date; lte?: Date };
-      estudiante_id?: string;
+      estudianteId?: string;
     } = {
-      clase_grupo_id: claseGrupoId,
+      claseGrupoId: claseGrupoId,
     };
 
     if (filtros?.fechaDesde || filtros?.fechaHasta) {
@@ -177,7 +175,7 @@ export class AsistenciasService {
     }
 
     if (filtros?.estudianteId) {
-      where.estudiante_id = filtros.estudianteId;
+      where.estudianteId = filtros.estudianteId;
     }
 
     const asistencias = await this.prisma.asistenciaClaseGrupo.findMany({
@@ -211,7 +209,7 @@ export class AsistenciasService {
       success: true,
       data: {
         asistencias,
-        por_fecha: porFecha,
+        porFecha: porFecha,
       },
       total: asistencias.length,
     };
@@ -268,8 +266,8 @@ export class AsistenciasService {
   ) {
     const asistencias = await this.prisma.asistenciaClaseGrupo.findMany({
       where: {
-        clase_grupo_id: claseGrupoId,
-        estudiante_id: estudianteId,
+        claseGrupoId: claseGrupoId,
+        estudianteId: estudianteId,
       },
     });
 
@@ -289,11 +287,11 @@ export class AsistenciasService {
     return {
       success: true,
       data: {
-        total_clases: total,
+        totalClases: total,
         presentes,
         ausentes,
         justificados,
-        porcentaje_asistencia: Math.round(porcentajeAsistencia * 100) / 100,
+        porcentajeAsistencia: Math.round(porcentajeAsistencia * 100) / 100,
       },
     };
   }

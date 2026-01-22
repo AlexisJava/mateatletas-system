@@ -43,7 +43,7 @@ describe('ComisionesService', () => {
     color_primario: '#10B981',
     color_secundario: '#34D399',
     icono_url: null,
-    xp_total: 0,
+    xpTotal: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -62,13 +62,13 @@ describe('ComisionesService', () => {
     id: 'comision-quantum-manana',
     nombre: 'QUANTUM Mañana',
     descripcion: 'Turno mañana para casa QUANTUM',
-    producto_id: 'producto-colonia-2026',
-    casa_id: 'casa-quantum-id',
-    docente_id: 'docente-maria-id',
-    cupo_maximo: 15,
+    productoId: 'producto-colonia-2026',
+    casaId: 'casa-quantum-id',
+    docenteId: 'docente-maria-id',
+    cupoMaximo: 15,
     horario: 'Lun-Vie 9:00-12:00',
-    fecha_inicio: new Date('2026-01-06'),
-    fecha_fin: new Date('2026-01-31'),
+    fechaInicio: new Date('2026-01-06'),
+    fechaFin: new Date('2026-01-31'),
     activo: true,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -80,7 +80,7 @@ describe('ComisionesService', () => {
     apellido: 'Pérez',
     username: 'juan.perez.abc1',
     edad: 10,
-    nivel_escolar: 'Primaria',
+    nivelEscolar: 'Primaria',
     equipo_id: 'casa-quantum-id',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -88,10 +88,10 @@ describe('ComisionesService', () => {
 
   const mockInscripcion = {
     id: 'inscripcion-1',
-    comision_id: 'comision-quantum-manana',
-    estudiante_id: 'estudiante-juan-id',
+    comisionId: 'comision-quantum-manana',
+    estudianteId: 'estudiante-juan-id',
     estado: EstadoInscripcionComision.Confirmada,
-    fecha_inscripcion: new Date(),
+    fechaInscripcion: new Date(),
     notas: null,
   };
 
@@ -178,10 +178,10 @@ describe('ComisionesService', () => {
 
       const result = await service.create({
         nombre: 'QUANTUM Mañana',
-        producto_id: 'producto-colonia-2026',
-        casa_id: 'casa-quantum-id',
-        docente_id: 'docente-maria-id',
-        cupo_maximo: 15,
+        productoId: 'producto-colonia-2026',
+        casaId: 'casa-quantum-id',
+        docenteId: 'docente-maria-id',
+        cupoMaximo: 15,
         horario: 'Lun-Vie 9:00-12:00',
       });
 
@@ -196,7 +196,7 @@ describe('ComisionesService', () => {
       await expect(
         service.create({
           nombre: 'QUANTUM Mañana',
-          producto_id: 'producto-inexistente',
+          productoId: 'producto-inexistente',
         }),
       ).rejects.toThrow(NotFoundException);
     });
@@ -207,7 +207,7 @@ describe('ComisionesService', () => {
       await expect(
         service.create({
           nombre: 'Test',
-          producto_id: 'producto-libro-digital',
+          productoId: 'producto-libro-digital',
         }),
       ).rejects.toThrow(BadRequestException);
     });
@@ -219,8 +219,8 @@ describe('ComisionesService', () => {
       await expect(
         service.create({
           nombre: 'QUANTUM Mañana',
-          producto_id: 'producto-colonia-2026',
-          casa_id: 'casa-inexistente',
+          productoId: 'producto-colonia-2026',
+          casaId: 'casa-inexistente',
         }),
       ).rejects.toThrow(NotFoundException);
     });
@@ -232,8 +232,8 @@ describe('ComisionesService', () => {
       await expect(
         service.create({
           nombre: 'QUANTUM Mañana',
-          producto_id: 'producto-colonia-2026',
-          docente_id: 'docente-inexistente',
+          productoId: 'producto-colonia-2026',
+          docenteId: 'docente-inexistente',
         }),
       ).rejects.toThrow(NotFoundException);
     });
@@ -260,47 +260,47 @@ describe('ComisionesService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toHaveLength(1);
-      expect(result.data[0].total_inscriptos).toBe(5);
+      expect(result.data[0].totalInscriptos).toBe(5);
       expect(result.data[0].cupos_disponibles).toBe(10); // 15 - 5
     });
 
-    it('should filter by producto_id', async () => {
+    it('should filter by productoId', async () => {
       prisma.comision.findMany.mockResolvedValue([]);
 
-      await service.findAll({ producto_id: 'producto-colonia-2026' });
+      await service.findAll({ productoId: 'producto-colonia-2026' });
 
       expect(prisma.comision.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            producto_id: 'producto-colonia-2026',
+            productoId: 'producto-colonia-2026',
           }),
         }),
       );
     });
 
-    it('should filter by casa_id', async () => {
+    it('should filter by casaId', async () => {
       prisma.comision.findMany.mockResolvedValue([]);
 
-      await service.findAll({ casa_id: 'casa-quantum-id' });
+      await service.findAll({ casaId: 'casa-quantum-id' });
 
       expect(prisma.comision.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            casa_id: 'casa-quantum-id',
+            casaId: 'casa-quantum-id',
           }),
         }),
       );
     });
 
-    it('should filter by docente_id', async () => {
+    it('should filter by docenteId', async () => {
       prisma.comision.findMany.mockResolvedValue([]);
 
-      await service.findAll({ docente_id: 'docente-maria-id' });
+      await service.findAll({ docenteId: 'docente-maria-id' });
 
       expect(prisma.comision.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            docente_id: 'docente-maria-id',
+            docenteId: 'docente-maria-id',
           }),
         }),
       );
@@ -345,7 +345,7 @@ describe('ComisionesService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data.inscripciones).toHaveLength(1);
-      expect(result.data.total_inscriptos).toBe(1);
+      expect(result.data.totalInscriptos).toBe(1);
     });
 
     it('should throw error when comision is not found', async () => {
@@ -383,11 +383,11 @@ describe('ComisionesService', () => {
       expect(result.data.nombre).toBe('QUANTUM Tarde');
     });
 
-    it('should update docente_id to null (desasignar docente)', async () => {
+    it('should update docenteId to null (desasignar docente)', async () => {
       prisma.comision.findUnique.mockResolvedValue(mockComision);
       prisma.comision.update.mockResolvedValue({
         ...mockComision,
-        docente_id: null,
+        docenteId: null,
         docente: null,
         producto: mockProductoCurso,
         casa: mockCasa,
@@ -395,7 +395,7 @@ describe('ComisionesService', () => {
       });
 
       const result = await service.update('comision-quantum-manana', {
-        docente_id: null,
+        docenteId: null,
       });
 
       expect(result.success).toBe(true);
@@ -410,11 +410,11 @@ describe('ComisionesService', () => {
       );
     });
 
-    it('should update casa_id to null (desasignar casa)', async () => {
+    it('should update casaId to null (desasignar casa)', async () => {
       prisma.comision.findUnique.mockResolvedValue(mockComision);
       prisma.comision.update.mockResolvedValue({
         ...mockComision,
-        casa_id: null,
+        casaId: null,
         casa: null,
         producto: mockProductoCurso,
         docente: mockDocente,
@@ -422,7 +422,7 @@ describe('ComisionesService', () => {
       });
 
       const result = await service.update('comision-quantum-manana', {
-        casa_id: null,
+        casaId: null,
       });
 
       expect(result.success).toBe(true);
@@ -443,7 +443,7 @@ describe('ComisionesService', () => {
 
       await expect(
         service.update('comision-quantum-manana', {
-          casa_id: 'casa-inexistente',
+          casaId: 'casa-inexistente',
         }),
       ).rejects.toThrow(NotFoundException);
     });
@@ -454,7 +454,7 @@ describe('ComisionesService', () => {
 
       await expect(
         service.update('comision-quantum-manana', {
-          docente_id: 'docente-inexistente',
+          docenteId: 'docente-inexistente',
         }),
       ).rejects.toThrow(NotFoundException);
     });
@@ -520,7 +520,7 @@ describe('ComisionesService', () => {
       const mockInscripcion2 = {
         ...mockInscripcion,
         id: 'inscripcion-2',
-        estudiante_id: 'estudiante-maria-id',
+        estudianteId: 'estudiante-maria-id',
         estudiante: {
           ...mockEstudiante,
           id: 'estudiante-maria-id',
@@ -535,7 +535,7 @@ describe('ComisionesService', () => {
       const result = await service.inscribirEstudiantes(
         'comision-quantum-manana',
         {
-          estudiantes_ids: ['estudiante-juan-id', 'estudiante-maria-id'],
+          estudiantesIds: ['estudiante-juan-id', 'estudiante-maria-id'],
         },
       );
 
@@ -548,7 +548,7 @@ describe('ComisionesService', () => {
 
       await expect(
         service.inscribirEstudiantes('comision-inexistente', {
-          estudiantes_ids: ['estudiante-juan-id'],
+          estudiantesIds: ['estudiante-juan-id'],
         }),
       ).rejects.toThrow(NotFoundException);
     });
@@ -562,7 +562,7 @@ describe('ComisionesService', () => {
 
       await expect(
         service.inscribirEstudiantes('comision-quantum-manana', {
-          estudiantes_ids: ['estudiante-juan-id'],
+          estudiantesIds: ['estudiante-juan-id'],
         }),
       ).rejects.toThrow(BadRequestException);
     });
@@ -570,13 +570,13 @@ describe('ComisionesService', () => {
     it('should throw error when no cupos available', async () => {
       prisma.comision.findUnique.mockResolvedValue({
         ...mockComision,
-        cupo_maximo: 15,
+        cupoMaximo: 15,
         _count: { inscripciones: 15 },
       });
 
       await expect(
         service.inscribirEstudiantes('comision-quantum-manana', {
-          estudiantes_ids: ['estudiante-juan-id'],
+          estudiantesIds: ['estudiante-juan-id'],
         }),
       ).rejects.toThrow(BadRequestException);
     });
@@ -591,7 +591,7 @@ describe('ComisionesService', () => {
 
       await expect(
         service.inscribirEstudiantes('comision-quantum-manana', {
-          estudiantes_ids: ['estudiante-juan-id', 'estudiante-inexistente'],
+          estudiantesIds: ['estudiante-juan-id', 'estudiante-inexistente'],
         }),
       ).rejects.toThrow(NotFoundException);
     });
@@ -607,7 +607,7 @@ describe('ComisionesService', () => {
 
       await expect(
         service.inscribirEstudiantes('comision-quantum-manana', {
-          estudiantes_ids: ['estudiante-juan-id'],
+          estudiantesIds: ['estudiante-juan-id'],
         }),
       ).rejects.toThrow(BadRequestException);
     });
@@ -779,7 +779,7 @@ describe('ComisionesService', () => {
     it('should throw error when no cupos available', async () => {
       prisma.comision.findUnique.mockResolvedValue({
         ...mockComision,
-        cupo_maximo: 15,
+        cupoMaximo: 15,
         _count: { inscripciones: 15 },
       });
 
@@ -791,10 +791,10 @@ describe('ComisionesService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('should allow inscription when cupo_maximo is null (unlimited)', async () => {
+    it('should allow inscription when cupoMaximo is null (unlimited)', async () => {
       prisma.comision.findUnique.mockResolvedValue({
         ...mockComision,
-        cupo_maximo: null,
+        cupoMaximo: null,
         _count: { inscripciones: 100 },
       });
       estudiantesService.crearEstudianteConCredenciales.mockResolvedValue(
@@ -819,10 +819,10 @@ describe('ComisionesService', () => {
   // ============================================================================
 
   describe('edge cases', () => {
-    it('should handle comision with null cupo_maximo (unlimited)', async () => {
+    it('should handle comision with null cupoMaximo (unlimited)', async () => {
       const comisionWithoutCupo = {
         ...mockComision,
-        cupo_maximo: null,
+        cupoMaximo: null,
         _count: { inscripciones: 100 },
       };
       prisma.comision.findMany.mockResolvedValue([
@@ -842,7 +842,7 @@ describe('ComisionesService', () => {
     it('should handle comision without docente', async () => {
       const comisionWithoutDocente = {
         ...mockComision,
-        docente_id: null,
+        docenteId: null,
         docente: null,
         _count: { inscripciones: 0 },
       };
@@ -861,7 +861,7 @@ describe('ComisionesService', () => {
     it('should handle comision without casa', async () => {
       const comisionWithoutCasa = {
         ...mockComision,
-        casa_id: null,
+        casaId: null,
         casa: null,
         _count: { inscripciones: 0 },
       };

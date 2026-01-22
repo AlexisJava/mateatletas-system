@@ -80,9 +80,9 @@ describe('Eventos After Commit', () => {
   const mockPlan = {
     id: 'plan-123',
     nombre: 'STEAM',
-    precio_base: { toNumber: () => 40000 },
+    precioBase: { toNumber: () => 40000 },
     intervalo: IntervaloSuscripcion.MENSUAL,
-    intervalo_cantidad: 1,
+    intervaloCantidad: 1,
     activo: true,
   };
 
@@ -148,7 +148,7 @@ describe('Eventos After Commit', () => {
       mockPrismaService.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
       mockPrismaService.suscripcion.create.mockResolvedValue({
         id: 'suscripcion-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         estado: EstadoSuscripcion.PENDIENTE,
       });
       mockMpClient.create.mockResolvedValue({
@@ -177,7 +177,7 @@ describe('Eventos After Commit', () => {
       mockPrismaService.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
       mockPrismaService.suscripcion.create.mockResolvedValue({
         id: 'suscripcion-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         estado: EstadoSuscripcion.PENDIENTE,
       });
       mockMpClient.create.mockResolvedValue({
@@ -207,7 +207,7 @@ describe('Eventos After Commit', () => {
       mockPrismaService.planSuscripcion.findUnique.mockResolvedValue(mockPlan);
       mockPrismaService.suscripcion.create.mockResolvedValue({
         id: 'suscripcion-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
       });
 
       // MP falla - transacción debe hacer rollback
@@ -244,8 +244,8 @@ describe('Eventos After Commit', () => {
   describe('PreapprovalService.cancelar() - Evento después del commit', () => {
     const mockSuscripcion = {
       id: 'suscripcion-123',
-      tutor_id: 'tutor-123',
-      mp_preapproval_id: 'mp-123',
+      tutorId: 'tutor-123',
+      mpPreapprovalId: 'mp-123',
       estado: EstadoSuscripcion.ACTIVA,
       plan: { nombre: 'STEAM' },
     };
@@ -315,7 +315,7 @@ describe('Eventos After Commit', () => {
   describe('PreapprovalWebhookService - Evento después del commit', () => {
     const mockSuscripcion = {
       id: 'suscripcion-123',
-      tutor_id: 'tutor-123',
+      tutorId: 'tutor-123',
       estado: EstadoSuscripcion.PENDIENTE,
       version: 1,
     };
@@ -327,14 +327,14 @@ describe('Eventos After Commit', () => {
       api_version: 'v1',
       date_created: new Date().toISOString(),
       live_mode: false,
-      user_id: 'user-123',
+      userId: 'user-123',
       data: { id: 'mp-preapproval-123' },
     };
 
     const preapprovalDetail: PreApprovalDetail = {
       id: 'mp-preapproval-123',
       status: 'authorized',
-      external_reference: 'suscripcion-123',
+      externalReference: 'suscripcion-123',
       payer_email: 'test@test.com',
       payer_id: 123,
       reason: 'Test',

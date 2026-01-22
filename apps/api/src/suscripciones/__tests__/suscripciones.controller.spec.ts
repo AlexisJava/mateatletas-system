@@ -105,14 +105,14 @@ describe('SuscripcionesController', () => {
 
     it('should_create_subscription_successfully', async () => {
       const dto = {
-        plan_id: 'plan-1',
-        estudiante_ids: ['est-1', 'est-2'],
+        planId: 'plan-1',
+        estudianteIds: ['est-1', 'est-2'],
       };
 
       // Mock estudiantes pertenecen al tutor
       mockPrisma.estudiante.findMany.mockResolvedValue([
-        { id: 'est-1', tutor_id: tutorId },
-        { id: 'est-2', tutor_id: tutorId },
+        { id: 'est-1', tutorId: tutorId },
+        { id: 'est-2', tutorId: tutorId },
       ]);
 
       // Mock plan existe y no requiere clase
@@ -132,15 +132,15 @@ describe('SuscripcionesController', () => {
 
       const result = await controller.crearSuscripcion(dto, tutorUser);
 
-      expect(result.suscripcion_id).toBe('sus-1');
+      expect(result.suscripcionId).toBe('sus-1');
       expect(result.init_point).toBe('https://mp.com/checkout');
       expect(result.monto_final).toBe(27000);
     });
 
     it('should_fail_when_estudiante_not_belongs_to_tutor', async () => {
       const dto = {
-        plan_id: 'plan-1',
-        estudiante_ids: ['est-1'],
+        planId: 'plan-1',
+        estudianteIds: ['est-1'],
       };
 
       // Mock estudiante no pertenece al tutor
@@ -151,15 +151,15 @@ describe('SuscripcionesController', () => {
       );
     });
 
-    it('should_fail_when_sync_plan_without_clase_grupo', async () => {
+    it('should_fail_when_sync_plan_without_claseGrupo', async () => {
       const dto = {
-        plan_id: 'plan-sync',
-        estudiante_ids: ['est-1'],
-        // Sin clase_grupo_id
+        planId: 'plan-sync',
+        estudianteIds: ['est-1'],
+        // Sin claseGrupoId
       };
 
       mockPrisma.estudiante.findMany.mockResolvedValue([
-        { id: 'est-1', tutor_id: tutorId },
+        { id: 'est-1', tutorId: tutorId },
       ]);
 
       mockPrisma.planSuscripcion.findUnique.mockResolvedValue({
@@ -216,7 +216,7 @@ describe('SuscripcionesController', () => {
         id: 'sus-1',
         estado: EstadoSuscripcion.ACTIVA,
         pagos: [{ id: 'pago-1', monto: 30000 }],
-        historial_estados: [],
+        historialEstados: [],
       };
 
       mockQueryService.getSuscripcionDetalle.mockResolvedValue(mockDetalle);
@@ -246,9 +246,9 @@ describe('SuscripcionesController', () => {
 
       mockPrisma.suscripcion.findUnique.mockResolvedValue({
         id: 'sus-1',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         estado: EstadoSuscripcion.ACTIVA,
-        fecha_proximo_cobro: fechaFinAcceso,
+        fechaProximoCobro: fechaFinAcceso,
       });
 
       mockPreapprovalService.cancelar.mockResolvedValue(undefined);
@@ -256,7 +256,7 @@ describe('SuscripcionesController', () => {
       const result = await controller.cancelarSuscripcion('sus-1', tutorUser);
 
       expect(result.mensaje).toContain('cancelada');
-      expect(result.fecha_fin_acceso).toEqual(fechaFinAcceso);
+      expect(result.fechaFin_acceso).toEqual(fechaFinAcceso);
     });
 
     it('should_fail_when_already_cancelled', async () => {
@@ -264,7 +264,7 @@ describe('SuscripcionesController', () => {
 
       mockPrisma.suscripcion.findUnique.mockResolvedValue({
         id: 'sus-1',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         estado: EstadoSuscripcion.CANCELADA,
       });
 
@@ -339,12 +339,12 @@ describe('SuscripcionesController', () => {
   describe('GET /admin/suscripciones/metricas', () => {
     it('should_return_dashboard_metrics', async () => {
       const mockMetricas = {
-        total_activas: 50,
-        total_morosas: 5,
+        totalActivas: 50,
+        totalMorosas: 5,
         total_en_gracia: 3,
         total_canceladas_mes: 2,
-        ingresos_mes: 1500000,
-        tasa_cancelacion: 3.33,
+        ingresosMes: 1500000,
+        tasaCancelacion: 3.33,
       };
 
       mockAdminService.getMetricas.mockResolvedValue(mockMetricas);

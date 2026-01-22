@@ -76,21 +76,21 @@ describe('EstudianteCommandService - Asignar Clases', () => {
       const estudiante = {
         id: estudianteId,
         nombre: 'Juan',
-        sector_id: 'sector-matematica-id',
+        sectorId: 'sector-matematica-id',
       };
 
       const clase = {
         id: claseId,
         nombre: 'Matemática B1',
-        sector_id: 'sector-matematica-id',
-        cupos_maximo: 10,
-        cupos_ocupados: 5,
+        sectorId: 'sector-matematica-id',
+        cuposMaximo: 10,
+        cuposOcupados: 5,
       };
 
       const inscripcion = {
         id: 'inscripcion-id',
-        estudiante_id: estudianteId,
-        clase_id: claseId,
+        estudianteId: estudianteId,
+        claseId: claseId,
         estado: 'Activa',
       };
 
@@ -104,7 +104,7 @@ describe('EstudianteCommandService - Asignar Clases', () => {
         .mockResolvedValue(inscripcion as any);
       jest
         .spyOn(prisma.clase, 'update')
-        .mockResolvedValue({ ...clase, cupos_ocupados: 6 } as any);
+        .mockResolvedValue({ ...clase, cuposOcupados: 6 } as any);
 
       // Act
       const result = await service.asignarClaseAEstudiante(
@@ -114,11 +114,11 @@ describe('EstudianteCommandService - Asignar Clases', () => {
 
       // Assert
       expect(result).toBeDefined();
-      expect(result.estudiante_id).toBe(estudianteId);
-      expect(result.clase_id).toBe(claseId);
+      expect(result.estudianteId).toBe(estudianteId);
+      expect(result.claseId).toBe(claseId);
       expect(prisma.clase.update).toHaveBeenCalledWith({
         where: { id: claseId },
-        data: { cupos_ocupados: { increment: 1 } },
+        data: { cuposOcupados: { increment: 1 } },
       });
     });
   });
@@ -131,15 +131,15 @@ describe('EstudianteCommandService - Asignar Clases', () => {
 
       const estudiante = {
         id: estudianteId,
-        sector_id: 'sector-matematica-id',
+        sectorId: 'sector-matematica-id',
       };
 
       const clases = clasesIds.map((id, index) => ({
         id,
         nombre: `Clase ${index + 1}`,
-        sector_id: 'sector-matematica-id',
-        cupos_maximo: 10,
-        cupos_ocupados: 5,
+        sectorId: 'sector-matematica-id',
+        cuposMaximo: 10,
+        cuposOcupados: 5,
       }));
 
       jest
@@ -149,23 +149,23 @@ describe('EstudianteCommandService - Asignar Clases', () => {
       (prisma.inscripcionClase.create as jest.Mock)
         .mockResolvedValueOnce({
           id: 'inscripcion-clase-1',
-          estudiante_id: estudianteId,
-          clase_id: 'clase-1',
+          estudianteId: estudianteId,
+          claseId: 'clase-1',
         } as any)
         .mockResolvedValueOnce({
           id: 'inscripcion-clase-2',
-          estudiante_id: estudianteId,
-          clase_id: 'clase-2',
+          estudianteId: estudianteId,
+          claseId: 'clase-2',
         } as any)
         .mockResolvedValueOnce({
           id: 'inscripcion-clase-3',
-          estudiante_id: estudianteId,
-          clase_id: 'clase-3',
+          estudianteId: estudianteId,
+          claseId: 'clase-3',
         } as any);
 
       (prisma.clase.update as jest.Mock).mockResolvedValue({
         ...clases[0],
-        cupos_ocupados: 6,
+        cuposOcupados: 6,
       } as any);
 
       // Act
@@ -176,9 +176,9 @@ describe('EstudianteCommandService - Asignar Clases', () => {
 
       // Assert
       expect(result).toHaveLength(3);
-      expect(result[0].estudiante_id).toBe(estudianteId);
-      expect(result[1].estudiante_id).toBe(estudianteId);
-      expect(result[2].estudiante_id).toBe(estudianteId);
+      expect(result[0].estudianteId).toBe(estudianteId);
+      expect(result[1].estudianteId).toBe(estudianteId);
+      expect(result[2].estudianteId).toBe(estudianteId);
     });
   });
 
@@ -190,13 +190,13 @@ describe('EstudianteCommandService - Asignar Clases', () => {
 
       const estudiante = {
         id: estudianteId,
-        sector_id: 'sector-matematica-id',
+        sectorId: 'sector-matematica-id',
       };
 
       const clase = {
         id: claseId,
         nombre: 'Programación',
-        sector_id: 'sector-programacion-id', // Sector diferente
+        sectorId: 'sector-programacion-id', // Sector diferente
       };
 
       jest
@@ -222,15 +222,15 @@ describe('EstudianteCommandService - Asignar Clases', () => {
 
       const estudiante = {
         id: estudianteId,
-        sector_id: 'sector-matematica-id',
+        sectorId: 'sector-matematica-id',
       };
 
       const claseCompleta = {
         id: claseId,
         nombre: 'Matemática B1',
-        sector_id: 'sector-matematica-id',
-        cupos_maximo: 10,
-        cupos_ocupados: 10, // Clase llena
+        sectorId: 'sector-matematica-id',
+        cuposMaximo: 10,
+        cuposOcupados: 10, // Clase llena
       };
 
       jest
@@ -258,20 +258,20 @@ describe('EstudianteCommandService - Asignar Clases', () => {
 
       const estudiante = {
         id: estudianteId,
-        sector_id: 'sector-matematica-id',
+        sectorId: 'sector-matematica-id',
       };
 
       const clase = {
         id: claseId,
-        sector_id: 'sector-matematica-id',
-        cupos_maximo: 10,
-        cupos_ocupados: 5,
+        sectorId: 'sector-matematica-id',
+        cuposMaximo: 10,
+        cuposOcupados: 5,
       };
 
       const inscripcionExistente = {
         id: 'inscripcion-existente',
-        estudiante_id: estudianteId,
-        clase_id: claseId,
+        estudianteId: estudianteId,
+        claseId: claseId,
       };
 
       jest
@@ -300,23 +300,23 @@ describe('EstudianteCommandService - Asignar Clases', () => {
 
       const estudiante = {
         id: estudianteId,
-        sector_id: sectorId,
+        sectorId: sectorId,
       };
 
       const clasesDisponibles = [
         {
           id: 'clase-1',
           nombre: 'Matemática B1',
-          sector_id: sectorId,
-          cupos_maximo: 10,
-          cupos_ocupados: 5,
+          sectorId: sectorId,
+          cuposMaximo: 10,
+          cuposOcupados: 5,
         },
         {
           id: 'clase-2',
           nombre: 'Matemática B2',
-          sector_id: sectorId,
-          cupos_maximo: 8,
-          cupos_ocupados: 3,
+          sectorId: sectorId,
+          cuposMaximo: 8,
+          cuposOcupados: 3,
         },
       ];
 
@@ -333,11 +333,11 @@ describe('EstudianteCommandService - Asignar Clases', () => {
 
       // Assert
       expect(result).toHaveLength(2);
-      expect(result[0].cupos_maximo).toBeGreaterThan(result[0].cupos_ocupados);
+      expect(result[0].cuposMaximo).toBeGreaterThan(result[0].cuposOcupados);
       expect(prisma.clase.findMany).toHaveBeenCalledWith({
         where: {
-          sector_id: sectorId,
-          cupos_ocupados: { lt: expect.any(Object) },
+          sectorId: sectorId,
+          cuposOcupados: { lt: expect.any(Object) },
         },
       });
     });

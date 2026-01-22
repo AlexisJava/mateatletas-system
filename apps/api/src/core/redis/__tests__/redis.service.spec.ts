@@ -372,5 +372,5 @@ describe('RedisService - PASO 3.1', () => {
  *
  * CACHE HIT RATE esperado: >80%
  * - MercadoPago reintenta webhooks → cache hits
- * - Mismo payment_id consultado múltiples veces → cache hits
+ * - Mismo paymentId consultado múltiples veces → cache hits
  */

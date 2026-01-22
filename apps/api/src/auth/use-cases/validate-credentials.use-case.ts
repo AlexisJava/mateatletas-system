@@ -5,9 +5,9 @@ import * as bcrypt from 'bcrypt';
 import { BCRYPT_ROUNDS } from '../../common/constants/security.constants';
 
 /**
- * Tipo de retorno: Tutor sin password_hash
+ * Tipo de retorno: Tutor sin passwordHash
  */
-export type TutorWithoutPassword = Omit<Tutor, 'password_hash'>;
+export type TutorWithoutPassword = Omit<Tutor, 'passwordHash'>;
 
 /**
  * Use Case: Validar Credenciales de Usuario
@@ -15,7 +15,7 @@ export type TutorWithoutPassword = Omit<Tutor, 'password_hash'>;
  * RESPONSABILIDAD ÚNICA:
  * - Validar email + password contra la base de datos
  * - Migrar hashes de bcrypt con rounds antiguos (10 → 12)
- * - Retornar usuario sin password_hash si es válido
+ * - Retornar usuario sin passwordHash si es válido
  *
  * SEGURIDAD (NIST SP 800-63B 2025):
  * - Bcrypt con 12 rounds mínimo
@@ -33,7 +33,7 @@ export class ValidateCredentialsUseCase {
    *
    * @param email - Email del tutor
    * @param password - Contraseña en texto plano
-   * @returns Tutor sin password_hash si es válido, null si no
+   * @returns Tutor sin passwordHash si es válido, null si no
    */
   async execute(
     email: string,
@@ -50,7 +50,7 @@ export class ValidateCredentialsUseCase {
 
       const isPasswordValid = await bcrypt.compare(
         password,
-        tutor.password_hash,
+        tutor.passwordHash,
       );
 
       if (!isPasswordValid) {
@@ -60,9 +60,9 @@ export class ValidateCredentialsUseCase {
       // ✅ SECURITY: Rehash password if using old rounds (gradual migration)
       await this.rehashIfNeeded(tutor, password);
 
-      // Retornar tutor sin password_hash
-      const { password_hash, ...result } = tutor;
-      void password_hash; // Evitar warning de variable no usada
+      // Retornar tutor sin passwordHash
+      const { passwordHash, ...result } = tutor;
+      void passwordHash; // Evitar warning de variable no usada
       return result;
     } catch (error) {
       // Log del error sin exponer detalles al cliente
@@ -78,11 +78,11 @@ export class ValidateCredentialsUseCase {
    * Rehashea la contraseña si usa rounds antiguos
    * Operación fire-and-forget para no bloquear el login
    *
-   * @param tutor - Tutor con password_hash
+   * @param tutor - Tutor con passwordHash
    * @param password - Contraseña en texto plano
    */
   private async rehashIfNeeded(tutor: Tutor, password: string): Promise<void> {
-    const currentRounds = this.getRoundsFromHash(tutor.password_hash);
+    const currentRounds = this.getRoundsFromHash(tutor.passwordHash);
 
     if (currentRounds < BCRYPT_ROUNDS) {
       this.logger.log(
@@ -94,7 +94,7 @@ export class ValidateCredentialsUseCase {
 
         await this.prisma.tutor.update({
           where: { id: tutor.id },
-          data: { password_hash: newHash },
+          data: { passwordHash: newHash },
         });
 
         this.logger.log(`Password rehashed successfully for tutor ${tutor.id}`);

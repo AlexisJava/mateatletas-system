@@ -45,13 +45,13 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
       const mockClase = {
         id: 'clase-123',
         nombre: 'Matemáticas Avanzadas',
-        cupos_maximo: 10,
-        cupos_ocupados: 9, // Solo 1 cupo disponible
+        cuposMaximo: 10,
+        cuposOcupados: 9, // Solo 1 cupo disponible
         estado: 'Programada',
-        fecha_hora_inicio: new Date(
+        fechaHoraInicio: new Date(
           Date.now() + 24 * 60 * 60 * 1000,
         ).toISOString(), // Mañana
-        producto_id: null,
+        productoId: null,
         producto: null,
       };
 
@@ -59,7 +59,7 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
         id: 'est-1',
         nombre: 'Juan',
         apellido: 'Perez',
-        tutor_id: 'tutor-1',
+        tutorId: 'tutor-1',
         inscripciones_curso: [],
       };
 
@@ -67,7 +67,7 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
         id: 'est-2',
         nombre: 'Maria',
         apellido: 'Garcia',
-        tutor_id: 'tutor-2',
+        tutorId: 'tutor-2',
         inscripciones_curso: [],
       };
 
@@ -95,20 +95,20 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
             clase: {
               findUnique: jest.fn().mockResolvedValue({
                 ...mockClase,
-                cupos_ocupados: transactionCount === 1 ? 9 : 10, // Segunda transacción ve 10
+                cuposOcupados: transactionCount === 1 ? 9 : 10, // Segunda transacción ve 10
               }),
               update: jest.fn().mockResolvedValue({
                 ...mockClase,
-                cupos_ocupados: transactionCount === 1 ? 10 : 11,
+                cuposOcupados: transactionCount === 1 ? 10 : 11,
               }),
             },
             inscripcionClase: {
               findUnique: jest.fn().mockResolvedValue(null),
               create: jest.fn().mockResolvedValue({
                 id: `inscripcion-${transactionCount}`,
-                clase_id: 'clase-123',
-                estudiante_id: transactionCount === 1 ? 'est-1' : 'est-2',
-                tutor_id: transactionCount === 1 ? 'tutor-1' : 'tutor-2',
+                claseId: 'clase-123',
+                estudianteId: transactionCount === 1 ? 'est-1' : 'est-2',
+                tutorId: transactionCount === 1 ? 'tutor-1' : 'tutor-2',
               }),
             },
           };
@@ -150,20 +150,20 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
       const mockClase = {
         id: 'clase-456',
         nombre: 'Programación',
-        cupos_maximo: 10,
-        cupos_ocupados: 5, // 5 cupos disponibles
+        cuposMaximo: 10,
+        cuposOcupados: 5, // 5 cupos disponibles
         estado: 'Programada',
-        fecha_hora_inicio: new Date(
+        fechaHoraInicio: new Date(
           Date.now() + 24 * 60 * 60 * 1000,
         ).toISOString(),
-        producto_id: null,
+        productoId: null,
         producto: null,
       };
 
       let currentCupos = 5;
 
       // Mock: Todos los estudiantes existen
-      // ✅ El tutor_id debe coincidir con el tutor que hace la reserva
+      // ✅ El tutorId debe coincidir con el tutor que hace la reserva
       // Estudiante est-0 pertenece a tutor-0, est-1 a tutor-1, etc.
       (prisma.estudiante.findUnique as jest.Mock).mockImplementation((args) => {
         const estudianteId = args.where.id;
@@ -173,7 +173,7 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
           id: estudianteId,
           nombre: 'Estudiante',
           apellido: `Test-${index}`,
-          tutor_id: `tutor-${index}`, // ✅ Cada estudiante pertenece a su tutor correspondiente
+          tutorId: `tutor-${index}`, // ✅ Cada estudiante pertenece a su tutor correspondiente
           inscripciones_curso: [],
         } as any);
       });
@@ -195,14 +195,14 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
                 // ✅ findUnique retorna el estado MÁS RECIENTE (después de esperar en la cola)
                 findUnique: jest.fn().mockResolvedValue({
                   ...mockClase,
-                  cupos_ocupados: cuposAtTransactionStart,
+                  cuposOcupados: cuposAtTransactionStart,
                 }),
                 update: jest.fn().mockImplementation(() => {
                   // Solo se llama si la validación pasó
                   currentCupos++;
                   return Promise.resolve({
                     ...mockClase,
-                    cupos_ocupados: currentCupos,
+                    cuposOcupados: currentCupos,
                   });
                 }),
               },
@@ -210,10 +210,10 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
                 findUnique: jest.fn().mockResolvedValue(null),
                 create: jest.fn().mockImplementation((data) => {
                   return Promise.resolve({
-                    id: `inscripcion-${data.data.estudiante_id}`,
-                    clase_id: 'clase-456',
-                    estudiante_id: data.data.estudiante_id,
-                    tutor_id: data.data.tutor_id,
+                    id: `inscripcion-${data.data.estudianteId}`,
+                    claseId: 'clase-456',
+                    estudianteId: data.data.estudianteId,
+                    tutorId: data.data.tutorId,
                     estudiante: { nombre: 'Test', apellido: 'Student' },
                     clase: {
                       ...mockClase,
@@ -265,11 +265,11 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
       const mockClase = {
         id: 'clase-789',
         nombre: 'Física',
-        cupos_maximo: 20,
-        cupos_ocupados: 5,
+        cuposMaximo: 20,
+        cuposOcupados: 5,
         estado: 'Programada',
-        fecha_hora_inicio: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        producto_id: null,
+        fechaHoraInicio: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        productoId: null,
         producto: null,
       };
 
@@ -277,7 +277,7 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
         id: 'est-123',
         nombre: 'Pedro',
         apellido: 'Lopez',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         inscripciones_curso: [],
       };
 
@@ -296,16 +296,16 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
               findUnique: jest.fn().mockResolvedValue(mockClase),
               update: jest.fn().mockResolvedValue({
                 ...mockClase,
-                cupos_ocupados: 6,
+                cuposOcupados: 6,
               }),
             },
             inscripcionClase: {
               findUnique: jest.fn().mockResolvedValue(null),
               create: jest.fn().mockResolvedValue({
                 id: 'inscripcion-123',
-                clase_id: 'clase-789',
-                estudiante_id: 'est-123',
-                tutor_id: 'tutor-123',
+                claseId: 'clase-789',
+                estudianteId: 'est-123',
+                tutorId: 'tutor-123',
                 estudiante: mockEstudiante,
                 clase: {
                   ...mockClase,
@@ -326,8 +326,8 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
 
       // Assert
       expect(result).toHaveProperty('id');
-      expect(result).toHaveProperty('clase_id', 'clase-789');
-      expect(result).toHaveProperty('estudiante_id', 'est-123');
+      expect(result).toHaveProperty('claseId', 'clase-789');
+      expect(result).toHaveProperty('estudianteId', 'est-123');
     });
   });
 });

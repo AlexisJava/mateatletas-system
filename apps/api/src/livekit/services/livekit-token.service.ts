@@ -172,10 +172,10 @@ export class LivekitTokenService {
   ): Promise<void> {
     const claseGrupo = await this.prisma.claseGrupo.findUnique({
       where: { id: claseGrupoId },
-      select: { docente_id: true },
+      select: { docenteId: true },
     });
 
-    if (!claseGrupo || claseGrupo.docente_id !== docenteId) {
+    if (!claseGrupo || claseGrupo.docenteId !== docenteId) {
       throw new ForbiddenException('No tienes permisos para esta clase');
     }
   }
@@ -186,10 +186,10 @@ export class LivekitTokenService {
   ): Promise<void> {
     const comision = await this.prisma.comision.findUnique({
       where: { id: comisionId },
-      select: { docente_id: true },
+      select: { docenteId: true },
     });
 
-    if (!comision || comision.docente_id !== docenteId) {
+    if (!comision || comision.docenteId !== docenteId) {
       throw new ForbiddenException('No tienes permisos para esta comisión');
     }
   }
@@ -210,8 +210,8 @@ export class LivekitTokenService {
     // Usa vista unificada para incluir inscripciones manuales y via suscripción
     const inscripcion = await this.prisma.inscripcionUnificada.findFirst({
       where: {
-        clase_grupo_id: claseGrupoId,
-        estudiante_id: estudianteId,
+        claseGrupoId: claseGrupoId,
+        estudianteId: estudianteId,
         estado: 'ACTIVA',
       },
     });
@@ -236,8 +236,8 @@ export class LivekitTokenService {
 
     const inscripcion = await this.prisma.inscripcionComision.findFirst({
       where: {
-        comision_id: comisionId,
-        estudiante_id: estudianteId,
+        comisionId: comisionId,
+        estudianteId: estudianteId,
         estado: EstadoInscripcionComision.Confirmada,
       },
     });

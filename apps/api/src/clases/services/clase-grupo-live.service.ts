@@ -14,10 +14,10 @@ import { EstadoClase } from '@prisma/client';
 interface ClaseEnVivoResponse {
   id: string;
   nombre: string;
-  estado_clase: EstadoClase;
-  iniciada_en: Date | null;
-  finalizada_en: Date | null;
-  livekit_room_name: string | null;
+  estadoClase: EstadoClase;
+  iniciadaEn: Date | null;
+  finalizadaEn: Date | null;
+  livekitRoomName: string | null;
 }
 
 interface IniciarClaseResponse extends ClaseEnVivoResponse {
@@ -26,7 +26,7 @@ interface IniciarClaseResponse extends ClaseEnVivoResponse {
 
 interface FinalizarClaseResponse extends ClaseEnVivoResponse {
   mensaje: string;
-  duracion_minutos: number;
+  duracionMinutos: number;
 }
 
 /**
@@ -64,10 +64,10 @@ export class ClaseGrupoLiveService {
       select: {
         id: true,
         nombre: true,
-        docente_id: true,
-        estado_clase: true,
+        docenteId: true,
+        estadoClase: true,
         activo: true,
-        livekit_room_name: true,
+        livekitRoomName: true,
       },
     });
 
@@ -78,7 +78,7 @@ export class ClaseGrupoLiveService {
     }
 
     // 2. Validar que el docente es el titular
-    if (claseGrupo.docente_id !== docenteId) {
+    if (claseGrupo.docenteId !== docenteId) {
       throw new ForbiddenException(
         'Solo el docente titular puede iniciar esta clase',
       );
@@ -90,17 +90,17 @@ export class ClaseGrupoLiveService {
     }
 
     // 4. Validar estado actual
-    if (claseGrupo.estado_clase === 'EnVivo') {
+    if (claseGrupo.estadoClase === 'EnVivo') {
       throw new BadRequestException('La clase ya está en vivo');
     }
 
-    if (claseGrupo.estado_clase === 'Finalizada') {
+    if (claseGrupo.estadoClase === 'Finalizada') {
       throw new BadRequestException(
         'La clase ya ha finalizado. Debe reiniciarse desde el panel de administración.',
       );
     }
 
-    if (claseGrupo.estado_clase === 'Cancelada') {
+    if (claseGrupo.estadoClase === 'Cancelada') {
       throw new BadRequestException(
         'La clase está cancelada. Debe reactivarse desde el panel de administración.',
       );
@@ -108,24 +108,24 @@ export class ClaseGrupoLiveService {
 
     // 5. Generar nombre de sala si no existe
     const livekitRoomName =
-      claseGrupo.livekit_room_name || `clase-grupo-${claseGrupoId}`;
+      claseGrupo.livekitRoomName || `clase-grupo-${claseGrupoId}`;
 
     // 6. Actualizar estado a EnVivo
     const updated = await this.prisma.claseGrupo.update({
       where: { id: claseGrupoId },
       data: {
-        estado_clase: 'EnVivo',
-        iniciada_en: new Date(),
-        finalizada_en: null, // Limpiar por si se reinicia
-        livekit_room_name: livekitRoomName,
+        estadoClase: 'EnVivo',
+        iniciadaEn: new Date(),
+        finalizadaEn: null, // Limpiar por si se reinicia
+        livekitRoomName: livekitRoomName,
       },
       select: {
         id: true,
         nombre: true,
-        estado_clase: true,
-        iniciada_en: true,
-        finalizada_en: true,
-        livekit_room_name: true,
+        estadoClase: true,
+        iniciadaEn: true,
+        finalizadaEn: true,
+        livekitRoomName: true,
       },
     });
 
@@ -159,10 +159,10 @@ export class ClaseGrupoLiveService {
       select: {
         id: true,
         nombre: true,
-        docente_id: true,
-        estado_clase: true,
-        iniciada_en: true,
-        livekit_room_name: true,
+        docenteId: true,
+        estadoClase: true,
+        iniciadaEn: true,
+        livekitRoomName: true,
       },
     });
 
@@ -173,16 +173,16 @@ export class ClaseGrupoLiveService {
     }
 
     // 2. Validar que el docente es el titular
-    if (claseGrupo.docente_id !== docenteId) {
+    if (claseGrupo.docenteId !== docenteId) {
       throw new ForbiddenException(
         'Solo el docente titular puede finalizar esta clase',
       );
     }
 
     // 3. Validar que la clase está en vivo
-    if (claseGrupo.estado_clase !== 'EnVivo') {
+    if (claseGrupo.estadoClase !== 'EnVivo') {
       throw new BadRequestException(
-        `La clase no está en vivo. Estado actual: ${claseGrupo.estado_clase}`,
+        `La clase no está en vivo. Estado actual: ${claseGrupo.estadoClase}`,
       );
     }
 
@@ -190,9 +190,9 @@ export class ClaseGrupoLiveService {
     const finalizadaEn = new Date();
     let duracionMinutos = 0;
 
-    if (claseGrupo.iniciada_en) {
+    if (claseGrupo.iniciadaEn) {
       const duracionMs =
-        finalizadaEn.getTime() - claseGrupo.iniciada_en.getTime();
+        finalizadaEn.getTime() - claseGrupo.iniciadaEn.getTime();
       duracionMinutos = Math.round(duracionMs / (1000 * 60));
     }
 
@@ -200,16 +200,16 @@ export class ClaseGrupoLiveService {
     const updated = await this.prisma.claseGrupo.update({
       where: { id: claseGrupoId },
       data: {
-        estado_clase: 'Finalizada',
-        finalizada_en: finalizadaEn,
+        estadoClase: 'Finalizada',
+        finalizadaEn: finalizadaEn,
       },
       select: {
         id: true,
         nombre: true,
-        estado_clase: true,
-        iniciada_en: true,
-        finalizada_en: true,
-        livekit_room_name: true,
+        estadoClase: true,
+        iniciadaEn: true,
+        finalizadaEn: true,
+        livekitRoomName: true,
       },
     });
 
@@ -220,7 +220,7 @@ export class ClaseGrupoLiveService {
     return {
       ...updated,
       mensaje: 'Clase finalizada exitosamente',
-      duracion_minutos: duracionMinutos,
+      duracionMinutos: duracionMinutos,
     };
   }
 
@@ -236,10 +236,10 @@ export class ClaseGrupoLiveService {
       select: {
         id: true,
         nombre: true,
-        estado_clase: true,
-        iniciada_en: true,
-        finalizada_en: true,
-        livekit_room_name: true,
+        estadoClase: true,
+        iniciadaEn: true,
+        finalizadaEn: true,
+        livekitRoomName: true,
       },
     });
 
@@ -276,17 +276,17 @@ export class ClaseGrupoLiveService {
     const updated = await this.prisma.claseGrupo.update({
       where: { id: claseGrupoId },
       data: {
-        estado_clase: 'Programada',
-        iniciada_en: null,
-        finalizada_en: null,
+        estadoClase: 'Programada',
+        iniciadaEn: null,
+        finalizadaEn: null,
       },
       select: {
         id: true,
         nombre: true,
-        estado_clase: true,
-        iniciada_en: true,
-        finalizada_en: true,
-        livekit_room_name: true,
+        estadoClase: true,
+        iniciadaEn: true,
+        finalizadaEn: true,
+        livekitRoomName: true,
       },
     });
 

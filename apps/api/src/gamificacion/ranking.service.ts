@@ -5,7 +5,7 @@ import { PrismaService } from '../core/database/prisma.service';
  * Servicio de Ranking
  * Gestiona el sistema de ranking y leaderboards: global, por casa, por estudiante
  *
- * Refactorizado para usar RecursosEstudiante.xp_total en lugar de Estudiante.puntos_totales
+ * Refactorizado para usar RecursosEstudiante.xpTotal en lugar de Estudiante.puntos_totales
  */
 @Injectable()
 export class RankingService {
@@ -27,7 +27,7 @@ export class RankingService {
       throw new NotFoundException('Estudiante no encontrado');
     }
 
-    const xpEstudiante = estudiante.recursos?.xp_total ?? 0;
+    const xpEstudiante = estudiante.recursos?.xpTotal ?? 0;
 
     // Ranking de la casa (solo si tiene casa)
     const rankingCasa = estudiante.casaId
@@ -41,7 +41,7 @@ export class RankingService {
     const posicionGlobal =
       (await this.prisma.recursosEstudiante.count({
         where: {
-          xp_total: {
+          xpTotal: {
             gt: xpEstudiante,
           },
         },
@@ -72,7 +72,7 @@ export class RankingService {
         apellido: true,
         fotoUrl: true,
         recursos: {
-          select: { xp_total: true },
+          select: { xpTotal: true },
         },
       },
     });
@@ -84,7 +84,7 @@ export class RankingService {
         nombre: e.nombre,
         apellido: e.apellido,
         avatar: e.fotoUrl,
-        puntos: e.recursos?.xp_total ?? 0,
+        puntos: e.recursos?.xpTotal ?? 0,
       }))
       .sort((a, b) => b.puntos - a.puntos);
 
@@ -100,19 +100,19 @@ export class RankingService {
    * - Retorna metadata con total, totalPages, currentPage
    *
    * ESTRATEGIA:
-   * Query RecursosEstudiante ordenado por xp_total, luego join con Estudiante
+   * Query RecursosEstudiante ordenado por xpTotal, luego join con Estudiante
    */
   async getRankingGlobal(page: number = 1, limit: number = 20) {
     const normalizedPage = Math.max(1, page);
     const normalizedLimit = Math.min(Math.max(1, limit), 100);
     const skip = (normalizedPage - 1) * normalizedLimit;
 
-    // Query ordenado por xp_total desde RecursosEstudiante
+    // Query ordenado por xpTotal desde RecursosEstudiante
     const [recursos, total] = await Promise.all([
       this.prisma.recursosEstudiante.findMany({
         skip,
         take: normalizedLimit,
-        orderBy: { xp_total: 'desc' },
+        orderBy: { xpTotal: 'desc' },
         include: {
           estudiante: {
             select: {
@@ -134,7 +134,7 @@ export class RankingService {
       apellido: r.estudiante.apellido,
       avatar: r.estudiante.fotoUrl,
       casa: r.estudiante.casa,
-      puntos: r.xp_total,
+      puntos: r.xpTotal,
       posicion: skip + index + 1,
     }));
 

@@ -12,7 +12,7 @@ import {
  *
  * NOTA: claseId es opcional porque:
  * - El frontend de clases en vivo usa ClaseGrupo (grupos recurrentes), no Clase
- * - El modelo PuntoObtenido.clase_id apunta a Clase (clases individuales con cupos)
+ * - El modelo PuntoObtenido.claseId apunta a Clase (clases individuales con cupos)
  * - Son modelos diferentes, por lo que no siempre hay un claseId válido
  */
 export class AsignarInsigniaDto {

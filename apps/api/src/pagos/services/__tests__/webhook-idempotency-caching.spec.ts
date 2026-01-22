@@ -78,7 +78,7 @@ describe('WebhookIdempotencyService - Redis Caching (PASO 3.1.B)', () => {
    * BENCHMARK: <5ms (vs 50-100ms sin cache)
    */
   it('debe retornar desde cache (cache hit) sin consultar DB', async () => {
-    // Arrange: Cache tiene 'true' para este payment_id
+    // Arrange: Cache tiene 'true' para este paymentId
     mockRedisService.get.mockResolvedValue('true');
 
     // Act
@@ -137,11 +137,11 @@ describe('WebhookIdempotencyService - Redis Caching (PASO 3.1.B)', () => {
     // DB tiene el registro
     const mockWebhook = {
       id: 'webhook-1',
-      payment_id: 'payment-789',
-      webhook_type: 'payment',
+      paymentId: 'payment-789',
+      webhookType: 'payment',
       status: 'approved',
-      external_reference: 'ref-123',
-      processed_at: new Date('2025-01-15T10:00:00Z'),
+      externalReference: 'ref-123',
+      processedAt: new Date('2025-01-15T10:00:00Z'),
     };
     mockPrismaService.webhookProcessed.findUnique.mockResolvedValue(
       mockWebhook,
@@ -160,7 +160,7 @@ describe('WebhookIdempotencyService - Redis Caching (PASO 3.1.B)', () => {
 
     // 2. Consultó DB
     expect(mockPrismaService.webhookProcessed.findUnique).toHaveBeenCalledWith({
-      where: { payment_id: 'payment-789' },
+      where: { paymentId: 'payment-789' },
     });
 
     // 3. Guardó resultado en cache con TTL 300s
@@ -220,8 +220,8 @@ describe('WebhookIdempotencyService - Redis Caching (PASO 3.1.B)', () => {
     // DB funciona correctamente
     mockPrismaService.webhookProcessed.findUnique.mockResolvedValue({
       id: 'webhook-1',
-      payment_id: 'payment-fallback',
-      processed_at: new Date(),
+      paymentId: 'payment-fallback',
+      processedAt: new Date(),
     });
 
     // Act
@@ -253,11 +253,11 @@ describe('WebhookIdempotencyService - Redis Caching (PASO 3.1.B)', () => {
 
     mockPrismaService.webhookProcessed.create.mockResolvedValue({
       id: 'webhook-new',
-      payment_id: 'payment-invalidate',
-      webhook_type: 'payment',
+      paymentId: 'payment-invalidate',
+      webhookType: 'payment',
       status: 'approved',
-      external_reference: 'ref-123',
-      processed_at: new Date(),
+      externalReference: 'ref-123',
+      processedAt: new Date(),
     });
 
     // Act
@@ -341,7 +341,7 @@ describe('WebhookIdempotencyService - Redis Caching (PASO 3.1.B)', () => {
  * - Mejora: 75% más rápido
  *
  * CACHE HIT RATE esperado: >80%
- * - MP reintenta webhooks → múltiples requests con mismo payment_id
+ * - MP reintenta webhooks → múltiples requests con mismo paymentId
  * - Primero: cache miss (consulta DB)
  * - Reintentos: cache hit (desde Redis)
  */

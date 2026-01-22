@@ -22,8 +22,8 @@ export interface AuthEstudiante extends DetailedAuthUserBase {
   edad: number;
   nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
   fotoUrl: string | null;
-  xp_total: number; // Antes: puntos_totales
-  nivel_actual: number;
+  xpTotal: number; // Antes: puntos_totales
+  nivelActual: number;
   tutor: {
     id: string;
     nombre: string;
@@ -46,13 +46,13 @@ export interface AuthTutor extends DetailedAuthUserBase {
   role: Role.TUTOR;
   dni: string;
   telefono: string | null;
-  fecha_registro: Date;
-  ha_completado_onboarding: boolean;
+  fechaRegistro: Date;
+  haCompletadoOnboarding: boolean;
 }
 
 export interface AuthAdmin extends DetailedAuthUserBase {
   role: Role.ADMIN;
-  fecha_registro: Date;
+  fechaRegistro: Date;
 }
 
 /**

@@ -258,19 +258,19 @@ export class EventosController {
    * Actualizar fechas de un evento (para Drag & Drop)
    *
    * PATCH /eventos/:id/fechas
-   * Body: { fecha_inicio: string, fecha_fin: string }
+   * Body: { fechaInicio: string, fechaFin: string }
    */
   @Patch(':id/fechas')
   async updateFechas(
     @Param('id', ParseIdPipe) id: string,
     @GetUser('id') docenteId: string,
-    @Body() body: { fecha_inicio: string; fecha_fin: string },
+    @Body() body: { fechaInicio: string; fechaFin: string },
   ) {
     return this.eventosService.updateFechas(
       id,
       docenteId,
-      new Date(body.fecha_inicio),
-      new Date(body.fecha_fin),
+      new Date(body.fechaInicio),
+      new Date(body.fechaFin),
     );
   }
 

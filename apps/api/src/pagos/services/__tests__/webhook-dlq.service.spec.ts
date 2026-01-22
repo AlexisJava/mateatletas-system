@@ -31,7 +31,7 @@ describe('WebhookDLQService', () => {
     id: 123456789,
     live_mode: true,
     type: 'payment',
-    user_id: '123456',
+    userId: '123456',
   });
 
   beforeEach(async () => {
@@ -62,16 +62,16 @@ describe('WebhookDLQService', () => {
 
       mockPrismaService.webhookFailed.create.mockResolvedValue({
         id: 'dlq-record-1',
-        payment_id: addData.paymentId,
-        webhook_type: addData.webhookType,
+        paymentId: addData.paymentId,
+        webhookType: addData.webhookType,
         payload: addData.payload,
-        error_message: addData.errorMessage,
-        error_stack: addData.errorStack,
+        errorMessage: addData.errorMessage,
+        errorStack: addData.errorStack,
         retries: addData.retries,
         status: DLQStatus.PENDING,
-        last_retry_at: expect.any(Date),
-        created_at: new Date(),
-        updated_at: new Date(),
+        lastRetryAt: expect.any(Date),
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       const result = await service.addToDLQ(addData);
@@ -79,14 +79,14 @@ describe('WebhookDLQService', () => {
       expect(result).toEqual({ id: 'dlq-record-1' });
       expect(mockPrismaService.webhookFailed.create).toHaveBeenCalledWith({
         data: {
-          payment_id: addData.paymentId,
-          webhook_type: addData.webhookType,
+          paymentId: addData.paymentId,
+          webhookType: addData.webhookType,
           payload: addData.payload,
-          error_message: addData.errorMessage,
-          error_stack: addData.errorStack,
+          errorMessage: addData.errorMessage,
+          errorStack: addData.errorStack,
           retries: addData.retries,
           status: DLQStatus.PENDING,
-          last_retry_at: expect.any(Date),
+          lastRetryAt: expect.any(Date),
         },
       });
     });
@@ -108,7 +108,7 @@ describe('WebhookDLQService', () => {
 
       expect(mockPrismaService.webhookFailed.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          error_stack: undefined,
+          errorStack: undefined,
         }),
       });
     });
@@ -119,15 +119,15 @@ describe('WebhookDLQService', () => {
       const mockItems = [
         {
           id: 'dlq-1',
-          payment_id: '111',
+          paymentId: '111',
           status: DLQStatus.PENDING,
-          created_at: new Date(),
+          createdAt: new Date(),
         },
         {
           id: 'dlq-2',
-          payment_id: '222',
+          paymentId: '222',
           status: DLQStatus.PENDING,
-          created_at: new Date(),
+          createdAt: new Date(),
         },
       ];
 
@@ -145,7 +145,7 @@ describe('WebhookDLQService', () => {
       });
       expect(mockPrismaService.webhookFailed.findMany).toHaveBeenCalledWith({
         where: {},
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
         take: 50,
         skip: 0,
       });
@@ -164,7 +164,7 @@ describe('WebhookDLQService', () => {
       );
     });
 
-    it('should_filter_by_payment_id_when_provided', async () => {
+    it('should_filter_by_paymentId_when_provided', async () => {
       mockPrismaService.webhookFailed.findMany.mockResolvedValue([]);
       mockPrismaService.webhookFailed.count.mockResolvedValue(0);
 
@@ -172,7 +172,7 @@ describe('WebhookDLQService', () => {
 
       expect(mockPrismaService.webhookFailed.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { payment_id: '12345' },
+          where: { paymentId: '12345' },
         }),
       );
     });
@@ -189,7 +189,7 @@ describe('WebhookDLQService', () => {
       expect(mockPrismaService.webhookFailed.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
-            created_at: {
+            createdAt: {
               gte: fromDate,
               lte: toDate,
             },
@@ -203,7 +203,7 @@ describe('WebhookDLQService', () => {
         .fill(null)
         .map((_, i) => ({
           id: `dlq-${i}`,
-          payment_id: `${i}`,
+          paymentId: `${i}`,
           status: DLQStatus.PENDING,
         }));
 
@@ -220,7 +220,7 @@ describe('WebhookDLQService', () => {
     it('should_return_record_when_exists', async () => {
       const mockRecord = {
         id: 'dlq-1',
-        payment_id: '12345',
+        paymentId: '12345',
         status: DLQStatus.PENDING,
       };
 
@@ -265,7 +265,7 @@ describe('WebhookDLQService', () => {
         where: { id: 'dlq-1' },
         data: {
           status: DLQStatus.PROCESSING,
-          last_retry_at: expect.any(Date),
+          lastRetryAt: expect.any(Date),
         },
       });
     });
@@ -311,8 +311,8 @@ describe('WebhookDLQService', () => {
       mockPrismaService.webhookFailed.update.mockResolvedValue({
         ...mockExisting,
         status: DLQStatus.RESOLVED,
-        resolved_by: 'admin-123',
-        resolution_notes: 'Processed manually',
+        resolvedBy: 'admin-123',
+        resolutionNotes: 'Processed manually',
       });
 
       const result = await service.markAsResolved('dlq-1', {
@@ -325,9 +325,9 @@ describe('WebhookDLQService', () => {
         where: { id: 'dlq-1' },
         data: {
           status: DLQStatus.RESOLVED,
-          resolved_at: expect.any(Date),
-          resolved_by: 'admin-123',
-          resolution_notes: 'Processed manually',
+          resolvedAt: expect.any(Date),
+          resolvedBy: 'admin-123',
+          resolutionNotes: 'Processed manually',
         },
       });
     });
@@ -354,8 +354,8 @@ describe('WebhookDLQService', () => {
       mockPrismaService.webhookFailed.update.mockResolvedValue({
         ...mockExisting,
         status: DLQStatus.ABANDONED,
-        resolved_by: 'admin-456',
-        resolution_notes: 'Invalid payment ID',
+        resolvedBy: 'admin-456',
+        resolutionNotes: 'Invalid payment ID',
       });
 
       const result = await service.markAsAbandoned('dlq-1', {
@@ -368,9 +368,9 @@ describe('WebhookDLQService', () => {
         where: { id: 'dlq-1' },
         data: {
           status: DLQStatus.ABANDONED,
-          resolved_at: expect.any(Date),
-          resolved_by: 'admin-456',
-          resolution_notes: 'Invalid payment ID',
+          resolvedAt: expect.any(Date),
+          resolvedBy: 'admin-456',
+          resolutionNotes: 'Invalid payment ID',
         },
       });
     });
@@ -403,8 +403,8 @@ describe('WebhookDLQService', () => {
         where: { id: 'dlq-1' },
         data: {
           status: DLQStatus.PENDING,
-          error_message: 'New error message',
-          last_retry_at: expect.any(Date),
+          errorMessage: 'New error message',
+          lastRetryAt: expect.any(Date),
           retries: { increment: 1 },
         },
       });
@@ -421,8 +421,8 @@ describe('WebhookDLQService', () => {
       mockPrismaService.webhookFailed.count.mockResolvedValue(5);
       mockPrismaService.webhookFailed.findFirst.mockResolvedValue({
         id: 'oldest-1',
-        created_at: new Date('2026-01-01'),
-        payment_id: '11111',
+        createdAt: new Date('2026-01-01'),
+        paymentId: '11111',
       });
 
       const result = await service.getStats();
@@ -434,7 +434,7 @@ describe('WebhookDLQService', () => {
       });
       expect(result.totalPending).toBe(5);
       expect(result.oldestPending).toBeDefined();
-      expect(result.oldestPending?.payment_id).toBe('11111');
+      expect(result.oldestPending?.paymentId).toBe('11111');
     });
 
     it('should_return_empty_stats_when_no_records', async () => {
@@ -464,7 +464,7 @@ describe('WebhookDLQService', () => {
           status: {
             in: [DLQStatus.RESOLVED, DLQStatus.ABANDONED],
           },
-          resolved_at: {
+          resolvedAt: {
             lt: expect.any(Date),
           },
         },

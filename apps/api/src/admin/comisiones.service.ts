@@ -38,12 +38,12 @@ export class ComisionesService {
   async create(dto: CreateComisionDto) {
     // Validar que el producto existe y es de tipo Curso
     const producto = await this.prisma.producto.findUnique({
-      where: { id: dto.producto_id },
+      where: { id: dto.productoId },
     });
 
     if (!producto) {
       throw new NotFoundException(
-        `No se encontró el producto con ID ${dto.producto_id}`,
+        `No se encontró el producto con ID ${dto.productoId}`,
       );
     }
 
@@ -55,37 +55,37 @@ export class ComisionesService {
     }
 
     // Validar casa si se especifica
-    if (dto.casa_id) {
+    if (dto.casaId) {
       const casa = await this.prisma.casa.findUnique({
-        where: { id: dto.casa_id },
+        where: { id: dto.casaId },
       });
       if (!casa) {
         throw new NotFoundException(
-          `No se encontró la casa con ID ${dto.casa_id}`,
+          `No se encontró la casa con ID ${dto.casaId}`,
         );
       }
     }
 
     // Validar docente si se especifica
-    if (dto.docente_id) {
+    if (dto.docenteId) {
       const docente = await this.prisma.docente.findUnique({
-        where: { id: dto.docente_id },
+        where: { id: dto.docenteId },
       });
       if (!docente) {
         throw new NotFoundException(
-          `No se encontró el docente con ID ${dto.docente_id}`,
+          `No se encontró el docente con ID ${dto.docenteId}`,
         );
       }
     }
 
     // Validar planificación si se especifica
-    if (dto.planificacion_id) {
+    if (dto.planificacionId) {
       const planificacion = await this.prisma.planificacion.findUnique({
-        where: { id: dto.planificacion_id },
+        where: { id: dto.planificacionId },
       });
       if (!planificacion) {
         throw new NotFoundException(
-          `No se encontró la planificación con ID ${dto.planificacion_id}`,
+          `No se encontró la planificación con ID ${dto.planificacionId}`,
         );
       }
     }
@@ -95,15 +95,15 @@ export class ComisionesService {
       data: {
         nombre: dto.nombre,
         descripcion: dto.descripcion,
-        producto_id: dto.producto_id,
-        casa_id: dto.casa_id,
-        docente_id: dto.docente_id,
-        cupo_maximo: dto.cupo_maximo,
+        productoId: dto.productoId,
+        casaId: dto.casaId,
+        docenteId: dto.docenteId,
+        cupoMaximo: dto.cupoMaximo,
         horario: dto.horario,
-        fecha_inicio: dto.fecha_inicio ? new Date(dto.fecha_inicio) : undefined,
-        fecha_fin: dto.fecha_fin ? new Date(dto.fecha_fin) : undefined,
+        fechaInicio: dto.fechaInicio ? new Date(dto.fechaInicio) : undefined,
+        fechaFin: dto.fechaFin ? new Date(dto.fechaFin) : undefined,
         activo: dto.activo ?? true,
-        planificacion_id: dto.planificacion_id,
+        planificacionId: dto.planificacionId,
       },
       include: {
         producto: {
@@ -131,7 +131,7 @@ export class ComisionesService {
           select: {
             id: true,
             titulo: true,
-            cantidad_clases: true,
+            cantidadClases: true,
           },
         },
       },
@@ -150,16 +150,16 @@ export class ComisionesService {
   async findAll(filtros?: FiltrosComisionDto) {
     const where: Prisma.ComisionWhereInput = {};
 
-    if (filtros?.producto_id) {
-      where.producto_id = filtros.producto_id;
+    if (filtros?.productoId) {
+      where.productoId = filtros.productoId;
     }
 
-    if (filtros?.casa_id) {
-      where.casa_id = filtros.casa_id;
+    if (filtros?.casaId) {
+      where.casaId = filtros.casaId;
     }
 
-    if (filtros?.docente_id) {
-      where.docente_id = filtros.docente_id;
+    if (filtros?.docenteId) {
+      where.docenteId = filtros.docenteId;
     }
 
     if (filtros?.activo !== undefined) {
@@ -195,7 +195,7 @@ export class ComisionesService {
           select: {
             id: true,
             titulo: true,
-            cantidad_clases: true,
+            cantidadClases: true,
           },
         },
         _count: {
@@ -213,9 +213,9 @@ export class ComisionesService {
       success: true,
       data: comisiones.map((comision: ComisionConContadores) => ({
         ...comision,
-        total_inscriptos: comision._count.inscripciones,
-        cupos_disponibles: comision.cupo_maximo
-          ? comision.cupo_maximo - comision._count.inscripciones
+        totalInscriptos: comision._count.inscripciones,
+        cuposDisponibles: comision.cupoMaximo
+          ? comision.cupoMaximo - comision._count.inscripciones
           : null,
       })),
       total: comisiones.length,
@@ -258,7 +258,7 @@ export class ComisionesService {
           select: {
             id: true,
             titulo: true,
-            cantidad_clases: true,
+            cantidadClases: true,
           },
         },
         inscripciones: {
@@ -280,7 +280,7 @@ export class ComisionesService {
             },
           },
           orderBy: {
-            fecha_inscripcion: 'desc',
+            fechaInscripcion: 'desc',
           },
         },
         _count: {
@@ -299,9 +299,9 @@ export class ComisionesService {
       success: true,
       data: {
         ...comision,
-        total_inscriptos: comision._count.inscripciones,
-        cupos_disponibles: comision.cupo_maximo
-          ? comision.cupo_maximo - comision._count.inscripciones
+        totalInscriptos: comision._count.inscripciones,
+        cuposDisponibles: comision.cupoMaximo
+          ? comision.cupoMaximo - comision._count.inscripciones
           : null,
       },
     };
@@ -319,7 +319,7 @@ export class ComisionesService {
       throw new NotFoundException(`No se encontró la comisión con ID ${id}`);
     }
 
-    await this.validateUpdateRelations(dto, comisionExistente.producto_id);
+    await this.validateUpdateRelations(dto, comisionExistente.productoId);
     const updateData = this.buildComisionUpdateData(dto);
 
     const comision = await this.prisma.comision.update({
@@ -342,39 +342,39 @@ export class ComisionesService {
     dto: UpdateComisionDto,
     currentProductoId: string,
   ): Promise<void> {
-    if (dto.producto_id && dto.producto_id !== currentProductoId) {
-      await this.validateProductoForComision(dto.producto_id);
+    if (dto.productoId && dto.productoId !== currentProductoId) {
+      await this.validateProductoForComision(dto.productoId);
     }
 
-    if (dto.casa_id) {
+    if (dto.casaId) {
       const casa = await this.prisma.casa.findUnique({
-        where: { id: dto.casa_id },
+        where: { id: dto.casaId },
       });
       if (!casa) {
         throw new NotFoundException(
-          `No se encontró la casa con ID ${dto.casa_id}`,
+          `No se encontró la casa con ID ${dto.casaId}`,
         );
       }
     }
 
-    if (dto.docente_id) {
+    if (dto.docenteId) {
       const docente = await this.prisma.docente.findUnique({
-        where: { id: dto.docente_id },
+        where: { id: dto.docenteId },
       });
       if (!docente) {
         throw new NotFoundException(
-          `No se encontró el docente con ID ${dto.docente_id}`,
+          `No se encontró el docente con ID ${dto.docenteId}`,
         );
       }
     }
 
-    if (dto.planificacion_id) {
+    if (dto.planificacionId) {
       const planificacion = await this.prisma.planificacion.findUnique({
-        where: { id: dto.planificacion_id },
+        where: { id: dto.planificacionId },
       });
       if (!planificacion) {
         throw new NotFoundException(
-          `No se encontró la planificación con ID ${dto.planificacion_id}`,
+          `No se encontró la planificación con ID ${dto.planificacionId}`,
         );
       }
     }
@@ -418,25 +418,25 @@ export class ComisionesService {
     return {
       ...(dto.nombre !== undefined && { nombre: dto.nombre }),
       ...(dto.descripcion !== undefined && { descripcion: dto.descripcion }),
-      ...(dto.producto_id !== undefined && {
-        producto: { connect: { id: dto.producto_id } },
+      ...(dto.productoId !== undefined && {
+        producto: { connect: { id: dto.productoId } },
       }),
-      ...(dto.casa_id !== undefined && {
-        casa: this.buildRelationUpdate(dto.casa_id),
+      ...(dto.casaId !== undefined && {
+        casa: this.buildRelationUpdate(dto.casaId),
       }),
-      ...(dto.docente_id !== undefined && {
-        docente: this.buildRelationUpdate(dto.docente_id),
+      ...(dto.docenteId !== undefined && {
+        docente: this.buildRelationUpdate(dto.docenteId),
       }),
-      ...(dto.planificacion_id !== undefined && {
-        planificacion: this.buildRelationUpdate(dto.planificacion_id),
+      ...(dto.planificacionId !== undefined && {
+        planificacion: this.buildRelationUpdate(dto.planificacionId),
       }),
-      ...(dto.cupo_maximo !== undefined && { cupo_maximo: dto.cupo_maximo }),
+      ...(dto.cupoMaximo !== undefined && { cupoMaximo: dto.cupoMaximo }),
       ...(dto.horario !== undefined && { horario: dto.horario }),
-      ...(dto.fecha_inicio !== undefined && {
-        fecha_inicio: dto.fecha_inicio ? new Date(dto.fecha_inicio) : null,
+      ...(dto.fechaInicio !== undefined && {
+        fechaInicio: dto.fechaInicio ? new Date(dto.fechaInicio) : null,
       }),
-      ...(dto.fecha_fin !== undefined && {
-        fecha_fin: dto.fecha_fin ? new Date(dto.fecha_fin) : null,
+      ...(dto.fechaFin !== undefined && {
+        fechaFin: dto.fechaFin ? new Date(dto.fechaFin) : null,
       }),
       ...(dto.activo !== undefined && { activo: dto.activo }),
     };
@@ -457,7 +457,7 @@ export class ComisionesService {
         select: { id: true, nombre: true, apellido: true },
       },
       planificacion: {
-        select: { id: true, titulo: true, cantidad_clases: true },
+        select: { id: true, titulo: true, cantidadClases: true },
       },
       _count: {
         select: { inscripciones: true },
@@ -470,14 +470,14 @@ export class ComisionesService {
    */
   private formatComisionResponse(comision: {
     _count: { inscripciones: number };
-    cupo_maximo: number | null;
+    cupoMaximo: number | null;
     [key: string]: unknown;
   }) {
     return {
       ...comision,
-      total_inscriptos: comision._count.inscripciones,
-      cupos_disponibles: comision.cupo_maximo
-        ? comision.cupo_maximo - comision._count.inscripciones
+      totalInscriptos: comision._count.inscripciones,
+      cuposDisponibles: comision.cupoMaximo
+        ? comision.cupoMaximo - comision._count.inscripciones
         : null,
     };
   }
@@ -541,22 +541,22 @@ export class ComisionesService {
     }
 
     // Verificar cupo disponible
-    if (comision.cupo_maximo) {
+    if (comision.cupoMaximo) {
       const cuposDisponibles =
-        comision.cupo_maximo - comision._count.inscripciones;
-      if (dto.estudiantes_ids.length > cuposDisponibles) {
+        comision.cupoMaximo - comision._count.inscripciones;
+      if (dto.estudiantesIds.length > cuposDisponibles) {
         throw new BadRequestException(
-          `No hay suficientes cupos. Disponibles: ${cuposDisponibles}, Solicitados: ${dto.estudiantes_ids.length}`,
+          `No hay suficientes cupos. Disponibles: ${cuposDisponibles}, Solicitados: ${dto.estudiantesIds.length}`,
         );
       }
     }
 
     // Validar que los estudiantes existan
     const estudiantes = await this.prisma.estudiante.findMany({
-      where: { id: { in: dto.estudiantes_ids } },
+      where: { id: { in: dto.estudiantesIds } },
     });
 
-    if (estudiantes.length !== dto.estudiantes_ids.length) {
+    if (estudiantes.length !== dto.estudiantesIds.length) {
       throw new NotFoundException(
         'Uno o más estudiantes no fueron encontrados',
       );
@@ -566,8 +566,8 @@ export class ComisionesService {
     const inscripcionesExistentes =
       await this.prisma.inscripcionComision.findMany({
         where: {
-          comision_id: comisionId,
-          estudiante_id: { in: dto.estudiantes_ids },
+          comisionId: comisionId,
+          estudianteId: { in: dto.estudiantesIds },
         },
       });
 
@@ -579,11 +579,11 @@ export class ComisionesService {
 
     // Crear las inscripciones
     const inscripciones = await this.prisma.$transaction(
-      dto.estudiantes_ids.map((estudianteId) =>
+      dto.estudiantesIds.map((estudianteId) =>
         this.prisma.inscripcionComision.create({
           data: {
-            comision_id: comisionId,
-            estudiante_id: estudianteId,
+            comisionId: comisionId,
+            estudianteId: estudianteId,
             estado: dto.estado || EstadoInscripcionComision.Pendiente,
           },
           include: {
@@ -617,9 +617,9 @@ export class ComisionesService {
     // Buscar la inscripción
     const inscripcion = await this.prisma.inscripcionComision.findUnique({
       where: {
-        comision_id_estudiante_id: {
-          comision_id: comisionId,
-          estudiante_id: estudianteId,
+        comisionId_estudianteId: {
+          comisionId: comisionId,
+          estudianteId: estudianteId,
         },
       },
     });
@@ -670,9 +670,9 @@ export class ComisionesService {
     // Buscar la inscripción
     const inscripcion = await this.prisma.inscripcionComision.findUnique({
       where: {
-        comision_id_estudiante_id: {
-          comision_id: comisionId,
-          estudiante_id: estudianteId,
+        comisionId_estudianteId: {
+          comisionId: comisionId,
+          estudianteId: estudianteId,
         },
       },
       include: {
@@ -745,9 +745,9 @@ export class ComisionesService {
     }
 
     // Verificar cupo disponible
-    if (comision.cupo_maximo) {
+    if (comision.cupoMaximo) {
       const cuposDisponibles =
-        comision.cupo_maximo - comision._count.inscripciones;
+        comision.cupoMaximo - comision._count.inscripciones;
       if (cuposDisponibles <= 0) {
         throw new BadRequestException(
           'No hay cupos disponibles en esta comisión',
@@ -762,8 +762,8 @@ export class ComisionesService {
     // Inscribir al estudiante en la comisión
     const inscripcion = await this.prisma.inscripcionComision.create({
       data: {
-        comision_id: comisionId,
-        estudiante_id: resultadoEstudiante.estudiante.id,
+        comisionId: comisionId,
+        estudianteId: resultadoEstudiante.estudiante.id,
         estado: EstadoInscripcionComision.Confirmada,
       },
       include: {
@@ -782,7 +782,7 @@ export class ComisionesService {
         id: inscripcion.id,
         comision: inscripcion.comision,
         estado: inscripcion.estado,
-        fecha_inscripcion: inscripcion.fecha_inscripcion,
+        fechaInscripcion: inscripcion.fechaInscripcion,
       },
     };
   }

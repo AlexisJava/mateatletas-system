@@ -15,7 +15,7 @@ import { EstadoPago } from '../../domain/constants';
 export interface MercadoPagoPaymentData {
   id: string;
   status: string;
-  external_reference: string;
+  externalReference: string;
   transaction_amount?: number;
   payment_type_id?: string;
 }
@@ -25,7 +25,7 @@ export interface MercadoPagoPaymentData {
  *
  * Responsabilidades:
  * - Procesar notificaciones de pago de MercadoPago
- * - Parsear external_reference para identificar el tipo de pago
+ * - Parsear externalReference para identificar el tipo de pago
  * - Actualizar estados de inscripciones
  * - Emitir eventos de dominio
  *
@@ -34,7 +34,7 @@ export interface MercadoPagoPaymentData {
  * ✅ Validación de montos: Verifica que el amount coincida con precio esperado
  * ✅ Eventos de fraude: Emite alertas cuando se detecta monto inválido
  *
- * Formatos de external_reference soportados:
+ * Formatos de externalReference soportados:
  * - "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
  */
 @Injectable()
@@ -58,7 +58,7 @@ export class PaymentWebhookService {
    * 1. Valida que sea notificación de tipo "payment"
    * 2. ✅ NUEVO: Verifica idempotencia (previene doble procesamiento)
    * 3. Consulta detalles del pago a MercadoPago API
-   * 4. Parsea external_reference para identificar el tipo
+   * 4. Parsea externalReference para identificar el tipo
    * 5. Delega a métodos específicos según el tipo
    * 6. ✅ NUEVO: Marca webhook como procesado
    *
@@ -85,7 +85,7 @@ export class PaymentWebhookService {
 
       if (yaFueProcesado) {
         this.logger.warn(
-          `⏭️ Webhook duplicado ignorado: payment_id=${paymentId}`,
+          `⏭️ Webhook duplicado ignorado: paymentId=${paymentId}`,
         );
         return {
           success: true,
@@ -98,15 +98,15 @@ export class PaymentWebhookService {
       const payment = await this.mercadoPagoService.getPayment(paymentId);
 
       this.logger.log(
-        `💰 Pago consultado - Estado: ${payment.status} - Ref Externa: ${payment.external_reference}`,
+        `💰 Pago consultado - Estado: ${payment.status} - Ref Externa: ${payment.externalReference}`,
       );
 
-      // Validar que tenga external_reference, id y status
-      const externalRef = payment.external_reference;
+      // Validar que tenga externalReference, id y status
+      const externalRef = payment.externalReference;
 
       if (!externalRef) {
-        this.logger.warn('⚠️ Pago sin external_reference - Ignorando');
-        return { message: 'Payment without external_reference' };
+        this.logger.warn('⚠️ Pago sin externalReference - Ignorando');
+        return { message: 'Payment without externalReference' };
       }
 
       if (!payment.id || !payment.status) {
@@ -114,9 +114,9 @@ export class PaymentWebhookService {
         return { message: 'Payment without id or status' };
       }
 
-      // Parsear external_reference y delegar
+      // Parsear externalReference y delegar
       const result = await this.procesarPorTipoExternalReference({
-        external_reference: externalRef,
+        externalReference: externalRef,
         id: payment.id,
         status: payment.status,
         transaction_amount: payment.transaction_amount,
@@ -146,29 +146,29 @@ export class PaymentWebhookService {
   }
 
   /**
-   * Procesa pago según el tipo de external_reference
+   * Procesa pago según el tipo de externalReference
    *
-   * @param payment - Datos del pago con external_reference, id, status y monto
+   * @param payment - Datos del pago con externalReference, id, status y monto
    * @returns Resultado del procesamiento
    */
   private async procesarPorTipoExternalReference(payment: {
-    external_reference: string;
+    externalReference: string;
     id: string;
     status: string;
     transaction_amount?: number;
   }) {
-    const externalRef = payment.external_reference;
+    const externalRef = payment.externalReference;
 
     // Determinar tipo de pago (inscripción)
     if (externalRef.startsWith('inscripcion-')) {
       return this.procesarPagoInscripcion(payment);
     } else {
       this.logger.warn(
-        `⚠️ Formato de external_reference desconocido: ${externalRef}`,
+        `⚠️ Formato de externalReference desconocido: ${externalRef}`,
       );
       return {
         success: false,
-        message: 'Unknown external_reference format',
+        message: 'Unknown externalReference format',
         type: 'unknown',
       };
     }
@@ -177,24 +177,24 @@ export class PaymentWebhookService {
   /**
    * Procesa pago de inscripción a curso CON VALIDACIÓN DE MONTO
    *
-   * external_reference format: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
+   * externalReference format: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
    *
    * @param payment - Datos del pago
    * @returns Resultado del procesamiento
    */
   private async procesarPagoInscripcion(payment: {
-    external_reference: string;
+    externalReference: string;
     id: string;
     status: string;
     transaction_amount?: number;
   }) {
-    const externalRef = payment.external_reference;
+    const externalRef = payment.externalReference;
     const parts = externalRef.split('-');
     const inscripcionId = parts[1]; // "inscripcion-{ID}-estudiante-..."
 
     if (!inscripcionId) {
       throw new Error(
-        `external_reference inválido para inscripción: "${externalRef}" - formato esperado: inscripcion-{ID}-...`,
+        `externalReference inválido para inscripción: "${externalRef}" - formato esperado: inscripcion-{ID}-...`,
       );
     }
 

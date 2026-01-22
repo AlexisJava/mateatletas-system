@@ -67,16 +67,16 @@ export class PlanificacionesAdminController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('estado') estado?: 'BORRADOR' | 'PUBLICADO' | 'ARCHIVADO',
-    @Query('casa_tipo') casa_tipo?: 'QUANTUM' | 'VERTEX' | 'PULSAR',
-    @Query('mundo_tipo')
-    mundo_tipo?: 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS',
+    @Query('casaTipo') casaTipo?: 'QUANTUM' | 'VERTEX' | 'PULSAR',
+    @Query('mundoTipo')
+    mundoTipo?: 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS',
   ) {
     return this.planificacionesService.listar({
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
       estado,
-      casa_tipo,
-      mundo_tipo,
+      casaTipo,
+      mundoTipo,
     });
   }
 

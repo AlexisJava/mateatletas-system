@@ -99,8 +99,8 @@ export class EstudianteCommandService {
         data: {
           ...createDto,
           username,
-          password_hash: passwordHash,
-          tutor_id: tutorId,
+          passwordHash: passwordHash,
+          tutorId: tutorId,
         },
         include: {
           casa: true,
@@ -110,8 +110,8 @@ export class EstudianteCommandService {
       // Auto-crear RecursosEstudiante para evitar FK violations en queries de XP
       await tx.recursosEstudiante.create({
         data: {
-          estudiante_id: est.id,
-          xp_total: 0,
+          estudianteId: est.id,
+          xpTotal: 0,
         },
       });
 
@@ -206,17 +206,17 @@ export class EstudianteCommandService {
   /**
    * Actualiza la URL de animación idle del estudiante
    * @param id - ID del estudiante
-   * @param animacion_idle_url - URL de la animación
+   * @param animacionIdleUrl - URL de la animación
    * @returns El estudiante actualizado
    */
-  async updateAnimacionIdle(id: string, animacion_idle_url: string) {
+  async updateAnimacionIdle(id: string, animacionIdleUrl: string) {
     // Verificar que el estudiante existe
     await this.validator.validateEstudianteExists(id);
 
     // Actualizar solo la animación idle
     const estudiante = await this.prisma.estudiante.update({
       where: { id },
-      data: { animacion_idle_url },
+      data: { animacionIdleUrl },
       include: {
         casa: true,
         tutor: {
@@ -248,13 +248,13 @@ export class EstudianteCommandService {
     const estudiante = await this.prisma.estudiante.update({
       where: { id },
       data: {
-        avatar_gradient: gradientId,
+        avatarGradient: gradientId,
       },
       select: {
         id: true,
         nombre: true,
         apellido: true,
-        avatar_gradient: true,
+        avatarGradient: true,
       },
     });
 
@@ -353,7 +353,7 @@ export class EstudianteCommandService {
           telefono: dto.tutor.telefono,
           username: usernameTutor,
           email: dto.tutor.email,
-          password_hash: passwordHash,
+          passwordHash: passwordHash,
         },
       });
 
@@ -383,9 +383,9 @@ export class EstudianteCommandService {
               nivelEscolar: estDto.nivelEscolar,
               email: estDto.email,
               username: usernameEstudiante,
-              password_hash: passwordHash,
-              tutor_id: tutor!.id,
-              sector_id: dto.sectorId,
+              passwordHash: passwordHash,
+              tutorId: tutor!.id,
+              sectorId: dto.sectorId,
             },
             include: {
               sector: true,
@@ -396,8 +396,8 @@ export class EstudianteCommandService {
           // Auto-crear RecursosEstudiante para evitar FK violations en queries de XP
           await prisma.recursosEstudiante.create({
             data: {
-              estudiante_id: estudiante.id,
-              xp_total: 0,
+              estudianteId: estudiante.id,
+              xpTotal: 0,
             },
           });
 
@@ -462,22 +462,22 @@ export class EstudianteCommandService {
       }
 
       // Validar que la clase pertenece al sector del estudiante
-      if (clase.sector_id !== estudiante.sector_id) {
+      if (clase.sectorId !== estudiante.sectorId) {
         throw new BadRequestException(
           'La clase no pertenece al sector del estudiante',
         );
       }
 
       // Validar cupos disponibles (dentro de transacción para evitar race condition)
-      if (clase.cupos_ocupados >= clase.cupos_maximo) {
+      if (clase.cuposOcupados >= clase.cuposMaximo) {
         throw new ConflictException('La clase no tiene cupos disponibles');
       }
 
       // Validar que no esté ya inscrito
       const inscripcionExistente = await tx.inscripcionClase.findFirst({
         where: {
-          estudiante_id: estudianteId,
-          clase_id: claseId,
+          estudianteId: estudianteId,
+          claseId: claseId,
         },
       });
 
@@ -490,9 +490,9 @@ export class EstudianteCommandService {
       // Crear inscripción
       const nuevaInscripcion = await tx.inscripcionClase.create({
         data: {
-          estudiante_id: estudianteId,
-          clase_id: claseId,
-          tutor_id: estudiante.tutor_id,
+          estudianteId: estudianteId,
+          claseId: claseId,
+          tutorId: estudiante.tutorId,
         },
       });
 
@@ -500,7 +500,7 @@ export class EstudianteCommandService {
       await tx.clase.update({
         where: { id: claseId },
         data: {
-          cupos_ocupados: {
+          cuposOcupados: {
             increment: 1,
           },
         },
@@ -555,14 +555,14 @@ export class EstudianteCommandService {
         }
 
         // Validar sector
-        if (clase.sector_id !== estudiante.sector_id) {
+        if (clase.sectorId !== estudiante.sectorId) {
           throw new BadRequestException(
             `La clase ${clase.nombre} no pertenece al sector del estudiante`,
           );
         }
 
         // Validar cupos (dentro de transacción para evitar race condition)
-        if (clase.cupos_ocupados >= clase.cupos_maximo) {
+        if (clase.cuposOcupados >= clase.cuposMaximo) {
           throw new ConflictException(
             `La clase ${clase.nombre} no tiene cupos disponibles`,
           );
@@ -571,8 +571,8 @@ export class EstudianteCommandService {
         // Verificar inscripción duplicada
         const existente = await tx.inscripcionClase.findFirst({
           where: {
-            estudiante_id: estudianteId,
-            clase_id: claseId,
+            estudianteId: estudianteId,
+            claseId: claseId,
           },
         });
 
@@ -585,9 +585,9 @@ export class EstudianteCommandService {
         // Crear inscripción
         const inscripcion = await tx.inscripcionClase.create({
           data: {
-            estudiante_id: estudianteId,
-            clase_id: claseId,
-            tutor_id: estudiante.tutor_id,
+            estudianteId: estudianteId,
+            claseId: claseId,
+            tutorId: estudiante.tutorId,
           },
         });
 
@@ -595,7 +595,7 @@ export class EstudianteCommandService {
         await tx.clase.update({
           where: { id: claseId },
           data: {
-            cupos_ocupados: { increment: 1 },
+            cuposOcupados: { increment: 1 },
           },
         });
 

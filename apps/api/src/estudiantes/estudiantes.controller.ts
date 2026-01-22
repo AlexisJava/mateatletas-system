@@ -663,14 +663,14 @@ export class EstudiantesController {
   @UseGuards(EstudianteOwnershipGuard)
   async updateAvatar(
     @Param('id', ParseIdPipe) id: string,
-    @Body() body: { avatar_gradient: number },
+    @Body() body: { avatarGradient: number },
     @GetUser() _user: AuthUser,
   ) {
     // Nota: No necesitamos usar '_user' aquí porque el guard ya validó ownership
     // El guard se ejecuta ANTES de este método y rechaza requests no autorizados
     return this.estudiantesService.updateAvatarGradient(
       id,
-      body.avatar_gradient,
+      body.avatarGradient,
     );
   }
 

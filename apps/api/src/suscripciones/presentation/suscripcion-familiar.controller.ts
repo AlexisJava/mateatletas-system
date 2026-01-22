@@ -737,7 +737,7 @@ export class SuscripcionFamiliarController {
     @Body() dto: AdminCancelarSuscripcionDto,
   ) {
     try {
-      // Obtener el tutor_id de la suscripción para reusar el método cancelar existente
+      // Obtener el tutorId de la suscripción para reusar el método cancelar existente
       const suscripcion = await this.queryService.obtenerPorId(id);
 
       await this.commandService.cancelar({

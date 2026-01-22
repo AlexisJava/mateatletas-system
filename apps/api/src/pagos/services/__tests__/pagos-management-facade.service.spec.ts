@@ -182,7 +182,7 @@ describe('PagosManagementFacadeService', () => {
     it('actualizarEstadoInscripcion debe delegar a commandService', async () => {
       const inscripcionId = 'insc-1';
       const estado = EstadoPago.PAGADO;
-      const expectedResult = { id: inscripcionId, estado_pago: estado };
+      const expectedResult = { id: inscripcionId, estadoPago: estado };
       commandService.actualizarEstadoInscripcion.mockResolvedValue(
         expectedResult,
       );

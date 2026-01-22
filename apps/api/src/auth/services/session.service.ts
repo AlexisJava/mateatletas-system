@@ -66,10 +66,10 @@ export class SessionService {
       await this.prisma.refreshTokenSession.create({
         data: {
           id: jti,
-          user_id: userId,
-          user_type: userType,
-          ip_address: ipAddress ?? null,
-          user_agent: userAgent ?? null,
+          userId: userId,
+          userType: userType,
+          ipAddress: ipAddress ?? null,
+          userAgent: userAgent ?? null,
           expiresAt,
           lastUsedAt: new Date(),
           revoked: false,
@@ -114,7 +114,7 @@ export class SessionService {
   ): Promise<SessionInfo[]> {
     const sessions = await this.prisma.refreshTokenSession.findMany({
       where: {
-        user_id: userId,
+        userId: userId,
         revoked: false,
         expiresAt: {
           gt: new Date(),
@@ -126,12 +126,12 @@ export class SessionService {
     });
 
     return sessions.map((session) => {
-      const { device, browser } = this.parseUserAgent(session.user_agent);
+      const { device, browser } = this.parseUserAgent(session.userAgent);
 
       return {
         id: session.id,
-        ipAddress: session.ip_address,
-        userAgent: session.user_agent,
+        ipAddress: session.ipAddress,
+        userAgent: session.userAgent,
         device,
         browser,
         createdAt: session.createdAt,
@@ -158,7 +158,7 @@ export class SessionService {
     const session = await this.prisma.refreshTokenSession.findFirst({
       where: {
         id: sessionId,
-        user_id: userId,
+        userId: userId,
         revoked: false,
       },
     });
@@ -208,7 +208,7 @@ export class SessionService {
     // 1. Obtener todas las sesiones activas excepto la actual
     const sessions = await this.prisma.refreshTokenSession.findMany({
       where: {
-        user_id: userId,
+        userId: userId,
         revoked: false,
         id: {
           not: currentJti,
@@ -262,7 +262,7 @@ export class SessionService {
   ): Promise<number> {
     const sessions = await this.prisma.refreshTokenSession.findMany({
       where: {
-        user_id: userId,
+        userId: userId,
         revoked: false,
         expiresAt: {
           gt: new Date(),

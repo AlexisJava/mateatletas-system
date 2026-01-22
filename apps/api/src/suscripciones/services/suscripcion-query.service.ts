@@ -49,10 +49,7 @@ const DIAS_ALERTA_PROXIMO_COBRO = 3;
  */
 type SuscripcionParaAlerta = Pick<
   Suscripcion,
-  | 'estado'
-  | 'dias_gracia_usados'
-  | 'fecha_inicio_gracia'
-  | 'fecha_proximo_cobro'
+  'estado' | 'diasGraciaUsados' | 'fechaInicioGracia' | 'fechaProximoCobro'
 >;
 
 /**
@@ -75,7 +72,7 @@ export class SuscripcionQueryService {
   async getPlanes(): Promise<PlanesResponseDto> {
     const planes = await this.prisma.planSuscripcion.findMany({
       where: { activo: true },
-      orderBy: { precio_base: 'asc' },
+      orderBy: { precioBase: 'asc' },
     });
 
     return {
@@ -90,11 +87,11 @@ export class SuscripcionQueryService {
     tutorId: string,
   ): Promise<MisSuscripcionesResponseDto> {
     const suscripciones = await this.prisma.suscripcion.findMany({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
       include: {
         plan: true,
       },
-      orderBy: { created_at: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
 
     return {
@@ -116,10 +113,10 @@ export class SuscripcionQueryService {
       include: {
         plan: true,
         pagos: {
-          orderBy: { created_at: 'desc' },
+          orderBy: { createdAt: 'desc' },
         },
         historial: {
-          orderBy: { created_at: 'desc' },
+          orderBy: { createdAt: 'desc' },
         },
       },
     });
@@ -128,7 +125,7 @@ export class SuscripcionQueryService {
       throw new NotFoundException(`Suscripción ${suscripcionId} no encontrada`);
     }
 
-    if (suscripcion.tutor_id !== tutorId) {
+    if (suscripcion.tutorId !== tutorId) {
       throw new ForbiddenException('No autorizado para ver esta suscripción');
     }
 
@@ -138,15 +135,15 @@ export class SuscripcionQueryService {
       ...listItem,
       pagos: suscripcion.pagos.map((pago) => ({
         id: pago.id,
-        fecha: pago.fecha_cobro || pago.created_at,
+        fecha: pago.fechaCobro || pago.createdAt,
         monto: pago.monto.toNumber(),
-        estado: pago.mp_status,
-        metodo_pago: 'MercadoPago',
+        estado: pago.mpStatus,
+        metodoPago: 'MercadoPago',
       })),
-      historial_estados: suscripcion.historial.map((h) => ({
-        fecha: h.created_at,
-        estado_anterior: h.estado_anterior,
-        estado_nuevo: h.estado_nuevo,
+      historialEstados: suscripcion.historial.map((h) => ({
+        fecha: h.createdAt,
+        estadoAnterior: h.estadoAnterior,
+        estadoNuevo: h.estadoNuevo,
         motivo: h.motivo,
       })),
     };
@@ -162,29 +159,29 @@ export class SuscripcionQueryService {
     // Validar ownership
     const suscripcion = await this.prisma.suscripcion.findUnique({
       where: { id: suscripcionId },
-      select: { tutor_id: true },
+      select: { tutorId: true },
     });
 
     if (!suscripcion) {
       throw new NotFoundException(`Suscripción ${suscripcionId} no encontrada`);
     }
 
-    if (suscripcion.tutor_id !== tutorId) {
+    if (suscripcion.tutorId !== tutorId) {
       throw new ForbiddenException('No autorizado para ver esta suscripción');
     }
 
     const pagos = await this.prisma.pagoSuscripcion.findMany({
-      where: { suscripcion_id: suscripcionId },
-      orderBy: { created_at: 'desc' },
+      where: { suscripcionId: suscripcionId },
+      orderBy: { createdAt: 'desc' },
     });
 
     return {
       pagos: pagos.map((pago) => ({
         id: pago.id,
-        fecha: pago.fecha_cobro || pago.created_at,
+        fecha: pago.fechaCobro || pago.createdAt,
         monto: pago.monto.toNumber(),
-        estado: pago.mp_status,
-        metodo_pago: 'MercadoPago',
+        estado: pago.mpStatus,
+        metodoPago: 'MercadoPago',
       })),
       total: pagos.length,
     };
@@ -203,11 +200,11 @@ export class SuscripcionQueryService {
   ): AlertaSuscripcionDto | null {
     // Alerta por período de gracia
     if (suscripcion.estado === EstadoSuscripcion.EN_GRACIA) {
-      const diasRestantes = DIAS_GRACIA_MAXIMO - suscripcion.dias_gracia_usados;
+      const diasRestantes = DIAS_GRACIA_MAXIMO - suscripcion.diasGraciaUsados;
       return {
         tipo: 'EN_GRACIA',
         mensaje: `Tu suscripción está en período de gracia. Tienes ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''} para regularizar el pago.`,
-        dias_restantes: diasRestantes,
+        diasRestantes: diasRestantes,
       };
     }
 
@@ -216,17 +213,17 @@ export class SuscripcionQueryService {
       return {
         tipo: 'MOROSA',
         mensaje: 'Tu suscripción está suspendida por falta de pago.',
-        dias_restantes: 0,
+        diasRestantes: 0,
       };
     }
 
     // Alerta por próximo cobro
     if (
       suscripcion.estado === EstadoSuscripcion.ACTIVA &&
-      suscripcion.fecha_proximo_cobro
+      suscripcion.fechaProximoCobro
     ) {
       const hoy = new Date();
-      const proximoCobro = new Date(suscripcion.fecha_proximo_cobro);
+      const proximoCobro = new Date(suscripcion.fechaProximoCobro);
       const diasHastaProximoCobro = Math.ceil(
         (proximoCobro.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24),
       );
@@ -238,7 +235,7 @@ export class SuscripcionQueryService {
         return {
           tipo: 'PROXIMO_COBRO',
           mensaje: `Tu próximo cobro será en ${diasHastaProximoCobro} día${diasHastaProximoCobro !== 1 ? 's' : ''}.`,
-          dias_restantes: diasHastaProximoCobro,
+          diasRestantes: diasHastaProximoCobro,
         };
       }
     }
@@ -253,13 +250,13 @@ export class SuscripcionQueryService {
     id: string;
     nombre: string;
     descripcion: string | null;
-    precio_base: { toNumber(): number };
+    precioBase: { toNumber(): number };
   }): PlanResponseDto {
     return {
       id: plan.id,
       nombre: plan.nombre,
       descripcion: plan.descripcion,
-      precio: plan.precio_base.toNumber(),
+      precio: plan.precioBase.toNumber(),
       features: FEATURES_POR_PLAN[plan.nombre] || [],
     };
   }
@@ -273,7 +270,7 @@ export class SuscripcionQueryService {
         id: string;
         nombre: string;
         descripcion: string | null;
-        precio_base: { toNumber(): number };
+        precioBase: { toNumber(): number };
       };
     },
   ): SuscripcionListItemDto {
@@ -284,11 +281,11 @@ export class SuscripcionQueryService {
       id: sus.id,
       estado: sus.estado,
       plan: this.mapPlanToDto(sus.plan),
-      monto_final: sus.precio_final.toNumber(),
-      descuento_aplicado: sus.descuento_porcentaje,
-      fecha_inicio: sus.fecha_inicio,
-      proximo_cobro: sus.fecha_proximo_cobro,
-      dias_restantes: diasRestantes,
+      montoFinal: sus.precioFinal.toNumber(),
+      descuentoAplicado: sus.descuentoPorcentaje,
+      fechaInicio: sus.fechaInicio,
+      proximoCobro: sus.fechaProximoCobro,
+      diasRestantes: diasRestantes,
       estudiantes: [], // TODO: Implementar cuando se vincule con estudiantes
       alerta: alerta ?? undefined,
     };
@@ -298,10 +295,10 @@ export class SuscripcionQueryService {
    * Calcula los días restantes del período actual
    */
   private calcularDiasRestantes(suscripcion: Suscripcion): number | null {
-    if (!suscripcion.fecha_proximo_cobro) return null;
+    if (!suscripcion.fechaProximoCobro) return null;
 
     const hoy = new Date();
-    const proximoCobro = new Date(suscripcion.fecha_proximo_cobro);
+    const proximoCobro = new Date(suscripcion.fechaProximoCobro);
     return Math.ceil(
       (proximoCobro.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24),
     );

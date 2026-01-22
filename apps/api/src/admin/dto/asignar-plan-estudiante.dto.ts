@@ -30,7 +30,7 @@ export class AsignarPlanEstudianteDto {
   })
   @IsOptional()
   @IsString()
-  plan_id?: string | null;
+  planId?: string | null;
 
   @ApiPropertyOptional({
     description: 'Estado del acceso del estudiante',
@@ -39,7 +39,7 @@ export class AsignarPlanEstudianteDto {
   })
   @IsOptional()
   @IsEnum(EstadoAccesoEstudiante)
-  estado_acceso?: EstadoAccesoEstudiante;
+  estadoAcceso?: EstadoAccesoEstudiante;
 
   @ApiPropertyOptional({
     description: 'Fecha de vencimiento del plan (para becas temporales)',
@@ -47,7 +47,7 @@ export class AsignarPlanEstudianteDto {
   })
   @IsOptional()
   @IsDateString()
-  fecha_vencimiento_plan?: string | null;
+  fechaVencimientoPlan?: string | null;
 
   @ApiPropertyOptional({
     description: 'Notas administrativas sobre el plan',
@@ -57,5 +57,5 @@ export class AsignarPlanEstudianteDto {
   @IsOptional()
   @IsString()
   @MaxLength(500)
-  notas_plan?: string | null;
+  notasPlan?: string | null;
 }

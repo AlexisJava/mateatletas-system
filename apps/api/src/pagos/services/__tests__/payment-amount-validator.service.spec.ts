@@ -49,7 +49,7 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
     it('should validate exact amount match', async () => {
       mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
         id: 'inscripcion-1',
-        precio_final: 5000.0,
+        precioFinal: 5000.0,
       });
 
       const result = await service.validateInscripcionMensual(
@@ -66,7 +66,7 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
     it('should REJECT payment with incorrect amount', async () => {
       mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
         id: 'inscripcion-1',
-        precio_final: 5000.0,
+        precioFinal: 5000.0,
       });
 
       const result = await service.validateInscripcionMensual(
@@ -84,7 +84,7 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
     it('should ACCEPT small differences within 1% tolerance (rounding)', async () => {
       mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
         id: 'inscripcion-1',
-        precio_final: 10000.0,
+        precioFinal: 10000.0,
       });
 
       // 1% de $10,000 = $100 de tolerancia
@@ -99,7 +99,7 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
     it('should REJECT differences exceeding 1% tolerance', async () => {
       mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
         id: 'inscripcion-1',
-        precio_final: 10000.0,
+        precioFinal: 10000.0,
       });
 
       // 1% de $10,000 = $100 de tolerancia
@@ -127,7 +127,7 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
       const loggerErrorSpy = jest.spyOn(service['logger'], 'error');
 
       mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
-        precio_final: 5000.0,
+        precioFinal: 5000.0,
       });
 
       await service.validateInscripcionMensual('inscripcion-1', 50.0);
@@ -170,7 +170,7 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
       const externalRef = 'inscripcion-123-estudiante-456-producto-789';
 
       mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
-        precio_final: 5000.0,
+        precioFinal: 5000.0,
       });
 
       const result = await service.validateByExternalReference(
@@ -183,7 +183,7 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
         mockPrismaService.inscripcionMensual.findUnique,
       ).toHaveBeenCalledWith({
         where: { id: '123' },
-        select: { precio_final: true },
+        select: { precioFinal: true },
       });
     });
 
@@ -203,7 +203,7 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
   describe('Edge cases and security scenarios', () => {
     it('should handle Decimal type conversion correctly', async () => {
       mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
-        precio_final: 5000.5, // Decimal con centavos
+        precioFinal: 5000.5, // Decimal con centavos
       });
 
       const result = await service.validateInscripcionMensual(
@@ -216,7 +216,7 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
 
     it('should prevent zero-amount fraud', async () => {
       mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
-        precio_final: 5000.0,
+        precioFinal: 5000.0,
       });
 
       const result = await service.validateInscripcionMensual(
@@ -230,7 +230,7 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
 
     it('should prevent negative amount fraud', async () => {
       mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
-        precio_final: 5000.0,
+        precioFinal: 5000.0,
       });
 
       const result = await service.validateInscripcionMensual(
@@ -243,7 +243,7 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
 
     it('should handle very large amounts correctly', async () => {
       mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
-        precio_final: 1000000.0, // $1M
+        precioFinal: 1000000.0, // $1M
       });
 
       const result = await service.validateInscripcionMensual(

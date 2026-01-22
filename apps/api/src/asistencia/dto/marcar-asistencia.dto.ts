@@ -12,5 +12,5 @@ export class MarcarAsistenciaDto {
   @IsOptional()
   @IsInt()
   @Min(0)
-  puntos_otorgados?: number;
+  puntosOtorgados?: number;
 }

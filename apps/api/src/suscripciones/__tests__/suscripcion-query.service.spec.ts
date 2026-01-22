@@ -43,14 +43,14 @@ describe('SuscripcionQueryService', () => {
           id: 'plan-1',
           nombre: 'STEAM_LIBROS',
           descripcion: 'Plan con libros',
-          precio_base: { toNumber: () => 30000 },
+          precioBase: { toNumber: () => 30000 },
           activo: true,
         },
         {
           id: 'plan-2',
           nombre: 'STEAM_SINCRONICO',
           descripcion: 'Plan con clases en vivo',
-          precio_base: { toNumber: () => 75000 },
+          precioBase: { toNumber: () => 75000 },
           activo: true,
         },
       ];
@@ -69,7 +69,7 @@ describe('SuscripcionQueryService', () => {
       });
       expect(mockPrisma.planSuscripcion.findMany).toHaveBeenCalledWith({
         where: { activo: true },
-        orderBy: { precio_base: 'asc' },
+        orderBy: { precioBase: 'asc' },
       });
     });
 
@@ -89,18 +89,18 @@ describe('SuscripcionQueryService', () => {
       const mockSuscripciones = [
         {
           id: 'sus-1',
-          tutor_id: tutorId,
+          tutorId: tutorId,
           estado: EstadoSuscripcion.ACTIVA,
-          precio_final: { toNumber: () => 30000 },
-          descuento_porcentaje: 10,
-          fecha_inicio: new Date('2025-01-01'),
-          fecha_proximo_cobro: new Date('2025-02-01'),
-          dias_gracia_usados: 0,
+          precioFinal: { toNumber: () => 30000 },
+          descuentoPorcentaje: 10,
+          fechaInicio: new Date('2025-01-01'),
+          fechaProximoCobro: new Date('2025-02-01'),
+          diasGraciaUsados: 0,
           plan: {
             id: 'plan-1',
             nombre: 'STEAM_LIBROS',
             descripcion: 'Plan básico',
-            precio_base: { toNumber: () => 30000 },
+            precioBase: { toNumber: () => 30000 },
           },
           // Nota: estudiantes vendrían de otra query en implementación real
         },
@@ -115,7 +115,7 @@ describe('SuscripcionQueryService', () => {
       expect(result.suscripciones[0].monto_final).toBe(30000);
       expect(mockPrisma.suscripcion.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { tutor_id: tutorId },
+          where: { tutorId: tutorId },
         }),
       );
     });
@@ -135,19 +135,19 @@ describe('SuscripcionQueryService', () => {
       const mockSuscripciones = [
         {
           id: 'sus-1',
-          tutor_id: tutorId,
+          tutorId: tutorId,
           estado: EstadoSuscripcion.EN_GRACIA,
-          precio_final: { toNumber: () => 30000 },
-          descuento_porcentaje: 0,
-          fecha_inicio: new Date('2025-01-01'),
-          fecha_proximo_cobro: null,
-          dias_gracia_usados: 1,
-          fecha_inicio_gracia: fechaInicioGracia,
+          precioFinal: { toNumber: () => 30000 },
+          descuentoPorcentaje: 0,
+          fechaInicio: new Date('2025-01-01'),
+          fechaProximoCobro: null,
+          diasGraciaUsados: 1,
+          fechaInicioGracia: fechaInicioGracia,
           plan: {
             id: 'plan-1',
             nombre: 'STEAM_LIBROS',
             descripcion: 'Plan básico',
-            precio_base: { toNumber: () => 30000 },
+            precioBase: { toNumber: () => 30000 },
           },
         },
       ];
@@ -169,32 +169,32 @@ describe('SuscripcionQueryService', () => {
     it('should_return_subscription_detail_with_payments', async () => {
       const mockSuscripcion = {
         id: suscripcionId,
-        tutor_id: tutorId,
+        tutorId: tutorId,
         estado: EstadoSuscripcion.ACTIVA,
-        precio_final: { toNumber: () => 30000 },
-        descuento_porcentaje: 10,
-        fecha_inicio: new Date('2025-01-01'),
-        fecha_proximo_cobro: new Date('2025-02-01'),
-        dias_gracia_usados: 0,
+        precioFinal: { toNumber: () => 30000 },
+        descuentoPorcentaje: 10,
+        fechaInicio: new Date('2025-01-01'),
+        fechaProximoCobro: new Date('2025-02-01'),
+        diasGraciaUsados: 0,
         plan: {
           id: 'plan-1',
           nombre: 'STEAM_LIBROS',
           descripcion: 'Plan básico',
-          precio_base: { toNumber: () => 30000 },
+          precioBase: { toNumber: () => 30000 },
         },
         pagos: [
           {
             id: 'pago-1',
-            fecha_cobro: new Date('2025-01-01'),
+            fechaCobro: new Date('2025-01-01'),
             monto: { toNumber: () => 30000 },
-            mp_status: 'approved',
+            mpStatus: 'approved',
           },
         ],
         historial: [
           {
-            created_at: new Date('2025-01-01'),
-            estado_anterior: null,
-            estado_nuevo: EstadoSuscripcion.ACTIVA,
+            createdAt: new Date('2025-01-01'),
+            estadoAnterior: null,
+            estadoNuevo: EstadoSuscripcion.ACTIVA,
             motivo: 'Pago inicial',
           },
         ],
@@ -223,17 +223,17 @@ describe('SuscripcionQueryService', () => {
     it('should_throw_forbidden_when_tutor_not_owner', async () => {
       const mockSuscripcion = {
         id: suscripcionId,
-        tutor_id: 'otro-tutor',
+        tutorId: 'otro-tutor',
         estado: EstadoSuscripcion.ACTIVA,
-        precio_final: { toNumber: () => 30000 },
-        descuento_porcentaje: 0,
-        fecha_inicio: new Date(),
-        fecha_proximo_cobro: new Date(),
-        dias_gracia_usados: 0,
+        precioFinal: { toNumber: () => 30000 },
+        descuentoPorcentaje: 0,
+        fechaInicio: new Date(),
+        fechaProximoCobro: new Date(),
+        diasGraciaUsados: 0,
         plan: {
           id: 'plan-1',
           nombre: 'Test',
-          precio_base: { toNumber: () => 30000 },
+          precioBase: { toNumber: () => 30000 },
         },
         pagos: [],
         historial: [],
@@ -254,23 +254,23 @@ describe('SuscripcionQueryService', () => {
     it('should_return_payment_history', async () => {
       const mockSuscripcion = {
         id: suscripcionId,
-        tutor_id: tutorId,
+        tutorId: tutorId,
       };
 
       const mockPagos = [
         {
           id: 'pago-1',
-          fecha_cobro: new Date('2025-01-01'),
+          fechaCobro: new Date('2025-01-01'),
           monto: { toNumber: () => 30000 },
-          mp_status: 'approved',
-          mp_status_detail: 'accredited',
+          mpStatus: 'approved',
+          mpStatus_detail: 'accredited',
         },
         {
           id: 'pago-2',
-          fecha_cobro: new Date('2024-12-01'),
+          fechaCobro: new Date('2024-12-01'),
           monto: { toNumber: () => 30000 },
-          mp_status: 'approved',
-          mp_status_detail: 'accredited',
+          mpStatus: 'approved',
+          mpStatus_detail: 'accredited',
         },
       ];
 
@@ -286,7 +286,7 @@ describe('SuscripcionQueryService', () => {
     it('should_throw_forbidden_when_not_owner', async () => {
       const mockSuscripcion = {
         id: suscripcionId,
-        tutor_id: 'otro-tutor',
+        tutorId: 'otro-tutor',
       };
 
       mockPrisma.suscripcion.findUnique.mockResolvedValue(mockSuscripcion);
@@ -304,9 +304,9 @@ describe('SuscripcionQueryService', () => {
 
       const suscripcion = {
         estado: EstadoSuscripcion.EN_GRACIA,
-        dias_gracia_usados: 2,
-        fecha_inicio_gracia: fechaInicioGracia,
-        fecha_proximo_cobro: null,
+        diasGraciaUsados: 2,
+        fechaInicioGracia: fechaInicioGracia,
+        fechaProximoCobro: null,
       };
 
       const alerta = service.calcularAlerta(suscripcion as never);
@@ -322,9 +322,9 @@ describe('SuscripcionQueryService', () => {
 
       const suscripcion = {
         estado: EstadoSuscripcion.ACTIVA,
-        dias_gracia_usados: 0,
-        fecha_inicio_gracia: null,
-        fecha_proximo_cobro: proximoCobro,
+        diasGraciaUsados: 0,
+        fechaInicioGracia: null,
+        fechaProximoCobro: proximoCobro,
       };
 
       const alerta = service.calcularAlerta(suscripcion as never);
@@ -340,9 +340,9 @@ describe('SuscripcionQueryService', () => {
 
       const suscripcion = {
         estado: EstadoSuscripcion.ACTIVA,
-        dias_gracia_usados: 0,
-        fecha_inicio_gracia: null,
-        fecha_proximo_cobro: proximoCobro,
+        diasGraciaUsados: 0,
+        fechaInicioGracia: null,
+        fechaProximoCobro: proximoCobro,
       };
 
       const alerta = service.calcularAlerta(suscripcion as never);

@@ -36,14 +36,14 @@ describe('WebhookPreapprovalProcessor', () => {
     api_version: 'v1',
     date_created: new Date().toISOString(),
     live_mode: false,
-    user_id: '12345',
+    userId: '12345',
     data: { id: 'mp-preapproval-123' },
   };
 
   const validDetail: PreApprovalDetail = {
     id: 'mp-preapproval-123',
     status: 'authorized',
-    external_reference: 'suscripcion-123',
+    externalReference: 'suscripcion-123',
     payer_email: 'test@test.com',
     payer_id: 123,
     reason: 'Test subscription',

@@ -73,7 +73,7 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       id: 'webhook-id-123',
       live_mode: true,
       type: 'payment',
-      user_id: '166135502',
+      userId: '166135502',
     };
   }
 
@@ -157,11 +157,11 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       expect(guard.canActivate(mockContext)).toBe(true);
     });
 
-    it('should allow webhook with numeric user_id', () => {
+    it('should allow webhook with numeric userId', () => {
       // Arrange
       const body = {
         ...createValidWebhookBody(),
-        user_id: 166135502, // Numérico
+        userId: 166135502, // Numérico
       };
       const { signature } = generateValidSignature(body, TEST_SECRET);
 
@@ -599,9 +599,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       );
     });
 
-    it('should reject webhook with invalid user_id type', () => {
+    it('should reject webhook with invalid userId type', () => {
       // Arrange
-      const body = { ...createValidWebhookBody(), user_id: true }; // Boolean
+      const body = { ...createValidWebhookBody(), userId: true }; // Boolean
       const { signature } = generateValidSignature(body, TEST_SECRET);
 
       const mockContext = createMockExecutionContext({
@@ -614,7 +614,7 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
         UnauthorizedException,
       );
       expect(() => guard.canActivate(mockContext)).toThrow(
-        'user_id must be a string or number',
+        'userId must be a string or number',
       );
     });
   });

@@ -12,8 +12,8 @@ import { EstadoAsistencia } from '@prisma/client';
  * Similar a grupos.service.ts getDetalleCompleto() pero para Comisiones
  *
  * Campos de respuesta esperados:
- * - id, nombre, descripcion, producto, casa, horario, fecha_inicio, fecha_fin
- * - cupo_maximo, activo
+ * - id, nombre, descripcion, producto, casa, horario, fechaInicio, fechaFin
+ * - cupoMaximo, activo
  * - estudiantes: Array<EstudianteConStats>
  *
  * EstudianteConStats debe incluir:
@@ -104,9 +104,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Turno Mañana',
         descripcion: 'Descripción de la comisión',
         horario: 'Lunes 10:00',
-        fecha_inicio: new Date('2025-01-01'),
-        fecha_fin: new Date('2025-12-31'),
-        cupo_maximo: 20,
+        fechaInicio: new Date('2025-01-01'),
+        fechaFin: new Date('2025-12-31'),
+        cupoMaximo: 20,
         activo: true,
         producto: mockProducto,
         casa: mockCasa,
@@ -143,9 +143,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Turno Mañana',
         descripcion: null,
         horario: null,
-        fecha_inicio: null,
-        fecha_fin: null,
-        cupo_maximo: 20,
+        fechaInicio: null,
+        fechaFin: null,
+        cupoMaximo: 20,
         activo: true,
         producto: mockProducto,
         casa: null,
@@ -188,9 +188,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Turno Tarde',
         descripcion: 'Clases de matemáticas avanzadas',
         horario: 'Martes 14:00',
-        fecha_inicio: fechaInicio,
-        fecha_fin: fechaFin,
-        cupo_maximo: 15,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+        cupoMaximo: 15,
         activo: true,
         producto: mockProducto,
         casa: mockCasa,
@@ -211,9 +211,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         'Clases de matemáticas avanzadas',
       );
       expect(result).toHaveProperty('horario', 'Martes 14:00');
-      expect(result).toHaveProperty('fecha_inicio');
-      expect(result).toHaveProperty('fecha_fin');
-      expect(result).toHaveProperty('cupo_maximo', 15);
+      expect(result).toHaveProperty('fechaInicio');
+      expect(result).toHaveProperty('fechaFin');
+      expect(result).toHaveProperty('cupoMaximo', 15);
       expect(result).toHaveProperty('activo', true);
     });
 
@@ -225,9 +225,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Comisión Test',
         descripcion: null,
         horario: null,
-        fecha_inicio: null,
-        fecha_fin: null,
-        cupo_maximo: 20,
+        fechaInicio: null,
+        fechaFin: null,
+        cupoMaximo: 20,
         activo: true,
         producto: {
           id: 'prod-1',
@@ -258,9 +258,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Comisión QUANTUM',
         descripcion: null,
         horario: null,
-        fecha_inicio: null,
-        fecha_fin: null,
-        cupo_maximo: 20,
+        fechaInicio: null,
+        fechaFin: null,
+        cupoMaximo: 20,
         activo: true,
         producto: mockProducto,
         casa: {
@@ -291,9 +291,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Comisión sin casa',
         descripcion: null,
         horario: null,
-        fecha_inicio: null,
-        fecha_fin: null,
-        cupo_maximo: 20,
+        fechaInicio: null,
+        fechaFin: null,
+        cupoMaximo: 20,
         activo: true,
         producto: mockProducto,
         casa: null,
@@ -319,9 +319,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Comisión Test',
         descripcion: null,
         horario: null,
-        fecha_inicio: null,
-        fecha_fin: null,
-        cupo_maximo: 20,
+        fechaInicio: null,
+        fechaFin: null,
+        cupoMaximo: 20,
         activo: true,
         producto: mockProducto,
         casa: null,
@@ -370,9 +370,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Comisión Vacía',
         descripcion: null,
         horario: null,
-        fecha_inicio: null,
-        fecha_fin: null,
-        cupo_maximo: 20,
+        fechaInicio: null,
+        fechaFin: null,
+        cupoMaximo: 20,
         activo: true,
         producto: mockProducto,
         casa: null,
@@ -397,9 +397,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Comisión Grande',
         descripcion: null,
         horario: null,
-        fecha_inicio: null,
-        fecha_fin: null,
-        cupo_maximo: 30,
+        fechaInicio: null,
+        fechaFin: null,
+        cupoMaximo: 30,
         activo: true,
         producto: mockProducto,
         casa: mockCasa,
@@ -470,9 +470,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Test',
         descripcion: null,
         horario: null,
-        fecha_inicio: null,
-        fecha_fin: null,
-        cupo_maximo: 20,
+        fechaInicio: null,
+        fechaFin: null,
+        cupoMaximo: 20,
         activo: true,
         producto: mockProducto,
         casa: null,
@@ -521,7 +521,7 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
     it('3.13 Comisión existe pero pertenece a otro docente: lanza error', async () => {
       // Arrange
       validator.validarDocenteExiste.mockResolvedValue(undefined);
-      // findFirst con where: { id, docente_id } retorna null si no coincide
+      // findFirst con where: { id, docenteId } retorna null si no coincide
       (prisma.comision.findFirst as jest.Mock).mockResolvedValue(null);
 
       // Act & Assert
@@ -611,7 +611,7 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
   // ============================================================================
 
   describe('Query correcta a Prisma', () => {
-    it('3.26 Usa findFirst con id y docente_id para verificar ownership', async () => {
+    it('3.26 Usa findFirst con id y docenteId para verificar ownership', async () => {
       // Arrange
       validator.validarDocenteExiste.mockResolvedValue(undefined);
       (prisma.comision.findFirst as jest.Mock).mockResolvedValue({
@@ -619,9 +619,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Test',
         descripcion: null,
         horario: null,
-        fecha_inicio: null,
-        fecha_fin: null,
-        cupo_maximo: 20,
+        fechaInicio: null,
+        fechaFin: null,
+        cupoMaximo: 20,
         activo: true,
         producto: mockProducto,
         casa: null,
@@ -636,7 +636,7 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         expect.objectContaining({
           where: expect.objectContaining({
             id: mockComisionId,
-            docente_id: mockDocenteId,
+            docenteId: mockDocenteId,
           }),
         }),
       );
@@ -650,9 +650,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Test',
         descripcion: null,
         horario: null,
-        fecha_inicio: null,
-        fecha_fin: null,
-        cupo_maximo: 20,
+        fechaInicio: null,
+        fechaFin: null,
+        cupoMaximo: 20,
         activo: true,
         producto: mockProducto,
         casa: null,
@@ -682,9 +682,9 @@ describe('DocenteStatsService - getComisionDetalle (Endpoint 3 TDD)', () => {
         nombre: 'Test',
         descripcion: null,
         horario: null,
-        fecha_inicio: null,
-        fecha_fin: null,
-        cupo_maximo: 20,
+        fechaInicio: null,
+        fechaFin: null,
+        cupoMaximo: 20,
         activo: true,
         producto: mockProducto,
         casa: null,

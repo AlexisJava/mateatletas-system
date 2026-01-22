@@ -119,8 +119,8 @@ describe('CompleteMfaLoginUseCase', () => {
       mockPrismaService.admin.findUnique.mockResolvedValueOnce({
         id: 'admin-no-mfa',
         email: 'admin@test.com',
-        mfa_enabled: false, // MFA deshabilitado
-        mfa_secret: null,
+        mfaEnabled: false, // MFA deshabilitado
+        mfaSecret: null,
       });
 
       await expect(
@@ -145,12 +145,12 @@ describe('CompleteMfaLoginUseCase', () => {
         email: 'admin@test.com',
         nombre: 'Admin',
         apellido: 'User',
-        fecha_registro: new Date(),
+        fechaRegistro: new Date(),
         dni: '12345678',
         telefono: '1234567890',
-        mfa_enabled: true,
-        mfa_secret: 'JBSWY3DPEHPK3PXP',
-        mfa_backup_codes: [],
+        mfaEnabled: true,
+        mfaSecret: 'JBSWY3DPEHPK3PXP',
+        mfaBackupCodes: [],
         roles: '["admin"]',
       };
 
@@ -181,9 +181,9 @@ describe('CompleteMfaLoginUseCase', () => {
       mockPrismaService.admin.findUnique.mockResolvedValueOnce({
         id: 'admin-123',
         email: 'admin@test.com',
-        mfa_enabled: true,
-        mfa_secret: 'JBSWY3DPEHPK3PXP',
-        mfa_backup_codes: [],
+        mfaEnabled: true,
+        mfaSecret: 'JBSWY3DPEHPK3PXP',
+        mfaBackupCodes: [],
       });
 
       (authenticator.verify as jest.Mock).mockReturnValueOnce(false);
@@ -213,10 +213,10 @@ describe('CompleteMfaLoginUseCase', () => {
         email: 'admin@test.com',
         nombre: 'Admin',
         apellido: 'Backup',
-        fecha_registro: new Date(),
-        mfa_enabled: true,
-        mfa_secret: 'SECRET',
-        mfa_backup_codes: [hashedBackupCode, 'other-hashed-code'],
+        fechaRegistro: new Date(),
+        mfaEnabled: true,
+        mfaSecret: 'SECRET',
+        mfaBackupCodes: [hashedBackupCode, 'other-hashed-code'],
         roles: '["admin"]',
       };
 
@@ -235,7 +235,7 @@ describe('CompleteMfaLoginUseCase', () => {
       // Verificar que se eliminó el código usado
       expect(mockPrismaService.admin.update).toHaveBeenCalledWith({
         where: { id: 'admin-backup' },
-        data: { mfa_backup_codes: ['other-hashed-code'] },
+        data: { mfaBackupCodes: ['other-hashed-code'] },
       });
     });
 
@@ -254,9 +254,9 @@ describe('CompleteMfaLoginUseCase', () => {
       mockPrismaService.admin.findUnique.mockResolvedValueOnce({
         id: 'admin-123',
         email: 'admin@test.com',
-        mfa_enabled: true,
-        mfa_secret: 'SECRET',
-        mfa_backup_codes: [hashedBackupCode],
+        mfaEnabled: true,
+        mfaSecret: 'SECRET',
+        mfaBackupCodes: [hashedBackupCode],
       });
 
       await expect(
@@ -281,12 +281,12 @@ describe('CompleteMfaLoginUseCase', () => {
         email: 'admin@test.com',
         nombre: 'Structure',
         apellido: 'Test',
-        fecha_registro: new Date('2024-01-01'),
+        fechaRegistro: new Date('2024-01-01'),
         dni: '99999999',
         telefono: '9999999999',
-        mfa_enabled: true,
-        mfa_secret: 'SECRET',
-        mfa_backup_codes: [],
+        mfaEnabled: true,
+        mfaSecret: 'SECRET',
+        mfaBackupCodes: [],
         roles: '["admin"]',
       };
 
@@ -324,10 +324,10 @@ describe('CompleteMfaLoginUseCase', () => {
         email: 'admin-event@test.com',
         nombre: 'Event',
         apellido: 'Admin',
-        fecha_registro: new Date(),
-        mfa_enabled: true,
-        mfa_secret: 'SECRET',
-        mfa_backup_codes: [],
+        fechaRegistro: new Date(),
+        mfaEnabled: true,
+        mfaSecret: 'SECRET',
+        mfaBackupCodes: [],
         roles: '["admin"]',
       });
 

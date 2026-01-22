@@ -44,15 +44,15 @@ describe('PreapprovalWebhookService', () => {
   // Mock de suscripción existente
   const mockSuscripcion = {
     id: 'suscripcion-123',
-    tutor_id: 'tutor-456',
-    plan_id: 'plan-789',
+    tutorId: 'tutor-456',
+    planId: 'plan-789',
     estado: EstadoSuscripcion.PENDIENTE,
-    mp_preapproval_id: 'mp-preapproval-abc',
-    precio_final: 40000,
-    created_at: new Date(),
-    updated_at: new Date(),
-    dias_gracia_usados: 0,
-    fecha_inicio_gracia: null,
+    mpPreapprovalId: 'mp-preapproval-abc',
+    precioFinal: 40000,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    diasGraciaUsados: 0,
+    fechaInicioGracia: null,
     version: 1,
   };
 
@@ -67,7 +67,7 @@ describe('PreapprovalWebhookService', () => {
     api_version: 'v1',
     date_created: new Date().toISOString(),
     live_mode: true,
-    user_id: '12345678',
+    userId: '12345678',
     data: { id: preapprovalId },
   });
 
@@ -78,7 +78,7 @@ describe('PreapprovalWebhookService', () => {
   ): PreApprovalDetail => ({
     id: 'mp-preapproval-abc',
     status,
-    external_reference: externalRef,
+    externalReference: externalRef,
     payer_email: 'tutor@example.com',
     payer_id: 999,
     reason: 'Suscripción STEAM',

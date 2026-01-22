@@ -9,11 +9,11 @@ export interface ClaseInminente {
   id: string;
   titulo: string;
   grupoNombre: string;
-  grupo_id: string;
-  fecha_hora: string;
+  grupoId: string;
+  fechaHora: string;
   duracion: number;
   estudiantesInscritos: number;
-  cupo_maximo: number;
+  cupoMaximo: number;
   minutosParaEmpezar: number;
 }
 
@@ -24,12 +24,12 @@ export interface ClaseDelDia {
   id: string;
   nombre: string;
   codigo: string;
-  dia_semana: string;
-  hora_inicio: string;
-  hora_fin: string;
+  diaSemana: string;
+  horaInicio: string;
+  horaFin: string;
   estudiantes: EstudianteInscrito[];
-  cupo_maximo: number;
-  grupo_id: string;
+  cupoMaximo: number;
+  grupoId: string;
 }
 
 /**
@@ -39,7 +39,7 @@ export interface EstudianteInscrito {
   id: string;
   nombre: string;
   apellido: string;
-  avatar_gradient: number;
+  avatarGradient: number;
 }
 
 /**
@@ -49,11 +49,11 @@ export interface GrupoResumen {
   id: string;
   nombre: string;
   codigo: string;
-  dia_semana: string;
-  hora_inicio: string;
-  hora_fin: string;
+  diaSemana: string;
+  horaInicio: string;
+  horaFin: string;
   estudiantesActivos: number;
-  cupo_maximo: number;
+  cupoMaximo: number;
   nivel: string | null;
 }
 
@@ -75,9 +75,9 @@ export interface ComisionResumen {
     emoji: string;
   } | null;
   horario: string | null;
-  fecha_inicio: string | null;
-  fecha_fin: string | null;
-  cupo_maximo: number | null;
+  fechaInicio: string | null;
+  fechaFin: string | null;
+  cupoMaximo: number | null;
   estudiantesInscritos: number;
   activo: boolean;
 }
@@ -89,9 +89,9 @@ export interface EstudianteConFalta {
   id: string;
   nombre: string;
   apellido: string;
-  faltas_consecutivas: number;
-  ultimo_grupo: string;
-  tutor_email: string | null;
+  faltasConsecutivas: number;
+  ultimoGrupo: string;
+  tutorEmail: string | null;
 }
 
 export type TipoAlerta = 'warning' | 'info' | 'urgent';

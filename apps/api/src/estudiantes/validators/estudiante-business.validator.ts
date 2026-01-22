@@ -71,14 +71,14 @@ export class EstudianteBusinessValidator {
   ): Promise<void> {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: estudianteId },
-      select: { id: true, tutor_id: true },
+      select: { id: true, tutorId: true },
     });
 
     if (!estudiante) {
       throw new NotFoundException('Estudiante no encontrado');
     }
 
-    if (estudiante.tutor_id !== tutorId) {
+    if (estudiante.tutorId !== tutorId) {
       throw new BadRequestException(
         'Este estudiante no pertenece al tutor especificado',
       );

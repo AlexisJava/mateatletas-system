@@ -11,6 +11,8 @@ import { TipoClaseGrupo } from '@prisma/client';
 
 /**
  * DTO para filtros de listado de ClaseGrupos
+ *
+ * NOTA: Usamos camelCase para consistencia con el frontend (JavaScript conventions)
  */
 export class FiltrosClaseGruposDto {
   @ApiPropertyOptional({
@@ -21,7 +23,7 @@ export class FiltrosClaseGruposDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  anio_lectivo?: number;
+  anioLectivo?: number;
 
   @ApiPropertyOptional({
     description: 'Filtrar por estado activo/inactivo',
@@ -39,7 +41,7 @@ export class FiltrosClaseGruposDto {
   })
   @IsOptional()
   @IsString()
-  docente_id?: string;
+  docenteId?: string;
 
   @ApiPropertyOptional({
     description: 'Filtrar por tipo de grupo',
@@ -55,7 +57,7 @@ export class FiltrosClaseGruposDto {
   })
   @IsOptional()
   @IsString()
-  grupo_id?: string;
+  grupoId?: string;
 
   @ApiPropertyOptional({
     description:
@@ -64,5 +66,5 @@ export class FiltrosClaseGruposDto {
   })
   @IsOptional()
   @IsString()
-  producto_id?: string;
+  productoId?: string;
 }

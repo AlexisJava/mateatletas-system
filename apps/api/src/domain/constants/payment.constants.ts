@@ -4,7 +4,7 @@
  * Centraliza:
  * - Estados de pago (internos y MercadoPago)
  * - Mapeo de estados externos a internos
- * - Formatos de external_reference
+ * - Formatos de externalReference
  * - Parsers y formateadores
  */
 
@@ -62,7 +62,7 @@ export function mapearEstadoMercadoPago(estadoMercadoPago: string): EstadoPago {
 }
 
 /**
- * Tipos de external_reference
+ * Tipos de externalReference
  */
 export enum TipoExternalReference {
   CLASE_INSCRIPCION = 'CLASE_INSCRIPCION',
@@ -110,11 +110,11 @@ export type ExternalReference =
   | EstudianteRecargaReference;
 
 /**
- * Builders para generar external_reference
+ * Builders para generar externalReference
  */
 export const EXTERNAL_REFERENCE_FORMATS = {
   /**
-   * Crear external_reference para inscripción a clase
+   * Crear externalReference para inscripción a clase
    */
   claseInscripcion(
     claseId: string,
@@ -125,21 +125,21 @@ export const EXTERNAL_REFERENCE_FORMATS = {
   },
 
   /**
-   * Crear external_reference para inscripción a curso
+   * Crear externalReference para inscripción a curso
    */
   cursoInscripcion(cursoId: string, estudianteId: string): string {
     return `${TipoExternalReference.CURSO_INSCRIPCION}:${cursoId}:${estudianteId}`;
   },
 
   /**
-   * Crear external_reference para recarga de saldo
+   * Crear externalReference para recarga de saldo
    */
   estudianteRecarga(estudianteId: string, monto: number): string {
     return `${TipoExternalReference.ESTUDIANTE_RECARGA}:${estudianteId}:${monto}`;
   },
 
   /**
-   * Crear external_reference para membresía (Legacy)
+   * Crear externalReference para membresía (Legacy)
    * Format: "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
    */
   membresia(membresiaId: string, tutorId: string, productoId: string): string {
@@ -147,7 +147,7 @@ export const EXTERNAL_REFERENCE_FORMATS = {
   },
 
   /**
-   * Crear external_reference para inscripción mensual (Legacy)
+   * Crear externalReference para inscripción mensual (Legacy)
    * Format: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
    */
   inscripcionMensual(
@@ -160,7 +160,7 @@ export const EXTERNAL_REFERENCE_FORMATS = {
 };
 
 /**
- * Resultado de parsear external_reference legacy
+ * Resultado de parsear externalReference legacy
  */
 export interface LegacyExternalReferenceResult {
   tipo: TipoExternalReference;
@@ -168,7 +168,7 @@ export interface LegacyExternalReferenceResult {
 }
 
 /**
- * Parser de external_reference (formatos nuevos con ':')
+ * Parser de externalReference (formatos nuevos con ':')
  * @param externalReference - String en formato "TIPO:param1:param2:..."
  * @returns Objeto parseado o null si formato inválido
  */
@@ -219,7 +219,7 @@ export function parseExternalReference(
 }
 
 /**
- * Parser de external_reference legacy (formatos con '-')
+ * Parser de externalReference legacy (formatos con '-')
  * @param externalReference - String en formato legacy
  * @returns Objeto parseado o null si formato inválido
  *
@@ -279,7 +279,7 @@ export function parseLegacyExternalReference(
 }
 
 /**
- * Validar formato de external_reference
+ * Validar formato de externalReference
  * @param externalReference - String a validar
  * @returns true si es válido
  */
@@ -288,7 +288,7 @@ export function esExternalReferenceValido(externalReference: string): boolean {
 }
 
 /**
- * Extraer tipo de external_reference sin parsear completo
+ * Extraer tipo de externalReference sin parsear completo
  * @param externalReference - String en formato "TIPO:..."
  * @returns Tipo o null si inválido
  */

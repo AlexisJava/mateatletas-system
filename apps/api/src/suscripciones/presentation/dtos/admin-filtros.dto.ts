@@ -12,7 +12,7 @@ export class AdminFiltrosSuscripcionDto {
 
   @IsOptional()
   @IsUUID()
-  plan_id?: string;
+  planId?: string;
 
   @IsOptional()
   @Type(() => Number)
@@ -55,11 +55,11 @@ export interface AdminSuscripcionItemDto {
     id: string;
     nombre: string;
   };
-  monto_final: number;
-  fecha_inicio: Date | null;
-  fecha_proximo_cobro: Date | null;
-  dias_gracia_usados: number;
-  estudiantes_count: number;
+  montoFinal: number;
+  fechaInicio: Date | null;
+  fechaProximoCobro: Date | null;
+  diasGraciaUsados: number;
+  estudiantesCount: number;
 }
 
 /**
@@ -74,10 +74,10 @@ export interface MorosasResponseDto {
  * Métricas de suscripciones para dashboard admin
  */
 export interface MetricasSuscripcionesDto {
-  total_activas: number;
-  total_morosas: number;
+  totalActivas: number;
+  totalMorosas: number;
   total_en_gracia: number;
   total_canceladas_mes: number;
-  ingresos_mes: number;
-  tasa_cancelacion: number;
+  ingresosMes: number;
+  tasaCancelacion: number;
 }

@@ -86,7 +86,7 @@ describe('PaymentAmountValidatorService - Redis Caching (PASO 3.1.B)', () => {
     const inscripcionId = 'inscripcion-123';
     const receivedAmount = 10000;
 
-    // Arrange: Cache tiene precio_final cacheado
+    // Arrange: Cache tiene precioFinal cacheado
     mockRedisService.get.mockResolvedValue('10000');
 
     // Act
@@ -118,7 +118,7 @@ describe('PaymentAmountValidatorService - Redis Caching (PASO 3.1.B)', () => {
    * ESPERADO:
    * 1. Verifica cache → null (miss)
    * 2. Consulta DB → encuentra inscripción
-   * 3. Guarda precio_final en cache con TTL 120s
+   * 3. Guarda precioFinal en cache con TTL 120s
    * 4. Retorna resultado de validación
    */
   it('debe consultar DB en cache miss y guardar resultado (InscripcionMensual)', async () => {
@@ -130,7 +130,7 @@ describe('PaymentAmountValidatorService - Redis Caching (PASO 3.1.B)', () => {
 
     // DB tiene el registro
     mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
-      precio_final: 5000,
+      precioFinal: 5000,
     });
 
     // Act
@@ -153,7 +153,7 @@ describe('PaymentAmountValidatorService - Redis Caching (PASO 3.1.B)', () => {
       mockPrismaService.inscripcionMensual.findUnique,
     ).toHaveBeenCalledWith({
       where: { id: inscripcionId },
-      select: { precio_final: true },
+      select: { precioFinal: true },
     });
 
     // 3. Guardó en cache con TTL 120s
@@ -226,7 +226,7 @@ describe('PaymentAmountValidatorService - Redis Caching (PASO 3.1.B)', () => {
 
     // DB funciona correctamente
     mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
-      precio_final: 4000,
+      precioFinal: 4000,
     });
 
     // Act
@@ -250,7 +250,7 @@ describe('PaymentAmountValidatorService - Redis Caching (PASO 3.1.B)', () => {
   it('debe usar formato de cache key correcto', async () => {
     mockRedisService.get.mockResolvedValue(null);
     mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
-      precio_final: 1000,
+      precioFinal: 1000,
     });
 
     await service.validateInscripcionMensual('test-id', 1000);
@@ -278,7 +278,7 @@ describe('PaymentAmountValidatorService - Redis Caching (PASO 3.1.B)', () => {
   it('debe usar TTL de 120 segundos en cache', async () => {
     mockRedisService.get.mockResolvedValue(null);
     mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({
-      precio_final: 5500,
+      precioFinal: 5500,
     });
 
     await service.validateInscripcionMensual('ttl-test', 5500);
@@ -351,5 +351,5 @@ describe('PaymentAmountValidatorService - Redis Caching (PASO 3.1.B)', () => {
  * CACHE HIT RATE: >70%
  * - Primer webhook: cache miss (consulta DB)
  * - Reintentos MP: cache hit (desde Redis)
- * - Webhooks paralelos: cache hit si mismo payment_id
+ * - Webhooks paralelos: cache hit si mismo paymentId
  */

@@ -26,7 +26,7 @@ import {
 interface MpPreApprovalGetResponse {
   id?: string;
   status?: string;
-  external_reference?: string;
+  externalReference?: string;
   payer_email?: string;
   payer_id?: number;
   reason?: string;
@@ -297,8 +297,8 @@ export class MercadoPagoPreApprovalClientService {
     const status =
       typeof mpData.status === 'string' ? mpData.status : 'pending';
     const externalRef =
-      typeof mpData.external_reference === 'string'
-        ? mpData.external_reference
+      typeof mpData.externalReference === 'string'
+        ? mpData.externalReference
         : '';
     const payerEmail =
       typeof mpData.payer_email === 'string' ? mpData.payer_email : '';
@@ -336,7 +336,7 @@ export class MercadoPagoPreApprovalClientService {
     return {
       id,
       status: status as PreApprovalDetail['status'],
-      external_reference: externalRef,
+      externalReference: externalRef,
       payer_email: payerEmail,
       payer_id: payerId,
       reason,

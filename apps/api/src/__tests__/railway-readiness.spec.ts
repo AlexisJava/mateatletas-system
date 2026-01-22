@@ -115,7 +115,7 @@ describeOrSkip('Railway Production Readiness', () => {
       // Verificar migraciones clave del Sprint 3
       const migrationNames = migrations.map((m) => m.migration_name);
       expect(
-        migrationNames.some((name) => name.includes('add_ip_address')),
+        migrationNames.some((name) => name.includes('add_ipAddress')),
       ).toBe(true);
       expect(
         migrationNames.some((name) => name.includes('add_performance_indexes')),
@@ -137,7 +137,7 @@ describeOrSkip('Railway Production Readiness', () => {
       expect(indexNames).toContain('estudiantes_inscripciones_2026_pin_idx');
       expect(indexNames).toContain('tutores_dni_idx');
       expect(indexNames).toContain('tutores_cuil_idx');
-      expect(indexNames).toContain('inscripciones_2026_tutor_id_estado_idx');
+      expect(indexNames).toContain('inscripciones_2026_tutorId_estado_idx');
       expect(indexNames).toContain('estudiantes_email_idx');
     });
 

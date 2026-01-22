@@ -54,16 +54,16 @@ export class CreateDocenteDto {
   @Min(0, { message: 'La experiencia no puede ser negativa' })
   @Max(50, { message: 'La experiencia no puede ser mayor a 50 años' })
   @IsOptional()
-  experiencia_anos?: number;
+  experienciaAnos?: number;
 
   @IsObject({ message: 'La disponibilidad horaria debe ser un objeto' })
   @IsOptional()
-  disponibilidad_horaria?: Record<string, string[]>;
+  disponibilidadHoraria?: Record<string, string[]>;
 
   @IsArray({ message: 'El nivel educativo debe ser un array' })
   @IsString({ each: true, message: 'Cada nivel educativo debe ser texto' })
   @IsOptional()
-  nivel_educativo?: string[];
+  nivelEducativo?: string[];
 
   @IsString({ message: 'El estado debe ser un texto' })
   @IsOptional()

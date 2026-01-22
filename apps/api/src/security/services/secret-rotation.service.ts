@@ -99,11 +99,11 @@ export class SecretRotationService {
 
     // Verificar si ya existen secrets activos
     const existingJwt = await this.prisma.secretRotation.findFirst({
-      where: { secret_type: 'JWT_SECRET', status: 'active' },
+      where: { secretType: 'JWT_SECRET', status: 'active' },
     });
 
     const existingWebhook = await this.prisma.secretRotation.findFirst({
-      where: { secret_type: 'WEBHOOK_SECRET', status: 'active' },
+      where: { secretType: 'WEBHOOK_SECRET', status: 'active' },
     });
 
     // Si no existen, crear los registros iniciales
@@ -130,7 +130,7 @@ export class SecretRotationService {
     type: string,
     secret: string,
     version: number,
-  ): Promise<{ id: string; expires_at: Date }> {
+  ): Promise<{ id: string; expiresAt: Date }> {
     const hash = this.hashSecret(secret);
     const now = new Date();
     const expiresAt = new Date(now);
@@ -138,12 +138,12 @@ export class SecretRotationService {
 
     const record = await this.prisma.secretRotation.create({
       data: {
-        secret_type: type,
+        secretType: type,
         version,
-        secret_hash: hash,
+        secretHash: hash,
         status: 'active',
-        created_at: now,
-        expires_at: expiresAt,
+        createdAt: now,
+        expiresAt: expiresAt,
       },
     });
 
@@ -167,7 +167,7 @@ export class SecretRotationService {
     expiresAt: Date | null;
   }> {
     const activeSecret = await this.prisma.secretRotation.findFirst({
-      where: { secret_type: type, status: 'active' },
+      where: { secretType: type, status: 'active' },
       orderBy: { version: 'desc' },
     });
 
@@ -185,7 +185,7 @@ export class SecretRotationService {
 
     const now = new Date();
     const daysUntilExpiration = Math.floor(
-      (activeSecret.expires_at.getTime() - now.getTime()) /
+      (activeSecret.expiresAt.getTime() - now.getTime()) /
         (1000 * 60 * 60 * 24),
     );
 
@@ -201,7 +201,7 @@ export class SecretRotationService {
       needsRotation,
       daysUntilExpiration,
       currentVersion: activeSecret.version,
-      expiresAt: activeSecret.expires_at,
+      expiresAt: activeSecret.expiresAt,
     };
   }
 
@@ -248,7 +248,7 @@ export class SecretRotationService {
     }
 
     const activeSecret = await this.prisma.secretRotation.findFirst({
-      where: { secret_type: type, status: 'active' },
+      where: { secretType: type, status: 'active' },
       orderBy: { version: 'desc' },
     });
 
@@ -258,13 +258,13 @@ export class SecretRotationService {
     }
 
     const currentHash = this.hashSecret(currentSecret);
-    const matches = currentHash === activeSecret.secret_hash;
+    const matches = currentHash === activeSecret.secretHash;
 
     if (!matches) {
       this.logger.error(
         `🚨 CRITICAL: El ${type} en variables de entorno NO coincide con el hash en BD`,
       );
-      this.logger.error(`Expected hash: ${activeSecret.secret_hash}`);
+      this.logger.error(`Expected hash: ${activeSecret.secretHash}`);
       this.logger.error(`Actual hash: ${currentHash}`);
     }
 
@@ -281,20 +281,20 @@ export class SecretRotationService {
     Array<{
       version: number;
       status: string;
-      created_at: Date;
-      expires_at: Date;
-      rotated_at: Date | null;
+      createdAt: Date;
+      expiresAt: Date;
+      rotatedAt: Date | null;
     }>
   > {
     const history = await this.prisma.secretRotation.findMany({
-      where: { secret_type: type },
+      where: { secretType: type },
       orderBy: { version: 'desc' },
       select: {
         version: true,
         status: true,
-        created_at: true,
-        expires_at: true,
-        rotated_at: true,
+        createdAt: true,
+        expiresAt: true,
+        rotatedAt: true,
       },
     });
 
@@ -316,7 +316,7 @@ export class SecretRotationService {
       daysUntilExpiration: number;
       currentVersion: number;
     };
-    overall_status: 'healthy' | 'warning' | 'critical';
+    overallStatus: 'healthy' | 'warning' | 'critical';
   }> {
     const jwtStatus = await this.checkSecretStatus('JWT_SECRET');
     const webhookStatus = await this.checkSecretStatus('WEBHOOK_SECRET');
@@ -343,7 +343,7 @@ export class SecretRotationService {
         daysUntilExpiration: webhookStatus.daysUntilExpiration,
         currentVersion: webhookStatus.currentVersion,
       },
-      overall_status: overallStatus,
+      overallStatus: overallStatus,
     };
   }
 }

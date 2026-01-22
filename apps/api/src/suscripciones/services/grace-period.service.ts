@@ -30,8 +30,8 @@ type PrismaTransactionClient = Prisma.TransactionClient;
 interface SuscripcionGraciaData {
   id: string;
   estado: EstadoSuscripcion;
-  tutor_id: string;
-  fecha_inicio_gracia: Date | null;
+  tutorId: string;
+  fechaInicioGracia: Date | null;
 }
 
 @Injectable()
@@ -80,7 +80,7 @@ export class GracePeriodService {
 
     // Calcular días en gracia
     const diasEnGracia = this.calcularDiasEnGracia(
-      suscripcion.fecha_inicio_gracia,
+      suscripcion.fechaInicioGracia,
     );
 
     // Si ya pasó el grace period → MOROSA
@@ -113,7 +113,7 @@ export class GracePeriodService {
     diasEnGracia: number,
   ): Promise<ProcessWebhookResult> {
     const estadoAnterior = suscripcion.estado;
-    const fechaInicioGracia = suscripcion.fecha_inicio_gracia || new Date();
+    const fechaInicioGracia = suscripcion.fechaInicioGracia || new Date();
 
     // TRANSACCIÓN: update + historial
     await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
@@ -121,8 +121,8 @@ export class GracePeriodService {
         where: { id: suscripcion.id },
         data: {
           estado: EstadoSuscripcion.EN_GRACIA,
-          fecha_inicio_gracia: fechaInicioGracia,
-          dias_gracia_usados: diasEnGracia,
+          fechaInicioGracia: fechaInicioGracia,
+          diasGraciaUsados: diasEnGracia,
         },
       });
 
@@ -130,14 +130,14 @@ export class GracePeriodService {
       if (estadoAnterior !== EstadoSuscripcion.EN_GRACIA) {
         await tx.historialEstadoSuscripcion.create({
           data: {
-            suscripcion_id: suscripcion.id,
-            estado_anterior: estadoAnterior,
-            estado_nuevo: EstadoSuscripcion.EN_GRACIA,
+            suscripcionId: suscripcion.id,
+            estadoAnterior: estadoAnterior,
+            estadoNuevo: EstadoSuscripcion.EN_GRACIA,
             motivo: `Pago fallido: ${paymentStatus}`,
-            realizado_por: 'system',
+            realizadoPor: 'system',
             metadata: {
               payment_status: paymentStatus,
-              dias_gracia: diasEnGracia,
+              diasGracia: diasEnGracia,
             },
           },
         });
@@ -152,7 +152,7 @@ export class GracePeriodService {
       'suscripcion.en_gracia',
       new SuscripcionEnGraciaEvent({
         suscripcionId: suscripcion.id,
-        tutorId: suscripcion.tutor_id,
+        tutorId: suscripcion.tutorId,
         fechaLimiteGracia,
         diasRestantes: GRACE_PERIOD_DIAS - diasEnGracia,
       }),
@@ -175,7 +175,7 @@ export class GracePeriodService {
    * TRANSACCIONAL: update + historial en una transacción
    */
   async transicionarAMorosa(
-    suscripcion: { id: string; estado: EstadoSuscripcion; tutor_id: string },
+    suscripcion: { id: string; estado: EstadoSuscripcion; tutorId: string },
     paymentStatus: string,
   ): Promise<ProcessWebhookResult> {
     const estadoAnterior = suscripcion.estado;
@@ -186,17 +186,17 @@ export class GracePeriodService {
         where: { id: suscripcion.id },
         data: {
           estado: EstadoSuscripcion.MOROSA,
-          dias_gracia_usados: GRACE_PERIOD_DIAS,
+          diasGraciaUsados: GRACE_PERIOD_DIAS,
         },
       });
 
       await tx.historialEstadoSuscripcion.create({
         data: {
-          suscripcion_id: suscripcion.id,
-          estado_anterior: estadoAnterior,
-          estado_nuevo: EstadoSuscripcion.MOROSA,
+          suscripcionId: suscripcion.id,
+          estadoAnterior: estadoAnterior,
+          estadoNuevo: EstadoSuscripcion.MOROSA,
           motivo: `Grace period expirado. Último pago: ${paymentStatus}`,
-          realizado_por: 'system',
+          realizadoPor: 'system',
           metadata: { payment_status: paymentStatus },
         },
       });
@@ -207,7 +207,7 @@ export class GracePeriodService {
       'suscripcion.morosa',
       new SuscripcionMorosaEvent({
         suscripcionId: suscripcion.id,
-        tutorId: suscripcion.tutor_id,
+        tutorId: suscripcion.tutorId,
         diasGraciaUsados: GRACE_PERIOD_DIAS,
       }),
     );

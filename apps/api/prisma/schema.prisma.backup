@@ -12,48 +12,48 @@ datasource db {
 /// Representa a los usuarios educadores que crean y gestionan contenido educativo
 model Tutor {
   /// Identificador único del tutor (CUID para mejor distribución)
-  id                      String                  @id @default(cuid())
+  id                        String                  @id @default(cuid())
   /// Username único del tutor - usado para autenticación alternativa
-  username                String?                 @unique
+  username                  String?                 @unique
   /// Email único del tutor - usado para autenticación
   /// IMPORTANTE: Debe estar indexado para búsquedas rápidas en login
-  email                   String?                 @unique
+  email                     String?                 @unique
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
   /// Se maneja solo en backend para seguridad
-  passwordHash            String                  @map("password_hash")
+  password_hash             String
   /// Indica si el tutor debe completar su perfil (datos personales adicionales)
-  debeCompletarPerfil     Boolean                 @default(false) @map("debe_completar_perfil")
+  debe_completar_perfil     Boolean                 @default(false)
   /// Fecha del último cambio de contraseña
-  fechaUltimoCambio       DateTime?               @map("fecha_ultimo_cambio")
+  fecha_ultimo_cambio       DateTime?
   /// Nombre del tutor
-  nombre                  String
+  nombre                    String
   /// Apellido del tutor
-  apellido                String
+  apellido                  String
   /// Documento Nacional de Identidad (opcional)
-  dni                     String?
+  dni                       String?
   /// CUIL/CUIT para facturación (REQUERIDO para inscripciones 2026)
-  cuil                    String?
+  cuil                      String?
   /// Teléfono de contacto (opcional)
-  telefono                String?
+  telefono                  String?
   /// Fecha en que el tutor se registró en la plataforma
-  fechaRegistro           DateTime                @default(now()) @map("fecha_registro")
+  fecha_registro            DateTime                @default(now())
   /// Indica si el tutor completó el proceso de onboarding inicial
   /// Se usa para redirigir a nuevos tutores al flujo de configuración
-  haCompletadoOnboarding  Boolean                 @default(false) @map("ha_completado_onboarding")
+  ha_completado_onboarding  Boolean                 @default(false)
   /// Timestamp de creación del registro
-  createdAt               DateTime                @default(now())
+  createdAt                 DateTime                @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt               DateTime                @updatedAt
+  updatedAt                 DateTime                @updatedAt
   /// Roles asignados al tutor (normalmente solo ["tutor"])
   /// Ejemplo: ["tutor"]
-  roles                   Json                    @default("[\"tutor\"]")
-  estudiantes             Estudiante[]
-  inscripcionesClase      InscripcionClase[]
-  inscripcionesClaseGrupo InscripcionClaseGrupo[]
-  inscripcionesMensuales  InscripcionMensual[]
+  roles                     Json                    @default("[\"tutor\"]")
+  estudiantes               Estudiante[]
+  inscripciones_clase       InscripcionClase[]
+  inscripciones_clase_grupo InscripcionClaseGrupo[]
+  inscripciones_mensuales   InscripcionMensual[]
 
   /// COLONIA DE VERANO
-  inscripcionesColonia ColoniaInscripcion[]
+  inscripciones_colonia ColoniaInscripcion[]
 
   /// SUSCRIPCIONES RECURRENTES (PreApproval MercadoPago)
   suscripciones Suscripcion[]
@@ -80,97 +80,97 @@ model Tutor {
 /// Representa a los alumnos que utilizarán la plataforma
 model Estudiante {
   /// Identificador único del estudiante
-  id                String    @id @default(cuid())
+  id                        String                  @id @default(cuid())
   /// Username único del estudiante - usado para autenticación (OBLIGATORIO)
-  username          String    @unique
+  username                  String                  @unique
   /// Nombre del estudiante
-  nombre            String
+  nombre                    String
   /// Apellido del estudiante
-  apellido          String
+  apellido                  String
   /// Nivel escolar del estudiante: Primaria, Secundaria, Universidad
-  nivelEscolar      String    @map("nivel_escolar")
+  nivelEscolar              String                  @map("nivel_escolar")
   /// URL del avatar 3D de Ready Player Me
   /// Ejemplo: https://models.readyplayer.me/abc123.glb
-  avatarUrl         String?   @map("avatar_url") @db.Text
+  avatarUrl                 String?                 @map("avatar_url") @db.Text
   /// URL de la animación idle seleccionada por el estudiante
   /// Ejemplo: https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb
-  animacionIdleUrl  String?   @map("animacion_idle_url") @db.Text
+  animacion_idle_url        String?                 @db.Text
   /// DEPRECADO: URL de la foto de perfil del estudiante (mantener por compatibilidad)
-  fotoUrl           String?   @map("foto_url")
+  fotoUrl                   String?                 @map("foto_url")
   /// ID del tutor que gestiona este estudiante
-  tutorId           String    @map("tutor_id")
+  tutor_id                  String
   /// ID de la casa a la que pertenece el estudiante (sistema 2026)
-  casaId            String?   @map("casa_id")
+  casaId                    String?                 @map("casa_id")
   /// Nivel actual del estudiante en el sistema de gamificación
   /// NOTA: puntos_totales fue migrado a RecursosEstudiante.xp_total (SUB-FASE 1.3)
-  nivelActual       Int       @default(1) @map("nivel_actual")
+  nivel_actual              Int                     @default(1)
   /// Timestamp de creación del registro
-  createdAt         DateTime  @default(now())
+  createdAt                 DateTime                @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt         DateTime  @updatedAt
+  updatedAt                 DateTime                @updatedAt
   /// ID del gradiente del avatar (0-9)
   /// Corresponde a uno de los 10 gradientes predefinidos del sistema
-  avatarGradient    Int       @default(0) @map("avatar_gradient")
+  avatar_gradient           Int                     @default(0)
   /// Edad del estudiante en años
-  edad              Int
+  edad                      Int
   /// Email único del estudiante - usado para autenticación propia
   /// IMPORTANTE: Debe estar indexado para búsquedas rápidas en login
-  email             String?   @unique
+  email                     String?                 @unique
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
   /// Permite que el estudiante acceda al portal con sus propias credenciales
-  passwordHash      String?   @map("password_hash")
+  password_hash             String?
   /// Fecha del último cambio de contraseña
-  fechaUltimoCambio DateTime? @map("fecha_ultimo_cambio")
+  fecha_ultimo_cambio       DateTime?
   /// Roles asignados al estudiante (normalmente solo ["estudiante"])
   /// Ejemplo: ["estudiante"]
-  roles             Json      @default("[\"estudiante\"]")
+  roles                     Json                    @default("[\"estudiante\"]")
   /// DEPRECADO: ID del sector al que pertenece el estudiante (usar sectores[] en su lugar)
   /// Mantener temporalmente para migración gradual
-  sectorId          String?   @map("sector_id")
+  sector_id                 String?
 
   // === PLAN DE SUSCRIPCIÓN DIRECTO (2026) ===
   /// ID del plan asignado directamente al estudiante
   /// Si es null, se hereda del tutor (comportamiento legacy)
   /// Permite asignar planes diferentes a cada hijo del mismo tutor
-  planId               String?                @map("plan_id")
+  plan_id                   String?                 @map("plan_id")
   /// Estado del acceso del estudiante (independiente del pago)
   /// Permite becas, suspensiones temporales, etc.
-  estadoAcceso         EstadoAccesoEstudiante @default(ACTIVO) @map("estado_acceso")
+  estado_acceso             EstadoAccesoEstudiante  @default(ACTIVO)
   /// Fecha de vencimiento del plan (para becas temporales, promociones)
   /// Si es null, el plan no vence
-  fechaVencimientoPlan DateTime?              @map("fecha_vencimiento_plan")
+  fecha_vencimiento_plan    DateTime?               @map("fecha_vencimiento_plan")
   /// Notas administrativas sobre el plan (ej: "Beca olimpiada 2026")
-  notasPlan            String?                @map("notas_plan")
+  notas_plan                String?                 @map("notas_plan")
 
   // === SISTEMA DE ACCESO FLEXIBLE (2026) ===
   /// Override manual de acceso (admin puede dar acceso temporal sin plan/comisión)
-  accesoOverride       Boolean   @default(false) @map("acceso_override")
+  acceso_override           Boolean                 @default(false)
   /// Fecha hasta la cual el override es válido (null = indefinido)
-  accesoOverrideHasta  DateTime? @map("acceso_override_hasta")
+  acceso_override_hasta     DateTime?               @map("acceso_override_hasta")
   /// Motivo del override (ej: "Prueba gratuita", "Cortesía evento")
-  accesoOverrideMotivo String?   @map("acceso_override_motivo")
+  acceso_override_motivo    String?                 @map("acceso_override_motivo")
 
   // Relación con PlanSuscripcion
-  plan PlanSuscripcion? @relation(fields: [planId], references: [id])
+  plan                      PlanSuscripcion?        @relation(fields: [plan_id], references: [id])
 
-  alertas                 Alerta[]
-  asistencias             Asistencia[]
-  casa                    Casa?                   @relation(fields: [casaId], references: [id])
-  sector                  Sector?                 @relation("EstudianteSectorLegacy", fields: [sectorId], references: [id])
-  tutor                   Tutor                   @relation(fields: [tutorId], references: [id], onDelete: Cascade)
-  inscripcionesClase      InscripcionClase[]
-  inscripcionesClaseGrupo InscripcionClaseGrupo[]
-  asistenciasClaseGrupo   AsistenciaClaseGrupo[]
-  puntosObtenidos         PuntoObtenido[]
-  inscripcionesMensuales  InscripcionMensual[]
-  recursos                RecursosEstudiante?
+  alertas                   Alerta[]
+  asistencias               Asistencia[]
+  casa                      Casa?                   @relation(fields: [casaId], references: [id])
+  sector                    Sector?                 @relation("EstudianteSectorLegacy", fields: [sector_id], references: [id])
+  tutor                     Tutor                   @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  inscripciones_clase       InscripcionClase[]
+  inscripciones_clase_grupo InscripcionClaseGrupo[]
+  asistencias_clase_grupo   AsistenciaClaseGrupo[]
+  puntosObtenidos           PuntoObtenido[]
+  inscripciones_mensuales   InscripcionMensual[]
+  recursos                  RecursosEstudiante?
 
   /// GAMIFICACIÓN V2
-  logrosDesbloqueados LogroEstudiante[]
-  racha               RachaEstudiante?
+  logros_desbloqueados LogroEstudiante[]
+  racha                RachaEstudiante?
 
   /// COLONIA DE VERANO
-  coloniaInscripciones ColoniaEstudiante[]
+  colonia_inscripciones ColoniaEstudiante[]
 
   /// SANDBOX: Progreso en contenidos educativos
   progresosContenido ProgresoContenido[]
@@ -179,25 +179,25 @@ model Estudiante {
   inscripcionesComision InscripcionComision[]
 
   /// LIVEKIT: Registros de asistencia en clases en vivo
-  asistenciasLive AsistenciaLive[]
+  asistencias_live AsistenciaLive[]
 
   /// PLANIFICACIONES v2: Progreso del estudiante en clases y tareas
   progresosClase ProgresoClaseEstudiante[]
   progresosTarea ProgresoTareaEstudiante[]
 
   /// COMISIONES: Registros de asistencia en comisiones (talleres, colonias)
-  asistenciasComision AsistenciaComision[]
+  asistencias_comision AsistenciaComision[]
 
   /// Observaciones recibidas de docentes
   observaciones ObservacionEstudiante[]
 
   /// SISTEMA ACCESO: Historial de cambios de acceso del estudiante
-  historialAcceso HistorialAccesoEstudiante[]
+  historial_acceso HistorialAccesoEstudiante[]
 
   /// ACTIVITY FEED: Actividades del estudiante en el feed social
-  actividadesFeed ActividadFeed[]
+  actividades_feed ActividadFeed[]
   /// ACTIVITY FEED: Reacciones del estudiante a actividades de otros
-  reaccionesFeed  ReaccionFeed[]
+  reacciones_feed  ReaccionFeed[]
 
   /// SISTEMA 2026: Inscripciones de actividades
   inscripcionesActividad InscripcionActividad[]
@@ -215,7 +215,7 @@ model Estudiante {
 
   // Índices de performance para rankings y listados
   // NOTA: Índices de puntos_totales eliminados - usar RecursosEstudiante para rankings (SUB-FASE 1.3)
-  @@index([tutorId, apellido], name: "idx_estudiantes_tutor_listado")
+  @@index([tutor_id, apellido], name: "idx_estudiantes_tutor_listado")
   @@map("estudiantes")
 }
 
@@ -223,33 +223,33 @@ model Estudiante {
 /// Registra todas las modificaciones de acceso para auditoría y trazabilidad
 model HistorialAccesoEstudiante {
   /// Identificador único del registro
-  id           String   @id @default(cuid())
+  id            String   @id @default(cuid())
   /// ID del estudiante al que pertenece este registro
-  estudianteId String   @map("estudiante_id")
+  estudiante_id String
   /// Fecha y hora del cambio
-  fecha        DateTime @default(now())
+  fecha         DateTime @default(now())
 
   /// Acción realizada (ej: "PLAN_ASIGNADO", "COMISION_INSCRIPCION", "OVERRIDE_ACTIVADO", "ACCESO_REVOCADO")
-  accion   String
+  accion        String
   /// Origen del acceso (ej: "PLAN_DIRECTO", "SUSCRIPCION_TUTOR", "COMISION", "OVERRIDE")
-  origen   String
+  origen        String
   /// ID del recurso origen (plan_id, suscripcion_id, comision_id, etc.)
-  origenId String? @map("origen_id")
+  origen_id     String?
 
   /// Estado anterior del acceso (JSON con permisos anteriores)
-  estadoAnterior Json?   @map("estado_anterior")
+  estado_anterior Json?
   /// Estado nuevo del acceso (JSON con permisos nuevos)
-  estadoNuevo    Json?   @map("estado_nuevo")
+  estado_nuevo    Json?
   /// ID del usuario que ejecutó el cambio (admin, sistema, etc.)
-  ejecutadoPor   String? @map("ejecutado_por")
+  ejecutado_por   String?
 
   /// Metadata adicional (motivo, notas, contexto)
-  metadata Json?
+  metadata      Json?
 
   /// Relación con Estudiante
-  estudiante Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  estudiante    Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
-  @@index([estudianteId, fecha])
+  @@index([estudiante_id, fecha])
   @@index([accion, fecha])
   @@map("historial_acceso_estudiante")
 }
@@ -300,7 +300,7 @@ model Casa {
   comisiones Comision[]
 
   /// Actividades del feed de esta casa
-  actividadesFeed ActividadFeed[]
+  actividades_feed ActividadFeed[]
 
   @@map("casas")
 }
@@ -522,23 +522,23 @@ model ProgresoContenido {
 /// - Todos los tiers tienen acceso a libros
 model Tier {
   /// Identificador único del tier
-  id            String     @id @default(cuid())
+  id             String     @id @default(cuid())
   /// Nombre del tier (STEAM_LIBROS, STEAM_ASINCRONICO, STEAM_SINCRONICO)
-  nombre        TierNombre @unique
+  nombre         TierNombre @unique
   /// Precio mensual en pesos
-  precioMensual Int        @map("precio_mensual")
+  precio_mensual Int
   /// Cantidad de mundos async incluidos
-  mundosAsync   Int        @map("mundos_async")
+  mundos_async   Int
   /// Cantidad de mundos sync (con docente) incluidos
-  mundosSync    Int        @map("mundos_sync")
+  mundos_sync    Int
   /// Indica si incluye acceso a docente
-  tieneDocente  Boolean    @default(false) @map("tiene_docente")
+  tiene_docente  Boolean    @default(false)
   /// Descripción del tier para UI
-  descripcion   String?
+  descripcion    String?
   /// Indica si el tier está activo para nuevas inscripciones
-  activo        Boolean    @default(true)
+  activo         Boolean    @default(true)
   /// Orden de visualización (para pricing page)
-  orden         Int        @default(0)
+  orden          Int        @default(0)
 
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
@@ -552,54 +552,54 @@ model Tier {
 /// Representa a los usuarios educadores que dictan clases
 model Docente {
   /// Identificador único del docente
-  id                    String          @id @default(cuid())
+  id                     String          @id @default(cuid())
   /// Email único del docente - usado para autenticación
-  email                 String          @unique
+  email                  String          @unique
   /// Hash bcrypt de la contraseña
-  passwordHash          String          @map("password_hash")
+  password_hash          String
   /// Nombre del docente
-  nombre                String
+  nombre                 String
   /// Apellido del docente
-  apellido              String
+  apellido               String
   /// Título profesional (ej: "Profesor de Matemática", "Licenciado en Física")
-  titulo                String?
+  titulo                 String?
   /// Biografía o descripción del docente
-  bio                   String?
+  bio                    String?
   /// Timestamp de creación del registro
-  createdAt             DateTime        @default(now())
+  createdAt              DateTime        @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt             DateTime        @updatedAt
+  updatedAt              DateTime        @updatedAt
   /// Disponibilidad horaria del docente (ej: {"lunes": ["09:00-12:00", "14:00-18:00"], "martes": ["10:00-13:00"]})
   /// Se almacena como JSON object con días de la semana como keys
-  disponibilidadHoraria Json?           @map("disponibilidad_horaria")
+  disponibilidad_horaria Json?
   /// Especialidades del docente (ej: ["Álgebra", "Geometría", "Trigonometría"])
   /// Se almacena como JSON array de strings
-  especialidades        Json?
+  especialidades         Json?
   /// Estado del docente (activo, inactivo, vacaciones)
-  estado                String          @default("activo")
+  estado                 String          @default("activo")
   /// Años de experiencia docente
-  experienciaAnos       Int?            @map("experiencia_anos")
+  experiencia_anos       Int?
   /// Nivel educativo que el docente puede impartir (ej: ["Primaria", "Secundaria", "Universidad"])
   /// Se almacena como JSON array de strings
-  nivelEducativo        Json?           @map("nivel_educativo")
+  nivel_educativo        Json?
   /// Roles asignados al docente (puede ser docente y admin simultáneamente)
   /// Ejemplo: ["docente", "admin"]
-  roles                 Json            @default("[\"docente\"]")
+  roles                  Json            @default("[\"docente\"]")
   /// Teléfono de contacto (opcional)
-  telefono              String?
+  telefono               String?
   /// Fecha del último cambio de contraseña
-  fechaUltimoCambio     DateTime?       @map("fecha_ultimo_cambio")
+  fecha_ultimo_cambio    DateTime?
   /// Indica si el docente debe cambiar su contraseña en el próximo login
   /// Se establece en true al crear el docente o cuando un admin resetea su contraseña
-  mustChangePassword    Boolean         @default(true) @map("must_change_password")
-  clases                Clase[]
-  claseGrupos           ClaseGrupo[]
-  rutasEspecialidad     DocenteRuta[]
-  eventos               Evento[]
-  notificaciones        Notificacion[]
-  puntosOtorgados       PuntoObtenido[] @relation("PuntosOtorgados")
+  must_change_password   Boolean         @default(true)
+  clases                 Clase[]
+  claseGrupos            ClaseGrupo[]
+  rutasEspecialidad      DocenteRuta[]
+  eventos                Evento[]
+  notificaciones         Notificacion[]
+  puntosOtorgados        PuntoObtenido[] @relation("PuntosOtorgados")
   /// Comisiones a cargo de este docente
-  comisiones            Comision[]
+  comisiones             Comision[]
 
   /// Asignaciones de planificaciones a grupos
   asignacionesPlanificacion AsignacionPlanificacion[]
@@ -614,7 +614,7 @@ model Docente {
   mundos DocenteMundo[]
 
   /// Sistema Casa/Mundo 2026: Tipo de asignación del docente
-  tipoAsignacion TipoAsignacionDocente @default(CLASE_GRUPOS) @map("tipo_asignacion")
+  tipo_asignacion TipoAsignacionDocente @default(CLASE_GRUPOS)
 
   @@map("docentes")
 }
@@ -626,20 +626,20 @@ model DocenteCasa {
   id String @id @default(cuid())
 
   /// ID del docente
-  docenteId String @map("docente_id")
+  docente_id String
 
   /// Tipo de casa asignada
-  casaTipo CasaTipo @map("casa_tipo")
+  casa_tipo CasaTipo
 
   /// Fecha de asignación
-  asignadoEn DateTime @default(now()) @map("asignado_en")
+  asignado_en DateTime @default(now())
 
   /// Relaciones
-  docente Docente @relation(fields: [docenteId], references: [id], onDelete: Cascade)
+  docente Docente @relation(fields: [docente_id], references: [id], onDelete: Cascade)
 
-  @@unique([docenteId, casaTipo])
-  @@index([docenteId])
-  @@index([casaTipo])
+  @@unique([docente_id, casa_tipo])
+  @@index([docente_id])
+  @@index([casa_tipo])
   @@map("docentes_casas")
 }
 
@@ -650,20 +650,20 @@ model DocenteMundo {
   id String @id @default(cuid())
 
   /// ID del docente
-  docenteId String @map("docente_id")
+  docente_id String
 
   /// Tipo de mundo asignado
-  mundoTipo MundoTipo @map("mundo_tipo")
+  mundo_tipo MundoTipo
 
   /// Fecha de asignación
-  asignadoEn DateTime @default(now()) @map("asignado_en")
+  asignado_en DateTime @default(now())
 
   /// Relaciones
-  docente Docente @relation(fields: [docenteId], references: [id], onDelete: Cascade)
+  docente Docente @relation(fields: [docente_id], references: [id], onDelete: Cascade)
 
-  @@unique([docenteId, mundoTipo])
-  @@index([docenteId])
-  @@index([mundoTipo])
+  @@unique([docente_id, mundo_tipo])
+  @@index([docente_id])
+  @@index([mundo_tipo])
   @@map("docentes_mundos")
 }
 
@@ -671,38 +671,38 @@ model DocenteMundo {
 /// Tienen acceso completo al dashboard administrativo
 model Admin {
   /// Identificador único del admin (CUID)
-  id                String    @id @default(cuid())
+  id                  String    @id @default(cuid())
   /// Email único del admin - usado para autenticación
-  email             String    @unique
+  email               String    @unique
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
-  passwordHash      String    @map("password_hash")
+  password_hash       String
   /// Fecha del último cambio de contraseña
-  fechaUltimoCambio DateTime? @map("fecha_ultimo_cambio")
+  fecha_ultimo_cambio DateTime?
   /// Nombre del admin
-  nombre            String
+  nombre              String
   /// Apellido del admin
-  apellido          String
+  apellido            String
   /// Fecha en que el admin fue creado
-  fechaRegistro     DateTime  @default(now()) @map("fecha_registro")
+  fecha_registro      DateTime  @default(now())
   /// Timestamp de creación del registro
-  createdAt         DateTime  @default(now())
+  createdAt           DateTime  @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt         DateTime  @updatedAt
+  updatedAt           DateTime  @updatedAt
   /// DNI del admin (opcional)
-  dni               String?
+  dni                 String?
   /// Roles asignados al admin (puede ser admin y docente simultáneamente)
   /// Ejemplo: ["admin", "docente"]
-  roles             Json      @default("[\"admin\"]")
+  roles               Json      @default("[\"admin\"]")
   /// Teléfono del admin (opcional)
-  telefono          String?
+  telefono            String?
   /// Secret TOTP para MFA (Multi-Factor Authentication)
   /// Guardado encriptado en DB para seguridad
-  mfaSecret         String?   @map("mfa_secret")
+  mfa_secret          String?
   /// Indica si MFA está habilitado para este admin
-  mfaEnabled        Boolean   @default(false) @map("mfa_enabled")
+  mfa_enabled         Boolean   @default(false)
   /// Códigos de backup para MFA (hasheados con bcrypt)
   /// Array de strings - cada código es de un solo uso
-  mfaBackupCodes    String[]  @default([]) @map("mfa_backup_codes")
+  mfa_backup_codes    String[]  @default([])
 
   /// SANDBOX: Contenidos educativos creados por este admin
   contenidosCreados Contenido[]
@@ -742,7 +742,7 @@ model PasswordResetToken {
   /// Token hasheado (SHA256) - nunca almacenar en texto plano
   token     String   @db.VarChar(64)
   /// Tipo de usuario (tutor, docente, admin, estudiante)
-  userType  String   @map("user_type") @db.VarChar(20)
+  user_type String   @db.VarChar(20)
   /// Timestamp de expiración (1 hora desde creación)
   expiresAt DateTime @map("expires_at") @db.Timestamptz
   /// Si el token ya fue usado
@@ -762,13 +762,13 @@ model RefreshTokenSession {
   /// Identificador único (JTI del refresh token)
   id            String   @id @db.VarChar(36)
   /// ID del usuario (CUID - compatible con Tutor, Docente, Admin, Estudiante)
-  userId        String   @map("user_id") @db.VarChar(30)
+  user_id       String   @db.VarChar(30)
   /// Tipo de usuario (tutor, docente, admin, estudiante)
-  userType      String   @map("user_type") @db.VarChar(20)
+  user_type     String   @db.VarChar(20)
   /// Dirección IP desde donde se creó la sesión
-  ipAddress     String?  @map("ip_address") @db.VarChar(45)
+  ip_address    String?  @db.VarChar(45)
   /// User agent del navegador/app
-  userAgent     String?  @map("user_agent") @db.VarChar(500)
+  user_agent    String?  @db.VarChar(500)
   /// Timestamp de creación de la sesión
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
   /// Timestamp de última actividad (renovación de token)
@@ -780,7 +780,7 @@ model RefreshTokenSession {
   /// Razón de revocación (logout, password_change, security, admin_action)
   revokedReason String?  @map("revoked_reason") @db.VarChar(50)
 
-  @@index([userId], name: "idx_refresh_session_user")
+  @@index([user_id], name: "idx_refresh_session_user")
   @@index([expiresAt], name: "idx_refresh_session_expires")
   @@map("refresh_token_sessions")
 }
@@ -790,97 +790,97 @@ model RefreshTokenSession {
 /// Sistema 2026: Productos tipo Club con segmentación Casa/Mundo
 model Producto {
   /// Identificador único del producto
-  id            String       @id @default(cuid())
+  id                      String               @id @default(cuid())
   /// Nombre del producto (ej: "Club Matemática Olímpica - Ñandú N1")
-  nombre        String
+  nombre                  String
   /// Descripción detallada del producto
-  descripcion   String?
+  descripcion             String?
   /// Precio del producto en pesos (formato decimal para precisión)
   /// Para tipo Club: ignorado (el precio lo define el Tier)
-  precio        Decimal      @db.Decimal(10, 2)
+  precio                  Decimal              @db.Decimal(10, 2)
   /// Tipo de producto (Club, Evento, Digital, Fisico, Curso, etc.)
-  tipo          TipoProducto
+  tipo                    TipoProducto
   /// Subcategoría del producto (opcional, para agrupar por tipo)
-  subcategoria  String?
+  subcategoria            String?
   /// URL de imagen de portada del producto (opcional)
-  imagenPortada String?      @map("imagen_portada")
+  imagenPortada           String?              @map("imagen_portada")
   /// Indica si el producto está activo y disponible para compra
-  activo        Boolean      @default(true)
+  activo                  Boolean              @default(true)
 
   // === SEGMENTACIÓN CASA/MUNDO (Sistema 2026) ===
 
   /// Casa a la que pertenece el producto (QUANTUM, VERTEX, PULSAR)
-  casa           CasaTipo?
+  casa                    CasaTipo?
   /// Mundo al que pertenece el producto (MATEMATICA, PROGRAMACION, CIENCIAS)
-  mundo          MundoTipo?
+  mundo                   MundoTipo?
   /// Subtipo de mundo (solo para Matemática: GENERAL u OLIMPICA)
-  subtipoMundo   SubtipoMundo?   @map("subtipo_mundo")
+  subtipo_mundo           SubtipoMundo?
   /// Nivel de olimpiadas (solo si subtipo_mundo = OLIMPICA)
-  nivelOlimpiada NivelOlimpiada? @map("nivel_olimpiada")
+  nivel_olimpiada         NivelOlimpiada?
 
   // === RESTRICCIONES DE EDAD ===
 
   /// Edad mínima para inscribirse
-  edadMinima         Int?    @map("edad_minima")
+  edad_minima             Int?
   /// Edad máxima para inscribirse
-  edadMaxima         Int?    @map("edad_maxima")
+  edad_maxima             Int?
   /// Permite excepciones por altas capacidades
-  permiteExcepciones Boolean @default(false) @map("permite_excepciones")
+  permite_excepciones     Boolean              @default(false)
 
   // === VISIBILIDAD ===
 
   /// Visible en la landing page pública
-  visibleEnLanding Boolean @default(true) @map("visible_en_landing")
+  visible_en_landing      Boolean              @default(true)
   /// Orden de display en listados (menor = primero)
-  ordenDisplay     Int     @default(0) @map("orden_display")
+  orden_display           Int                  @default(0)
 
   // === CAMPOS EXISTENTES (cursos temporales) ===
 
   /// Fecha de inicio del curso (solo para tipo Curso/Evento)
-  fechaInicio   DateTime? @map("fecha_inicio")
+  fecha_inicio            DateTime?
   /// Fecha de finalización del curso (solo para tipo Curso/Evento)
-  fechaFin      DateTime? @map("fecha_fin")
+  fecha_fin               DateTime?
   /// Cupo máximo de estudiantes (solo para tipo Curso/Evento)
-  cupoMaximo    Int?      @map("cupo_maximo")
+  cupo_maximo             Int?
   /// Duración en meses de la suscripción (1=mensual, 12=anual, etc.)
-  duracionMeses Int?      @default(1) @map("duracion_meses")
+  duracion_meses          Int?                 @default(1)
   /// Precio con descuento por pago de contado (1 solo pago)
-  precioContado Decimal?  @map("precio_contado") @db.Decimal(10, 2)
+  precio_contado          Decimal?             @db.Decimal(10, 2)
   /// Indica si el producto permite pago en cuotas via MercadoPago
-  permiteCuotas Boolean   @default(false) @map("permite_cuotas")
+  permite_cuotas          Boolean              @default(false)
   /// Máximo de cuotas permitidas (3, 6, 12, etc.)
-  maxCuotas     Int?      @map("max_cuotas")
+  max_cuotas              Int?
 
   // === TIMESTAMPS ===
 
   /// Timestamp de creación del registro
-  createdAt DateTime @default(now())
+  createdAt               DateTime             @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt DateTime @updatedAt
+  updatedAt               DateTime             @updatedAt
 
   // === PLANIFICACIÓN (Solo para tipo Club) ===
 
   /// Planificación asignada a nivel producto (aplica a todos sus ClaseGrupos)
-  planificacionId String?        @map("planificacion_id")
-  planificacion   Planificacion? @relation(fields: [planificacionId], references: [id])
+  planificacion_id        String?
+  planificacion           Planificacion? @relation(fields: [planificacion_id], references: [id])
 
   // === RELACIONES ===
 
-  clases                 Clase[]
-  inscripcionesMensuales InscripcionMensual[]
+  clases                  Clase[]
+  inscripciones_mensuales InscripcionMensual[]
   /// Comisiones (turnos/horarios) de este producto
-  comisiones             Comision[]
+  comisiones              Comision[]
   /// ClaseGrupos (horarios de Club) de este producto
-  claseGrupos            ClaseGrupo[]
+  claseGrupos             ClaseGrupo[]
   /// Inscripciones de actividad a este producto
-  inscripcionesActividad InscripcionActividad[]
+  inscripcionesActividad  InscripcionActividad[]
   /// Pagos de cursos temporales
-  pagosCurso             PagoCurso[]
+  pagosCurso              PagoCurso[]
 
   @@index([tipo, activo])
   @@index([casa, mundo])
-  @@index([visibleEnLanding, activo])
-  @@index([planificacionId])
+  @@index([visible_en_landing, activo])
+  @@index([planificacion_id])
   @@map("productos")
 }
 
@@ -890,45 +890,45 @@ model Producto {
 /// Representa una clase en vivo programada por un admin
 model Clase {
   /// Identificador único de la clase
-  id              String             @id @default(cuid())
+  id                String             @id @default(cuid())
   /// ID del docente asignado a la clase
-  docenteId       String             @map("docente_id")
+  docente_id        String
   /// Fecha y hora de inicio de la clase
-  fechaHoraInicio DateTime           @map("fecha_hora_inicio")
+  fecha_hora_inicio DateTime
   /// Duración de la clase en minutos
-  duracionMinutos Int                @map("duracion_minutos")
+  duracion_minutos  Int
   /// Estado de la clase (Programada, Cancelada)
-  estado          EstadoClase        @default(Programada)
+  estado            EstadoClase        @default(Programada)
   /// Cupo máximo de estudiantes
-  cuposMaximo     Int                @map("cupos_maximo")
+  cupos_maximo      Int
   /// Cupos ocupados actualmente
-  cuposOcupados   Int                @default(0) @map("cupos_ocupados")
+  cupos_ocupados    Int                @default(0)
   /// ID del producto curso (opcional - si null es clase de suscripción general)
   /// Si tiene valor, solo estudiantes con InscripcionCurso activa pueden reservar
-  productoId      String?            @map("producto_id")
+  producto_id       String?
   /// Timestamp de creación del registro
-  createdAt       DateTime           @default(now())
+  createdAt         DateTime           @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt       DateTime           @updatedAt
+  updatedAt         DateTime           @updatedAt
   /// Descripción o grupo de la clase (ej: "Niños 6-7 años", "Grupo A", "Preparación olimpiadas")
-  descripcion     String?
+  descripcion       String?
   /// Nombre o tema de la clase (ej: "Godot", "Scratch", "Preparación Olimpiadas")
-  nombre          String
+  nombre            String
   /// ID del sector (Matemática o Programación) - OPCIONAL
-  sectorId        String?            @map("sector_id")
-  alertas         Alerta[]
-  asistencias     Asistencia[]
-  docente         Docente            @relation(fields: [docenteId], references: [id])
-  producto        Producto?          @relation(fields: [productoId], references: [id])
-  sector          Sector?            @relation(fields: [sectorId], references: [id])
-  eventos         Evento[]
-  inscripciones   InscripcionClase[]
-  puntosObtenidos PuntoObtenido[]
+  sector_id         String?
+  alertas           Alerta[]
+  asistencias       Asistencia[]
+  docente           Docente            @relation(fields: [docente_id], references: [id])
+  producto          Producto?          @relation(fields: [producto_id], references: [id])
+  sector            Sector?            @relation(fields: [sector_id], references: [id])
+  eventos           Evento[]
+  inscripciones     InscripcionClase[]
+  puntosObtenidos   PuntoObtenido[]
 
-  @@index([docenteId])
-  @@index([fechaHoraInicio])
+  @@index([docente_id])
+  @@index([fecha_hora_inicio])
   @@index([estado])
-  @@index([productoId])
+  @@index([producto_id])
   @@map("clases")
 }
 
@@ -950,20 +950,20 @@ model GrupoPedagogico {
   descripcion String?
 
   /// Rango de edad sugerido
-  edadMinima Int? @map("edad_minima")
-  edadMaxima Int? @map("edad_maxima")
+  edad_minima Int?
+  edad_maxima Int?
 
   /// Sistema Casa/Mundo 2026: Casa a la que pertenece (QUANTUM, VERTEX, PULSAR)
-  casaTipo CasaTipo? @map("casa_tipo")
+  casa_tipo CasaTipo?
 
   /// Sistema Casa/Mundo 2026: Mundo al que pertenece (MATEMATICA, PROGRAMACION, CIENCIAS)
-  mundoTipo MundoTipo? @map("mundo_tipo")
+  mundo_tipo MundoTipo?
 
   /// @deprecated Sector al que pertenece - LEGACY, usar casa_tipo y mundo_tipo
-  sectorId String? @map("sector_id")
+  sector_id String?
 
   /// Link de Google Meet para las clases de este grupo
-  linkMeet String? @map("link_meet")
+  link_meet String?
 
   /// Indica si el grupo está activo
   activo Boolean @default(true)
@@ -976,7 +976,7 @@ model GrupoPedagogico {
 
   /// Relaciones
   /// @deprecated LEGACY - usar casa_tipo y mundo_tipo
-  sector Sector? @relation(fields: [sectorId], references: [id])
+  sector Sector? @relation(fields: [sector_id], references: [id])
 
   /// ClaseGrupos (instancias de clases sincrónicas semanales)
   claseGrupos ClaseGrupo[]
@@ -986,8 +986,8 @@ model GrupoPedagogico {
 
   @@index([codigo])
   @@index([activo])
-  @@index([casaTipo])
-  @@index([mundoTipo])
+  @@index([casa_tipo])
+  @@index([mundo_tipo])
   @@map("grupos")
 }
 
@@ -1009,40 +1009,40 @@ model ClaseGrupo {
   tipo TipoClaseGrupo @default(GRUPO_REGULAR)
 
   /// Día de la semana en que se reúne
-  diaSemana DiaSemana @map("dia_semana")
+  dia_semana DiaSemana
 
   /// Hora de inicio en formato HH:MM (ej: "19:30")
-  horaInicio String @map("hora_inicio")
+  hora_inicio String
 
   /// Hora de fin en formato HH:MM (ej: "21:00")
-  horaFin String @map("hora_fin")
+  hora_fin String
 
   /// Fecha de inicio de vigencia del grupo
-  fechaInicio DateTime @map("fecha_inicio")
+  fecha_inicio DateTime
 
   /// Fecha de fin de vigencia del grupo
   /// Para GRUPO_REGULAR: siempre 15 de diciembre del año
   /// Para CURSO_TEMPORAL: fecha específica definida por admin
-  fechaFin DateTime @map("fecha_fin")
+  fecha_fin DateTime
 
   /// Año lectivo al que pertenece (ej: 2025)
-  anioLectivo Int @map("anio_lectivo")
+  anio_lectivo Int
 
   /// Cupo máximo de estudiantes
-  cupoMaximo Int @default(15) @map("cupo_maximo")
+  cupo_maximo Int @default(15)
 
   /// ID del grupo pedagógico al que pertenece (B1, B2, B3, etc.)
-  grupoId String @map("grupo_id")
+  grupo_id String
 
   /// ID del docente asignado
-  docenteId String @map("docente_id")
+  docente_id String
 
   /// ID del sector (Matemática o Programación)
-  sectorId String? @map("sector_id")
+  sector_id String?
 
   /// ID del producto al que pertenece este horario (Sistema 2026)
   /// Permite vincular ClaseGrupo con Producto tipo Club
-  productoId String? @map("producto_id")
+  producto_id String?
 
   /// Nivel o descripción (ej: "6 y 7 años", "Preparación olimpiadas")
   nivel String?
@@ -1054,16 +1054,16 @@ model ClaseGrupo {
 
   /// Nombre único de la sala en LiveKit (generado automáticamente)
   /// Formato sugerido: "clase_{id}_{timestamp}"
-  livekitRoomName String? @unique @map("livekit_room_name")
+  livekit_room_name String? @unique
 
   /// Estado actual de la clase en vivo
-  estadoClase EstadoClase @default(Programada) @map("estado_clase")
+  estado_clase EstadoClase @default(Programada)
 
   /// Timestamp de cuando el docente inició la clase en vivo
-  iniciadaEn DateTime? @map("iniciada_en")
+  iniciada_en DateTime?
 
   /// Timestamp de cuando finalizó la clase en vivo
-  finalizadaEn DateTime? @map("finalizada_en")
+  finalizada_en DateTime?
 
   /// Timestamp de creación
   createdAt DateTime @default(now())
@@ -1072,10 +1072,10 @@ model ClaseGrupo {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  grupo    GrupoPedagogico @relation(fields: [grupoId], references: [id])
-  docente  Docente         @relation(fields: [docenteId], references: [id])
-  sector   Sector?         @relation(fields: [sectorId], references: [id])
-  producto Producto?       @relation(fields: [productoId], references: [id])
+  grupo    GrupoPedagogico @relation(fields: [grupo_id], references: [id])
+  docente  Docente         @relation(fields: [docente_id], references: [id])
+  sector   Sector?         @relation(fields: [sector_id], references: [id])
+  producto Producto?       @relation(fields: [producto_id], references: [id])
 
   /// Estudiantes inscritos en el grupo
   inscripciones InscripcionClaseGrupo[]
@@ -1084,7 +1084,7 @@ model ClaseGrupo {
   asistencias AsistenciaClaseGrupo[]
 
   /// Registros de asistencia en vivo (LiveKit)
-  asistenciasLive AsistenciaLive[]
+  asistencias_live AsistenciaLive[]
 
   /// Asignaciones de planificaciones a este grupo
   asignacionesPlanificacion AsignacionPlanificacion[]
@@ -1095,14 +1095,14 @@ model ClaseGrupo {
   /// Vista unificada: todas las inscripciones (manual + suscripción)
   inscripcionesUnificadas InscripcionUnificada[] @relation("InscripcionUnificadaClaseGrupo")
 
-  @@index([docenteId])
-  @@index([diaSemana])
-  @@index([fechaInicio, fechaFin])
-  @@index([anioLectivo])
+  @@index([docente_id])
+  @@index([dia_semana])
+  @@index([fecha_inicio, fecha_fin])
+  @@index([anio_lectivo])
   @@index([activo])
-  @@index([estadoClase])
-  @@index([livekitRoomName])
-  @@index([productoId])
+  @@index([estado_clase])
+  @@index([livekit_room_name])
+  @@index([producto_id])
   @@map("clase_grupos")
 }
 
@@ -1117,26 +1117,26 @@ model InscripcionClaseGrupo {
   id String @id @default(cuid())
 
   /// ID del grupo de clase
-  claseGrupoId String @map("clase_grupo_id")
+  clase_grupo_id String
 
   /// ID del estudiante inscrito
-  estudianteId String @map("estudiante_id")
+  estudiante_id String
 
   /// ID del tutor del estudiante
-  tutorId String @map("tutor_id")
+  tutor_id String
 
   /// Fecha de inscripción al grupo
-  fechaInscripcion DateTime @default(now()) @map("fecha_inscripcion")
+  fecha_inscripcion DateTime @default(now())
 
   /// Fecha de baja del grupo (si se retira antes del fin)
-  fechaBaja DateTime? @map("fecha_baja")
+  fecha_baja DateTime?
 
   /// Observaciones
   observaciones String?
 
   /// Sistema Casa/Mundo 2026: Tipo de acceso del estudiante
   /// SINCRONICO = participa en vivo, ASINCRONICO = solo grabaciones
-  tipoAcceso TipoAccesoInscripcion @default(SINCRONICO) @map("tipo_acceso")
+  tipo_acceso TipoAccesoInscripcion @default(SINCRONICO)
 
   /// Timestamp de creación
   createdAt DateTime @default(now())
@@ -1145,15 +1145,15 @@ model InscripcionClaseGrupo {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  claseGrupo ClaseGrupo @relation(fields: [claseGrupoId], references: [id], onDelete: Cascade)
-  estudiante Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
-  tutor      Tutor      @relation(fields: [tutorId], references: [id])
+  claseGrupo ClaseGrupo @relation(fields: [clase_grupo_id], references: [id], onDelete: Cascade)
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  tutor      Tutor      @relation(fields: [tutor_id], references: [id])
 
-  @@unique([claseGrupoId, estudianteId])
-  @@index([estudianteId])
-  @@index([tutorId])
-  @@index([claseGrupoId])
-  @@index([tipoAcceso])
+  @@unique([clase_grupo_id, estudiante_id])
+  @@index([estudiante_id])
+  @@index([tutor_id])
+  @@index([clase_grupo_id])
+  @@index([tipo_acceso])
   @@map("inscripciones_clase_grupo")
 }
 
@@ -1164,10 +1164,10 @@ model AsistenciaClaseGrupo {
   id String @id @default(cuid())
 
   /// ID del grupo de clase
-  claseGrupoId String @map("clase_grupo_id")
+  clase_grupo_id String
 
   /// ID del estudiante
-  estudianteId String @map("estudiante_id")
+  estudiante_id String
 
   /// Fecha específica de la clase (ej: "2025-10-21" para el lunes 21/10)
   fecha DateTime
@@ -1188,12 +1188,12 @@ model AsistenciaClaseGrupo {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  claseGrupo ClaseGrupo @relation(fields: [claseGrupoId], references: [id], onDelete: Cascade)
-  estudiante Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  claseGrupo ClaseGrupo @relation(fields: [clase_grupo_id], references: [id], onDelete: Cascade)
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
-  @@unique([claseGrupoId, estudianteId, fecha])
-  @@index([claseGrupoId])
-  @@index([estudianteId])
+  @@unique([clase_grupo_id, estudiante_id, fecha])
+  @@index([clase_grupo_id])
+  @@index([estudiante_id])
   @@index([fecha])
   // Índice de performance para filtros por estado de asistencia
   @@index([estado], name: "idx_asistencias_estado")
@@ -1207,31 +1207,31 @@ model AsistenciaLive {
   id String @id @default(cuid())
 
   /// ID del grupo de clase
-  claseGrupoId String @map("clase_grupo_id")
+  clase_grupo_id String
 
   /// ID del estudiante
-  estudianteId String @map("estudiante_id")
+  estudiante_id String
 
   /// Timestamp de cuando entró a la sala LiveKit
-  entroEn DateTime @default(now()) @map("entro_en")
+  entro_en DateTime @default(now())
 
   /// Timestamp de cuando salió de la sala (null si aún está conectado)
-  salioEn DateTime? @map("salio_en")
+  salio_en DateTime?
 
   /// Duración total en minutos (calculado al salir o periódicamente)
-  duracionMinutos Int @default(0) @map("duracion_minutos")
+  duracion_minutos Int @default(0)
 
   /// Si el estudiante tiene la mano levantada actualmente
-  levantaMano Boolean @default(false) @map("levanta_mano")
+  levanta_mano Boolean @default(false)
 
   /// Si el estudiante está muteado actualmente
-  estaMuteado Boolean @default(false) @map("esta_muteado")
+  esta_muteado Boolean @default(false)
 
   /// Si el estudiante tiene la cámara encendida
-  camaraEncendida Boolean @default(false) @map("camara_encendida")
+  camara_encendida Boolean @default(false)
 
   /// Si el estudiante está compartiendo pantalla
-  compartiendoPantalla Boolean @default(false) @map("compartiendo_pantalla")
+  compartiendo_pantalla Boolean @default(false)
 
   /// Timestamp de creación
   createdAt DateTime @default(now())
@@ -1240,14 +1240,14 @@ model AsistenciaLive {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  claseGrupo ClaseGrupo @relation(fields: [claseGrupoId], references: [id], onDelete: Cascade)
-  estudiante Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  claseGrupo ClaseGrupo @relation(fields: [clase_grupo_id], references: [id], onDelete: Cascade)
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
   /// Un estudiante solo puede tener un registro activo por clase en vivo
-  @@unique([claseGrupoId, estudianteId])
-  @@index([claseGrupoId])
-  @@index([estudianteId])
-  @@index([entroEn])
+  @@unique([clase_grupo_id, estudiante_id])
+  @@index([clase_grupo_id])
+  @@index([estudiante_id])
+  @@index([entro_en])
   @@map("asistencias_live")
 }
 
@@ -1255,28 +1255,28 @@ model AsistenciaLive {
 /// Vincula un estudiante con una clase específica
 model InscripcionClase {
   /// Identificador único de la inscripción
-  id               String     @id @default(cuid())
+  id                String     @id @default(cuid())
   /// ID de la clase
-  claseId          String     @map("clase_id")
+  clase_id          String
   /// ID del estudiante inscrito
-  estudianteId     String     @map("estudiante_id")
+  estudiante_id     String
   /// ID del tutor que realizó la reserva
-  tutorId          String     @map("tutor_id")
+  tutor_id          String
   /// Fecha de la inscripción
-  fechaInscripcion DateTime   @default(now()) @map("fecha_inscripcion")
+  fecha_inscripcion DateTime   @default(now())
   /// Observaciones o notas sobre la inscripción
-  observaciones    String?
+  observaciones     String?
   /// Timestamp de creación del registro
-  createdAt        DateTime   @default(now())
+  createdAt         DateTime   @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt        DateTime   @updatedAt
-  clase            Clase      @relation(fields: [claseId], references: [id], onDelete: Cascade)
-  estudiante       Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
-  tutor            Tutor      @relation(fields: [tutorId], references: [id])
+  updatedAt         DateTime   @updatedAt
+  clase             Clase      @relation(fields: [clase_id], references: [id], onDelete: Cascade)
+  estudiante        Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  tutor             Tutor      @relation(fields: [tutor_id], references: [id])
 
-  @@unique([claseId, estudianteId])
-  @@index([estudianteId])
-  @@index([tutorId])
+  @@unique([clase_id, estudiante_id])
+  @@index([estudiante_id])
+  @@index([tutor_id])
   @@map("inscripciones_clase")
 }
 
@@ -1284,30 +1284,30 @@ model InscripcionClase {
 /// Registra la asistencia y feedback del docente después de la clase
 model Asistencia {
   /// Identificador único del registro de asistencia
-  id              String           @id @default(cuid())
+  id               String           @id @default(cuid())
   /// ID de la clase
-  claseId         String           @map("clase_id")
+  clase_id         String
   /// ID del estudiante
-  estudianteId    String           @map("estudiante_id")
+  estudiante_id    String
   /// Estado de asistencia (Presente, Ausente, Justificado)
-  estado          EstadoAsistencia
+  estado           EstadoAsistencia
   /// Observaciones del docente sobre el estudiante en esta clase
-  observaciones   String?
+  observaciones    String?
   /// Puntos otorgados al estudiante en esta clase (para gamificación)
-  puntosOtorgados Int              @default(0) @map("puntos_otorgados")
+  puntos_otorgados Int              @default(0)
   /// Fecha y hora del registro de asistencia
-  fechaRegistro   DateTime         @default(now()) @map("fecha_registro")
+  fecha_registro   DateTime         @default(now())
   /// Timestamp de creación del registro
-  createdAt       DateTime         @default(now())
+  createdAt        DateTime         @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt       DateTime         @updatedAt
-  clase           Clase            @relation(fields: [claseId], references: [id], onDelete: Cascade)
-  estudiante      Estudiante       @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  updatedAt        DateTime         @updatedAt
+  clase            Clase            @relation(fields: [clase_id], references: [id], onDelete: Cascade)
+  estudiante       Estudiante       @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
-  @@unique([claseId, estudianteId])
-  @@index([estudianteId])
+  @@unique([clase_id, estudiante_id])
+  @@index([estudiante_id])
   @@index([estado])
-  @@index([claseId, estudianteId, estado])
+  @@index([clase_id, estudiante_id, estado])
   @@map("asistencias")
 }
 
@@ -1315,25 +1315,25 @@ model Asistencia {
 /// Permite al admin detectar y resolver situaciones que requieren atención
 model Alerta {
   /// Identificador único de la alerta
-  id           String     @id @default(cuid())
+  id            String     @id @default(cuid())
   /// ID del estudiante relacionado con la alerta
-  estudianteId String     @map("estudiante_id")
+  estudiante_id String
   /// ID de la clase donde se generó la alerta
-  claseId      String     @map("clase_id")
+  clase_id      String
   /// Descripción de la alerta (observaciones del docente)
-  descripcion  String
+  descripcion   String
   /// Fecha de creación de la alerta
-  fecha        DateTime   @default(now())
+  fecha         DateTime   @default(now())
   /// Indica si la alerta ha sido resuelta
-  resuelta     Boolean    @default(false)
+  resuelta      Boolean    @default(false)
   /// Timestamp de creación del registro
-  createdAt    DateTime   @default(now())
+  createdAt     DateTime   @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt    DateTime   @updatedAt
-  clase        Clase      @relation(fields: [claseId], references: [id], onDelete: Cascade)
-  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  updatedAt     DateTime   @updatedAt
+  clase         Clase      @relation(fields: [clase_id], references: [id], onDelete: Cascade)
+  estudiante    Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
-  @@index([estudianteId])
+  @@index([estudiante_id])
   @@index([resuelta])
   @@index([fecha])
   @@map("alertas")
@@ -1343,34 +1343,34 @@ model Alerta {
 /// Cada registro representa un evento donde un estudiante ganó puntos
 model PuntoObtenido {
   /// Identificador único del registro
-  id            String     @id @default(cuid())
+  id             String     @id @default(cuid())
   /// ID del estudiante que obtuvo los puntos
-  estudianteId  String     @map("estudiante_id")
+  estudiante_id  String
   /// ID del docente que otorgó los puntos
-  docenteId     String     @map("docente_id")
+  docente_id     String
   /// Tipo de acción que generó los puntos (reemplaza FK a AccionPuntuable)
   /// Ejemplos: "ASISTENCIA", "PARTICIPACION", "LOGRO", "BONUS"
-  tipoAccion    String     @default("ASISTENCIA") @map("tipo_accion")
+  tipo_accion    String     @default("ASISTENCIA")
   /// ID de la clase donde se ganaron los puntos (opcional)
-  claseId       String?    @map("clase_id")
+  clase_id       String?
   /// Cantidad de puntos otorgados (se guarda para preservar historial)
-  puntos        Int
+  puntos         Int
   /// Contexto o razón adicional (opcional)
-  contexto      String?
+  contexto       String?
   /// Fecha y hora en que se otorgaron los puntos
-  fechaOtorgado DateTime   @default(now()) @map("fecha_otorgado")
+  fecha_otorgado DateTime   @default(now())
   /// Timestamp de creación del registro
-  createdAt     DateTime   @default(now())
+  createdAt      DateTime   @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt     DateTime   @updatedAt
-  clase         Clase?     @relation(fields: [claseId], references: [id])
-  docente       Docente    @relation("PuntosOtorgados", fields: [docenteId], references: [id])
-  estudiante    Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  updatedAt      DateTime   @updatedAt
+  clase          Clase?     @relation(fields: [clase_id], references: [id])
+  docente        Docente    @relation("PuntosOtorgados", fields: [docente_id], references: [id])
+  estudiante     Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
-  @@index([estudianteId])
-  @@index([docenteId])
-  @@index([tipoAccion])
-  @@index([fechaOtorgado])
+  @@index([estudiante_id])
+  @@index([docente_id])
+  @@index([tipo_accion])
+  @@index([fecha_otorgado])
   @@map("puntos_obtenidos")
 }
 
@@ -1382,30 +1382,30 @@ model PuntoObtenido {
 /// IMPORTANTE: Exactamente UNO de los campos *_id debe estar presente (constraint a nivel de app)
 model Notificacion {
   /// Identificador único de la notificación
-  id        String                @id @default(cuid())
+  id            String             @id @default(cuid())
   /// Tipo de notificación (determina destinatario y comportamiento)
-  tipo      TipoNotificacion
+  tipo          TipoNotificacion
   /// Título de la notificación (max 100 chars recomendado)
-  titulo    String
+  titulo        String
   /// Mensaje descriptivo de la notificación (max 500 chars recomendado)
-  mensaje   String
+  mensaje       String
   /// Indica si la notificación ha sido leída
-  leida     Boolean               @default(false)
+  leida         Boolean            @default(false)
   /// Prioridad de la notificación (afecta UI y orden)
-  prioridad PrioridadNotificacion @default(MEDIA)
+  prioridad     PrioridadNotificacion @default(MEDIA)
 
   // ═══════════════════════════════════════════════════════════════
   // CAMPOS POLIMÓRFICOS (exactamente uno debe estar presente)
   // ═══════════════════════════════════════════════════════════════
 
   /// ID del tutor destinatario (null si no es para tutor)
-  tutorId      String? @map("tutor_id")
+  tutor_id      String?
   /// ID del estudiante destinatario (null si no es para estudiante)
-  estudianteId String? @map("estudiante_id")
+  estudiante_id String?
   /// ID del docente destinatario (null si no es para docente)
-  docenteId    String? @map("docente_id")
+  docente_id    String?
   /// ID del admin destinatario (null si no es para admin)
-  adminId      String? @map("admin_id")
+  admin_id      String?
 
   // ═══════════════════════════════════════════════════════════════
   // METADATA Y TIMESTAMPS
@@ -1413,39 +1413,40 @@ model Notificacion {
 
   /// Metadata adicional en formato JSON (clase_id, estudiante_id, urls, etc)
   /// Estructura flexible según el tipo de notificación
-  metadata  Json?
+  metadata      Json?
   /// Timestamp de creación de la notificación
-  createdAt DateTime  @default(now())
+  createdAt     DateTime           @default(now())
   /// Fecha de expiración (notificaciones pueden auto-eliminarse)
-  expiraEn  DateTime?
+  expiraEn      DateTime?
 
   // ═══════════════════════════════════════════════════════════════
   // RELACIONES
   // ═══════════════════════════════════════════════════════════════
 
-  tutor      Tutor?      @relation(fields: [tutorId], references: [id], onDelete: Cascade)
-  estudiante Estudiante? @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
-  docente    Docente?    @relation(fields: [docenteId], references: [id], onDelete: Cascade)
-  admin      Admin?      @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  tutor         Tutor?             @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  estudiante    Estudiante?        @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  docente       Docente?           @relation(fields: [docente_id], references: [id], onDelete: Cascade)
+  admin         Admin?             @relation(fields: [admin_id], references: [id], onDelete: Cascade)
 
   // ═══════════════════════════════════════════════════════════════
   // ÍNDICES DE PERFORMANCE
   // ═══════════════════════════════════════════════════════════════
 
   /// Índice para listar notificaciones no leídas de tutor
-  @@index([tutorId, leida])
-  @@index([tutorId, createdAt])
+  @@index([tutor_id, leida])
+  @@index([tutor_id, createdAt])
   /// Índice para listar notificaciones no leídas de estudiante
-  @@index([estudianteId, leida])
-  @@index([estudianteId, createdAt])
+  @@index([estudiante_id, leida])
+  @@index([estudiante_id, createdAt])
   /// Índice para listar notificaciones no leídas de docente
-  @@index([docenteId, leida])
-  @@index([docenteId, createdAt])
+  @@index([docente_id, leida])
+  @@index([docente_id, createdAt])
   /// Índice para listar notificaciones no leídas de admin
-  @@index([adminId, leida])
-  @@index([adminId, createdAt])
+  @@index([admin_id, leida])
+  @@index([admin_id, createdAt])
   /// Índice para cleanup de notificaciones expiradas
   @@index([expiraEn])
+
   @@map("notificaciones")
 }
 
@@ -1468,37 +1469,37 @@ enum PrioridadNotificacion {
 /// Modelo base polimórfico: puede ser Clase, Tarea, Recordatorio o Nota
 model Evento {
   /// Identificador único del evento
-  id           String        @id @default(cuid())
+  id             String        @id @default(cuid())
   /// Título del evento
-  titulo       String
+  titulo         String
   /// Descripción detallada del evento
-  descripcion  String?
+  descripcion    String?
   /// Tipo de evento (CLASE, TAREA, RECORDATORIO, NOTA)
-  tipo         TipoEvento
+  tipo           TipoEvento
   /// Fecha y hora de inicio del evento
-  fechaInicio  DateTime      @map("fecha_inicio")
+  fecha_inicio   DateTime
   /// Fecha y hora de fin del evento
-  fechaFin     DateTime      @map("fecha_fin")
+  fecha_fin      DateTime
   /// Indica si el evento dura todo el día
-  esTodoElDia  Boolean       @default(false) @map("es_todo_el_dia")
+  es_todo_el_dia Boolean       @default(false)
   /// ID del docente al que pertenece el evento
-  docenteId    String        @map("docente_id")
+  docente_id     String
   /// ID de la clase relacionada (para reprogramación/recuperación)
-  claseId      String?       @map("clase_id")
+  clase_id       String?
   /// Timestamp de creación del evento
-  createdAt    DateTime      @default(now())
+  createdAt      DateTime      @default(now())
   /// Timestamp de última actualización del evento
-  updatedAt    DateTime      @updatedAt
-  clase        Clase?        @relation(fields: [claseId], references: [id])
-  docente      Docente       @relation(fields: [docenteId], references: [id], onDelete: Cascade)
-  nota         Nota?
-  recordatorio Recordatorio?
-  tarea        Tarea?
+  updatedAt      DateTime      @updatedAt
+  clase          Clase?        @relation(fields: [clase_id], references: [id])
+  docente        Docente       @relation(fields: [docente_id], references: [id], onDelete: Cascade)
+  nota           Nota?
+  recordatorio   Recordatorio?
+  tarea          Tarea?
 
-  @@index([docenteId, fechaInicio])
+  @@index([docente_id, fecha_inicio])
   @@index([tipo])
-  @@index([docenteId, tipo])
-  @@index([claseId])
+  @@index([docente_id, tipo])
+  @@index([clase_id])
   @@map("eventos")
 }
 
@@ -1506,42 +1507,42 @@ model Evento {
 /// Extensión del modelo Evento para tareas con funcionalidad completa
 model Tarea {
   /// Identificador único de la tarea
-  id                      String         @id @default(cuid())
+  id                        String         @id @default(cuid())
   /// ID del evento base asociado
-  eventoId                String         @unique @map("evento_id")
+  evento_id                 String         @unique
   /// Estado actual de la tarea
-  estado                  EstadoTarea    @default(PENDIENTE)
+  estado                    EstadoTarea    @default(PENDIENTE)
   /// Nivel de prioridad de la tarea
-  prioridad               PrioridadTarea @default(MEDIA)
+  prioridad                 PrioridadTarea @default(MEDIA)
   /// Porcentaje de completitud (0-100)
-  porcentajeCompletado    Int            @default(0) @map("porcentaje_completado")
+  porcentaje_completado     Int            @default(0)
   /// Categoría personalizada de la tarea (ej: "Planificación", "Evaluación")
-  categoria               String?
+  categoria                 String?
   /// Etiquetas para organización (array de strings)
-  etiquetas               String[]
+  etiquetas                 String[]
   /// Subtareas en formato JSON
   /// Estructura: [{id: string, titulo: string, completada: boolean, orden: number}]
-  subtareas               Json           @default("[]")
+  subtareas                 Json           @default("[]")
   /// Archivos adjuntos en formato JSON
   /// Estructura: [{id: string, nombre: string, url: string, tipo: string, tamaño: number}]
-  archivos                Json           @default("[]")
+  archivos                  Json           @default("[]")
   /// ID de clase relacionada (opcional)
-  claseRelacionadaId      String?        @map("clase_relacionada_id")
+  clase_relacionada_id      String?
   /// ID de estudiante relacionado (opcional)
-  estudianteRelacionadoId String?        @map("estudiante_relacionado_id")
+  estudiante_relacionado_id String?
   /// Tiempo estimado para completar en minutos
-  tiempoEstimadoMinutos   Int?           @map("tiempo_estimado_minutos")
+  tiempo_estimado_minutos   Int?
   /// Tiempo real invertido en minutos
-  tiempoRealMinutos       Int?           @map("tiempo_real_minutos")
+  tiempo_real_minutos       Int?
   /// Configuración de recurrencia en formato JSON
   /// Estructura: {tipo: 'DIARIA'|'SEMANAL'|'MENSUAL', intervalo: number, dias_semana: number[], fecha_fin: string, excepciones: string[]}
-  recurrencia             Json?
+  recurrencia               Json?
   /// Recordatorios configurados en formato JSON
   /// Estructura: [{minutos_antes: number, enviado: boolean}]
-  recordatorios           Json           @default("[]")
+  recordatorios             Json           @default("[]")
   /// Fecha de completitud
-  completedAt             DateTime?
-  evento                  Evento         @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  completedAt               DateTime?
+  evento                    Evento         @relation(fields: [evento_id], references: [id], onDelete: Cascade)
 
   @@index([estado])
   @@index([prioridad])
@@ -1555,12 +1556,12 @@ model Recordatorio {
   /// Identificador único del recordatorio
   id         String  @id @default(cuid())
   /// ID del evento base asociado
-  eventoId   String  @unique @map("evento_id")
+  evento_id  String  @unique
   /// Indica si el recordatorio fue completado/marcado
   completado Boolean @default(false)
   /// Color personalizado del recordatorio (formato hex)
   color      String  @default("#6366f1")
-  evento     Evento  @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  evento     Evento  @relation(fields: [evento_id], references: [id], onDelete: Cascade)
 
   @@map("recordatorios")
 }
@@ -1571,14 +1572,14 @@ model Nota {
   /// Identificador único de la nota
   id        String  @id @default(cuid())
   /// ID del evento base asociado
-  eventoId  String  @unique @map("evento_id")
+  evento_id String  @unique
   /// Contenido de la nota (texto largo)
   contenido String
   /// Categoría de la nota (opcional)
   categoria String?
   /// Color personalizado de la nota (formato hex)
   color     String  @default("#8b5cf6")
-  evento    Evento  @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  evento    Evento  @relation(fields: [evento_id], references: [id], onDelete: Cascade)
 
   @@index([categoria])
   @@map("notas")
@@ -1707,13 +1708,13 @@ enum EstadoContenido {
 
 /// Tipo de contenido educativo
 enum TipoContenido {
-  LECCION // Clase en vivo (teoría/práctica)
-  TAREA // Trabajo asignable
+  LECCION      // Clase en vivo (teoría/práctica)
+  TAREA        // Trabajo asignable
   MICROLECCION // Cápsula autoguiada
-  EVALUACION // Quiz, examen
-  JUEGO // Minijuego Phaser
-  SIMULACION // Experimento interactivo
-  RECURSO // Material de consulta (no se completa)
+  EVALUACION   // Quiz, examen
+  JUEGO        // Minijuego Phaser
+  SIMULACION   // Experimento interactivo
+  RECURSO      // Material de consulta (no se completa)
 
   @@map("tipo_contenido")
 }
@@ -1746,7 +1747,7 @@ enum TierNombre {
 /// Subtipo de mundo para Matemática (2026)
 /// Solo aplica a Matemática: General (curricular) u Olímpica (competencia)
 enum SubtipoMundo {
-  GENERAL // Matemática curricular estándar
+  GENERAL  // Matemática curricular estándar
   OLIMPICA // Preparación para Olimpiadas Matemáticas
 
   @@map("subtipo_mundo")
@@ -1757,27 +1758,27 @@ enum SubtipoMundo {
 enum NivelOlimpiada {
   NANDU_N1 // Ñandú Nivel 1 - 10 años
   NANDU_N2 // Ñandú Nivel 2 - 11-12 años
-  OMA_N1 // OMA Nivel 1 - 13 años
-  OMA_N2 // OMA Nivel 2 - 14-15 años
-  OMA_N3 // OMA Nivel 3 - 16-17 años
+  OMA_N1   // OMA Nivel 1 - 13 años
+  OMA_N2   // OMA Nivel 2 - 14-15 años
+  OMA_N3   // OMA Nivel 3 - 16-17 años
 
   @@map("nivel_olimpiada")
 }
 
 /// Estado de la suscripción familiar (PreApproval MercadoPago)
 enum EstadoSuscripcionFamiliar {
-  PENDING // Esperando autorización de MP
+  PENDING    // Esperando autorización de MP
   AUTHORIZED // Activa y cobrando
-  PAUSED // Pausada por fallo de pago
-  CANCELLED // Cancelada por tutor o admin
+  PAUSED     // Pausada por fallo de pago
+  CANCELLED  // Cancelada por tutor o admin
 
   @@map("estado_suscripcion_familiar")
 }
 
 /// Estado de una inscripción a actividad
 enum EstadoInscripcionActividad {
-  ACTIVA // Inscripción activa
-  PAUSADA // Pausada temporalmente
+  ACTIVA    // Inscripción activa
+  PAUSADA   // Pausada temporalmente
   CANCELADA // Cancelada (baja)
 
   @@map("estado_inscripcion_actividad")
@@ -1785,11 +1786,11 @@ enum EstadoInscripcionActividad {
 
 /// Tipo de cambio en inscripción (para historial)
 enum TipoCambioInscripcion {
-  ALTA // Nueva inscripción
-  BAJA // Cancelación de inscripción
-  CAMBIO_HORARIO // Cambio de horario dentro del mismo producto
+  ALTA            // Nueva inscripción
+  BAJA            // Cancelación de inscripción
+  CAMBIO_HORARIO  // Cambio de horario dentro del mismo producto
   CAMBIO_PRODUCTO // Cambio a otro producto compatible
-  CAMBIO_TIER // Cambio de tier familiar
+  CAMBIO_TIER     // Cambio de tier familiar
 
   @@map("tipo_cambio_inscripcion")
 }
@@ -1797,17 +1798,17 @@ enum TipoCambioInscripcion {
 /// Modalidad de pago para cursos temporales
 enum ModalidadPagoCurso {
   CONTADO // Pago único
-  CUOTAS // Pago en cuotas
+  CUOTAS  // Pago en cuotas
 
   @@map("modalidad_pago_curso")
 }
 
 /// Estado de pago de curso temporal
 enum EstadoPagoCurso {
-  PENDING // Esperando pago
-  PAID // Pagado completo
-  PARTIAL // Parcialmente pagado (cuotas)
-  FAILED // Pago fallido
+  PENDING  // Esperando pago
+  PAID     // Pagado completo
+  PARTIAL  // Parcialmente pagado (cuotas)
+  FAILED   // Pago fallido
   REFUNDED // Reembolsado
 
   @@map("estado_pago_curso")
@@ -1834,8 +1835,8 @@ enum EstadoAsistencia {
 /// Define qué tipo de grupos puede manejar el docente
 enum TipoAsignacionDocente {
   CLASE_GRUPOS // Solo clases grupales regulares
-  COMISIONES // Solo comisiones de productos (Colonia, Talleres)
-  AMBOS // Puede manejar ambos tipos
+  COMISIONES   // Solo comisiones de productos (Colonia, Talleres)
+  AMBOS        // Puede manejar ambos tipos
 
   @@map("tipo_asignacion_docente")
 }
@@ -1843,7 +1844,7 @@ enum TipoAsignacionDocente {
 /// Enum para tipo de acceso en inscripción (2026)
 /// Define cómo el estudiante participa en el grupo
 enum TipoAccesoInscripcion {
-  SINCRONICO // Participa en vivo en clases
+  SINCRONICO  // Participa en vivo en clases
   ASINCRONICO // Solo accede a grabaciones
 
   @@map("tipo_acceso_inscripcion")
@@ -2038,11 +2039,11 @@ enum TipoEvento {
 
 /// Estados de una tarea
 enum EstadoTarea {
-  PENDIENTE // No iniciada
-  EN_PROGRESO // Iniciada pero no completada
-  COMPLETADA // Terminada exitosamente
-  CANCELADA // Cancelada por admin/docente
-  VENCIDA // Pasó la fecha límite sin completar
+  PENDIENTE     // No iniciada
+  EN_PROGRESO   // Iniciada pero no completada
+  COMPLETADA    // Terminada exitosamente
+  CANCELADA     // Cancelada por admin/docente
+  VENCIDA       // Pasó la fecha límite sin completar
 
   @@map("estado_tarea")
 }
@@ -2069,22 +2070,22 @@ model ConfiguracionPrecios {
   id String @id @default("singleton")
 
   /// Precios por Tier STEAM (Sistema 2026)
-  precioSteamLibros      Decimal @default(40000) @map("precio_steam_libros") @db.Decimal(10, 2)
-  precioSteamAsincronico Decimal @default(65000) @map("precio_steam_asincronico") @db.Decimal(10, 2)
-  precioSteamSincronico  Decimal @default(95000) @map("precio_steam_sincronico") @db.Decimal(10, 2)
+  precio_steam_libros      Decimal @default(40000) @db.Decimal(10, 2)
+  precio_steam_asincronico Decimal @default(65000) @db.Decimal(10, 2)
+  precio_steam_sincronico  Decimal @default(95000) @db.Decimal(10, 2)
 
   /// Descuento familiar simplificado
-  descuentoSegundoHermano Decimal @default(10) @map("descuento_segundo_hermano") @db.Decimal(5, 2) // 10% para 2do hermano en adelante
+  descuento_segundo_hermano Decimal @default(10) @db.Decimal(5, 2) // 10% para 2do hermano en adelante
 
   /// Configuración de notificaciones
-  diaVencimiento        Int     @default(15) @map("dia_vencimiento")
-  diasAntesRecordatorio Int     @default(5) @map("dias_antes_recordatorio")
-  notificacionesActivas Boolean @default(true) @map("notificaciones_activas")
+  dia_vencimiento         Int     @default(15)
+  dias_antes_recordatorio Int     @default(5)
+  notificaciones_activas  Boolean @default(true)
 
   /// Metadata
-  actualizadoPorAdminId String?  @map("actualizado_por_admin_id")
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  actualizado_por_admin_id String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 
   /// Relaciones
   historial HistorialCambioPrecios[]
@@ -2099,22 +2100,22 @@ model HistorialCambioPrecios {
   id String @id @default(cuid())
 
   /// Referencia a la configuración
-  configuracionId String @map("configuracion_id")
+  configuracion_id String
 
   /// Valores antes y después del cambio (JSON flexible)
-  valoresAnteriores Json @map("valores_anteriores")
-  valoresNuevos     Json @map("valores_nuevos")
+  valores_anteriores Json
+  valores_nuevos     Json
 
   /// Metadata del cambio
-  motivoCambio String?  @map("motivo_cambio")
-  adminId      String   @map("admin_id")
-  fechaCambio  DateTime @default(now()) @map("fecha_cambio")
+  motivo_cambio String?
+  admin_id      String
+  fecha_cambio  DateTime @default(now())
 
   /// Relaciones
-  configuracion ConfiguracionPrecios @relation(fields: [configuracionId], references: [id])
+  configuracion ConfiguracionPrecios @relation(fields: [configuracion_id], references: [id])
 
-  @@index([configuracionId])
-  @@index([fechaCambio])
+  @@index([configuracion_id])
+  @@index([fecha_cambio])
   @@map("historial_cambio_precios")
 }
 
@@ -2125,9 +2126,9 @@ model InscripcionMensual {
   id String @id @default(cuid())
 
   /// Relaciones principales
-  estudianteId String @map("estudiante_id")
-  productoId   String @map("producto_id")
-  tutorId      String @map("tutor_id")
+  estudiante_id String
+  producto_id   String
+  tutor_id      String
 
   /// Período de facturación
   anio    Int
@@ -2135,35 +2136,35 @@ model InscripcionMensual {
   periodo String // "2025-01" para facilitar queries
 
   /// Cálculo de precios (guardado para historial)
-  precioBase        Decimal @map("precio_base") @db.Decimal(10, 2)
-  descuentoAplicado Decimal @default(0) @map("descuento_aplicado") @db.Decimal(10, 2)
-  precioFinal       Decimal @map("precio_final") @db.Decimal(10, 2)
+  precio_base        Decimal @db.Decimal(10, 2)
+  descuento_aplicado Decimal @default(0) @db.Decimal(10, 2)
+  precio_final       Decimal @db.Decimal(10, 2)
 
   /// Metadata del cálculo
-  tipoDescuento  TipoDescuento @map("tipo_descuento")
-  detalleCalculo String        @map("detalle_calculo") // Explicación del cálculo aplicado
+  tipo_descuento  TipoDescuento
+  detalle_calculo String // Explicación del cálculo aplicado
 
   /// Estado de pago
-  estadoPago       EstadoPago @default(Pendiente) @map("estado_pago")
-  montoPagado      Decimal    @default(0) @map("monto_pagado") @db.Decimal(10, 2) // Monto acumulado de pagos
-  fechaVencimiento DateTime?  @map("fecha_vencimiento") // Fecha límite de pago
-  fechaPago        DateTime?  @map("fecha_pago")
-  metodoPago       String?    @map("metodo_pago") // "Efectivo", "Transferencia", "MercadoPago"
-  comprobanteUrl   String?    @map("comprobante_url") // URL del comprobante subido
-  observaciones    String?
+  estado_pago       EstadoPago @default(Pendiente)
+  monto_pagado      Decimal    @default(0) @db.Decimal(10, 2) // Monto acumulado de pagos
+  fecha_vencimiento DateTime? // Fecha límite de pago
+  fecha_pago        DateTime?
+  metodo_pago       String? // "Efectivo", "Transferencia", "MercadoPago"
+  comprobante_url   String? // URL del comprobante subido
+  observaciones     String?
 
   /// Auditoría
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  estudiante Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
-  producto   Producto   @relation(fields: [productoId], references: [id])
-  tutor      Tutor      @relation(fields: [tutorId], references: [id])
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  producto   Producto   @relation(fields: [producto_id], references: [id])
+  tutor      Tutor      @relation(fields: [tutor_id], references: [id])
 
-  @@unique([estudianteId, productoId, periodo])
-  @@index([tutorId, periodo])
-  @@index([estadoPago])
+  @@unique([estudiante_id, producto_id, periodo])
+  @@index([tutor_id, periodo])
+  @@index([estado_pago])
   @@index([periodo])
   @@map("inscripciones_mensuales")
 }
@@ -2226,14 +2227,14 @@ model RecursosEstudiante {
   id String @id @default(cuid())
 
   /// ID del estudiante
-  estudianteId String @unique @map("estudiante_id")
+  estudiante_id String @unique
 
   /// XP total acumulado (Experience Points)
   /// Se usa para niveles, desafíos, progresión
-  xpTotal Int @default(0) @map("xp_total")
+  xp_total Int @default(0)
 
   /// Última actualización de recursos
-  ultimaActualizacion DateTime @updatedAt @map("ultima_actualizacion")
+  ultima_actualizacion DateTime @updatedAt
 
   /// Timestamp de creación
   createdAt DateTime @default(now())
@@ -2242,10 +2243,10 @@ model RecursosEstudiante {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  estudiante    Estudiante           @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  estudiante    Estudiante           @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
   transacciones TransaccionRecurso[]
 
-  @@index([estudianteId])
+  @@index([estudiante_id])
   @@map("recursos_estudiante")
 }
 
@@ -2256,10 +2257,10 @@ model TransaccionRecurso {
   id String @id @default(cuid())
 
   /// ID del recurso del estudiante
-  recursosEstudianteId String @map("recursos_estudiante_id")
+  recursos_estudiante_id String
 
   /// Tipo de recurso afectado
-  tipoRecurso TipoRecurso @map("tipo_recurso")
+  tipo_recurso TipoRecurso
 
   /// Cantidad (positivo = ganancia, negativo = gasto)
   cantidad Int
@@ -2279,10 +2280,10 @@ model TransaccionRecurso {
   createdAt DateTime @default(now())
 
   /// Relaciones
-  recursosEstudiante RecursosEstudiante @relation(fields: [recursosEstudianteId], references: [id], onDelete: Cascade)
+  recursosEstudiante RecursosEstudiante @relation(fields: [recursos_estudiante_id], references: [id], onDelete: Cascade)
 
-  @@index([recursosEstudianteId])
-  @@index([tipoRecurso])
+  @@index([recursos_estudiante_id])
+  @@index([tipo_recurso])
   @@index([fecha])
   @@map("transacciones_recurso")
 }
@@ -2327,31 +2328,31 @@ model Logro {
   categoria   String // "consistencia", "maestria", "social", etc
 
   // Recompensas
-  xpRecompensa Int @map("xp_recompensa")
+  xp_recompensa Int
 
   // Criterios de desbloqueo
-  criterioTipo  String @map("criterio_tipo") // "racha_dias", "temas_completados", etc
-  criterioValor String @map("criterio_valor") // JSON con valor(es) necesarios
+  criterio_tipo  String // "racha_dias", "temas_completados", etc
+  criterio_valor String // JSON con valor(es) necesarios
 
   // Metadata
-  icono             String
-  rareza            String // "comun", "raro", "epico", "legendario"
-  secreto           Boolean @default(false)
-  animacion         String? // ID de animación desbloqueada
-  titulo            String? // Título que otorga
-  badge             String? // Badge que otorga
-  mensajeDesbloqueo String? @map("mensaje_desbloqueo") // Mensaje especial al desbloquear
-  extras            Json? // Array de extras (["texto1", "texto2"])
+  icono              String
+  rareza             String // "comun", "raro", "epico", "legendario"
+  secreto            Boolean @default(false)
+  animacion          String? // ID de animación desbloqueada
+  titulo             String? // Título que otorga
+  badge              String? // Badge que otorga
+  mensaje_desbloqueo String? // Mensaje especial al desbloquear
+  extras             Json? // Array de extras (["texto1", "texto2"])
 
   // Orden y estado
   orden  Int     @default(0)
   activo Boolean @default(true)
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   // Relaciones
-  logrosEstudiantes LogroEstudiante[]
+  logros_estudiantes LogroEstudiante[]
 
   // Índices de performance para agrupaciones y filtros
   @@index([categoria], name: "idx_logros_categoria")
@@ -2367,19 +2368,19 @@ model Logro {
 model LogroEstudiante {
   id String @id @default(cuid())
 
-  estudianteId String @map("estudiante_id")
-  logroId      String @map("logro_id")
+  estudiante_id String
+  logro_id      String
 
-  fechaDesbloqueo DateTime @default(now()) @map("fecha_desbloqueo")
-  visto           Boolean  @default(false) // Para notificaciones
+  fecha_desbloqueo DateTime @default(now())
+  visto            Boolean  @default(false) // Para notificaciones
 
   // Relaciones
-  estudiante Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
-  logro      Logro      @relation(fields: [logroId], references: [id])
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  logro      Logro      @relation(fields: [logro_id], references: [id])
 
-  @@unique([estudianteId, logroId])
-  @@index([estudianteId])
-  @@index([logroId])
+  @@unique([estudiante_id, logro_id])
+  @@index([estudiante_id])
+  @@index([logro_id])
   @@index([visto])
   @@map("logros_estudiantes_gamificacion")
 }
@@ -2389,27 +2390,27 @@ model LogroEstudiante {
 // ==========================================
 
 model RachaEstudiante {
-  id           String @id @default(cuid())
-  estudianteId String @unique @map("estudiante_id")
+  id            String @id @default(cuid())
+  estudiante_id String @unique
 
   // Estado actual
-  rachaActual Int @default(0) @map("racha_actual")
-  rachaMaxima Int @default(0) @map("racha_maxima")
+  racha_actual Int @default(0)
+  racha_maxima Int @default(0)
 
   // Fechas
-  ultimaActividad   DateTime? @map("ultima_actividad")
-  inicioRachaActual DateTime? @map("inicio_racha_actual")
+  ultima_actividad    DateTime?
+  inicio_racha_actual DateTime?
 
   // Metadata
-  totalDiasActivos Int @default(0) @map("total_dias_activos")
+  total_dias_activos Int @default(0)
 
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updated_at DateTime @updatedAt
 
   // Relaciones
-  estudiante Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
-  @@index([estudianteId])
-  @@index([ultimaActividad])
+  @@index([estudiante_id])
+  @@index([ultima_actividad])
   @@map("rachas_estudiantes")
 }
 
@@ -2420,14 +2421,14 @@ model RachaEstudiante {
 
 /// Tipos de actividad para el feed
 enum TipoActividadFeed {
-  LECCION_COMPLETADA // Completó teoría o práctica
-  CLASE_COMPLETADA // Completó clase completa (teoría + práctica)
-  TAREA_COMPLETADA // Completó una tarea
-  TAREA_PERFECTA // Completó tarea con 100%
+  LECCION_COMPLETADA    // Completó teoría o práctica
+  CLASE_COMPLETADA      // Completó clase completa (teoría + práctica)
+  TAREA_COMPLETADA      // Completó una tarea
+  TAREA_PERFECTA        // Completó tarea con 100%
   PLANIFICACION_COMPLETADA // Completó toda una planificación
-  LOGRO_DESBLOQUEADO // Desbloqueó un logro
-  NIVEL_SUBIDO // Subió de nivel
-  RACHA_EXTENDIDA // Extendió su racha de días
+  LOGRO_DESBLOQUEADO    // Desbloqueó un logro
+  NIVEL_SUBIDO          // Subió de nivel
+  RACHA_EXTENDIDA       // Extendió su racha de días
 }
 
 /// Feed de actividades de estudiantes
@@ -2436,7 +2437,7 @@ model ActividadFeed {
   id String @id @default(cuid())
 
   // Estudiante que realizó la actividad
-  estudianteId String @map("estudiante_id")
+  estudiante_id String
 
   // Tipo de actividad
   tipo TipoActividadFeed
@@ -2446,29 +2447,29 @@ model ActividadFeed {
   mensaje String
 
   // XP ganado por esta actividad (para mostrar en el feed)
-  xpGanado Int @default(0) @map("xp_ganado")
+  xp_ganado Int @default(0)
 
   // Metadata adicional (JSON flexible)
   // Puede incluir: claseId, planificacionId, logroId, etc.
   metadata Json @default("{}")
 
   // Timestamp de la actividad
-  creadoEn DateTime @default(now()) @map("creado_en")
+  creado_en DateTime @default(now())
 
   // Para filtrar por casa (permite feed por casa)
-  casaId String? @map("casa_id")
+  casa_id String?
 
   // Relaciones
-  estudiante Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
-  casa       Casa?      @relation(fields: [casaId], references: [id])
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  casa       Casa?      @relation(fields: [casa_id], references: [id])
 
   // Reacciones al item del feed
   reacciones ReaccionFeed[]
 
-  @@index([estudianteId])
-  @@index([casaId])
+  @@index([estudiante_id])
+  @@index([casa_id])
   @@index([tipo])
-  @@index([creadoEn])
+  @@index([creado_en])
   @@map("actividad_feed")
 }
 
@@ -2477,26 +2478,26 @@ model ReaccionFeed {
   id String @id @default(cuid())
 
   // Item del feed al que se reacciona
-  actividadId String @map("actividad_id")
+  actividad_id String
 
   // Estudiante que reaccionó
-  estudianteId String @map("estudiante_id")
+  estudiante_id String
 
   // Tipo de reacción (emoji)
   // Valores comunes: "👏", "🎉", "🔥", "💪", "❤️"
   emoji String
 
   // Timestamp
-  creadoEn DateTime @default(now()) @map("creado_en")
+  creado_en DateTime @default(now())
 
   // Relaciones
-  actividad  ActividadFeed @relation(fields: [actividadId], references: [id], onDelete: Cascade)
-  estudiante Estudiante    @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  actividad  ActividadFeed @relation(fields: [actividad_id], references: [id], onDelete: Cascade)
+  estudiante Estudiante    @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
   // Un estudiante solo puede reaccionar una vez con el mismo emoji a un item
-  @@unique([actividadId, estudianteId, emoji])
-  @@index([actividadId])
-  @@index([estudianteId])
+  @@unique([actividad_id, estudiante_id, emoji])
+  @@index([actividad_id])
+  @@index([estudiante_id])
   @@map("reacciones_feed")
 }
 
@@ -2517,20 +2518,20 @@ model ReaccionFeed {
 model ColoniaInscripcion {
   id String @id @default(cuid())
 
-  tutorId           String   @map("tutor_id")
-  estado            String   @default("active") // "active", "blocked", "cancelled"
-  descuentoAplicado Int      @map("descuento_aplicado") // 0, 12 o 20
-  totalMensual      Int      @map("total_mensual") // Monto que se cobra cada mes
-  fechaInscripcion  DateTime @default(now()) @map("fecha_inscripcion")
+  tutor_id           String
+  estado             String   @default("active") // "active", "blocked", "cancelled"
+  descuento_aplicado Int // 0, 12 o 20
+  total_mensual      Int // Monto que se cobra cada mes
+  fecha_inscripcion  DateTime @default(now())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tutor       Tutor               @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  tutor       Tutor               @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
   estudiantes ColoniaEstudiante[]
   pagos       ColoniaPago[]
 
-  @@index([tutorId])
+  @@index([tutor_id])
   @@index([estado])
   @@map("colonia_inscripciones")
 }
@@ -2539,21 +2540,21 @@ model ColoniaInscripcion {
 model ColoniaEstudiante {
   id String @id @default(cuid())
 
-  inscripcionId String @map("inscripcion_id")
-  estudianteId  String @map("estudiante_id") // Referencia a la tabla estudiantes
-  nombre        String
-  edad          Int
-  pin           String @unique // 4 dígitos para acceso
+  inscripcion_id String
+  estudiante_id  String // Referencia a la tabla estudiantes
+  nombre         String
+  edad           Int
+  pin            String @unique // 4 dígitos para acceso
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  inscripcion ColoniaInscripcion       @relation(fields: [inscripcionId], references: [id], onDelete: Cascade)
-  estudiante  Estudiante               @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  inscripcion ColoniaInscripcion       @relation(fields: [inscripcion_id], references: [id], onDelete: Cascade)
+  estudiante  Estudiante               @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
   cursos      ColoniaEstudianteCurso[]
 
-  @@index([inscripcionId])
-  @@index([estudianteId])
+  @@index([inscripcion_id])
+  @@index([estudiante_id])
   @@index([pin])
   @@map("colonia_estudiantes")
 }
@@ -2562,23 +2563,23 @@ model ColoniaEstudiante {
 model ColoniaEstudianteCurso {
   id String @id @default(cuid())
 
-  coloniaEstudianteId String @map("colonia_estudiante_id")
-  courseId            String @map("course_id") // ID del curso (ej: 'mat-juegos-desafios')
-  courseName          String @map("course_name")
-  courseArea          String @map("course_area") // "Matemática", "Programación", "Ciencias"
-  instructor          String
-  dayOfWeek           String @map("day_of_week") // "Lunes", "Martes", etc
-  timeSlot            String @map("time_slot") // "10:30-12:00", "14:30-16:00"
-  precioBase          Int    @map("precio_base") // 55000
-  precioConDescuento  Int    @map("precio_con_descuento") // Después de aplicar descuento
+  colonia_estudiante_id String
+  course_id             String // ID del curso (ej: 'mat-juegos-desafios')
+  course_name           String
+  course_area           String // "Matemática", "Programación", "Ciencias"
+  instructor            String
+  day_of_week           String // "Lunes", "Martes", etc
+  time_slot             String // "10:30-12:00", "14:30-16:00"
+  precio_base           Int // 55000
+  precio_con_descuento  Int // Después de aplicar descuento
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  estudiante ColoniaEstudiante @relation(fields: [coloniaEstudianteId], references: [id], onDelete: Cascade)
+  estudiante ColoniaEstudiante @relation(fields: [colonia_estudiante_id], references: [id], onDelete: Cascade)
 
-  @@index([coloniaEstudianteId])
-  @@index([courseId])
+  @@index([colonia_estudiante_id])
+  @@index([course_id])
   @@map("colonia_estudiante_cursos")
 }
 
@@ -2586,28 +2587,28 @@ model ColoniaEstudianteCurso {
 model ColoniaPago {
   id String @id @default(cuid())
 
-  inscripcionId           String    @map("inscripcion_id")
-  mes                     String // "enero", "febrero", "marzo"
-  anio                    Int // 2026
-  monto                   Int
-  estado                  String    @default("pending") // "pending", "paid", "failed", "cancelled"
-  mercadopagoPreferenceId String?   @map("mercadopago_preference_id")
-  mercadopagoPaymentId    String?   @map("mercadopago_payment_id")
-  fechaVencimiento        DateTime  @map("fecha_vencimiento") // Día 5 del mes
-  fechaPago               DateTime? @map("fecha_pago")
-  fechaCreacion           DateTime  @default(now()) @map("fecha_creacion")
-  processedAt             DateTime? @map("processed_at") // Para idempotencia en webhooks
+  inscripcion_id            String
+  mes                       String // "enero", "febrero", "marzo"
+  anio                      Int // 2026
+  monto                     Int
+  estado                    String    @default("pending") // "pending", "paid", "failed", "cancelled"
+  mercadopago_preference_id String?
+  mercadopago_payment_id    String?
+  fecha_vencimiento         DateTime // Día 5 del mes
+  fecha_pago                DateTime?
+  fecha_creacion            DateTime  @default(now())
+  processed_at              DateTime? // Para idempotencia en webhooks
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  inscripcion ColoniaInscripcion @relation(fields: [inscripcionId], references: [id], onDelete: Cascade)
+  inscripcion ColoniaInscripcion @relation(fields: [inscripcion_id], references: [id], onDelete: Cascade)
 
-  @@index([inscripcionId])
+  @@index([inscripcion_id])
   @@index([estado])
-  @@index([fechaVencimiento])
-  @@index([mercadopagoPreferenceId])
-  @@index([processedAt])
+  @@index([fecha_vencimiento])
+  @@index([mercadopago_preference_id])
+  @@index([processed_at])
   @@map("colonia_pagos")
 }
 
@@ -2630,11 +2631,11 @@ model WebhookProcessed {
 
   /// ID del pago de MercadoPago (payment_id)
   /// UNIQUE constraint previene doble procesamiento
-  paymentId String @unique @map("payment_id")
+  payment_id String @unique
 
   /// Tipo de webhook procesado
   /// Ejemplos: "inscripcion", "membresia", "inscripcion2026", "colonia"
-  webhookType String @map("webhook_type")
+  webhook_type String
 
   /// Estado del pago cuando se procesó
   /// Ejemplos: "approved", "rejected", "pending"
@@ -2642,18 +2643,18 @@ model WebhookProcessed {
 
   /// External reference del pago (para debugging)
   /// Formato: "inscripcion-{id}-estudiante-{id}-producto-{id}"
-  externalReference String @map("external_reference")
+  external_reference String
 
   /// Timestamp de cuando se procesó el webhook
-  processedAt DateTime @default(now()) @map("processed_at")
+  processed_at DateTime @default(now())
 
   /// Timestamp de creación del registro
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
   /// Índices para queries eficientes
-  @@index([paymentId])
-  @@index([processedAt])
-  @@index([webhookType])
+  @@index([payment_id])
+  @@index([processed_at])
+  @@index([webhook_type])
   @@map("webhooks_processed")
 }
 
@@ -2685,14 +2686,14 @@ model AuditLog {
 
   /// ID del usuario que realizó la acción (null para acciones del sistema)
   /// Formato: UUID del usuario (tutor, admin, docente, estudiante)
-  userId String? @map("user_id")
+  user_id String?
 
   /// Tipo de usuario que realizó la acción
   /// Valores: "tutor", "admin", "docente", "estudiante", "system"
-  userType String? @map("user_type")
+  user_type String?
 
   /// Email del usuario (para facilitar búsquedas)
-  userEmail String? @map("user_email")
+  user_email String?
 
   /// Acción realizada
   /// Ejemplos: "create", "update", "delete", "login", "logout", "payment_created", "mfa_enabled"
@@ -2700,11 +2701,11 @@ model AuditLog {
 
   /// Entidad afectada
   /// Ejemplos: "Tutor", "Admin", "Pago", "Inscripcion", "Membresia", "Auth"
-  entityType String @map("entity_type")
+  entity_type String
 
   /// ID de la entidad afectada (si aplica)
   /// Formato: UUID de la entidad modificada
-  entityId String? @map("entity_id")
+  entity_id String?
 
   /// Descripción legible de la acción
   /// Ejemplo: "Creó inscripción mensual para estudiante Juan Pérez ($5000)"
@@ -2728,25 +2729,25 @@ model AuditLog {
   category String
 
   /// IP desde donde se realizó la acción
-  ipAddress String? @map("ip_address")
+  ip_address String?
 
   /// User agent del cliente
-  userAgent String? @map("user_agent")
+  user_agent String?
 
   /// Request ID (para correlacionar con logs de aplicación)
-  requestId String? @map("request_id")
+  request_id String?
 
   /// Timestamp de creación del registro (siempre NOW)
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
   /// Índices para queries eficientes
   @@index([timestamp])
-  @@index([userId])
+  @@index([user_id])
   @@index([action])
-  @@index([entityType])
+  @@index([entity_type])
   @@index([category])
   @@index([severity])
-  @@index([userEmail])
+  @@index([user_email])
   @@map("audit_logs")
 }
 
@@ -2780,7 +2781,7 @@ model SecretRotation {
 
   /// Tipo de secret
   /// Valores: "JWT_SECRET", "WEBHOOK_SECRET"
-  secretType String @map("secret_type")
+  secret_type String
 
   /// Versión del secret (incremental)
   /// Ejemplo: v1, v2, v3...
@@ -2788,33 +2789,33 @@ model SecretRotation {
 
   /// Hash SHA-256 del secret (para verificación sin exponer el secret)
   /// El secret real se almacena en variables de entorno
-  secretHash String @map("secret_hash")
+  secret_hash String
 
   /// Estado del secret
   /// Valores: "active" (en uso), "pending" (nuevo, en período de gracia), "expired" (ya no válido)
   status String @default("active")
 
   /// Fecha de creación del secret
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
   /// Fecha de expiración (90 días después de created_at)
-  expiresAt DateTime @map("expires_at")
+  expires_at DateTime
 
   /// Fecha en que fue rotado (cuando pasó de active a expired)
-  rotatedAt DateTime? @map("rotated_at")
+  rotated_at DateTime?
 
   /// ID del admin que activó la rotación
-  rotatedBy String? @map("rotated_by")
+  rotated_by String?
 
   /// Metadata adicional (JSON)
   /// Puede incluir: razón de rotación, IP de quien lo rotó, etc.
   metadata Json?
 
-  @@unique([secretType, version])
+  @@unique([secret_type, version])
   /// Índices para queries eficientes
-  @@index([secretType])
+  @@index([secret_type])
   @@index([status])
-  @@index([expiresAt])
+  @@index([expires_at])
   @@index([version])
   @@map("secret_rotations")
 }
@@ -2872,7 +2873,7 @@ model PlanSuscripcion {
   descripcion String?
 
   /// Precio base mensual en pesos argentinos
-  precioBase Decimal @map("precio_base") @db.Decimal(10, 2)
+  precio_base Decimal @db.Decimal(10, 2)
 
   /// Moneda del precio (por defecto ARS)
   moneda String @default("ARS")
@@ -2881,16 +2882,16 @@ model PlanSuscripcion {
   intervalo IntervaloSuscripcion @default(MENSUAL)
 
   /// Cantidad de intervalos entre cobros (1 = cada mes)
-  intervaloCantidad Int @default(1) @map("intervalo_cantidad")
+  intervalo_cantidad Int @default(1)
 
   /// Si el plan está activo para nuevas suscripciones
   activo Boolean @default(true)
 
   /// Timestamp de creación
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
   /// Timestamp de última actualización
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updated_at DateTime @updatedAt
 
   /// Suscripciones asociadas a este plan (pagos de tutores)
   suscripciones Suscripcion[]
@@ -2908,18 +2909,18 @@ model Suscripcion {
   id String @id @default(cuid())
 
   /// ID del tutor propietario
-  tutorId String @map("tutor_id")
+  tutor_id String
 
   /// ID del plan de suscripción
-  planId String @map("plan_id")
+  plan_id String
 
   // === MercadoPago PreApproval ===
 
   /// ID de la suscripción en MercadoPago (preapproval_id)
-  mpPreapprovalId String? @unique @map("mp_preapproval_id")
+  mp_preapproval_id String? @unique
 
   /// Estado actual en MercadoPago (pending, authorized, paused, cancelled)
-  mpStatus String? @map("mp_status")
+  mp_status String?
 
   // === Estado interno ===
 
@@ -2929,49 +2930,49 @@ model Suscripcion {
   // === Fechas ===
 
   /// Fecha de inicio de la suscripción (primer pago confirmado)
-  fechaInicio DateTime? @map("fecha_inicio")
+  fecha_inicio DateTime?
 
   /// Fecha del próximo cobro programado
-  fechaProximoCobro DateTime? @map("fecha_proximo_cobro")
+  fecha_proximo_cobro DateTime?
 
   /// Fecha de cancelación (si aplica)
-  fechaCancelacion DateTime? @map("fecha_cancelacion")
+  fecha_cancelacion DateTime?
 
   /// Fecha en que se pausó la suscripción
-  fechaPausa DateTime? @map("fecha_pausa")
+  fecha_pausa DateTime?
 
   /// Fecha en que termina la pausa (máx 30 días después de fecha_pausa)
-  fechaFinPausa DateTime? @map("fecha_fin_pausa")
+  fecha_fin_pausa DateTime?
 
   // === Grace Period ===
 
   /// Días de gracia usados en el ciclo actual (máx 3)
-  diasGraciaUsados Int @default(0) @map("dias_gracia_usados")
+  dias_gracia_usados Int @default(0)
 
   /// Fecha en que inició el período de gracia actual
-  fechaInicioGracia DateTime? @map("fecha_inicio_gracia")
+  fecha_inicio_gracia DateTime?
 
   // === Descuento familiar ===
 
   /// Porcentaje de descuento aplicado (0, 10, 20, etc.)
-  descuentoPorcentaje Int @default(0) @map("descuento_porcentaje")
+  descuento_porcentaje Int @default(0)
 
   /// Precio final después de aplicar descuento
-  precioFinal Decimal @map("precio_final") @db.Decimal(10, 2)
+  precio_final Decimal @db.Decimal(10, 2)
 
   // === Auditoría ===
 
   /// Motivo de cancelación (si fue cancelada)
-  motivoCancelacion String? @map("motivo_cancelacion")
+  motivo_cancelacion String?
 
   /// Quién canceló: tutor_id, 'system', 'mercadopago'
-  canceladoPor String? @map("cancelado_por")
+  cancelado_por String?
 
   /// Timestamp de creación
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
   /// Timestamp de última actualización
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updated_at DateTime @updatedAt
 
   // === Optimistic Locking ===
 
@@ -2981,10 +2982,10 @@ model Suscripcion {
   // === Relaciones ===
 
   /// Tutor propietario de la suscripción
-  tutor Tutor @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  tutor Tutor @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
 
   /// Plan de suscripción
-  plan PlanSuscripcion @relation(fields: [planId], references: [id])
+  plan PlanSuscripcion @relation(fields: [plan_id], references: [id])
 
   /// Pagos realizados en esta suscripción
   pagos PagoSuscripcion[]
@@ -2992,9 +2993,9 @@ model Suscripcion {
   /// Historial de cambios de estado
   historial HistorialEstadoSuscripcion[]
 
-  @@index([tutorId])
+  @@index([tutor_id])
   @@index([estado])
-  @@index([mpPreapprovalId])
+  @@index([mp_preapproval_id])
   @@map("suscripciones")
 }
 
@@ -3005,18 +3006,18 @@ model PagoSuscripcion {
   id String @id @default(cuid())
 
   /// ID de la suscripción a la que pertenece
-  suscripcionId String @map("suscripcion_id")
+  suscripcion_id String
 
   // === MercadoPago ===
 
   /// ID del pago en MercadoPago
-  mpPaymentId String @unique @map("mp_payment_id")
+  mp_payment_id String @unique
 
   /// Estado del pago en MercadoPago (approved, rejected, pending, etc.)
-  mpStatus String @map("mp_status")
+  mp_status String
 
   /// Detalle del estado (ej: "accredited", "cc_rejected_insufficient_amount")
-  mpStatusDetail String? @map("mp_status_detail")
+  mp_status_detail String?
 
   // === Montos ===
 
@@ -3029,36 +3030,36 @@ model PagoSuscripcion {
   // === Período cubierto ===
 
   /// Fecha de inicio del período que cubre este pago
-  periodoInicio DateTime @map("periodo_inicio")
+  periodo_inicio DateTime
 
   /// Fecha de fin del período que cubre este pago
-  periodoFin DateTime @map("periodo_fin")
+  periodo_fin DateTime
 
   // === Intento ===
 
   /// Número de intento (1 = primer intento, 2+ = reintentos)
-  intentoNumero Int @default(1) @map("intento_numero")
+  intento_numero Int @default(1)
 
   /// Código de error si falló (ej: "cc_rejected_insufficient_amount")
-  errorCode String? @map("error_code")
+  error_code String?
 
   /// Mensaje de error legible
-  errorMessage String? @map("error_message")
+  error_message String?
 
   // === Fechas ===
 
   /// Fecha en que se realizó el cobro exitoso
-  fechaCobro DateTime? @map("fecha_cobro")
+  fecha_cobro DateTime?
 
   /// Timestamp de creación (fecha del intento)
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
   // === Relaciones ===
 
   /// Suscripción a la que pertenece este pago
-  suscripcion Suscripcion @relation(fields: [suscripcionId], references: [id], onDelete: Cascade)
+  suscripcion Suscripcion @relation(fields: [suscripcion_id], references: [id], onDelete: Cascade)
 
-  @@index([suscripcionId])
+  @@index([suscripcion_id])
   @@map("pagos_suscripcion")
 }
 
@@ -3069,32 +3070,32 @@ model HistorialEstadoSuscripcion {
   id String @id @default(cuid())
 
   /// ID de la suscripción
-  suscripcionId String @map("suscripcion_id")
+  suscripcion_id String
 
   /// Estado anterior (null si es el primer estado)
-  estadoAnterior EstadoSuscripcion? @map("estado_anterior")
+  estado_anterior EstadoSuscripcion?
 
   /// Estado nuevo
-  estadoNuevo EstadoSuscripcion @map("estado_nuevo")
+  estado_nuevo EstadoSuscripcion
 
   /// Motivo del cambio
   motivo String?
 
   /// Quién realizó el cambio: tutor_id, 'system', 'mercadopago'
-  realizadoPor String? @map("realizado_por")
+  realizado_por String?
 
   /// Metadata adicional (JSON)
   metadata Json?
 
   /// Timestamp del cambio
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
   // === Relaciones ===
 
   /// Suscripción a la que pertenece este historial
-  suscripcion Suscripcion @relation(fields: [suscripcionId], references: [id], onDelete: Cascade)
+  suscripcion Suscripcion @relation(fields: [suscripcion_id], references: [id], onDelete: Cascade)
 
-  @@index([suscripcionId])
+  @@index([suscripcion_id])
   @@map("historial_estado_suscripcion")
 }
 
@@ -3124,33 +3125,33 @@ model Comision {
   descripcion String?
 
   /// Producto al que pertenece esta comisión
-  productoId String   @map("producto_id")
-  producto   Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  producto_id String
+  producto    Producto @relation(fields: [producto_id], references: [id], onDelete: Cascade)
 
   /// Casa asignada (opcional - QUANTUM/VERTEX/PULSAR)
-  casaId String? @map("casa_id")
-  casa   Casa?   @relation(fields: [casaId], references: [id])
+  casa_id String?
+  casa    Casa?   @relation(fields: [casa_id], references: [id])
 
   /// Sistema Casa/Mundo 2026: Grupo pedagógico al que pertenece (opcional)
   /// Permite vincular comisiones a grupos específicos del sistema educativo
-  grupoId String?          @map("grupo_id")
-  grupo   GrupoPedagogico? @relation(fields: [grupoId], references: [id])
+  grupo_id String?
+  grupo    GrupoPedagogico? @relation(fields: [grupo_id], references: [id])
 
   /// Docente a cargo (opcional)
-  docenteId String?  @map("docente_id")
-  docente   Docente? @relation(fields: [docenteId], references: [id])
+  docente_id String?
+  docente    Docente? @relation(fields: [docente_id], references: [id])
 
   /// Cupo máximo de estudiantes
-  cupoMaximo Int? @map("cupo_maximo")
+  cupo_maximo Int?
 
   /// Horario en texto libre (ej: "Lun-Vie 9:00-12:00")
   horario String?
 
   /// Fecha de inicio específica de esta comisión (puede diferir del producto)
-  fechaInicio DateTime? @map("fecha_inicio")
+  fecha_inicio DateTime?
 
   /// Fecha de fin específica de esta comisión
-  fechaFin DateTime? @map("fecha_fin")
+  fecha_fin DateTime?
 
   /// Indica si la comisión está activa
   activo Boolean @default(true)
@@ -3161,23 +3162,23 @@ model Comision {
 
   /// Planificación específica de esta comisión (override de la planificación del producto)
   /// Si es null, se usa la planificación del producto padre
-  planificacionId String?        @map("planificacion_id")
-  planificacion   Planificacion? @relation(fields: [planificacionId], references: [id])
+  planificacion_id String?
+  planificacion    Planificacion? @relation(fields: [planificacion_id], references: [id])
 
   // ========== LIVEKIT - Clases en vivo ==========
 
   /// Nombre único de la sala en LiveKit (generado automáticamente)
   /// Formato: "comision_{id}_{timestamp}"
-  livekitRoomName String? @unique @map("livekit_room_name")
+  livekit_room_name String? @unique
 
   /// Estado actual de la clase en vivo
-  estadoClase EstadoClase @default(Programada) @map("estado_clase")
+  estado_clase EstadoClase @default(Programada)
 
   /// Timestamp de cuando el docente inició la clase en vivo
-  iniciadaEn DateTime? @map("iniciada_en")
+  iniciada_en DateTime?
 
   /// Timestamp de cuando el docente finalizó la clase en vivo
-  finalizadaEn DateTime? @map("finalizada_en")
+  finalizada_en DateTime?
 
   // ========== FIN LIVEKIT ==========
 
@@ -3202,14 +3203,14 @@ model Comision {
   /// SISTEMA 2026: Pagos de cursos temporales
   pagosCurso PagoCurso[]
 
-  @@index([productoId])
-  @@index([docenteId])
-  @@index([casaId])
-  @@index([grupoId])
-  @@index([planificacionId])
+  @@index([producto_id])
+  @@index([docente_id])
+  @@index([casa_id])
+  @@index([grupo_id])
+  @@index([planificacion_id])
   @@index([activo])
-  @@index([estadoClase])
-  @@index([livekitRoomName])
+  @@index([estado_clase])
+  @@index([livekit_room_name])
   @@index([modalidad])
   @@map("comisiones")
 }
@@ -3221,18 +3222,18 @@ model InscripcionComision {
   id String @id @default(cuid())
 
   /// Comisión a la que se inscribe
-  comisionId String   @map("comision_id")
-  comision   Comision @relation(fields: [comisionId], references: [id], onDelete: Cascade)
+  comision_id String
+  comision    Comision @relation(fields: [comision_id], references: [id], onDelete: Cascade)
 
   /// Estudiante inscrito
-  estudianteId String     @map("estudiante_id")
-  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  estudiante_id String
+  estudiante    Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
   /// Estado de la inscripción
   estado EstadoInscripcionComision @default(Pendiente)
 
   /// Fecha de inscripción
-  fechaInscripcion DateTime @default(now()) @map("fecha_inscripcion")
+  fecha_inscripcion DateTime @default(now())
 
   /// Notas o comentarios sobre la inscripción
   notas String?
@@ -3241,8 +3242,8 @@ model InscripcionComision {
   updatedAt DateTime @updatedAt
 
   /// Un estudiante solo puede estar inscrito una vez por comisión
-  @@unique([comisionId, estudianteId])
-  @@index([estudianteId])
+  @@unique([comision_id, estudiante_id])
+  @@index([estudiante_id])
   @@index([estado])
   @@map("inscripciones_comision")
 }
@@ -3254,12 +3255,12 @@ model AsistenciaComision {
   id String @id @default(cuid())
 
   /// Comisión donde se registra la asistencia
-  comisionId String   @map("comision_id")
-  comision   Comision @relation(fields: [comisionId], references: [id], onDelete: Cascade)
+  comision_id String
+  comision    Comision @relation(fields: [comision_id], references: [id], onDelete: Cascade)
 
   /// Estudiante al que corresponde la asistencia
-  estudianteId String     @map("estudiante_id")
-  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  estudiante_id String
+  estudiante    Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
   /// Fecha de la sesión (solo fecha, sin hora)
   fecha DateTime @db.Date
@@ -3271,12 +3272,12 @@ model AsistenciaComision {
   observacion String?
 
   /// Timestamp de creación
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
   /// Un estudiante solo puede tener un registro de asistencia por comisión y fecha
-  @@unique([comisionId, estudianteId, fecha])
-  @@index([comisionId])
-  @@index([estudianteId])
+  @@unique([comision_id, estudiante_id, fecha])
+  @@index([comision_id])
+  @@index([estudiante_id])
   @@index([fecha])
   @@map("asistencia_comision")
 }
@@ -3328,271 +3329,271 @@ model TareaAdmin {
 
 /// Planificación: un curso completo (ej: 16 clases de Scratch)
 model Planificacion {
-  id String @id @default(cuid())
+  id              String @id @default(cuid())
 
   /// Título del curso/planificación
-  titulo String
+  titulo          String
 
   /// Descripción del curso
-  descripcion String?
+  descripcion     String?
 
   /// Cantidad total de clases en la planificación
-  cantidadClases Int @map("cantidad_clases")
+  cantidad_clases Int
 
   /// Días entre clases (default: 7 = semanal)
-  duracionClaseDias Int @default(7) @map("duracion_clase_dias")
+  duracion_clase_dias Int @default(7)
 
   /// Casa objetivo (QUANTUM, VERTEX, PULSAR)
-  casaTipo CasaTipo @map("casa_tipo")
+  casa_tipo       CasaTipo @map("casa_tipo")
 
   /// Mundo/materia (MATEMATICA, PROGRAMACION, CIENCIAS)
-  mundoTipo MundoTipo @map("mundo_tipo")
+  mundo_tipo      MundoTipo @map("mundo_tipo")
 
   /// Estado de publicación
-  estado EstadoContenido @default(BORRADOR)
+  estado          EstadoContenido @default(BORRADOR)
 
   /// Timestamps
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
   /// Relaciones
-  clases       ClasePlanificacion[]
-  asignaciones AsignacionPlanificacion[]
+  clases          ClasePlanificacion[]
+  asignaciones    AsignacionPlanificacion[]
   /// Productos que usan esta planificación (Clubs)
-  productos    Producto[]
+  productos       Producto[]
   /// Comisiones que usan esta planificación (override de la del producto)
-  comisiones   Comision[]
+  comisiones      Comision[]
 
-  @@index([casaTipo, mundoTipo])
+  @@index([casa_tipo, mundo_tipo])
   @@index([estado])
   @@map("planificaciones")
 }
 
 /// Clase dentro de una planificación (ej: Clase 1 de 16)
 model ClasePlanificacion {
-  id String @id @default(cuid())
+  id                String @id @default(cuid())
 
   /// ID de la planificación padre
-  planificacionId String @map("planificacion_id")
+  planificacion_id  String
 
   /// Número de clase (1, 2, 3... cantidad_clases)
-  numero Int
+  numero            Int
 
   /// Título de la clase
-  titulo String
+  titulo            String
 
   /// Descripción/objetivos de la clase
-  descripcion String?
+  descripcion       String?
 
   /// ID del contenido de TEORIA
-  teoriaId String @map("teoria_id")
+  teoria_id         String
 
   /// ID del contenido de PRACTICA
-  practicaId String @map("practica_id")
+  practica_id       String
 
   /// Timestamps
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
 
   /// Relaciones
-  planificacion Planificacion @relation(fields: [planificacionId], references: [id], onDelete: Cascade)
-  teoria        Contenido     @relation("ClaseTeoria", fields: [teoriaId], references: [id])
-  practica      Contenido     @relation("ClasePractica", fields: [practicaId], references: [id])
+  planificacion     Planificacion @relation(fields: [planificacion_id], references: [id], onDelete: Cascade)
+  teoria            Contenido @relation("ClaseTeoria", fields: [teoria_id], references: [id])
+  practica          Contenido @relation("ClasePractica", fields: [practica_id], references: [id])
 
-  tareas         TareaClase[]
-  estadosClase   EstadoClaseGrupo[]
-  progresosClase ProgresoClaseEstudiante[]
+  tareas            TareaClase[]
+  estadosClase      EstadoClaseGrupo[]
+  progresosClase    ProgresoClaseEstudiante[]
 
-  @@unique([planificacionId, numero])
-  @@index([teoriaId])
-  @@index([practicaId])
+  @@unique([planificacion_id, numero])
+  @@index([teoria_id])
+  @@index([practica_id])
   @@map("clases_planificacion")
 }
 
 /// Tarea asociada a una clase (contenido asignable como tarea)
 model TareaClase {
-  id String @id @default(cuid())
+  id           String @id @default(cuid())
 
   /// ID de la clase a la que pertenece
-  claseId String @map("clase_id")
+  clase_id     String
 
   /// ID del contenido que es la tarea
-  contenidoId String @map("contenido_id")
+  contenido_id String
 
   /// Orden de la tarea dentro de la clase
-  orden Int @default(0)
+  orden        Int @default(0)
 
   /// Si la tarea es obligatoria para completar la clase
-  obligatoria Boolean @default(false)
+  obligatoria  Boolean @default(false)
 
   /// Relaciones
-  clase     ClasePlanificacion @relation(fields: [claseId], references: [id], onDelete: Cascade)
-  contenido Contenido          @relation(fields: [contenidoId], references: [id])
+  clase        ClasePlanificacion @relation(fields: [clase_id], references: [id], onDelete: Cascade)
+  contenido    Contenido @relation(fields: [contenido_id], references: [id])
 
   asignaciones TareaAsignada[]
 
-  @@unique([claseId, contenidoId])
-  @@index([contenidoId])
+  @@unique([clase_id, contenido_id])
+  @@index([contenido_id])
   @@map("tareas_clase")
 }
 
 /// Asignación de una planificación a un ClaseGrupo por un docente
 model AsignacionPlanificacion {
-  id String @id @default(cuid())
+  id                String @id @default(cuid())
 
   /// ID de la planificación
-  planificacionId String @map("planificacion_id")
+  planificacion_id  String
 
   /// ID del grupo de clase (comisión)
-  claseGrupoId String @map("clase_grupo_id")
+  clase_grupo_id    String
 
   /// ID del docente responsable
-  docenteId String @map("docente_id")
+  docente_id        String
 
   /// Fecha de inicio del curso para este grupo
-  fechaInicio DateTime @default(now()) @map("fecha_inicio")
+  fecha_inicio      DateTime @default(now())
 
   /// Si la asignación está activa
-  activa Boolean @default(true)
+  activa            Boolean @default(true)
 
   /// Timestamps
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
 
   /// Relaciones
-  planificacion Planificacion @relation(fields: [planificacionId], references: [id])
-  claseGrupo    ClaseGrupo    @relation(fields: [claseGrupoId], references: [id])
-  docente       Docente       @relation(fields: [docenteId], references: [id])
+  planificacion     Planificacion @relation(fields: [planificacion_id], references: [id])
+  claseGrupo        ClaseGrupo @relation(fields: [clase_grupo_id], references: [id])
+  docente           Docente @relation(fields: [docente_id], references: [id])
 
-  estadosClases   EstadoClaseGrupo[]
-  tareasAsignadas TareaAsignada[]
+  estadosClases     EstadoClaseGrupo[]
+  tareasAsignadas   TareaAsignada[]
 
-  @@unique([planificacionId, claseGrupoId])
-  @@index([docenteId])
-  @@index([claseGrupoId])
+  @@unique([planificacion_id, clase_grupo_id])
+  @@index([docente_id])
+  @@index([clase_grupo_id])
   @@map("asignaciones_planificacion")
 }
 
 /// Estado de una clase para un grupo específico (qué está activo/desbloqueado)
 model EstadoClaseGrupo {
-  id String @id @default(cuid())
+  id              String @id @default(cuid())
 
   /// ID de la asignación planificación-grupo
-  asignacionId String @map("asignacion_id")
+  asignacion_id   String
 
   /// ID de la clase
-  claseId String @map("clase_id")
+  clase_id        String
 
   /// Si la teoría está activa/visible para estudiantes
-  teoriaActiva Boolean @default(false) @map("teoria_activa")
+  teoria_activa   Boolean @default(false)
 
   /// Si la práctica está activa/visible para estudiantes
-  practicaActiva Boolean @default(false) @map("practica_activa")
+  practica_activa Boolean @default(false)
 
   /// Timestamp de cuando se activó la clase
-  activadaEn DateTime? @map("activada_en")
+  activada_en     DateTime?
 
   /// Timestamp de cuando se marcó como completada
-  completadaEn DateTime? @map("completada_en")
+  completada_en   DateTime?
 
   /// Relaciones
-  asignacion AsignacionPlanificacion @relation(fields: [asignacionId], references: [id], onDelete: Cascade)
-  clase      ClasePlanificacion      @relation(fields: [claseId], references: [id])
+  asignacion      AsignacionPlanificacion @relation(fields: [asignacion_id], references: [id], onDelete: Cascade)
+  clase           ClasePlanificacion @relation(fields: [clase_id], references: [id])
 
-  @@unique([asignacionId, claseId])
-  @@index([claseId])
+  @@unique([asignacion_id, clase_id])
+  @@index([clase_id])
   @@map("estados_clase_grupo")
 }
 
 /// Tarea asignada a un grupo (instancia de TareaClase para una asignación)
 model TareaAsignada {
-  id String @id @default(cuid())
+  id               String @id @default(cuid())
 
   /// ID de la asignación planificación-grupo
-  asignacionId String @map("asignacion_id")
+  asignacion_id    String
 
   /// ID de la tarea de clase
-  tareaClaseId String @map("tarea_clase_id")
+  tarea_clase_id   String
 
   /// Fecha en que se asignó la tarea
-  fechaAsignacion DateTime @default(now()) @map("fecha_asignacion")
+  fecha_asignacion DateTime @default(now())
 
   /// Fecha límite de entrega (opcional)
-  fechaLimite DateTime? @map("fecha_limite")
+  fecha_limite     DateTime?
 
   /// Si la tarea está activa/visible
-  activa Boolean @default(true)
+  activa           Boolean @default(true)
 
   /// Relaciones
-  asignacion AsignacionPlanificacion @relation(fields: [asignacionId], references: [id], onDelete: Cascade)
-  tareaClase TareaClase              @relation(fields: [tareaClaseId], references: [id])
+  asignacion       AsignacionPlanificacion @relation(fields: [asignacion_id], references: [id], onDelete: Cascade)
+  tareaClase       TareaClase @relation(fields: [tarea_clase_id], references: [id])
 
-  progresos ProgresoTareaEstudiante[]
+  progresos        ProgresoTareaEstudiante[]
 
-  @@unique([asignacionId, tareaClaseId])
-  @@index([tareaClaseId])
+  @@unique([asignacion_id, tarea_clase_id])
+  @@index([tarea_clase_id])
   @@map("tareas_asignadas")
 }
 
 /// Progreso de un estudiante en una clase (teoría + práctica)
 model ProgresoClaseEstudiante {
-  id String @id @default(cuid())
+  id                     String @id @default(cuid())
 
   /// ID del estudiante
-  estudianteId String @map("estudiante_id")
+  estudiante_id          String
 
   /// ID de la clase
-  claseId String @map("clase_id")
+  clase_id               String
 
   /// Si completó la teoría
-  teoriaCompletada   Boolean   @default(false) @map("teoria_completada")
-  teoriaCompletadaEn DateTime? @map("teoria_completada_en")
+  teoria_completada      Boolean @default(false)
+  teoria_completada_en   DateTime?
 
   /// Si completó la práctica
-  practicaCompletada   Boolean   @default(false) @map("practica_completada")
-  practicaCompletadaEn DateTime? @map("practica_completada_en")
+  practica_completada    Boolean @default(false)
+  practica_completada_en DateTime?
 
   /// Tiempo dedicado en segundos
-  tiempoTeoriaSegundos   Int @default(0) @map("tiempo_teoria_segundos")
-  tiempoPracticaSegundos Int @default(0) @map("tiempo_practica_segundos")
+  tiempo_teoria_segundos   Int @default(0)
+  tiempo_practica_segundos Int @default(0)
 
   /// Relaciones
-  estudiante Estudiante         @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
-  clase      ClasePlanificacion @relation(fields: [claseId], references: [id])
+  estudiante             Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  clase                  ClasePlanificacion @relation(fields: [clase_id], references: [id])
 
-  @@unique([estudianteId, claseId])
-  @@index([claseId])
+  @@unique([estudiante_id, clase_id])
+  @@index([clase_id])
   @@map("progresos_clase_estudiante")
 }
 
 /// Progreso de un estudiante en una tarea asignada
 model ProgresoTareaEstudiante {
-  id String @id @default(cuid())
+  id                    String @id @default(cuid())
 
   /// ID del estudiante
-  estudianteId String @map("estudiante_id")
+  estudiante_id         String
 
   /// ID de la tarea asignada
-  tareaAsignadaId String @map("tarea_asignada_id")
+  tarea_asignada_id     String
 
   /// Estado de la tarea
-  estado EstadoTarea @default(PENDIENTE)
+  estado                EstadoTarea @default(PENDIENTE)
 
   /// Timestamps de progreso
-  iniciadaEn   DateTime? @map("iniciada_en")
-  completadaEn DateTime? @map("completada_en")
+  iniciada_en           DateTime?
+  completada_en         DateTime?
 
   /// Métricas
-  tiempoTotalSegundos Int    @default(0) @map("tiempo_total_segundos")
-  intentos            Int    @default(0)
-  calificacion        Float?
+  tiempo_total_segundos Int @default(0)
+  intentos              Int @default(0)
+  calificacion          Float?
 
   /// Relaciones
-  estudiante    Estudiante    @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
-  tareaAsignada TareaAsignada @relation(fields: [tareaAsignadaId], references: [id], onDelete: Cascade)
+  estudiante            Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  tareaAsignada         TareaAsignada @relation(fields: [tarea_asignada_id], references: [id], onDelete: Cascade)
 
-  @@unique([estudianteId, tareaAsignadaId])
-  @@index([tareaAsignadaId])
+  @@unique([estudiante_id, tarea_asignada_id])
+  @@index([tarea_asignada_id])
   @@map("progresos_tarea_estudiante")
 }
 
@@ -3646,61 +3647,61 @@ model Observacion {
   id String @id @default(cuid())
 
   /// Docente que creó la observación
-  docenteId String  @map("docente_id")
-  docente   Docente @relation(fields: [docenteId], references: [id], onDelete: Cascade)
+  docente_id String
+  docente    Docente @relation(fields: [docente_id], references: [id], onDelete: Cascade)
 
   /// Comisión/contexto donde ocurrió (opcional)
-  comisionId String?   @map("comision_id")
-  comision   Comision? @relation(fields: [comisionId], references: [id], onDelete: SetNull)
+  comision_id String?
+  comision    Comision? @relation(fields: [comision_id], references: [id], onDelete: SetNull)
 
   /// Contenido de la observación
   contenido String @db.Text
 
   /// Fecha en que ocurrió el evento observado
-  fechaEvento DateTime @map("fecha_evento")
+  fecha_evento DateTime
 
   /// Clasificación
   tipo      TipoObservacion
   prioridad PrioridadObservacion @default(Baja)
 
   /// Flags de notificación
-  requiereSeguimiento Boolean @default(false) @map("requiere_seguimiento")
-  notificarAdmin      Boolean @default(false) @map("notificar_admin")
-  notificarPedagogia  Boolean @default(false) @map("notificar_pedagogia")
+  requiere_seguimiento Boolean @default(false)
+  notificar_admin      Boolean @default(false)
+  notificar_pedagogia  Boolean @default(false)
 
   /// Estado del ciclo de vida
   estado EstadoObservacion @default(Abierta)
 
   /// Timestamps
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   /// Relaciones
   estudiantes  ObservacionEstudiante[]
   seguimientos SeguimientoObservacion[]
 
-  @@index([docenteId])
-  @@index([comisionId])
+  @@index([docente_id])
+  @@index([comision_id])
   @@index([tipo])
   @@index([prioridad])
   @@index([estado])
-  @@index([requiereSeguimiento, estado])
-  @@index([fechaEvento])
-  @@index([createdAt])
+  @@index([requiere_seguimiento, estado])
+  @@index([fecha_evento])
+  @@index([created_at])
   @@map("observaciones_docente")
 }
 
 /// Relación N:M entre Observación y Estudiante
 /// Permite observaciones grupales (múltiples estudiantes)
 model ObservacionEstudiante {
-  observacionId String @map("observacion_id")
-  estudianteId  String @map("estudiante_id")
+  observacion_id String
+  estudiante_id  String
 
-  observacion Observacion @relation(fields: [observacionId], references: [id], onDelete: Cascade)
-  estudiante  Estudiante  @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  observacion Observacion @relation(fields: [observacion_id], references: [id], onDelete: Cascade)
+  estudiante  Estudiante  @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
-  @@id([observacionId, estudianteId])
-  @@index([estudianteId])
+  @@id([observacion_id, estudiante_id])
+  @@index([estudiante_id])
   @@map("observaciones_estudiantes")
 }
 
@@ -3711,21 +3712,21 @@ model SeguimientoObservacion {
   id String @id @default(cuid())
 
   /// Observación padre
-  observacionId String      @map("observacion_id")
-  observacion   Observacion @relation(fields: [observacionId], references: [id], onDelete: Cascade)
+  observacion_id String
+  observacion    Observacion @relation(fields: [observacion_id], references: [id], onDelete: Cascade)
 
   /// Autor del seguimiento (puede ser docente o admin)
-  autorId   String               @map("autor_id")
-  autorTipo TipoAutorSeguimiento @map("autor_tipo")
+  autor_id   String
+  autor_tipo TipoAutorSeguimiento
 
   /// Contenido del seguimiento
   contenido String @db.Text
 
   /// Timestamp
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
-  @@index([observacionId])
-  @@index([autorId])
+  @@index([observacion_id])
+  @@index([autor_id])
   @@map("seguimientos_observacion")
 }
 
@@ -3735,11 +3736,11 @@ model SeguimientoObservacion {
 // =============================================================================
 
 /// Estado de webhooks en Dead Letter Queue
-enum DlqStatus {
-  PENDING /// Esperando ser procesado manualmente
+enum DLQStatus {
+  PENDING    /// Esperando ser procesado manualmente
   PROCESSING /// En proceso de reprocesamiento
-  RESOLVED /// Resuelto exitosamente
-  ABANDONED /// Marcado como abandonado (no se puede procesar)
+  RESOLVED   /// Resuelto exitosamente
+  ABANDONED  /// Marcado como abandonado (no se puede procesar)
 
   @@map("dlq_status")
 }
@@ -3751,44 +3752,44 @@ model WebhookFailed {
   id String @id @default(cuid())
 
   /// ID del pago de MercadoPago
-  paymentId String @map("payment_id")
+  payment_id String
 
   /// Tipo de webhook (payment, subscription, etc.)
-  webhookType String @map("webhook_type")
+  webhook_type String
 
   /// Payload completo del webhook (para reprocesamiento)
   payload Json
 
   /// Mensaje de error del último intento
-  errorMessage String @map("error_message")
+  error_message String
 
   /// Stack trace del error (debugging)
-  errorStack String? @map("error_stack")
+  error_stack String?
 
   /// Número de reintentos realizados antes de ir a DLQ
   retries Int @default(0)
 
   /// Estado en la DLQ
-  status DlqStatus @default(PENDING)
+  status DLQStatus @default(PENDING)
 
   /// Fecha del último reintento
-  lastRetryAt DateTime? @map("last_retry_at")
+  last_retry_at DateTime?
 
   /// Fecha de resolución (si fue resuelto)
-  resolvedAt DateTime? @map("resolved_at")
+  resolved_at DateTime?
 
   /// Admin que resolvió (ID)
-  resolvedBy String? @map("resolved_by")
+  resolved_by String?
 
   /// Notas de resolución
-  resolutionNotes String? @map("resolution_notes")
+  resolution_notes String?
 
   /// Timestamps
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  @@index([status, createdAt])
-  @@index([paymentId])
+  @@index([status, created_at])
+  @@index([payment_id])
   @@map("webhook_failed")
 }
 
@@ -3804,16 +3805,16 @@ model SuscripcionFamiliar {
   id String @id @default(cuid())
 
   /// Tutor titular de la suscripción (1 por familia)
-  tutorId String @unique @map("tutor_id")
-  tutor   Tutor  @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  tutor_id String @unique
+  tutor    Tutor  @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
 
   // === MERCADOPAGO ===
 
   /// ID del PreApproval en MercadoPago
-  preapprovalId String? @unique @map("preapproval_id")
+  preapproval_id String? @unique
 
   /// ID del plan de MercadoPago (si usamos plans)
-  preapprovalPlanId String? @map("preapproval_plan_id")
+  preapproval_plan_id String?
 
   // === ESTADO ===
 
@@ -3826,18 +3827,18 @@ model SuscripcionFamiliar {
   tier TierNombre @default(STEAM_LIBROS)
 
   /// Monto mensual total calculado (suma de actividades con descuentos)
-  montoMensual Int @default(0) @map("monto_mensual")
+  monto_mensual Int @default(0)
 
   /// Fecha del próximo cobro programado
-  fechaProximoCobro DateTime? @map("fecha_proximo_cobro")
+  fecha_proximo_cobro DateTime?
 
   /// Período de gracia por fallo de pago (fecha límite)
-  fechaGracia DateTime? @map("fecha_gracia")
+  fecha_gracia DateTime?
 
   // === TIMESTAMPS ===
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   // === RELACIONES ===
 
@@ -3845,10 +3846,10 @@ model SuscripcionFamiliar {
   inscripciones InscripcionActividad[]
 
   /// Historial de cambios en inscripciones
-  historialCambios CambioInscripcion[]
+  historial_cambios CambioInscripcion[]
 
   @@index([estado])
-  @@index([fechaProximoCobro])
+  @@index([fecha_proximo_cobro])
   @@map("suscripciones_familiares")
 }
 
@@ -3861,26 +3862,26 @@ model InscripcionActividad {
   // === RELACIONES PRINCIPALES ===
 
   /// Suscripción familiar a la que pertenece
-  suscripcionFamiliarId String              @map("suscripcion_familiar_id")
-  suscripcionFamiliar   SuscripcionFamiliar @relation(fields: [suscripcionFamiliarId], references: [id], onDelete: Cascade)
+  suscripcion_familiar_id String
+  suscripcion_familiar    SuscripcionFamiliar @relation(fields: [suscripcion_familiar_id], references: [id], onDelete: Cascade)
 
   /// Estudiante inscrito
-  estudianteId String     @map("estudiante_id")
-  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  estudiante_id String
+  estudiante    Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
 
   /// Producto al que se inscribe
-  productoId String   @map("producto_id")
-  producto   Producto @relation(fields: [productoId], references: [id])
+  producto_id String
+  producto    Producto @relation(fields: [producto_id], references: [id])
 
   // === ASIGNACIÓN ESPECÍFICA (uno u otro) ===
 
   /// ClaseGrupo para productos tipo Club
-  claseGrupoId String?     @map("clase_grupo_id")
-  claseGrupo   ClaseGrupo? @relation(fields: [claseGrupoId], references: [id])
+  clase_grupo_id String?
+  clase_grupo    ClaseGrupo? @relation(fields: [clase_grupo_id], references: [id])
 
   /// Comisión para cursos temporales
-  comisionId String?   @map("comision_id")
-  comision   Comision? @relation(fields: [comisionId], references: [id])
+  comision_id String?
+  comision    Comision? @relation(fields: [comision_id], references: [id])
 
   // === TIER Y ESTADO ===
 
@@ -3892,20 +3893,20 @@ model InscripcionActividad {
   estado EstadoInscripcionActividad @default(ACTIVA)
 
   /// Fecha de inicio de la inscripción
-  fechaInicio DateTime @default(now()) @map("fecha_inicio")
+  fecha_inicio DateTime @default(now())
 
   /// Fecha de fin (para cursos temporales o bajas)
-  fechaFin DateTime? @map("fecha_fin")
+  fecha_fin DateTime?
 
   // === TIMESTAMPS ===
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  @@unique([estudianteId, productoId, claseGrupoId])
-  @@unique([estudianteId, comisionId])
-  @@index([suscripcionFamiliarId])
-  @@index([estudianteId])
+  @@unique([estudiante_id, producto_id, clase_grupo_id])
+  @@unique([estudiante_id, comision_id])
+  @@index([suscripcion_familiar_id])
+  @@index([estudiante_id])
   @@index([estado])
   @@map("inscripciones_actividad")
 }
@@ -3917,8 +3918,8 @@ model CambioInscripcion {
   id String @id @default(cuid())
 
   /// Suscripción familiar afectada
-  suscripcionFamiliarId String              @map("suscripcion_familiar_id")
-  suscripcionFamiliar   SuscripcionFamiliar @relation(fields: [suscripcionFamiliarId], references: [id], onDelete: Cascade)
+  suscripcion_familiar_id String
+  suscripcion_familiar    SuscripcionFamiliar @relation(fields: [suscripcion_familiar_id], references: [id], onDelete: Cascade)
 
   /// Tipo de cambio realizado
   tipo TipoCambioInscripcion
@@ -3926,18 +3927,18 @@ model CambioInscripcion {
   // === REFERENCIAS A INSCRIPCIONES ===
 
   /// ID de la inscripción anterior (para cambios)
-  inscripcionAnteriorId String? @map("inscripcion_anterior_id")
+  inscripcion_anterior_id String?
 
   /// ID de la inscripción nueva (para altas y cambios)
-  inscripcionNuevaId String? @map("inscripcion_nueva_id")
+  inscripcion_nueva_id String?
 
   // === CUÁNDO APLICA ===
 
   /// Fecha en que se solicitó el cambio
-  solicitadoEn DateTime @default(now()) @map("solicitado_en")
+  solicitado_en DateTime @default(now())
 
   /// Fecha desde la cual aplica el cambio (siempre el 1ro del mes siguiente)
-  aplicaDesde DateTime @map("aplica_desde")
+  aplica_desde DateTime
 
   /// Indica si el cambio ya fue procesado
   procesado Boolean @default(false)
@@ -3945,20 +3946,20 @@ model CambioInscripcion {
   // === MONTOS PARA REGISTRO HISTÓRICO ===
 
   /// Monto mensual antes del cambio
-  montoAnterior Int @map("monto_anterior")
+  monto_anterior Int
 
   /// Monto mensual después del cambio
-  montoNuevo Int @map("monto_nuevo")
+  monto_nuevo Int
 
   /// Detalle adicional del cambio (JSON flexible)
   detalle Json?
 
   // === TIMESTAMPS ===
 
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
-  @@index([suscripcionFamiliarId])
-  @@index([aplicaDesde, procesado])
+  @@index([suscripcion_familiar_id])
+  @@index([aplica_desde, procesado])
   @@map("cambios_inscripcion")
 }
 
@@ -3971,20 +3972,20 @@ model PagoCurso {
   // === RELACIONES ===
 
   /// Tutor que realiza el pago
-  tutorId String @map("tutor_id")
-  tutor   Tutor  @relation(fields: [tutorId], references: [id])
+  tutor_id String
+  tutor    Tutor @relation(fields: [tutor_id], references: [id])
 
   /// Estudiante beneficiario
-  estudianteId String     @map("estudiante_id")
-  estudiante   Estudiante @relation(fields: [estudianteId], references: [id])
+  estudiante_id String
+  estudiante    Estudiante @relation(fields: [estudiante_id], references: [id])
 
   /// Comisión a la que se inscribe
-  comisionId String   @map("comision_id")
-  comision   Comision @relation(fields: [comisionId], references: [id])
+  comision_id String
+  comision    Comision @relation(fields: [comision_id], references: [id])
 
   /// Producto (para referencia rápida)
-  productoId String   @map("producto_id")
-  producto   Producto @relation(fields: [productoId], references: [id])
+  producto_id String
+  producto    Producto @relation(fields: [producto_id], references: [id])
 
   // === MODALIDAD DE PAGO ===
 
@@ -3994,24 +3995,24 @@ model PagoCurso {
   // === MONTOS ===
 
   /// Monto total del curso
-  montoTotal Int @map("monto_total")
+  monto_total Int
 
   /// Monto por cuota (si es en cuotas)
-  montoPorCuota Int? @map("monto_por_cuota")
+  monto_por_cuota Int?
 
   /// Cantidad de cuotas (si es en cuotas)
-  cantidadCuotas Int? @map("cantidad_cuotas")
+  cantidad_cuotas Int?
 
   /// Cuotas ya pagadas
-  cuotasPagadas Int @default(0) @map("cuotas_pagadas")
+  cuotas_pagadas Int @default(0)
 
   // === MERCADOPAGO ===
 
   /// ID del payment de MercadoPago (pago único)
-  paymentId String? @map("payment_id")
+  payment_id String?
 
   /// ID del PreApproval de MercadoPago (para cuotas)
-  preapprovalId String? @map("preapproval_id")
+  preapproval_id String?
 
   // === ESTADO ===
 
@@ -4019,18 +4020,18 @@ model PagoCurso {
   estado EstadoPagoCurso @default(PENDING)
 
   /// Fecha del pago inicial
-  fechaPago DateTime? @map("fecha_pago")
+  fecha_pago DateTime?
 
   /// Fecha del próximo cobro (para cuotas)
-  fechaProximoCobro DateTime? @map("fecha_proximo_cobro")
+  fecha_proximo_cobro DateTime?
 
   // === TIMESTAMPS ===
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  @@unique([estudianteId, comisionId])
-  @@index([tutorId])
+  @@unique([estudiante_id, comision_id])
+  @@index([tutor_id])
   @@index([estado])
   @@map("pagos_curso")
 }
@@ -4053,26 +4054,26 @@ model PagoCurso {
 /// - Manual (becas): usar InscripcionClaseGrupo
 /// - Suscripción 2026: usar InscripcionActividad
 view InscripcionUnificada {
-  id                    String    @unique
-  estudianteId          String    @map("estudiante_id")
-  claseGrupoId          String    @map("clase_grupo_id")
-  tutorId               String    @map("tutor_id")
-  fechaInscripcion      DateTime  @map("fecha_inscripcion")
-  fechaBaja             DateTime? @map("fecha_baja")
-  tipoAcceso            String    @map("tipo_acceso") // 'SINCRONICO' | 'ASINCRONICO'
-  observaciones         String?
-  createdAt             DateTime  @map("created_at")
-  updatedAt             DateTime  @map("updated_at")
-  fuente                String // 'MANUAL' | 'SUSCRIPCION_2026'
-  suscripcionFamiliarId String?   @map("suscripcion_familiar_id") // Solo para fuente SUSCRIPCION_2026
-  productoId            String?   @map("producto_id") // Solo para fuente SUSCRIPCION_2026
-  tier                  String? // Solo para fuente SUSCRIPCION_2026
-  estado                String // 'ACTIVA' | 'CANCELADA' | 'PAUSADA'
+  id                      String    @unique
+  estudiante_id           String
+  clase_grupo_id          String
+  tutor_id                String
+  fecha_inscripcion       DateTime
+  fecha_baja              DateTime?
+  tipo_acceso             String // 'SINCRONICO' | 'ASINCRONICO'
+  observaciones           String?
+  created_at              DateTime
+  updated_at              DateTime
+  fuente                  String // 'MANUAL' | 'SUSCRIPCION_2026'
+  suscripcion_familiar_id String? // Solo para fuente SUSCRIPCION_2026
+  producto_id             String? // Solo para fuente SUSCRIPCION_2026
+  tier                    String? // Solo para fuente SUSCRIPCION_2026
+  estado                  String // 'ACTIVA' | 'CANCELADA' | 'PAUSADA'
 
   // Relaciones (read-only)
-  estudiante Estudiante @relation("InscripcionUnificadaEstudiante", fields: [estudianteId], references: [id])
-  claseGrupo ClaseGrupo @relation("InscripcionUnificadaClaseGrupo", fields: [claseGrupoId], references: [id])
-  tutor      Tutor      @relation("InscripcionUnificadaTutor", fields: [tutorId], references: [id])
+  estudiante Estudiante @relation("InscripcionUnificadaEstudiante", fields: [estudiante_id], references: [id])
+  claseGrupo ClaseGrupo @relation("InscripcionUnificadaClaseGrupo", fields: [clase_grupo_id], references: [id])
+  tutor      Tutor      @relation("InscripcionUnificadaTutor", fields: [tutor_id], references: [id])
 
   @@map("inscripciones_unificadas")
 }
@@ -4092,27 +4093,27 @@ view InscripcionUnificada {
 /// NOTA: Esta es una vista de SOLO LECTURA.
 /// Para escribir, usar las tablas fuente correspondientes.
 view FacturacionUnificada {
-  id                    String    @unique
-  fuente                String // 'SUSCRIPCION' | 'MANUAL'
-  tutorId               String    @map("tutor_id")
-  estudianteId          String?   @map("estudiante_id") // NULL para pagos de suscripción (nivel familia)
-  periodo               String // "2026-01"
-  anio                  Int
-  mes                   Int
-  monto                 Decimal   @db.Decimal(10, 2)
-  estadoPago            String    @map("estado_pago") // 'Pagado' | 'Pendiente' | 'Vencido' | 'Parcial' | 'Anulado'
-  metodoPago            String    @map("metodo_pago") // 'MercadoPago' | 'Efectivo' | 'Transferencia' | 'Manual'
-  referenciaExterna     String?   @map("referencia_externa") // mp_payment_id para MercadoPago
-  comprobanteUrl        String?   @map("comprobante_url")
-  observaciones         String?
-  fechaCreacion         DateTime  @map("fecha_creacion")
-  fechaPago             DateTime? @map("fecha_pago")
-  suscripcionFamiliarId String?   @map("suscripcion_familiar_id") // Solo para fuente SUSCRIPCION
-  inscripcionMensualId  String?   @map("inscripcion_mensual_id") // Solo para fuente MANUAL
+  id                      String    @unique
+  fuente                  String // 'SUSCRIPCION' | 'MANUAL'
+  tutor_id                String
+  estudiante_id           String? // NULL para pagos de suscripción (nivel familia)
+  periodo                 String // "2026-01"
+  anio                    Int
+  mes                     Int
+  monto                   Decimal   @db.Decimal(10, 2)
+  estado_pago             String // 'Pagado' | 'Pendiente' | 'Vencido' | 'Parcial' | 'Anulado'
+  metodo_pago             String // 'MercadoPago' | 'Efectivo' | 'Transferencia' | 'Manual'
+  referencia_externa      String? // mp_payment_id para MercadoPago
+  comprobante_url         String?
+  observaciones           String?
+  fecha_creacion          DateTime
+  fecha_pago              DateTime?
+  suscripcion_familiar_id String? // Solo para fuente SUSCRIPCION
+  inscripcion_mensual_id  String? // Solo para fuente MANUAL
 
   // Relaciones (read-only)
-  tutor      Tutor       @relation("FacturacionUnificadaTutor", fields: [tutorId], references: [id])
-  estudiante Estudiante? @relation("FacturacionUnificadaEstudiante", fields: [estudianteId], references: [id])
+  tutor      Tutor       @relation("FacturacionUnificadaTutor", fields: [tutor_id], references: [id])
+  estudiante Estudiante? @relation("FacturacionUnificadaEstudiante", fields: [estudiante_id], references: [id])
 
   @@map("facturacion_unificada")
 }

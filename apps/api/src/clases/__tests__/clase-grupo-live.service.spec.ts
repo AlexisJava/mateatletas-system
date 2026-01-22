@@ -14,12 +14,12 @@ describe('ClaseGrupoLiveService', () => {
   const mockClaseGrupo = {
     id: 'clase-grupo-123',
     nombre: 'Grupo Lunes 16:00 - Básico 1',
-    docente_id: 'docente-123',
-    estado_clase: 'Programada',
+    docenteId: 'docente-123',
+    estadoClase: 'Programada',
     activo: true,
-    livekit_room_name: null,
-    iniciada_en: null,
-    finalizada_en: null,
+    livekitRoomName: null,
+    iniciadaEn: null,
+    finalizadaEn: null,
   };
 
   const createMockPrismaService = () => ({
@@ -55,9 +55,9 @@ describe('ClaseGrupoLiveService', () => {
 
       jest.spyOn(prisma.claseGrupo, 'update').mockResolvedValue({
         ...mockClaseGrupo,
-        estado_clase: 'EnVivo',
-        iniciada_en: now,
-        livekit_room_name: 'clase-grupo-clase-grupo-123',
+        estadoClase: 'EnVivo',
+        iniciadaEn: now,
+        livekitRoomName: 'clase-grupo-clase-grupo-123',
       } as any);
 
       const result = await service.iniciarClase(
@@ -65,16 +65,16 @@ describe('ClaseGrupoLiveService', () => {
         'docente-123',
       );
 
-      expect(result.estado_clase).toBe('EnVivo');
-      expect(result.iniciada_en).toEqual(now);
+      expect(result.estadoClase).toBe('EnVivo');
+      expect(result.iniciadaEn).toEqual(now);
       expect(result.mensaje).toBe('Clase iniciada exitosamente');
       expect(prisma.claseGrupo.update).toHaveBeenCalledWith({
         where: { id: 'clase-grupo-123' },
         data: {
-          estado_clase: 'EnVivo',
-          iniciada_en: expect.any(Date),
-          finalizada_en: null,
-          livekit_room_name: 'clase-grupo-clase-grupo-123',
+          estadoClase: 'EnVivo',
+          iniciadaEn: expect.any(Date),
+          finalizadaEn: null,
+          livekitRoomName: 'clase-grupo-clase-grupo-123',
         },
         select: expect.any(Object),
       });
@@ -93,7 +93,7 @@ describe('ClaseGrupoLiveService', () => {
     it('should_throw_ForbiddenException_when_docente_is_not_titular', async () => {
       jest.spyOn(prisma.claseGrupo, 'findUnique').mockResolvedValue({
         ...mockClaseGrupo,
-        docente_id: 'otro-docente',
+        docenteId: 'otro-docente',
       } as any);
 
       await expect(
@@ -104,7 +104,7 @@ describe('ClaseGrupoLiveService', () => {
     it('should_throw_BadRequestException_when_class_is_already_EnVivo', async () => {
       jest.spyOn(prisma.claseGrupo, 'findUnique').mockResolvedValue({
         ...mockClaseGrupo,
-        estado_clase: 'EnVivo',
+        estadoClase: 'EnVivo',
       } as any);
 
       await expect(
@@ -115,7 +115,7 @@ describe('ClaseGrupoLiveService', () => {
     it('should_throw_BadRequestException_when_class_is_Finalizada', async () => {
       jest.spyOn(prisma.claseGrupo, 'findUnique').mockResolvedValue({
         ...mockClaseGrupo,
-        estado_clase: 'Finalizada',
+        estadoClase: 'Finalizada',
       } as any);
 
       await expect(
@@ -126,7 +126,7 @@ describe('ClaseGrupoLiveService', () => {
     it('should_throw_BadRequestException_when_class_is_Cancelada', async () => {
       jest.spyOn(prisma.claseGrupo, 'findUnique').mockResolvedValue({
         ...mockClaseGrupo,
-        estado_clase: 'Cancelada',
+        estadoClase: 'Cancelada',
       } as any);
 
       await expect(
@@ -145,18 +145,18 @@ describe('ClaseGrupoLiveService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('should_preserve_existing_livekit_room_name_if_already_set', async () => {
+    it('should_preserve_existing_livekitRoomName_if_already_set', async () => {
       const existingRoomName = 'clase-custom-room';
       jest.spyOn(prisma.claseGrupo, 'findUnique').mockResolvedValue({
         ...mockClaseGrupo,
-        livekit_room_name: existingRoomName,
+        livekitRoomName: existingRoomName,
       } as any);
 
       jest.spyOn(prisma.claseGrupo, 'update').mockResolvedValue({
         ...mockClaseGrupo,
-        estado_clase: 'EnVivo',
-        iniciada_en: new Date(),
-        livekit_room_name: existingRoomName,
+        estadoClase: 'EnVivo',
+        iniciadaEn: new Date(),
+        livekitRoomName: existingRoomName,
       } as any);
 
       await service.iniciarClase('clase-grupo-123', 'docente-123');
@@ -164,7 +164,7 @@ describe('ClaseGrupoLiveService', () => {
       expect(prisma.claseGrupo.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            livekit_room_name: existingRoomName,
+            livekitRoomName: existingRoomName,
           }),
         }),
       );
@@ -179,15 +179,15 @@ describe('ClaseGrupoLiveService', () => {
 
       jest.spyOn(prisma.claseGrupo, 'findUnique').mockResolvedValue({
         ...mockClaseGrupo,
-        estado_clase: 'EnVivo',
-        iniciada_en: iniciada,
+        estadoClase: 'EnVivo',
+        iniciadaEn: iniciada,
       } as any);
 
       jest.spyOn(prisma.claseGrupo, 'update').mockResolvedValue({
         ...mockClaseGrupo,
-        estado_clase: 'Finalizada',
-        iniciada_en: iniciada,
-        finalizada_en: finalizada,
+        estadoClase: 'Finalizada',
+        iniciadaEn: iniciada,
+        finalizadaEn: finalizada,
       } as any);
 
       const result = await service.finalizarClase(
@@ -195,8 +195,8 @@ describe('ClaseGrupoLiveService', () => {
         'docente-123',
       );
 
-      expect(result.estado_clase).toBe('Finalizada');
-      expect(result.duracion_minutos).toBe(45);
+      expect(result.estadoClase).toBe('Finalizada');
+      expect(result.duracionMinutos).toBe(45);
       expect(result.mensaje).toBe('Clase finalizada exitosamente');
 
       jest.useRealTimers();
@@ -213,8 +213,8 @@ describe('ClaseGrupoLiveService', () => {
     it('should_throw_ForbiddenException_when_docente_is_not_titular', async () => {
       jest.spyOn(prisma.claseGrupo, 'findUnique').mockResolvedValue({
         ...mockClaseGrupo,
-        estado_clase: 'EnVivo',
-        docente_id: 'otro-docente',
+        estadoClase: 'EnVivo',
+        docenteId: 'otro-docente',
       } as any);
 
       await expect(
@@ -225,7 +225,7 @@ describe('ClaseGrupoLiveService', () => {
     it('should_throw_BadRequestException_when_class_is_not_EnVivo', async () => {
       jest.spyOn(prisma.claseGrupo, 'findUnique').mockResolvedValue({
         ...mockClaseGrupo,
-        estado_clase: 'Programada',
+        estadoClase: 'Programada',
       } as any);
 
       await expect(
@@ -233,21 +233,21 @@ describe('ClaseGrupoLiveService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('should_return_zero_duration_when_iniciada_en_is_null', async () => {
+    it('should_return_zero_duration_when_iniciadaEn_is_null', async () => {
       const finalizada = new Date('2025-01-06T14:45:00Z');
       jest.useFakeTimers().setSystemTime(finalizada);
 
       jest.spyOn(prisma.claseGrupo, 'findUnique').mockResolvedValue({
         ...mockClaseGrupo,
-        estado_clase: 'EnVivo',
-        iniciada_en: null,
+        estadoClase: 'EnVivo',
+        iniciadaEn: null,
       } as any);
 
       jest.spyOn(prisma.claseGrupo, 'update').mockResolvedValue({
         ...mockClaseGrupo,
-        estado_clase: 'Finalizada',
-        iniciada_en: null,
-        finalizada_en: finalizada,
+        estadoClase: 'Finalizada',
+        iniciadaEn: null,
+        finalizadaEn: finalizada,
       } as any);
 
       const result = await service.finalizarClase(
@@ -255,7 +255,7 @@ describe('ClaseGrupoLiveService', () => {
         'docente-123',
       );
 
-      expect(result.duracion_minutos).toBe(0);
+      expect(result.duracionMinutos).toBe(0);
 
       jest.useRealTimers();
     });
@@ -266,16 +266,16 @@ describe('ClaseGrupoLiveService', () => {
       jest.spyOn(prisma.claseGrupo, 'findUnique').mockResolvedValue({
         id: 'clase-grupo-123',
         nombre: 'Grupo Lunes',
-        estado_clase: 'Programada',
-        iniciada_en: null,
-        finalizada_en: null,
-        livekit_room_name: null,
+        estadoClase: 'Programada',
+        iniciadaEn: null,
+        finalizadaEn: null,
+        livekitRoomName: null,
       } as any);
 
       const result = await service.obtenerEstadoClase('clase-grupo-123');
 
       expect(result.id).toBe('clase-grupo-123');
-      expect(result.estado_clase).toBe('Programada');
+      expect(result.estadoClase).toBe('Programada');
     });
 
     it('should_throw_NotFoundException_when_class_does_not_exist', async () => {
@@ -296,23 +296,23 @@ describe('ClaseGrupoLiveService', () => {
       jest.spyOn(prisma.claseGrupo, 'update').mockResolvedValue({
         id: 'clase-grupo-123',
         nombre: 'Grupo Lunes',
-        estado_clase: 'Programada',
-        iniciada_en: null,
-        finalizada_en: null,
-        livekit_room_name: 'clase-grupo-clase-grupo-123',
+        estadoClase: 'Programada',
+        iniciadaEn: null,
+        finalizadaEn: null,
+        livekitRoomName: 'clase-grupo-clase-grupo-123',
       } as any);
 
       const result = await service.reiniciarEstadoClase('clase-grupo-123');
 
-      expect(result.estado_clase).toBe('Programada');
-      expect(result.iniciada_en).toBeNull();
-      expect(result.finalizada_en).toBeNull();
+      expect(result.estadoClase).toBe('Programada');
+      expect(result.iniciadaEn).toBeNull();
+      expect(result.finalizadaEn).toBeNull();
       expect(prisma.claseGrupo.update).toHaveBeenCalledWith({
         where: { id: 'clase-grupo-123' },
         data: {
-          estado_clase: 'Programada',
-          iniciada_en: null,
-          finalizada_en: null,
+          estadoClase: 'Programada',
+          iniciadaEn: null,
+          finalizadaEn: null,
         },
         select: expect.any(Object),
       });

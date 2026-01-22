@@ -18,21 +18,21 @@ export interface EstudianteInfoDto {
  * Estadísticas de XP y nivel
  */
 export interface GamificacionDto {
-  xp_total: number;
+  xpTotal: number;
   nivel: number;
-  xp_progreso: number;
-  xp_necesario: number;
-  porcentaje_nivel: number;
+  xpProgreso: number;
+  xpNecesario: number;
+  porcentajeNivel: number;
 }
 
 /**
  * Estadísticas de racha
  */
 export interface RachaDto {
-  racha_actual: number;
-  racha_maxima: number;
-  total_dias_activos: number;
-  ultima_actividad: Date | null;
+  rachaActual: number;
+  rachaMaxima: number;
+  totalDiasActivos: number;
+  ultimaActividad: Date | null;
 }
 
 /**
@@ -42,7 +42,7 @@ export interface LogroRecienteDto {
   nombre: string;
   icono: string;
   rareza: string;
-  fecha_desbloqueo: Date;
+  fechaDesbloqueo: Date;
 }
 
 /**
@@ -60,8 +60,8 @@ export interface LogrosResumenDto {
 export interface ActividadRecienteDto {
   tipo: string;
   mensaje: string;
-  xp_ganado: number;
-  creado_en: Date;
+  xpGanado: number;
+  creadoEn: Date;
 }
 
 /**
@@ -72,5 +72,5 @@ export interface MiProgresoResponseDto {
   gamificacion: GamificacionDto;
   racha: RachaDto;
   logros: LogrosResumenDto;
-  actividad_reciente: ActividadRecienteDto[];
+  actividadReciente: ActividadRecienteDto[];
 }

@@ -13,7 +13,7 @@ interface TutorProfile {
   dni?: string | null;
   telefono?: string | null;
   fecha_registro?: Date;
-  ha_completado_onboarding?: boolean;
+  haCompletadoOnboarding?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   role: string;
@@ -59,10 +59,10 @@ interface EstudianteProfile {
   edad?: number | null;
   nivelEscolar?: string | null;
   fotoUrl?: string | null;
-  xp_total?: number;
+  xpTotal?: number;
   nivel_actual?: number;
   casaId?: string | null;
-  tutor_id?: string | null;
+  tutorId?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
   role: string;
@@ -82,11 +82,11 @@ export type UserProfile =
  *
  * RESPONSABILIDAD ÚNICA:
  * - Obtener perfil según el rol del usuario
- * - Excluir datos sensibles (password_hash)
+ * - Excluir datos sensibles (passwordHash)
  * - Incluir el rol en la respuesta
  *
  * SEGURIDAD:
- * - Nunca devuelve password_hash
+ * - Nunca devuelve passwordHash
  * - Solo selecciona campos necesarios
  */
 @Injectable()
@@ -148,11 +148,11 @@ export class GetProfileUseCase {
         apellido: true,
         dni: true,
         telefono: true,
-        fecha_registro: true,
-        ha_completado_onboarding: true,
+        fechaRegistro: true,
+        haCompletadoOnboarding: true,
         createdAt: true,
         updatedAt: true,
-        // IMPORTANTE: NO incluir password_hash
+        // IMPORTANTE: NO incluir passwordHash
       },
     });
 
@@ -181,7 +181,7 @@ export class GetProfileUseCase {
         bio: true,
         createdAt: true,
         updatedAt: true,
-        // IMPORTANTE: NO incluir password_hash
+        // IMPORTANTE: NO incluir passwordHash
       },
     });
 
@@ -206,10 +206,10 @@ export class GetProfileUseCase {
         email: true,
         nombre: true,
         apellido: true,
-        fecha_registro: true,
+        fechaRegistro: true,
         createdAt: true,
         updatedAt: true,
-        // IMPORTANTE: NO incluir password_hash
+        // IMPORTANTE: NO incluir passwordHash
       },
     });
 
@@ -239,17 +239,17 @@ export class GetProfileUseCase {
         edad: true,
         nivelEscolar: true,
         fotoUrl: true,
-        nivel_actual: true,
+        nivelActual: true,
         recursos: {
           select: {
-            xp_total: true,
+            xpTotal: true,
           },
         },
         casaId: true,
-        tutor_id: true,
+        tutorId: true,
         createdAt: true,
         updatedAt: true,
-        // IMPORTANTE: NO incluir password_hash
+        // IMPORTANTE: NO incluir passwordHash
       },
     });
 
@@ -260,7 +260,7 @@ export class GetProfileUseCase {
     const { recursos, ...rest } = estudiante;
     return {
       ...rest,
-      xp_total: recursos?.xp_total ?? 0,
+      xpTotal: recursos?.xpTotal ?? 0,
       role: Role.ESTUDIANTE,
     };
   }

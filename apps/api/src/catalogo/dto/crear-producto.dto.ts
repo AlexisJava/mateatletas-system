@@ -98,18 +98,7 @@ export class CrearProductoDto {
   @ValidateIf((o: CrearProductoDto) => o.tipo === 'Curso')
   @IsDateString({}, { message: 'La fecha de inicio debe ser una fecha válida' })
   @IsNotEmpty({ message: 'La fecha de inicio es requerida para cursos' })
-  fecha_inicio?: string;
-
-  @ApiPropertyOptional({
-    description: '[Solo Cursos] Alias camelCase de fecha_inicio',
-    example: '2025-11-01',
-    type: String,
-    format: 'date',
-  })
-  @ValidateIf((o: CrearProductoDto) => o.tipo === 'Curso')
-  @IsDateString({}, { message: 'La fecha de inicio debe ser una fecha válida' })
-  @IsOptional()
-  fechaInicio?: string; // Alias camelCase
+  fechaInicio?: string;
 
   @ApiPropertyOptional({
     description: '[Solo Cursos] Fecha de fin del curso en formato ISO',
@@ -120,18 +109,7 @@ export class CrearProductoDto {
   @ValidateIf((o: CrearProductoDto) => o.tipo === 'Curso')
   @IsDateString({}, { message: 'La fecha de fin debe ser una fecha válida' })
   @IsNotEmpty({ message: 'La fecha de fin es requerida para cursos' })
-  fecha_fin?: string;
-
-  @ApiPropertyOptional({
-    description: '[Solo Cursos] Alias camelCase de fecha_fin',
-    example: '2026-07-31',
-    type: String,
-    format: 'date',
-  })
-  @ValidateIf((o: CrearProductoDto) => o.tipo === 'Curso')
-  @IsDateString({}, { message: 'La fecha de fin debe ser una fecha válida' })
-  @IsOptional()
-  fechaFin?: string; // Alias camelCase
+  fechaFin?: string;
 
   @ApiPropertyOptional({
     description: '[Solo Cursos] Cupo máximo de estudiantes para el curso',
@@ -143,40 +121,14 @@ export class CrearProductoDto {
   @IsInt({ message: 'El cupo máximo debe ser un número entero' })
   @Min(1, { message: 'El cupo máximo debe ser al menos 1' })
   @IsNotEmpty({ message: 'El cupo máximo es requerido para cursos' })
-  cupo_maximo?: number;
-
-  @ApiPropertyOptional({
-    description: '[Solo Cursos] Alias camelCase de cupo_maximo',
-    example: 30,
-    type: Number,
-    minimum: 1,
-  })
-  @ValidateIf((o: CrearProductoDto) => o.tipo === 'Curso')
-  @IsInt({ message: 'El cupo máximo debe ser un número entero' })
-  @Min(1, { message: 'El cupo máximo debe ser al menos 1' })
-  @IsOptional()
-  cupoMaximo?: number; // Alias camelCase
+  cupoMaximo?: number;
 
   // --- Campos específicos para tipo Servicio Y Curso ---
   // Los cursos PUEDEN tener duración en meses (ej: "Exploradores Matemáticos de 9 meses")
-  // O pueden tener fechas específicas (fecha_inicio + fecha_fin)
+  // O pueden tener fechas específicas (fechaInicio + fechaFin)
 
   @ApiPropertyOptional({
     description: '[Servicios y Cursos] Duración en meses',
-    example: 1,
-    type: Number,
-    minimum: 1,
-  })
-  @ValidateIf(
-    (o: CrearProductoDto) => o.tipo === 'Servicio' || o.tipo === 'Curso',
-  )
-  @IsInt({ message: 'La duración debe ser un número entero de meses' })
-  @Min(1, { message: 'La duración debe ser al menos 1 mes' })
-  @IsOptional()
-  duracion_meses?: number;
-
-  @ApiPropertyOptional({
-    description: '[Servicios y Cursos] Alias camelCase de duracion_meses',
     example: 1,
     type: Number,
     minimum: 1,
@@ -222,7 +174,7 @@ export class CrearProductoDto {
     message: 'El subtipo debe ser: GENERAL u OLIMPICA',
   })
   @IsOptional()
-  subtipo_mundo?: SubtipoMundo;
+  subtipoMundo?: SubtipoMundo;
 
   @ApiPropertyOptional({
     description: 'Nivel de olimpiada (solo para subtipo OLIMPICA)',
@@ -233,7 +185,7 @@ export class CrearProductoDto {
     message: 'El nivel debe ser: NANDU_N1, NANDU_N2, OMA_N1, OMA_N2 u OMA_N3',
   })
   @IsOptional()
-  nivel_olimpiada?: NivelOlimpiada;
+  nivelOlimpiada?: NivelOlimpiada;
 
   @ApiPropertyOptional({
     description: 'Edad mínima requerida para el producto',
@@ -246,7 +198,7 @@ export class CrearProductoDto {
   @Min(4, { message: 'La edad mínima debe ser al menos 4' })
   @Max(99, { message: 'La edad mínima no puede ser mayor a 99' })
   @IsOptional()
-  edad_minima?: number;
+  edadMinima?: number;
 
   @ApiPropertyOptional({
     description: 'Edad máxima permitida para el producto',
@@ -259,7 +211,7 @@ export class CrearProductoDto {
   @Min(4, { message: 'La edad máxima debe ser al menos 4' })
   @Max(99, { message: 'La edad máxima no puede ser mayor a 99' })
   @IsOptional()
-  edad_maxima?: number;
+  edadMaxima?: number;
 
   @ApiPropertyOptional({
     description: 'Si el producto permite excepciones de edad',
@@ -267,9 +219,9 @@ export class CrearProductoDto {
     type: Boolean,
     default: false,
   })
-  @IsBoolean({ message: 'permite_excepciones debe ser verdadero o falso' })
+  @IsBoolean({ message: 'permiteExcepciones debe ser verdadero o falso' })
   @IsOptional()
-  permite_excepciones?: boolean;
+  permiteExcepciones?: boolean;
 
   @ApiPropertyOptional({
     description: 'Si el producto es visible en la landing pública',
@@ -277,9 +229,9 @@ export class CrearProductoDto {
     type: Boolean,
     default: true,
   })
-  @IsBoolean({ message: 'visible_en_landing debe ser verdadero o falso' })
+  @IsBoolean({ message: 'visibleEnLanding debe ser verdadero o falso' })
   @IsOptional()
-  visible_en_landing?: boolean;
+  visibleEnLanding?: boolean;
 
   @ApiPropertyOptional({
     description: 'Orden de display en listados',
@@ -290,5 +242,5 @@ export class CrearProductoDto {
   @IsInt({ message: 'El orden debe ser un número entero' })
   @Min(0, { message: 'El orden no puede ser negativo' })
   @IsOptional()
-  orden_display?: number;
+  ordenDisplay?: number;
 }

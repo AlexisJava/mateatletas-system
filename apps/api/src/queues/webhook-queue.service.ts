@@ -56,7 +56,7 @@ export class WebhookQueueService {
 
     try {
       await this.webhookQueue.add('process-webhook', webhookData, {
-        jobId: paymentId, // Usar payment_id como jobId para evitar duplicados
+        jobId: paymentId, // Usar paymentId como jobId para evitar duplicados
         priority: 1, // Alta prioridad
         attempts: 3, // 3 reintentos
         backoff: {
@@ -67,13 +67,13 @@ export class WebhookQueueService {
       });
 
       this.logger.log(
-        `✅ Webhook agregado a queue: payment_id=${paymentId}, type=${webhookData.type}`,
+        `✅ Webhook agregado a queue: paymentId=${paymentId}, type=${webhookData.type}`,
       );
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       this.logger.error(
-        `❌ Error agregando webhook a queue: payment_id=${paymentId}, error=${errorMessage}`,
+        `❌ Error agregando webhook a queue: paymentId=${paymentId}, error=${errorMessage}`,
       );
       throw error;
     }

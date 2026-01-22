@@ -19,7 +19,7 @@ import { PrismaService } from '../core/database/prisma.service';
  * - Un estudiante puede BAJAR de casa (nunca subir)
  * - PULSAR solo puede bajar a VERTEX (nunca a QUANTUM)
  *
- * Refactorizado para usar RecursosEstudiante.xp_total en lugar de puntos_totales
+ * Refactorizado para usar RecursosEstudiante.xpTotal en lugar de puntos_totales
  */
 @Injectable()
 export class CasasService {
@@ -124,10 +124,10 @@ export class CasasService {
             id: true,
             nombre: true,
             apellido: true,
-            nivel_actual: true,
+            nivelActual: true,
             avatarUrl: true,
             recursos: {
-              select: { xp_total: true },
+              select: { xpTotal: true },
             },
           },
         },
@@ -147,11 +147,11 @@ export class CasasService {
         id: est.id,
         nombre: est.nombre,
         apellido: est.apellido,
-        xp_total: est.recursos?.xp_total ?? 0,
-        nivel_actual: est.nivel_actual,
+        xpTotal: est.recursos?.xpTotal ?? 0,
+        nivelActual: est.nivelActual,
         avatarUrl: est.avatarUrl,
       }))
-      .sort((a, b) => b.xp_total - a.xp_total);
+      .sort((a, b) => b.xpTotal - a.xpTotal);
 
     return {
       ...casa,
@@ -192,10 +192,10 @@ export class CasasService {
             id: true,
             nombre: true,
             apellido: true,
-            nivel_actual: true,
+            nivelActual: true,
             avatarUrl: true,
             recursos: {
-              select: { xp_total: true },
+              select: { xpTotal: true },
             },
           },
         },
@@ -212,8 +212,8 @@ export class CasasService {
         id: est.id,
         nombre: est.nombre,
         apellido: est.apellido,
-        puntosTotales: est.recursos?.xp_total ?? 0,
-        nivelActual: est.nivel_actual,
+        puntosTotales: est.recursos?.xpTotal ?? 0,
+        nivelActual: est.nivelActual,
         avatarUrl: est.avatarUrl,
       }))
       .sort((a, b) => b.puntosTotales - a.puntosTotales);
@@ -271,11 +271,11 @@ export class CasasService {
         },
       },
       _sum: {
-        xp_total: true,
+        xpTotal: true,
       },
     });
 
-    const puntosTotales = resultado._sum.xp_total ?? 0;
+    const puntosTotales = resultado._sum.xpTotal ?? 0;
 
     return this.prisma.casa.update({
       where: { id: casaId },
@@ -312,8 +312,8 @@ interface EstudianteBasico {
   id: string;
   nombre: string;
   apellido: string;
-  xp_total: number;
-  nivel_actual: number;
+  xpTotal: number;
+  nivelActual: number;
   avatarUrl: string | null;
 }
 

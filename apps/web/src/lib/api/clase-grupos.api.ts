@@ -9,40 +9,14 @@ import type { ClaseGrupo, CrearClaseGrupoDto, ListarClaseGruposParams } from '@/
 export type { ClaseGrupo, CrearClaseGrupoDto, ListarClaseGruposParams };
 
 /**
- * Transforma un objeto ClaseGrupo del backend (snake_case) al formato frontend (camelCase)
+ * Transforma un objeto ClaseGrupo del backend al formato frontend
+ *
+ * NOTA: El CamelCaseResponseInterceptor del backend ya transforma snake_case → camelCase,
+ * por lo que esta función ahora solo hace type casting.
  */
 function transformClaseGrupo(raw: Record<string, unknown>): ClaseGrupo {
-  return {
-    id: raw.id as string,
-    codigo: raw.codigo as string,
-    nombre: raw.nombre as string,
-    tipo: raw.tipo as ClaseGrupo['tipo'],
-    diaSemana: (raw.diaSemana || raw.diaSemana) as ClaseGrupo['diaSemana'],
-    horaInicio: (raw.horaInicio || raw.horaInicio) as string,
-    horaFin: (raw.horaFin || raw.horaFin) as string,
-    fechaInicio: (raw.fechaInicio || raw.fechaInicio) as string,
-    fechaFin: (raw.fechaFin || raw.fechaFin) as string,
-    anioLectivo: (raw.anioLectivo || raw.anioLectivo) as number,
-    cupoMaximo: (raw.cupoMaximo || raw.cupoMaximo) as number,
-    activo: raw.activo as boolean,
-    docenteId: (raw.docenteId || raw.docenteId) as string,
-    productoId: (raw.productoId || raw.productoId) as string | undefined,
-    grupoId: (raw.grupoId || raw.grupoId) as string | undefined,
-    rutaCurricularId: (raw.rutaCurricularId || raw.rutaCurricularId) as string | undefined,
-    sectorId: (raw.sectorId || raw.sectorId) as string | undefined,
-    nivel: raw.nivel as string | undefined,
-    createdAt: (raw.createdAt || raw.createdAt) as string,
-    updatedAt: (raw.updatedAt || raw.updatedAt) as string,
-    // Relations
-    docente: raw.docente as ClaseGrupo['docente'],
-    rutaCurricular: raw.rutaCurricular as ClaseGrupo['rutaCurricular'],
-    sector: raw.sector as ClaseGrupo['sector'],
-    inscripciones: raw.inscripciones as ClaseGrupo['inscripciones'],
-    // Computed fields
-    totalInscriptos: (raw.totalInscriptos || raw.totalInscriptos) as number | undefined,
-    totalAsistencias: (raw.totalAsistencias || raw.totalAsistencias) as number | undefined,
-    cuposDisponibles: (raw.cuposDisponibles || raw.cuposDisponibles) as number | undefined,
-  };
+  // El interceptor ya transforma las keys, solo hacemos type casting
+  return raw as unknown as ClaseGrupo;
 }
 
 /**

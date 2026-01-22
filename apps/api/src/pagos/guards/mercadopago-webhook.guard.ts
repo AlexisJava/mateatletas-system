@@ -32,7 +32,7 @@ interface MercadoPagoWebhookBody {
   id: string;
   live_mode: boolean;
   type: string;
-  user_id: string;
+  userId: string;
 }
 
 /**
@@ -61,7 +61,7 @@ interface SignatureValidationResult {
  * 4. Construir payload: `${timestamp}.${JSON.stringify(body)}`
  * 5. Calcular HMAC-SHA256 con secret (soporta múltiples secrets durante rotación)
  * 6. Comparación timing-safe con v1
- * 7. Validar campos obligatorios: type, user_id, live_mode
+ * 7. Validar campos obligatorios: type, userId, live_mode
  *
  * Seguridad:
  * - ✅ IP Whitelisting (solo IPs oficiales de MercadoPago)
@@ -251,7 +251,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       this.validateTimestamp(validationResult.timestamp);
 
       this.logger.log(
-        `✅ Webhook validado: IP=${clientIp}, type=${webhookBody.type}, data_id=${webhookBody.data?.id}, user_id=${webhookBody.user_id}`,
+        `✅ Webhook validado: IP=${clientIp}, type=${webhookBody.type}, data_id=${webhookBody.data?.id}, userId=${webhookBody.userId}`,
       );
       return true;
     } catch (error) {
@@ -286,7 +286,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       'id',
       'live_mode',
       'type',
-      'user_id',
+      'userId',
     ];
     const missingFields = requiredFields.filter((field) => !(field in body));
 
@@ -317,9 +317,9 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       );
     }
 
-    if (typeof body.user_id !== 'string' && typeof body.user_id !== 'number') {
+    if (typeof body.userId !== 'string' && typeof body.userId !== 'number') {
       throw new UnauthorizedException(
-        'Invalid webhook body: user_id must be a string or number',
+        'Invalid webhook body: userId must be a string or number',
       );
     }
 

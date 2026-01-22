@@ -80,7 +80,7 @@ export class ClaseGruposService {
       );
     }
 
-    // Calcular fecha_fin automática para GRUPO_REGULAR
+    // Calcular fechaFin automática para GRUPO_REGULAR
     let fechaFin: Date;
     // Usar comparación de string para evitar problemas de enum
     const esGrupoRegular =
@@ -99,7 +99,7 @@ export class ClaseGruposService {
 
     const fechaInicio = new Date(dto.fechaInicio);
 
-    // Validar que fecha_fin sea posterior a fecha_inicio
+    // Validar que fechaFin sea posterior a fechaInicio
     if (fechaFin <= fechaInicio) {
       throw new BadRequestException(
         'La fecha de fin debe ser posterior a la fecha de inicio',
@@ -111,21 +111,21 @@ export class ClaseGruposService {
       async (tx: Prisma.TransactionClient) => {
         const grupo = await tx.claseGrupo.create({
           data: {
-            grupo_id: dto.grupoId,
+            grupoId: dto.grupoId,
             codigo: dto.codigo,
             nombre: dto.nombre,
             tipo: dto.tipo,
-            dia_semana: dto.diaSemana,
-            hora_inicio: dto.horaInicio,
-            hora_fin: dto.horaFin,
-            fecha_inicio: fechaInicio,
-            fecha_fin: fechaFin,
-            anio_lectivo: dto.anioLectivo,
-            cupo_maximo: dto.cupoMaximo,
-            docente_id: dto.docenteId,
-            sector_id: dto.sectorId,
+            diaSemana: dto.diaSemana,
+            horaInicio: dto.horaInicio,
+            horaFin: dto.horaFin,
+            fechaInicio: fechaInicio,
+            fechaFin: fechaFin,
+            anioLectivo: dto.anioLectivo,
+            cupoMaximo: dto.cupoMaximo,
+            docenteId: dto.docenteId,
+            sectorId: dto.sectorId,
             nivel: dto.nivel,
-            producto_id: dto.productoId, // FASE 3: Vincular con producto (Club)
+            productoId: dto.productoId, // FASE 3: Vincular con producto (Club)
             activo: true,
           },
           include: {
@@ -156,10 +156,10 @@ export class ClaseGruposService {
           estudiantes.map((estudiante: EstudianteConTutor) =>
             tx.inscripcionClaseGrupo.create({
               data: {
-                clase_grupo_id: grupo.id,
-                estudiante_id: estudiante.id,
-                tutor_id: estudiante.tutor_id,
-                fecha_inscripcion: new Date(),
+                claseGrupoId: grupo.id,
+                estudianteId: estudiante.id,
+                tutorId: estudiante.tutorId,
+                fechaInscripcion: new Date(),
               },
               include: {
                 estudiante: {
@@ -186,7 +186,7 @@ export class ClaseGruposService {
         return {
           ...grupo,
           inscripciones,
-          total_inscriptos: inscripciones.length,
+          totalInscriptos: inscripciones.length,
         };
       },
     );
@@ -204,46 +204,52 @@ export class ClaseGruposService {
     return {
       success: true,
       data: claseGrupo,
-      message: `Grupo ${dto.codigo} creado exitosamente con ${claseGrupo.total_inscriptos} estudiantes`,
+      message: `Grupo ${dto.codigo} creado exitosamente con ${claseGrupo.totalInscriptos} estudiantes`,
     };
   }
 
   /**
    * Listar todos los ClaseGrupos con filtros opcionales
+   * NOTA: Parámetros en camelCase para consistencia con frontend
    */
   async listarClaseGrupos(params?: {
-    anio_lectivo?: number;
+    anioLectivo?: number;
     activo?: boolean;
-    docente_id?: string;
+    docenteId?: string;
     tipo?: TipoClaseGrupo;
-    grupo_id?: string;
-    producto_id?: string; // FASE 3: Filtro por producto (para Clubs)
+    grupoId?: string;
+    productoId?: string; // FASE 3: Filtro por producto (para Clubs)
   }) {
+    // DEBUG: Ver qué parámetros llegan
+    this.logger.debug(
+      `[listarClaseGrupos] params recibidos: ${JSON.stringify(params)}`,
+    );
+
     const where: Prisma.ClaseGrupoWhereInput = {};
 
-    if (params?.anio_lectivo !== undefined) {
-      where.anio_lectivo = params.anio_lectivo;
+    if (params?.anioLectivo !== undefined) {
+      where.anioLectivo = params.anioLectivo;
     }
 
     if (params?.activo !== undefined) {
       where.activo = params.activo;
     }
 
-    if (params?.docente_id) {
-      where.docente_id = params.docente_id;
+    if (params?.docenteId) {
+      where.docenteId = params.docenteId;
     }
 
     if (params?.tipo) {
       where.tipo = params.tipo;
     }
 
-    if (params?.grupo_id) {
-      where.grupo_id = params.grupo_id;
+    if (params?.grupoId) {
+      where.grupoId = params.grupoId;
     }
 
     // FASE 3: Filtro por producto (para listar horarios de un Club específico)
-    if (params?.producto_id) {
-      where.producto_id = params.producto_id;
+    if (params?.productoId) {
+      where.productoId = params.productoId;
     }
 
     const grupos = await this.prisma.claseGrupo.findMany({
@@ -284,7 +290,7 @@ export class ClaseGruposService {
           },
         },
       },
-      orderBy: [{ dia_semana: 'asc' }, { hora_inicio: 'asc' }],
+      orderBy: [{ diaSemana: 'asc' }, { horaInicio: 'asc' }],
     });
 
     type GrupoConContadores = (typeof grupos)[number];
@@ -295,10 +301,10 @@ export class ClaseGruposService {
         ...grupo,
         // Mapear inscripcionesUnificadas a inscripciones para mantener compatibilidad API
         inscripciones: grupo.inscripcionesUnificadas,
-        total_inscriptos: grupo._count.inscripcionesUnificadas,
-        total_asistencias: grupo._count.asistencias,
-        cupos_disponibles:
-          grupo.cupo_maximo - grupo._count.inscripcionesUnificadas,
+        totalInscriptos: grupo._count.inscripcionesUnificadas,
+        totalAsistencias: grupo._count.asistencias,
+        cuposDisponibles:
+          grupo.cupoMaximo - grupo._count.inscripcionesUnificadas,
       })),
       total: grupos.length,
     };
@@ -377,10 +383,10 @@ export class ClaseGruposService {
         ...grupo,
         // Mapear inscripcionesUnificadas a inscripciones para mantener compatibilidad API
         inscripciones: grupo.inscripcionesUnificadas,
-        total_inscriptos: grupo._count.inscripcionesUnificadas,
-        total_asistencias: grupo._count.asistencias,
-        cupos_disponibles:
-          grupo.cupo_maximo - grupo._count.inscripcionesUnificadas,
+        totalInscriptos: grupo._count.inscripcionesUnificadas,
+        totalAsistencias: grupo._count.asistencias,
+        cuposDisponibles:
+          grupo.cupoMaximo - grupo._count.inscripcionesUnificadas,
       },
     };
   }
@@ -472,7 +478,7 @@ export class ClaseGruposService {
 
           // Eliminar todas las inscripciones actuales
           await tx.inscripcionClaseGrupo.deleteMany({
-            where: { clase_grupo_id: id },
+            where: { claseGrupoId: id },
           });
 
           // Crear las nuevas inscripciones
@@ -484,10 +490,10 @@ export class ClaseGruposService {
             estudiantes.map((estudiante: EstudianteConTutorUpdate) =>
               tx.inscripcionClaseGrupo.create({
                 data: {
-                  clase_grupo_id: id,
-                  estudiante_id: estudiante.id,
-                  tutor_id: estudiante.tutor_id,
-                  fecha_inscripcion: new Date(),
+                  claseGrupoId: id,
+                  estudianteId: estudiante.id,
+                  tutorId: estudiante.tutorId,
+                  fechaInscripcion: new Date(),
                 },
               }),
             ),
@@ -496,7 +502,7 @@ export class ClaseGruposService {
 
         // Obtener el grupo con las inscripciones actualizadas
         const inscripciones = await tx.inscripcionClaseGrupo.findMany({
-          where: { clase_grupo_id: id },
+          where: { claseGrupoId: id },
           include: {
             estudiante: {
               select: {
@@ -520,17 +526,17 @@ export class ClaseGruposService {
         return {
           ...grupoActualizado,
           inscripciones,
-          total_inscriptos: inscripciones.length,
+          totalInscriptos: inscripciones.length,
         };
       },
     );
 
     // Si cambió el docente, notificar al nuevo docente
-    if (dto.docenteId && dto.docenteId !== grupoExistente.docente_id) {
+    if (dto.docenteId && dto.docenteId !== grupoExistente.docenteId) {
       const nombre = dto.nombre || grupoExistente.nombre;
-      const diaSemana = dto.diaSemana ?? grupoExistente.dia_semana;
-      const horaInicio = dto.horaInicio || grupoExistente.hora_inicio;
-      const horaFin = dto.horaFin || grupoExistente.hora_fin;
+      const diaSemana = dto.diaSemana ?? grupoExistente.diaSemana;
+      const horaInicio = dto.horaInicio || grupoExistente.horaInicio;
+      const horaFin = dto.horaFin || grupoExistente.horaFin;
 
       this.notificarDocenteAsignado(
         dto.docenteId,
@@ -617,12 +623,12 @@ export class ClaseGruposService {
 
     // Eliminar inscripciones manuales inactivas asociadas
     await this.prisma.inscripcionClaseGrupo.deleteMany({
-      where: { clase_grupo_id: id },
+      where: { claseGrupoId: id },
     });
 
     // Eliminar registros de asistencia asociados
     await this.prisma.asistenciaClaseGrupo.deleteMany({
-      where: { clase_grupo_id: id },
+      where: { claseGrupoId: id },
     });
 
     // Hard delete del ClaseGrupo
@@ -663,7 +669,7 @@ export class ClaseGruposService {
 
     // Verificar que no se exceda el cupo máximo
     const cuposDisponibles =
-      grupo.cupo_maximo - grupo._count.inscripcionesUnificadas;
+      grupo.cupoMaximo - grupo._count.inscripcionesUnificadas;
     if (estudiantesIds.length > cuposDisponibles) {
       throw new BadRequestException(
         `No hay suficientes cupos disponibles. Disponibles: ${cuposDisponibles}, Solicitados: ${estudiantesIds.length}`,
@@ -686,8 +692,8 @@ export class ClaseGruposService {
     const inscripcionesExistentes =
       await this.prisma.inscripcionUnificada.findMany({
         where: {
-          clase_grupo_id: claseGrupoId,
-          estudiante_id: { in: estudiantesIds },
+          claseGrupoId: claseGrupoId,
+          estudianteId: { in: estudiantesIds },
           estado: 'ACTIVA',
         },
       });
@@ -705,10 +711,10 @@ export class ClaseGruposService {
           estudiantes.map((estudiante) =>
             tx.inscripcionClaseGrupo.create({
               data: {
-                clase_grupo_id: claseGrupoId,
-                estudiante_id: estudiante.id,
-                tutor_id: estudiante.tutor_id,
-                fecha_inscripcion: new Date(),
+                claseGrupoId: claseGrupoId,
+                estudianteId: estudiante.id,
+                tutorId: estudiante.tutorId,
+                fechaInscripcion: new Date(),
               },
               include: {
                 estudiante: {
@@ -762,8 +768,8 @@ export class ClaseGruposService {
     const inscripcionUnificada =
       await this.prisma.inscripcionUnificada.findFirst({
         where: {
-          clase_grupo_id: claseGrupoId,
-          estudiante_id: estudianteId,
+          claseGrupoId: claseGrupoId,
+          estudianteId: estudianteId,
           estado: 'ACTIVA',
         },
         include: {
@@ -794,9 +800,9 @@ export class ClaseGruposService {
     const inscripcionManual = await this.prisma.inscripcionClaseGrupo.findFirst(
       {
         where: {
-          clase_grupo_id: claseGrupoId,
-          estudiante_id: estudianteId,
-          fecha_baja: null,
+          claseGrupoId: claseGrupoId,
+          estudianteId: estudianteId,
+          fechaBaja: null,
         },
       },
     );
@@ -810,7 +816,7 @@ export class ClaseGruposService {
     // Eliminar la inscripción (soft delete con fecha_baja)
     await this.prisma.inscripcionClaseGrupo.update({
       where: { id: inscripcionManual.id },
-      data: { fecha_baja: new Date() },
+      data: { fechaBaja: new Date() },
     });
 
     return {
@@ -829,13 +835,13 @@ export class ClaseGruposService {
 
     if (dto.nombre) updateData.nombre = dto.nombre;
     if (dto.tipo) updateData.tipo = dto.tipo;
-    if (dto.diaSemana) updateData.dia_semana = dto.diaSemana;
-    if (dto.horaInicio) updateData.hora_inicio = dto.horaInicio;
-    if (dto.horaFin) updateData.hora_fin = dto.horaFin;
-    if (dto.fechaInicio) updateData.fecha_inicio = new Date(dto.fechaInicio);
-    if (dto.fechaFin) updateData.fecha_fin = new Date(dto.fechaFin);
-    if (dto.anioLectivo) updateData.anio_lectivo = dto.anioLectivo;
-    if (dto.cupoMaximo) updateData.cupo_maximo = dto.cupoMaximo;
+    if (dto.diaSemana) updateData.diaSemana = dto.diaSemana;
+    if (dto.horaInicio) updateData.horaInicio = dto.horaInicio;
+    if (dto.horaFin) updateData.horaFin = dto.horaFin;
+    if (dto.fechaInicio) updateData.fechaInicio = new Date(dto.fechaInicio);
+    if (dto.fechaFin) updateData.fechaFin = new Date(dto.fechaFin);
+    if (dto.anioLectivo) updateData.anioLectivo = dto.anioLectivo;
+    if (dto.cupoMaximo) updateData.cupoMaximo = dto.cupoMaximo;
     if (dto.docenteId) {
       updateData.docente = { connect: { id: dto.docenteId } };
     }

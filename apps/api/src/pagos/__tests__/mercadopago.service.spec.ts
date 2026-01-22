@@ -170,7 +170,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
           name: 'Juan',
           surname: 'Pérez',
         },
-        external_reference:
+        externalReference:
           'membresia-memb-456-tutor-tutor-789-producto-prod-123',
         notification_url: 'http://localhost:3001/api/pagos/webhook',
         back_urls: {
@@ -268,7 +268,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
       expect(result.items[0].unit_price).toBeNaN();
     });
 
-    it('should build correct external_reference format', () => {
+    it('should build correct externalReference format', () => {
       const result = service.buildMembershipPreferenceData(
         { id: 'P1', nombre: 'Test', precio: 100 },
         { email: 't@t.com', nombre: 'T', apellido: 'T' },
@@ -278,7 +278,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         'http://localhost:3000',
       );
 
-      expect(result.external_reference).toBe(
+      expect(result.externalReference).toBe(
         'membresia-M123-tutor-T456-producto-P1',
       );
     });
@@ -363,7 +363,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
           name: 'Carlos',
           surname: 'López',
         },
-        external_reference:
+        externalReference:
           'inscripcion-insc-789-estudiante-est-456-producto-curso-123',
         notification_url: 'http://localhost:3001/api/pagos/webhook',
         back_urls: {
@@ -391,7 +391,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
       expect(result.items[0].title).toBe('Física - Ana García');
     });
 
-    it('should build correct external_reference for course', () => {
+    it('should build correct externalReference for course', () => {
       const result = service.buildCoursePreferenceData(
         { id: 'C1', nombre: 'Test', precio: 100 },
         { nombre: 'Est', apellido: 'Udiante' },
@@ -402,7 +402,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         'http://localhost:3000',
       );
 
-      expect(result.external_reference).toBe(
+      expect(result.externalReference).toBe(
         'inscripcion-I123-estudiante-E456-producto-C1',
       );
     });
@@ -519,7 +519,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         'http://localhost:3000',
       );
 
-      expect(result.external_reference).toBe(
+      expect(result.externalReference).toBe(
         'membresia-memb-456-def-tutor-tutor-789-ghi-producto-prod-123-abc',
       );
     });

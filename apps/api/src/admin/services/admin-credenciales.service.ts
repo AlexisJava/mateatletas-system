@@ -105,7 +105,7 @@ export class AdminCredencialesService {
             usuario = await this.prisma.tutor.update({
               where: { id: usuarioId },
               data: {
-                password_hash: hashedPassword,
+                passwordHash: hashedPassword,
               },
               select: {
                 id: true,
@@ -120,7 +120,7 @@ export class AdminCredencialesService {
             usuario = await this.prisma.estudiante.update({
               where: { id: usuarioId },
               data: {
-                password_hash: hashedPassword,
+                passwordHash: hashedPassword,
               },
               select: {
                 id: true,
@@ -135,7 +135,7 @@ export class AdminCredencialesService {
             usuario = await this.prisma.docente.update({
               where: { id: usuarioId },
               data: {
-                password_hash: hashedPassword,
+                passwordHash: hashedPassword,
               },
               select: {
                 id: true,
@@ -305,7 +305,7 @@ export class AdminCredencialesService {
           usuario:
             t.username ||
             `${t.nombre.toLowerCase()}.${t.apellido.toLowerCase()}`,
-          fecha_creacion: t.createdAt,
+          fechaCreacion: t.createdAt,
         })),
         estudiantes: estudiantes.map((e) => ({
           id: e.id,
@@ -314,7 +314,7 @@ export class AdminCredencialesService {
           apellido: e.apellido,
           usuario: e.username,
           tutor: `${e.tutor.nombre} ${e.tutor.apellido}`,
-          fecha_creacion: e.createdAt,
+          fechaCreacion: e.createdAt,
         })),
         docentes: docentes.map((d) => ({
           id: d.id,
@@ -322,7 +322,7 @@ export class AdminCredencialesService {
           nombre: d.nombre,
           apellido: d.apellido,
           usuario: `${d.nombre.toLowerCase()}.${d.apellido.toLowerCase()}`,
-          fecha_creacion: d.createdAt,
+          fechaCreacion: d.createdAt,
         })),
       };
     } catch (error) {

@@ -40,11 +40,11 @@ export class InscripcionesListener {
     const inscripcionesPendientes =
       await this.prisma.inscripcionComision.findMany({
         where: {
-          estudiante_id: estudianteId,
+          estudianteId: estudianteId,
           estado: 'Pendiente',
           comision: {
             activo: true,
-            OR: [{ fecha_fin: null }, { fecha_fin: { gte: hoy } }],
+            OR: [{ fechaFin: null }, { fechaFin: { gte: hoy } }],
           },
         },
         include: {

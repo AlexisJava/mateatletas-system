@@ -39,7 +39,7 @@ const PUNTOS_POR_ACCION: Record<TipoAccionPuntos, number> = {
  *
  * Refactorizado para:
  * - Usar RecursosService.agregarXP() en lugar de puntos_totales directo
- * - Usar tipo_accion (string) en lugar de FK a AccionPuntuable
+ * - Usar tipoAccion (string) en lugar de FK a AccionPuntuable
  */
 @Injectable()
 export class PuntosService {
@@ -64,7 +64,7 @@ export class PuntosService {
    */
   async getHistorialPuntos(estudianteId: string) {
     return this.prisma.puntoObtenido.findMany({
-      where: { estudiante_id: estudianteId },
+      where: { estudianteId: estudianteId },
       include: {
         docente: {
           select: { nombre: true, apellido: true },
@@ -73,11 +73,11 @@ export class PuntosService {
           select: {
             id: true,
             nombre: true,
-            fecha_hora_inicio: true,
+            fechaHoraInicio: true,
           },
         },
       },
-      orderBy: { fecha_otorgado: 'desc' },
+      orderBy: { fechaOtorgado: 'desc' },
       take: 50,
     });
   }
@@ -127,7 +127,7 @@ export class PuntosService {
       throw new NotFoundException('Docente no encontrado');
     }
 
-    // 3. Si se especifica clase_id, validar que existe
+    // 3. Si se especifica claseId, validar que existe
     if (claseId) {
       const clase = await this.prisma.clase.findUnique({
         where: { id: claseId },
@@ -141,10 +141,10 @@ export class PuntosService {
     // 4. Crear registro de punto obtenido
     const puntoObtenido = await this.prisma.puntoObtenido.create({
       data: {
-        estudiante_id: estudianteId,
-        docente_id: docenteId,
-        tipo_accion: tipoAccion,
-        clase_id: claseId,
+        estudianteId: estudianteId,
+        docenteId: docenteId,
+        tipoAccion: tipoAccion,
+        claseId: claseId,
         puntos,
         contexto,
       },
@@ -164,9 +164,9 @@ export class PuntosService {
       puntos,
       tipoAccion,
       {
-        punto_obtenido_id: puntoObtenido.id,
-        docente_id: docenteId,
-        clase_id: claseId,
+        puntoObtenidoId: puntoObtenido.id,
+        docenteId: docenteId,
+        claseId: claseId,
       },
     );
 
@@ -180,7 +180,7 @@ export class PuntosService {
 
   /**
    * Obtener puntos del estudiante
-   * Ahora usa RecursosEstudiante.xp_total como fuente única
+   * Ahora usa RecursosEstudiante.xpTotal como fuente única
    */
   async getPuntosEstudiante(estudianteId: string) {
     // Obtener recursos (XP total)
@@ -189,7 +189,7 @@ export class PuntosService {
 
     // Calcular puntos por asistencia
     const asistencias = await this.prisma.asistencia.findMany({
-      where: { estudiante_id: estudianteId },
+      where: { estudianteId: estudianteId },
       include: {
         clase: {
           select: { id: true, nombre: true },
@@ -212,11 +212,11 @@ export class PuntosService {
       });
 
     return {
-      total: recursos.xp_total,
+      total: recursos.xpTotal,
       nivel: recursos.nivel,
-      porcentaje_nivel: recursos.porcentaje_nivel,
+      porcentajeNivel: recursos.porcentajeNivel,
       asistencia: puntosAsistencia,
-      extras: recursos.xp_total - puntosAsistencia,
+      extras: recursos.xpTotal - puntosAsistencia,
       porClase: puntosPorClase,
     };
   }

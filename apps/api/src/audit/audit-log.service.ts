@@ -35,7 +35,7 @@ export enum AuditAction {
   LOGOUT = 'logout',
   LOGIN_FAILED = 'login_failed',
   PASSWORD_CHANGE = 'password_change',
-  MFA_ENABLED = 'mfa_enabled',
+  MFA_ENABLED = 'mfaEnabled',
   MFA_DISABLED = 'mfa_disabled',
   PAYMENT_CREATED = 'payment_created',
   PAYMENT_APPROVED = 'payment_approved',
@@ -143,12 +143,12 @@ export class AuditLogService {
       const auditLog = await this.prisma.auditLog.create({
         data: {
           timestamp: new Date(),
-          user_id: input.userId ?? null,
-          user_type: input.userType ?? null,
-          user_email: input.userEmail ?? null,
+          userId: input.userId ?? null,
+          userType: input.userType ?? null,
+          userEmail: input.userEmail ?? null,
           action: input.action,
-          entity_type: input.entityType,
-          entity_id: input.entityId ?? null,
+          entityType: input.entityType,
+          entityId: input.entityId ?? null,
           description: input.description,
           changes: input.changes
             ? (input.changes as Prisma.InputJsonValue)
@@ -158,9 +158,9 @@ export class AuditLogService {
             : Prisma.JsonNull,
           severity: input.severity ?? AuditSeverity.INFO,
           category: input.category,
-          ip_address: input.ipAddress ?? null,
-          user_agent: input.userAgent ?? null,
-          request_id: input.requestId ?? null,
+          ipAddress: input.ipAddress ?? null,
+          userAgent: input.userAgent ?? null,
+          requestId: input.requestId ?? null,
         },
       });
 
@@ -342,7 +342,7 @@ export class AuditLogService {
       metadata: {
         amount,
         type,
-        mercadopago_payment_id: mercadopagoPaymentId,
+        mercadopagoPaymentId: mercadopagoPaymentId,
       },
     });
   }
@@ -579,9 +579,9 @@ export class AuditLogService {
   }): { before?: Record<string, unknown>; after?: Record<string, unknown> } {
     const sensitiveFields = [
       'password',
-      'password_hash',
-      'mfa_secret',
-      'mfa_backup_codes',
+      'passwordHash',
+      'mfaSecret',
+      'mfaBackupCodes',
       'token',
       'access_token',
       'refresh_token',
@@ -627,10 +627,10 @@ export class AuditLogService {
   }) {
     const where: Record<string, unknown> = {};
 
-    if (filters.userId) where.user_id = filters.userId;
-    if (filters.userEmail) where.user_email = { contains: filters.userEmail };
+    if (filters.userId) where.userId = filters.userId;
+    if (filters.userEmail) where.userEmail = { contains: filters.userEmail };
     if (filters.action) where.action = filters.action;
-    if (filters.entityType) where.entity_type = filters.entityType;
+    if (filters.entityType) where.entityType = filters.entityType;
     if (filters.category) where.category = filters.category;
     if (filters.severity) where.severity = filters.severity;
 
@@ -774,8 +774,8 @@ export class AuditLogService {
   > {
     const logs = await this.prisma.auditLog.findMany({
       where: {
-        entity_type: entityType,
-        entity_id: entityId,
+        entityType: entityType,
+        entityId: entityId,
       },
       orderBy: {
         timestamp: 'desc',
@@ -784,12 +784,12 @@ export class AuditLogService {
 
     return logs.map((log) => ({
       id: log.id,
-      entityType: log.entity_type,
-      entityId: log.entity_id || '',
+      entityType: log.entityType,
+      entityId: log.entityId || '',
       action: log.action,
-      performedBy: log.user_id || 'system',
+      performedBy: log.userId || 'system',
       performedByType:
-        log.user_type?.toUpperCase() === 'USER' ? 'USER' : 'SYSTEM',
+        log.userType?.toUpperCase() === 'USER' ? 'USER' : 'SYSTEM',
       createdAt: log.timestamp,
     }));
   }
@@ -811,7 +811,7 @@ export class AuditLogService {
   > {
     const logs = await this.prisma.auditLog.findMany({
       where: {
-        user_id: userId,
+        userId: userId,
       },
       orderBy: {
         timestamp: 'desc',
@@ -821,8 +821,8 @@ export class AuditLogService {
     return logs.map((log) => ({
       id: log.id,
       action: log.action,
-      performedBy: log.user_id || 'system',
-      entityId: log.entity_id || '',
+      performedBy: log.userId || 'system',
+      entityId: log.entityId || '',
       createdAt: log.timestamp,
     }));
   }

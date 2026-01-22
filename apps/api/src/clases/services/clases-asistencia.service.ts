@@ -37,7 +37,7 @@ export class ClasesAsistenciaService {
       where: { id: claseId },
       include: {
         inscripciones: {
-          select: { estudiante_id: true },
+          select: { estudianteId: true },
         },
       },
     });
@@ -46,7 +46,7 @@ export class ClasesAsistenciaService {
       throw new NotFoundException(`Clase con ID ${claseId} no encontrada`);
     }
 
-    if (clase.docente_id !== docenteId) {
+    if (clase.docenteId !== docenteId) {
       throw new ForbiddenException(
         'No tienes permiso para registrar asistencia de esta clase',
       );
@@ -54,7 +54,7 @@ export class ClasesAsistenciaService {
 
     // 2. Verificar que todos los estudiantes estén inscritos en la clase
     const estudiantesInscritos = new Set(
-      clase.inscripciones.map((i) => i.estudiante_id),
+      clase.inscripciones.map((i) => i.estudianteId),
     );
 
     for (const asistencia of dto.asistencias) {
@@ -71,16 +71,16 @@ export class ClasesAsistenciaService {
     // Query 1: Obtener asistencias existentes
     const asistenciasExistentes = await this.prisma.asistencia.findMany({
       where: {
-        clase_id: claseId,
-        estudiante_id: { in: estudianteIds },
+        claseId: claseId,
+        estudianteId: { in: estudianteIds },
       },
       select: {
-        estudiante_id: true,
+        estudianteId: true,
       },
     });
 
     const existentesSet = new Set(
-      asistenciasExistentes.map((a) => a.estudiante_id),
+      asistenciasExistentes.map((a) => a.estudianteId),
     );
 
     // Separar actualizaciones de creaciones
@@ -102,16 +102,16 @@ export class ClasesAsistenciaService {
         for (const asistencia of paraActualizar) {
           const updatedRecord = await tx.asistencia.update({
             where: {
-              clase_id_estudiante_id: {
-                clase_id: claseId,
-                estudiante_id: asistencia.estudianteId,
+              claseId_estudianteId: {
+                claseId: claseId,
+                estudianteId: asistencia.estudianteId,
               },
             },
             data: {
               estado: asistencia.estado,
               observaciones: asistencia.observaciones,
-              puntos_otorgados: asistencia.puntosOtorgados || 0,
-              fecha_registro: ahora,
+              puntosOtorgados: asistencia.puntosOtorgados || 0,
+              fechaRegistro: ahora,
             },
             include: {
               estudiante: {
@@ -130,11 +130,11 @@ export class ClasesAsistenciaService {
         for (const asistencia of paraCrear) {
           const createdRecord = await tx.asistencia.create({
             data: {
-              clase_id: claseId,
-              estudiante_id: asistencia.estudianteId,
+              claseId: claseId,
+              estudianteId: asistencia.estudianteId,
               estado: asistencia.estado,
               observaciones: asistencia.observaciones,
-              puntos_otorgados: asistencia.puntosOtorgados || 0,
+              puntosOtorgados: asistencia.puntosOtorgados || 0,
             },
             include: {
               estudiante: {

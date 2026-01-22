@@ -113,15 +113,15 @@ describe('AuditLogService', () => {
     // Assert: Debe crear audit log con datos completos (usando snake_case de Prisma)
     expect(prisma.auditLog.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
-        entity_type: 'inscripcion_2026',
-        entity_id: 'insc-123',
+        entityType: 'inscripcion_2026',
+        entityId: 'insc-123',
         action: 'UPDATE_ESTADO',
-        user_id: 'admin-456',
-        user_type: 'user',
+        userId: 'admin-456',
+        userType: 'user',
         category: 'data_modification',
         severity: 'warning',
-        ip_address: '192.168.1.100',
-        user_agent: 'Mozilla/5.0...',
+        ipAddress: '192.168.1.100',
+        userAgent: 'Mozilla/5.0...',
         metadata: auditData.metadata,
       }),
     });
@@ -172,12 +172,12 @@ describe('AuditLogService', () => {
     // Act: Registrar cambio de webhook
     const result = await service.logStateChange(webhookAuditData);
 
-    // Assert: Debe marcar como SYSTEM (user_type='system' en DB)
+    // Assert: Debe marcar como SYSTEM (userType='system' en DB)
     expect(prisma.auditLog.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
-        user_type: 'system',
-        entity_type: 'inscripcion_2026',
-        entity_id: 'insc-456',
+        userType: 'system',
+        entityType: 'inscripcion_2026',
+        entityId: 'insc-456',
       }),
     });
 
@@ -196,20 +196,20 @@ describe('AuditLogService', () => {
     const mockHistory = [
       {
         id: 'log-003',
-        entity_type: 'inscripcion_2026',
-        entity_id: 'insc-789',
+        entityType: 'inscripcion_2026',
+        entityId: 'insc-789',
         action: 'WEBHOOK_PAYMENT_APPROVED',
-        user_id: null,
-        user_type: 'system',
+        userId: null,
+        userType: 'system',
         timestamp: new Date('2025-11-22T10:30:00Z'),
       },
       {
         id: 'log-002',
-        entity_type: 'inscripcion_2026',
-        entity_id: 'insc-789',
+        entityType: 'inscripcion_2026',
+        entityId: 'insc-789',
         action: 'CREATE',
-        user_id: 'tutor-123',
-        user_type: 'user',
+        userId: 'tutor-123',
+        userType: 'user',
         timestamp: new Date('2025-11-22T10:00:00Z'),
       },
     ];
@@ -225,8 +225,8 @@ describe('AuditLogService', () => {
     // Assert: Debe obtener logs ordenados (Prisma usa snake_case)
     expect(prisma.auditLog.findMany).toHaveBeenCalledWith({
       where: {
-        entity_type: 'inscripcion_2026',
-        entity_id: 'insc-789',
+        entityType: 'inscripcion_2026',
+        entityId: 'insc-789',
       },
       orderBy: {
         timestamp: 'desc',
@@ -251,15 +251,15 @@ describe('AuditLogService', () => {
       {
         id: 'log-004',
         action: 'UPDATE_ESTADO',
-        user_id: 'admin-456',
-        entity_id: 'insc-001',
+        userId: 'admin-456',
+        entityId: 'insc-001',
         timestamp: new Date('2025-11-22T09:00:00Z'),
       },
       {
         id: 'log-005',
         action: 'UPDATE_ESTADO',
-        user_id: 'admin-456',
-        entity_id: 'insc-002',
+        userId: 'admin-456',
+        entityId: 'insc-002',
         timestamp: new Date('2025-11-22T09:30:00Z'),
       },
     ];
@@ -269,10 +269,10 @@ describe('AuditLogService', () => {
     // Act: Obtener logs por usuario
     const userLogs = await service.getUserLogs('admin-456');
 
-    // Assert: Debe filtrar por user_id (Prisma usa snake_case)
+    // Assert: Debe filtrar por userId (Prisma usa snake_case)
     expect(prisma.auditLog.findMany).toHaveBeenCalledWith({
       where: {
-        user_id: 'admin-456',
+        userId: 'admin-456',
       },
       orderBy: {
         timestamp: 'desc',

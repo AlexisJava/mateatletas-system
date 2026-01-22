@@ -25,7 +25,7 @@ export interface DocenteLoginResult {
     roles: Role[];
   };
   /** Indica si el docente debe cambiar su contraseña (primer ingreso o reset por admin) */
-  must_change_password: boolean;
+  mustChangePassword: boolean;
 }
 
 // ============================================================================
@@ -76,7 +76,7 @@ export class DocenteAuthService {
     const verificationResult =
       await this.passwordService.verifyWithTimingProtection(
         password,
-        docente?.password_hash ?? null,
+        docente?.passwordHash ?? null,
       );
 
     // 3. Validar credenciales
@@ -130,7 +130,7 @@ export class DocenteAuthService {
         role: Role.DOCENTE,
         roles: finalRoles,
       },
-      must_change_password: docente.must_change_password,
+      mustChangePassword: docente.mustChangePassword,
     };
   }
 
@@ -144,7 +144,7 @@ export class DocenteAuthService {
     const newHash = await this.passwordService.hash(plainPassword);
     await this.prisma.docente.update({
       where: { id: docenteId },
-      data: { password_hash: newHash },
+      data: { passwordHash: newHash },
     });
     this.logger.log(`Password hash upgraded for docente ${docenteId}`);
   }

@@ -129,7 +129,7 @@ export class ClaseBusinessValidator {
 
     if (userRole === 'docente') {
       // Docente solo puede cancelar SUS clases
-      if (clase.docente_id !== userId) {
+      if (clase.docenteId !== userId) {
         throw new ForbiddenException(
           'No tienes permiso para cancelar esta clase',
         );
@@ -148,7 +148,7 @@ export class ClaseBusinessValidator {
    * @throws BadRequestException si no hay cupos suficientes
    */
   validarCuposDisponibles(clase: Clase, cantidadEstudiantes: number): void {
-    const cuposDisponibles = clase.cupos_maximo - clase.cupos_ocupados;
+    const cuposDisponibles = clase.cuposMaximo - clase.cuposOcupados;
 
     if (cantidadEstudiantes > cuposDisponibles) {
       throw new BadRequestException(
@@ -188,11 +188,11 @@ export class ClaseBusinessValidator {
    * @throws BadRequestException si algún estudiante ya está inscrito
    */
   validarEstudiantesNoInscritos(
-    clase: Clase & { inscripciones: { estudiante_id: string }[] },
+    clase: Clase & { inscripciones: { estudianteId: string }[] },
     estudianteIds: string[],
   ): void {
     const estudiantesYaInscritos = clase.inscripciones
-      .map((i) => i.estudiante_id)
+      .map((i) => i.estudianteId)
       .filter((id) => estudianteIds.includes(id));
 
     if (estudiantesYaInscritos.length > 0) {

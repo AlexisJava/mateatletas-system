@@ -208,21 +208,21 @@ export class SuscripcionFamiliarCommandService {
 
         const suscripcion = await tx.suscripcionFamiliar.create({
           data: {
-            tutor_id: tutorId,
+            tutorId: tutorId,
             tier,
             estado: estadoInicial,
-            monto_mensual: montoMensual,
+            montoMensual: montoMensual,
           },
         });
 
         // 4.2 Crear inscripciones si las hay (MODELO 2026: tier por inscripción)
         if (inscripciones && inscripciones.length > 0) {
           const inscripcionesData = inscripciones.map((insc) => ({
-            suscripcion_familiar_id: suscripcion.id,
-            estudiante_id: insc.estudianteId,
-            producto_id: insc.productoId,
-            clase_grupo_id: insc.claseGrupoId ?? null,
-            comision_id: insc.comisionId ?? null,
+            suscripcionFamiliarId: suscripcion.id,
+            estudianteId: insc.estudianteId,
+            productoId: insc.productoId,
+            claseGrupoId: insc.claseGrupoId ?? null,
+            comisionId: insc.comisionId ?? null,
             estado: EstadoInscripcionActividad.ACTIVA,
             // MODELO 2026: Guardar tier específico de cada inscripción
             // Si no se especifica, usa el tier de la suscripción como fallback
@@ -243,7 +243,7 @@ export class SuscripcionFamiliarCommandService {
             payer_email: usarBricks ? payerEmail : tutorEmail,
             back_url: `${this.frontendUrl}/tutor/suscripcion/callback`,
             reason: `Suscripción Familiar Mateatletas - ${tier} (${tutorNombre})`,
-            external_reference: `suscripcion_familiar:${suscripcion.id}`,
+            externalReference: `suscripcionFamiliar:${suscripcion.id}`,
             auto_recurring: {
               frequency: 1,
               frequency_type: 'months',
@@ -275,7 +275,7 @@ export class SuscripcionFamiliarCommandService {
         // 4.4 Actualizar con ID de MercadoPago
         await tx.suscripcionFamiliar.update({
           where: { id: suscripcion.id },
-          data: { preapproval_id: mpPreapprovalId },
+          data: { preapprovalId: mpPreapprovalId },
         });
 
         return {
@@ -327,7 +327,7 @@ export class SuscripcionFamiliarCommandService {
       );
     }
 
-    if (suscripcion.tutor_id !== tutorId) {
+    if (suscripcion.tutorId !== tutorId) {
       throw new SuscripcionFamiliarError(
         'No autorizado',
         SuscripcionFamiliarErrorCode.UNAUTHORIZED,
@@ -383,7 +383,7 @@ export class SuscripcionFamiliarCommandService {
       });
     }
 
-    const montoAnterior = suscripcion.monto_mensual;
+    const montoAnterior = suscripcion.montoMensual;
     const calculoNuevo = calcularMontoMensualConTiers([
       ...inscripcionesActualesConTier,
       ...inscripcionesNuevasConTier,
@@ -398,11 +398,11 @@ export class SuscripcionFamiliarCommandService {
         for (const insc of inscripciones) {
           const nueva = await tx.inscripcionActividad.create({
             data: {
-              suscripcion_familiar_id: suscripcionFamiliarId,
-              estudiante_id: insc.estudianteId,
-              producto_id: insc.productoId,
-              clase_grupo_id: insc.claseGrupoId ?? null,
-              comision_id: insc.comisionId ?? null,
+              suscripcionFamiliarId: suscripcionFamiliarId,
+              estudianteId: insc.estudianteId,
+              productoId: insc.productoId,
+              claseGrupoId: insc.claseGrupoId ?? null,
+              comisionId: insc.comisionId ?? null,
               estado: EstadoInscripcionActividad.ACTIVA,
               // MODELO 2026: tier específico por inscripción
               tier: insc.tier ?? suscripcion.tier,
@@ -413,12 +413,12 @@ export class SuscripcionFamiliarCommandService {
           // Registrar cambio
           await tx.cambioInscripcion.create({
             data: {
-              suscripcion_familiar_id: suscripcionFamiliarId,
+              suscripcionFamiliarId: suscripcionFamiliarId,
               tipo: TipoCambioInscripcion.ALTA,
-              inscripcion_nueva_id: nueva.id,
-              aplica_desde: new Date(),
-              monto_anterior: montoAnterior,
-              monto_nuevo: nuevoMontoMensual,
+              inscripcionNuevaId: nueva.id,
+              aplicaDesde: new Date(),
+              montoAnterior: montoAnterior,
+              montoNuevo: nuevoMontoMensual,
             },
           });
         }
@@ -426,7 +426,7 @@ export class SuscripcionFamiliarCommandService {
         // Actualizar monto mensual
         await tx.suscripcionFamiliar.update({
           where: { id: suscripcionFamiliarId },
-          data: { monto_mensual: nuevoMontoMensual },
+          data: { montoMensual: nuevoMontoMensual },
         });
 
         return creadas;
@@ -471,7 +471,7 @@ export class SuscripcionFamiliarCommandService {
       );
     }
 
-    if (suscripcion.tutor_id !== tutorId) {
+    if (suscripcion.tutorId !== tutorId) {
       throw new SuscripcionFamiliarError(
         'No autorizado',
         SuscripcionFamiliarErrorCode.UNAUTHORIZED,
@@ -488,7 +488,7 @@ export class SuscripcionFamiliarCommandService {
         i.producto.precio?.toNumber() ?? obtenerPrecioTier(suscripcion.tier),
     );
 
-    const montoAnterior = suscripcion.monto_mensual;
+    const montoAnterior = suscripcion.montoMensual;
     const calculoNuevo = calcularMontoMensualTotal(preciosRestantes);
     const nuevoMontoMensual = calculoNuevo.montoConDescuento;
 
@@ -499,19 +499,19 @@ export class SuscripcionFamiliarCommandService {
           where: { id: inscId },
           data: {
             estado: EstadoInscripcionActividad.CANCELADA,
-            fecha_fin: new Date(),
+            fechaFin: new Date(),
           },
         });
 
         // Registrar cambio
         await tx.cambioInscripcion.create({
           data: {
-            suscripcion_familiar_id: suscripcionFamiliarId,
+            suscripcionFamiliarId: suscripcionFamiliarId,
             tipo: TipoCambioInscripcion.BAJA,
-            inscripcion_anterior_id: inscId,
-            aplica_desde: new Date(),
-            monto_anterior: montoAnterior,
-            monto_nuevo: nuevoMontoMensual,
+            inscripcionAnteriorId: inscId,
+            aplicaDesde: new Date(),
+            montoAnterior: montoAnterior,
+            montoNuevo: nuevoMontoMensual,
             detalle: { motivo },
           },
         });
@@ -520,7 +520,7 @@ export class SuscripcionFamiliarCommandService {
       // Actualizar monto mensual
       await tx.suscripcionFamiliar.update({
         where: { id: suscripcionFamiliarId },
-        data: { monto_mensual: nuevoMontoMensual },
+        data: { montoMensual: nuevoMontoMensual },
       });
     });
 
@@ -552,7 +552,7 @@ export class SuscripcionFamiliarCommandService {
       );
     }
 
-    if (suscripcion.tutor_id !== tutorId && canceladoPor !== 'admin') {
+    if (suscripcion.tutorId !== tutorId && canceladoPor !== 'admin') {
       throw new SuscripcionFamiliarError(
         'No autorizado',
         SuscripcionFamiliarErrorCode.UNAUTHORIZED,
@@ -566,14 +566,14 @@ export class SuscripcionFamiliarCommandService {
       );
     }
 
-    const montoAnterior = suscripcion.monto_mensual;
+    const montoAnterior = suscripcion.montoMensual;
 
     await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
       // Cancelar en MercadoPago si tiene preapproval y está configurado
-      if (suscripcion.preapproval_id && this.mpClient.isConfigured()) {
+      if (suscripcion.preapprovalId && this.mpClient.isConfigured()) {
         await this.circuitBreaker.execute(async () => {
           return await this.mpClient.cancel(
-            suscripcion.preapproval_id as string,
+            suscripcion.preapprovalId as string,
           );
         });
       }
@@ -583,30 +583,30 @@ export class SuscripcionFamiliarCommandService {
         where: { id: suscripcionFamiliarId },
         data: {
           estado: EstadoSuscripcionFamiliar.CANCELLED,
-          monto_mensual: 0,
+          montoMensual: 0,
         },
       });
 
       // Cancelar todas las inscripciones activas
       await tx.inscripcionActividad.updateMany({
         where: {
-          suscripcion_familiar_id: suscripcionFamiliarId,
+          suscripcionFamiliarId: suscripcionFamiliarId,
           estado: EstadoInscripcionActividad.ACTIVA,
         },
         data: {
           estado: EstadoInscripcionActividad.CANCELADA,
-          fecha_fin: new Date(),
+          fechaFin: new Date(),
         },
       });
 
       // Registrar cambio
       await tx.cambioInscripcion.create({
         data: {
-          suscripcion_familiar_id: suscripcionFamiliarId,
+          suscripcionFamiliarId: suscripcionFamiliarId,
           tipo: TipoCambioInscripcion.BAJA,
-          aplica_desde: new Date(),
-          monto_anterior: montoAnterior,
-          monto_nuevo: 0,
+          aplicaDesde: new Date(),
+          montoAnterior: montoAnterior,
+          montoNuevo: 0,
           detalle: { motivo, canceladoPor },
         },
       });
@@ -644,7 +644,7 @@ export class SuscripcionFamiliarCommandService {
       );
     }
 
-    if (suscripcion.tutor_id !== tutorId) {
+    if (suscripcion.tutorId !== tutorId) {
       throw new SuscripcionFamiliarError(
         'No autorizado',
         SuscripcionFamiliarErrorCode.UNAUTHORIZED,
@@ -662,7 +662,7 @@ export class SuscripcionFamiliarCommandService {
     // 2. Validar que el nuevo ClaseGrupo pertenece al mismo producto
     const nuevoClaseGrupo = await this.prisma.claseGrupo.findUnique({
       where: { id: nuevoClaseGrupoId },
-      select: { id: true, nombre: true, producto_id: true },
+      select: { id: true, nombre: true, productoId: true },
     });
 
     if (!nuevoClaseGrupo) {
@@ -672,31 +672,31 @@ export class SuscripcionFamiliarCommandService {
       );
     }
 
-    if (nuevoClaseGrupo.producto_id !== inscripcion.producto.id) {
+    if (nuevoClaseGrupo.productoId !== inscripcion.producto.id) {
       throw new SuscripcionFamiliarError(
         'El nuevo horario debe pertenecer al mismo producto',
         SuscripcionFamiliarErrorCode.INVALID_STATE,
       );
     }
 
-    const claseGrupoAnteriorId = inscripcion.clase_grupo_id ?? '';
+    const claseGrupoAnteriorId = inscripcion.claseGrupoId ?? '';
 
     // 3. Actualizar inscripción
     await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
       await tx.inscripcionActividad.update({
         where: { id: inscripcionId },
-        data: { clase_grupo_id: nuevoClaseGrupoId },
+        data: { claseGrupoId: nuevoClaseGrupoId },
       });
 
       // Registrar cambio
       await tx.cambioInscripcion.create({
         data: {
-          suscripcion_familiar_id: suscripcionFamiliarId,
+          suscripcionFamiliarId: suscripcionFamiliarId,
           tipo: TipoCambioInscripcion.CAMBIO_HORARIO,
-          inscripcion_anterior_id: inscripcionId,
-          aplica_desde: new Date(),
-          monto_anterior: suscripcion.monto_mensual,
-          monto_nuevo: suscripcion.monto_mensual,
+          inscripcionAnteriorId: inscripcionId,
+          aplicaDesde: new Date(),
+          montoAnterior: suscripcion.montoMensual,
+          montoNuevo: suscripcion.montoMensual,
           detalle: {
             claseGrupoAnteriorId,
             nuevoClaseGrupoId,
@@ -752,7 +752,7 @@ export class SuscripcionFamiliarCommandService {
       );
     }
 
-    if (suscripcion.tutor_id !== tutorId) {
+    if (suscripcion.tutorId !== tutorId) {
       throw new SuscripcionFamiliarError(
         'No autorizado',
         SuscripcionFamiliarErrorCode.UNAUTHORIZED,
@@ -783,7 +783,7 @@ export class SuscripcionFamiliarCommandService {
     }
 
     // 3. Calcular nuevo monto
-    const montoAnterior = suscripcion.monto_mensual;
+    const montoAnterior = suscripcion.montoMensual;
     const preciosActuales = suscripcion.inscripciones.map((i) =>
       i.id === inscripcionId
         ? (nuevoProducto.precio?.toNumber() ??
@@ -800,27 +800,27 @@ export class SuscripcionFamiliarCommandService {
       await tx.inscripcionActividad.update({
         where: { id: inscripcionId },
         data: {
-          producto_id: nuevoProductoId,
-          clase_grupo_id: nuevoClaseGrupoId ?? null,
-          comision_id: nuevaComisionId ?? null,
+          productoId: nuevoProductoId,
+          claseGrupoId: nuevoClaseGrupoId ?? null,
+          comisionId: nuevaComisionId ?? null,
         },
       });
 
       // Actualizar monto de suscripción
       await tx.suscripcionFamiliar.update({
         where: { id: suscripcionFamiliarId },
-        data: { monto_mensual: nuevoMontoMensual },
+        data: { montoMensual: nuevoMontoMensual },
       });
 
       // Registrar cambio
       await tx.cambioInscripcion.create({
         data: {
-          suscripcion_familiar_id: suscripcionFamiliarId,
+          suscripcionFamiliarId: suscripcionFamiliarId,
           tipo: TipoCambioInscripcion.CAMBIO_PRODUCTO,
-          inscripcion_anterior_id: inscripcionId,
-          aplica_desde: new Date(),
-          monto_anterior: montoAnterior,
-          monto_nuevo: nuevoMontoMensual,
+          inscripcionAnteriorId: inscripcionId,
+          aplicaDesde: new Date(),
+          montoAnterior: montoAnterior,
+          montoNuevo: nuevoMontoMensual,
           detalle: {
             productoAnteriorId: inscripcionActual.producto.id,
             nuevoProductoId,
@@ -832,11 +832,11 @@ export class SuscripcionFamiliarCommandService {
     // 5. Actualizar monto en MercadoPago si cambió
     if (
       montoAnterior !== nuevoMontoMensual &&
-      suscripcion.preapproval_id &&
+      suscripcion.preapprovalId &&
       this.mpClient.isConfigured()
     ) {
       await this.actualizarMontoEnMercadoPago(
-        suscripcion.preapproval_id,
+        suscripcion.preapprovalId,
         nuevoMontoMensual,
       );
     }
@@ -884,7 +884,7 @@ export class SuscripcionFamiliarCommandService {
       );
     }
 
-    if (suscripcion.tutor_id !== tutorId) {
+    if (suscripcion.tutorId !== tutorId) {
       throw new SuscripcionFamiliarError(
         'No autorizado',
         SuscripcionFamiliarErrorCode.UNAUTHORIZED,
@@ -899,7 +899,7 @@ export class SuscripcionFamiliarCommandService {
     }
 
     const tierAnterior = suscripcion.tier;
-    const montoAnterior = suscripcion.monto_mensual;
+    const montoAnterior = suscripcion.montoMensual;
 
     // 2. Recalcular monto con nuevo tier (para inscripciones sin precio específico)
     const precios = suscripcion.inscripciones.map(
@@ -915,18 +915,18 @@ export class SuscripcionFamiliarCommandService {
         where: { id: suscripcionFamiliarId },
         data: {
           tier: nuevoTier,
-          monto_mensual: nuevoMontoMensual,
+          montoMensual: nuevoMontoMensual,
         },
       });
 
       // Registrar cambio
       await tx.cambioInscripcion.create({
         data: {
-          suscripcion_familiar_id: suscripcionFamiliarId,
+          suscripcionFamiliarId: suscripcionFamiliarId,
           tipo: TipoCambioInscripcion.CAMBIO_TIER,
-          aplica_desde: new Date(),
-          monto_anterior: montoAnterior,
-          monto_nuevo: nuevoMontoMensual,
+          aplicaDesde: new Date(),
+          montoAnterior: montoAnterior,
+          montoNuevo: nuevoMontoMensual,
           detalle: {
             tierAnterior,
             nuevoTier,
@@ -938,11 +938,11 @@ export class SuscripcionFamiliarCommandService {
     // 4. Actualizar monto en MercadoPago si cambió
     if (
       montoAnterior !== nuevoMontoMensual &&
-      suscripcion.preapproval_id &&
+      suscripcion.preapprovalId &&
       this.mpClient.isConfigured()
     ) {
       await this.actualizarMontoEnMercadoPago(
-        suscripcion.preapproval_id,
+        suscripcion.preapprovalId,
         nuevoMontoMensual,
       );
     }
@@ -976,7 +976,7 @@ export class SuscripcionFamiliarCommandService {
     const inscripcion = await this.prisma.inscripcionActividad.findUnique({
       where: { id: inscripcionId },
       include: {
-        suscripcion_familiar: {
+        suscripcionFamiliar: {
           include: {
             inscripciones: {
               where: { estado: EstadoInscripcionActividad.ACTIVA },
@@ -996,7 +996,7 @@ export class SuscripcionFamiliarCommandService {
     }
 
     // 2. Validar ownership
-    if (inscripcion.suscripcion_familiar.tutor_id !== tutorId) {
+    if (inscripcion.suscripcionFamiliar.tutorId !== tutorId) {
       throw new SuscripcionFamiliarError(
         'No autorizado',
         SuscripcionFamiliarErrorCode.UNAUTHORIZED,
@@ -1013,7 +1013,7 @@ export class SuscripcionFamiliarCommandService {
 
     // 4. Validar estado de suscripción
     if (
-      inscripcion.suscripcion_familiar.estado ===
+      inscripcion.suscripcionFamiliar.estado ===
       EstadoSuscripcionFamiliar.CANCELLED
     ) {
       throw new SuscripcionFamiliarError(
@@ -1023,18 +1023,18 @@ export class SuscripcionFamiliarCommandService {
     }
 
     const tierAnterior = inscripcion.tier;
-    const montoAnterior = inscripcion.suscripcion_familiar.monto_mensual;
-    const suscripcionId = inscripcion.suscripcion_familiar_id;
+    const montoAnterior = inscripcion.suscripcionFamiliar.montoMensual;
+    const suscripcionId = inscripcion.suscripcionFamiliarId;
 
     // 5. Calcular nuevo monto con la nueva lógica (tier por inscripción)
     // Crear array de inscripciones con sus tiers, actualizando el tier de la inscripción actual
     const inscripcionesParaCalculo: InscripcionConTier[] =
-      inscripcion.suscripcion_familiar.inscripciones.map((insc) => ({
+      inscripcion.suscripcionFamiliar.inscripciones.map((insc) => ({
         id: insc.id,
         tier:
           insc.id === inscripcionId
             ? nuevoTier
-            : (insc.tier ?? inscripcion.suscripcion_familiar.tier),
+            : (insc.tier ?? inscripcion.suscripcionFamiliar.tier),
       }));
 
     const calculoNuevo = calcularMontoMensualConTiers(inscripcionesParaCalculo);
@@ -1051,18 +1051,18 @@ export class SuscripcionFamiliarCommandService {
       // Actualizar monto de la suscripción
       await tx.suscripcionFamiliar.update({
         where: { id: suscripcionId },
-        data: { monto_mensual: nuevoMontoMensual },
+        data: { montoMensual: nuevoMontoMensual },
       });
 
       // Registrar cambio
       await tx.cambioInscripcion.create({
         data: {
-          suscripcion_familiar_id: suscripcionId,
+          suscripcionFamiliarId: suscripcionId,
           tipo: TipoCambioInscripcion.CAMBIO_TIER,
-          inscripcion_anterior_id: inscripcionId,
-          aplica_desde: new Date(),
-          monto_anterior: montoAnterior,
-          monto_nuevo: nuevoMontoMensual,
+          inscripcionAnteriorId: inscripcionId,
+          aplicaDesde: new Date(),
+          montoAnterior: montoAnterior,
+          montoNuevo: nuevoMontoMensual,
           detalle: {
             tierAnterior,
             nuevoTier,
@@ -1075,11 +1075,11 @@ export class SuscripcionFamiliarCommandService {
     // 7. Actualizar monto en MercadoPago si cambió
     if (
       montoAnterior !== nuevoMontoMensual &&
-      inscripcion.suscripcion_familiar.preapproval_id &&
+      inscripcion.suscripcionFamiliar.preapprovalId &&
       this.mpClient.isConfigured()
     ) {
       await this.actualizarMontoEnMercadoPago(
-        inscripcion.suscripcion_familiar.preapproval_id,
+        inscripcion.suscripcionFamiliar.preapprovalId,
         nuevoMontoMensual,
       );
     }
@@ -1138,9 +1138,9 @@ export class SuscripcionFamiliarCommandService {
     const estadoAnterior = suscripcion.estado;
 
     // Pausar en MercadoPago si está configurado
-    if (suscripcion.preapproval_id && this.mpClient.isConfigured()) {
+    if (suscripcion.preapprovalId && this.mpClient.isConfigured()) {
       await this.circuitBreaker.execute(async () => {
-        return await this.mpClient.pause(suscripcion.preapproval_id as string);
+        return await this.mpClient.pause(suscripcion.preapprovalId as string);
       });
     }
 
@@ -1192,10 +1192,10 @@ export class SuscripcionFamiliarCommandService {
     const estadoAnterior = suscripcion.estado;
 
     // Reactivar en MercadoPago si está configurado
-    if (suscripcion.preapproval_id && this.mpClient.isConfigured()) {
+    if (suscripcion.preapprovalId && this.mpClient.isConfigured()) {
       await this.circuitBreaker.execute(async () => {
         return await this.mpClient.reactivate(
-          suscripcion.preapproval_id as string,
+          suscripcion.preapprovalId as string,
         );
       });
     }
@@ -1231,7 +1231,7 @@ export class SuscripcionFamiliarCommandService {
     const inscripcion = await this.prisma.inscripcionActividad.findUnique({
       where: { id: inscripcionId },
       include: {
-        suscripcion_familiar: {
+        suscripcionFamiliar: {
           include: {
             inscripciones: {
               where: { estado: EstadoInscripcionActividad.ACTIVA },
@@ -1258,7 +1258,7 @@ export class SuscripcionFamiliarCommandService {
 
     // 3. Validar estado de suscripción
     if (
-      inscripcion.suscripcion_familiar.estado ===
+      inscripcion.suscripcionFamiliar.estado ===
       EstadoSuscripcionFamiliar.CANCELLED
     ) {
       throw new SuscripcionFamiliarError(
@@ -1268,17 +1268,17 @@ export class SuscripcionFamiliarCommandService {
     }
 
     const tierAnterior = inscripcion.tier;
-    const montoAnterior = inscripcion.suscripcion_familiar.monto_mensual;
-    const suscripcionId = inscripcion.suscripcion_familiar_id;
+    const montoAnterior = inscripcion.suscripcionFamiliar.montoMensual;
+    const suscripcionId = inscripcion.suscripcionFamiliarId;
 
     // 4. Calcular nuevo monto con la nueva lógica (tier por inscripción)
     const inscripcionesParaCalculo: InscripcionConTier[] =
-      inscripcion.suscripcion_familiar.inscripciones.map((insc) => ({
+      inscripcion.suscripcionFamiliar.inscripciones.map((insc) => ({
         id: insc.id,
         tier:
           insc.id === inscripcionId
             ? nuevoTier
-            : (insc.tier ?? inscripcion.suscripcion_familiar.tier),
+            : (insc.tier ?? inscripcion.suscripcionFamiliar.tier),
       }));
 
     const calculoNuevo = calcularMontoMensualConTiers(inscripcionesParaCalculo);
@@ -1295,18 +1295,18 @@ export class SuscripcionFamiliarCommandService {
       // Actualizar monto de la suscripción
       await tx.suscripcionFamiliar.update({
         where: { id: suscripcionId },
-        data: { monto_mensual: nuevoMontoMensual },
+        data: { montoMensual: nuevoMontoMensual },
       });
 
       // Registrar cambio
       await tx.cambioInscripcion.create({
         data: {
-          suscripcion_familiar_id: suscripcionId,
+          suscripcionFamiliarId: suscripcionId,
           tipo: TipoCambioInscripcion.CAMBIO_TIER,
-          inscripcion_anterior_id: inscripcionId,
-          aplica_desde: new Date(),
-          monto_anterior: montoAnterior,
-          monto_nuevo: nuevoMontoMensual,
+          inscripcionAnteriorId: inscripcionId,
+          aplicaDesde: new Date(),
+          montoAnterior: montoAnterior,
+          montoNuevo: nuevoMontoMensual,
           detalle: {
             tierAnterior,
             nuevoTier,
@@ -1321,11 +1321,11 @@ export class SuscripcionFamiliarCommandService {
     // 6. Actualizar monto en MercadoPago si cambió
     if (
       montoAnterior !== nuevoMontoMensual &&
-      inscripcion.suscripcion_familiar.preapproval_id &&
+      inscripcion.suscripcionFamiliar.preapprovalId &&
       this.mpClient.isConfigured()
     ) {
       await this.actualizarMontoEnMercadoPago(
-        inscripcion.suscripcion_familiar.preapproval_id,
+        inscripcion.suscripcionFamiliar.preapprovalId,
         nuevoMontoMensual,
       );
     }
@@ -1364,7 +1364,7 @@ export class SuscripcionFamiliarCommandService {
     const inscripcion = await this.prisma.inscripcionActividad.findUnique({
       where: { id: inscripcionId },
       include: {
-        suscripcion_familiar: {
+        suscripcionFamiliar: {
           include: {
             inscripciones: {
               where: { estado: EstadoInscripcionActividad.ACTIVA },
@@ -1384,7 +1384,7 @@ export class SuscripcionFamiliarCommandService {
     }
 
     // 2. Validar ownership
-    if (inscripcion.suscripcion_familiar.tutor_id !== tutorId) {
+    if (inscripcion.suscripcionFamiliar.tutorId !== tutorId) {
       throw new SuscripcionFamiliarError(
         'No autorizado',
         SuscripcionFamiliarErrorCode.UNAUTHORIZED,
@@ -1401,7 +1401,7 @@ export class SuscripcionFamiliarCommandService {
 
     // 4. Validar que la suscripción no esté cancelada
     if (
-      inscripcion.suscripcion_familiar.estado ===
+      inscripcion.suscripcionFamiliar.estado ===
       EstadoSuscripcionFamiliar.CANCELLED
     ) {
       throw new SuscripcionFamiliarError(
@@ -1410,19 +1410,19 @@ export class SuscripcionFamiliarCommandService {
       );
     }
 
-    const montoAnterior = inscripcion.suscripcion_familiar.monto_mensual;
-    const suscripcionId = inscripcion.suscripcion_familiar_id;
+    const montoAnterior = inscripcion.suscripcionFamiliar.montoMensual;
+    const suscripcionId = inscripcion.suscripcionFamiliarId;
 
     // 5. Calcular nuevo monto (sin la inscripción pausada)
     const inscripcionesActivas =
-      inscripcion.suscripcion_familiar.inscripciones.filter(
+      inscripcion.suscripcionFamiliar.inscripciones.filter(
         (i) => i.id !== inscripcionId,
       );
 
     const inscripcionesParaCalculo: InscripcionConTier[] =
       inscripcionesActivas.map((insc) => ({
         id: insc.id,
-        tier: insc.tier ?? inscripcion.suscripcion_familiar.tier,
+        tier: insc.tier ?? inscripcion.suscripcionFamiliar.tier,
       }));
 
     const calculoNuevo = calcularMontoMensualConTiers(inscripcionesParaCalculo);
@@ -1439,18 +1439,18 @@ export class SuscripcionFamiliarCommandService {
       // Actualizar monto de suscripción
       await tx.suscripcionFamiliar.update({
         where: { id: suscripcionId },
-        data: { monto_mensual: nuevoMontoMensual },
+        data: { montoMensual: nuevoMontoMensual },
       });
 
       // Registrar cambio
       await tx.cambioInscripcion.create({
         data: {
-          suscripcion_familiar_id: suscripcionId,
+          suscripcionFamiliarId: suscripcionId,
           tipo: TipoCambioInscripcion.BAJA, // Usamos BAJA como tipo para pausas temporales
-          inscripcion_anterior_id: inscripcionId,
-          aplica_desde: new Date(),
-          monto_anterior: montoAnterior,
-          monto_nuevo: nuevoMontoMensual,
+          inscripcionAnteriorId: inscripcionId,
+          aplicaDesde: new Date(),
+          montoAnterior: montoAnterior,
+          montoNuevo: nuevoMontoMensual,
           detalle: {
             accion: 'pausar',
             motivo: motivo ?? 'Pausa solicitada por tutor',
@@ -1462,11 +1462,11 @@ export class SuscripcionFamiliarCommandService {
     // 7. Actualizar monto en MercadoPago si cambió
     if (
       montoAnterior !== nuevoMontoMensual &&
-      inscripcion.suscripcion_familiar.preapproval_id &&
+      inscripcion.suscripcionFamiliar.preapprovalId &&
       this.mpClient.isConfigured()
     ) {
       await this.actualizarMontoEnMercadoPago(
-        inscripcion.suscripcion_familiar.preapproval_id,
+        inscripcion.suscripcionFamiliar.preapprovalId,
         nuevoMontoMensual,
       );
     }
@@ -1502,7 +1502,7 @@ export class SuscripcionFamiliarCommandService {
     const inscripcion = await this.prisma.inscripcionActividad.findUnique({
       where: { id: inscripcionId },
       include: {
-        suscripcion_familiar: {
+        suscripcionFamiliar: {
           include: {
             inscripciones: {
               where: { estado: EstadoInscripcionActividad.ACTIVA },
@@ -1522,7 +1522,7 @@ export class SuscripcionFamiliarCommandService {
     }
 
     // 2. Validar ownership
-    if (inscripcion.suscripcion_familiar.tutor_id !== tutorId) {
+    if (inscripcion.suscripcionFamiliar.tutorId !== tutorId) {
       throw new SuscripcionFamiliarError(
         'No autorizado',
         SuscripcionFamiliarErrorCode.UNAUTHORIZED,
@@ -1539,7 +1539,7 @@ export class SuscripcionFamiliarCommandService {
 
     // 4. Validar que la suscripción esté activa o pausada (no cancelada)
     if (
-      inscripcion.suscripcion_familiar.estado ===
+      inscripcion.suscripcionFamiliar.estado ===
       EstadoSuscripcionFamiliar.CANCELLED
     ) {
       throw new SuscripcionFamiliarError(
@@ -1548,21 +1548,21 @@ export class SuscripcionFamiliarCommandService {
       );
     }
 
-    const montoAnterior = inscripcion.suscripcion_familiar.monto_mensual;
-    const suscripcionId = inscripcion.suscripcion_familiar_id;
+    const montoAnterior = inscripcion.suscripcionFamiliar.montoMensual;
+    const suscripcionId = inscripcion.suscripcionFamiliarId;
 
     // 5. Calcular nuevo monto (incluyendo la inscripción reactivada)
-    const inscripcionesActivas = inscripcion.suscripcion_familiar.inscripciones;
+    const inscripcionesActivas = inscripcion.suscripcionFamiliar.inscripciones;
 
     const inscripcionesParaCalculo: InscripcionConTier[] = [
       ...inscripcionesActivas.map((insc) => ({
         id: insc.id,
-        tier: insc.tier ?? inscripcion.suscripcion_familiar.tier,
+        tier: insc.tier ?? inscripcion.suscripcionFamiliar.tier,
       })),
       // Agregar la inscripción que vamos a reactivar
       {
         id: inscripcionId,
-        tier: inscripcion.tier ?? inscripcion.suscripcion_familiar.tier,
+        tier: inscripcion.tier ?? inscripcion.suscripcionFamiliar.tier,
       },
     ];
 
@@ -1580,18 +1580,18 @@ export class SuscripcionFamiliarCommandService {
       // Actualizar monto de suscripción
       await tx.suscripcionFamiliar.update({
         where: { id: suscripcionId },
-        data: { monto_mensual: nuevoMontoMensual },
+        data: { montoMensual: nuevoMontoMensual },
       });
 
       // Registrar cambio
       await tx.cambioInscripcion.create({
         data: {
-          suscripcion_familiar_id: suscripcionId,
+          suscripcionFamiliarId: suscripcionId,
           tipo: TipoCambioInscripcion.ALTA, // Usamos ALTA para reactivaciones
-          inscripcion_nueva_id: inscripcionId,
-          aplica_desde: new Date(),
-          monto_anterior: montoAnterior,
-          monto_nuevo: nuevoMontoMensual,
+          inscripcionNuevaId: inscripcionId,
+          aplicaDesde: new Date(),
+          montoAnterior: montoAnterior,
+          montoNuevo: nuevoMontoMensual,
           detalle: { accion: 'reactivar' },
         },
       });
@@ -1600,11 +1600,11 @@ export class SuscripcionFamiliarCommandService {
     // 7. Actualizar monto en MercadoPago si cambió
     if (
       montoAnterior !== nuevoMontoMensual &&
-      inscripcion.suscripcion_familiar.preapproval_id &&
+      inscripcion.suscripcionFamiliar.preapprovalId &&
       this.mpClient.isConfigured()
     ) {
       await this.actualizarMontoEnMercadoPago(
-        inscripcion.suscripcion_familiar.preapproval_id,
+        inscripcion.suscripcionFamiliar.preapprovalId,
         nuevoMontoMensual,
       );
     }
@@ -1638,7 +1638,7 @@ export class SuscripcionFamiliarCommandService {
 
     // 1. Obtener suscripción del tutor
     const suscripcion = await this.prisma.suscripcionFamiliar.findFirst({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
       include: {
         inscripciones: {
           where: { estado: EstadoInscripcionActividad.ACTIVA },
@@ -1663,9 +1663,9 @@ export class SuscripcionFamiliarCommandService {
     const inscripcionesAPausar = suscripcion.inscripciones.length;
 
     // 2. Pausar en MercadoPago si está configurado
-    if (suscripcion.preapproval_id && this.mpClient.isConfigured()) {
+    if (suscripcion.preapprovalId && this.mpClient.isConfigured()) {
       await this.circuitBreaker.execute(async () => {
-        return await this.mpClient.pause(suscripcion.preapproval_id as string);
+        return await this.mpClient.pause(suscripcion.preapprovalId as string);
       });
     }
 
@@ -1680,7 +1680,7 @@ export class SuscripcionFamiliarCommandService {
       // Pausar todas las inscripciones activas
       await tx.inscripcionActividad.updateMany({
         where: {
-          suscripcion_familiar_id: suscripcion.id,
+          suscripcionFamiliarId: suscripcion.id,
           estado: EstadoInscripcionActividad.ACTIVA,
         },
         data: { estado: EstadoInscripcionActividad.PAUSADA },
@@ -1689,11 +1689,11 @@ export class SuscripcionFamiliarCommandService {
       // Registrar cambio
       await tx.cambioInscripcion.create({
         data: {
-          suscripcion_familiar_id: suscripcion.id,
+          suscripcionFamiliarId: suscripcion.id,
           tipo: TipoCambioInscripcion.BAJA,
-          aplica_desde: new Date(),
-          monto_anterior: suscripcion.monto_mensual,
-          monto_nuevo: 0,
+          aplicaDesde: new Date(),
+          montoAnterior: suscripcion.montoMensual,
+          montoNuevo: 0,
           detalle: {
             accion: 'pausar_suscripcion',
             motivo: motivo ?? 'Pausa solicitada por tutor',
@@ -1727,7 +1727,7 @@ export class SuscripcionFamiliarCommandService {
 
     // 1. Obtener suscripción del tutor
     const suscripcion = await this.prisma.suscripcionFamiliar.findFirst({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
       include: {
         inscripciones: {
           where: { estado: EstadoInscripcionActividad.PAUSADA },
@@ -1762,10 +1762,10 @@ export class SuscripcionFamiliarCommandService {
     const nuevoMontoMensual = calculoNuevo.montoConDescuento;
 
     // 3. Reactivar en MercadoPago si está configurado
-    if (suscripcion.preapproval_id && this.mpClient.isConfigured()) {
+    if (suscripcion.preapprovalId && this.mpClient.isConfigured()) {
       await this.circuitBreaker.execute(async () => {
         return await this.mpClient.reactivate(
-          suscripcion.preapproval_id as string,
+          suscripcion.preapprovalId as string,
         );
       });
     }
@@ -1777,14 +1777,14 @@ export class SuscripcionFamiliarCommandService {
         where: { id: suscripcion.id },
         data: {
           estado: EstadoSuscripcionFamiliar.AUTHORIZED,
-          monto_mensual: nuevoMontoMensual,
+          montoMensual: nuevoMontoMensual,
         },
       });
 
       // Reactivar todas las inscripciones pausadas
       await tx.inscripcionActividad.updateMany({
         where: {
-          suscripcion_familiar_id: suscripcion.id,
+          suscripcionFamiliarId: suscripcion.id,
           estado: EstadoInscripcionActividad.PAUSADA,
         },
         data: { estado: EstadoInscripcionActividad.ACTIVA },
@@ -1793,11 +1793,11 @@ export class SuscripcionFamiliarCommandService {
       // Registrar cambio
       await tx.cambioInscripcion.create({
         data: {
-          suscripcion_familiar_id: suscripcion.id,
+          suscripcionFamiliarId: suscripcion.id,
           tipo: TipoCambioInscripcion.ALTA,
-          aplica_desde: new Date(),
-          monto_anterior: 0,
-          monto_nuevo: nuevoMontoMensual,
+          aplicaDesde: new Date(),
+          montoAnterior: 0,
+          montoNuevo: nuevoMontoMensual,
           detalle: {
             accion: 'reactivar_suscripcion',
             inscripcionesReactivadas: inscripcionesAReactivar,

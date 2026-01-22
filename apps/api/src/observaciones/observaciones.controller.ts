@@ -75,7 +75,7 @@ export class ObservacionesController {
 
   /**
    * GET /observaciones/pendientes - Obtener observaciones pendientes de seguimiento
-   * Filtra observaciones con requiere_seguimiento = true y estado != Cerrada
+   * Filtra observaciones con requiereSeguimiento = true y estado != Cerrada
    *
    * DEBE ir ANTES de GET /observaciones/:id para evitar conflictos de rutas
    *

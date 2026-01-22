@@ -21,18 +21,18 @@ describe('AdminAuthService', () => {
     email: 'admin@test.com',
     nombre: 'Admin',
     apellido: 'User',
-    password_hash: 'hashed-password',
-    fecha_registro: new Date('2024-01-01'),
-    mfa_enabled: false,
-    mfa_secret: null,
+    passwordHash: 'hashed-password',
+    fechaRegistro: new Date('2024-01-01'),
+    mfaEnabled: false,
+    mfaSecret: null,
     roles: 'Admin',
   };
 
   const mockAdminWithMfa = {
     ...mockAdmin,
     id: 'admin-mfa-123',
-    mfa_enabled: true,
-    mfa_secret: 'JBSWY3DPEHPK3PXP',
+    mfaEnabled: true,
+    mfaSecret: 'JBSWY3DPEHPK3PXP',
   };
 
   beforeEach(async () => {
@@ -209,7 +209,7 @@ describe('AdminAuthService', () => {
       expect(passwordService.hash).toHaveBeenCalledWith('password123');
       expect(prisma.admin.update).toHaveBeenCalledWith({
         where: { id: 'admin-123' },
-        data: { password_hash: 'new-hash' },
+        data: { passwordHash: 'new-hash' },
       });
     });
   });
@@ -232,7 +232,7 @@ describe('AdminAuthService', () => {
           email: 'admin@test.com',
           nombre: 'Admin',
           apellido: 'User',
-          fecha_registro: new Date(),
+          fechaRegistro: new Date(),
           role: Role.ADMIN,
           roles: [Role.ADMIN],
         },

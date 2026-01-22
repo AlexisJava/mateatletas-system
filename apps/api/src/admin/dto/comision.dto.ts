@@ -39,7 +39,7 @@ export class CreateComisionDto {
   })
   @IsString()
   @IsNotEmpty()
-  producto_id!: string;
+  productoId!: string;
 
   @ApiPropertyOptional({
     description:
@@ -47,18 +47,18 @@ export class CreateComisionDto {
     example: 'clxyz456def',
   })
   @IsString()
-  @ValidateIf((o: CreateComisionDto) => o.casa_id !== null)
+  @ValidateIf((o: CreateComisionDto) => o.casaId !== null)
   @IsOptional()
-  casa_id?: string | null;
+  casaId?: string | null;
 
   @ApiPropertyOptional({
     description: 'ID del docente a cargo. Enviar null para desasignar.',
     example: 'clxyz789ghi',
   })
   @IsString()
-  @ValidateIf((o: CreateComisionDto) => o.docente_id !== null)
+  @ValidateIf((o: CreateComisionDto) => o.docenteId !== null)
   @IsOptional()
-  docente_id?: string | null;
+  docenteId?: string | null;
 
   @ApiPropertyOptional({
     description: 'Cupo máximo de estudiantes',
@@ -67,7 +67,7 @@ export class CreateComisionDto {
   @IsInt()
   @Min(1)
   @IsOptional()
-  cupo_maximo?: number;
+  cupoMaximo?: number;
 
   @ApiPropertyOptional({
     description: 'Horario en texto libre',
@@ -83,7 +83,7 @@ export class CreateComisionDto {
   })
   @IsDateString()
   @IsOptional()
-  fecha_inicio?: string;
+  fechaInicio?: string;
 
   @ApiPropertyOptional({
     description: 'Fecha de fin de la comisión',
@@ -91,7 +91,7 @@ export class CreateComisionDto {
   })
   @IsDateString()
   @IsOptional()
-  fecha_fin?: string;
+  fechaFin?: string;
 
   @ApiPropertyOptional({
     description: 'Si la comisión está activa',
@@ -107,9 +107,9 @@ export class CreateComisionDto {
     example: 'clxyzplanif123',
   })
   @IsString()
-  @ValidateIf((o: CreateComisionDto) => o.planificacion_id !== null)
+  @ValidateIf((o: CreateComisionDto) => o.planificacionId !== null)
   @IsOptional()
-  planificacion_id?: string | null;
+  planificacionId?: string | null;
 }
 
 /**
@@ -126,21 +126,21 @@ export class FiltrosComisionDto {
   })
   @IsString()
   @IsOptional()
-  producto_id?: string;
+  productoId?: string;
 
   @ApiPropertyOptional({
     description: 'Filtrar por casa',
   })
   @IsString()
   @IsOptional()
-  casa_id?: string;
+  casaId?: string;
 
   @ApiPropertyOptional({
     description: 'Filtrar por docente',
   })
   @IsString()
   @IsOptional()
-  docente_id?: string;
+  docenteId?: string;
 
   @ApiPropertyOptional({
     description: 'Filtrar solo activas',
@@ -161,7 +161,7 @@ export class InscribirEstudiantesDto {
   })
   @IsArray()
   @IsString({ each: true })
-  estudiantes_ids!: string[];
+  estudiantesIds!: string[];
 
   @ApiPropertyOptional({
     description: 'Estado inicial de la inscripción',

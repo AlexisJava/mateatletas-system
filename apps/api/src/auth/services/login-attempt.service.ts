@@ -31,7 +31,7 @@ export class LoginAttemptService {
   ): Promise<void> {
     // 1. Registrar intento en la base de datos
     await this.prisma.$executeRaw`
-      INSERT INTO login_attempts (id, email, ip, success, created_at)
+      INSERT INTO login_attempts (id, email, ip, success, createdAt)
       VALUES (gen_random_uuid(), ${email}, ${ip}, ${success}, NOW())
     `;
 
@@ -46,7 +46,7 @@ export class LoginAttemptService {
       SELECT COUNT(*) as count FROM login_attempts
       WHERE email = ${email}
       AND success = false
-      AND created_at > NOW() - INTERVAL '15 minutes'
+      AND createdAt > NOW() - INTERVAL '15 minutes'
     `;
 
     const failureCount = Number(recentFailures[0].count);

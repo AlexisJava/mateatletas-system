@@ -17,11 +17,11 @@ describe('UserLookupService', () => {
     username: 'tutor.test',
     nombre: 'Juan',
     apellido: 'Perez',
-    password_hash: '$2b$12$hashedpassword',
-    ha_completado_onboarding: true,
+    passwordHash: '$2b$12$hashedpassword',
+    haCompletadoOnboarding: true,
     dni: '12345678',
     telefono: '1234567890',
-    fecha_registro: new Date(),
+    fechaRegistro: new Date(),
     roles: JSON.stringify(['tutor']),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -32,7 +32,7 @@ describe('UserLookupService', () => {
     email: 'docente@test.com',
     nombre: 'Maria',
     apellido: 'Garcia',
-    password_hash: '$2b$12$hashedpassword',
+    passwordHash: '$2b$12$hashedpassword',
     titulo: 'Profesora de Matematicas',
     bio: 'Experta en algebra',
     roles: JSON.stringify(['docente']),
@@ -45,13 +45,13 @@ describe('UserLookupService', () => {
     email: 'admin@test.com',
     nombre: 'Carlos',
     apellido: 'Lopez',
-    password_hash: '$2b$12$hashedpassword',
-    fecha_registro: new Date(),
+    passwordHash: '$2b$12$hashedpassword',
+    fechaRegistro: new Date(),
     dni: '87654321',
     telefono: '0987654321',
-    mfa_enabled: false,
-    mfa_secret: null,
-    mfa_backup_codes: [],
+    mfaEnabled: false,
+    mfaSecret: null,
+    mfaBackupCodes: [],
     roles: JSON.stringify(['admin']),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -63,13 +63,13 @@ describe('UserLookupService', () => {
     email: 'estudiante@test.com',
     nombre: 'Pedro',
     apellido: 'Martinez',
-    password_hash: '$2b$12$hashedpassword',
+    passwordHash: '$2b$12$hashedpassword',
     edad: 12,
     nivelEscolar: 'Primaria',
-    tutor_id: 'tutor-123',
+    tutorId: 'tutor-123',
     equipoId: null,
-    xp_total: 100,
-    nivel_actual: 2,
+    xpTotal: 100,
+    nivelActual: 2,
     roles: JSON.stringify(['estudiante']),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -284,7 +284,7 @@ describe('UserLookupService', () => {
     it('should find estudiante by ID', async () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
         id: 'estudiante-123',
-        password_hash: '$2b$12$hash',
+        passwordHash: '$2b$12$hash',
       } as never);
 
       const result = await service.findByIdForPasswordChange('estudiante-123');
@@ -297,7 +297,7 @@ describe('UserLookupService', () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue({
         id: 'tutor-123',
-        password_hash: '$2b$12$hash',
+        passwordHash: '$2b$12$hash',
       } as never);
 
       const result = await service.findByIdForPasswordChange('tutor-123');
@@ -311,7 +311,7 @@ describe('UserLookupService', () => {
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue({
         id: 'docente-123',
-        password_hash: '$2b$12$hash',
+        passwordHash: '$2b$12$hash',
       } as never);
 
       const result = await service.findByIdForPasswordChange('docente-123');
@@ -326,7 +326,7 @@ describe('UserLookupService', () => {
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
       jest.spyOn(prisma.admin, 'findUnique').mockResolvedValue({
         id: 'admin-123',
-        password_hash: '$2b$12$hash',
+        passwordHash: '$2b$12$hash',
       } as never);
 
       const result = await service.findByIdForPasswordChange('admin-123');
@@ -435,8 +435,8 @@ describe('UserLookupService', () => {
   describe('updatePasswordData (delegated to UserUpdateService)', () => {
     it('should delegate to updateService', async () => {
       const updateData = {
-        password_hash: '$2b$12$newhash',
-        fecha_ultimo_cambio: new Date(),
+        passwordHash: '$2b$12$newhash',
+        fechaUltimoCambio: new Date(),
       };
 
       await service.updatePasswordData('user-123', 'tutor', updateData);

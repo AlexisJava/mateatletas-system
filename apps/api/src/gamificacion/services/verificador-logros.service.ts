@@ -130,7 +130,7 @@ export class VerificadorLogrosService {
     ];
 
     for (const logro of logros) {
-      if (racha.racha_actual === logro.dias) {
+      if (racha.rachaActual === logro.dias) {
         await this.intentarDesbloquear(
           estudianteId,
           logro.codigo,
@@ -140,7 +140,7 @@ export class VerificadorLogrosService {
     }
 
     // Verificar días activos totales
-    const diasActivos = racha.total_dias_activos;
+    const diasActivos = racha.totalDiasActivos;
     const logrosDiasActivos = [
       { codigo: 'segunda_semana', dias: 7 },
       { codigo: 'veterano_gimnasio', dias: 30 },
@@ -255,7 +255,7 @@ export class VerificadorLogrosService {
         codigoLogro,
       );
 
-      if (!resultado.ya_desbloqueado) {
+      if (!resultado.yaDesbloqueado) {
         logrosDesbloqueados.push(codigoLogro);
         this.logger.log(
           `Logro "${codigoLogro}" desbloqueado para estudiante ${estudianteId}`,
@@ -297,7 +297,7 @@ export class VerificadorLogrosService {
   private async contarClasesAsistidas(estudianteId: string): Promise<number> {
     return this.prisma.asistencia.count({
       where: {
-        estudiante_id: estudianteId,
+        estudianteId: estudianteId,
         estado: 'Presente',
       },
     });

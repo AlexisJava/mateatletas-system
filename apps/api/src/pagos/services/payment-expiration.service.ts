@@ -79,7 +79,7 @@ export class PaymentExpirationService {
     const inscripcionesPendientes =
       await this.prisma.inscripcionMensual.findMany({
         where: {
-          estado_pago: {
+          estadoPago: {
             in: [EstadoPago.Pendiente, EstadoPago.Parcial],
           },
           periodo: {
@@ -89,7 +89,7 @@ export class PaymentExpirationService {
         select: {
           id: true,
           periodo: true,
-          precio_final: true,
+          precioFinal: true,
         },
       });
 
@@ -98,7 +98,7 @@ export class PaymentExpirationService {
       (inscripcion) => {
         const estadoPago = calcularEstadoPago(
           inscripcion.periodo,
-          Number(inscripcion.precio_final),
+          Number(inscripcion.precioFinal),
           hoy,
         );
         return estadoPago.estado === 'ANULABLE';
@@ -117,7 +117,7 @@ export class PaymentExpirationService {
         id: { in: idsAAnular },
       },
       data: {
-        estado_pago: EstadoPago.Anulado,
+        estadoPago: EstadoPago.Anulado,
       },
     });
 
@@ -146,7 +146,7 @@ export class PaymentExpirationService {
     const inscripcionesPendientes =
       await this.prisma.inscripcionMensual.findMany({
         where: {
-          estado_pago: {
+          estadoPago: {
             in: [EstadoPago.Pendiente, EstadoPago.Parcial],
           },
           periodo: {
@@ -156,7 +156,7 @@ export class PaymentExpirationService {
         select: {
           id: true,
           periodo: true,
-          precio_final: true,
+          precioFinal: true,
         },
       });
 
@@ -167,7 +167,7 @@ export class PaymentExpirationService {
     for (const inscripcion of inscripcionesPendientes) {
       const estadoPago = calcularEstadoPago(
         inscripcion.periodo,
-        Number(inscripcion.precio_final),
+        Number(inscripcion.precioFinal),
         hoy,
       );
 
@@ -188,7 +188,7 @@ export class PaymentExpirationService {
     if (idsAAnular.length > 0) {
       await this.prisma.inscripcionMensual.updateMany({
         where: { id: { in: idsAAnular } },
-        data: { estado_pago: EstadoPago.Anulado },
+        data: { estadoPago: EstadoPago.Anulado },
       });
     }
 
@@ -214,7 +214,7 @@ export class PaymentExpirationService {
     const inscripcionesPendientes =
       await this.prisma.inscripcionMensual.findMany({
         where: {
-          estado_pago: {
+          estadoPago: {
             in: [EstadoPago.Pendiente, EstadoPago.Parcial],
           },
           periodo: periodoActual,
@@ -222,7 +222,7 @@ export class PaymentExpirationService {
         select: {
           id: true,
           periodo: true,
-          precio_final: true,
+          precioFinal: true,
         },
       });
 
@@ -233,7 +233,7 @@ export class PaymentExpirationService {
     for (const inscripcion of inscripcionesPendientes) {
       const estadoPago = calcularEstadoPago(
         inscripcion.periodo,
-        Number(inscripcion.precio_final),
+        Number(inscripcion.precioFinal),
         hoy,
       );
 

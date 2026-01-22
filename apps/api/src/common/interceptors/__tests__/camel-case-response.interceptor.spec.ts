@@ -28,9 +28,9 @@ describe('CamelCaseResponseInterceptor', () => {
     it('debe transformar objeto simple snake_case a camelCase', (done) => {
       const testData = {
         id: '123',
-        nivel_escolar: 'PRIMARIA',
-        foto_url: 'https://example.com/photo.jpg',
-        created_at: '2025-01-01T00:00:00Z',
+        nivelEscolar: 'PRIMARIA',
+        fotoUrl: 'https://example.com/photo.jpg',
+        createdAt: '2025-01-01T00:00:00Z',
       };
       mockCallHandler = {
         handle: () => of(testData),
@@ -50,9 +50,9 @@ describe('CamelCaseResponseInterceptor', () => {
             '2025-01-01T00:00:00Z',
           );
           // Verificar que NO tiene las keys originales snake_case
-          expect(transformed).not.toHaveProperty('nivel_escolar');
+          expect(transformed).not.toHaveProperty('nivelEscolar');
           expect(transformed).not.toHaveProperty('foto_url');
-          expect(transformed).not.toHaveProperty('created_at');
+          expect(transformed).not.toHaveProperty('createdAt');
           done();
         },
       });
@@ -135,12 +135,12 @@ describe('CamelCaseResponseInterceptor', () => {
 
     it('debe transformar objetos con arrays anidados', (done) => {
       const testData = {
-        clase_grupo: {
+        claseGrupo: {
           id: 'cg1',
           nombre_publico: 'Matemáticas Avanzadas',
           estudiantes_inscritos: [
-            { id: 'e1', nivel_escolar: 'SECUNDARIA' },
-            { id: 'e2', nivel_escolar: 'PRIMARIA' },
+            { id: 'e1', nivelEscolar: 'SECUNDARIA' },
+            { id: 'e2', nivelEscolar: 'PRIMARIA' },
           ],
         },
       };
@@ -197,7 +197,7 @@ describe('CamelCaseResponseInterceptor', () => {
     it('debe preservar campos null dentro de objetos', (done) => {
       const testData = {
         id: '123',
-        foto_url: null,
+        fotoUrl: null,
         biografia_corta: null,
       };
       mockCallHandler = {
@@ -292,7 +292,7 @@ describe('CamelCaseResponseInterceptor', () => {
         nombreCompleto: 'Juan Pérez', // camelCase
         fecha_nacimiento: '2010-01-01', // snake_case
         esActivo: true, // camelCase
-        nivel_escolar: 'PRIMARIA', // snake_case
+        nivelEscolar: 'PRIMARIA', // snake_case
       };
       mockCallHandler = {
         handle: () => of(testData),
@@ -307,7 +307,7 @@ describe('CamelCaseResponseInterceptor', () => {
           expect(transformed).toHaveProperty('nivelEscolar', 'PRIMARIA');
           // No debe tener snake_case
           expect(transformed).not.toHaveProperty('fecha_nacimiento');
-          expect(transformed).not.toHaveProperty('nivel_escolar');
+          expect(transformed).not.toHaveProperty('nivelEscolar');
           done();
         },
       });
@@ -349,7 +349,7 @@ describe('CamelCaseResponseInterceptor', () => {
         id: '123',
         __v: 0, // MongoDB version key
         _id: 'mongo_id',
-        created_at_utc: '2025-01-01T00:00:00Z',
+        createdAt_utc: '2025-01-01T00:00:00Z',
       };
       mockCallHandler = {
         handle: () => of(testData),
@@ -368,7 +368,7 @@ describe('CamelCaseResponseInterceptor', () => {
       const dateValue = new Date('2025-01-01T00:00:00Z');
       const testData = {
         id: '123',
-        created_at: dateValue,
+        createdAt: dateValue,
       };
       mockCallHandler = {
         handle: () => of(testData),
@@ -388,8 +388,8 @@ describe('CamelCaseResponseInterceptor', () => {
     it('debe manejar estructura de respuesta paginada de Prisma', (done) => {
       const testData = {
         items: [
-          { id: '1', nivel_escolar: 'PRIMARIA', casa_id: 'quantum' },
-          { id: '2', nivel_escolar: 'SECUNDARIA', casa_id: 'vertex' },
+          { id: '1', nivelEscolar: 'PRIMARIA', casaId: 'quantum' },
+          { id: '2', nivelEscolar: 'SECUNDARIA', casaId: 'vertex' },
         ],
         total_count: 100,
         has_next_page: true,
@@ -420,14 +420,14 @@ describe('CamelCaseResponseInterceptor', () => {
       const testData = {
         id: 'est123',
         nombre_completo: 'María García',
-        nivel_escolar: 'PRIMARIA',
+        nivelEscolar: 'PRIMARIA',
         grado_escolar: '5to',
-        foto_url: 'https://storage.com/photos/maria.jpg',
+        fotoUrl: 'https://storage.com/photos/maria.jpg',
         fecha_nacimiento: '2014-05-15',
         es_activo: true,
         puntos_xp: 1500,
-        created_at: '2025-01-01T00:00:00Z',
-        updated_at: '2025-01-15T00:00:00Z',
+        createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-15T00:00:00Z',
         tutor: {
           id: 'tut456',
           nombre_completo: 'Roberto García',
@@ -474,8 +474,8 @@ describe('CamelCaseResponseInterceptor', () => {
 
           // Verificar que NO tiene snake_case
           expect(transformed).not.toHaveProperty('nombre_completo');
-          expect(transformed).not.toHaveProperty('nivel_escolar');
-          expect(transformed).not.toHaveProperty('created_at');
+          expect(transformed).not.toHaveProperty('nivelEscolar');
+          expect(transformed).not.toHaveProperty('createdAt');
 
           done();
         },

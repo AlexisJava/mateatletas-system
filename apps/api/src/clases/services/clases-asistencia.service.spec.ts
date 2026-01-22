@@ -13,28 +13,28 @@ describe('ClasesAsistenciaService', () => {
 
   const mockClase = {
     id: 'clase-1',
-    docente_id: 'doc-1',
-    fecha_hora_inicio: new Date('2025-10-15T10:00:00Z'),
-    inscripciones: [{ estudiante_id: 'est-1' }, { estudiante_id: 'est-2' }],
+    docenteId: 'doc-1',
+    fechaHoraInicio: new Date('2025-10-15T10:00:00Z'),
+    inscripciones: [{ estudianteId: 'est-1' }, { estudianteId: 'est-2' }],
   };
 
   const mockAsistencias = [
     {
       id: 'asist-1',
-      clase_id: 'clase-1',
-      estudiante_id: 'est-1',
+      claseId: 'clase-1',
+      estudianteId: 'est-1',
       estado: 'Presente',
       observaciones: 'Excelente participación',
-      puntos_otorgados: 10,
+      puntosOtorgados: 10,
       estudiante: { nombre: 'Juan', apellido: 'Pérez' },
     },
     {
       id: 'asist-2',
-      clase_id: 'clase-1',
-      estudiante_id: 'est-2',
+      claseId: 'clase-1',
+      estudianteId: 'est-2',
       estado: 'Ausente',
       observaciones: undefined,
-      puntos_otorgados: 0,
+      puntosOtorgados: 0,
       estudiante: { nombre: 'María', apellido: 'González' },
     },
   ];
@@ -133,7 +133,7 @@ describe('ClasesAsistenciaService', () => {
       // Arrange
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue({
         ...mockClase,
-        docente_id: 'other-doc',
+        docenteId: 'other-doc',
       } as any);
 
       // Act & Assert
@@ -188,7 +188,7 @@ describe('ClasesAsistenciaService', () => {
         .mockResolvedValue(mockClase as any);
       jest
         .spyOn(prisma.asistencia, 'findMany')
-        .mockResolvedValue([{ estudiante_id: 'est-1' }] as any);
+        .mockResolvedValue([{ estudianteId: 'est-1' }] as any);
 
       (prisma.$transaction as jest.Mock).mockImplementation((callback) =>
         callback(prisma),
@@ -208,15 +208,15 @@ describe('ClasesAsistenciaService', () => {
       // Assert
       expect(updateSpy).toHaveBeenCalledWith({
         where: {
-          clase_id_estudiante_id: {
-            clase_id: 'clase-1',
-            estudiante_id: 'est-1',
+          claseId_estudianteId: {
+            claseId: 'clase-1',
+            estudianteId: 'est-1',
           },
         },
         data: expect.objectContaining({
           estado: 'Presente',
           observaciones: 'Excelente participación',
-          puntos_otorgados: 10,
+          puntosOtorgados: 10,
         }),
         include: expect.any(Object),
       });
@@ -257,7 +257,7 @@ describe('ClasesAsistenciaService', () => {
         .mockResolvedValue(mockClase as any);
       jest
         .spyOn(prisma.asistencia, 'findMany')
-        .mockResolvedValue([{ estudiante_id: 'est-1' }] as any);
+        .mockResolvedValue([{ estudianteId: 'est-1' }] as any);
 
       (prisma.$transaction as jest.Mock).mockImplementation((callback) =>
         callback(prisma),
@@ -278,7 +278,7 @@ describe('ClasesAsistenciaService', () => {
       expect(updateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            fecha_registro: expect.any(Date),
+            fechaRegistro: expect.any(Date),
           }),
         }),
       );
@@ -327,7 +327,7 @@ describe('ClasesAsistenciaService', () => {
       );
     });
 
-    it('should default puntos_otorgados to 0 if not provided', async () => {
+    it('should default puntosOtorgados to 0 if not provided', async () => {
       // Arrange
       jest
         .spyOn(prisma.clase, 'findUnique')
@@ -364,7 +364,7 @@ describe('ClasesAsistenciaService', () => {
       expect(createSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            puntos_otorgados: 0,
+            puntosOtorgados: 0,
           }),
         }),
       );
@@ -398,7 +398,7 @@ describe('ClasesAsistenciaService', () => {
       // expect(result[0]).toHaveProperty('estudiante');
       // expect(result[0].estudiante).toHaveProperty('nombre', 'Juan');
       // expect(result[0].estudiante).toHaveProperty('apellido', 'Pérez');
-      expect(result[0]).toHaveProperty('estudiante_id');
+      expect(result[0]).toHaveProperty('estudianteId');
     });
   });
 });

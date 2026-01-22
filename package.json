@@ -86,6 +86,7 @@
     "husky": "^9.1.7",
     "nx": "22.3.3",
     "prettier": "^3.6.2",
+    "prisma-case-format": "^2.2.1",
     "socket.io-client": "4.8.1",
     "turbo": "^2.0.0",
     "typescript": "^5.6.3"

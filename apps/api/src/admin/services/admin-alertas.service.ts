@@ -29,8 +29,8 @@ export class AdminAlertasService {
           select: {
             id: true,
             nombre: true,
-            fecha_hora_inicio: true,
-            duracion_minutos: true,
+            fechaHoraInicio: true,
+            duracionMinutos: true,
           },
         },
       },
@@ -48,8 +48,8 @@ export class AdminAlertasService {
       clase: {
         id: alerta.clase.id,
         nombre: alerta.clase.nombre,
-        fecha_hora_inicio: alerta.clase.fecha_hora_inicio,
-        duracion_minutos: alerta.clase.duracion_minutos,
+        fechaHoraInicio: alerta.clase.fechaHoraInicio,
+        duracionMinutos: alerta.clase.duracionMinutos,
       },
       createdAt: alerta.createdAt,
     }));
@@ -128,8 +128,8 @@ export class AdminAlertasService {
   ) {
     const alerta = await this.prisma.alerta.create({
       data: {
-        estudiante_id: estudianteId,
-        clase_id: claseId,
+        estudianteId: estudianteId,
+        claseId: claseId,
         descripcion,
       },
       include: {

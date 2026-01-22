@@ -11,5 +11,5 @@ export class AsignarTareaDto {
    */
   @IsOptional()
   @IsDateString()
-  fecha_limite?: string;
+  fechaLimite?: string;
 }

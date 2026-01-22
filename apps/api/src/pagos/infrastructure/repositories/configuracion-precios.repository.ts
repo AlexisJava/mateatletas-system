@@ -81,18 +81,18 @@ export class ConfiguracionPreciosRepository
         where: { id: 'singleton' },
         data: {
           ...datosActualizacion,
-          actualizado_por_admin_id: adminId,
+          actualizadoPorAdminId: adminId,
         },
       });
 
       // 2. Guardar historial
       await tx.historialCambioPrecios.create({
         data: {
-          configuracion_id: 'singleton',
-          valores_anteriores: this.extraerValoresParaHistorial(configActual),
-          valores_nuevos: this.extraerValoresParaHistorial(configActualizada),
-          admin_id: adminId,
-          motivo_cambio: motivo || null,
+          configuracionId: 'singleton',
+          valoresAnteriores: this.extraerValoresParaHistorial(configActual),
+          valoresNuevos: this.extraerValoresParaHistorial(configActualizada),
+          adminId: adminId,
+          motivoCambio: motivo || null,
         },
       });
 
@@ -109,18 +109,18 @@ export class ConfiguracionPreciosRepository
     limit: number = 50,
   ): Promise<HistorialCambio[]> {
     const historial = await this.prisma.historialCambioPrecios.findMany({
-      where: { configuracion_id: 'singleton' },
-      orderBy: { fecha_cambio: 'desc' },
+      where: { configuracionId: 'singleton' },
+      orderBy: { fechaCambio: 'desc' },
       take: limit,
     });
 
     return historial.map((registro) => ({
       id: registro.id,
-      valoresAnteriores: registro.valores_anteriores as Record<string, unknown>,
-      valoresNuevos: registro.valores_nuevos as Record<string, unknown>,
-      motivoCambio: registro.motivo_cambio,
-      adminId: registro.admin_id,
-      fechaCambio: registro.fecha_cambio,
+      valoresAnteriores: registro.valoresAnteriores as Record<string, unknown>,
+      valoresNuevos: registro.valoresNuevos as Record<string, unknown>,
+      motivoCambio: registro.motivoCambio,
+      adminId: registro.adminId,
+      fechaCambio: registro.fechaCambio,
     }));
   }
 
@@ -137,21 +137,21 @@ export class ConfiguracionPreciosRepository
   ): ConfiguracionPrecios {
     return {
       // Precios por Tier STEAM (Sistema 2026)
-      precioSteamLibros: new Decimal(config.precio_steam_libros.toString()),
+      precioSteamLibros: new Decimal(config.precioSteamLibros.toString()),
       precioSteamAsincronico: new Decimal(
-        config.precio_steam_asincronico.toString(),
+        config.precioSteamAsincronico.toString(),
       ),
       precioSteamSincronico: new Decimal(
-        config.precio_steam_sincronico.toString(),
+        config.precioSteamSincronico.toString(),
       ),
       // Descuento familiar simplificado
       descuentoSegundoHermano: new Decimal(
-        config.descuento_segundo_hermano.toString(),
+        config.descuentoSegundoHermano.toString(),
       ),
       // Configuración de notificaciones
-      diaVencimiento: config.dia_vencimiento,
-      diasAntesRecordatorio: config.dias_antes_recordatorio,
-      notificacionesActivas: config.notificaciones_activas,
+      diaVencimiento: config.diaVencimiento,
+      diasAntesRecordatorio: config.diasAntesRecordatorio,
+      notificacionesActivas: config.notificacionesActivas,
     };
   }
 
@@ -166,29 +166,29 @@ export class ConfiguracionPreciosRepository
 
     // Precios por Tier STEAM
     if (config.precioSteamLibros !== undefined) {
-      resultado.precio_steam_libros = config.precioSteamLibros;
+      resultado.precioSteamLibros = config.precioSteamLibros;
     }
     if (config.precioSteamAsincronico !== undefined) {
-      resultado.precio_steam_asincronico = config.precioSteamAsincronico;
+      resultado.precioSteamAsincronico = config.precioSteamAsincronico;
     }
     if (config.precioSteamSincronico !== undefined) {
-      resultado.precio_steam_sincronico = config.precioSteamSincronico;
+      resultado.precioSteamSincronico = config.precioSteamSincronico;
     }
 
     // Descuento familiar simplificado
     if (config.descuentoSegundoHermano !== undefined) {
-      resultado.descuento_segundo_hermano = config.descuentoSegundoHermano;
+      resultado.descuentoSegundoHermano = config.descuentoSegundoHermano;
     }
 
     // Configuración de notificaciones
     if (config.diaVencimiento !== undefined) {
-      resultado.dia_vencimiento = config.diaVencimiento;
+      resultado.diaVencimiento = config.diaVencimiento;
     }
     if (config.diasAntesRecordatorio !== undefined) {
-      resultado.dias_antes_recordatorio = config.diasAntesRecordatorio;
+      resultado.diasAntesRecordatorio = config.diasAntesRecordatorio;
     }
     if (config.notificacionesActivas !== undefined) {
-      resultado.notificaciones_activas = config.notificacionesActivas;
+      resultado.notificacionesActivas = config.notificacionesActivas;
     }
 
     return resultado;
@@ -203,15 +203,15 @@ export class ConfiguracionPreciosRepository
   ): Record<string, string | boolean | number> {
     return {
       // Precios por Tier STEAM
-      precio_steam_libros: config.precio_steam_libros.toString(),
-      precio_steam_asincronico: config.precio_steam_asincronico.toString(),
-      precio_steam_sincronico: config.precio_steam_sincronico.toString(),
+      precioSteamLibros: config.precioSteamLibros.toString(),
+      precioSteamAsincronico: config.precioSteamAsincronico.toString(),
+      precioSteamSincronico: config.precioSteamSincronico.toString(),
       // Descuento familiar
-      descuento_segundo_hermano: config.descuento_segundo_hermano.toString(),
+      descuentoSegundoHermano: config.descuentoSegundoHermano.toString(),
       // Configuración de notificaciones
-      dia_vencimiento: config.dia_vencimiento,
-      dias_antes_recordatorio: config.dias_antes_recordatorio,
-      notificaciones_activas: config.notificaciones_activas,
+      diaVencimiento: config.diaVencimiento,
+      diasAntesRecordatorio: config.diasAntesRecordatorio,
+      notificacionesActivas: config.notificacionesActivas,
     };
   }
 }

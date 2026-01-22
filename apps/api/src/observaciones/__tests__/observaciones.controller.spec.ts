@@ -41,17 +41,17 @@ describe('ObservacionesController', () => {
   const mockObservacion = {
     id: 'obs-123',
     contenido: 'Estudiante muestra dificultad con fracciones',
-    fecha_evento: new Date('2024-01-15'),
+    fechaEvento: new Date('2024-01-15'),
     tipo: TipoObservacion.Academica,
     prioridad: PrioridadObservacion.Media,
     estado: EstadoObservacion.Abierta,
-    requiere_seguimiento: false,
-    notificar_admin: false,
-    notificar_pedagogia: false,
-    docente_id: 'docente-123',
-    comision_id: 'comision-123',
-    created_at: new Date(),
-    updated_at: new Date(),
+    requiereSeguimiento: false,
+    notificarAdmin: false,
+    notificarPedagogia: false,
+    docenteId: 'docente-123',
+    comisionId: 'comision-123',
+    createdAt: new Date(),
+    updatedAt: new Date(),
     fecha_resolucion: null,
     estudiantes: [
       {
@@ -243,8 +243,8 @@ describe('ObservacionesController', () => {
         {
           id: 'seg-1',
           contenido: 'Se habló con el tutor sobre la situación',
-          autor_id: 'docente-123',
-          created_at: new Date(),
+          autorId: 'docente-123',
+          createdAt: new Date(),
         },
       ],
     };
@@ -333,7 +333,7 @@ describe('ObservacionesController', () => {
   // ============================================================================
   describe('GET /observaciones/pendientes - obtenerPendientes()', () => {
     const mockPendientes = {
-      data: [{ ...mockObservacion, requiere_seguimiento: true }],
+      data: [{ ...mockObservacion, requiereSeguimiento: true }],
       total: 1,
     };
 

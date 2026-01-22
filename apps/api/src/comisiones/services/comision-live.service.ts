@@ -14,10 +14,10 @@ import { EstadoClase } from '@prisma/client';
 interface ComisionEnVivoResponse {
   id: string;
   nombre: string;
-  estado_clase: EstadoClase;
-  iniciada_en: Date | null;
-  finalizada_en: Date | null;
-  livekit_room_name: string | null;
+  estadoClase: EstadoClase;
+  iniciadaEn: Date | null;
+  finalizadaEn: Date | null;
+  livekitRoomName: string | null;
 }
 
 interface IniciarComisionResponse extends ComisionEnVivoResponse {
@@ -26,7 +26,7 @@ interface IniciarComisionResponse extends ComisionEnVivoResponse {
 
 interface FinalizarComisionResponse extends ComisionEnVivoResponse {
   mensaje: string;
-  duracion_minutos: number;
+  duracionMinutos: number;
 }
 
 /**
@@ -64,10 +64,10 @@ export class ComisionLiveService {
       select: {
         id: true,
         nombre: true,
-        docente_id: true,
-        estado_clase: true,
+        docenteId: true,
+        estadoClase: true,
         activo: true,
-        livekit_room_name: true,
+        livekitRoomName: true,
       },
     });
 
@@ -78,7 +78,7 @@ export class ComisionLiveService {
     }
 
     // 2. Validar que el docente es el asignado
-    if (comision.docente_id !== docenteId) {
+    if (comision.docenteId !== docenteId) {
       throw new ForbiddenException(
         'Solo el docente asignado puede iniciar esta clase',
       );
@@ -91,24 +91,24 @@ export class ComisionLiveService {
 
     // 4. Generar nombre de sala si no existe
     const livekitRoomName =
-      comision.livekit_room_name || `comision-${comisionId}`;
+      comision.livekitRoomName || `comision-${comisionId}`;
 
     // 5. Actualizar estado a EnVivo
     const updated = await this.prisma.comision.update({
       where: { id: comisionId },
       data: {
-        estado_clase: 'EnVivo',
-        iniciada_en: new Date(),
-        finalizada_en: null, // Limpiar por si se reinicia
-        livekit_room_name: livekitRoomName,
+        estadoClase: 'EnVivo',
+        iniciadaEn: new Date(),
+        finalizadaEn: null, // Limpiar por si se reinicia
+        livekitRoomName: livekitRoomName,
       },
       select: {
         id: true,
         nombre: true,
-        estado_clase: true,
-        iniciada_en: true,
-        finalizada_en: true,
-        livekit_room_name: true,
+        estadoClase: true,
+        iniciadaEn: true,
+        finalizadaEn: true,
+        livekitRoomName: true,
       },
     });
 
@@ -142,10 +142,10 @@ export class ComisionLiveService {
       select: {
         id: true,
         nombre: true,
-        docente_id: true,
-        estado_clase: true,
-        iniciada_en: true,
-        livekit_room_name: true,
+        docenteId: true,
+        estadoClase: true,
+        iniciadaEn: true,
+        livekitRoomName: true,
       },
     });
 
@@ -156,16 +156,16 @@ export class ComisionLiveService {
     }
 
     // 2. Validar que el docente es el asignado
-    if (comision.docente_id !== docenteId) {
+    if (comision.docenteId !== docenteId) {
       throw new ForbiddenException(
         'Solo el docente asignado puede finalizar esta clase',
       );
     }
 
     // 3. Validar que la clase está en vivo
-    if (comision.estado_clase !== 'EnVivo') {
+    if (comision.estadoClase !== 'EnVivo') {
       throw new BadRequestException(
-        `La clase no está en vivo. Estado actual: ${comision.estado_clase}`,
+        `La clase no está en vivo. Estado actual: ${comision.estadoClase}`,
       );
     }
 
@@ -173,9 +173,8 @@ export class ComisionLiveService {
     const finalizadaEn = new Date();
     let duracionMinutos = 0;
 
-    if (comision.iniciada_en) {
-      const duracionMs =
-        finalizadaEn.getTime() - comision.iniciada_en.getTime();
+    if (comision.iniciadaEn) {
+      const duracionMs = finalizadaEn.getTime() - comision.iniciadaEn.getTime();
       duracionMinutos = Math.round(duracionMs / (1000 * 60));
     }
 
@@ -183,16 +182,16 @@ export class ComisionLiveService {
     const updated = await this.prisma.comision.update({
       where: { id: comisionId },
       data: {
-        estado_clase: 'Finalizada',
-        finalizada_en: finalizadaEn,
+        estadoClase: 'Finalizada',
+        finalizadaEn: finalizadaEn,
       },
       select: {
         id: true,
         nombre: true,
-        estado_clase: true,
-        iniciada_en: true,
-        finalizada_en: true,
-        livekit_room_name: true,
+        estadoClase: true,
+        iniciadaEn: true,
+        finalizadaEn: true,
+        livekitRoomName: true,
       },
     });
 
@@ -203,7 +202,7 @@ export class ComisionLiveService {
     return {
       ...updated,
       mensaje: 'Clase de comisión finalizada exitosamente',
-      duracion_minutos: duracionMinutos,
+      duracionMinutos: duracionMinutos,
     };
   }
 
@@ -221,10 +220,10 @@ export class ComisionLiveService {
       select: {
         id: true,
         nombre: true,
-        estado_clase: true,
-        iniciada_en: true,
-        finalizada_en: true,
-        livekit_room_name: true,
+        estadoClase: true,
+        iniciadaEn: true,
+        finalizadaEn: true,
+        livekitRoomName: true,
       },
     });
 

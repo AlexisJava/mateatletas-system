@@ -37,10 +37,10 @@ export class EstudianteHandler implements RoleHandler {
     user: UserWithPassword,
     password: string,
   ): Promise<boolean> {
-    if (!user.password_hash) {
+    if (!user.passwordHash) {
       return false; // Usuario sin password no puede autenticarse
     }
-    return bcrypt.compare(password, user.password_hash);
+    return bcrypt.compare(password, user.passwordHash);
   }
 
   async getProfile(userId: string): Promise<UserProfile | null> {
@@ -62,19 +62,19 @@ export class EstudianteHandler implements RoleHandler {
             colorSecondary: true,
           },
         },
-        inscripciones_clase: {
+        inscripcionesClase: {
           include: {
             clase: {
               select: {
                 id: true,
                 nombre: true,
-                fecha_hora_inicio: true,
-                duracion_minutos: true,
+                fechaHoraInicio: true,
+                duracionMinutos: true,
               },
             },
           },
           orderBy: {
-            fecha_inscripcion: 'desc',
+            fechaInscripcion: 'desc',
           },
           take: 5, // Últimas 5 inscripciones
         },

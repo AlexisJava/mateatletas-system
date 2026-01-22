@@ -39,10 +39,10 @@ describe('EstudianteAuthService', () => {
     nivelEscolar: 'Secundaria',
     fotoUrl: null,
     avatarUrl: 'https://example.com/avatar.png',
-    animacion_idle_url: null,
-    recursos: { xp_total: 100 },
-    nivel_actual: 2,
-    password_hash: 'hashed-password',
+    animacionIdleUrl: null,
+    recursos: { xpTotal: 100 },
+    nivelActual: 2,
+    passwordHash: 'hashed-password',
     roles: 'Estudiante',
     tutor: mockTutor,
     casa: mockCasa,
@@ -121,8 +121,8 @@ describe('EstudianteAuthService', () => {
       expect(result.user.apellido).toBe('Martínez');
       expect(result.user.edad).toBe(12);
       expect(result.user.nivelEscolar).toBe('Secundaria');
-      expect(result.user.xp_total).toBe(100);
-      expect(result.user.nivel_actual).toBe(2);
+      expect(result.user.xpTotal).toBe(100);
+      expect(result.user.nivelActual).toBe(2);
       expect(result.user.casa).toEqual(mockCasa);
       expect(result.user.tutor).toEqual(mockTutor);
       expect(result.user.role).toBe(Role.ESTUDIANTE);
@@ -204,7 +204,7 @@ describe('EstudianteAuthService', () => {
       expect(passwordService.hash).toHaveBeenCalledWith('password123');
       expect(prisma.estudiante.update).toHaveBeenCalledWith({
         where: { id: 'estudiante-123' },
-        data: { password_hash: 'new-hash' },
+        data: { passwordHash: 'new-hash' },
       });
     });
 

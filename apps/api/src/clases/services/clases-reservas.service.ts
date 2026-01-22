@@ -24,14 +24,14 @@ export class ClasesReservasService {
    * SECURITY FIX (2025-10-18):
    * - Movida validación de cupos DENTRO de transacción
    * - Previene race condition en reservas concurrentes
-   * - Garantiza que cupos_ocupados NUNCA exceda cupos_maximo
+   * - Garantiza que cuposOcupados NUNCA exceda cuposMaximo
    * - Re-lectura de clase dentro de transacción para datos frescos
    */
   async reservarClase(claseId: string, tutorId: string, dto: ReservarClaseDto) {
     // 1. Verificar estudiante (puede estar fuera de transacción - datos estáticos)
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: dto.estudianteId },
-      select: { id: true, tutor_id: true },
+      select: { id: true, tutorId: true },
     });
 
     if (!estudiante) {
@@ -40,7 +40,7 @@ export class ClasesReservasService {
       );
     }
 
-    if (estudiante.tutor_id !== tutorId) {
+    if (estudiante.tutorId !== tutorId) {
       throw new ForbiddenException('El estudiante no pertenece a este tutor');
     }
 
@@ -63,22 +63,22 @@ export class ClasesReservasService {
         throw new BadRequestException('La clase está cancelada');
       }
 
-      if (clase.fecha_hora_inicio <= new Date()) {
+      if (clase.fechaHoraInicio <= new Date()) {
         throw new BadRequestException('La clase ya comenzó o pasó');
       }
 
       // ✅ VALIDACIÓN ATÓMICA DE CUPOS (dentro de transacción)
       // Esta lectura ve el estado MÁS RECIENTE incluso con requests concurrentes
-      if (clase.cupos_ocupados >= clase.cupos_maximo) {
+      if (clase.cuposOcupados >= clase.cuposMaximo) {
         throw new BadRequestException('La clase está llena');
       }
 
       // ✅ Verificar duplicados (dentro de transacción)
       const yaInscrito = await tx.inscripcionClase.findUnique({
         where: {
-          clase_id_estudiante_id: {
-            clase_id: claseId,
-            estudiante_id: dto.estudianteId,
+          claseId_estudianteId: {
+            claseId: claseId,
+            estudianteId: dto.estudianteId,
           },
         },
       });
@@ -92,9 +92,9 @@ export class ClasesReservasService {
       // ✅ Crear inscripción (dentro de transacción)
       const nuevaInscripcion = await tx.inscripcionClase.create({
         data: {
-          clase_id: claseId,
-          estudiante_id: dto.estudianteId,
-          tutor_id: tutorId,
+          claseId: claseId,
+          estudianteId: dto.estudianteId,
+          tutorId: tutorId,
           observaciones: dto.observaciones,
         },
         include: {
@@ -106,7 +106,7 @@ export class ClasesReservasService {
       // ✅ Incrementar cupos (dentro de transacción)
       await tx.clase.update({
         where: { id: claseId },
-        data: { cupos_ocupados: { increment: 1 } },
+        data: { cuposOcupados: { increment: 1 } },
       });
 
       return nuevaInscripcion;
@@ -124,7 +124,7 @@ export class ClasesReservasService {
    */
   async listarReservasDeTutor(tutorId: string) {
     const reservas = await this.prisma.inscripcionClase.findMany({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
       include: {
         clase: {
           include: {
@@ -137,7 +137,7 @@ export class ClasesReservasService {
         estudiante: { select: { id: true, nombre: true, apellido: true } },
       },
       orderBy: {
-        clase: { fecha_hora_inicio: 'asc' },
+        clase: { fechaHoraInicio: 'asc' },
       },
     });
 
@@ -147,14 +147,14 @@ export class ClasesReservasService {
       }
 
       const cupoDisponible =
-        reserva.clase.cupos_maximo - reserva.clase.cupos_ocupados;
+        reserva.clase.cuposMaximo - reserva.clase.cuposOcupados;
 
       return {
         ...reserva,
         clase: {
           ...reserva.clase,
-          cupo_maximo: reserva.clase.cupos_maximo,
-          cupo_disponible: cupoDisponible,
+          cupoMaximo: reserva.clase.cuposMaximo,
+          cupoDisponible: cupoDisponible,
         },
       };
     });
@@ -177,14 +177,14 @@ export class ClasesReservasService {
       );
     }
 
-    if (inscripcion.tutor_id !== tutorId) {
+    if (inscripcion.tutorId !== tutorId) {
       throw new ForbiddenException(
         'No tienes permiso para cancelar esta inscripción',
       );
     }
 
     // Verificar que la clase aún no haya pasado
-    if (inscripcion.clase.fecha_hora_inicio <= new Date()) {
+    if (inscripcion.clase.fechaHoraInicio <= new Date()) {
       throw new BadRequestException(
         'No se puede cancelar una inscripción de una clase que ya comenzó',
       );
@@ -197,8 +197,8 @@ export class ClasesReservasService {
       });
 
       await tx.clase.update({
-        where: { id: inscripcion.clase_id },
-        data: { cupos_ocupados: { decrement: 1 } },
+        where: { id: inscripcion.claseId },
+        data: { cuposOcupados: { decrement: 1 } },
       });
     });
 

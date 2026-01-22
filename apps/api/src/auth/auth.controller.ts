@@ -79,7 +79,7 @@ export class AuthController {
    * Registra un nuevo tutor en la plataforma
    *
    * @param registerDto - Datos del tutor a registrar (email, password, nombre, apellido, etc.)
-   * @returns 201 Created - Usuario creado exitosamente (sin password_hash)
+   * @returns 201 Created - Usuario creado exitosamente (sin passwordHash)
    * @throws 409 Conflict - Email ya está registrado
    * @throws 400 Bad Request - Datos de entrada inválidos
    */
@@ -222,17 +222,17 @@ export class AuthController {
       userAgent,
     );
 
-    // Extraer must_change_password si existe (solo docentes)
+    // Extraer mustChangePassword si existe (solo docentes)
     const mustChangePassword =
-      'must_change_password' in result
-        ? (result as { must_change_password?: boolean }).must_change_password
+      'mustChangePassword' in result
+        ? (result as { mustChangePassword?: boolean }).mustChangePassword
         : undefined;
 
     return {
       user: loginResult.user,
       roles: loginResult.user.roles ?? [],
       ...(mustChangePassword !== undefined && {
-        must_change_password: mustChangePassword,
+        mustChangePassword: mustChangePassword,
       }),
     };
   }
@@ -319,7 +319,7 @@ export class AuthController {
    * Requiere token JWT válido en el header Authorization
    *
    * @param userId - ID del usuario extraído del token JWT por JwtStrategy
-   * @returns 200 OK - Datos completos del tutor (sin password_hash)
+   * @returns 200 OK - Datos completos del tutor (sin passwordHash)
    * @throws 401 Unauthorized - Token JWT inválido o no proporcionado
    * @throws 404 Not Found - Tutor no encontrado en la base de datos
    */

@@ -32,13 +32,13 @@ export class CrearPlanificacionDto {
   @IsInt()
   @Min(1)
   @Max(52)
-  cantidad_clases: number;
+  cantidadClases: number;
 
   @IsEnum(CasaTipo)
-  casa_tipo: CasaTipo;
+  casaTipo: CasaTipo;
 
   @IsEnum(MundoTipo)
-  mundo_tipo: MundoTipo;
+  mundoTipo: MundoTipo;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -70,11 +70,11 @@ export class ActualizarClasePlanificacionDto {
 
   @IsOptional()
   @IsUUID()
-  teoria_id?: string;
+  teoriaId?: string;
 
   @IsOptional()
   @IsUUID()
-  practica_id?: string;
+  practicaId?: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -83,7 +83,7 @@ export class ActualizarClasePlanificacionDto {
 
 export class AgregarTareaDto {
   @IsUUID()
-  contenido_id: string;
+  contenidoId: string;
 
   @IsOptional()
   @IsInt()
@@ -101,7 +101,7 @@ export class AgregarTareaDto {
 
 export class ReordenarClaseDto {
   @IsUUID()
-  clase_id: string;
+  claseId: string;
 
   @IsInt()
   @Min(1)
@@ -127,8 +127,8 @@ export interface ClasePlanificacionResponse {
   numero: number;
   titulo: string;
   descripcion: string | null;
-  teoria_id: string;
-  practica_id: string;
+  teoriaId: string;
+  practicaId: string;
   teoria?: {
     id: string;
     titulo: string;
@@ -141,7 +141,7 @@ export interface ClasePlanificacionResponse {
   };
   tareas?: {
     id: string;
-    contenido_id: string;
+    contenidoId: string;
     orden: number;
     obligatoria: boolean;
     contenido: {
@@ -158,12 +158,12 @@ export interface PlanificacionResponse {
   id: string;
   titulo: string;
   descripcion: string | null;
-  cantidad_clases: number;
-  casa_tipo: CasaTipo;
-  mundo_tipo: MundoTipo;
+  cantidadClases: number;
+  casaTipo: CasaTipo;
+  mundoTipo: MundoTipo;
   estado: EstadoContenido;
-  created_at: Date;
-  updated_at: Date;
+  createdAt: Date;
+  updatedAt: Date;
   clases: ClasePlanificacionResponse[];
 }
 

@@ -6,7 +6,7 @@
  * RESPONSABILIDAD ÚNICA:
  * - Obtener perfil de usuario según rol
  * - Soportar Tutor, Docente, Admin y Estudiante
- * - Excluir campos sensibles (password_hash)
+ * - Excluir campos sensibles (passwordHash)
  * - Incluir rol en la respuesta
  */
 
@@ -59,8 +59,8 @@ describe('GetProfileUseCase', () => {
         apellido: 'García',
         dni: '12345678',
         telefono: '1234567890',
-        fecha_registro: new Date('2024-01-01'),
-        ha_completado_onboarding: true,
+        fechaRegistro: new Date('2024-01-01'),
+        haCompletadoOnboarding: true,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-06-01'),
       };
@@ -73,7 +73,7 @@ describe('GetProfileUseCase', () => {
       expect(result.email).toBe('tutor@test.com');
       expect(result.nombre).toBe('María');
       expect(result.role).toBe(Role.TUTOR);
-      expect(result).not.toHaveProperty('password_hash');
+      expect(result).not.toHaveProperty('passwordHash');
     });
 
     /**
@@ -110,7 +110,7 @@ describe('GetProfileUseCase', () => {
         email: 'admin@test.com',
         nombre: 'Admin',
         apellido: 'User',
-        fecha_registro: new Date('2023-01-01'),
+        fechaRegistro: new Date('2023-01-01'),
         createdAt: new Date('2023-01-01'),
         updatedAt: new Date('2024-06-01'),
       };
@@ -126,7 +126,7 @@ describe('GetProfileUseCase', () => {
 
     /**
      * TEST 4: should_get_estudiante_profile
-     * NOTA: xp_total ahora viene de recursos (RecursosEstudiante)
+     * NOTA: xpTotal ahora viene de recursos (RecursosEstudiante)
      */
     it('should_get_estudiante_profile', async () => {
       const mockEstudiante = {
@@ -137,10 +137,10 @@ describe('GetProfileUseCase', () => {
         edad: 12,
         nivelEscolar: 'PRIMARIA',
         fotoUrl: 'https://foto.url',
-        recursos: { xp_total: 500 },
-        nivel_actual: 5,
+        recursos: { xpTotal: 500 },
+        nivelActual: 5,
         casaId: 'casa-1',
-        tutor_id: 'tutor-1',
+        tutorId: 'tutor-1',
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-06-01'),
       };
@@ -153,8 +153,8 @@ describe('GetProfileUseCase', () => {
 
       expect(result.id).toBe('est-123');
       expect(result.nombre).toBe('Juan');
-      expect((result as any).xp_total).toBe(500);
-      expect((result as any).nivel_actual).toBe(5);
+      expect((result as any).xpTotal).toBe(500);
+      expect((result as any).nivelActual).toBe(5);
       expect(result.role).toBe(Role.ESTUDIANTE);
     });
   });

@@ -56,24 +56,24 @@ export class EventosService {
         titulo: dto.titulo,
         descripcion: dto.descripcion,
         tipo: TipoEvento.TAREA,
-        fecha_inicio: new Date(dto.fechaInicio),
-        fecha_fin: new Date(dto.fechaFin),
-        es_todo_el_dia: dto.esTodoElDia ?? false,
-        docente_id: docenteId,
-        clase_id: dto.claseId,
+        fechaInicio: new Date(dto.fechaInicio),
+        fechaFin: new Date(dto.fechaFin),
+        esTodoElDia: dto.esTodoElDia ?? false,
+        docenteId: docenteId,
+        claseId: dto.claseId,
         tarea: {
           create: {
             estado: dto.estado ?? 'PENDIENTE',
             prioridad: dto.prioridad ?? 'MEDIA',
-            porcentaje_completado: dto.porcentajeCompletado ?? 0,
+            porcentajeCompletado: dto.porcentajeCompletado ?? 0,
             categoria: dto.categoria,
             etiquetas: dto.etiquetas ?? [],
             subtareas: subtareasJson,
             archivos: archivosJson,
-            clase_relacionada_id: dto.claseRelacionadaId,
-            estudiante_relacionado_id: dto.estudianteRelacionadoId,
-            tiempo_estimado_minutos: dto.tiempoEstimadoMinutos,
-            tiempo_real_minutos: dto.tiempoRealMinutos,
+            claseRelacionadaId: dto.claseRelacionadaId,
+            estudianteRelacionadoId: dto.estudianteRelacionadoId,
+            tiempoEstimadoMinutos: dto.tiempoEstimadoMinutos,
+            tiempoRealMinutos: dto.tiempoRealMinutos,
             recurrencia: recurrenciaJson,
             recordatorios: recordatoriosJson,
           },
@@ -95,11 +95,11 @@ export class EventosService {
         titulo: dto.titulo,
         descripcion: dto.descripcion,
         tipo: TipoEvento.RECORDATORIO,
-        fecha_inicio: new Date(dto.fechaInicio),
-        fecha_fin: new Date(dto.fechaFin),
-        es_todo_el_dia: dto.esTodoElDia ?? false,
-        docente_id: docenteId,
-        clase_id: dto.claseId,
+        fechaInicio: new Date(dto.fechaInicio),
+        fechaFin: new Date(dto.fechaFin),
+        esTodoElDia: dto.esTodoElDia ?? false,
+        docenteId: docenteId,
+        claseId: dto.claseId,
         recordatorio: {
           create: {
             completado: dto.completado ?? false,
@@ -123,11 +123,11 @@ export class EventosService {
         titulo: dto.titulo,
         descripcion: dto.descripcion,
         tipo: TipoEvento.NOTA,
-        fecha_inicio: new Date(dto.fechaInicio),
-        fecha_fin: new Date(dto.fechaFin),
-        es_todo_el_dia: dto.esTodoElDia ?? false,
-        docente_id: docenteId,
-        clase_id: dto.claseId,
+        fechaInicio: new Date(dto.fechaInicio),
+        fechaFin: new Date(dto.fechaFin),
+        esTodoElDia: dto.esTodoElDia ?? false,
+        docenteId: docenteId,
+        claseId: dto.claseId,
         nota: {
           create: {
             contenido: dto.contenido,
@@ -158,17 +158,17 @@ export class EventosService {
     },
   ) {
     const where: Prisma.EventoWhereInput = {
-      docente_id: docenteId,
+      docenteId: docenteId,
     };
 
     // Filtro por rango de fechas
     if (options?.fechaInicio || options?.fechaFin) {
-      where.fecha_inicio = {};
+      where.fechaInicio = {};
       if (options.fechaInicio) {
-        where.fecha_inicio.gte = options.fechaInicio;
+        where.fechaInicio.gte = options.fechaInicio;
       }
       if (options.fechaFin) {
-        where.fecha_inicio.lte = options.fechaFin;
+        where.fechaInicio.lte = options.fechaFin;
       }
     }
 
@@ -193,7 +193,7 @@ export class EventosService {
         nota: true,
         clase: true,
       },
-      orderBy: { fecha_inicio: 'asc' },
+      orderBy: { fechaInicio: 'asc' },
     });
   }
 
@@ -204,7 +204,7 @@ export class EventosService {
     const evento = await this.prisma.evento.findFirst({
       where: {
         id,
-        docente_id: docenteId,
+        docenteId: docenteId,
       },
       include: {
         tarea: true,
@@ -259,7 +259,7 @@ export class EventosService {
     en7Dias.setDate(en7Dias.getDate() + 7);
 
     eventos.forEach((evento) => {
-      const fechaEvento = new Date(evento.fecha_inicio);
+      const fechaEvento = new Date(evento.fechaInicio);
       fechaEvento.setHours(0, 0, 0, 0);
 
       if (fechaEvento.getTime() === hoy.getTime()) {
@@ -335,13 +335,13 @@ export class EventosService {
     if (dto.titulo !== undefined) updateData.titulo = dto.titulo;
     if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion;
     if (dto.fechaInicio !== undefined) {
-      updateData.fecha_inicio = new Date(dto.fechaInicio);
+      updateData.fechaInicio = new Date(dto.fechaInicio);
     }
     if (dto.fechaFin !== undefined) {
-      updateData.fecha_fin = new Date(dto.fechaFin);
+      updateData.fechaFin = new Date(dto.fechaFin);
     }
     if (dto.esTodoElDia !== undefined) {
-      updateData.es_todo_el_dia = dto.esTodoElDia;
+      updateData.esTodoElDia = dto.esTodoElDia;
     }
     if (dto.claseId !== undefined) {
       updateData.clase = dto.claseId
@@ -361,7 +361,7 @@ export class EventosService {
     if (dto.estado !== undefined) tareaUpdate.estado = dto.estado;
     if (dto.prioridad !== undefined) tareaUpdate.prioridad = dto.prioridad;
     if (dto.porcentajeCompletado !== undefined) {
-      tareaUpdate.porcentaje_completado = dto.porcentajeCompletado;
+      tareaUpdate.porcentajeCompletado = dto.porcentajeCompletado;
     }
     if (dto.categoria !== undefined) tareaUpdate.categoria = dto.categoria;
     if (dto.etiquetas !== undefined) tareaUpdate.etiquetas = dto.etiquetas;
@@ -372,16 +372,16 @@ export class EventosService {
       tareaUpdate.archivos = this.serializeArray(dto.archivos);
     }
     if (dto.claseRelacionadaId !== undefined) {
-      tareaUpdate.clase_relacionada_id = dto.claseRelacionadaId;
+      tareaUpdate.claseRelacionadaId = dto.claseRelacionadaId;
     }
     if (dto.estudianteRelacionadoId !== undefined) {
-      tareaUpdate.estudiante_relacionado_id = dto.estudianteRelacionadoId;
+      tareaUpdate.estudianteRelacionadoId = dto.estudianteRelacionadoId;
     }
     if (dto.tiempoEstimadoMinutos !== undefined) {
-      tareaUpdate.tiempo_estimado_minutos = dto.tiempoEstimadoMinutos;
+      tareaUpdate.tiempoEstimadoMinutos = dto.tiempoEstimadoMinutos;
     }
     if (dto.tiempoRealMinutos !== undefined) {
-      tareaUpdate.tiempo_real_minutos = dto.tiempoRealMinutos;
+      tareaUpdate.tiempoRealMinutos = dto.tiempoRealMinutos;
     }
     if (dto.recurrencia !== undefined) {
       tareaUpdate.recurrencia = this.serializeObject(dto.recurrencia);
@@ -474,8 +474,8 @@ export class EventosService {
     return this.prisma.evento.update({
       where: { id },
       data: {
-        fecha_inicio: fechaInicio,
-        fecha_fin: fechaFin,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
       },
       include: {
         tarea: true,
@@ -512,23 +512,23 @@ export class EventosService {
       tareasCompletadas,
     ] = await Promise.all([
       this.prisma.evento.count({
-        where: { docente_id: docenteId, tipo: TipoEvento.TAREA },
+        where: { docenteId: docenteId, tipo: TipoEvento.TAREA },
       }),
       this.prisma.evento.count({
-        where: { docente_id: docenteId, tipo: TipoEvento.RECORDATORIO },
+        where: { docenteId: docenteId, tipo: TipoEvento.RECORDATORIO },
       }),
       this.prisma.evento.count({
-        where: { docente_id: docenteId, tipo: TipoEvento.NOTA },
+        where: { docenteId: docenteId, tipo: TipoEvento.NOTA },
       }),
       this.prisma.tarea.count({
         where: {
-          evento: { docente_id: docenteId },
+          evento: { docenteId: docenteId },
           estado: 'PENDIENTE',
         },
       }),
       this.prisma.tarea.count({
         where: {
-          evento: { docente_id: docenteId },
+          evento: { docenteId: docenteId },
           estado: 'COMPLETADA',
         },
       }),

@@ -39,7 +39,7 @@ export class GruposService {
       where: { id: claseGrupoId },
       include: {
         inscripciones: {
-          where: { fecha_baja: null }, // Solo inscritos activos
+          where: { fechaBaja: null }, // Solo inscritos activos
           include: {
             estudiante: {
               include: {
@@ -49,9 +49,9 @@ export class GruposService {
                     colorPrimary: true,
                   },
                 },
-                asistencias_clase_grupo: {
+                asistenciasClaseGrupo: {
                   where: {
-                    clase_grupo_id: claseGrupoId,
+                    claseGrupoId: claseGrupoId,
                   },
                   select: {
                     id: true,
@@ -94,7 +94,7 @@ export class GruposService {
     }
 
     // 2. Verificar que el docente autenticado es el titular
-    if (claseGrupo.docente_id !== docenteId) {
+    if (claseGrupo.docenteId !== docenteId) {
       throw new ForbiddenException('No tiene permisos para ver este grupo');
     }
 
@@ -104,7 +104,7 @@ export class GruposService {
         const estudiante = insc.estudiante;
 
         // Asistencias del estudiante en este grupo
-        const asistencias = estudiante.asistencias_clase_grupo;
+        const asistencias = estudiante.asistenciasClaseGrupo;
         const clasesAsistidas = asistencias.filter(
           (a) => a.estado === EstadoAsistencia.Presente,
         ).length;
@@ -131,7 +131,7 @@ export class GruposService {
           id: estudiante.id,
           nombre: estudiante.nombre,
           apellido: estudiante.apellido,
-          avatar_gradient: estudiante.avatar_gradient,
+          avatarGradient: estudiante.avatarGradient,
           casa: estudiante.casa
             ? {
                 nombre: estudiante.casa.nombre,
@@ -216,8 +216,8 @@ export class GruposService {
 
     // 7. Calcular próxima clase
     const proximaClase = this.calcularProximaClase(
-      claseGrupo.dia_semana,
-      claseGrupo.hora_inicio,
+      claseGrupo.diaSemana,
+      claseGrupo.horaInicio,
     );
 
     // 8. Ensamblar response BRUTAL
@@ -225,10 +225,10 @@ export class GruposService {
       id: claseGrupo.id,
       nombre: claseGrupo.nombre,
       codigo: claseGrupo.codigo,
-      dia_semana: claseGrupo.dia_semana,
-      hora_inicio: claseGrupo.hora_inicio,
-      hora_fin: claseGrupo.hora_fin,
-      cupo_maximo: claseGrupo.cupo_maximo,
+      diaSemana: claseGrupo.diaSemana,
+      horaInicio: claseGrupo.horaInicio,
+      horaFin: claseGrupo.horaFin,
+      cupoMaximo: claseGrupo.cupoMaximo,
       estudiantes: estudiantesConStats,
       tareas,
       observacionesRecientes,
@@ -239,18 +239,18 @@ export class GruposService {
         tareasCompletadasPromedio: 0, // TODO: Cuando tengamos tareas
       },
       proximaClase,
-      docenteId: claseGrupo.docente_id,
+      docenteId: claseGrupo.docenteId,
       activo: claseGrupo.activo,
     };
   }
 
   /**
    * Calcular la próxima clase del grupo
-   * Devuelve la fecha del próximo día que coincide con el dia_semana
+   * Devuelve la fecha del próximo día que coincide con el diaSemana
    */
   private calcularProximaClase(
-    dia_semana: DiaSemana,
-    hora_inicio: string,
+    diaSemana: DiaSemana,
+    horaInicio: string,
   ): ProximaClaseDto | null {
     const now = new Date();
     const diasSemanaMap: Record<DiaSemana, number> = {
@@ -263,7 +263,7 @@ export class GruposService {
       [DiaSemana.SABADO]: 6,
     };
 
-    const diaNumero = diasSemanaMap[dia_semana];
+    const diaNumero = diasSemanaMap[diaSemana];
     const hoyNumero = now.getDay();
 
     // Calcular cuántos días faltan para el próximo día de clase
@@ -274,7 +274,7 @@ export class GruposService {
     if (diasHasta === 0) {
       // Si es hoy, verificar si ya pasó la hora
       const { horas: horaClase, minutos: minutoClase } =
-        parseHorario(hora_inicio);
+        parseHorario(horaInicio);
       const horaActual = now.getHours();
       const minutoActual = now.getMinutes();
 
@@ -294,7 +294,7 @@ export class GruposService {
     let minutosParaEmpezar: number | null = null;
     if (diasHasta === 0) {
       const { horas: horaClase, minutos: minutoClase } =
-        parseHorario(hora_inicio);
+        parseHorario(horaInicio);
       const fechaClase = new Date(now);
       fechaClase.setHours(horaClase, minutoClase, 0, 0);
       minutosParaEmpezar = Math.floor(
@@ -304,7 +304,7 @@ export class GruposService {
 
     return {
       fecha: proximaFecha.toISOString().split('T')[0] || '', // YYYY-MM-DD
-      hora: hora_inicio,
+      hora: horaInicio,
       minutosParaEmpezar,
     };
   }

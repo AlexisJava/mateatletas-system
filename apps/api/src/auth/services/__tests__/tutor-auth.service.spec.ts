@@ -23,9 +23,9 @@ describe('TutorAuthService', () => {
     apellido: 'Pérez',
     dni: '12345678',
     telefono: '+5491123456789',
-    password_hash: 'hashed-password',
-    fecha_registro: new Date('2024-01-01'),
-    ha_completado_onboarding: true,
+    passwordHash: 'hashed-password',
+    fechaRegistro: new Date('2024-01-01'),
+    haCompletadoOnboarding: true,
     roles: 'Tutor',
   };
 
@@ -170,7 +170,7 @@ describe('TutorAuthService', () => {
       expect(passwordService.hash).toHaveBeenCalledWith('password123');
       expect(prisma.tutor.update).toHaveBeenCalledWith({
         where: { id: 'tutor-123' },
-        data: { password_hash: 'new-hash' },
+        data: { passwordHash: 'new-hash' },
       });
     });
 

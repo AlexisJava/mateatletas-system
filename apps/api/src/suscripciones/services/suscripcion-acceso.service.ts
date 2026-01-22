@@ -62,8 +62,8 @@ export class SuscripcionAccesoService {
   async verificarAccesoTutor(tutorId: string): Promise<AccesoResult> {
     // Buscar suscripción más reciente (cualquier estado)
     const suscripcion = await this.prisma.suscripcion.findFirst({
-      where: { tutor_id: tutorId },
-      orderBy: { created_at: 'desc' },
+      where: { tutorId: tutorId },
+      orderBy: { createdAt: 'desc' },
     });
 
     if (!suscripcion) {
@@ -88,7 +88,7 @@ export class SuscripcionAccesoService {
     // Buscar estudiante y su tutor
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: estudianteId },
-      select: { tutor_id: true },
+      select: { tutorId: true },
     });
 
     if (!estudiante) {
@@ -101,7 +101,7 @@ export class SuscripcionAccesoService {
     }
 
     // Verificar acceso del tutor
-    return this.verificarAccesoTutor(estudiante.tutor_id);
+    return this.verificarAccesoTutor(estudiante.tutorId);
   }
 
   /**
@@ -115,12 +115,12 @@ export class SuscripcionAccesoService {
   ): Promise<Suscripcion | null> {
     return this.prisma.suscripcion.findFirst({
       where: {
-        tutor_id: tutorId,
+        tutorId: tutorId,
         estado: {
           in: [EstadoSuscripcion.ACTIVA, EstadoSuscripcion.EN_GRACIA],
         },
       },
-      orderBy: { created_at: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -140,13 +140,13 @@ export class SuscripcionAccesoService {
    * Evalúa el acceso basado en el estado de la suscripción
    */
   private evaluarAcceso(suscripcion: Suscripcion): AccesoResult {
-    const { estado, id, dias_gracia_usados } = suscripcion;
+    const { estado, id, diasGraciaUsados } = suscripcion;
 
     // Estados con acceso completo
     if (ESTADOS_CON_ACCESO.has(estado)) {
       const diasRestantes =
         estado === EstadoSuscripcion.EN_GRACIA
-          ? GRACE_PERIOD_DIAS - (dias_gracia_usados || 0)
+          ? GRACE_PERIOD_DIAS - (diasGraciaUsados || 0)
           : undefined;
 
       return {

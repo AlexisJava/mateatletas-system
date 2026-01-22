@@ -35,10 +35,10 @@ export type AnyUser = Tutor | Docente | AdminModel | Estudiante;
 // ============================================================================
 
 /**
- * Type guard para Tutor - usa campo único `ha_completado_onboarding`
+ * Type guard para Tutor - usa campo único `haCompletadoOnboarding`
  */
 export const isTutorUser = (user: AuthenticatedUser): user is Tutor =>
-  'ha_completado_onboarding' in user;
+  'haCompletadoOnboarding' in user;
 
 /**
  * Type guard para Docente - usa campo único `titulo`
@@ -56,7 +56,7 @@ export const isAdminUser = (user: AuthenticatedUser): user is AdminModel =>
  * Type guard para Estudiante
  */
 export const isEstudianteUser = (user: AnyUser): user is Estudiante =>
-  'tutor_id' in user && 'nivelEscolar' in user;
+  'tutorId' in user && 'nivelEscolar' in user;
 
 // ============================================================================
 // INTERFACES DE RESULTADO
@@ -84,7 +84,7 @@ export interface UserByIdResult<T extends AnyUser = AnyUser> {
  */
 export interface UserPasswordData {
   id: string;
-  password_hash: string | null;
+  passwordHash: string | null;
 }
 
 /**
@@ -109,7 +109,7 @@ export interface EstudianteWithRelations extends Estudiante {
 
 const PASSWORD_FIELDS_SELECT = {
   id: true,
-  password_hash: true,
+  passwordHash: true,
 } as const;
 
 // ============================================================================
@@ -350,7 +350,7 @@ export class UserLookupService {
   async updatePasswordData(
     userId: string,
     userType: UserType,
-    data: { password_hash: string; fecha_ultimo_cambio: Date },
+    data: { passwordHash: string; fechaUltimoCambio: Date },
   ): Promise<void> {
     return this.updateService.updatePasswordData(userId, userType, data);
   }

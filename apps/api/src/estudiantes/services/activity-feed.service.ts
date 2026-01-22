@@ -56,12 +56,12 @@ export class ActivityFeedService {
   async create(data: CreateActividadFeedDto) {
     return this.prisma.actividadFeed.create({
       data: {
-        estudiante_id: data.estudianteId,
+        estudianteId: data.estudianteId,
         tipo: data.tipo,
         mensaje: data.mensaje,
-        xp_ganado: data.xpGanado ?? 0,
+        xpGanado: data.xpGanado ?? 0,
         metadata: data.metadata ?? {},
-        casa_id: data.casaId,
+        casaId: data.casaId,
       },
       include: {
         estudiante: {
@@ -88,7 +88,7 @@ export class ActivityFeedService {
     const where: Record<string, unknown> = {};
 
     if (query.casaId) {
-      where.casa_id = query.casaId;
+      where.casaId = query.casaId;
     }
 
     if (query.tipo) {
@@ -96,7 +96,7 @@ export class ActivityFeedService {
     }
 
     if (query.estudianteId) {
-      where.estudiante_id = query.estudianteId;
+      where.estudianteId = query.estudianteId;
     }
 
     const [items, total] = await Promise.all([
@@ -114,7 +114,7 @@ export class ActivityFeedService {
           reacciones: {
             select: {
               emoji: true,
-              estudiante_id: true,
+              estudianteId: true,
             },
           },
           _count: {
@@ -124,7 +124,7 @@ export class ActivityFeedService {
           },
         },
         orderBy: {
-          creado_en: 'desc',
+          creadoEn: 'desc',
         },
         skip,
         take: limit,
@@ -139,9 +139,9 @@ export class ActivityFeedService {
         id: item.id,
         tipo: item.tipo,
         mensaje: item.mensaje,
-        xpGanado: item.xp_ganado,
+        xpGanado: item.xpGanado,
         metadata: item.metadata,
-        creadoEn: item.creado_en,
+        creadoEn: item.creadoEn,
         estudiante: item.estudiante,
         reacciones: reaccionesAgrupadas,
         totalReacciones: item._count.reacciones,
@@ -181,14 +181,14 @@ export class ActivityFeedService {
     // Verificar que no está reaccionando a su propia actividad (fuera de transacción)
     const actividad = await this.prisma.actividadFeed.findUnique({
       where: { id: actividadId },
-      select: { estudiante_id: true },
+      select: { estudianteId: true },
     });
 
     if (!actividad) {
       throw new BadRequestException('Actividad no encontrada');
     }
 
-    if (actividad.estudiante_id === estudianteId) {
+    if (actividad.estudianteId === estudianteId) {
       throw new BadRequestException(
         'No puedes reaccionar a tus propias actividades',
       );
@@ -237,9 +237,9 @@ export class ActivityFeedService {
         // Verificar si ya existe esta reacción específica
         const existente = await tx.reaccionFeed.findUnique({
           where: {
-            actividad_id_estudiante_id_emoji: {
-              actividad_id: actividadId,
-              estudiante_id: estudianteId,
+            actividadId_estudianteId_emoji: {
+              actividadId: actividadId,
+              estudianteId: estudianteId,
               emoji,
             },
           },
@@ -256,8 +256,8 @@ export class ActivityFeedService {
 
         const reaccionesHoy = await tx.reaccionFeed.count({
           where: {
-            estudiante_id: estudianteId,
-            creado_en: { gte: hoy },
+            estudianteId: estudianteId,
+            creadoEn: { gte: hoy },
           },
         });
 
@@ -275,8 +275,8 @@ export class ActivityFeedService {
         // Crear la reacción
         return tx.reaccionFeed.create({
           data: {
-            actividad_id: actividadId,
-            estudiante_id: estudianteId,
+            actividadId: actividadId,
+            estudianteId: estudianteId,
             emoji,
           },
         });
@@ -297,8 +297,8 @@ export class ActivityFeedService {
 
     return this.prisma.reaccionFeed.count({
       where: {
-        estudiante_id: estudianteId,
-        creado_en: {
+        estudianteId: estudianteId,
+        creadoEn: {
           gte: hoy,
         },
       },
@@ -328,8 +328,8 @@ export class ActivityFeedService {
   ) {
     return this.prisma.reaccionFeed.deleteMany({
       where: {
-        actividad_id: actividadId,
-        estudiante_id: estudianteId,
+        actividadId: actividadId,
+        estudianteId: estudianteId,
         emoji,
       },
     });
@@ -352,7 +352,7 @@ export class ActivityFeedService {
 
   /**
    * Obtiene el feed de múltiples estudiantes (para comisión/ClaseGrupo)
-   * Filtra actividades donde estudiante_id está en la lista
+   * Filtra actividades donde estudianteId está en la lista
    * @param estudianteIds - Lista de IDs de estudiantes
    * @param limit - Cantidad máxima de items (default: 10, max: 50)
    * @param page - Página para paginación (default: 1)
@@ -370,7 +370,7 @@ export class ActivityFeedService {
     const skip = (page - 1) * safeLimit;
 
     const where = {
-      estudiante_id: { in: estudianteIds },
+      estudianteId: { in: estudianteIds },
     };
 
     const [items, total] = await Promise.all([
@@ -388,7 +388,7 @@ export class ActivityFeedService {
           reacciones: {
             select: {
               emoji: true,
-              estudiante_id: true,
+              estudianteId: true,
             },
           },
           _count: {
@@ -398,7 +398,7 @@ export class ActivityFeedService {
           },
         },
         orderBy: {
-          creado_en: 'desc',
+          creadoEn: 'desc',
         },
         skip,
         take: safeLimit,
@@ -412,9 +412,9 @@ export class ActivityFeedService {
         id: item.id,
         tipo: item.tipo,
         mensaje: item.mensaje,
-        xpGanado: item.xp_ganado,
+        xpGanado: item.xpGanado,
         metadata: item.metadata,
-        creadoEn: item.creado_en,
+        creadoEn: item.creadoEn,
         estudiante: item.estudiante,
         reacciones: reaccionesAgrupadas,
         totalReacciones: item._count.reacciones,
@@ -437,7 +437,7 @@ export class ActivityFeedService {
    * Agrupa reacciones por emoji y cuenta cuántas hay de cada tipo
    */
   private agruparReacciones(
-    reacciones: Array<{ emoji: string; estudiante_id: string }>,
+    reacciones: Array<{ emoji: string; estudianteId: string }>,
   ): Array<{ emoji: string; count: number; estudiantesIds: string[] }> {
     const grouped = new Map<
       string,
@@ -447,7 +447,7 @@ export class ActivityFeedService {
     for (const r of reacciones) {
       const current = grouped.get(r.emoji) || { count: 0, estudiantesIds: [] };
       current.count++;
-      current.estudiantesIds.push(r.estudiante_id);
+      current.estudiantesIds.push(r.estudianteId);
       grouped.set(r.emoji, current);
     }
 

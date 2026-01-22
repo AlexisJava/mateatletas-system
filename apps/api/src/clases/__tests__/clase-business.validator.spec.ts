@@ -43,9 +43,9 @@ describe('ClaseBusinessValidator', () => {
         apellido: 'Pérez',
         email: 'juan@test.com',
         titulo: 'Matemático',
-        sector_id: 'sector-1',
-        created_at: new Date(),
-        updated_at: new Date(),
+        sectorId: 'sector-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       await expect(
@@ -73,8 +73,8 @@ describe('ClaseBusinessValidator', () => {
         nombre: 'Matemáticas',
         icono: '🔢',
         color: '#3B82F6',
-        created_at: new Date(),
-        updated_at: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       await expect(
@@ -102,11 +102,11 @@ describe('ClaseBusinessValidator', () => {
         nombre: 'Curso de Álgebra',
         tipo: 'Curso',
         descripcion: 'Curso completo',
-        precio_mensual: 1000,
+        precioMensual: 1000,
         precio_anual: 10000,
         estado: 'Activo',
-        created_at: new Date(),
-        updated_at: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       await expect(
@@ -132,11 +132,11 @@ describe('ClaseBusinessValidator', () => {
         nombre: 'Suscripción Mensual',
         tipo: 'Suscripción',
         descripcion: 'Suscripción',
-        precio_mensual: 500,
+        precioMensual: 500,
         precio_anual: 5000,
         estado: 'Activo',
-        created_at: new Date(),
-        updated_at: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       await expect(
@@ -243,7 +243,7 @@ describe('ClaseBusinessValidator', () => {
   describe('validarPermisosCancelacion', () => {
     const clase = {
       id: 'clase-1',
-      docente_id: 'docente-1',
+      docenteId: 'docente-1',
     } as any;
 
     it('debe permitir cancelación si el usuario es admin', () => {
@@ -307,8 +307,8 @@ describe('ClaseBusinessValidator', () => {
     it('debe pasar si hay cupos suficientes', () => {
       const clase = {
         id: 'clase-1',
-        cupos_maximo: 10,
-        cupos_ocupados: 5,
+        cuposMaximo: 10,
+        cuposOcupados: 5,
       } as any;
 
       expect(() => validator.validarCuposDisponibles(clase, 3)).not.toThrow();
@@ -317,8 +317,8 @@ describe('ClaseBusinessValidator', () => {
     it('debe pasar si se asignan exactamente los cupos disponibles', () => {
       const clase = {
         id: 'clase-1',
-        cupos_maximo: 10,
-        cupos_ocupados: 5,
+        cuposMaximo: 10,
+        cuposOcupados: 5,
       } as any;
 
       expect(() => validator.validarCuposDisponibles(clase, 5)).not.toThrow();
@@ -327,8 +327,8 @@ describe('ClaseBusinessValidator', () => {
     it('debe lanzar BadRequestException si no hay cupos suficientes', () => {
       const clase = {
         id: 'clase-1',
-        cupos_maximo: 10,
-        cupos_ocupados: 8,
+        cuposMaximo: 10,
+        cuposOcupados: 8,
       } as any;
 
       expect(() => validator.validarCuposDisponibles(clase, 5)).toThrow(
@@ -343,8 +343,8 @@ describe('ClaseBusinessValidator', () => {
     it('debe lanzar BadRequestException si la clase está llena', () => {
       const clase = {
         id: 'clase-1',
-        cupos_maximo: 10,
-        cupos_ocupados: 10,
+        cuposMaximo: 10,
+        cuposOcupados: 10,
       } as any;
 
       expect(() => validator.validarCuposDisponibles(clase, 1)).toThrow(
@@ -355,8 +355,8 @@ describe('ClaseBusinessValidator', () => {
     it('debe lanzar BadRequestException si se intenta asignar más de los cupos máximos', () => {
       const clase = {
         id: 'clase-1',
-        cupos_maximo: 10,
-        cupos_ocupados: 0,
+        cuposMaximo: 10,
+        cuposOcupados: 0,
       } as any;
 
       expect(() => validator.validarCuposDisponibles(clase, 15)).toThrow(
@@ -373,10 +373,10 @@ describe('ClaseBusinessValidator', () => {
           nombre: 'María',
           apellido: 'García',
           nivelEscolar: 'Primaria',
-          tutor_id: 'tutor-1',
-          avatar_gradient: 'gradient-1',
-          created_at: new Date(),
-          updated_at: new Date(),
+          tutorId: 'tutor-1',
+          avatarGradient: 'gradient-1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
           tutor: {
             id: 'tutor-1',
             nombre: 'Tutor',
@@ -384,8 +384,8 @@ describe('ClaseBusinessValidator', () => {
             email: 'tutor@test.com',
             password: 'hash',
             telefono: '123456',
-            created_at: new Date(),
-            updated_at: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
           },
         },
         {
@@ -393,10 +393,10 @@ describe('ClaseBusinessValidator', () => {
           nombre: 'Pedro',
           apellido: 'López',
           nivelEscolar: 'Secundaria',
-          tutor_id: 'tutor-1',
-          avatar_gradient: 'gradient-2',
-          created_at: new Date(),
-          updated_at: new Date(),
+          tutorId: 'tutor-1',
+          avatarGradient: 'gradient-2',
+          createdAt: new Date(),
+          updatedAt: new Date(),
           tutor: {
             id: 'tutor-1',
             nombre: 'Tutor',
@@ -404,8 +404,8 @@ describe('ClaseBusinessValidator', () => {
             email: 'tutor@test.com',
             password: 'hash',
             telefono: '123456',
-            created_at: new Date(),
-            updated_at: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
           },
         },
       ];
@@ -429,10 +429,10 @@ describe('ClaseBusinessValidator', () => {
           nombre: 'María',
           apellido: 'García',
           nivelEscolar: 'Primaria',
-          tutor_id: 'tutor-1',
-          avatar_gradient: 'gradient-1',
-          created_at: new Date(),
-          updated_at: new Date(),
+          tutorId: 'tutor-1',
+          avatarGradient: 'gradient-1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
           tutor: {
             id: 'tutor-1',
             nombre: 'Tutor',
@@ -440,8 +440,8 @@ describe('ClaseBusinessValidator', () => {
             email: 'tutor@test.com',
             password: 'hash',
             telefono: '123456',
-            created_at: new Date(),
-            updated_at: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
           },
         },
       ]);
@@ -468,7 +468,7 @@ describe('ClaseBusinessValidator', () => {
     it('debe pasar si ningún estudiante está inscrito', () => {
       const clase = {
         id: 'clase-1',
-        inscripciones: [{ estudiante_id: 'est-1' }, { estudiante_id: 'est-2' }],
+        inscripciones: [{ estudianteId: 'est-1' }, { estudianteId: 'est-2' }],
       } as any;
 
       expect(() =>
@@ -490,7 +490,7 @@ describe('ClaseBusinessValidator', () => {
     it('debe lanzar BadRequestException si algún estudiante ya está inscrito', () => {
       const clase = {
         id: 'clase-1',
-        inscripciones: [{ estudiante_id: 'est-1' }, { estudiante_id: 'est-2' }],
+        inscripciones: [{ estudianteId: 'est-1' }, { estudianteId: 'est-2' }],
       } as any;
 
       expect(() =>
@@ -506,9 +506,9 @@ describe('ClaseBusinessValidator', () => {
       const clase = {
         id: 'clase-1',
         inscripciones: [
-          { estudiante_id: 'est-1' },
-          { estudiante_id: 'est-2' },
-          { estudiante_id: 'est-3' },
+          { estudianteId: 'est-1' },
+          { estudianteId: 'est-2' },
+          { estudianteId: 'est-3' },
         ],
       } as any;
 
@@ -532,7 +532,7 @@ describe('ClaseBusinessValidator', () => {
     it('debe lanzar BadRequestException si todos los estudiantes están inscritos', () => {
       const clase = {
         id: 'clase-1',
-        inscripciones: [{ estudiante_id: 'est-1' }, { estudiante_id: 'est-2' }],
+        inscripciones: [{ estudianteId: 'est-1' }, { estudianteId: 'est-2' }],
       } as any;
 
       expect(() =>

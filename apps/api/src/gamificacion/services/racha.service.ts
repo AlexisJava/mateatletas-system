@@ -18,12 +18,12 @@ export class RachaService {
     // Upsert atómico evita TOCTOU race condition
     // Si dos requests llegan simultáneamente, PostgreSQL maneja el conflicto
     return this.prisma.rachaEstudiante.upsert({
-      where: { estudiante_id: estudianteId },
+      where: { estudianteId: estudianteId },
       create: {
-        estudiante_id: estudianteId,
-        racha_actual: 0,
-        racha_maxima: 0,
-        total_dias_activos: 0,
+        estudianteId: estudianteId,
+        rachaActual: 0,
+        rachaMaxima: 0,
+        totalDiasActivos: 0,
       },
       update: {}, // No actualizar nada, solo retornar existente
     });
@@ -34,10 +34,10 @@ export class RachaService {
    * Retorna true si la racha aumentó
    */
   async registrarActividad(estudianteId: string): Promise<{
-    racha_actual: number;
-    racha_maxima: number;
-    es_nueva_racha: boolean;
-    rompio_racha: boolean;
+    rachaActual: number;
+    rachaMaxima: number;
+    esNuevaRacha: boolean;
+    rompioRacha: boolean;
   }> {
     const racha = await this.obtenerRacha(estudianteId);
     const ahora = new Date();
@@ -45,51 +45,49 @@ export class RachaService {
 
     // Si ya hay actividad hoy, no hacer nada
     if (
-      racha.ultima_actividad &&
-      this.esMismoDia(racha.ultima_actividad, ahora)
+      racha.ultimaActividad &&
+      this.esMismoDia(racha.ultimaActividad, ahora)
     ) {
       return {
-        racha_actual: racha.racha_actual,
-        racha_maxima: racha.racha_maxima,
-        es_nueva_racha: false,
-        rompio_racha: false,
+        rachaActual: racha.rachaActual,
+        rachaMaxima: racha.rachaMaxima,
+        esNuevaRacha: false,
+        rompioRacha: false,
       };
     }
 
     // Verificar si la actividad es del día siguiente consecutivo
     const esConsecutivo =
-      racha.ultima_actividad &&
-      this.esDiaSiguiente(racha.ultima_actividad, ahora);
+      racha.ultimaActividad &&
+      this.esDiaSiguiente(racha.ultimaActividad, ahora);
 
-    let nuevaRacha = racha.racha_actual;
+    let nuevaRacha = racha.rachaActual;
     let rompioRacha = false;
 
     if (esConsecutivo) {
       // Aumentar racha
-      nuevaRacha = racha.racha_actual + 1;
-    } else if (racha.ultima_actividad) {
+      nuevaRacha = racha.rachaActual + 1;
+    } else if (racha.ultimaActividad) {
       // Se rompió la racha
       nuevaRacha = 1;
-      rompioRacha = racha.racha_actual > 0;
+      rompioRacha = racha.rachaActual > 0;
     } else {
       // Primera actividad
       nuevaRacha = 1;
     }
 
-    const nuevaRachaMaxima = Math.max(racha.racha_maxima, nuevaRacha);
-    const esNuevaRacha = nuevaRacha > racha.racha_actual;
+    const nuevaRachaMaxima = Math.max(racha.rachaMaxima, nuevaRacha);
+    const esNuevaRacha = nuevaRacha > racha.rachaActual;
 
     // Actualizar registro
     const rachaActualizada = await this.prisma.rachaEstudiante.update({
       where: { id: racha.id },
       data: {
-        racha_actual: nuevaRacha,
-        racha_maxima: nuevaRachaMaxima,
-        ultima_actividad: ahora,
-        inicio_racha_actual: esNuevaRacha
-          ? hoy
-          : racha.inicio_racha_actual || hoy,
-        total_dias_activos: racha.total_dias_activos + 1,
+        rachaActual: nuevaRacha,
+        rachaMaxima: nuevaRachaMaxima,
+        ultimaActividad: ahora,
+        inicioRachaActual: esNuevaRacha ? hoy : racha.inicioRachaActual || hoy,
+        totalDiasActivos: racha.totalDiasActivos + 1,
       },
     });
 
@@ -98,18 +96,18 @@ export class RachaService {
       'racha.actualizada',
       new RachaActualizadaEvent(
         estudianteId,
-        rachaActualizada.racha_actual,
-        rachaActualizada.racha_maxima,
+        rachaActualizada.rachaActual,
+        rachaActualizada.rachaMaxima,
         esNuevaRacha,
         rompioRacha,
       ),
     );
 
     return {
-      racha_actual: rachaActualizada.racha_actual,
-      racha_maxima: rachaActualizada.racha_maxima,
-      es_nueva_racha: esNuevaRacha,
-      rompio_racha: rompioRacha,
+      rachaActual: rachaActualizada.rachaActual,
+      rachaMaxima: rachaActualizada.rachaMaxima,
+      esNuevaRacha: esNuevaRacha,
+      rompioRacha: rompioRacha,
     };
   }
 
@@ -120,20 +118,20 @@ export class RachaService {
   async verificarRacha(estudianteId: string) {
     const racha = await this.obtenerRacha(estudianteId);
 
-    if (!racha.ultima_actividad) {
+    if (!racha.ultimaActividad) {
       return racha;
     }
 
     const ahora = new Date();
-    const diferenciaDias = this.diasEntre(racha.ultima_actividad, ahora);
+    const diferenciaDias = this.diasEntre(racha.ultimaActividad, ahora);
 
     // Si pasaron más de 1 día, se rompió la racha
     if (diferenciaDias > 1) {
       return this.prisma.rachaEstudiante.update({
         where: { id: racha.id },
         data: {
-          racha_actual: 0,
-          inicio_racha_actual: null,
+          rachaActual: 0,
+          inicioRachaActual: null,
         },
       });
     }
@@ -191,11 +189,11 @@ export class RachaService {
     const racha = await this.verificarRacha(estudianteId);
 
     return {
-      racha_actual: racha.racha_actual,
-      racha_maxima: racha.racha_maxima,
-      total_dias_activos: racha.total_dias_activos,
-      ultima_actividad: racha.ultima_actividad,
-      dias_consecutivos: racha.racha_actual,
+      rachaActual: racha.rachaActual,
+      rachaMaxima: racha.rachaMaxima,
+      totalDiasActivos: racha.totalDiasActivos,
+      ultimaActividad: racha.ultimaActividad,
+      diasConsecutivos: racha.rachaActual,
     };
   }
 }

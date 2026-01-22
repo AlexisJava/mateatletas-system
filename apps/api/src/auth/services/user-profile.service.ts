@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 
 /**
- * Campos de perfil para Tutor (sin password_hash)
+ * Campos de perfil para Tutor (sin passwordHash)
  */
 const TUTOR_PROFILE_SELECT = {
   id: true,
@@ -11,14 +11,14 @@ const TUTOR_PROFILE_SELECT = {
   apellido: true,
   dni: true,
   telefono: true,
-  fecha_registro: true,
-  ha_completado_onboarding: true,
+  fechaRegistro: true,
+  haCompletadoOnboarding: true,
   createdAt: true,
   updatedAt: true,
 } as const;
 
 /**
- * Campos de perfil para Docente (sin password_hash)
+ * Campos de perfil para Docente (sin passwordHash)
  */
 const DOCENTE_PROFILE_SELECT = {
   id: true,
@@ -32,20 +32,20 @@ const DOCENTE_PROFILE_SELECT = {
 } as const;
 
 /**
- * Campos de perfil para Admin (sin password_hash)
+ * Campos de perfil para Admin (sin passwordHash)
  */
 const ADMIN_PROFILE_SELECT = {
   id: true,
   email: true,
   nombre: true,
   apellido: true,
-  fecha_registro: true,
+  fechaRegistro: true,
   createdAt: true,
   updatedAt: true,
 } as const;
 
 /**
- * Campos de perfil para Estudiante (sin password_hash)
+ * Campos de perfil para Estudiante (sin passwordHash)
  */
 const ESTUDIANTE_PROFILE_SELECT = {
   id: true,
@@ -55,10 +55,10 @@ const ESTUDIANTE_PROFILE_SELECT = {
   edad: true,
   nivelEscolar: true,
   fotoUrl: true,
-  nivel_actual: true,
+  nivelActual: true,
   recursos: {
     select: {
-      xp_total: true,
+      xpTotal: true,
     },
   },
   casaId: true,
@@ -73,7 +73,7 @@ const ESTUDIANTE_PROFILE_SELECT = {
       gradiente: true,
     },
   },
-  tutor_id: true,
+  tutorId: true,
   createdAt: true,
   updatedAt: true,
 } as const;
@@ -83,7 +83,7 @@ const ESTUDIANTE_PROFILE_SELECT = {
  *
  * Responsabilidades:
  * - Obtener perfiles de usuario por ID y rol
- * - NUNCA retornar password_hash
+ * - NUNCA retornar passwordHash
  *
  * Extraído de UserLookupService para respetar SRP
  */
@@ -95,11 +95,11 @@ export class UserProfileService {
 
   /**
    * Obtiene el perfil de un usuario por ID y rol
-   * NUNCA retorna password_hash
+   * NUNCA retorna passwordHash
    *
    * @param userId - ID del usuario
    * @param role - Rol del usuario ('tutor', 'docente', 'admin', 'estudiante')
-   * @returns Perfil del usuario sin password_hash
+   * @returns Perfil del usuario sin passwordHash
    * @throws NotFoundException si el usuario no existe
    */
   async getProfile(userId: string, role: string) {

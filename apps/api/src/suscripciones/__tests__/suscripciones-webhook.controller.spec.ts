@@ -41,7 +41,7 @@ describe('SuscripcionesWebhookController', () => {
     api_version: 'v1',
     date_created: new Date().toISOString(),
     live_mode: false,
-    user_id: '12345',
+    userId: '12345',
     data: { id: 'mp-preapproval-123' },
   };
 
@@ -49,7 +49,7 @@ describe('SuscripcionesWebhookController', () => {
   const validPreapprovalDetail: PreApprovalDetail = {
     id: 'mp-preapproval-123',
     status: 'authorized',
-    external_reference: 'suscripcion-uuid-456',
+    externalReference: 'suscripcion-uuid-456',
     payer_email: 'tutor@example.com',
     payer_id: 123456789,
     reason: 'Suscripción Mateatletas - Plan Mensual',

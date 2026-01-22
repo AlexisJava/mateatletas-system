@@ -39,10 +39,10 @@ describe('SuscripcionAdminService', () => {
         {
           id: 'sus-1',
           estado: EstadoSuscripcion.ACTIVA,
-          precio_final: { toNumber: () => 30000 },
-          fecha_inicio: new Date('2025-01-01'),
-          fecha_proximo_cobro: new Date('2025-02-01'),
-          dias_gracia_usados: 0,
+          precioFinal: { toNumber: () => 30000 },
+          fechaInicio: new Date('2025-01-01'),
+          fechaProximoCobro: new Date('2025-02-01'),
+          diasGraciaUsados: 0,
           tutor: {
             id: 'tutor-1',
             nombre: 'Juan',
@@ -85,18 +85,15 @@ describe('SuscripcionAdminService', () => {
       );
     });
 
-    it('should_filter_by_plan_id', async () => {
+    it('should_filter_by_planId', async () => {
       mockPrisma.suscripcion.findMany.mockResolvedValue([]);
       mockPrisma.suscripcion.count.mockResolvedValue(0);
 
-      await service.listarTodas(
-        { plan_id: 'plan-123' },
-        { page: 1, limit: 20 },
-      );
+      await service.listarTodas({ planId: 'plan-123' }, { page: 1, limit: 20 });
 
       expect(mockPrisma.suscripcion.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { plan_id: 'plan-123' },
+          where: { planId: 'plan-123' },
         }),
       );
     });
@@ -123,10 +120,10 @@ describe('SuscripcionAdminService', () => {
         {
           id: 'sus-1',
           estado: EstadoSuscripcion.MOROSA,
-          precio_final: { toNumber: () => 30000 },
-          fecha_inicio: new Date(),
-          fecha_proximo_cobro: null,
-          dias_gracia_usados: 3,
+          precioFinal: { toNumber: () => 30000 },
+          fechaInicio: new Date(),
+          fechaProximoCobro: null,
+          diasGraciaUsados: 3,
           tutor: {
             id: 'tutor-1',
             nombre: 'Juan',
@@ -138,10 +135,10 @@ describe('SuscripcionAdminService', () => {
         {
           id: 'sus-2',
           estado: EstadoSuscripcion.EN_GRACIA,
-          precio_final: { toNumber: () => 30000 },
-          fecha_inicio: new Date(),
-          fecha_proximo_cobro: null,
-          dias_gracia_usados: 1,
+          precioFinal: { toNumber: () => 30000 },
+          fechaInicio: new Date(),
+          fechaProximoCobro: null,
+          diasGraciaUsados: 1,
           tutor: {
             id: 'tutor-2',
             nombre: 'María',

@@ -128,7 +128,7 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       const mockEstudiante = {
         id: 'est123',
         username: 'juan.perez',
-        password_hash: await bcrypt.hash(passwordActualTexto, 10),
+        passwordHash: await bcrypt.hash(passwordActualTexto, 10),
       };
 
       jest
@@ -152,7 +152,7 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       expect(updateSpy).toHaveBeenCalledWith({
         where: { id: 'est123' },
         data: expect.objectContaining({
-          fecha_ultimo_cambio: expect.any(Date),
+          fechaUltimoCambio: expect.any(Date),
         }),
       });
     });
@@ -165,7 +165,7 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       const mockEstudiante = {
         id: 'est123',
         username: 'juan.perez',
-        password_hash: await bcrypt.hash(passwordActualTexto, 10),
+        passwordHash: await bcrypt.hash(passwordActualTexto, 10),
       };
 
       jest
@@ -175,10 +175,10 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       let nuevoHashGuardado: string | undefined;
       (prisma.estudiante.update as jest.Mock).mockImplementation(
         async (params: any) => {
-          nuevoHashGuardado = params.data.password_hash;
+          nuevoHashGuardado = params.data.passwordHash;
           return {
             ...mockEstudiante,
-            password_hash: nuevoHashGuardado,
+            passwordHash: nuevoHashGuardado,
           } as any;
         },
       );
@@ -215,7 +215,7 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       const mockEstudiante = {
         id: 'est123',
         username: 'juan.perez',
-        password_hash: await bcrypt.hash('1234', 10),
+        passwordHash: await bcrypt.hash('1234', 10),
       };
 
       jest
@@ -237,7 +237,7 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       // Este test verifica que se guarde el timestamp
       const mockEstudiante = {
         id: 'est123',
-        password_hash: await bcrypt.hash('1234', 10),
+        passwordHash: await bcrypt.hash('1234', 10),
       };
 
       jest
@@ -260,7 +260,7 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         // expect(updateSpy).toHaveBeenCalledWith({
         //   where: { id: 'est123' },
         //   data: expect.objectContaining({
-        //     fecha_ultimo_cambio: expect.any(Date),
+        //     fechaUltimoCambio: expect.any(Date),
         //   }),
         // });
       } catch (error) {
@@ -274,7 +274,7 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       const mockTutor = {
         id: 'tutor123',
         username: 'padre.perez',
-        password_hash: await bcrypt.hash('TempPass123', 10),
+        passwordHash: await bcrypt.hash('TempPass123', 10),
       };
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);

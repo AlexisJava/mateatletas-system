@@ -22,7 +22,7 @@ export interface MercadoPagoPayment {
   id: string;
   status: MercadoPagoPaymentStatus;
   status_detail: string;
-  external_reference: string | null;
+  externalReference: string | null;
   transaction_amount: number;
   date_approved: string | null;
   date_created: string;
@@ -85,7 +85,7 @@ export interface CreateMercadoPagoPreferenceDto {
   items: MercadoPagoItem[];
   back_urls?: MercadoPagoBackUrls;
   auto_return?: 'approved' | 'all';
-  external_reference?: string;
+  externalReference?: string;
   notification_url?: string;
   statement_descriptor?: string;
   payment_methods?: {
@@ -112,6 +112,6 @@ export interface MercadoPagoWebhookPayload {
   date_created: string;
   id: number;
   live_mode: boolean;
-  user_id: string;
+  userId: string;
   api_version: string;
 }

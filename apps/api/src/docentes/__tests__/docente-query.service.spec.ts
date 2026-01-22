@@ -10,16 +10,16 @@ describe('DocenteQueryService', () => {
   const mockDocente = {
     id: 'docente-123',
     email: 'juan@example.com',
-    password_hash: 'hashed_password',
+    passwordHash: 'hashed_password',
     nombre: 'Juan',
     apellido: 'Pérez',
     titulo: 'Licenciado en Matemáticas',
     bio: 'Docente con 10 años de experiencia',
     telefono: '+54123456789',
     especialidades: ['Álgebra', 'Geometría'],
-    experiencia_anos: 10,
-    disponibilidad_horaria: { lunes: ['09:00-12:00'] },
-    nivel_educativo: ['Secundaria'],
+    experienciaAnos: 10,
+    disponibilidadHoraria: { lunes: ['09:00-12:00'] },
+    nivelEducativo: ['Secundaria'],
     estado: 'activo',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
@@ -47,14 +47,14 @@ describe('DocenteQueryService', () => {
   });
 
   describe('findAll', () => {
-    it('should return paginated list of docentes without password_hash', async () => {
+    it('should return paginated list of docentes without passwordHash', async () => {
       jest.spyOn(prisma.docente, 'findMany').mockResolvedValue([mockDocente]);
       jest.spyOn(prisma.docente, 'count').mockResolvedValue(1);
 
       const result = await service.findAll(1, 20);
 
       expect(result.data).toHaveLength(1);
-      expect(result.data[0]).not.toHaveProperty('password_hash');
+      expect(result.data[0]).not.toHaveProperty('passwordHash');
       expect(result.data[0].nombre).toBe('Juan');
       expect(result.meta).toEqual({
         total: 1,
@@ -101,15 +101,15 @@ describe('DocenteQueryService', () => {
   });
 
   describe('findByEmail', () => {
-    it('should return docente with password_hash (for authentication)', async () => {
+    it('should return docente with passwordHash (for authentication)', async () => {
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente);
 
       const result = await service.findByEmail('juan@example.com');
 
       expect(result).toBeDefined();
       expect(result?.email).toBe('juan@example.com');
-      // IMPORTANTE: findByEmail SÍ incluye password_hash para auth
-      expect(result?.password_hash).toBe('hashed_password');
+      // IMPORTANTE: findByEmail SÍ incluye passwordHash para auth
+      expect(result?.passwordHash).toBe('hashed_password');
     });
 
     it('should return null if docente does not exist', async () => {
@@ -122,7 +122,7 @@ describe('DocenteQueryService', () => {
   });
 
   describe('findById', () => {
-    it('should return docente without password_hash', async () => {
+    it('should return docente without passwordHash', async () => {
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue({
         ...mockDocente,
         rutasEspecialidad: [],
@@ -132,7 +132,7 @@ describe('DocenteQueryService', () => {
 
       expect(result).toBeDefined();
       expect(result.nombre).toBe('Juan');
-      expect(result).not.toHaveProperty('password_hash');
+      expect(result).not.toHaveProperty('passwordHash');
     });
 
     it('should throw NotFoundException if docente does not exist', async () => {
@@ -198,7 +198,7 @@ describe('DocenteQueryService', () => {
   });
 
   describe('findByIds', () => {
-    it('should return multiple docentes without password_hash', async () => {
+    it('should return multiple docentes without passwordHash', async () => {
       const mockDocente2 = {
         ...mockDocente,
         id: 'docente-456',
@@ -213,8 +213,8 @@ describe('DocenteQueryService', () => {
       const result = await service.findByIds(['docente-123', 'docente-456']);
 
       expect(result).toHaveLength(2);
-      expect(result[0]).not.toHaveProperty('password_hash');
-      expect(result[1]).not.toHaveProperty('password_hash');
+      expect(result[0]).not.toHaveProperty('passwordHash');
+      expect(result[1]).not.toHaveProperty('passwordHash');
       expect(result[0].nombre).toBe('Juan');
       expect(result[1].nombre).toBe('María');
     });

@@ -6,14 +6,14 @@ import { CasaTipo, MundoTipo } from '@prisma/client';
  * DTOs para grupos pedagógicos
  */
 export interface FiltrosGrupoPedagogicoDto {
-  casa_tipo?: CasaTipo;
-  mundo_tipo?: MundoTipo;
+  casaTipo?: CasaTipo;
+  mundoTipo?: MundoTipo;
   activo?: boolean | string; // Query params llegan como string
 }
 
 export interface ActualizarGrupoPedagogicoDto {
-  casa_tipo?: CasaTipo;
-  mundo_tipo?: MundoTipo;
+  casaTipo?: CasaTipo;
+  mundoTipo?: MundoTipo;
   nombre?: string;
   descripcion?: string;
 }
@@ -37,11 +37,11 @@ export class GrupoPedagogicoService {
   async listar(filtros: FiltrosGrupoPedagogicoDto) {
     const where: Record<string, unknown> = {};
 
-    if (filtros.casa_tipo) {
-      where.casa_tipo = filtros.casa_tipo;
+    if (filtros.casaTipo) {
+      where.casaTipo = filtros.casaTipo;
     }
-    if (filtros.mundo_tipo) {
-      where.mundo_tipo = filtros.mundo_tipo;
+    if (filtros.mundoTipo) {
+      where.mundoTipo = filtros.mundoTipo;
     }
     if (filtros.activo !== undefined) {
       // Query params llegan como string, convertir a boolean
@@ -59,7 +59,7 @@ export class GrupoPedagogicoService {
           },
         },
       },
-      orderBy: [{ casa_tipo: 'asc' }, { mundo_tipo: 'asc' }, { codigo: 'asc' }],
+      orderBy: [{ casaTipo: 'asc' }, { mundoTipo: 'asc' }, { codigo: 'asc' }],
     });
   }
 
@@ -95,7 +95,7 @@ export class GrupoPedagogicoService {
   }
 
   /**
-   * Actualizar casa_tipo y mundo_tipo de un grupo
+   * Actualizar casaTipo y mundoTipo de un grupo
    */
   async actualizar(id: string, dto: ActualizarGrupoPedagogicoDto) {
     const grupo = await this.prisma.grupoPedagogico.findUnique({
@@ -108,15 +108,15 @@ export class GrupoPedagogicoService {
     const actualizado = await this.prisma.grupoPedagogico.update({
       where: { id },
       data: {
-        casa_tipo: dto.casa_tipo,
-        mundo_tipo: dto.mundo_tipo,
+        casaTipo: dto.casaTipo,
+        mundoTipo: dto.mundoTipo,
         nombre: dto.nombre,
         descripcion: dto.descripcion,
       },
     });
 
     this.logger.log(
-      `Grupo ${grupo.codigo} actualizado: casa=${dto.casa_tipo}, mundo=${dto.mundo_tipo}`,
+      `Grupo ${grupo.codigo} actualizado: casa=${dto.casaTipo}, mundo=${dto.mundoTipo}`,
     );
     return actualizado;
   }
@@ -155,14 +155,14 @@ export class GrupoPedagogicoService {
   }
 
   /**
-   * Migrar grupos legacy (sector_id) a Casa/Mundo
+   * Migrar grupos legacy (sectorId) a Casa/Mundo
    * Útil para migración de datos existentes
    */
   async migrarGruposLegacy() {
     const gruposLegacy = await this.prisma.grupoPedagogico.findMany({
       where: {
-        sector_id: { not: null },
-        OR: [{ casa_tipo: null }, { mundo_tipo: null }],
+        sectorId: { not: null },
+        OR: [{ casaTipo: null }, { mundoTipo: null }],
       },
       include: { sector: true },
     });
@@ -178,22 +178,22 @@ export class GrupoPedagogicoService {
         grupo.sector?.nombre,
       );
       const casaTipo = this.inferirCasaDesdeEdad(
-        grupo.edad_minima,
-        grupo.edad_maxima,
+        grupo.edadMinima,
+        grupo.edadMaxima,
       );
 
       if (!casaTipo && !mundoTipo) continue;
 
       await this.prisma.grupoPedagogico.update({
         where: { id: grupo.id },
-        data: { casa_tipo: casaTipo, mundo_tipo: mundoTipo },
+        data: { casaTipo: casaTipo, mundoTipo: mundoTipo },
       });
 
       resultados.push({
         id: grupo.id,
         codigo: grupo.codigo,
-        casa_tipo: casaTipo,
-        mundo_tipo: mundoTipo,
+        casaTipo: casaTipo,
+        mundoTipo: mundoTipo,
       });
     }
 
@@ -212,12 +212,12 @@ export class GrupoPedagogicoService {
   async obtenerEstadisticas() {
     const [porCasa, porMundo, totales] = await Promise.all([
       this.prisma.grupoPedagogico.groupBy({
-        by: ['casa_tipo'],
+        by: ['casaTipo'],
         where: { activo: true },
         _count: true,
       }),
       this.prisma.grupoPedagogico.groupBy({
-        by: ['mundo_tipo'],
+        by: ['mundoTipo'],
         where: { activo: true },
         _count: true,
       }),
@@ -228,13 +228,13 @@ export class GrupoPedagogicoService {
     ]);
 
     return {
-      total_grupos: totales._count,
-      por_casa: porCasa.map((c) => ({
-        casa: c.casa_tipo ?? 'SIN_ASIGNAR',
+      totalGrupos: totales._count,
+      porCasa: porCasa.map((c) => ({
+        casa: c.casaTipo ?? 'SIN_ASIGNAR',
         cantidad: c._count,
       })),
-      por_mundo: porMundo.map((m) => ({
-        mundo: m.mundo_tipo ?? 'SIN_ASIGNAR',
+      porMundo: porMundo.map((m) => ({
+        mundo: m.mundoTipo ?? 'SIN_ASIGNAR',
         cantidad: m._count,
       })),
     };

@@ -31,11 +31,11 @@ export class EstudianteAulaService {
     // Usa vista unificada para incluir inscripciones manuales y via suscripción
     const inscripciones = await this.prisma.inscripcionUnificada.findMany({
       where: {
-        estudiante_id: estudianteId,
+        estudianteId: estudianteId,
         estado: 'ACTIVA',
       },
       select: {
-        clase_grupo_id: true,
+        claseGrupoId: true,
         claseGrupo: {
           select: {
             id: true,
@@ -60,12 +60,12 @@ export class EstudianteAulaService {
       },
     });
 
-    const claseGrupoIds = inscripciones.map((i) => i.clase_grupo_id);
+    const claseGrupoIds = inscripciones.map((i) => i.claseGrupoId);
 
     // 2. Obtener asignaciones de planificación para esos grupos
     const asignaciones = await this.prisma.asignacionPlanificacion.findMany({
       where: {
-        clase_grupo_id: { in: claseGrupoIds },
+        claseGrupoId: { in: claseGrupoIds },
         activa: true,
       },
       include: {
@@ -74,9 +74,9 @@ export class EstudianteAulaService {
             id: true,
             titulo: true,
             descripcion: true,
-            cantidad_clases: true,
-            mundo_tipo: true,
-            casa_tipo: true,
+            cantidadClases: true,
+            mundoTipo: true,
+            casaTipo: true,
           },
         },
         claseGrupo: {
@@ -102,23 +102,23 @@ export class EstudianteAulaService {
         },
         estadosClases: {
           where: {
-            OR: [{ teoria_activa: true }, { practica_activa: true }],
+            OR: [{ teoriaActiva: true }, { practicaActiva: true }],
           },
           select: {
             id: true,
-            clase_id: true,
-            teoria_activa: true,
-            practica_activa: true,
-            activada_en: true,
-            completada_en: true,
+            claseId: true,
+            teoriaActiva: true,
+            practicaActiva: true,
+            activadaEn: true,
+            completadaEn: true,
           },
         },
         tareasAsignadas: {
           where: { activa: true },
           select: {
             id: true,
-            tarea_clase_id: true,
-            fecha_limite: true,
+            tareaClaseId: true,
+            fechaLimite: true,
           },
         },
       },
@@ -126,17 +126,17 @@ export class EstudianteAulaService {
 
     // 3. Obtener progreso del estudiante en clases
     const clasesIds = asignaciones.flatMap((a) =>
-      a.estadosClases.map((e) => e.clase_id),
+      a.estadosClases.map((e) => e.claseId),
     );
 
     const progresosClases = await this.prisma.progresoClaseEstudiante.findMany({
       where: {
-        estudiante_id: estudianteId,
-        clase_id: { in: clasesIds },
+        estudianteId: estudianteId,
+        claseId: { in: clasesIds },
       },
     });
 
-    const progresosMap = new Map(progresosClases.map((p) => [p.clase_id, p]));
+    const progresosMap = new Map(progresosClases.map((p) => [p.claseId, p]));
 
     // 4. Obtener tareas asignadas y su progreso
     const tareasAsignadasIds = asignaciones.flatMap((a) =>
@@ -145,21 +145,21 @@ export class EstudianteAulaService {
 
     const progresosTareas = await this.prisma.progresoTareaEstudiante.findMany({
       where: {
-        estudiante_id: estudianteId,
-        tarea_asignada_id: { in: tareasAsignadasIds },
+        estudianteId: estudianteId,
+        tareaAsignadaId: { in: tareasAsignadasIds },
       },
     });
 
     const progresosTareasMap = new Map(
-      progresosTareas.map((p) => [p.tarea_asignada_id, p]),
+      progresosTareas.map((p) => [p.tareaAsignadaId, p]),
     );
 
     // 5. Estructurar respuesta
     const planificaciones = asignaciones.map((asignacion) => {
       const clasesActivas = asignacion.estadosClases.length;
       const clasesCompletadas = asignacion.estadosClases.filter((e) => {
-        const progreso = progresosMap.get(e.clase_id);
-        return progreso?.teoria_completada && progreso?.practica_completada;
+        const progreso = progresosMap.get(e.claseId);
+        return progreso?.teoriaCompletada && progreso?.practicaCompletada;
       }).length;
 
       const tareasTotal = asignacion.tareasAsignadas.length;
@@ -169,7 +169,7 @@ export class EstudianteAulaService {
       }).length;
 
       return {
-        asignacion_id: asignacion.id,
+        asignacionId: asignacion.id,
         planificacion: asignacion.planificacion,
         grupo: {
           id: asignacion.claseGrupo.id,
@@ -177,12 +177,12 @@ export class EstudianteAulaService {
           codigo: asignacion.claseGrupo.codigo,
         },
         docente: asignacion.docente,
-        fecha_inicio: asignacion.fecha_inicio,
+        fechaInicio: asignacion.fechaInicio,
         progreso: {
-          clases_activas: clasesActivas,
-          clases_completadas: clasesCompletadas,
-          tareas_total: tareasTotal,
-          tareas_completadas: tareasCompletadas,
+          clasesActivas: clasesActivas,
+          clasesCompletadas: clasesCompletadas,
+          tareasTotal: tareasTotal,
+          tareasCompletadas: tareasCompletadas,
           porcentaje:
             clasesActivas > 0
               ? Math.round((clasesCompletadas / clasesActivas) * 100)
@@ -226,21 +226,21 @@ export class EstudianteAulaService {
     return {
       sectores: Array.from(sectoresMap.values()),
       resumen: {
-        total_planificaciones: planificaciones.length,
-        total_clases_activas: planificaciones.reduce(
-          (sum, p) => sum + p.progreso.clases_activas,
+        totalPlanificaciones: planificaciones.length,
+        totalClasesActivas: planificaciones.reduce(
+          (sum, p) => sum + p.progreso.clasesActivas,
           0,
         ),
-        total_clases_completadas: planificaciones.reduce(
-          (sum, p) => sum + p.progreso.clases_completadas,
+        totalClasesCompletadas: planificaciones.reduce(
+          (sum, p) => sum + p.progreso.clasesCompletadas,
           0,
         ),
-        total_tareas: planificaciones.reduce(
-          (sum, p) => sum + p.progreso.tareas_total,
+        totalTareas: planificaciones.reduce(
+          (sum, p) => sum + p.progreso.tareasTotal,
           0,
         ),
-        total_tareas_completadas: planificaciones.reduce(
-          (sum, p) => sum + p.progreso.tareas_completadas,
+        total_tareasCompletadas: planificaciones.reduce(
+          (sum, p) => sum + p.progreso.tareasCompletadas,
           0,
         ),
       },
@@ -263,8 +263,8 @@ export class EstudianteAulaService {
         claseGrupo: {
           inscripciones: {
             some: {
-              estudiante_id: estudianteId,
-              fecha_baja: null,
+              estudianteId: estudianteId,
+              fechaBaja: null,
             },
           },
         },
@@ -344,33 +344,33 @@ export class EstudianteAulaService {
 
     // 2. Crear mapas para estados
     const estadosMap = new Map(
-      asignacion.estadosClases.map((e) => [e.clase_id, e]),
+      asignacion.estadosClases.map((e) => [e.claseId, e]),
     );
     const tareasAsignadasMap = new Map(
-      asignacion.tareasAsignadas.map((t) => [t.tarea_clase_id, t]),
+      asignacion.tareasAsignadas.map((t) => [t.tareaClaseId, t]),
     );
 
     // 3. Obtener progresos del estudiante
     const clasesIds = asignacion.planificacion.clases.map((c) => c.id);
     const progresosClases = await this.prisma.progresoClaseEstudiante.findMany({
       where: {
-        estudiante_id: estudianteId,
-        clase_id: { in: clasesIds },
+        estudianteId: estudianteId,
+        claseId: { in: clasesIds },
       },
     });
     const progresosClasesMap = new Map(
-      progresosClases.map((p) => [p.clase_id, p]),
+      progresosClases.map((p) => [p.claseId, p]),
     );
 
     const tareasAsignadasIds = asignacion.tareasAsignadas.map((t) => t.id);
     const progresosTareas = await this.prisma.progresoTareaEstudiante.findMany({
       where: {
-        estudiante_id: estudianteId,
-        tarea_asignada_id: { in: tareasAsignadasIds },
+        estudianteId: estudianteId,
+        tareaAsignadaId: { in: tareasAsignadasIds },
       },
     });
     const progresosTareasMap = new Map(
-      progresosTareas.map((p) => [p.tarea_asignada_id, p]),
+      progresosTareas.map((p) => [p.tareaAsignadaId, p]),
     );
 
     // 4. Estructurar clases con información de activación y progreso
@@ -385,18 +385,18 @@ export class EstudianteAulaService {
     );
 
     return {
-      asignacion_id: asignacion.id,
+      asignacionId: asignacion.id,
       planificacion: {
         id: asignacion.planificacion.id,
         titulo: asignacion.planificacion.titulo,
         descripcion: asignacion.planificacion.descripcion,
-        cantidad_clases: asignacion.planificacion.cantidad_clases,
-        mundo_tipo: asignacion.planificacion.mundo_tipo,
-        casa_tipo: asignacion.planificacion.casa_tipo,
+        cantidadClases: asignacion.planificacion.cantidadClases,
+        mundoTipo: asignacion.planificacion.mundoTipo,
+        casaTipo: asignacion.planificacion.casaTipo,
       },
       grupo: asignacion.claseGrupo,
       docente: asignacion.docente,
-      fecha_inicio: asignacion.fecha_inicio,
+      fechaInicio: asignacion.fechaInicio,
       clases: clases.filter((c) => c.activada), // Solo clases activadas
     };
   }
@@ -423,15 +423,15 @@ export class EstudianteAulaService {
         claseGrupo: {
           inscripciones: {
             some: {
-              estudiante_id: estudianteId,
-              fecha_baja: null,
+              estudianteId: estudianteId,
+              fechaBaja: null,
             },
           },
         },
       },
       include: {
         estadosClases: {
-          where: { clase_id: claseId },
+          where: { claseId: claseId },
         },
       },
     });
@@ -446,7 +446,7 @@ export class EstudianteAulaService {
     }
 
     const activo =
-      tipo === 'teoria' ? estado.teoria_activa : estado.practica_activa;
+      tipo === 'teoria' ? estado.teoriaActiva : estado.practicaActiva;
     if (!activo) {
       throw new NotFoundException(
         `La ${tipo} de esta clase no está activada aún`,
@@ -489,9 +489,9 @@ export class EstudianteAulaService {
     // 3. Obtener o crear progreso
     let progreso = await this.prisma.progresoClaseEstudiante.findUnique({
       where: {
-        estudiante_id_clase_id: {
-          estudiante_id: estudianteId,
-          clase_id: claseId,
+        estudianteId_claseId: {
+          estudianteId: estudianteId,
+          claseId: claseId,
         },
       },
     });
@@ -499,8 +499,8 @@ export class EstudianteAulaService {
     if (!progreso) {
       progreso = await this.prisma.progresoClaseEstudiante.create({
         data: {
-          estudiante_id: estudianteId,
-          clase_id: claseId,
+          estudianteId: estudianteId,
+          claseId: claseId,
         },
       });
     }
@@ -516,16 +516,16 @@ export class EstudianteAulaService {
       progreso: {
         completada:
           tipo === 'teoria'
-            ? progreso.teoria_completada
-            : progreso.practica_completada,
-        completada_en:
+            ? progreso.teoriaCompletada
+            : progreso.practicaCompletada,
+        completadaEn:
           tipo === 'teoria'
-            ? progreso.teoria_completada_en
-            : progreso.practica_completada_en,
-        tiempo_segundos:
+            ? progreso.teoriaCompletadaEn
+            : progreso.practicaCompletadaEn,
+        tiempoSegundos:
           tipo === 'teoria'
-            ? progreso.tiempo_teoria_segundos
-            : progreso.tiempo_practica_segundos,
+            ? progreso.tiempoTeoriaSegundos
+            : progreso.tiempoPracticaSegundos,
       },
     };
   }
@@ -554,15 +554,15 @@ export class EstudianteAulaService {
         claseGrupo: {
           inscripciones: {
             some: {
-              estudiante_id: estudianteId,
-              fecha_baja: null,
+              estudianteId: estudianteId,
+              fechaBaja: null,
             },
           },
         },
       },
       include: {
         estadosClases: {
-          where: { clase_id: claseId },
+          where: { claseId: claseId },
         },
         planificacion: {
           select: {
@@ -582,7 +582,7 @@ export class EstudianteAulaService {
     }
 
     const activo =
-      tipo === 'teoria' ? estado.teoria_activa : estado.practica_activa;
+      tipo === 'teoria' ? estado.teoriaActiva : estado.practicaActiva;
     if (!activo) {
       throw new NotFoundException(`La ${tipo} no está activada`);
     }
@@ -608,13 +608,13 @@ export class EstudianteAulaService {
         Array<{ was_insert: boolean }>
       >(
         `INSERT INTO progresos_clase_estudiante
-           (id, estudiante_id, clase_id, teoria_completada, teoria_completada_en, tiempo_teoria_segundos)
+           (id, estudianteId, claseId, teoriaCompletada, teoriaCompletadaEn, tiempoTeoriaSegundos)
          VALUES (gen_random_uuid()::text, $1, $2, true, NOW(), $3)
-         ON CONFLICT (estudiante_id, clase_id) DO UPDATE SET
-           teoria_completada = true,
-           teoria_completada_en = COALESCE(progresos_clase_estudiante.teoria_completada_en, NOW()),
-           tiempo_teoria_segundos = progresos_clase_estudiante.tiempo_teoria_segundos + EXCLUDED.tiempo_teoria_segundos
-         WHERE progresos_clase_estudiante.teoria_completada = false
+         ON CONFLICT (estudianteId, claseId) DO UPDATE SET
+           teoriaCompletada = true,
+           teoriaCompletadaEn = COALESCE(progresos_clase_estudiante.teoriaCompletadaEn, NOW()),
+           tiempoTeoriaSegundos = progresos_clase_estudiante.tiempoTeoriaSegundos + EXCLUDED.tiempoTeoriaSegundos
+         WHERE progresos_clase_estudiante.teoriaCompletada = false
          RETURNING (xmax = 0) as was_insert`,
         estudianteId,
         claseId,
@@ -629,13 +629,13 @@ export class EstudianteAulaService {
         Array<{ was_insert: boolean }>
       >(
         `INSERT INTO progresos_clase_estudiante
-           (id, estudiante_id, clase_id, practica_completada, practica_completada_en, tiempo_practica_segundos)
+           (id, estudianteId, claseId, practicaCompletada, practicaCompletadaEn, tiempoPracticaSegundos)
          VALUES (gen_random_uuid()::text, $1, $2, true, NOW(), $3)
-         ON CONFLICT (estudiante_id, clase_id) DO UPDATE SET
-           practica_completada = true,
-           practica_completada_en = COALESCE(progresos_clase_estudiante.practica_completada_en, NOW()),
-           tiempo_practica_segundos = progresos_clase_estudiante.tiempo_practica_segundos + EXCLUDED.tiempo_practica_segundos
-         WHERE progresos_clase_estudiante.practica_completada = false
+         ON CONFLICT (estudianteId, claseId) DO UPDATE SET
+           practicaCompletada = true,
+           practicaCompletadaEn = COALESCE(progresos_clase_estudiante.practicaCompletadaEn, NOW()),
+           tiempoPracticaSegundos = progresos_clase_estudiante.tiempoPracticaSegundos + EXCLUDED.tiempoPracticaSegundos
+         WHERE progresos_clase_estudiante.practicaCompletada = false
          RETURNING (xmax = 0) as was_insert`,
         estudianteId,
         claseId,
@@ -647,9 +647,9 @@ export class EstudianteAulaService {
     // 4b. Obtener el progreso actualizado
     const progreso = await this.prisma.progresoClaseEstudiante.findUnique({
       where: {
-        estudiante_id_clase_id: {
-          estudiante_id: estudianteId,
-          clase_id: claseId,
+        estudianteId_claseId: {
+          estudianteId: estudianteId,
+          claseId: claseId,
         },
       },
     });
@@ -679,10 +679,10 @@ export class EstudianteAulaService {
     return {
       success: true,
       progreso: {
-        teoria_completada: progreso.teoria_completada,
-        practica_completada: progreso.practica_completada,
+        teoriaCompletada: progreso.teoriaCompletada,
+        practicaCompletada: progreso.practicaCompletada,
       },
-      xp_ganado: xpBase + xpBonusTiempo,
+      xpGanado: xpBase + xpBonusTiempo,
       mensaje: `¡${tipo === 'teoria' ? 'Teoría' : 'Práctica'} completada! +${xpBase + xpBonusTiempo} XP`,
     };
   }
@@ -701,13 +701,13 @@ export class EstudianteAulaService {
     // Usa vista unificada para incluir inscripciones manuales y via suscripción
     const inscripciones = await this.prisma.inscripcionUnificada.findMany({
       where: {
-        estudiante_id: estudianteId,
+        estudianteId: estudianteId,
         estado: 'ACTIVA',
       },
-      select: { clase_grupo_id: true },
+      select: { claseGrupoId: true },
     });
 
-    const claseGrupoIds = inscripciones.map((i) => i.clase_grupo_id);
+    const claseGrupoIds = inscripciones.map((i) => i.claseGrupoId);
 
     // 2. Obtener tareas asignadas
     const tareasAsignadas = await this.prisma.tareaAsignada.findMany({
@@ -715,7 +715,7 @@ export class EstudianteAulaService {
         activa: true,
         asignacion: {
           activa: true,
-          clase_grupo_id: { in: claseGrupoIds },
+          claseGrupoId: { in: claseGrupoIds },
         },
       },
       include: {
@@ -766,42 +766,42 @@ export class EstudianteAulaService {
           },
         },
         progresos: {
-          where: { estudiante_id: estudianteId },
+          where: { estudianteId: estudianteId },
         },
       },
-      orderBy: [{ fecha_limite: 'asc' }, { fecha_asignacion: 'desc' }],
+      orderBy: [{ fechaLimite: 'asc' }, { fechaAsignacion: 'desc' }],
     });
 
     // 3. Mapear y filtrar
     const tareas = tareasAsignadas.map((ta) => {
       const progreso = ta.progresos[0];
-      const vencida = ta.fecha_limite && new Date(ta.fecha_limite) < new Date();
+      const vencida = ta.fechaLimite && new Date(ta.fechaLimite) < new Date();
 
       return {
-        tarea_asignada_id: ta.id,
+        tareaAsignadaId: ta.id,
         contenido: ta.tareaClase.contenido,
         clase: ta.tareaClase.clase,
         obligatoria: ta.tareaClase.obligatoria,
-        fecha_asignacion: ta.fecha_asignacion,
-        fecha_limite: ta.fecha_limite,
+        fechaAsignacion: ta.fechaAsignacion,
+        fechaLimite: ta.fechaLimite,
         vencida: vencida && progreso?.estado !== EstadoTarea.COMPLETADA,
         grupo: ta.asignacion.claseGrupo,
         docente: ta.asignacion.docente,
-        asignacion_id: ta.asignacion.id,
+        asignacionId: ta.asignacion.id,
         progreso: progreso
           ? {
               estado: progreso.estado,
-              iniciada_en: progreso.iniciada_en,
-              completada_en: progreso.completada_en,
-              tiempo_total_segundos: progreso.tiempo_total_segundos,
+              iniciadaEn: progreso.iniciadaEn,
+              completadaEn: progreso.completadaEn,
+              tiempoTotalSegundos: progreso.tiempoTotalSegundos,
               intentos: progreso.intentos,
               calificacion: progreso.calificacion,
             }
           : {
               estado: EstadoTarea.PENDIENTE,
-              iniciada_en: null,
-              completada_en: null,
-              tiempo_total_segundos: 0,
+              iniciadaEn: null,
+              completadaEn: null,
+              tiempoTotalSegundos: 0,
               intentos: 0,
               calificacion: null,
             },
@@ -827,7 +827,7 @@ export class EstudianteAulaService {
         pendientes: tareas.filter(
           (t) => t.progreso.estado === EstadoTarea.PENDIENTE,
         ).length,
-        en_progreso: tareas.filter(
+        enProgreso: tareas.filter(
           (t) => t.progreso.estado === EstadoTarea.EN_PROGRESO,
         ).length,
         completadas: tareas.filter(
@@ -855,8 +855,8 @@ export class EstudianteAulaService {
           claseGrupo: {
             inscripciones: {
               some: {
-                estudiante_id: estudianteId,
-                fecha_baja: null,
+                estudianteId: estudianteId,
+                fechaBaja: null,
               },
             },
           },
@@ -884,21 +884,21 @@ export class EstudianteAulaService {
     // 2. Crear o actualizar progreso
     const progreso = await this.prisma.progresoTareaEstudiante.upsert({
       where: {
-        estudiante_id_tarea_asignada_id: {
-          estudiante_id: estudianteId,
-          tarea_asignada_id: tareaAsignadaId,
+        estudianteId_tareaAsignadaId: {
+          estudianteId: estudianteId,
+          tareaAsignadaId: tareaAsignadaId,
         },
       },
       create: {
-        estudiante_id: estudianteId,
-        tarea_asignada_id: tareaAsignadaId,
+        estudianteId: estudianteId,
+        tareaAsignadaId: tareaAsignadaId,
         estado: EstadoTarea.EN_PROGRESO,
-        iniciada_en: new Date(),
+        iniciadaEn: new Date(),
         intentos: 1,
       },
       update: {
         estado: EstadoTarea.EN_PROGRESO,
-        iniciada_en: new Date(),
+        iniciadaEn: new Date(),
         intentos: { increment: 1 },
       },
     });
@@ -926,8 +926,8 @@ export class EstudianteAulaService {
         claseGrupo: {
           inscripciones: {
             some: {
-              estudiante_id: estudianteId,
-              fecha_baja: null,
+              estudianteId: estudianteId,
+              fechaBaja: null,
             },
           },
         },
@@ -937,7 +937,7 @@ export class EstudianteAulaService {
           select: {
             id: true,
             titulo: true,
-            cantidad_clases: true,
+            cantidadClases: true,
           },
         },
         claseGrupo: {
@@ -945,9 +945,9 @@ export class EstudianteAulaService {
             id: true,
             nombre: true,
             inscripciones: {
-              where: { fecha_baja: null },
+              where: { fechaBaja: null },
               select: {
-                estudiante_id: true,
+                estudianteId: true,
                 estudiante: {
                   select: {
                     id: true,
@@ -955,7 +955,7 @@ export class EstudianteAulaService {
                     apellido: true,
                     avatarUrl: true,
                     recursos: {
-                      select: { xp_total: true },
+                      select: { xpTotal: true },
                     },
                   },
                 },
@@ -965,9 +965,9 @@ export class EstudianteAulaService {
         },
         estadosClases: {
           where: {
-            OR: [{ teoria_activa: true }, { practica_activa: true }],
+            OR: [{ teoriaActiva: true }, { practicaActiva: true }],
           },
-          select: { clase_id: true },
+          select: { claseId: true },
         },
         tareasAsignadas: {
           where: { activa: true },
@@ -983,16 +983,16 @@ export class EstudianteAulaService {
     }
 
     const estudiantesIds = asignacion.claseGrupo.inscripciones.map(
-      (i) => i.estudiante_id,
+      (i) => i.estudianteId,
     );
-    const clasesActivasIds = asignacion.estadosClases.map((e) => e.clase_id);
+    const clasesActivasIds = asignacion.estadosClases.map((e) => e.claseId);
     const tareasAsignadasIds = asignacion.tareasAsignadas.map((t) => t.id);
 
     // 2. Obtener progresos de clases para todos los estudiantes
     const progresosClases = await this.prisma.progresoClaseEstudiante.findMany({
       where: {
-        estudiante_id: { in: estudiantesIds },
-        clase_id: { in: clasesActivasIds },
+        estudianteId: { in: estudiantesIds },
+        claseId: { in: clasesActivasIds },
       },
     });
 
@@ -1002,16 +1002,16 @@ export class EstudianteAulaService {
       typeof progresosClases
     >();
     for (const p of progresosClases) {
-      const existing = progresosClasesPorEstudiante.get(p.estudiante_id) || [];
+      const existing = progresosClasesPorEstudiante.get(p.estudianteId) || [];
       existing.push(p);
-      progresosClasesPorEstudiante.set(p.estudiante_id, existing);
+      progresosClasesPorEstudiante.set(p.estudianteId, existing);
     }
 
     // 3. Obtener progresos de tareas
     const progresosTareas = await this.prisma.progresoTareaEstudiante.findMany({
       where: {
-        estudiante_id: { in: estudiantesIds },
-        tarea_asignada_id: { in: tareasAsignadasIds },
+        estudianteId: { in: estudiantesIds },
+        tareaAsignadaId: { in: tareasAsignadasIds },
       },
     });
 
@@ -1020,9 +1020,9 @@ export class EstudianteAulaService {
       typeof progresosTareas
     >();
     for (const p of progresosTareas) {
-      const existing = progresosTareasPorEstudiante.get(p.estudiante_id) || [];
+      const existing = progresosTareasPorEstudiante.get(p.estudianteId) || [];
       existing.push(p);
-      progresosTareasPorEstudiante.set(p.estudiante_id, existing);
+      progresosTareasPorEstudiante.set(p.estudianteId, existing);
     }
 
     // 4. Calcular progreso y puntos por estudiante
@@ -1033,7 +1033,7 @@ export class EstudianteAulaService {
 
       // Clases completadas (teoría Y práctica)
       const clasesCompletadas = progClases.filter(
-        (p) => p.teoria_completada && p.practica_completada,
+        (p) => p.teoriaCompletada && p.practicaCompletada,
       ).length;
 
       // Tareas completadas
@@ -1062,26 +1062,26 @@ export class EstudianteAulaService {
           nombre: est.nombre,
           apellido: est.apellido,
           avatar: est.avatarUrl,
-          xp_total: est.recursos?.xp_total ?? 0,
+          xpTotal: est.recursos?.xpTotal ?? 0,
         },
         progreso: {
-          clases_completadas: clasesCompletadas,
-          clases_totales: clasesActivasIds.length,
-          tareas_completadas: tareasCompletadas,
-          tareas_totales: tareasAsignadasIds.length,
+          clasesCompletadas: clasesCompletadas,
+          clasesTotales: clasesActivasIds.length,
+          tareasCompletadas: tareasCompletadas,
+          tareasTotales: tareasAsignadasIds.length,
           porcentaje,
         },
-        puntos_planificacion: puntosPlanificacion,
-        es_yo: est.id === estudianteId,
+        puntosPlanificacion: puntosPlanificacion,
+        esYo: est.id === estudianteId,
       };
     });
 
     // 5. Ordenar por puntos de planificación, luego por XP total como desempate
     leaderboardEntries.sort((a, b) => {
-      if (b.puntos_planificacion !== a.puntos_planificacion) {
-        return b.puntos_planificacion - a.puntos_planificacion;
+      if (b.puntosPlanificacion !== a.puntosPlanificacion) {
+        return b.puntosPlanificacion - a.puntosPlanificacion;
       }
-      return b.estudiante.xp_total - a.estudiante.xp_total;
+      return b.estudiante.xpTotal - a.estudiante.xpTotal;
     });
 
     // 6. Asignar posiciones
@@ -1092,7 +1092,7 @@ export class EstudianteAulaService {
 
     // 7. Encontrar mi posición
     const miPosicion =
-      leaderboard.find((e) => e.es_yo)?.posicion ?? leaderboard.length;
+      leaderboard.find((e) => e.esYo)?.posicion ?? leaderboard.length;
 
     return {
       planificacion: asignacion.planificacion,
@@ -1100,8 +1100,8 @@ export class EstudianteAulaService {
         id: asignacion.claseGrupo.id,
         nombre: asignacion.claseGrupo.nombre,
       },
-      mi_posicion: miPosicion,
-      total_participantes: leaderboard.length,
+      miPosicion: miPosicion,
+      totalParticipantes: leaderboard.length,
       leaderboard,
     };
   }
@@ -1130,8 +1130,8 @@ export class EstudianteAulaService {
           claseGrupo: {
             inscripciones: {
               some: {
-                estudiante_id: estudianteId,
-                fecha_baja: null,
+                estudianteId: estudianteId,
+                fechaBaja: null,
               },
             },
           },
@@ -1164,9 +1164,9 @@ export class EstudianteAulaService {
     const progresoExistente =
       await this.prisma.progresoTareaEstudiante.findUnique({
         where: {
-          estudiante_id_tarea_asignada_id: {
-            estudiante_id: estudianteId,
-            tarea_asignada_id: tareaAsignadaId,
+          estudianteId_tareaAsignadaId: {
+            estudianteId: estudianteId,
+            tareaAsignadaId: tareaAsignadaId,
           },
         },
       });
@@ -1176,32 +1176,32 @@ export class EstudianteAulaService {
         success: false,
         mensaje: 'Esta tarea ya fue completada',
         progreso: progresoExistente,
-        xp_ganado: 0,
+        xpGanado: 0,
       };
     }
 
     // 3. Actualizar progreso
     const progreso = await this.prisma.progresoTareaEstudiante.upsert({
       where: {
-        estudiante_id_tarea_asignada_id: {
-          estudiante_id: estudianteId,
-          tarea_asignada_id: tareaAsignadaId,
+        estudianteId_tareaAsignadaId: {
+          estudianteId: estudianteId,
+          tareaAsignadaId: tareaAsignadaId,
         },
       },
       create: {
-        estudiante_id: estudianteId,
-        tarea_asignada_id: tareaAsignadaId,
+        estudianteId: estudianteId,
+        tareaAsignadaId: tareaAsignadaId,
         estado: EstadoTarea.COMPLETADA,
-        iniciada_en: new Date(),
-        completada_en: new Date(),
-        tiempo_total_segundos: tiempoSegundos,
+        iniciadaEn: new Date(),
+        completadaEn: new Date(),
+        tiempoTotalSegundos: tiempoSegundos,
         intentos: 1,
         calificacion,
       },
       update: {
         estado: EstadoTarea.COMPLETADA,
-        completada_en: new Date(),
-        tiempo_total_segundos: { increment: tiempoSegundos },
+        completadaEn: new Date(),
+        tiempoTotalSegundos: { increment: tiempoSegundos },
         calificacion,
       },
     });
@@ -1212,8 +1212,8 @@ export class EstudianteAulaService {
       ? Math.floor((calificacion / 100) * 25)
       : 0;
     const xpBonusTiempo =
-      tareaAsignada.fecha_limite &&
-      new Date() < new Date(tareaAsignada.fecha_limite)
+      tareaAsignada.fechaLimite &&
+      new Date() < new Date(tareaAsignada.fechaLimite)
         ? 15
         : 0; // Bonus por entregar a tiempo
 
@@ -1239,12 +1239,12 @@ export class EstudianteAulaService {
     return {
       success: true,
       progreso,
-      xp_ganado: xpTotal,
+      xpGanado: xpTotal,
       mensaje: `¡Tarea completada! +${xpTotal} XP`,
-      desglose_xp: {
+      desgloseXp: {
         base: xpBase,
-        bonus_calificacion: xpBonusCalificacion,
-        bonus_tiempo: xpBonusTiempo,
+        bonusCalificacion: xpBonusCalificacion,
+        bonusTiempo: xpBonusTiempo,
       },
     };
   }
@@ -1272,29 +1272,29 @@ export class EstudianteAulaService {
     estadosMap: Map<
       string,
       {
-        teoria_activa: boolean;
-        practica_activa: boolean;
-        activada_en: Date | null;
+        teoriaActiva: boolean;
+        practicaActiva: boolean;
+        activadaEn: Date | null;
       }
     >,
     progresosClasesMap: Map<
       string,
       {
-        teoria_completada: boolean;
-        teoria_completada_en: Date | null;
-        tiempo_teoria_segundos: number;
-        practica_completada: boolean;
-        practica_completada_en: Date | null;
-        tiempo_practica_segundos: number;
+        teoriaCompletada: boolean;
+        teoriaCompletadaEn: Date | null;
+        tiempoTeoriaSegundos: number;
+        practicaCompletada: boolean;
+        practicaCompletadaEn: Date | null;
+        tiempoPracticaSegundos: number;
       }
     >,
-    tareasAsignadasMap: Map<string, { id: string; fecha_limite: Date | null }>,
+    tareasAsignadasMap: Map<string, { id: string; fechaLimite: Date | null }>,
     progresosTareasMap: Map<
       string,
       {
         estado: EstadoTarea;
-        iniciada_en: Date | null;
-        completada_en: Date | null;
+        iniciadaEn: Date | null;
+        completadaEn: Date | null;
         calificacion: number | null;
       }
     >,
@@ -1314,21 +1314,21 @@ export class EstudianteAulaService {
       titulo: clase.titulo,
       descripcion: clase.descripcion,
       teoria: this.buildSeccionConProgreso(
-        estado?.teoria_activa,
+        estado?.teoriaActiva,
         clase.teoria,
-        progresoClase?.teoria_completada,
-        progresoClase?.teoria_completada_en,
-        progresoClase?.tiempo_teoria_segundos,
+        progresoClase?.teoriaCompletada,
+        progresoClase?.teoriaCompletadaEn,
+        progresoClase?.tiempoTeoriaSegundos,
       ),
       practica: this.buildSeccionConProgreso(
-        estado?.practica_activa,
+        estado?.practicaActiva,
         clase.practica,
-        progresoClase?.practica_completada,
-        progresoClase?.practica_completada_en,
-        progresoClase?.tiempo_practica_segundos,
+        progresoClase?.practicaCompletada,
+        progresoClase?.practicaCompletadaEn,
+        progresoClase?.tiempoPracticaSegundos,
       ),
-      activada: !!(estado?.teoria_activa || estado?.practica_activa),
-      activada_en: estado?.activada_en || null,
+      activada: !!(estado?.teoriaActiva || estado?.practicaActiva),
+      activadaEn: estado?.activadaEn || null,
       tareas: tareasConEstado.filter((t) => t.asignada),
     };
   }
@@ -1347,8 +1347,8 @@ export class EstudianteAulaService {
     return {
       ...(contenido as object),
       completada: completada || false,
-      completada_en: completadaEn || null,
-      tiempo_segundos: tiempoSegundos || 0,
+      completadaEn: completadaEn || null,
+      tiempoSegundos: tiempoSegundos || 0,
     };
   }
 
@@ -1362,13 +1362,13 @@ export class EstudianteAulaService {
       orden: number;
       obligatoria: boolean;
     }>,
-    tareasAsignadasMap: Map<string, { id: string; fecha_limite: Date | null }>,
+    tareasAsignadasMap: Map<string, { id: string; fechaLimite: Date | null }>,
     progresosTareasMap: Map<
       string,
       {
         estado: EstadoTarea;
-        iniciada_en: Date | null;
-        completada_en: Date | null;
+        iniciadaEn: Date | null;
+        completadaEn: Date | null;
         calificacion: number | null;
       }
     >,
@@ -1385,13 +1385,13 @@ export class EstudianteAulaService {
         orden: tarea.orden,
         obligatoria: tarea.obligatoria,
         asignada: !!tareaAsignada,
-        tarea_asignada_id: tareaAsignada?.id || null,
-        fecha_limite: tareaAsignada?.fecha_limite || null,
+        tareaAsignadaId: tareaAsignada?.id || null,
+        fechaLimite: tareaAsignada?.fechaLimite || null,
         progreso: progresoTarea
           ? {
               estado: progresoTarea.estado,
-              iniciada_en: progresoTarea.iniciada_en,
-              completada_en: progresoTarea.completada_en,
+              iniciadaEn: progresoTarea.iniciadaEn,
+              completadaEn: progresoTarea.completadaEn,
               calificacion: progresoTarea.calificacion,
             }
           : null,

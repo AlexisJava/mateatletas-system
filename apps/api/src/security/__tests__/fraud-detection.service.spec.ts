@@ -17,14 +17,14 @@ import { AuditLogService, EntityType } from '../../audit/audit-log.service';
  * ESCENARIOS DE FRAUDE COMUNES:
  * 1. Manipulación de monto en webhook: Pagar $1 pero reportar $25000
  * 2. Ataque de fuerza bruta: 50 intentos de pago desde misma IP en 5 minutos
- * 3. Reutilización de payment_id: Usar mismo pago para múltiples inscripciones
+ * 3. Reutilización de paymentId: Usar mismo pago para múltiples inscripciones
  * 4. Modificación de preference_id: Cambiar ID para evitar validaciones
  * 5. Inscripciones duplicadas: Mismo tutor + estudiante múltiples veces
  *
  * SOLUCIÓN:
  * - Validar montos contra pricing calculator antes de aprobar
  * - Detectar múltiples pagos desde misma IP (rate limiting + análisis)
- * - Verificar unicidad de payment_id y preference_id
+ * - Verificar unicidad de paymentId y preference_id
  * - Detectar patrones sospechosos (velocidad, montos, IPs)
  * - Loguear TODOS los intentos de fraude para análisis forense
  *
@@ -106,8 +106,8 @@ describe.skip('FraudDetectionService', () => {
 
     const mockRecentPayments = Array.from({ length: 15 }, (_, i) => ({
       id: `pago-${i}`,
-      inscripcion_id: `insc-${i}`,
-      ip_address: suspiciousIP,
+      inscripcionId: `insc-${i}`,
+      ipAddress: suspiciousIP,
       createdAt: new Date(Date.now() - i * 20 * 1000), // Cada 20 segundos
       monto: 25000,
       estado: 'pending',
@@ -154,8 +154,8 @@ describe.skip('FraudDetectionService', () => {
 
     const mockNormalPayments = Array.from({ length: 3 }, (_, i) => ({
       id: `pago-${i}`,
-      inscripcion_id: `insc-${i}`,
-      ip_address: legitimateIP,
+      inscripcionId: `insc-${i}`,
+      ipAddress: legitimateIP,
       createdAt: new Date(Date.now() - i * 3 * 60 * 1000), // Cada 3 minutos
       monto: 25000,
       estado: 'pending',
@@ -246,20 +246,20 @@ describe.skip('FraudDetectionService', () => {
   });
 
   /**
-   * TEST 6: Detectar reutilización de payment_id (duplicado)
+   * TEST 6: Detectar reutilización de paymentId (duplicado)
    *
-   * ESCENARIO: Mismo mercadopago_payment_id usado en 2 inscripciones diferentes
+   * ESCENARIO: Mismo mercadopagoPaymentId usado en 2 inscripciones diferentes
    * ESPERADO: Detectar fraude, un pago solo debe usar para 1 inscripción
-   * RAZÓN: Atacante puede reutilizar payment_id aprobado para múltiples inscripciones
+   * RAZÓN: Atacante puede reutilizar paymentId aprobado para múltiples inscripciones
    */
-  it('debe detectar reutilización de payment_id como fraude', async () => {
+  it('debe detectar reutilización de paymentId como fraude', async () => {
     // Arrange: Payment ID ya usado
     const paymentId = 'mp-payment-12345';
 
     const mockExistingPayment = {
       id: 'pago-001',
-      mercadopago_payment_id: paymentId,
-      inscripcion_id: 'insc-001',
+      mercadopagoPaymentId: paymentId,
+      inscripcionId: 'insc-001',
       estado: 'paid',
     };
 
@@ -267,7 +267,7 @@ describe.skip('FraudDetectionService', () => {
       mockExistingPayment,
     );
 
-    // Act: Verificar unicidad de payment_id
+    // Act: Verificar unicidad de paymentId
     const result = await service.checkPaymentIdUniqueness(paymentId);
 
     // Assert: Debe detectar duplicado
@@ -277,7 +277,7 @@ describe.skip('FraudDetectionService', () => {
 
     // Debe loguear fraude
     expect(auditLog.logFraudDetected).toHaveBeenCalledWith(
-      expect.stringContaining('Reutilización de payment_id'),
+      expect.stringContaining('Reutilización de paymentId'),
       expect.anything(),
       expect.anything(),
       expect.objectContaining({
@@ -289,13 +289,13 @@ describe.skip('FraudDetectionService', () => {
   });
 
   /**
-   * TEST 7: Aceptar payment_id único (primera vez)
+   * TEST 7: Aceptar paymentId único (primera vez)
    *
    * ESCENARIO: Payment ID nunca usado antes
    * ESPERADO: Validar como único, permitir uso
    * RAZÓN: Pagos nuevos deben procesarse normalmente
    */
-  it('debe aceptar payment_id único sin detectar fraude', async () => {
+  it('debe aceptar paymentId único sin detectar fraude', async () => {
     // Arrange: Payment ID no existe
     const newPaymentId = 'mp-payment-new-789';
 
@@ -326,7 +326,7 @@ describe.skip('FraudDetectionService', () => {
 
     const mockExistingInscripcion = {
       id: 'insc-existente-001',
-      tutor_id: tutorId,
+      tutorId: tutorId,
       estado: 'active',
       estudiantesInscripcion: [
         {
@@ -414,7 +414,7 @@ describe.skip('FraudDetectionService', () => {
     mockPrisma.pagoInscripcion2026.findMany.mockResolvedValueOnce(
       Array.from({ length: 15 }, (_, i) => ({
         id: `pago-${i}`,
-        ip_address: paymentData.ipAddress,
+        ipAddress: paymentData.ipAddress,
         createdAt: new Date(Date.now() - i * 20 * 1000),
       })),
     );
@@ -460,7 +460,7 @@ describe.skip('FraudDetectionService', () => {
     mockPrisma.pagoInscripcion2026.findMany.mockResolvedValueOnce(
       Array.from({ length: 3 }, (_, i) => ({
         id: `pago-${i}`,
-        ip_address: legitimatePayment.ipAddress,
+        ipAddress: legitimatePayment.ipAddress,
         createdAt: new Date(Date.now() - i * 3 * 60 * 1000),
       })),
     );

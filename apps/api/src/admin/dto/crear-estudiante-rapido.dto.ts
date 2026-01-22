@@ -67,7 +67,7 @@ export class CrearEstudianteRapidoDto {
    */
   @IsOptional()
   @IsCuid()
-  plan_id?: string;
+  planId?: string;
 
   /**
    * Estado de acceso del estudiante
@@ -78,5 +78,5 @@ export class CrearEstudianteRapidoDto {
    */
   @IsOptional()
   @IsEnum(['ACTIVO', 'SUSPENDIDO', 'VENCIDO', 'BECA'])
-  estado_acceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
+  estadoAcceso?: 'ACTIVO' | 'SUSPENDIDO' | 'VENCIDO' | 'BECA';
 }

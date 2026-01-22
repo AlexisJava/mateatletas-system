@@ -51,21 +51,21 @@ describe('Schema de Suscripciones (Tipos Prisma)', () => {
       // Verificar que el tipo existe y tiene la estructura correcta
       const planInput: Prisma.PlanSuscripcionCreateInput = {
         nombre: 'STEAM_LIBROS',
-        precio_base: 40000,
+        precioBase: 40000,
       };
 
       expect(planInput.nombre).toBe('STEAM_LIBROS');
-      expect(planInput.precio_base).toBe(40000);
+      expect(planInput.precioBase).toBe(40000);
     });
 
     it('debe permitir campos opcionales', () => {
       const planInput: Prisma.PlanSuscripcionCreateInput = {
         nombre: 'STEAM_ASINCRONICO',
         descripcion: 'Plan con clases asincrónicas',
-        precio_base: 65000,
+        precioBase: 65000,
         moneda: 'ARS',
         intervalo: IntervaloSuscripcion.MENSUAL,
-        intervalo_cantidad: 1,
+        intervaloCantidad: 1,
         activo: true,
       };
 
@@ -79,13 +79,13 @@ describe('Schema de Suscripciones (Tipos Prisma)', () => {
         id: true,
         nombre: true,
         descripcion: true,
-        precio_base: true,
+        precioBase: true,
         moneda: true,
         intervalo: true,
-        intervalo_cantidad: true,
+        intervaloCantidad: true,
         activo: true,
-        created_at: true,
-        updated_at: true,
+        createdAt: true,
+        updatedAt: true,
         suscripciones: true,
       };
 
@@ -95,71 +95,71 @@ describe('Schema de Suscripciones (Tipos Prisma)', () => {
   });
 
   describe('Suscripcion', () => {
-    it('debe requerir tutor_id, plan_id y precio_final', () => {
+    it('debe requerir tutorId, planId y precioFinal', () => {
       const suscripcionInput: Prisma.SuscripcionUncheckedCreateInput = {
-        tutor_id: 'tutor-123',
-        plan_id: 'plan-123',
-        precio_final: 40000,
+        tutorId: 'tutor-123',
+        planId: 'plan-123',
+        precioFinal: 40000,
       };
 
-      expect(suscripcionInput.tutor_id).toBe('tutor-123');
-      expect(suscripcionInput.plan_id).toBe('plan-123');
-      expect(suscripcionInput.precio_final).toBe(40000);
+      expect(suscripcionInput.tutorId).toBe('tutor-123');
+      expect(suscripcionInput.planId).toBe('plan-123');
+      expect(suscripcionInput.precioFinal).toBe(40000);
     });
 
     it('debe permitir campos de MercadoPago', () => {
       const suscripcionInput: Prisma.SuscripcionUncheckedCreateInput = {
-        tutor_id: 'tutor-123',
-        plan_id: 'plan-123',
-        precio_final: 40000,
-        mp_preapproval_id: 'preapproval-mp-123',
-        mp_status: 'authorized',
+        tutorId: 'tutor-123',
+        planId: 'plan-123',
+        precioFinal: 40000,
+        mpPreapprovalId: 'preapproval-mp-123',
+        mpStatus: 'authorized',
       };
 
-      expect(suscripcionInput.mp_preapproval_id).toBe('preapproval-mp-123');
-      expect(suscripcionInput.mp_status).toBe('authorized');
+      expect(suscripcionInput.mpPreapprovalId).toBe('preapproval-mp-123');
+      expect(suscripcionInput.mpStatus).toBe('authorized');
     });
 
     it('debe permitir campos de grace period', () => {
       const suscripcionInput: Prisma.SuscripcionUncheckedCreateInput = {
-        tutor_id: 'tutor-123',
-        plan_id: 'plan-123',
-        precio_final: 40000,
-        dias_gracia_usados: 2,
-        fecha_inicio_gracia: new Date(),
+        tutorId: 'tutor-123',
+        planId: 'plan-123',
+        precioFinal: 40000,
+        diasGraciaUsados: 2,
+        fechaInicioGracia: new Date(),
       };
 
-      expect(suscripcionInput.dias_gracia_usados).toBe(2);
-      expect(suscripcionInput.fecha_inicio_gracia).toBeInstanceOf(Date);
+      expect(suscripcionInput.diasGraciaUsados).toBe(2);
+      expect(suscripcionInput.fechaInicioGracia).toBeInstanceOf(Date);
     });
 
     // REGLA DE NEGOCIO: Las suscripciones NO SE PAUSAN.
     // Si el tutor no paga, se cancela. Si quiere volver, crea una nueva.
-    // Los campos fecha_pausa y fecha_fin_pausa existen en el schema por compatibilidad
+    // Los campos fecha_pausa y fechaFin_pausa existen en el schema por compatibilidad
     // con MercadoPago (que puede enviar estado PAUSED), pero NO se usan activamente.
 
     it('debe permitir campos de cancelación', () => {
       const suscripcionInput: Prisma.SuscripcionUncheckedCreateInput = {
-        tutor_id: 'tutor-123',
-        plan_id: 'plan-123',
-        precio_final: 40000,
+        tutorId: 'tutor-123',
+        planId: 'plan-123',
+        precioFinal: 40000,
         estado: EstadoSuscripcion.CANCELADA,
-        fecha_cancelacion: new Date(),
-        motivo_cancelacion: 'Solicitud del usuario',
-        cancelado_por: 'tutor',
+        fechaCancelacion: new Date(),
+        motivoCancelacion: 'Solicitud del usuario',
+        canceladoPor: 'tutor',
       };
 
-      expect(suscripcionInput.motivo_cancelacion).toBe('Solicitud del usuario');
-      expect(suscripcionInput.cancelado_por).toBe('tutor');
+      expect(suscripcionInput.motivoCancelacion).toBe('Solicitud del usuario');
+      expect(suscripcionInput.canceladoPor).toBe('tutor');
     });
 
     it('debe tener select fields con relaciones', () => {
       const select: Prisma.SuscripcionSelect = {
         id: true,
-        tutor_id: true,
-        plan_id: true,
+        tutorId: true,
+        planId: true,
         estado: true,
-        precio_final: true,
+        precioFinal: true,
         tutor: true,
         plan: true,
         pagos: true,
@@ -176,25 +176,25 @@ describe('Schema de Suscripciones (Tipos Prisma)', () => {
   describe('PagoSuscripcion', () => {
     it('debe requerir campos de pago', () => {
       const pagoInput: Prisma.PagoSuscripcionUncheckedCreateInput = {
-        suscripcion_id: 'suscripcion-123',
-        mp_payment_id: 'payment-mp-123',
-        mp_status: 'approved',
+        suscripcionId: 'suscripcion-123',
+        mpPaymentId: 'payment-mp-123',
+        mpStatus: 'approved',
         monto: 40000,
         periodo_inicio: new Date(),
         periodo_fin: new Date(),
       };
 
-      expect(pagoInput.suscripcion_id).toBe('suscripcion-123');
-      expect(pagoInput.mp_payment_id).toBe('payment-mp-123');
-      expect(pagoInput.mp_status).toBe('approved');
+      expect(pagoInput.suscripcionId).toBe('suscripcion-123');
+      expect(pagoInput.mp_paymentId).toBe('payment-mp-123');
+      expect(pagoInput.mpStatus).toBe('approved');
       expect(pagoInput.monto).toBe(40000);
     });
 
     it('debe permitir campos opcionales', () => {
       const pagoInput: Prisma.PagoSuscripcionUncheckedCreateInput = {
-        suscripcion_id: 'suscripcion-123',
-        mp_payment_id: 'payment-mp-123',
-        mp_status: 'approved',
+        suscripcionId: 'suscripcion-123',
+        mpPaymentId: 'payment-mp-123',
+        mpStatus: 'approved',
         monto: 40000,
         moneda: 'ARS',
         periodo_inicio: new Date(),
@@ -211,8 +211,8 @@ describe('Schema de Suscripciones (Tipos Prisma)', () => {
     it('debe tener select fields con relación', () => {
       const select: Prisma.PagoSuscripcionSelect = {
         id: true,
-        suscripcion_id: true,
-        mp_payment_id: true,
+        suscripcionId: true,
+        mpPaymentId: true,
         monto: true,
         suscripcion: true,
       };
@@ -225,41 +225,41 @@ describe('Schema de Suscripciones (Tipos Prisma)', () => {
     it('debe permitir registrar cambios de estado', () => {
       const historialInput: Prisma.HistorialEstadoSuscripcionUncheckedCreateInput =
         {
-          suscripcion_id: 'suscripcion-123',
-          estado_anterior: EstadoSuscripcion.PENDIENTE,
-          estado_nuevo: EstadoSuscripcion.ACTIVA,
+          suscripcionId: 'suscripcion-123',
+          estadoAnterior: EstadoSuscripcion.PENDIENTE,
+          estadoNuevo: EstadoSuscripcion.ACTIVA,
           motivo: 'Primer pago confirmado',
-          realizado_por: 'mercadopago',
+          realizadoPor: 'mercadopago',
         };
 
-      expect(historialInput.estado_anterior).toBe(EstadoSuscripcion.PENDIENTE);
-      expect(historialInput.estado_nuevo).toBe(EstadoSuscripcion.ACTIVA);
+      expect(historialInput.estadoAnterior).toBe(EstadoSuscripcion.PENDIENTE);
+      expect(historialInput.estadoNuevo).toBe(EstadoSuscripcion.ACTIVA);
       expect(historialInput.motivo).toBe('Primer pago confirmado');
     });
 
-    it('debe permitir estado_anterior null (primer estado)', () => {
+    it('debe permitir estadoAnterior null (primer estado)', () => {
       const historialInput: Prisma.HistorialEstadoSuscripcionUncheckedCreateInput =
         {
-          suscripcion_id: 'suscripcion-123',
-          estado_anterior: null,
-          estado_nuevo: EstadoSuscripcion.PENDIENTE,
+          suscripcionId: 'suscripcion-123',
+          estadoAnterior: null,
+          estadoNuevo: EstadoSuscripcion.PENDIENTE,
           motivo: 'Suscripción creada',
         };
 
-      expect(historialInput.estado_anterior).toBeNull();
+      expect(historialInput.estadoAnterior).toBeNull();
     });
 
     it('debe soportar metadata JSON', () => {
       const metadata = {
-        mp_payment_id: '12345',
+        mpPaymentId: '12345',
         monto: 40000,
-        fecha_cobro: new Date().toISOString(),
+        fechaCobro: new Date().toISOString(),
       };
 
       const historialInput: Prisma.HistorialEstadoSuscripcionUncheckedCreateInput =
         {
-          suscripcion_id: 'suscripcion-123',
-          estado_nuevo: EstadoSuscripcion.ACTIVA,
+          suscripcionId: 'suscripcion-123',
+          estadoNuevo: EstadoSuscripcion.ACTIVA,
           metadata,
         };
 
@@ -269,9 +269,9 @@ describe('Schema de Suscripciones (Tipos Prisma)', () => {
     it('debe tener select fields con relación', () => {
       const select: Prisma.HistorialEstadoSuscripcionSelect = {
         id: true,
-        suscripcion_id: true,
-        estado_anterior: true,
-        estado_nuevo: true,
+        suscripcionId: true,
+        estadoAnterior: true,
+        estadoNuevo: true,
         suscripcion: true,
       };
 
@@ -303,21 +303,21 @@ describe('Schema de Suscripciones (Tipos Prisma)', () => {
   });
 
   describe('Índices únicos', () => {
-    it('mp_preapproval_id debe ser unique (verificable por where)', () => {
+    it('mpPreapprovalId debe ser unique (verificable por where)', () => {
       // Si el campo es unique, Prisma genera un tipo WhereUniqueInput con ese campo
       const whereUnique: Prisma.SuscripcionWhereUniqueInput = {
-        mp_preapproval_id: 'preapproval-123',
+        mpPreapprovalId: 'preapproval-123',
       };
 
-      expect(whereUnique.mp_preapproval_id).toBe('preapproval-123');
+      expect(whereUnique.mpPreapprovalId).toBe('preapproval-123');
     });
 
-    it('mp_payment_id en PagoSuscripcion debe ser unique', () => {
+    it('mp_paymentId en PagoSuscripcion debe ser unique', () => {
       const whereUnique: Prisma.PagoSuscripcionWhereUniqueInput = {
-        mp_payment_id: 'payment-123',
+        mpPaymentId: 'payment-123',
       };
 
-      expect(whereUnique.mp_payment_id).toBe('payment-123');
+      expect(whereUnique.mp_paymentId).toBe('payment-123');
     });
   });
 });

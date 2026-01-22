@@ -255,7 +255,7 @@ describe('CasasService', () => {
             id: 'est-1',
             nombre: 'Juan',
             apellido: 'Pérez',
-            recursos: { xp_total: 100, nivel: 2 },
+            recursos: { xpTotal: 100, nivel: 2 },
           },
         ],
       };
@@ -308,30 +308,30 @@ describe('CasasService', () => {
     it('should_return_estudiantes_ordenados_por_puntos', async () => {
       const casaQuantum = {
         ...mockCasas[0],
-        // Ordenado en memoria por xp_total DESC
+        // Ordenado en memoria por xpTotal DESC
         estudiantes: [
           {
             id: 'est-2',
             nombre: 'Luis',
             apellido: 'Perez',
-            recursos: { xp_total: 750 },
-            nivel_actual: 3,
+            recursos: { xpTotal: 750 },
+            nivelActual: 3,
             avatarUrl: null,
           },
           {
             id: 'est-1',
             nombre: 'Ana',
             apellido: 'Garcia',
-            recursos: { xp_total: 500 },
-            nivel_actual: 2,
+            recursos: { xpTotal: 500 },
+            nivelActual: 2,
             avatarUrl: null,
           },
           {
             id: 'est-3',
             nombre: 'Maria',
             apellido: 'Lopez',
-            recursos: { xp_total: 300 },
-            nivel_actual: 1,
+            recursos: { xpTotal: 300 },
+            nivelActual: 1,
             avatarUrl: null,
           },
         ],

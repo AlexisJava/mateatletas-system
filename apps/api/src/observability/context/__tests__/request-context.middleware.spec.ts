@@ -59,7 +59,7 @@ describe('RequestContextMiddleware', () => {
       expect(nextFunction).toHaveBeenCalled();
     });
 
-    it('should_use_x_request_id_header_if_provided', async () => {
+    it('should_use_x_requestId_header_if_provided', async () => {
       const providedId = 'external-request-id-xyz';
       (mockRequest.headers as Record<string, string>)['x-request-id'] =
         providedId;
@@ -81,7 +81,7 @@ describe('RequestContextMiddleware', () => {
   });
 
   describe('response headers', () => {
-    it('should_set_x_request_id_response_header', async () => {
+    it('should_set_x_requestId_response_header', async () => {
       await middleware.use(
         mockRequest as Request,
         mockResponse as Response,

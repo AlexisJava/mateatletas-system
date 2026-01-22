@@ -56,7 +56,7 @@ describe('AccesoEstudianteService', () => {
       data: {
         nombre: 'STEAM_LIBROS',
         descripcion: 'Plan básico con acceso a libros',
-        precio_base: 45000,
+        precioBase: 45000,
       },
     });
     planLibrosId = planLibros.id;
@@ -65,7 +65,7 @@ describe('AccesoEstudianteService', () => {
       data: {
         nombre: 'STEAM_ASINCRONICO',
         descripcion: 'Plan con contenido asincrónico',
-        precio_base: 65000,
+        precioBase: 65000,
       },
     });
     planAsincId = planAsinc.id;
@@ -74,7 +74,7 @@ describe('AccesoEstudianteService', () => {
       data: {
         nombre: 'STEAM_SINCRONICO',
         descripcion: 'Plan completo con clases en vivo',
-        precio_base: 95000,
+        precioBase: 95000,
       },
     });
     planSincId = planSinc.id;
@@ -85,7 +85,7 @@ describe('AccesoEstudianteService', () => {
         nombre: 'Tutor',
         apellido: 'Test',
         email: `tutor-${Date.now()}@test.com`,
-        password_hash: 'hash123',
+        passwordHash: 'hash123',
       },
     });
     tutorId = tutor.id;
@@ -96,7 +96,7 @@ describe('AccesoEstudianteService', () => {
         nombre: 'Docente',
         apellido: 'Test',
         email: `docente-${Date.now()}@test.com`,
-        password_hash: 'hash123',
+        passwordHash: 'hash123',
       },
     });
     docenteId = docente.id;
@@ -109,7 +109,7 @@ describe('AccesoEstudianteService', () => {
         apellido: 'Test',
         nivelEscolar: 'Primaria',
         edad: 10,
-        tutor_id: tutorId,
+        tutorId: tutorId,
       },
     });
     estudianteId = estudiante.id;
@@ -130,7 +130,7 @@ describe('AccesoEstudianteService', () => {
         codigo: 'B1',
         nombre: 'Grupo B1 Test',
         descripcion: 'Grupo de prueba',
-        sector_id: sector.id,
+        sectorId: sector.id,
       },
     });
 
@@ -139,16 +139,16 @@ describe('AccesoEstudianteService', () => {
       data: {
         codigo: 'CG-TEST',
         nombre: `ClaseGrupo Test ${Date.now()}`,
-        dia_semana: 'LUNES',
-        hora_inicio: '18:00',
-        hora_fin: '19:30',
-        fecha_inicio: new Date('2026-01-01'),
-        fecha_fin: new Date('2026-12-15'),
-        anio_lectivo: 2026,
-        cupo_maximo: 15,
-        grupo_id: grupo.id,
-        docente_id: docenteId,
-        sector_id: sector.id,
+        diaSemana: 'LUNES',
+        horaInicio: '18:00',
+        horaFin: '19:30',
+        fechaInicio: new Date('2026-01-01'),
+        fechaFin: new Date('2026-12-15'),
+        anioLectivo: 2026,
+        cupoMaximo: 15,
+        grupoId: grupo.id,
+        docenteId: docenteId,
+        sectorId: sector.id,
       },
     });
     claseGrupoId = claseGrupo.id;
@@ -169,10 +169,10 @@ describe('AccesoEstudianteService', () => {
     const comision = await prisma.comision.create({
       data: {
         nombre: 'Turno Mañana',
-        producto_id: producto.id,
-        docente_id: docenteId,
-        fecha_inicio: new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000), // Hace 7 días
-        fecha_fin: new Date(hoy.getTime() + 30 * 24 * 60 * 60 * 1000), // En 30 días
+        productoId: producto.id,
+        docenteId: docenteId,
+        fechaInicio: new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000), // Hace 7 días
+        fechaFin: new Date(hoy.getTime() + 30 * 24 * 60 * 60 * 1000), // En 30 días
         activo: true,
       },
     });
@@ -219,7 +219,7 @@ describe('AccesoEstudianteService', () => {
       it('should_return_PLAN_DIRECTO_with_accesoClasesVivo_false_for_STEAM_LIBROS', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planLibrosId },
+          data: { planId: planLibrosId },
         });
 
         const result = await service.verificarAccesoEstudiante(estudianteId);
@@ -233,7 +233,7 @@ describe('AccesoEstudianteService', () => {
       it('should_return_PLAN_DIRECTO_with_accesoClasesVivo_false_for_STEAM_ASINCRONICO', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planAsincId },
+          data: { planId: planAsincId },
         });
 
         const result = await service.verificarAccesoEstudiante(estudianteId);
@@ -247,7 +247,7 @@ describe('AccesoEstudianteService', () => {
       it('should_return_PLAN_DIRECTO_with_accesoClasesVivo_true_for_STEAM_SINCRONICO', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planSincId },
+          data: { planId: planSincId },
         });
 
         const result = await service.verificarAccesoEstudiante(estudianteId);
@@ -265,8 +265,8 @@ describe('AccesoEstudianteService', () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
           data: {
-            plan_id: planSincId,
-            fecha_vencimiento_plan: ayer,
+            planId: planSincId,
+            fechaVencimientoPlan: ayer,
           },
         });
 
@@ -284,10 +284,10 @@ describe('AccesoEstudianteService', () => {
       it('should_inherit_plan_from_tutor_ACTIVA_subscription_when_no_direct_plan', async () => {
         await prisma.suscripcion.create({
           data: {
-            tutor_id: tutorId,
-            plan_id: planSincId,
+            tutorId: tutorId,
+            planId: planSincId,
             estado: 'ACTIVA',
-            precio_final: 95000,
+            precioFinal: 95000,
           },
         });
 
@@ -304,10 +304,10 @@ describe('AccesoEstudianteService', () => {
       it('should_inherit_plan_from_tutor_EN_GRACIA_subscription', async () => {
         await prisma.suscripcion.create({
           data: {
-            tutor_id: tutorId,
-            plan_id: planSincId,
+            tutorId: tutorId,
+            planId: planSincId,
             estado: 'EN_GRACIA',
-            precio_final: 95000,
+            precioFinal: 95000,
           },
         });
 
@@ -321,10 +321,10 @@ describe('AccesoEstudianteService', () => {
       it('should_NOT_inherit_from_tutor_CANCELADA_subscription', async () => {
         await prisma.suscripcion.create({
           data: {
-            tutor_id: tutorId,
-            plan_id: planSincId,
+            tutorId: tutorId,
+            planId: planSincId,
             estado: 'CANCELADA',
-            precio_final: 95000,
+            precioFinal: 95000,
           },
         });
 
@@ -342,8 +342,8 @@ describe('AccesoEstudianteService', () => {
       it('should_return_COMISION_ACTIVA_with_accesoClasesVivo_true_when_has_active_comision', async () => {
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionId,
+            estudianteId: estudianteId,
+            comisionId: comisionId,
             estado: 'Confirmada',
           },
         });
@@ -359,13 +359,13 @@ describe('AccesoEstudianteService', () => {
       it('should_return_COMISION_ACTIVA_even_with_plan_LIBROS', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planLibrosId },
+          data: { planId: planLibrosId },
         });
 
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionId,
+            estudianteId: estudianteId,
+            comisionId: comisionId,
             estado: 'Confirmada',
           },
         });
@@ -378,24 +378,24 @@ describe('AccesoEstudianteService', () => {
         expect(result.detalles.comisionesActivas).toHaveLength(1);
       });
 
-      it('should_ignore_comision_when_fecha_fin_passed', async () => {
+      it('should_ignore_comision_when_fechaFin_passed', async () => {
         const ayer = new Date();
         ayer.setDate(ayer.getDate() - 1);
 
         const comisionVencida = await prisma.comision.create({
           data: {
             nombre: 'Comisión Vencida',
-            producto_id: (await prisma.producto.findFirst())!.id,
-            fecha_inicio: new Date('2025-01-01'),
-            fecha_fin: ayer,
+            productoId: (await prisma.producto.findFirst())!.id,
+            fechaInicio: new Date('2025-01-01'),
+            fechaFin: ayer,
             activo: true,
           },
         });
 
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionVencida.id,
+            estudianteId: estudianteId,
+            comisionId: comisionVencida.id,
             estado: 'Confirmada',
           },
         });
@@ -406,24 +406,24 @@ describe('AccesoEstudianteService', () => {
         expect(result.detalles.comisionesActivas).toHaveLength(0);
       });
 
-      it('should_ignore_comision_when_fecha_inicio_in_future', async () => {
+      it('should_ignore_comision_when_fechaInicio_in_future', async () => {
         const manana = new Date();
         manana.setDate(manana.getDate() + 1);
 
         const comisionFutura = await prisma.comision.create({
           data: {
             nombre: 'Comisión Futura',
-            producto_id: (await prisma.producto.findFirst())!.id,
-            fecha_inicio: manana,
-            fecha_fin: new Date('2026-12-31'),
+            productoId: (await prisma.producto.findFirst())!.id,
+            fechaInicio: manana,
+            fechaFin: new Date('2026-12-31'),
             activo: true,
           },
         });
 
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionFutura.id,
+            estudianteId: estudianteId,
+            comisionId: comisionFutura.id,
             estado: 'Confirmada',
           },
         });
@@ -434,22 +434,22 @@ describe('AccesoEstudianteService', () => {
         expect(result.detalles.comisionesActivas).toHaveLength(0);
       });
 
-      it('should_accept_comision_without_fecha_fin_as_permanent', async () => {
+      it('should_accept_comision_without_fechaFin_as_permanent', async () => {
         const hoy = new Date();
         const comisionPermanente = await prisma.comision.create({
           data: {
             nombre: 'Comisión Permanente',
-            producto_id: (await prisma.producto.findFirst())!.id,
-            fecha_inicio: new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000),
-            fecha_fin: null, // Sin fecha fin = permanente
+            productoId: (await prisma.producto.findFirst())!.id,
+            fechaInicio: new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000),
+            fechaFin: null, // Sin fecha fin = permanente
             activo: true,
           },
         });
 
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionPermanente.id,
+            estudianteId: estudianteId,
+            comisionId: comisionPermanente.id,
             estado: 'Confirmada',
           },
         });
@@ -467,9 +467,9 @@ describe('AccesoEstudianteService', () => {
         const comision2 = await prisma.comision.create({
           data: {
             nombre: 'Turno Tarde',
-            producto_id: producto!.id,
-            fecha_inicio: new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000),
-            fecha_fin: new Date(hoy.getTime() + 30 * 24 * 60 * 60 * 1000),
+            productoId: producto!.id,
+            fechaInicio: new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000),
+            fechaFin: new Date(hoy.getTime() + 30 * 24 * 60 * 60 * 1000),
             activo: true,
           },
         });
@@ -477,13 +477,13 @@ describe('AccesoEstudianteService', () => {
         await prisma.inscripcionComision.createMany({
           data: [
             {
-              estudiante_id: estudianteId,
-              comision_id: comisionId,
+              estudianteId: estudianteId,
+              comisionId: comisionId,
               estado: 'Confirmada',
             },
             {
-              estudiante_id: estudianteId,
-              comision_id: comision2.id,
+              estudianteId: estudianteId,
+              comisionId: comision2.id,
               estado: 'Confirmada',
             },
           ],
@@ -502,13 +502,13 @@ describe('AccesoEstudianteService', () => {
       it('should_have_accesoClasesVivo_true_with_plan_LIBROS_plus_active_comision', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planLibrosId },
+          data: { planId: planLibrosId },
         });
 
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionId,
+            estudianteId: estudianteId,
+            comisionId: comisionId,
             estado: 'Confirmada',
           },
         });
@@ -522,7 +522,7 @@ describe('AccesoEstudianteService', () => {
       it('should_have_puedeAcceder_true_accesoClasesVivo_false_with_plan_LIBROS_plus_expired_comision', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planLibrosId },
+          data: { planId: planLibrosId },
         });
 
         const ayer = new Date();
@@ -531,17 +531,17 @@ describe('AccesoEstudianteService', () => {
         const comisionVencida = await prisma.comision.create({
           data: {
             nombre: 'Comisión Vencida',
-            producto_id: (await prisma.producto.findFirst())!.id,
-            fecha_inicio: new Date('2025-01-01'),
-            fecha_fin: ayer,
+            productoId: (await prisma.producto.findFirst())!.id,
+            fechaInicio: new Date('2025-01-01'),
+            fechaFin: ayer,
             activo: true,
           },
         });
 
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionVencida.id,
+            estudianteId: estudianteId,
+            comisionId: comisionVencida.id,
             estado: 'Confirmada',
           },
         });
@@ -559,17 +559,17 @@ describe('AccesoEstudianteService', () => {
         const comisionVencida = await prisma.comision.create({
           data: {
             nombre: 'Comisión Vencida',
-            producto_id: (await prisma.producto.findFirst())!.id,
-            fecha_inicio: new Date('2025-01-01'),
-            fecha_fin: ayer,
+            productoId: (await prisma.producto.findFirst())!.id,
+            fechaInicio: new Date('2025-01-01'),
+            fechaFin: ayer,
             activo: true,
           },
         });
 
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionVencida.id,
+            estudianteId: estudianteId,
+            comisionId: comisionVencida.id,
             estado: 'Confirmada',
           },
         });
@@ -584,12 +584,12 @@ describe('AccesoEstudianteService', () => {
     // verificarAccesoEstudiante - Estados especiales
     // ============================================================================
     describe('Estados especiales', () => {
-      it('should_return_SIN_ACCESO_when_estado_acceso_SUSPENDIDO_even_with_plan', async () => {
+      it('should_return_SIN_ACCESO_when_estadoAcceso_SUSPENDIDO_even_with_plan', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
           data: {
-            plan_id: planSincId,
-            estado_acceso: 'SUSPENDIDO',
+            planId: planSincId,
+            estadoAcceso: 'SUSPENDIDO',
           },
         });
 
@@ -599,12 +599,12 @@ describe('AccesoEstudianteService', () => {
         expect(result.mensaje).toContain('suspendid');
       });
 
-      it('should_grant_access_when_acceso_override_true_without_plan', async () => {
+      it('should_grant_access_when_accesoOverride_true_without_plan', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
           data: {
-            acceso_override: true,
-            acceso_override_motivo: 'Prueba gratuita',
+            accesoOverride: true,
+            accesoOverrideMotivo: 'Prueba gratuita',
           },
         });
 
@@ -613,16 +613,16 @@ describe('AccesoEstudianteService', () => {
         expect(result.puedeAcceder).toBe(true);
       });
 
-      it('should_ignore_override_when_acceso_override_hasta_passed', async () => {
+      it('should_ignore_override_when_accesoOverrideHasta_passed', async () => {
         const ayer = new Date();
         ayer.setDate(ayer.getDate() - 1);
 
         await prisma.estudiante.update({
           where: { id: estudianteId },
           data: {
-            acceso_override: true,
-            acceso_override_hasta: ayer,
-            acceso_override_motivo: 'Prueba vencida',
+            accesoOverride: true,
+            accesoOverrideHasta: ayer,
+            accesoOverrideMotivo: 'Prueba vencida',
           },
         });
 
@@ -639,7 +639,7 @@ describe('AccesoEstudianteService', () => {
       it('should_have_accesoLibros_true_for_any_active_plan', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planLibrosId },
+          data: { planId: planLibrosId },
         });
 
         const result = await service.verificarAccesoEstudiante(estudianteId);
@@ -650,7 +650,7 @@ describe('AccesoEstudianteService', () => {
       it('should_have_accesoPlanificaciones_true_for_ASYNC_plan', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planAsincId },
+          data: { planId: planAsincId },
         });
 
         const result = await service.verificarAccesoEstudiante(estudianteId);
@@ -661,7 +661,7 @@ describe('AccesoEstudianteService', () => {
       it('should_have_accesoPlanificaciones_true_for_SYNC_plan', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planSincId },
+          data: { planId: planSincId },
         });
 
         const result = await service.verificarAccesoEstudiante(estudianteId);
@@ -672,8 +672,8 @@ describe('AccesoEstudianteService', () => {
       it('should_have_accesoPlanificaciones_true_for_active_comision', async () => {
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionId,
+            estudianteId: estudianteId,
+            comisionId: comisionId,
             estado: 'Confirmada',
           },
         });
@@ -686,7 +686,7 @@ describe('AccesoEstudianteService', () => {
       it('should_have_accesoPlanificaciones_false_for_LIBROS_without_comision', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planLibrosId },
+          data: { planId: planLibrosId },
         });
 
         const result = await service.verificarAccesoEstudiante(estudianteId);
@@ -704,8 +704,8 @@ describe('AccesoEstudianteService', () => {
       it('should_allow_comision_class_when_enrolled_and_comision_active', async () => {
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionId,
+            estudianteId: estudianteId,
+            comisionId: comisionId,
             estado: 'Confirmada',
           },
         });
@@ -738,17 +738,17 @@ describe('AccesoEstudianteService', () => {
         const comisionVencida = await prisma.comision.create({
           data: {
             nombre: 'Comisión Vencida',
-            producto_id: (await prisma.producto.findFirst())!.id,
-            fecha_inicio: new Date('2025-01-01'),
-            fecha_fin: ayer,
+            productoId: (await prisma.producto.findFirst())!.id,
+            fechaInicio: new Date('2025-01-01'),
+            fechaFin: ayer,
             activo: true,
           },
         });
 
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionVencida.id,
+            estudianteId: estudianteId,
+            comisionId: comisionVencida.id,
             estado: 'Confirmada',
           },
         });
@@ -766,8 +766,8 @@ describe('AccesoEstudianteService', () => {
       it('should_reject_comision_class_when_inscription_cancelled', async () => {
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionId,
+            estudianteId: estudianteId,
+            comisionId: comisionId,
             estado: 'Cancelada',
           },
         });
@@ -791,9 +791,9 @@ describe('AccesoEstudianteService', () => {
         // Inscribir estudiante en el grupo para estos tests
         await prisma.inscripcionClaseGrupo.create({
           data: {
-            estudiante_id: estudianteId,
-            clase_grupo_id: claseGrupoId,
-            tutor_id: tutorId,
+            estudianteId: estudianteId,
+            claseGrupoId: claseGrupoId,
+            tutorId: tutorId,
           },
         });
       });
@@ -801,7 +801,7 @@ describe('AccesoEstudianteService', () => {
       it('should_allow_grupo_class_when_has_STEAM_SINCRONICO', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planSincId },
+          data: { planId: planSincId },
         });
 
         const result = await service.puedeEntrarAClase(
@@ -817,7 +817,7 @@ describe('AccesoEstudianteService', () => {
       it('should_reject_grupo_class_when_has_STEAM_LIBROS', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planLibrosId },
+          data: { planId: planLibrosId },
         });
 
         const result = await service.puedeEntrarAClase(
@@ -833,7 +833,7 @@ describe('AccesoEstudianteService', () => {
       it('should_reject_grupo_class_when_has_STEAM_ASINCRONICO', async () => {
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planAsincId },
+          data: { planId: planAsincId },
         });
 
         const result = await service.puedeEntrarAClase(
@@ -849,12 +849,12 @@ describe('AccesoEstudianteService', () => {
       it('should_reject_grupo_class_when_not_enrolled_in_grupo', async () => {
         // Eliminar la inscripción del beforeEach
         await prisma.inscripcionClaseGrupo.deleteMany({
-          where: { estudiante_id: estudianteId },
+          where: { estudianteId: estudianteId },
         });
 
         await prisma.estudiante.update({
           where: { id: estudianteId },
-          data: { plan_id: planSincId },
+          data: { planId: planSincId },
         });
 
         const result = await service.puedeEntrarAClase(
@@ -871,8 +871,8 @@ describe('AccesoEstudianteService', () => {
         // Solo tiene comisión, no plan sincrónico
         await prisma.inscripcionComision.create({
           data: {
-            estudiante_id: estudianteId,
-            comision_id: comisionId,
+            estudianteId: estudianteId,
+            comisionId: comisionId,
             estado: 'Confirmada',
           },
         });
@@ -918,17 +918,17 @@ describe('AccesoEstudianteService', () => {
       });
 
       const historial = await prisma.historialAccesoEstudiante.findFirst({
-        where: { estudiante_id: estudianteId },
+        where: { estudianteId: estudianteId },
       });
 
       expect(historial).toBeDefined();
       expect(historial!.accion).toBe('PLAN_ASIGNADO');
       expect(historial!.origen).toBe('PLAN_DIRECTO');
-      expect(historial!.origen_id).toBe(planSincId);
-      expect(historial!.ejecutado_por).toBe('admin-123');
+      expect(historial!.origenId).toBe(planSincId);
+      expect(historial!.ejecutadoPor).toBe('admin-123');
     });
 
-    it('should_save_estado_anterior_and_estado_nuevo_as_JSON', async () => {
+    it('should_save_estadoAnterior_and_estadoNuevo_as_JSON', async () => {
       const estadoAnterior = { plan: null, acceso: false };
       const estadoNuevo = { plan: 'STEAM_SINCRONICO', acceso: true };
 
@@ -941,14 +941,14 @@ describe('AccesoEstudianteService', () => {
       });
 
       const historial = await prisma.historialAccesoEstudiante.findFirst({
-        where: { estudiante_id: estudianteId },
+        where: { estudianteId: estudianteId },
       });
 
-      expect(historial!.estado_anterior).toEqual(estadoAnterior);
-      expect(historial!.estado_nuevo).toEqual(estadoNuevo);
+      expect(historial!.estadoAnterior).toEqual(estadoAnterior);
+      expect(historial!.estadoNuevo).toEqual(estadoNuevo);
     });
 
-    it('should_save_ejecutado_por_correctly', async () => {
+    it('should_save_ejecutadoPor_correctly', async () => {
       await service.registrarHistorialAcceso({
         estudianteId,
         accion: 'OVERRIDE_ACTIVADO',
@@ -958,10 +958,10 @@ describe('AccesoEstudianteService', () => {
       });
 
       const historial = await prisma.historialAccesoEstudiante.findFirst({
-        where: { estudiante_id: estudianteId },
+        where: { estudianteId: estudianteId },
       });
 
-      expect(historial!.ejecutado_por).toBe('admin-456');
+      expect(historial!.ejecutadoPor).toBe('admin-456');
       expect(historial!.metadata).toEqual({ motivo: 'Prueba gratuita' });
     });
   });

@@ -65,11 +65,11 @@ export class ObservacionesService {
    * Reglas implementadas:
    * - RN-001: Solo DOCENTE puede crear
    * - RN-002: Debe incluir al menos 1 estudiante
-   * - RN-003: fecha_evento no puede ser futura
+   * - RN-003: fechaEvento no puede ser futura
    * - RN-004: contenido mínimo 10 caracteres, máximo 2000
-   * - RN-005: Si prioridad=Urgente, auto-setear notificar_admin=true
-   * - RN-006: Si tipo=Incidente, auto-setear requiere_seguimiento=true
-   * - RN-007: Si comision_id presente, validar que docente pertenece
+   * - RN-005: Si prioridad=Urgente, auto-setear notificarAdmin=true
+   * - RN-006: Si tipo=Incidente, auto-setear requiereSeguimiento=true
+   * - RN-007: Si comisionId presente, validar que docente pertenece
    * - RN-008: Docente solo puede crear observaciones de estudiantes en sus comisiones
    */
   async crear(dto: CreateObservacionDto, docenteId: string) {
@@ -149,7 +149,7 @@ export class ObservacionesService {
     docenteId: string,
   ): Promise<void> {
     const comision = await this.prisma.comision.findFirst({
-      where: { id: dto.comisionId, docente_id: docenteId },
+      where: { id: dto.comisionId, docenteId: docenteId },
     });
 
     if (!comision) {
@@ -160,8 +160,8 @@ export class ObservacionesService {
 
     const inscripciones = await this.prisma.inscripcionComision.findMany({
       where: {
-        comision_id: dto.comisionId,
-        estudiante_id: { in: dto.estudianteIds },
+        comisionId: dto.comisionId,
+        estudianteId: { in: dto.estudianteIds },
       },
     });
 
@@ -180,7 +180,7 @@ export class ObservacionesService {
     docenteId: string,
   ): Promise<void> {
     const comisionesDocente = await this.prisma.comision.findMany({
-      where: { docente_id: docenteId },
+      where: { docenteId: docenteId },
       select: { id: true },
     });
 
@@ -188,13 +188,13 @@ export class ObservacionesService {
 
     const inscripciones = await this.prisma.inscripcionComision.findMany({
       where: {
-        comision_id: { in: comisionIds },
-        estudiante_id: { in: dto.estudianteIds },
+        comisionId: { in: comisionIds },
+        estudianteId: { in: dto.estudianteIds },
       },
     });
 
     const estudiantesInscritos = [
-      ...new Set(inscripciones.map((i) => i.estudiante_id)),
+      ...new Set(inscripciones.map((i) => i.estudianteId)),
     ];
 
     if (estudiantesInscritos.length !== dto.estudianteIds.length) {
@@ -212,13 +212,13 @@ export class ObservacionesService {
     docenteId: string,
     fechaEvento: Date,
   ) {
-    // RN-005: Auto-setear notificar_admin si prioridad es Urgente
+    // RN-005: Auto-setear notificarAdmin si prioridad es Urgente
     const notificarAdmin =
       dto.prioridad === PrioridadObservacion.Urgente
         ? true
         : (dto.notificarAdmin ?? false);
 
-    // RN-006: Auto-setear requiere_seguimiento si tipo es Incidente
+    // RN-006: Auto-setear requiereSeguimiento si tipo es Incidente
     const requiereSeguimiento =
       dto.tipo === TipoObservacion.Incidente
         ? true
@@ -226,19 +226,19 @@ export class ObservacionesService {
 
     return this.prisma.observacion.create({
       data: {
-        docente_id: docenteId,
-        comision_id: dto.comisionId || null,
+        docenteId: docenteId,
+        comisionId: dto.comisionId || null,
         contenido: dto.contenido,
-        fecha_evento: fechaEvento,
+        fechaEvento: fechaEvento,
         tipo: dto.tipo,
         prioridad: dto.prioridad ?? PrioridadObservacion.Baja,
-        requiere_seguimiento: requiereSeguimiento,
-        notificar_admin: notificarAdmin,
-        notificar_pedagogia: dto.notificarPedagogia ?? false,
+        requiereSeguimiento: requiereSeguimiento,
+        notificarAdmin: notificarAdmin,
+        notificarPedagogia: dto.notificarPedagogia ?? false,
         estado: EstadoObservacion.Abierta,
         estudiantes: {
           create: dto.estudianteIds.map((estudianteId) => ({
-            estudiante_id: estudianteId,
+            estudianteId: estudianteId,
           })),
         },
       },
@@ -290,7 +290,7 @@ export class ObservacionesService {
 
     // RN-010: Validar permisos - docente solo su observación, admin cualquiera
     const esAdmin = esAdminOPedagogia(user);
-    if (!esAdmin && observacion.docente_id !== user.id) {
+    if (!esAdmin && observacion.docenteId !== user.id) {
       throw new ForbiddenException(
         'Solo el autor de la observación puede agregar seguimiento',
       );
@@ -311,9 +311,9 @@ export class ObservacionesService {
     // Crear el seguimiento
     await this.prisma.seguimientoObservacion.create({
       data: {
-        observacion_id: observacionId,
-        autor_id: user.id,
-        autor_tipo: autorTipo,
+        observacionId: observacionId,
+        autorId: user.id,
+        autorTipo: autorTipo,
         contenido: dto.contenido,
       },
     });
@@ -345,7 +345,7 @@ export class ObservacionesService {
           },
         },
         seguimientos: {
-          orderBy: { created_at: 'desc' },
+          orderBy: { createdAt: 'desc' },
         },
       },
     });
@@ -375,7 +375,7 @@ export class ObservacionesService {
 
     // RN-020: Validar permisos
     const esAdmin = esAdminOPedagogia(user);
-    if (!esAdmin && observacion.docente_id !== user.id) {
+    if (!esAdmin && observacion.docenteId !== user.id) {
       throw new ForbiddenException(
         'Solo el autor de la observación puede cambiar su estado',
       );
@@ -435,7 +435,7 @@ export class ObservacionesService {
    * Reglas implementadas:
    * - RN-040: Docente solo ve sus propias observaciones
    * - RN-041: ADMIN y PEDAGOGIA ven todas las observaciones
-   * - RN-042: Por defecto, ordenar por created_at DESC
+   * - RN-042: Por defecto, ordenar por createdAt DESC
    * - RN-043: Filtros disponibles
    */
   async listar(
@@ -462,7 +462,7 @@ export class ObservacionesService {
 
     // RN-040: Docente solo ve sus propias observaciones
     if (!esAdminOPedagogia(user)) {
-      where.docente_id = user.id;
+      where.docenteId = user.id;
     }
 
     // Por defecto, excluir cerradas a menos que se filtren explícitamente
@@ -482,27 +482,27 @@ export class ObservacionesService {
     }
 
     if (filtros.comisionId) {
-      where.comision_id = filtros.comisionId;
+      where.comisionId = filtros.comisionId;
     }
 
     if (filtros.estudianteId) {
       where.estudiantes = {
-        some: { estudiante_id: filtros.estudianteId },
+        some: { estudianteId: filtros.estudianteId },
       };
     }
 
     if (filtros.requiereSeguimiento !== undefined) {
-      where.requiere_seguimiento = filtros.requiereSeguimiento;
+      where.requiereSeguimiento = filtros.requiereSeguimiento;
     }
 
     // Filtro de fecha
     if (filtros.fechaDesde || filtros.fechaHasta) {
-      where.fecha_evento = {};
+      where.fechaEvento = {};
       if (filtros.fechaDesde) {
-        where.fecha_evento.gte = new Date(filtros.fechaDesde);
+        where.fechaEvento.gte = new Date(filtros.fechaDesde);
       }
       if (filtros.fechaHasta) {
-        where.fecha_evento.lte = new Date(filtros.fechaHasta);
+        where.fechaEvento.lte = new Date(filtros.fechaHasta);
       }
     }
 
@@ -537,7 +537,7 @@ export class ObservacionesService {
             select: { seguimientos: true },
           },
         },
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
         take: limit,
         skip: offset,
       }),
@@ -582,7 +582,7 @@ export class ObservacionesService {
           },
         },
         seguimientos: {
-          orderBy: { created_at: 'desc' },
+          orderBy: { createdAt: 'desc' },
         },
         comision: {
           select: {
@@ -598,7 +598,7 @@ export class ObservacionesService {
     }
 
     // RN-040: Docente solo ve sus propias observaciones
-    if (!esAdminOPedagogia(user) && observacion.docente_id !== user.id) {
+    if (!esAdminOPedagogia(user) && observacion.docenteId !== user.id) {
       throw new ForbiddenException('No tienes acceso a esta observación');
     }
 
@@ -611,12 +611,12 @@ export class ObservacionesService {
    */
   async obtenerPendientes(user: AuthUser) {
     const where: Prisma.ObservacionWhereInput = {
-      requiere_seguimiento: true,
+      requiereSeguimiento: true,
       estado: { not: EstadoObservacion.Cerrada },
     };
 
     if (!esAdminOPedagogia(user)) {
-      where.docente_id = user.id;
+      where.docenteId = user.id;
     }
 
     const data = await this.prisma.observacion.findMany({
@@ -634,7 +634,7 @@ export class ObservacionesService {
           },
         },
       },
-      orderBy: [{ prioridad: 'desc' }, { created_at: 'desc' }],
+      orderBy: [{ prioridad: 'desc' }, { createdAt: 'desc' }],
     });
 
     return { data, total: data.length };
@@ -646,19 +646,19 @@ export class ObservacionesService {
   async obtenerPorEstudiante(estudianteId: string, user: AuthUser) {
     const where: Prisma.ObservacionWhereInput = {
       estudiantes: {
-        some: { estudiante_id: estudianteId },
+        some: { estudianteId: estudianteId },
       },
     };
 
     if (!esAdminOPedagogia(user)) {
-      where.docente_id = user.id;
+      where.docenteId = user.id;
     }
 
     const data = await this.prisma.observacion.findMany({
       where,
       include: {
         seguimientos: {
-          orderBy: { created_at: 'desc' },
+          orderBy: { createdAt: 'desc' },
         },
         docente: {
           select: {
@@ -668,7 +668,7 @@ export class ObservacionesService {
           },
         },
       },
-      orderBy: { created_at: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
 
     return { data, total: data.length };

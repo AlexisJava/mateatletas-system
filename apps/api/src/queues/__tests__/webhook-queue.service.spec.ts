@@ -24,7 +24,7 @@ import { Queue } from 'bull';
  *
  * TESTS:
  * 1. addWebhookJob() agrega job a queue
- * 2. Job tiene payment_id como jobId (evita duplicados)
+ * 2. Job tiene paymentId como jobId (evita duplicados)
  * 3. Job tiene retry config correcta (3 attempts, exponential backoff)
  * 4. getQueueStats() retorna estadísticas correctas
  * 5. getFailedJobs() retorna jobs fallidos
@@ -45,7 +45,7 @@ describe('WebhookQueueService - PASO 3.2', () => {
     id: 12345,
     live_mode: true,
     type: 'payment',
-    user_id: 'user-456',
+    userId: 'user-456',
   };
 
   beforeEach(async () => {
@@ -104,11 +104,11 @@ describe('WebhookQueueService - PASO 3.2', () => {
   });
 
   /**
-   * TEST 2: Job debe usar payment_id como jobId
+   * TEST 2: Job debe usar paymentId como jobId
    *
-   * RAZÓN: Evitar duplicados en la queue (mismo payment_id = mismo job)
+   * RAZÓN: Evitar duplicados en la queue (mismo paymentId = mismo job)
    */
-  it('debe usar payment_id como jobId para evitar duplicados', async () => {
+  it('debe usar paymentId como jobId para evitar duplicados', async () => {
     await service.addWebhookJob(mockWebhookData);
 
     expect(mockQueue.add).toHaveBeenCalledWith(

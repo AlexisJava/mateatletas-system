@@ -22,20 +22,20 @@ describe('MercadoPagoWebhookProcessorService', () => {
   const mockPaymentApproved = {
     id: 123456789,
     status: 'approved',
-    external_reference: 'pago-colonia-pago123-inscripcion-insc456',
+    externalReference: 'pago-colonia-pago123-inscripcion-insc456',
     transaction_amount: 55000,
     date_approved: '2024-01-15T10:30:00Z',
   };
 
   const mockPago = {
     id: 'pago123',
-    inscripcion_id: 'insc456',
+    inscripcionId: 'insc456',
     mes: 'enero',
     anio: 2026,
     monto: 55000,
     estado: 'pending',
-    mercadopago_payment_id: null,
-    fecha_pago: null,
+    mercadopagoPaymentId: null,
+    fechaPago: null,
   };
 
   beforeEach(async () => {
@@ -111,10 +111,10 @@ describe('MercadoPagoWebhookProcessorService', () => {
       expect(result.pagoId).toBe('pago123');
     });
 
-    it('debe retornar error si el pago no tiene external_reference', async () => {
+    it('debe retornar error si el pago no tiene externalReference', async () => {
       const paymentWithoutRef = {
         ...mockPaymentApproved,
-        external_reference: null,
+        externalReference: null,
       };
       jest
         .spyOn(mercadoPagoService, 'getPayment')
@@ -128,14 +128,14 @@ describe('MercadoPagoWebhookProcessorService', () => {
       );
 
       expect(result.success).toBe(false);
-      expect(result.message).toBe('Payment without external_reference');
+      expect(result.message).toBe('Payment without externalReference');
     });
 
-    it('debe retornar error si el external_reference es inválido', async () => {
-      // Empty string como external_reference no es válido
+    it('debe retornar error si el externalReference es inválido', async () => {
+      // Empty string como externalReference no es válido
       const paymentInvalidRef = {
         ...mockPaymentApproved,
-        external_reference: '', // Empty string no es válido
+        externalReference: '', // Empty string no es válido
       };
       jest
         .spyOn(mercadoPagoService, 'getPayment')
@@ -143,7 +143,7 @@ describe('MercadoPagoWebhookProcessorService', () => {
 
       const result = await service.processWebhook(
         mockWebhookData,
-        TipoExternalReference.PAGO_COLONIA, // Tipo válido pero external_reference vacío
+        TipoExternalReference.PAGO_COLONIA, // Tipo válido pero externalReference vacío
         async () => null,
         async () => ({ success: true }),
       );
@@ -152,11 +152,11 @@ describe('MercadoPagoWebhookProcessorService', () => {
       // Con empty string, findPayment no encuentra nada
     });
 
-    it('debe retornar error si el tipo de external_reference no coincide', async () => {
+    it('debe retornar error si el tipo de externalReference no coincide', async () => {
       // External reference de CLASE_INSCRIPCION pero esperamos PAGO_COLONIA
       const paymentWrongType = {
         ...mockPaymentApproved,
-        external_reference: 'CLASE_INSCRIPCION:clase123:est456:2025-01-15',
+        externalReference: 'CLASE_INSCRIPCION:clase123:est456:2025-01-15',
       };
       jest
         .spyOn(mercadoPagoService, 'getPayment')
@@ -270,7 +270,7 @@ describe('MercadoPagoWebhookProcessorService', () => {
           parsedReference: expect.objectContaining({
             tipo: TipoExternalReference.PAGO_COLONIA,
             ids: expect.objectContaining({
-              pagoId: 'pago-colonia-pago123-inscripcion-insc456', // El parser devuelve el external_reference completo como pagoId
+              pagoId: 'pago-colonia-pago123-inscripcion-insc456', // El parser devuelve el externalReference completo como pagoId
             }),
           }),
           paymentStatus: 'approved',

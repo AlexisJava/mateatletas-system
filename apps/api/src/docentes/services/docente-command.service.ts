@@ -15,7 +15,7 @@ import { generateSecurePassword } from '../../common/utils/password.utils';
  * - Create, Update, Delete de docentes
  * - Solo operaciones WRITE (con side effects)
  * - Usa DocenteBusinessValidator para validaciones
- * - Excluye password_hash de las respuestas
+ * - Excluye passwordHash de las respuestas
  *
  * Patrón: CQRS (Command Query Responsibility Segregation)
  */
@@ -31,7 +31,7 @@ export class DocenteCommandService {
    * - Auto-genera contraseña segura si no se provee
    * - Hashea la contraseña con bcrypt
    * @param createDto - Datos del docente a crear
-   * @returns El docente creado (sin password_hash) + generatedPassword si se auto-generó
+   * @returns El docente creado (sin passwordHash) + generatedPassword si se auto-generó
    */
   async create(createDto: CreateDocenteDto) {
     // Validar que el email no esté en uso
@@ -49,16 +49,16 @@ export class DocenteCommandService {
     const docente = await this.prisma.docente.create({
       data: {
         email: createDto.email,
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: createDto.nombre,
         apellido: createDto.apellido,
         titulo: createDto.titulo,
         bio: createDto.bio || createDto.biografia,
         telefono: createDto.telefono,
         especialidades: createDto.especialidades || [],
-        experiencia_anos: createDto.experiencia_anos,
-        disponibilidad_horaria: createDto.disponibilidad_horaria || {},
-        nivel_educativo: createDto.nivel_educativo || [],
+        experienciaAnos: createDto.experienciaAnos,
+        disponibilidadHoraria: createDto.disponibilidadHoraria || {},
+        nivelEducativo: createDto.nivelEducativo || [],
         estado: createDto.estado || 'activo',
       },
     });
@@ -82,7 +82,7 @@ export class DocenteCommandService {
    * - Hashea nueva contraseña si se proporciona
    * @param id - ID del docente
    * @param updateDto - Datos a actualizar
-   * @returns Docente actualizado sin password_hash
+   * @returns Docente actualizado sin passwordHash
    */
   async update(id: string, updateDto: UpdateDocenteDto) {
     // Verificar que el docente existe
@@ -102,15 +102,15 @@ export class DocenteCommandService {
       bio: updateDto.bio || updateDto.biografia,
       telefono: updateDto.telefono,
       especialidades: updateDto.especialidades,
-      experiencia_anos: updateDto.experiencia_anos,
-      disponibilidad_horaria: updateDto.disponibilidad_horaria,
-      nivel_educativo: updateDto.nivel_educativo,
+      experienciaAnos: updateDto.experienciaAnos,
+      disponibilidadHoraria: updateDto.disponibilidadHoraria,
+      nivelEducativo: updateDto.nivelEducativo,
       estado: updateDto.estado,
     };
 
     // Si se incluye password, hashearla
     if (updateDto.password) {
-      dataToUpdate.password_hash = await bcrypt.hash(
+      dataToUpdate.passwordHash = await bcrypt.hash(
         updateDto.password,
         BCRYPT_ROUNDS,
       );
@@ -171,8 +171,8 @@ export class DocenteCommandService {
 
     // Reasignar todas las clases
     const result = await this.prisma.clase.updateMany({
-      where: { docente_id: fromDocenteId },
-      data: { docente_id: toDocenteId },
+      where: { docenteId: fromDocenteId },
+      data: { docenteId: toDocenteId },
     });
 
     return {
@@ -212,14 +212,14 @@ export class DocenteCommandService {
   }
 
   /**
-   * Excluye password_hash de un docente
-   * @param docente - Docente con password_hash
-   * @returns Docente sin password_hash
+   * Excluye passwordHash de un docente
+   * @param docente - Docente con passwordHash
+   * @returns Docente sin passwordHash
    */
-  private excluirPasswordHash<T extends { password_hash?: string }>(
+  private excluirPasswordHash<T extends { passwordHash?: string }>(
     docente: T,
-  ): Omit<T, 'password_hash'> {
-    const { password_hash: _password_hash, ...docenteSinPassword } = docente;
+  ): Omit<T, 'passwordHash'> {
+    const { passwordHash: _passwordHash, ...docenteSinPassword } = docente;
     return docenteSinPassword;
   }
 }

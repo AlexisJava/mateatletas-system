@@ -51,22 +51,22 @@ interface EstudianteData {
   apellido: string;
   edad: number;
   nivelEscolar: string;
-  tutor_id: string;
+  tutorId: string;
 }
 
 /**
  * Datos de un curso para crear
  */
 interface CursoData {
-  colonia_estudiante_id: string;
-  course_id: string;
-  course_name: string;
-  course_area: string;
+  coloniaEstudianteId: string;
+  courseId: string;
+  courseName: string;
+  courseArea: string;
   instructor: string;
-  day_of_week: string;
-  time_slot: string;
-  precio_base: number;
-  precio_con_descuento: number;
+  dayOfWeek: string;
+  timeSlot: string;
+  precioBase: number;
+  precioConDescuento: number;
 }
 
 /**
@@ -135,7 +135,7 @@ export class ColoniaService {
       try {
         await this.prisma.coloniaPago.update({
           where: { id: pagoId },
-          data: { mercadopago_preference_id: preferenceId },
+          data: { mercadopagoPreferenceId: preferenceId },
         });
 
         // Éxito - log y retornar
@@ -329,7 +329,7 @@ export class ColoniaService {
               : estudianteDto.edad <= 12
                 ? 'Primaria'
                 : 'Secundaria',
-          tutor_id: tutorId,
+          tutorId: tutorId,
         };
       }),
     );
@@ -372,8 +372,8 @@ export class ColoniaService {
         }
         return await tx.coloniaEstudiante.create({
           data: {
-            inscripcion_id: inscriptionId,
-            estudiante_id: estudiante.id,
+            inscripcionId: inscriptionId,
+            estudianteId: estudiante.id,
             nombre: estudiante.nombre,
             edad: estudiante.edad,
             pin,
@@ -411,15 +411,15 @@ export class ColoniaService {
 
       estudianteDto.cursosSeleccionados.forEach((curso) => {
         cursosData.push({
-          colonia_estudiante_id: coloniaEstudianteId,
-          course_id: curso.id,
-          course_name: curso.name,
-          course_area: curso.area,
+          coloniaEstudianteId: coloniaEstudianteId,
+          courseId: curso.id,
+          courseName: curso.name,
+          courseArea: curso.area,
           instructor: curso.instructor,
-          day_of_week: curso.dayOfWeek,
-          time_slot: curso.timeSlot,
-          precio_base: PRECIOS.COLONIA_CURSO_BASE,
-          precio_con_descuento: precioConDescuento,
+          dayOfWeek: curso.dayOfWeek,
+          timeSlot: curso.timeSlot,
+          precioBase: PRECIOS.COLONIA_CURSO_BASE,
+          precioConDescuento: precioConDescuento,
         });
       });
     });
@@ -476,9 +476,9 @@ export class ColoniaService {
         },
       ],
       back_urls: {
-        success: `${process.env.FRONTEND_URL}/colonia/confirmacion?status=success&payment_id={{payment_id}}&inscription_id=${result.inscriptionId}`,
-        failure: `${process.env.FRONTEND_URL}/colonia/confirmacion?status=failure&payment_id={{payment_id}}&inscription_id=${result.inscriptionId}`,
-        pending: `${process.env.FRONTEND_URL}/colonia/confirmacion?status=pending&payment_id={{payment_id}}&inscription_id=${result.inscriptionId}`,
+        success: `${process.env.FRONTEND_URL}/colonia/confirmacion?status=success&paymentId={{paymentId}}&inscription_id=${result.inscriptionId}`,
+        failure: `${process.env.FRONTEND_URL}/colonia/confirmacion?status=failure&paymentId={{paymentId}}&inscription_id=${result.inscriptionId}`,
+        pending: `${process.env.FRONTEND_URL}/colonia/confirmacion?status=pending&paymentId={{paymentId}}&inscription_id=${result.inscriptionId}`,
       },
       auto_return: 'approved',
       external_reference: result.pagoEneroId,
@@ -554,11 +554,11 @@ export class ColoniaService {
           email: dto.email,
           nombre: dto.nombre,
           apellido: '',
-          password_hash: passwordHash,
+          passwordHash: passwordHash,
           dni: dto.dni || null,
           telefono: dto.telefono,
-          debe_completar_perfil: false,
-          ha_completado_onboarding: true,
+          debeCompletarPerfil: false,
+          haCompletadoOnboarding: true,
           roles: DEFAULT_ROLES.TUTOR,
         },
       });
@@ -567,11 +567,11 @@ export class ColoniaService {
 
       const inscripcion = await tx.coloniaInscripcion.create({
         data: {
-          tutor_id: tutor.id,
+          tutorId: tutor.id,
           estado: 'active',
-          descuento_aplicado: pricing.descuentoPorcentaje,
-          total_mensual: pricing.totalMensual,
-          fecha_inscripcion: new Date(),
+          descuentoAplicado: pricing.descuentoPorcentaje,
+          totalMensual: pricing.totalMensual,
+          fechaInscripcion: new Date(),
         },
       });
 
@@ -595,13 +595,13 @@ export class ColoniaService {
 
       const pagoEnero = await tx.coloniaPago.create({
         data: {
-          inscripcion_id: inscripcion.id,
+          inscripcionId: inscripcion.id,
           mes: 'enero',
           anio: 2026,
           monto: pricing.totalMensual,
           estado: 'pending',
-          fecha_vencimiento: calcularFechaVencimiento('Enero', 2026),
-          fecha_creacion: new Date(),
+          fechaVencimiento: calcularFechaVencimiento('Enero', 2026),
+          fechaCreacion: new Date(),
         },
       });
 
@@ -668,7 +668,7 @@ export class ColoniaService {
       const payment = await this.mercadoPagoService.getPayment(paymentId);
       this.logger.log('Pago Colonia consultado', {
         status: payment.status,
-        externalReference: payment.external_reference,
+        external_reference: payment.externalReference,
       });
 
       const pagoIdResult = this.extractPagoIdFromPayment(payment, paymentId);
@@ -704,17 +704,17 @@ export class ColoniaService {
   }
 
   /**
-   * Extrae el pagoId del external_reference del pago
+   * Extrae el pagoId del externalReference del pago
    */
   private extractPagoIdFromPayment(
     payment: MercadoPagoPayment,
     paymentId: string,
   ): { success: true; pagoId: string } | { success: false; message: string } {
-    const externalRef = payment.external_reference;
+    const externalRef = payment.externalReference;
 
     if (!externalRef) {
-      this.logger.warn('Pago sin external_reference', { paymentId });
-      return { success: false, message: 'Payment without external_reference' };
+      this.logger.warn('Pago sin externalReference', { paymentId });
+      return { success: false, message: 'Payment without externalReference' };
     }
 
     const parsed = parseLegacyExternalReference(externalRef);
@@ -725,7 +725,7 @@ export class ColoniaService {
         expectedType: TipoExternalReference.PAGO_COLONIA,
         actualType: parsed?.tipo,
       });
-      return { success: false, message: 'Invalid external_reference format' };
+      return { success: false, message: 'Invalid externalReference format' };
     }
 
     const pagoId = parsed.ids.pagoId;
@@ -733,7 +733,7 @@ export class ColoniaService {
       this.logger.warn('External reference sin pagoId', { externalRef });
       return {
         success: false,
-        message: 'Missing pagoId in external_reference',
+        message: 'Missing pagoId in externalReference',
       };
     }
 
@@ -756,7 +756,7 @@ export class ColoniaService {
 
     if (pago) return pago;
 
-    // Fallback: buscar por inscripcion_id desde additional_info
+    // Fallback: buscar por inscripcionId desde additional_info
     this.logger.warn('Pago no encontrado por ID, intentando fallback', {
       pagoId,
     });
@@ -777,10 +777,10 @@ export class ColoniaService {
 
     pago = await this.prisma.coloniaPago.findFirst({
       where: {
-        inscripcion_id: inscripcionId,
+        inscripcionId: inscripcionId,
         estado: 'pending',
       },
-      orderBy: { fecha_creacion: 'asc' },
+      orderBy: { fechaCreacion: 'asc' },
     });
 
     if (pago) {
@@ -794,20 +794,20 @@ export class ColoniaService {
    * Verifica idempotencia del webhook
    */
   private checkIdempotency(
-    pago: { id: string; processed_at: Date | null },
+    pago: { id: string; processedAt: Date | null },
     paymentId: string,
   ): { message: string; processedAt: Date } | null {
-    if (!pago.processed_at) return null;
+    if (!pago.processedAt) return null;
 
     this.logger.log('Webhook ya procesado previamente', {
       pagoId: pago.id,
-      processedAt: pago.processed_at,
+      processedAt: pago.processedAt,
       paymentId,
     });
 
     return {
       message: 'Webhook already processed',
-      processedAt: pago.processed_at,
+      processedAt: pago.processedAt,
     };
   }
 
@@ -875,22 +875,22 @@ export class ColoniaService {
       where: { id: pagoId },
       data: {
         estado: nuevoEstadoPago,
-        mercadopago_payment_id: payment.id?.toString(),
-        fecha_pago: payment.status === 'approved' ? new Date() : undefined,
-        processed_at: new Date(), // Marcar como procesado para idempotencia
+        mercadopagoPaymentId: payment.id?.toString(),
+        fechaPago: payment.status === 'approved' ? new Date() : undefined,
+        processedAt: new Date(), // Marcar como procesado para idempotencia
       },
     });
 
     this.logger.log('Pago Colonia procesado', {
       pagoId,
       nuevoEstado: nuevoEstadoPago,
-      inscripcionId: pagoActualizado.inscripcion_id,
+      inscripcionId: pagoActualizado.inscripcionId,
     });
 
     return {
       success: true,
       pagoId: pagoId,
-      inscripcionId: pagoActualizado.inscripcion_id,
+      inscripcionId: pagoActualizado.inscripcionId,
       paymentStatus: nuevoEstadoPago,
     };
   }

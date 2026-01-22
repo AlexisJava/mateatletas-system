@@ -127,7 +127,7 @@ describe('MercadoPagoWebhookGuard - live_mode Validation', () => {
         date_created: '2025-01-22T10:00:00Z',
         id: 'webhook-test-mode',
         live_mode: false, // ⚠️ MODO PRUEBA
-        user_id: '123456',
+        userId: '123456',
         api_version: 'v1',
       };
 
@@ -168,7 +168,7 @@ describe('MercadoPagoWebhookGuard - live_mode Validation', () => {
         date_created: '2025-01-22T10:00:00Z',
         id: 'webhook-prod-mode',
         live_mode: true, // ✅ MODO PRODUCCIÓN
-        user_id: '123456',
+        userId: '123456',
         api_version: 'v1',
       };
 
@@ -211,7 +211,7 @@ describe('MercadoPagoWebhookGuard - live_mode Validation', () => {
         date_created: '2025-01-22T10:00:00Z',
         id: 'webhook-malformed',
         live_mode: 'false' as unknown as boolean, // ⚠️ String en lugar de boolean
-        user_id: '123456',
+        userId: '123456',
         api_version: 'v1',
       };
 
@@ -271,7 +271,7 @@ describe('MercadoPagoWebhookGuard - live_mode Validation', () => {
         date_created: '2025-01-22T10:00:00Z',
         id: 'webhook-dev-test',
         live_mode: false, // OK en desarrollo
-        user_id: '123456',
+        userId: '123456',
         api_version: 'v1',
       };
 
@@ -310,7 +310,7 @@ describe('MercadoPagoWebhookGuard - live_mode Validation', () => {
         date_created: '2025-01-22T10:00:00Z',
         id: 'webhook-no-livemode',
         // live_mode: ausente
-        user_id: '123456',
+        userId: '123456',
         api_version: 'v1',
       };
 
@@ -339,7 +339,7 @@ describe('MercadoPagoWebhookGuard - live_mode Validation', () => {
         date_created: '2025-01-22T10:00:00Z',
         id: 'webhook-failfast',
         live_mode: false,
-        user_id: '123456',
+        userId: '123456',
         api_version: 'v1',
       };
 

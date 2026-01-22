@@ -11,21 +11,21 @@ import { CasaTipo, MundoTipo, TipoAsignacionDocente } from '@prisma/client';
  * DTOs para asignaciones de docentes
  */
 export interface AsignarCasaDto {
-  casa_tipo: CasaTipo;
+  casaTipo: CasaTipo;
 }
 
 export interface AsignarMundoDto {
-  mundo_tipo: MundoTipo;
+  mundoTipo: MundoTipo;
 }
 
 export interface ActualizarTipoAsignacionDto {
-  tipo_asignacion: TipoAsignacionDocente;
+  tipoAsignacion: TipoAsignacionDocente;
 }
 
 export interface FiltrosDocentesDto {
-  casa_tipo?: CasaTipo;
-  mundo_tipo?: MundoTipo;
-  tipo_asignacion?: TipoAsignacionDocente;
+  casaTipo?: CasaTipo;
+  mundoTipo?: MundoTipo;
+  tipoAsignacion?: TipoAsignacionDocente;
 }
 
 /**
@@ -57,28 +57,28 @@ export class DocenteAsignacionesService {
     // Verificar si ya tiene esta casa asignada
     const existente = await this.prisma.docenteCasa.findUnique({
       where: {
-        docente_id_casa_tipo: {
-          docente_id: docenteId,
-          casa_tipo: dto.casa_tipo,
+        docenteId_casaTipo: {
+          docenteId: docenteId,
+          casaTipo: dto.casaTipo,
         },
       },
     });
     if (existente) {
       throw new ConflictException(
-        `El docente ya tiene asignada la casa ${dto.casa_tipo}`,
+        `El docente ya tiene asignada la casa ${dto.casaTipo}`,
       );
     }
 
     const asignacion = await this.prisma.docenteCasa.create({
       data: {
-        docente_id: docenteId,
-        casa_tipo: dto.casa_tipo,
+        docenteId: docenteId,
+        casaTipo: dto.casaTipo,
       },
       include: { docente: { select: { nombre: true, apellido: true } } },
     });
 
     this.logger.log(
-      `Casa ${dto.casa_tipo} asignada a docente ${docente.nombre} ${docente.apellido}`,
+      `Casa ${dto.casaTipo} asignada a docente ${docente.nombre} ${docente.apellido}`,
     );
     return asignacion;
   }
@@ -89,9 +89,9 @@ export class DocenteAsignacionesService {
   async removerCasa(docenteId: string, casaTipo: CasaTipo) {
     const asignacion = await this.prisma.docenteCasa.findUnique({
       where: {
-        docente_id_casa_tipo: {
-          docente_id: docenteId,
-          casa_tipo: casaTipo,
+        docenteId_casaTipo: {
+          docenteId: docenteId,
+          casaTipo: casaTipo,
         },
       },
     });
@@ -103,9 +103,9 @@ export class DocenteAsignacionesService {
 
     await this.prisma.docenteCasa.delete({
       where: {
-        docente_id_casa_tipo: {
-          docente_id: docenteId,
-          casa_tipo: casaTipo,
+        docenteId_casaTipo: {
+          docenteId: docenteId,
+          casaTipo: casaTipo,
         },
       },
     });
@@ -126,8 +126,8 @@ export class DocenteAsignacionesService {
     }
 
     return this.prisma.docenteCasa.findMany({
-      where: { docente_id: docenteId },
-      orderBy: { asignado_en: 'asc' },
+      where: { docenteId: docenteId },
+      orderBy: { asignadoEn: 'asc' },
     });
   }
 
@@ -136,7 +136,7 @@ export class DocenteAsignacionesService {
    */
   async listarDocentesPorCasa(casaTipo: CasaTipo) {
     return this.prisma.docenteCasa.findMany({
-      where: { casa_tipo: casaTipo },
+      where: { casaTipo: casaTipo },
       include: {
         docente: {
           select: {
@@ -144,11 +144,11 @@ export class DocenteAsignacionesService {
             nombre: true,
             apellido: true,
             email: true,
-            tipo_asignacion: true,
+            tipoAsignacion: true,
           },
         },
       },
-      orderBy: { asignado_en: 'asc' },
+      orderBy: { asignadoEn: 'asc' },
     });
   }
 
@@ -169,28 +169,28 @@ export class DocenteAsignacionesService {
 
     const existente = await this.prisma.docenteMundo.findUnique({
       where: {
-        docente_id_mundo_tipo: {
-          docente_id: docenteId,
-          mundo_tipo: dto.mundo_tipo,
+        docenteId_mundoTipo: {
+          docenteId: docenteId,
+          mundoTipo: dto.mundoTipo,
         },
       },
     });
     if (existente) {
       throw new ConflictException(
-        `El docente ya tiene asignado el mundo ${dto.mundo_tipo}`,
+        `El docente ya tiene asignado el mundo ${dto.mundoTipo}`,
       );
     }
 
     const asignacion = await this.prisma.docenteMundo.create({
       data: {
-        docente_id: docenteId,
-        mundo_tipo: dto.mundo_tipo,
+        docenteId: docenteId,
+        mundoTipo: dto.mundoTipo,
       },
       include: { docente: { select: { nombre: true, apellido: true } } },
     });
 
     this.logger.log(
-      `Mundo ${dto.mundo_tipo} asignado a docente ${docente.nombre} ${docente.apellido}`,
+      `Mundo ${dto.mundoTipo} asignado a docente ${docente.nombre} ${docente.apellido}`,
     );
     return asignacion;
   }
@@ -201,9 +201,9 @@ export class DocenteAsignacionesService {
   async removerMundo(docenteId: string, mundoTipo: MundoTipo) {
     const asignacion = await this.prisma.docenteMundo.findUnique({
       where: {
-        docente_id_mundo_tipo: {
-          docente_id: docenteId,
-          mundo_tipo: mundoTipo,
+        docenteId_mundoTipo: {
+          docenteId: docenteId,
+          mundoTipo: mundoTipo,
         },
       },
     });
@@ -215,9 +215,9 @@ export class DocenteAsignacionesService {
 
     await this.prisma.docenteMundo.delete({
       where: {
-        docente_id_mundo_tipo: {
-          docente_id: docenteId,
-          mundo_tipo: mundoTipo,
+        docenteId_mundoTipo: {
+          docenteId: docenteId,
+          mundoTipo: mundoTipo,
         },
       },
     });
@@ -238,8 +238,8 @@ export class DocenteAsignacionesService {
     }
 
     return this.prisma.docenteMundo.findMany({
-      where: { docente_id: docenteId },
-      orderBy: { asignado_en: 'asc' },
+      where: { docenteId: docenteId },
+      orderBy: { asignadoEn: 'asc' },
     });
   }
 
@@ -248,7 +248,7 @@ export class DocenteAsignacionesService {
    */
   async listarDocentesPorMundo(mundoTipo: MundoTipo) {
     return this.prisma.docenteMundo.findMany({
-      where: { mundo_tipo: mundoTipo },
+      where: { mundoTipo: mundoTipo },
       include: {
         docente: {
           select: {
@@ -256,11 +256,11 @@ export class DocenteAsignacionesService {
             nombre: true,
             apellido: true,
             email: true,
-            tipo_asignacion: true,
+            tipoAsignacion: true,
           },
         },
       },
-      orderBy: { asignado_en: 'asc' },
+      orderBy: { asignadoEn: 'asc' },
     });
   }
 
@@ -284,17 +284,17 @@ export class DocenteAsignacionesService {
 
     const actualizado = await this.prisma.docente.update({
       where: { id: docenteId },
-      data: { tipo_asignacion: dto.tipo_asignacion },
+      data: { tipoAsignacion: dto.tipoAsignacion },
       select: {
         id: true,
         nombre: true,
         apellido: true,
-        tipo_asignacion: true,
+        tipoAsignacion: true,
       },
     });
 
     this.logger.log(
-      `Tipo asignación actualizado a ${dto.tipo_asignacion} para ${docente.nombre} ${docente.apellido}`,
+      `Tipo asignación actualizado a ${dto.tipoAsignacion} para ${docente.nombre} ${docente.apellido}`,
     );
     return actualizado;
   }
@@ -313,7 +313,7 @@ export class DocenteAsignacionesService {
         id: true,
         nombre: true,
         apellido: true,
-        tipo_asignacion: true,
+        tipoAsignacion: true,
       },
     });
     if (!docente) {
@@ -322,12 +322,12 @@ export class DocenteAsignacionesService {
 
     const [casas, mundos] = await Promise.all([
       this.prisma.docenteCasa.findMany({
-        where: { docente_id: docenteId },
-        orderBy: { asignado_en: 'asc' },
+        where: { docenteId: docenteId },
+        orderBy: { asignadoEn: 'asc' },
       }),
       this.prisma.docenteMundo.findMany({
-        where: { docente_id: docenteId },
-        orderBy: { asignado_en: 'asc' },
+        where: { docenteId: docenteId },
+        orderBy: { asignadoEn: 'asc' },
       }),
     ]);
 
@@ -347,30 +347,30 @@ export class DocenteAsignacionesService {
     let needsIntersection = false;
 
     // Filtrar por casa
-    if (filtros.casa_tipo) {
+    if (filtros.casaTipo) {
       const docentesConCasa = await this.prisma.docenteCasa.findMany({
-        where: { casa_tipo: filtros.casa_tipo },
-        select: { docente_id: true },
+        where: { casaTipo: filtros.casaTipo },
+        select: { docenteId: true },
       });
-      docenteIds.push(...docentesConCasa.map((d) => d.docente_id));
+      docenteIds.push(...docentesConCasa.map((d) => d.docenteId));
       needsIntersection = true;
     }
 
     // Filtrar por mundo
-    if (filtros.mundo_tipo) {
+    if (filtros.mundoTipo) {
       const docentesConMundo = await this.prisma.docenteMundo.findMany({
-        where: { mundo_tipo: filtros.mundo_tipo },
-        select: { docente_id: true },
+        where: { mundoTipo: filtros.mundoTipo },
+        select: { docenteId: true },
       });
 
       if (needsIntersection) {
         // Intersección con los que ya tienen la casa
-        const mundoIds = new Set(docentesConMundo.map((d) => d.docente_id));
+        const mundoIds = new Set(docentesConMundo.map((d) => d.docenteId));
         const intersected = docenteIds.filter((id) => mundoIds.has(id));
         docenteIds.length = 0;
         docenteIds.push(...intersected);
       } else {
-        docenteIds.push(...docentesConMundo.map((d) => d.docente_id));
+        docenteIds.push(...docentesConMundo.map((d) => d.docenteId));
         needsIntersection = true;
       }
     }
@@ -378,8 +378,8 @@ export class DocenteAsignacionesService {
     // Construir where final
     const where: Record<string, unknown> = {};
 
-    if (filtros.tipo_asignacion) {
-      where.tipo_asignacion = filtros.tipo_asignacion;
+    if (filtros.tipoAsignacion) {
+      where.tipoAsignacion = filtros.tipoAsignacion;
     }
 
     if (needsIntersection) {
@@ -393,7 +393,7 @@ export class DocenteAsignacionesService {
         nombre: true,
         apellido: true,
         email: true,
-        tipo_asignacion: true,
+        tipoAsignacion: true,
       },
       orderBy: { apellido: 'asc' },
     });
@@ -403,10 +403,10 @@ export class DocenteAsignacionesService {
       docentes.map(async (docente) => {
         const [casas, mundos] = await Promise.all([
           this.prisma.docenteCasa.findMany({
-            where: { docente_id: docente.id },
+            where: { docenteId: docente.id },
           }),
           this.prisma.docenteMundo.findMany({
-            where: { docente_id: docente.id },
+            where: { docenteId: docente.id },
           }),
         ]);
         return { ...docente, casas, mundos };

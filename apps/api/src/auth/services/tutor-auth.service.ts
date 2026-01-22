@@ -21,8 +21,8 @@ export interface TutorLoginResult {
     apellido: string;
     dni: string | null;
     telefono: string | null;
-    fecha_registro: Date | null;
-    ha_completado_onboarding: boolean;
+    fechaRegistro: Date | null;
+    haCompletadoOnboarding: boolean;
     role: Role;
     roles: Role[];
   };
@@ -82,7 +82,7 @@ export class TutorAuthService {
     const verificationResult =
       await this.passwordService.verifyWithTimingProtection(
         password,
-        tutor?.password_hash ?? null,
+        tutor?.passwordHash ?? null,
       );
 
     // 3. Validar credenciales
@@ -133,8 +133,8 @@ export class TutorAuthService {
         apellido: tutor.apellido,
         dni: tutor.dni,
         telefono: tutor.telefono,
-        fecha_registro: tutor.fecha_registro,
-        ha_completado_onboarding: tutor.ha_completado_onboarding,
+        fechaRegistro: tutor.fechaRegistro,
+        haCompletadoOnboarding: tutor.haCompletadoOnboarding,
         role: Role.TUTOR,
         roles: finalRoles,
       },
@@ -152,7 +152,7 @@ export class TutorAuthService {
     const newHash = await this.passwordService.hash(plainPassword);
     await this.prisma.tutor.update({
       where: { id: tutorId },
-      data: { password_hash: newHash },
+      data: { passwordHash: newHash },
     });
     this.logger.log(`Password hash upgraded for tutor ${tutorId}`);
   }

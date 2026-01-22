@@ -56,7 +56,7 @@ export interface IInscripcionMensualRepository {
 
   /**
    * Obtiene el total mensual de un tutor
-   * Suma de todas las inscripciones (precio_final) de un período
+   * Suma de todas las inscripciones (precioFinal) de un período
    */
   calcularTotalMensualTutor(
     tutorId: string,

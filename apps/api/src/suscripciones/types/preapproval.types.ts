@@ -56,11 +56,11 @@ export interface CreatePreApprovalRequest {
   /** Razón/descripción de la suscripción */
   readonly reason: string;
   /** Referencia externa para vincular con nuestro sistema */
-  readonly external_reference: string;
+  readonly externalReference: string;
   /** Configuración de cobro automático */
   readonly auto_recurring: AutoRecurring;
   /** ID del plan de suscripción (opcional si se usa auto_recurring) */
-  readonly preapproval_plan_id?: string;
+  readonly preapproval_planId?: string;
   /** Token de tarjeta para cobro inmediato */
   readonly card_token_id?: string;
   /** Estado inicial de la suscripción */
@@ -80,11 +80,11 @@ export interface PreApprovalResponse {
   /** ID del vendedor/collector */
   readonly collector_id: number;
   /** ID del plan de suscripción */
-  readonly preapproval_plan_id: string | null;
+  readonly preapproval_planId: string | null;
   /** Razón/descripción */
   readonly reason: string;
   /** Referencia externa */
-  readonly external_reference: string;
+  readonly externalReference: string;
   /** URL de retorno */
   readonly back_url: string;
   /** URL de checkout para que el usuario complete el pago */
@@ -117,7 +117,7 @@ export interface UpdatePreApprovalRequest {
   /** Nueva razón/descripción */
   readonly reason?: string;
   /** Nueva referencia externa */
-  readonly external_reference?: string;
+  readonly externalReference?: string;
   /** Nueva URL de retorno */
   readonly back_url?: string;
   /** Nueva configuración de cobro automático */
@@ -264,7 +264,7 @@ export interface PreApprovalWebhookPayload {
   /** Si es modo producción */
   readonly live_mode: boolean;
   /** ID del usuario/vendedor en MP */
-  readonly user_id: string;
+  readonly userId: string;
   /** Datos del recurso */
   readonly data: {
     /** ID del preapproval en MercadoPago */
@@ -282,7 +282,7 @@ export interface PreApprovalDetail {
   /** Estado actual */
   readonly status: PreApprovalStatus;
   /** Referencia externa (nuestro suscripcionId) */
-  readonly external_reference: string;
+  readonly externalReference: string;
   /** Email del pagador */
   readonly payer_email: string;
   /** ID del pagador en MP */

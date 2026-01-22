@@ -29,7 +29,7 @@ import { RedisService } from './redis.service';
  *
  *     // 2. Cache miss → consultar DB
  *     const record = await this.prisma.webhooksProcessed.findUnique({
- *       where: { payment_id: paymentId }
+ *       where: { paymentId: paymentId }
  *     });
  *
  *     // 3. Guardar en cache

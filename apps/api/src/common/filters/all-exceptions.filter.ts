@@ -130,7 +130,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       'password',
       'passwordActual',
       'nuevaPassword',
-      'password_hash',
+      'passwordHash',
       'token',
       'access_token',
       'refresh_token',

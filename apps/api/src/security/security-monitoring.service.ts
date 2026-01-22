@@ -311,10 +311,10 @@ export class SecurityMonitoringService {
    */
   async getTopSuspiciousIPs(limit: number = 10): Promise<SuspiciousIP[]> {
     const topIPs = await this.prisma.auditLog.groupBy({
-      by: ['ip_address'],
+      by: ['ipAddress'],
       where: {
         category: 'fraud_detection',
-        ip_address: {
+        ipAddress: {
           not: null,
         },
       },
@@ -330,7 +330,7 @@ export class SecurityMonitoringService {
     });
 
     return topIPs.map((item) => ({
-      ipAddress: item.ip_address || 'unknown',
+      ipAddress: item.ipAddress || 'unknown',
       fraudCount: item._count.id,
     }));
   }
@@ -411,10 +411,10 @@ export class SecurityMonitoringService {
     // Total de pagos en últimas 24h (inscripciones pagadas)
     const totalPayments = await this.prisma.inscripcionMensual.count({
       where: {
-        fecha_pago: {
+        fechaPago: {
           gte: last24Hours,
         },
-        estado_pago: 'Pagado',
+        estadoPago: 'Pagado',
       },
     });
 

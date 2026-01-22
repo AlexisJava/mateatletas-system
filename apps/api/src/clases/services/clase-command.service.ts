@@ -48,15 +48,15 @@ export class ClaseCommandService {
     const clase = await this.prisma.clase.create({
       data: {
         nombre: dto.nombre,
-        docente_id: dto.docenteId,
-        sector_id: dto.sectorId || null,
-        fecha_hora_inicio: fechaInicio,
-        duracion_minutos: dto.duracionMinutos,
-        cupos_maximo: dto.cuposMaximo,
-        cupos_ocupados: 0,
+        docenteId: dto.docenteId,
+        sectorId: dto.sectorId || null,
+        fechaHoraInicio: fechaInicio,
+        duracionMinutos: dto.duracionMinutos,
+        cuposMaximo: dto.cuposMaximo,
+        cuposOcupados: 0,
         descripcion: dto.descripcion ?? null,
         estado: 'Programada',
-        producto_id: dto.productoId ?? null,
+        productoId: dto.productoId ?? null,
       },
       include: {
         docente: { select: { nombre: true, apellido: true } },
@@ -107,7 +107,7 @@ export class ClaseCommandService {
         where: { id },
         data: {
           estado: 'Cancelada',
-          cupos_ocupados: 0, // Liberar todos los cupos
+          cuposOcupados: 0, // Liberar todos los cupos
         },
         include: {
           docente: { select: { nombre: true, apellido: true } },
@@ -116,9 +116,9 @@ export class ClaseCommandService {
 
       // Operación secundaria: Notificar al docente
       this.notificacionesService.notificarClaseCancelada(
-        clase.docente_id,
+        clase.docenteId,
         id,
-        `${clase.nombre || 'Clase'} - ${clase.fecha_hora_inicio.toLocaleDateString()}`,
+        `${clase.nombre || 'Clase'} - ${clase.fechaHoraInicio.toLocaleDateString()}`,
       ),
     ]);
 
@@ -230,9 +230,9 @@ export class ClaseCommandService {
           estudiantes.map((estudiante) =>
             prisma.inscripcionClase.create({
               data: {
-                clase_id: claseId,
-                estudiante_id: estudiante.id,
-                tutor_id: estudiante.tutor_id,
+                claseId: claseId,
+                estudianteId: estudiante.id,
+                tutorId: estudiante.tutorId,
                 observaciones: 'Asignado por administrador',
               },
               include: {
@@ -252,7 +252,7 @@ export class ClaseCommandService {
         await prisma.clase.update({
           where: { id: claseId },
           data: {
-            cupos_ocupados: clase.cupos_ocupados + estudianteIds.length,
+            cuposOcupados: clase.cuposOcupados + estudianteIds.length,
           },
         });
 

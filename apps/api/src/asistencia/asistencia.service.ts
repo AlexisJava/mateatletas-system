@@ -35,7 +35,7 @@ export class AsistenciaService {
     }
 
     // Only validate teacher if docenteId is present (not for self-registration)
-    if (docenteId !== null && clase.docente_id !== docenteId) {
+    if (docenteId !== null && clase.docenteId !== docenteId) {
       throw new ForbiddenException(
         'Solo el docente titular puede marcar asistencia',
       );
@@ -44,8 +44,8 @@ export class AsistenciaService {
     // 2. Verify that student is enrolled in the class
     const inscripcion = await this.prisma.inscripcionClase.findFirst({
       where: {
-        clase_id: claseId,
-        estudiante_id: estudianteId,
+        claseId: claseId,
+        estudianteId: estudianteId,
       },
     });
 
@@ -58,8 +58,8 @@ export class AsistenciaService {
     // 3. Check if attendance record already exists
     const asistenciaExistente = await this.prisma.asistencia.findFirst({
       where: {
-        clase_id: claseId,
-        estudiante_id: estudianteId,
+        claseId: claseId,
+        estudianteId: estudianteId,
       },
     });
 
@@ -71,7 +71,7 @@ export class AsistenciaService {
         data: {
           estado: dto.estado,
           observaciones: dto.observaciones,
-          puntos_otorgados: dto.puntos_otorgados || 0,
+          puntosOtorgados: dto.puntosOtorgados || 0,
         },
         include: {
           estudiante: {
@@ -86,11 +86,11 @@ export class AsistenciaService {
     } else {
       asistencia = await this.prisma.asistencia.create({
         data: {
-          clase_id: claseId,
-          estudiante_id: estudianteId,
+          claseId: claseId,
+          estudianteId: estudianteId,
           estado: dto.estado,
           observaciones: dto.observaciones,
-          puntos_otorgados: dto.puntos_otorgados || 0,
+          puntosOtorgados: dto.puntosOtorgados || 0,
         },
         include: {
           estudiante: {
@@ -109,8 +109,8 @@ export class AsistenciaService {
       estudiante: asistencia.estudiante,
       estado: asistencia.estado,
       observaciones: asistencia.observaciones,
-      puntos_otorgados: asistencia.puntos_otorgados,
-      fecha_registro: asistencia.createdAt,
+      puntosOtorgados: asistencia.puntosOtorgados,
+      fechaRegistro: asistencia.createdAt,
     };
   }
 
@@ -129,7 +129,7 @@ export class AsistenciaService {
         throw new NotFoundException('Clase no encontrada');
       }
 
-      if (clase.docente_id !== docenteId) {
+      if (clase.docenteId !== docenteId) {
         throw new ForbiddenException(
           'Solo el docente titular puede ver la asistencia',
         );
@@ -139,7 +139,7 @@ export class AsistenciaService {
     // Optimized: Single query using Promise.all + include relationships
     const [inscripciones, asistencias] = await Promise.all([
       this.prisma.inscripcionClase.findMany({
-        where: { clase_id: claseId },
+        where: { claseId: claseId },
         include: {
           estudiante: {
             select: {
@@ -152,12 +152,12 @@ export class AsistenciaService {
         },
       }),
       this.prisma.asistencia.findMany({
-        where: { clase_id: claseId },
+        where: { claseId: claseId },
       }),
     ]);
 
     // Create a map of attendance by student_id
-    const asistenciaMap = new Map(asistencias.map((a) => [a.estudiante_id, a]));
+    const asistenciaMap = new Map(asistencias.map((a) => [a.estudianteId, a]));
 
     // Count states
     let totalPresentes = 0;
@@ -165,7 +165,7 @@ export class AsistenciaService {
     let totalJustificados = 0;
 
     const lista = inscripciones.map((insc) => {
-      const asistencia = asistenciaMap.get(insc.estudiante_id);
+      const asistencia = asistenciaMap.get(insc.estudianteId);
 
       if (asistencia) {
         if (asistencia.estado === 'Presente') totalPresentes++;
@@ -174,12 +174,12 @@ export class AsistenciaService {
       }
 
       return {
-        inscripcion_id: insc.id,
+        inscripcionId: insc.id,
         estudiante: insc.estudiante,
-        estado_asistencia: asistencia?.estado || 'Pendiente',
+        estadoAsistencia: asistencia?.estado || 'Pendiente',
         observaciones: asistencia?.observaciones || null,
-        puntos_otorgados: asistencia?.puntos_otorgados || 0,
-        asistencia_id: asistencia?.id || null,
+        puntosOtorgados: asistencia?.puntosOtorgados || 0,
+        asistenciaId: asistencia?.id || null,
       };
     });
 
@@ -187,10 +187,10 @@ export class AsistenciaService {
       clase: {
         id: claseId,
       },
-      total_inscritos: inscripciones.length,
-      total_presentes: totalPresentes,
-      total_ausentes: totalAusentes,
-      total_justificados: totalJustificados,
+      totalInscritos: inscripciones.length,
+      totalPresentes: totalPresentes,
+      totalAusentes: totalAusentes,
+      totalJustificados: totalJustificados,
       lista,
     };
   }
@@ -201,20 +201,20 @@ export class AsistenciaService {
    * Crea o actualiza registros de asistencia usando transacción
    */
   async tomarAsistenciaClaseGrupoBatch(
-    clase_grupo_id: string,
+    claseGrupoId: string,
     fecha: string,
     asistencias: Array<{
       estudianteId: string;
       estado: import('@prisma/client').EstadoAsistencia;
       observaciones?: string;
     }>,
-    docente_id: string,
+    docenteId: string,
   ): Promise<{
     success: boolean;
     registrosCreados: number;
     registrosActualizados: number;
     estudiantes: Array<{
-      estudiante_id: string;
+      estudianteId: string;
       nombre: string;
       apellido: string;
       estado: import('@prisma/client').EstadoAsistencia;
@@ -224,14 +224,14 @@ export class AsistenciaService {
   }> {
     // 1. Verificar que el ClaseGrupo existe y el docente es el titular
     const claseGrupo = await this.prisma.claseGrupo.findUnique({
-      where: { id: clase_grupo_id },
+      where: { id: claseGrupoId },
     });
 
     if (!claseGrupo) {
       throw new NotFoundException('Grupo de clase no encontrado');
     }
 
-    if (claseGrupo.docente_id !== docente_id) {
+    if (claseGrupo.docenteId !== docenteId) {
       throw new ForbiddenException(
         'Solo el docente titular puede tomar asistencia de este grupo',
       );
@@ -242,8 +242,8 @@ export class AsistenciaService {
     const estudiantesIds = asistencias.map((a) => a.estudianteId);
     const inscripciones = await this.prisma.inscripcionUnificada.findMany({
       where: {
-        clase_grupo_id,
-        estudiante_id: { in: estudiantesIds },
+        claseGrupoId,
+        estudianteId: { in: estudiantesIds },
         estado: 'ACTIVA',
       },
       include: {
@@ -258,7 +258,7 @@ export class AsistenciaService {
     });
 
     if (inscripciones.length !== estudiantesIds.length) {
-      const inscritosIds = inscripciones.map((i) => i.estudiante_id);
+      const inscritosIds = inscripciones.map((i) => i.estudianteId);
       const noInscritos = estudiantesIds.filter(
         (id) => !inscritosIds.includes(id),
       );
@@ -277,15 +277,15 @@ export class AsistenciaService {
       asistencias.map((asistencia) => {
         return this.prisma.asistenciaClaseGrupo.upsert({
           where: {
-            clase_grupo_id_estudiante_id_fecha: {
-              clase_grupo_id,
-              estudiante_id: asistencia.estudianteId,
+            claseGrupoId_estudianteId_fecha: {
+              claseGrupoId,
+              estudianteId: asistencia.estudianteId,
               fecha: fechaISO,
             },
           },
           create: {
-            clase_grupo_id,
-            estudiante_id: asistencia.estudianteId,
+            claseGrupoId,
+            estudianteId: asistencia.estudianteId,
             fecha: fechaISO,
             estado: asistencia.estado,
             observaciones: asistencia.observaciones || null,
@@ -311,8 +311,8 @@ export class AsistenciaService {
     // (Prisma no nos dice directamente, así que revisamos si existían antes)
     const existentes = await this.prisma.asistenciaClaseGrupo.findMany({
       where: {
-        clase_grupo_id,
-        estudiante_id: { in: estudiantesIds },
+        claseGrupoId,
+        estudianteId: { in: estudiantesIds },
         fecha: fechaISO,
         createdAt: { lt: new Date(Date.now() - 1000) }, // Creados hace más de 1 segundo
       },
@@ -323,7 +323,7 @@ export class AsistenciaService {
 
     // 4. Formatear response
     const estudiantesResponse = resultados.map((r) => ({
-      estudiante_id: r.estudiante.id,
+      estudianteId: r.estudiante.id,
       nombre: r.estudiante.nombre,
       apellido: r.estudiante.apellido,
       estado: r.estado,
@@ -344,14 +344,14 @@ export class AsistenciaService {
    * Usado en el portal docente para tomar asistencia de colonias/cursos
    */
   async tomarAsistenciaComisionBatch(
-    comision_id: string,
+    comisionId: string,
     fecha: string,
     asistencias: Array<{
       estudianteId: string;
       estado: import('@prisma/client').EstadoAsistencia;
       observacion?: string;
     }>,
-    docente_id: string,
+    docenteId: string,
   ): Promise<{
     success: boolean;
     registrosCreados: number;
@@ -367,14 +367,14 @@ export class AsistenciaService {
   }> {
     // 1. Verificar que la comisión existe y el docente es el titular
     const comision = await this.prisma.comision.findUnique({
-      where: { id: comision_id },
+      where: { id: comisionId },
     });
 
     if (!comision) {
       throw new NotFoundException('Comisión no encontrada');
     }
 
-    if (comision.docente_id !== docente_id) {
+    if (comision.docenteId !== docenteId) {
       throw new ForbiddenException(
         'Solo el docente titular puede tomar asistencia de esta comisión',
       );
@@ -384,8 +384,8 @@ export class AsistenciaService {
     const estudiantesIds = asistencias.map((a) => a.estudianteId);
     const inscripciones = await this.prisma.inscripcionComision.findMany({
       where: {
-        comision_id,
-        estudiante_id: { in: estudiantesIds },
+        comisionId,
+        estudianteId: { in: estudiantesIds },
         estado: { not: 'Cancelada' },
       },
       include: {
@@ -400,7 +400,7 @@ export class AsistenciaService {
     });
 
     if (inscripciones.length !== estudiantesIds.length) {
-      const inscritosIds = inscripciones.map((i) => i.estudiante_id);
+      const inscritosIds = inscripciones.map((i) => i.estudianteId);
       const noInscritos = estudiantesIds.filter(
         (id) => !inscritosIds.includes(id),
       );
@@ -416,15 +416,15 @@ export class AsistenciaService {
       asistencias.map((asistencia) => {
         return this.prisma.asistenciaComision.upsert({
           where: {
-            comision_id_estudiante_id_fecha: {
-              comision_id,
-              estudiante_id: asistencia.estudianteId,
+            comisionId_estudianteId_fecha: {
+              comisionId,
+              estudianteId: asistencia.estudianteId,
               fecha: fechaISO,
             },
           },
           create: {
-            comision_id,
-            estudiante_id: asistencia.estudianteId,
+            comisionId,
+            estudianteId: asistencia.estudianteId,
             fecha: fechaISO,
             estado: asistencia.estado,
             observacion: asistencia.observacion || null,
@@ -449,10 +449,10 @@ export class AsistenciaService {
     // Contar creados vs actualizados
     const existentes = await this.prisma.asistenciaComision.findMany({
       where: {
-        comision_id,
-        estudiante_id: { in: estudiantesIds },
+        comisionId,
+        estudianteId: { in: estudiantesIds },
         fecha: fechaISO,
-        created_at: { lt: new Date(Date.now() - 1000) },
+        createdAt: { lt: new Date(Date.now() - 1000) },
       },
     });
 

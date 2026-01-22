@@ -96,10 +96,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           edad: true,
           nivelEscolar: true,
           fotoUrl: true,
-          nivel_actual: true,
+          nivelActual: true,
           recursos: {
             select: {
-              xp_total: true,
+              xpTotal: true,
             },
           },
           tutor: {
@@ -142,7 +142,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           email: true,
           nombre: true,
           apellido: true,
-          fecha_registro: true,
+          fechaRegistro: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -158,8 +158,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           apellido: true,
           dni: true,
           telefono: true,
-          fecha_registro: true,
-          ha_completado_onboarding: true,
+          fechaRegistro: true,
+          haCompletadoOnboarding: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -174,11 +174,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // Transformar recursos para estudiantes
     if (normalizedRole === 'estudiante' && 'recursos' in user) {
       const { recursos, ...rest } = user as typeof user & {
-        recursos?: { xp_total: number } | null;
+        recursos?: { xpTotal: number } | null;
       };
       return {
         ...rest,
-        xp_total: recursos?.xp_total ?? 0,
+        xpTotal: recursos?.xpTotal ?? 0,
         role,
         roles: normalizedRoles,
       };

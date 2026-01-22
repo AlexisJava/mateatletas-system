@@ -8,7 +8,7 @@ import {
 import { EstadoPago as EstadoPagoPrisma } from '@prisma/client';
 
 /**
- * Resultado de mapeo para estados de inscripción (estado_pago enum Prisma)
+ * Resultado de mapeo para estados de inscripción (estadoPago enum Prisma)
  */
 export interface EstadoInscripcionResult {
   estadoPago: EstadoPago;

@@ -28,13 +28,13 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
   const mockClase = {
     id: 'clase-1',
-    docente_id: 'doc-1',
-    fecha_hora_inicio: new Date('2025-10-15T10:00:00Z').toISOString(),
+    docenteId: 'doc-1',
+    fechaHoraInicio: new Date('2025-10-15T10:00:00Z').toISOString(),
     inscripciones: [
-      { estudiante_id: 'est-1' },
-      { estudiante_id: 'est-2' },
-      { estudiante_id: 'est-3' },
-      { estudiante_id: 'est-4' },
+      { estudianteId: 'est-1' },
+      { estudianteId: 'est-2' },
+      { estudianteId: 'est-3' },
+      { estudianteId: 'est-4' },
     ],
   };
 
@@ -78,8 +78,8 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       jest
         .spyOn(prisma.asistencia, 'findMany')
         .mockResolvedValue([
-          { estudiante_id: 'est-1' },
-          { estudiante_id: 'est-2' },
+          { estudianteId: 'est-1' },
+          { estudianteId: 'est-2' },
         ] as any);
 
       (prisma.$transaction as jest.Mock).mockImplementation((callback) =>
@@ -90,13 +90,13 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       (prisma.asistencia.update as jest.Mock)
         .mockResolvedValueOnce({
           id: 'asist-1',
-          estudiante_id: 'est-1',
+          estudianteId: 'est-1',
           estado: 'Presente',
           estudiante: { nombre: 'Est1', apellido: 'Apellido1' },
         } as any)
         .mockResolvedValueOnce({
           id: 'asist-2',
-          estudiante_id: 'est-2',
+          estudianteId: 'est-2',
           estado: 'Ausente',
           estudiante: { nombre: 'Est2', apellido: 'Apellido2' },
         } as any);
@@ -104,13 +104,13 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       (prisma.asistencia.create as jest.Mock)
         .mockResolvedValueOnce({
           id: 'asist-3',
-          estudiante_id: 'est-3',
+          estudianteId: 'est-3',
           estado: 'Presente',
           estudiante: { nombre: 'Est3', apellido: 'Apellido3' },
         } as any)
         .mockResolvedValueOnce({
           id: 'asist-4',
-          estudiante_id: 'est-4',
+          estudianteId: 'est-4',
           estado: 'Tardanza',
           estudiante: { nombre: 'Est4', apellido: 'Apellido4' },
         } as any);
@@ -151,11 +151,11 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       expect(result).toHaveLength(4);
       expect(prisma.asistencia.findMany).toHaveBeenCalledWith({
         where: {
-          clase_id: 'clase-1',
-          estudiante_id: { in: ['est-1', 'est-2', 'est-3', 'est-4'] },
+          claseId: 'clase-1',
+          estudianteId: { in: ['est-1', 'est-2', 'est-3', 'est-4'] },
         },
         select: {
-          estudiante_id: true,
+          estudianteId: true,
         },
       });
 
@@ -178,12 +178,12 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       (prisma.asistencia.create as jest.Mock)
         .mockResolvedValueOnce({
           id: 'asist-1',
-          estudiante_id: 'est-1',
+          estudianteId: 'est-1',
           estudiante: { nombre: 'Est1', apellido: 'A' },
         } as any)
         .mockResolvedValueOnce({
           id: 'asist-2',
-          estudiante_id: 'est-2',
+          estudianteId: 'est-2',
           estudiante: { nombre: 'Est2', apellido: 'B' },
         } as any);
 
@@ -221,8 +221,8 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       jest
         .spyOn(prisma.asistencia, 'findMany')
         .mockResolvedValue([
-          { estudiante_id: 'est-1' },
-          { estudiante_id: 'est-2' },
+          { estudianteId: 'est-1' },
+          { estudianteId: 'est-2' },
         ] as any);
 
       (prisma.$transaction as jest.Mock).mockImplementation((callback) =>
@@ -232,12 +232,12 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       (prisma.asistencia.update as jest.Mock)
         .mockResolvedValueOnce({
           id: 'asist-1',
-          estudiante_id: 'est-1',
+          estudianteId: 'est-1',
           estudiante: { nombre: 'Est1', apellido: 'A' },
         } as any)
         .mockResolvedValueOnce({
           id: 'asist-2',
-          estudiante_id: 'est-2',
+          estudianteId: 'est-2',
           estudiante: { nombre: 'Est2', apellido: 'B' },
         } as any);
 
@@ -339,7 +339,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue({
         ...mockClase,
         inscripciones: Array.from({ length: 30 }, (_, i) => ({
-          estudiante_id: `est-${i + 1}`,
+          estudianteId: `est-${i + 1}`,
         })),
       } as any);
 
@@ -355,7 +355,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
         async (args: any) =>
           ({
             id: 'mock',
-            estudiante_id: args.data.estudiante_id,
+            estudianteId: args.data.estudianteId,
             estudiante: { nombre: 'Test', apellido: 'Student' },
           }) as any,
       );
@@ -390,14 +390,14 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue({
         ...mockClase,
         inscripciones: Array.from({ length: 20 }, (_, i) => ({
-          estudiante_id: `est-${i + 1}`,
+          estudianteId: `est-${i + 1}`,
         })),
       } as any);
 
       // Mock: first 10 students already have asistencia
       jest.spyOn(prisma.asistencia, 'findMany').mockResolvedValue(
         Array.from({ length: 10 }, (_, i) => ({
-          estudiante_id: `est-${i + 1}`,
+          estudianteId: `est-${i + 1}`,
         })) as any,
       );
 
@@ -451,7 +451,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
         .mockResolvedValue(mockClase as any);
       jest
         .spyOn(prisma.asistencia, 'findMany')
-        .mockResolvedValue([{ estudiante_id: 'est-1' }] as any);
+        .mockResolvedValue([{ estudianteId: 'est-1' }] as any);
 
       (prisma.$transaction as jest.Mock).mockImplementation((callback) =>
         callback(prisma),
@@ -481,13 +481,13 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       // Assert
       expect(updateSpy).toHaveBeenCalledWith({
         where: {
-          clase_id_estudiante_id: {
-            clase_id: 'clase-1',
-            estudiante_id: 'est-1',
+          claseId_estudianteId: {
+            claseId: 'clase-1',
+            estudianteId: 'est-1',
           },
         },
         data: expect.objectContaining({
-          fecha_registro: expect.any(Date),
+          fechaRegistro: expect.any(Date),
         }),
         include: expect.any(Object),
       });
@@ -506,7 +506,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       jest.spyOn(prisma.asistencia, 'create').mockResolvedValue({
         id: 'asist-1',
-        estudiante_id: 'est-1',
+        estudianteId: 'est-1',
         estado: 'Presente',
         estudiante: { nombre: 'Juan', apellido: 'Pérez' },
       } as any);
@@ -532,10 +532,10 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       //   nombre: 'Juan',
       //   apellido: 'Pérez',
       // });
-      expect(result[0]).toHaveProperty('estudiante_id');
+      expect(result[0]).toHaveProperty('estudianteId');
     });
 
-    it('should preserve observaciones and puntos_otorgados', async () => {
+    it('should preserve observaciones and puntosOtorgados', async () => {
       // Arrange
       jest
         .spyOn(prisma.clase, 'findUnique')
@@ -571,7 +571,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       expect(createSpy).toHaveBeenCalledWith({
         data: expect.objectContaining({
           observaciones: 'Excelente participación',
-          puntos_otorgados: 15,
+          puntosOtorgados: 15,
         }),
         include: expect.any(Object),
       });
@@ -604,7 +604,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
       // Arrange
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue({
         ...mockClase,
-        docente_id: 'other-doc',
+        docenteId: 'other-doc',
       } as any);
 
       const dto = {

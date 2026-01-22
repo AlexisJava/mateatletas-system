@@ -14,7 +14,7 @@ describe('AdminUsuariosService', () => {
     email: 'tutor@example.com',
     nombre: 'Carlos',
     apellido: 'Rodríguez',
-    password_hash: 'hashed_password',
+    passwordHash: 'hashed_password',
     createdAt: new Date(),
     updatedAt: new Date(),
     _count: {
@@ -27,7 +27,7 @@ describe('AdminUsuariosService', () => {
     email: 'docente@example.com',
     nombre: 'María',
     apellido: 'González',
-    password_hash: 'hashed_password',
+    passwordHash: 'hashed_password',
     createdAt: new Date(),
     updatedAt: new Date(),
     _count: {
@@ -40,10 +40,10 @@ describe('AdminUsuariosService', () => {
     email: 'admin@example.com',
     nombre: 'Juan',
     apellido: 'Pérez',
-    password_hash: 'hashed_password',
+    passwordHash: 'hashed_password',
     createdAt: new Date(),
     updatedAt: new Date(),
-    fecha_registro: new Date(),
+    fechaRegistro: new Date(),
   };
 
   beforeEach(async () => {

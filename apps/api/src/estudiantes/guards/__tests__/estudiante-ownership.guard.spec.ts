@@ -76,7 +76,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
         id: 'est-456',
-        tutor_id: 'tutor-123', // Ownership match
+        tutorId: 'tutor-123', // Ownership match
       } as any);
 
       // Act
@@ -86,7 +86,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       expect(result).toBe(true);
       expect(prisma.estudiante.findUnique).toHaveBeenCalledWith({
         where: { id: 'est-456' },
-        select: { tutor_id: true },
+        select: { tutorId: true },
       });
     });
 
@@ -116,7 +116,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
         id: 'est-456',
-        tutor_id: 'tutor-999', // Different tutor owns this estudiante
+        tutorId: 'tutor-999', // Different tutor owns this estudiante
       } as any);
 
       // Act & Assert
@@ -183,7 +183,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle estudiante with null tutor_id', async () => {
+    it('should handle estudiante with null tutorId', async () => {
       // Arrange
       const mockContext = createMockContext(
         { id: 'tutor-123', role: Role.TUTOR, roles: [Role.TUTOR] },
@@ -192,7 +192,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
         id: 'est-456',
-        tutor_id: null, // Orphaned estudiante (no tutor assigned)
+        tutorId: null, // Orphaned estudiante (no tutor assigned)
       } as any);
 
       // Act & Assert
@@ -210,7 +210,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
         id: 'est-456',
-        tutor_id: 123, // Number instead of string (type mismatch)
+        tutorId: 123, // Number instead of string (type mismatch)
       } as any);
 
       // Act & Assert
@@ -248,7 +248,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
         id: 'victim-est-456',
-        tutor_id: 'legit-tutor-123', // Real owner
+        tutorId: 'legit-tutor-123', // Real owner
       } as any);
 
       // Act & Assert
@@ -269,7 +269,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
         id: 'est-456',
-        tutor_id: 'legit-tutor-123', // Owner match
+        tutorId: 'legit-tutor-123', // Owner match
       } as any);
 
       // Act
@@ -288,7 +288,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
         id: 'est-456',
-        tutor_id: 'tutor-123', // Owner match
+        tutorId: 'tutor-123', // Owner match
       } as any);
 
       // Act
@@ -298,7 +298,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       expect(result).toBe(true);
       expect(prisma.estudiante.findUnique).toHaveBeenCalledWith({
         where: { id: 'est-456' },
-        select: { tutor_id: true }, // Only fetches tutor_id for efficiency
+        select: { tutorId: true }, // Only fetches tutorId for efficiency
       });
     });
   });

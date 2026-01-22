@@ -32,12 +32,12 @@ export class ClaseStatsService {
     const where: Prisma.ClaseWhereInput = {};
 
     if (filtros?.fechaDesde || filtros?.fechaHasta) {
-      where.fecha_hora_inicio = {};
-      if (filtros.fechaDesde) where.fecha_hora_inicio.gte = filtros.fechaDesde;
-      if (filtros.fechaHasta) where.fecha_hora_inicio.lte = filtros.fechaHasta;
+      where.fechaHoraInicio = {};
+      if (filtros.fechaDesde) where.fechaHoraInicio.gte = filtros.fechaDesde;
+      if (filtros.fechaHasta) where.fechaHoraInicio.lte = filtros.fechaHasta;
     }
 
-    if (filtros?.docenteId) where.docente_id = filtros.docenteId;
+    if (filtros?.docenteId) where.docenteId = filtros.docenteId;
 
     // Obtener todas las clases según filtros
     const clases = await this.prisma.clase.findMany({
@@ -45,8 +45,8 @@ export class ClaseStatsService {
       select: {
         id: true,
         estado: true,
-        cupos_maximo: true,
-        cupos_ocupados: true,
+        cuposMaximo: true,
+        cuposOcupados: true,
       },
     });
 
@@ -58,20 +58,20 @@ export class ClaseStatsService {
       (c) => c.estado === 'Cancelada',
     ).length;
 
-    const clasesConCupos = clases.filter((c) => c.cupos_maximo > 0);
+    const clasesConCupos = clases.filter((c) => c.cuposMaximo > 0);
     const promedioOcupacion =
       clasesConCupos.length > 0
         ? clasesConCupos.reduce(
-            (sum, c) => sum + (c.cupos_ocupados / c.cupos_maximo) * 100,
+            (sum, c) => sum + (c.cuposOcupados / c.cuposMaximo) * 100,
             0,
           ) / clasesConCupos.length
         : 0;
 
     const clasesLlenas = clases.filter(
-      (c) => c.cupos_ocupados >= c.cupos_maximo && c.cupos_maximo > 0,
+      (c) => c.cuposOcupados >= c.cuposMaximo && c.cuposMaximo > 0,
     ).length;
     const clasesDisponibles = clases.filter(
-      (c) => c.cupos_ocupados < c.cupos_maximo && c.cupos_maximo > 0,
+      (c) => c.cuposOcupados < c.cuposMaximo && c.cuposMaximo > 0,
     ).length;
 
     return {
@@ -126,23 +126,23 @@ export class ClaseStatsService {
     // 3. Obtener clases del mes
     const clases = await this.prisma.clase.findMany({
       where: {
-        fecha_hora_inicio: {
+        fechaHoraInicio: {
           gte: fechaInicio,
           lte: fechaFin,
         },
         inscripciones: {
           some: {
-            estudiante_id: { in: estudiantesIds },
+            estudianteId: { in: estudiantesIds },
           },
         },
       },
       include: {
         inscripciones: {
           where: {
-            estudiante_id: { in: estudiantesIds },
+            estudianteId: { in: estudiantesIds },
           },
           select: {
-            estudiante_id: true,
+            estudianteId: true,
           },
         },
       },
@@ -151,7 +151,7 @@ export class ClaseStatsService {
     // 4. Calcular estadísticas
     const totalClases = clases.length;
     const totalHoras = clases.reduce(
-      (sum, c) => sum + c.duracion_minutos / 60,
+      (sum, c) => sum + c.duracionMinutos / 60,
       0,
     );
 
@@ -159,14 +159,14 @@ export class ClaseStatsService {
     const estudiantesUnicosSet = new Set<string>();
     clases.forEach((clase) => {
       clase.inscripciones.forEach((insc) => {
-        estudiantesUnicosSet.add(insc.estudiante_id);
+        estudiantesUnicosSet.add(insc.estudianteId);
       });
     });
 
     // Clases agrupadas por día
     const clasesPorDia: Record<number, number> = {};
     clases.forEach((clase) => {
-      const dia = clase.fecha_hora_inicio.getDate();
+      const dia = clase.fechaHoraInicio.getDate();
       clasesPorDia[dia] = (clasesPorDia[dia] || 0) + 1;
     });
 
@@ -204,7 +204,7 @@ export class ClaseStatsService {
         asistencias: {
           select: {
             id: true,
-            estudiante_id: true,
+            estudianteId: true,
             estado: true,
           },
         },
@@ -236,7 +236,7 @@ export class ClaseStatsService {
     // IDs de estudiantes presentes
     const estudiantesPresentesIds = clase.asistencias
       .filter((a) => a.estado === 'Presente')
-      .map((a) => a.estudiante_id);
+      .map((a) => a.estudianteId);
 
     // Separar estudiantes presentes y ausentes
     const estudiantesPresentes: string[] = [];

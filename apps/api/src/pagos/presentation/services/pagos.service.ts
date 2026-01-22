@@ -200,7 +200,7 @@ export class PagosService {
    * Flujo:
    * 1. Valida que sea notificación de tipo "payment"
    * 2. Consulta detalles del pago a MercadoPago API
-   * 3. Parsea external_reference para identificar el tipo
+   * 3. Parsea externalReference para identificar el tipo
    * 4. Actualiza estado en DB según resultado del pago
    *
    * External Reference Format:
@@ -230,15 +230,15 @@ export class PagosService {
       const payment = await this.mercadoPagoService.getPayment(paymentId);
 
       this.logger.log(
-        `💰 Pago consultado - Estado: ${payment.status} - Ref Externa: ${payment.external_reference}`,
+        `💰 Pago consultado - Estado: ${payment.status} - Ref Externa: ${payment.externalReference}`,
       );
 
-      // Parsear external_reference para identificar el tipo
-      const externalRef = payment.external_reference;
+      // Parsear externalReference para identificar el tipo
+      const externalRef = payment.externalReference;
 
       if (!externalRef) {
-        this.logger.warn('⚠️ Pago sin external_reference - Ignorando');
-        return { message: 'Payment without external_reference' };
+        this.logger.warn('⚠️ Pago sin externalReference - Ignorando');
+        return { message: 'Payment without externalReference' };
       }
 
       // Procesar solo inscripciones
@@ -248,15 +248,15 @@ export class PagosService {
           return { message: 'Payment without id or status' };
         }
         return await this.procesarPagoInscripcion({
-          external_reference: externalRef,
+          externalReference: externalRef,
           id: payment.id,
           status: payment.status,
         });
       } else {
         this.logger.warn(
-          `⚠️ Formato de external_reference desconocido: ${externalRef}`,
+          `⚠️ Formato de externalReference desconocido: ${externalRef}`,
         );
-        return { message: 'Unknown external_reference format' };
+        return { message: 'Unknown externalReference format' };
       }
     } catch (error) {
       const errorMessage =
@@ -272,14 +272,14 @@ export class PagosService {
 
   /**
    * Procesa pago de inscripción a curso
-   * external_reference format: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
+   * externalReference format: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
    */
   private async procesarPagoInscripcion(payment: {
-    external_reference: string;
+    externalReference: string;
     id: string;
     status: string;
   }) {
-    const externalRef = payment.external_reference;
+    const externalRef = payment.externalReference;
     const parts = externalRef.split('-');
     const inscripcionId = parts[1]; // "inscripcion-{ID}-estudiante-..."
 
@@ -308,7 +308,7 @@ export class PagosService {
     await this.prisma.inscripcionMensual.update({
       where: { id: inscripcionId },
       data: {
-        estado_pago: nuevoEstado,
+        estadoPago: nuevoEstado,
       },
     });
 
@@ -342,10 +342,10 @@ export class PagosService {
     const inscripcionesPendientes =
       await this.prisma.inscripcionMensual.findMany({
         where: {
-          estudiante_id: estudianteId,
-          tutor_id: tutorId,
+          estudianteId: estudianteId,
+          tutorId: tutorId,
           periodo,
-          estado_pago: 'Pendiente',
+          estadoPago: 'Pendiente',
         },
         include: {
           estudiante: {
@@ -369,7 +369,7 @@ export class PagosService {
 
     // Calcular total adeudado
     const totalAdeudado = inscripcionesPendientes.reduce(
-      (sum, insc) => sum + Number(insc.precio_final),
+      (sum, insc) => sum + Number(insc.precioFinal),
       0,
     );
 
@@ -377,15 +377,15 @@ export class PagosService {
     const fechaPago = new Date();
     await this.prisma.inscripcionMensual.updateMany({
       where: {
-        estudiante_id: estudianteId,
-        tutor_id: tutorId,
+        estudianteId: estudianteId,
+        tutorId: tutorId,
         periodo,
-        estado_pago: 'Pendiente',
+        estadoPago: 'Pendiente',
       },
       data: {
-        estado_pago: 'Pagado',
-        fecha_pago: fechaPago,
-        metodo_pago: 'Manual',
+        estadoPago: 'Pagado',
+        fechaPago: fechaPago,
+        metodoPago: 'Manual',
         observaciones: `Pago registrado manualmente el ${fechaPago.toLocaleDateString('es-AR')}`,
       },
     });

@@ -48,7 +48,7 @@ export class AuthService {
   /**
    * Registra un nuevo tutor en la plataforma
    * @param registerDto - Datos del tutor a registrar
-   * @returns Datos del tutor registrado (sin password_hash)
+   * @returns Datos del tutor registrado (sin passwordHash)
    * @throws BadRequestException si el email ya existe
    */
   async register(registerDto: RegisterDto) {
@@ -72,13 +72,13 @@ export class AuthService {
     const tutor = await this.prisma.tutor.create({
       data: {
         email,
-        password_hash: passwordHash,
+        passwordHash: passwordHash,
         nombre,
         apellido,
         dni: dni || null,
         telefono: telefono || null,
-        fecha_registro: new Date(),
-        ha_completado_onboarding: false,
+        fechaRegistro: new Date(),
+        haCompletadoOnboarding: false,
       },
       select: {
         id: true,
@@ -87,8 +87,8 @@ export class AuthService {
         apellido: true,
         dni: true,
         telefono: true,
-        fecha_registro: true,
-        ha_completado_onboarding: true,
+        fechaRegistro: true,
+        haCompletadoOnboarding: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -123,7 +123,7 @@ export class AuthService {
    * Obtiene el perfil de un usuario por su ID y rol
    * @param userId - ID del usuario
    * @param role - Rol del usuario
-   * @returns Datos del usuario (sin password_hash)
+   * @returns Datos del usuario (sin passwordHash)
    * @throws NotFoundException si el usuario no existe
    */
   async getProfile(userId: string, role: string) {
@@ -160,7 +160,7 @@ export class AuthService {
           email: true,
           nombre: true,
           apellido: true,
-          fecha_registro: true,
+          fechaRegistro: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -187,14 +187,14 @@ export class AuthService {
           edad: true,
           nivelEscolar: true,
           fotoUrl: true,
-          nivel_actual: true,
+          nivelActual: true,
           recursos: {
             select: {
-              xp_total: true,
+              xpTotal: true,
             },
           },
           casaId: true,
-          tutor_id: true,
+          tutorId: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -207,7 +207,7 @@ export class AuthService {
       const { recursos, ...rest } = estudiante;
       return {
         ...rest,
-        xp_total: recursos?.xp_total ?? 0,
+        xpTotal: recursos?.xpTotal ?? 0,
         role: Role.ESTUDIANTE,
       };
     }
@@ -222,8 +222,8 @@ export class AuthService {
         apellido: true,
         dni: true,
         telefono: true,
-        fecha_registro: true,
-        ha_completado_onboarding: true,
+        fechaRegistro: true,
+        haCompletadoOnboarding: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -256,7 +256,7 @@ export class AuthService {
       where: { id: userId },
       select: {
         id: true,
-        password_hash: true,
+        passwordHash: true,
       },
     });
 
@@ -271,7 +271,7 @@ export class AuthService {
         where: { id: userId },
         select: {
           id: true,
-          password_hash: true,
+          passwordHash: true,
         },
       });
       tipoUsuario = 'tutor';
@@ -281,7 +281,7 @@ export class AuthService {
           where: { id: userId },
           select: {
             id: true,
-            password_hash: true,
+            passwordHash: true,
           },
         });
         tipoUsuario = 'docente';
@@ -291,7 +291,7 @@ export class AuthService {
             where: { id: userId },
             select: {
               id: true,
-              password_hash: true,
+              passwordHash: true,
             },
           });
           tipoUsuario = 'admin';
@@ -308,7 +308,7 @@ export class AuthService {
     // 2. Verificar que la contraseña actual sea correcta
     const passwordValida = await this.passwordService.verify(
       passwordActual,
-      usuario!.password_hash!,
+      usuario!.passwordHash!,
     );
 
     if (!passwordValida) {
@@ -320,8 +320,8 @@ export class AuthService {
 
     // 4. Actualizar el usuario
     const updateData = {
-      password_hash: nuevoHash,
-      fecha_ultimo_cambio: new Date(),
+      passwordHash: nuevoHash,
+      fechaUltimoCambio: new Date(),
     };
 
     if (tipoUsuario === 'estudiante') {
@@ -339,7 +339,7 @@ export class AuthService {
         where: { id: userId },
         data: {
           ...updateData,
-          must_change_password: false, // Resetear flag al cambiar password
+          mustChangePassword: false, // Resetear flag al cambiar password
         },
       });
     } else {
@@ -393,7 +393,7 @@ export class AuthService {
       throw new UnauthorizedException('Usuario no encontrado');
     }
 
-    if (!admin.mfa_enabled || !admin.mfa_secret) {
+    if (!admin.mfaEnabled || !admin.mfaSecret) {
       throw new UnauthorizedException(
         'MFA no está habilitado para este usuario',
       );
@@ -410,21 +410,21 @@ export class AuthService {
       };
       isValid = authenticator.verify({
         token: totpCode,
-        secret: admin.mfa_secret,
+        secret: admin.mfaSecret,
       });
     } else if (backupCode) {
       // Verificar backup code
-      for (const [index, hashedCode] of admin.mfa_backup_codes.entries()) {
+      for (const [index, hashedCode] of admin.mfaBackupCodes.entries()) {
         const isMatch = await bcrypt.compare(backupCode, hashedCode);
         if (isMatch) {
           isValid = true;
           // Eliminar el código usado (single-use)
-          const updatedCodes = admin.mfa_backup_codes.filter(
+          const updatedCodes = admin.mfaBackupCodes.filter(
             (_, i) => i !== index,
           );
           await this.prisma.admin.update({
             where: { id: userId },
-            data: { mfa_backup_codes: updatedCodes },
+            data: { mfaBackupCodes: updatedCodes },
           });
           this.logger.warn(
             `Código de backup usado para ${admin.email}. Códigos restantes: ${updatedCodes.length}`,
@@ -469,7 +469,7 @@ export class AuthService {
         email: admin.email,
         nombre: admin.nombre,
         apellido: admin.apellido,
-        fecha_registro: admin.fecha_registro,
+        fechaRegistro: admin.fechaRegistro,
         dni: admin.dni ?? null,
         telefono: admin.telefono ?? null,
         role: Role.ADMIN,

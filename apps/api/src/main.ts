@@ -217,8 +217,13 @@ async function bootstrap() {
 
   // Global interceptors (aplicar DESPUÉS de ValidationPipe y filters)
   // ORDEN IMPORTANTE: Los interceptors se ejecutan en orden de registro
+  //
+  // RESPONSE FLOW (después del controller):
   // 1. CamelCaseResponseInterceptor - Transforma snake_case → camelCase
   // 2. TransformResponseInterceptor - Envuelve en formato {data, metadata}
+  //
+  // NOTA: No usamos SnakeCaseRequestInterceptor porque los DTOs deben usar camelCase
+  // consistentemente. Los DTOs que aún usan snake_case deben migrarse individualmente.
   app.useGlobalInterceptors(
     new CamelCaseResponseInterceptor(),
     new TransformResponseInterceptor(),

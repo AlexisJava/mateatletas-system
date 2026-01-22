@@ -45,24 +45,24 @@ describe('ObservacionesService', () => {
   const mockComision = {
     id: 'comision-1',
     nombre: 'Matemáticas 101',
-    docente_id: 'docente-1',
+    docenteId: 'docente-1',
   };
 
   const mockObservacion = {
     id: 'obs-1',
-    docente_id: 'docente-1',
-    comision_id: 'comision-1',
+    docenteId: 'docente-1',
+    comisionId: 'comision-1',
     contenido: 'Observación de prueba con contenido suficiente',
-    fecha_evento: new Date('2024-01-15'),
+    fechaEvento: new Date('2024-01-15'),
     tipo: TipoObservacion.Academica,
     prioridad: PrioridadObservacion.Baja,
-    requiere_seguimiento: false,
-    notificar_admin: false,
-    notificar_pedagogia: false,
+    requiereSeguimiento: false,
+    notificarAdmin: false,
+    notificarPedagogia: false,
     estado: EstadoObservacion.Abierta,
-    created_at: new Date(),
-    updated_at: new Date(),
-    estudiantes: [{ estudiante_id: 'estudiante-1', observacion_id: 'obs-1' }],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    estudiantes: [{ estudianteId: 'estudiante-1', observacionId: 'obs-1' }],
     seguimientos: [],
   };
 
@@ -124,7 +124,7 @@ describe('ObservacionesService', () => {
 
         mockPrismaService.comision.findFirst.mockResolvedValue(mockComision);
         mockPrismaService.inscripcionComision.findMany.mockResolvedValue([
-          { estudiante_id: 'estudiante-1', comision_id: 'comision-1' },
+          { estudianteId: 'estudiante-1', comisionId: 'comision-1' },
         ]);
         mockPrismaService.observacion.create.mockResolvedValue(mockObservacion);
 
@@ -149,16 +149,16 @@ describe('ObservacionesService', () => {
 
         mockPrismaService.comision.findFirst.mockResolvedValue(mockComision);
         mockPrismaService.inscripcionComision.findMany.mockResolvedValue([
-          { estudiante_id: 'estudiante-1', comision_id: 'comision-1' },
-          { estudiante_id: 'estudiante-2', comision_id: 'comision-1' },
-          { estudiante_id: 'estudiante-3', comision_id: 'comision-1' },
+          { estudianteId: 'estudiante-1', comisionId: 'comision-1' },
+          { estudianteId: 'estudiante-2', comisionId: 'comision-1' },
+          { estudianteId: 'estudiante-3', comisionId: 'comision-1' },
         ]);
         mockPrismaService.observacion.create.mockResolvedValue({
           ...mockObservacion,
           estudiantes: [
-            { estudiante_id: 'estudiante-1' },
-            { estudiante_id: 'estudiante-2' },
-            { estudiante_id: 'estudiante-3' },
+            { estudianteId: 'estudiante-1' },
+            { estudianteId: 'estudiante-2' },
+            { estudianteId: 'estudiante-3' },
           ],
         });
 
@@ -214,7 +214,7 @@ describe('ObservacionesService', () => {
         );
       });
 
-      it('should_fail_when_fecha_evento_is_future', async () => {
+      it('should_fail_when_fechaEvento_is_future', async () => {
         // Arrange
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -234,7 +234,7 @@ describe('ObservacionesService', () => {
     });
 
     describe('Reglas de negocio automáticas', () => {
-      it('should_auto_set_notificar_admin_when_prioridad_urgente', async () => {
+      it('should_auto_set_notificarAdmin_when_prioridad_urgente', async () => {
         // Arrange
         const dto = {
           estudianteIds: ['estudiante-1'],
@@ -248,7 +248,7 @@ describe('ObservacionesService', () => {
 
         mockPrismaService.comision.findFirst.mockResolvedValue(mockComision);
         mockPrismaService.inscripcionComision.findMany.mockResolvedValue([
-          { estudiante_id: 'estudiante-1', comision_id: 'comision-1' },
+          { estudianteId: 'estudiante-1', comisionId: 'comision-1' },
         ]);
         mockPrismaService.observacion.create.mockImplementation((args) => {
           return Promise.resolve({
@@ -265,13 +265,13 @@ describe('ObservacionesService', () => {
         expect(mockPrismaService.observacion.create).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
-              notificar_admin: true,
+              notificarAdmin: true,
             }),
           }),
         );
       });
 
-      it('should_auto_set_requiere_seguimiento_when_tipo_incidente', async () => {
+      it('should_auto_set_requiereSeguimiento_when_tipo_incidente', async () => {
         // Arrange
         const dto = {
           estudianteIds: ['estudiante-1'],
@@ -284,7 +284,7 @@ describe('ObservacionesService', () => {
 
         mockPrismaService.comision.findFirst.mockResolvedValue(mockComision);
         mockPrismaService.inscripcionComision.findMany.mockResolvedValue([
-          { estudiante_id: 'estudiante-1', comision_id: 'comision-1' },
+          { estudianteId: 'estudiante-1', comisionId: 'comision-1' },
         ]);
         mockPrismaService.observacion.create.mockImplementation((args) => {
           return Promise.resolve({
@@ -300,7 +300,7 @@ describe('ObservacionesService', () => {
         expect(mockPrismaService.observacion.create).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
-              requiere_seguimiento: true,
+              requiereSeguimiento: true,
             }),
           }),
         );
@@ -318,7 +318,7 @@ describe('ObservacionesService', () => {
 
         mockPrismaService.comision.findFirst.mockResolvedValue(mockComision);
         mockPrismaService.inscripcionComision.findMany.mockResolvedValue([
-          { estudiante_id: 'estudiante-1', comision_id: 'comision-1' },
+          { estudianteId: 'estudiante-1', comisionId: 'comision-1' },
         ]);
         mockPrismaService.observacion.create.mockImplementation((args) => {
           return Promise.resolve({
@@ -352,7 +352,7 @@ describe('ObservacionesService', () => {
 
         mockPrismaService.comision.findFirst.mockResolvedValue(mockComision);
         mockPrismaService.inscripcionComision.findMany.mockResolvedValue([
-          { estudiante_id: 'estudiante-1', comision_id: 'comision-1' },
+          { estudianteId: 'estudiante-1', comisionId: 'comision-1' },
         ]);
         mockPrismaService.observacion.create.mockImplementation((args) => {
           return Promise.resolve({
@@ -425,11 +425,11 @@ describe('ObservacionesService', () => {
 
         mockPrismaService.comision.findMany.mockResolvedValue([mockComision]);
         mockPrismaService.inscripcionComision.findMany.mockResolvedValue([
-          { estudiante_id: 'estudiante-1', comision_id: 'comision-1' },
+          { estudianteId: 'estudiante-1', comisionId: 'comision-1' },
         ]);
         mockPrismaService.observacion.create.mockResolvedValue({
           ...mockObservacion,
-          comision_id: null,
+          comisionId: null,
         });
 
         // Act
@@ -481,11 +481,11 @@ describe('ObservacionesService', () => {
           });
         mockPrismaService.seguimientoObservacion.create.mockResolvedValue({
           id: 'seg-1',
-          observacion_id: 'obs-1',
-          autor_id: 'docente-1',
-          autor_tipo: 'Docente',
+          observacionId: 'obs-1',
+          autorId: 'docente-1',
+          autorTipo: 'Docente',
           contenido: 'Seguimiento agregado por el autor',
-          created_at: new Date(),
+          createdAt: new Date(),
         });
         mockPrismaService.observacion.update.mockResolvedValue({
           ...mockObservacion,
@@ -520,11 +520,11 @@ describe('ObservacionesService', () => {
           });
         mockPrismaService.seguimientoObservacion.create.mockResolvedValue({
           id: 'seg-1',
-          observacion_id: 'obs-1',
-          autor_id: 'admin-1',
-          autor_tipo: 'Admin',
+          observacionId: 'obs-1',
+          autorId: 'admin-1',
+          autorTipo: 'Admin',
           contenido: 'Seguimiento de administración sobre el caso',
-          created_at: new Date(),
+          createdAt: new Date(),
         });
         mockPrismaService.observacion.update.mockResolvedValue({
           ...mockObservacion,
@@ -965,7 +965,7 @@ describe('ObservacionesService', () => {
         expect(mockPrismaService.observacion.findMany).toHaveBeenCalledWith(
           expect.objectContaining({
             where: expect.objectContaining({
-              docente_id: 'docente-1',
+              docenteId: 'docente-1',
             }),
           }),
         );
@@ -984,10 +984,10 @@ describe('ObservacionesService', () => {
         // Assert
         const callArgs =
           mockPrismaService.observacion.findMany.mock.calls[0][0];
-        expect(callArgs.where.docente_id).toBeUndefined();
+        expect(callArgs.where.docenteId).toBeUndefined();
       });
 
-      it('should_order_by_created_at_desc', async () => {
+      it('should_order_by_createdAt_desc', async () => {
         // Arrange
         mockPrismaService.observacion.findMany.mockResolvedValue([
           mockObservacion,
@@ -1000,7 +1000,7 @@ describe('ObservacionesService', () => {
         // Assert
         expect(mockPrismaService.observacion.findMany).toHaveBeenCalledWith(
           expect.objectContaining({
-            orderBy: { created_at: 'desc' },
+            orderBy: { createdAt: 'desc' },
           }),
         );
       });
@@ -1083,7 +1083,7 @@ describe('ObservacionesService', () => {
           expect.objectContaining({
             where: expect.objectContaining({
               estudiantes: {
-                some: { estudiante_id: 'estudiante-1' },
+                some: { estudianteId: 'estudiante-1' },
               },
             }),
           }),
@@ -1102,7 +1102,7 @@ describe('ObservacionesService', () => {
         expect(mockPrismaService.observacion.findMany).toHaveBeenCalledWith(
           expect.objectContaining({
             where: expect.objectContaining({
-              comision_id: 'comision-1',
+              comisionId: 'comision-1',
             }),
           }),
         );
@@ -1126,7 +1126,7 @@ describe('ObservacionesService', () => {
         expect(mockPrismaService.observacion.findMany).toHaveBeenCalledWith(
           expect.objectContaining({
             where: expect.objectContaining({
-              fecha_evento: {
+              fechaEvento: {
                 gte: expect.any(Date),
                 lte: expect.any(Date),
               },
@@ -1135,7 +1135,7 @@ describe('ObservacionesService', () => {
         );
       });
 
-      it('should_filter_by_requiere_seguimiento', async () => {
+      it('should_filter_by_requiereSeguimiento', async () => {
         // Arrange
         mockPrismaService.observacion.findMany.mockResolvedValue([]);
         mockPrismaService.observacion.count.mockResolvedValue(0);
@@ -1147,7 +1147,7 @@ describe('ObservacionesService', () => {
         expect(mockPrismaService.observacion.findMany).toHaveBeenCalledWith(
           expect.objectContaining({
             where: expect.objectContaining({
-              requiere_seguimiento: true,
+              requiereSeguimiento: true,
             }),
           }),
         );

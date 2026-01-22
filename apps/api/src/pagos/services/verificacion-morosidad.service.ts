@@ -7,10 +7,10 @@ type InscripcionMensualConRelaciones = Prisma.InscripcionMensualGetPayload<{
   select: {
     id: true;
     periodo: true;
-    precio_final: true;
-    estado_pago: true;
-    estudiante_id: true;
-    tutor_id: true;
+    precioFinal: true;
+    estadoPago: true;
+    estudianteId: true;
+    tutorId: true;
     estudiante: {
       select: {
         id: true;
@@ -34,7 +34,7 @@ type InscripcionMensualBasica = Prisma.InscripcionMensualGetPayload<{
   select: {
     id: true;
     periodo: true;
-    precio_final: true;
+    precioFinal: true;
   };
 }>;
 
@@ -53,19 +53,19 @@ type EstudianteConDeuda = Prisma.EstudianteGetPayload<{
         telefono: true;
       };
     };
-    inscripciones_mensuales: {
+    inscripcionesMensuales: {
       select: {
         id: true;
         periodo: true;
-        precio_final: true;
-        estado_pago: true;
+        precioFinal: true;
+        estadoPago: true;
       };
     };
   };
 }>;
 
 type InscripcionMensualDeEstudiante =
-  EstudianteConDeuda['inscripciones_mensuales'][number];
+  EstudianteConDeuda['inscripcionesMensuales'][number];
 
 interface DetalleDeuda {
   periodo: string;
@@ -125,8 +125,8 @@ export class VerificacionMorosidadService {
     const inscripcionesPendientes =
       await this.prisma.inscripcionMensual.findMany({
         where: {
-          estudiante_id: estudianteId,
-          estado_pago: 'Pendiente',
+          estudianteId: estudianteId,
+          estadoPago: 'Pendiente',
         },
         select: {
           periodo: true,
@@ -156,16 +156,16 @@ export class VerificacionMorosidadService {
     const inscripcionesPendientes =
       (await this.prisma.inscripcionMensual.findMany({
         where: {
-          tutor_id: tutorId,
-          estado_pago: 'Pendiente',
+          tutorId: tutorId,
+          estadoPago: 'Pendiente',
         },
         select: {
           id: true,
           periodo: true,
-          precio_final: true,
-          estado_pago: true,
-          estudiante_id: true,
-          tutor_id: true,
+          precioFinal: true,
+          estadoPago: true,
+          estudianteId: true,
+          tutorId: true,
           estudiante: {
             select: {
               id: true,
@@ -209,7 +209,7 @@ export class VerificacionMorosidadService {
         {
           registro,
         }: InscripcionConFechaVencimiento<InscripcionMensualConRelaciones>,
-      ) => sum + Number(registro.precio_final),
+      ) => sum + Number(registro.precioFinal),
       0,
     );
 
@@ -219,7 +219,7 @@ export class VerificacionMorosidadService {
           ({
             registro,
           }: InscripcionConFechaVencimiento<InscripcionMensualConRelaciones>) =>
-            registro.estudiante_id,
+            registro.estudianteId,
         ),
       ),
     );
@@ -243,7 +243,7 @@ export class VerificacionMorosidadService {
             estudianteId: registro.estudiante.id,
             estudianteNombre: `${registro.estudiante.nombre} ${registro.estudiante.apellido}`,
             periodo: registro.periodo,
-            monto: Number(registro.precio_final),
+            monto: Number(registro.precioFinal),
             fechaVencimiento,
             diasVencido,
           };
@@ -264,9 +264,9 @@ export class VerificacionMorosidadService {
 
     const estudiantesPendientes = (await this.prisma.estudiante.findMany({
       where: {
-        inscripciones_mensuales: {
+        inscripcionesMensuales: {
           some: {
-            estado_pago: 'Pendiente',
+            estadoPago: 'Pendiente',
             periodo: {
               lte: periodoActual,
             },
@@ -287,9 +287,9 @@ export class VerificacionMorosidadService {
             telefono: true,
           },
         },
-        inscripciones_mensuales: {
+        inscripcionesMensuales: {
           where: {
-            estado_pago: 'Pendiente',
+            estadoPago: 'Pendiente',
             periodo: {
               lte: periodoActual,
             },
@@ -300,8 +300,8 @@ export class VerificacionMorosidadService {
           select: {
             id: true,
             periodo: true,
-            precio_final: true,
-            estado_pago: true,
+            precioFinal: true,
+            estadoPago: true,
           },
         },
       },
@@ -310,7 +310,7 @@ export class VerificacionMorosidadService {
     const estudiantesMorosos = estudiantesPendientes
       .map<EstudianteMorosoDetalle | null>((estudiante: EstudianteConDeuda) => {
         const inscripcionesConFecha: InscripcionConFechaVencimiento<InscripcionMensualDeEstudiante>[] =
-          estudiante.inscripciones_mensuales.map(
+          estudiante.inscripcionesMensuales.map(
             (inscripcion: InscripcionMensualDeEstudiante) => ({
               registro: inscripcion,
               fechaVencimiento: calcularFechaVencimiento(inscripcion.periodo),
@@ -334,7 +334,7 @@ export class VerificacionMorosidadService {
             {
               registro,
             }: InscripcionConFechaVencimiento<InscripcionMensualDeEstudiante>,
-          ) => sum + Number(registro.precio_final),
+          ) => sum + Number(registro.precioFinal),
           0,
         );
 
@@ -350,7 +350,7 @@ export class VerificacionMorosidadService {
 
             return {
               periodo: registro.periodo,
-              monto: Number(registro.precio_final),
+              monto: Number(registro.precioFinal),
               fechaVencimiento,
               diasVencido,
             };
@@ -403,8 +403,8 @@ export class VerificacionMorosidadService {
     const inscripcionesPendientes =
       (await this.prisma.inscripcionMensual.findMany({
         where: {
-          estudiante_id: estudianteId,
-          estado_pago: 'Pendiente',
+          estudianteId: estudianteId,
+          estadoPago: 'Pendiente',
           periodo: {
             lte: periodoActual,
           },
@@ -412,7 +412,7 @@ export class VerificacionMorosidadService {
         select: {
           id: true,
           periodo: true,
-          precio_final: true,
+          precioFinal: true,
         },
         orderBy: {
           periodo: 'asc',
@@ -444,7 +444,7 @@ export class VerificacionMorosidadService {
       (
         sum: number,
         { registro }: InscripcionConFechaVencimiento<InscripcionMensualBasica>,
-      ) => sum + Number(registro.precio_final),
+      ) => sum + Number(registro.precioFinal),
       0,
     );
 

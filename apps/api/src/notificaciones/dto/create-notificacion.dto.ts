@@ -110,8 +110,8 @@ export class CreateNotificacionDto {
   // ═══════════════════════════════════════════════════════════════
 
   @ApiPropertyOptional({
-    description: 'Metadata adicional (clase_id, urls, etc)',
-    example: { clase_id: 'clxx123...', url: '/dashboard' },
+    description: 'Metadata adicional (claseId, urls, etc)',
+    example: { claseId: 'clxx123...', url: '/dashboard' },
   })
   @IsOptional()
   @IsObject()

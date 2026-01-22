@@ -39,7 +39,7 @@ export class MercadoPagoWebhookDto {
 
   @IsString()
   @IsNotEmpty()
-  user_id!: string; // ID del usuario de MercadoPago
+  userId!: string; // ID del usuario de MercadoPago
 
   @IsString()
   @IsNotEmpty()

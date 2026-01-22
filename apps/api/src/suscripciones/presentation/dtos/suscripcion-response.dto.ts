@@ -22,7 +22,7 @@ export interface ClaseGrupoResponseDto {
   id: string;
   nombre: string;
   horario: string;
-  dia_semana: string;
+  diaSemana: string;
 }
 
 /**
@@ -33,7 +33,7 @@ export interface EstudianteSuscripcionDto {
   nombre: string;
   apellido: string;
   casa: string | null;
-  clase_grupo?: ClaseGrupoResponseDto;
+  claseGrupo?: ClaseGrupoResponseDto;
 }
 
 /**
@@ -42,7 +42,7 @@ export interface EstudianteSuscripcionDto {
 export interface AlertaSuscripcionDto {
   tipo: 'EN_GRACIA' | 'PROXIMO_COBRO' | 'MOROSA';
   mensaje: string;
-  dias_restantes: number;
+  diasRestantes: number;
 }
 
 /**
@@ -52,11 +52,11 @@ export interface SuscripcionListItemDto {
   id: string;
   estado: EstadoSuscripcion;
   plan: PlanResponseDto;
-  monto_final: number;
-  descuento_aplicado: number;
-  fecha_inicio: Date | null;
-  proximo_cobro: Date | null;
-  dias_restantes: number | null;
+  montoFinal: number;
+  descuentoAplicado: number;
+  fechaInicio: Date | null;
+  proximoCobro: Date | null;
+  diasRestantes: number | null;
   estudiantes: EstudianteSuscripcionDto[];
   alerta?: AlertaSuscripcionDto;
 }
@@ -76,7 +76,7 @@ export interface PagoSuscripcionDto {
   fecha: Date;
   monto: number;
   estado: string;
-  metodo_pago: string;
+  metodoPago: string;
 }
 
 /**
@@ -84,7 +84,7 @@ export interface PagoSuscripcionDto {
  */
 export interface SuscripcionDetalleDto extends SuscripcionListItemDto {
   pagos: PagoSuscripcionDto[];
-  historial_estados: HistorialEstadoDto[];
+  historialEstados: HistorialEstadoDto[];
 }
 
 /**
@@ -92,8 +92,8 @@ export interface SuscripcionDetalleDto extends SuscripcionListItemDto {
  */
 export interface HistorialEstadoDto {
   fecha: Date;
-  estado_anterior: EstadoSuscripcion | null;
-  estado_nuevo: EstadoSuscripcion;
+  estadoAnterior: EstadoSuscripcion | null;
+  estadoNuevo: EstadoSuscripcion;
   motivo: string | null;
 }
 
@@ -105,13 +105,13 @@ export interface HistorialEstadoDto {
  * 2. Bricks: cobrado_inmediatamente=true, init_point es null
  */
 export interface CrearSuscripcionResponseDto {
-  suscripcion_id: string;
+  suscripcionId: string;
   /** URL de checkout de MercadoPago (null si se cobró con Bricks) */
   init_point: string | null;
-  monto_final: number;
-  descuento_aplicado: number;
+  montoFinal: number;
+  descuentoAplicado: number;
   /** Indica si se cobró inmediatamente con Bricks */
-  cobrado_inmediatamente: boolean;
+  cobradoInmediatamente: boolean;
 }
 
 /**
@@ -119,7 +119,7 @@ export interface CrearSuscripcionResponseDto {
  */
 export interface CancelarSuscripcionResponseDto {
   mensaje: string;
-  fecha_fin_acceso: Date;
+  fechaFinAcceso: Date;
 }
 
 /**

@@ -36,7 +36,7 @@ import {
   MetricasSuscripcionesDto,
 } from './dtos';
 
-/** Planes que requieren clase_grupo_id */
+/** Planes que requieren claseGrupoId */
 const PLANES_CON_CLASE = ['STEAM_ASINCRONICO', 'STEAM_SINCRONICO'];
 
 /**
@@ -96,22 +96,22 @@ export class SuscripcionesController {
     @GetUser() user: AuthUser,
   ): Promise<CrearSuscripcionResponseDto> {
     const {
-      plan_id,
-      estudiante_ids,
-      clase_grupo_id,
-      card_token_id,
-      payer_email,
+      planId,
+      estudianteIds,
+      claseGrupoId,
+      card_token_id: cardTokenId,
+      payer_email: payerEmail,
     } = dto;
 
     // 1. Validar que estudiantes pertenezcan al tutor
     const estudiantes = await this.prisma.estudiante.findMany({
       where: {
-        id: { in: estudiante_ids },
-        tutor_id: user.id,
+        id: { in: estudianteIds },
+        tutorId: user.id,
       },
     });
 
-    if (estudiantes.length !== estudiante_ids.length) {
+    if (estudiantes.length !== estudianteIds.length) {
       throw new BadRequestException(
         'Algunos estudiantes no pertenecen a tu cuenta',
       );
@@ -119,23 +119,23 @@ export class SuscripcionesController {
 
     // 2. Validar que el plan existe
     const plan = await this.prisma.planSuscripcion.findUnique({
-      where: { id: plan_id },
+      where: { id: planId },
     });
 
     if (!plan || !plan.activo) {
       throw new BadRequestException('El plan seleccionado no está disponible');
     }
 
-    // 3. Validar clase_grupo si el plan lo requiere
+    // 3. Validar claseGrupo si el plan lo requiere
     if (PLANES_CON_CLASE.includes(plan.nombre)) {
-      if (!clase_grupo_id) {
+      if (!claseGrupoId) {
         throw new BadRequestException(
           `El plan ${plan.nombre} requiere seleccionar una clase`,
         );
       }
 
       const claseGrupo = await this.prisma.claseGrupo.findUnique({
-        where: { id: clase_grupo_id },
+        where: { id: claseGrupoId },
         include: {
           _count: { select: { inscripciones: true } },
         },
@@ -149,8 +149,8 @@ export class SuscripcionesController {
 
       // Validar cupo
       const cupoDisponible =
-        claseGrupo.cupo_maximo - claseGrupo._count.inscripciones;
-      if (cupoDisponible < estudiante_ids.length) {
+        claseGrupo.cupoMaximo - claseGrupo._count.inscripciones;
+      if (cupoDisponible < estudianteIds.length) {
         throw new BadRequestException(
           `La clase no tiene cupo suficiente. Disponible: ${cupoDisponible}`,
         );
@@ -162,19 +162,19 @@ export class SuscripcionesController {
       tutorId: user.id,
       tutorEmail: user.email,
       tutorNombre: user.email?.split('@')[0] || 'Tutor',
-      planId: plan_id,
-      numeroHijo: estudiante_ids.length,
+      planId: planId,
+      numeroHijo: estudianteIds.length,
       // Campos opcionales para MercadoPago Bricks (cobro inmediato)
-      cardTokenId: card_token_id,
-      payerEmail: payer_email,
+      cardTokenId,
+      payerEmail,
     });
 
     return {
-      suscripcion_id: result.suscripcionId,
+      suscripcionId: result.suscripcionId,
       init_point: result.checkoutUrl,
-      monto_final: result.precioFinal,
-      descuento_aplicado: result.descuentoPorcentaje,
-      cobrado_inmediatamente: result.cobradoInmediatamente,
+      montoFinal: result.precioFinal,
+      descuentoAplicado: result.descuentoPorcentaje,
+      cobradoInmediatamente: result.cobradoInmediatamente,
     };
   }
 
@@ -207,8 +207,8 @@ export class SuscripcionesController {
   async adminListar(
     @Query() filtros: AdminFiltrosSuscripcionDto,
   ): Promise<AdminSuscripcionesResponseDto> {
-    const { estado, plan_id, page = 1, limit = 20 } = filtros;
-    return this.adminService.listarTodas({ estado, plan_id }, { page, limit });
+    const { estado, planId, page = 1, limit = 20 } = filtros;
+    return this.adminService.listarTodas({ estado, planId }, { page, limit });
   }
 
   /**
@@ -272,7 +272,7 @@ export class SuscripcionesController {
       throw new BadRequestException('Suscripción no encontrada');
     }
 
-    if (suscripcion.tutor_id !== user.id) {
+    if (suscripcion.tutorId !== user.id) {
       throw new BadRequestException(
         'No autorizado para cancelar esta suscripción',
       );
@@ -296,12 +296,12 @@ export class SuscripcionesController {
     });
 
     // La fecha fin de acceso es el próximo cobro (ya pagado)
-    const fechaFinAcceso = suscripcion.fecha_proximo_cobro || new Date();
+    const fechaFinAcceso = suscripcion.fechaProximoCobro || new Date();
 
     return {
       mensaje:
         'Suscripción cancelada exitosamente. Tendrás acceso hasta el fin del período pagado.',
-      fecha_fin_acceso: fechaFinAcceso,
+      fechaFinAcceso: fechaFinAcceso,
     };
   }
 

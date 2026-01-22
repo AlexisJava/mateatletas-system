@@ -17,7 +17,7 @@ type TipoUsuario = 'estudiante' | 'tutor' | 'docente' | 'admin';
  */
 interface UserPasswordData {
   id: string;
-  password_hash: string | null;
+  passwordHash: string | null;
 }
 
 /**
@@ -92,7 +92,7 @@ export class CambiarPasswordUseCase {
   ): Promise<{ usuario: UserPasswordData; tipoUsuario: TipoUsuario }> {
     const selectFields = {
       id: true,
-      password_hash: true,
+      passwordHash: true,
     };
 
     // Intentar estudiante
@@ -141,11 +141,11 @@ export class CambiarPasswordUseCase {
     usuario: UserPasswordData,
     passwordActual: string,
   ): Promise<void> {
-    if (!usuario.password_hash) {
+    if (!usuario.passwordHash) {
       throw new UnauthorizedException('Contraseña actual incorrecta');
     }
 
-    const isValid = await bcrypt.compare(passwordActual, usuario.password_hash);
+    const isValid = await bcrypt.compare(passwordActual, usuario.passwordHash);
 
     if (!isValid) {
       throw new UnauthorizedException('Contraseña actual incorrecta');
@@ -161,8 +161,8 @@ export class CambiarPasswordUseCase {
     nuevoHash: string,
   ): Promise<void> {
     const updateData = {
-      password_hash: nuevoHash,
-      fecha_ultimo_cambio: new Date(),
+      passwordHash: nuevoHash,
+      fechaUltimoCambio: new Date(),
     };
 
     switch (tipoUsuario) {
@@ -183,7 +183,7 @@ export class CambiarPasswordUseCase {
           where: { id: userId },
           data: {
             ...updateData,
-            must_change_password: false, // Resetear flag al cambiar password
+            mustChangePassword: false, // Resetear flag al cambiar password
           },
         });
         break;

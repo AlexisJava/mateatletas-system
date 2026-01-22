@@ -26,9 +26,9 @@ export interface EstudianteLoginResult {
     nivelEscolar: string;
     fotoUrl: string | null;
     avatarUrl: string | null;
-    animacion_idle_url: string | null;
-    xp_total: number;
-    nivel_actual: number;
+    animacionIdleUrl: string | null;
+    xpTotal: number;
+    nivelActual: number;
     casa: {
       id: string;
       nombre: string;
@@ -106,7 +106,7 @@ export class EstudianteAuthService {
         },
         recursos: {
           select: {
-            xp_total: true,
+            xpTotal: true,
           },
         },
       },
@@ -116,7 +116,7 @@ export class EstudianteAuthService {
     const verificationResult =
       await this.passwordService.verifyWithTimingProtection(
         password,
-        estudiante?.password_hash ?? null,
+        estudiante?.passwordHash ?? null,
       );
 
     // 3. Validar credenciales
@@ -165,9 +165,9 @@ export class EstudianteAuthService {
         nivelEscolar: estudiante.nivelEscolar,
         fotoUrl: estudiante.fotoUrl,
         avatarUrl: estudiante.avatarUrl,
-        animacion_idle_url: estudiante.animacion_idle_url,
-        xp_total: estudiante.recursos?.xp_total ?? 0,
-        nivel_actual: estudiante.nivel_actual,
+        animacionIdleUrl: estudiante.animacionIdleUrl,
+        xpTotal: estudiante.recursos?.xpTotal ?? 0,
+        nivelActual: estudiante.nivelActual,
         casa: estudiante.casa,
         tutor: estudiante.tutor,
         role: Role.ESTUDIANTE,
@@ -186,7 +186,7 @@ export class EstudianteAuthService {
   }): Promise<void> {
     // Verificar si es primer login (no tiene logros desbloqueados)
     const logrosDesbloqueados = await this.prisma.logroEstudiante.count({
-      where: { estudiante_id: estudiante.id },
+      where: { estudianteId: estudiante.id },
     });
 
     const esPrimerLogin = logrosDesbloqueados === 0;
@@ -224,7 +224,7 @@ export class EstudianteAuthService {
     const newHash = await this.passwordService.hash(plainPassword);
     await this.prisma.estudiante.update({
       where: { id: estudianteId },
-      data: { password_hash: newHash },
+      data: { passwordHash: newHash },
     });
     this.logger.log(`Password hash upgraded for estudiante ${estudianteId}`);
   }

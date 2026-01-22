@@ -66,10 +66,10 @@ describe('Optimistic Locking', () => {
   // Datos de prueba
   const mockSuscripcion = {
     id: 'suscripcion-123',
-    tutor_id: 'tutor-123',
-    plan_id: 'plan-123',
+    tutorId: 'tutor-123',
+    planId: 'plan-123',
     estado: EstadoSuscripcion.ACTIVA,
-    mp_preapproval_id: 'mp-123',
+    mpPreapprovalId: 'mp-123',
     version: 1, // Versión actual
     plan: { nombre: 'STEAM' },
   };
@@ -176,14 +176,14 @@ describe('Optimistic Locking', () => {
       api_version: 'v1',
       date_created: new Date().toISOString(),
       live_mode: false,
-      user_id: 'user-123',
+      userId: 'user-123',
       data: { id: 'mp-preapproval-123' },
     };
 
     const preapprovalDetail = {
       id: 'mp-preapproval-123',
       status: 'authorized' as const,
-      external_reference: 'suscripcion-123',
+      externalReference: 'suscripcion-123',
       payer_email: 'test@test.com',
       payer_id: 123,
       reason: 'Test',

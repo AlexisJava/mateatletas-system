@@ -23,8 +23,8 @@ type ListarPlanificacionesOptions = {
   page?: number;
   limit?: number;
   estado?: EstadoPlanificacion;
-  casa_tipo?: CasaTipo;
-  mundo_tipo?: MundoTipo;
+  casaTipo?: CasaTipo;
+  mundoTipo?: MundoTipo;
 };
 
 /**
@@ -60,13 +60,13 @@ export class AdminPlanificacionesService {
     const planificacion = await this.prisma.$transaction(async (tx) => {
       // 1. Crear contenidos vacíos para cada clase
       const clasesData = [];
-      for (let i = 1; i <= dto.cantidad_clases; i++) {
+      for (let i = 1; i <= dto.cantidadClases; i++) {
         // Crear contenido de teoría
         const teoria = await tx.contenido.create({
           data: {
             titulo: `${dto.titulo} - Clase ${i} (Teoría)`,
-            casaTipo: dto.casa_tipo,
-            mundoTipo: dto.mundo_tipo,
+            casaTipo: dto.casaTipo,
+            mundoTipo: dto.mundoTipo,
             estado: 'BORRADOR',
             tipo: 'LECCION',
             creadorId: creadorId,
@@ -101,8 +101,8 @@ export class AdminPlanificacionesService {
         const practica = await tx.contenido.create({
           data: {
             titulo: `${dto.titulo} - Clase ${i} (Práctica)`,
-            casaTipo: dto.casa_tipo,
-            mundoTipo: dto.mundo_tipo,
+            casaTipo: dto.casaTipo,
+            mundoTipo: dto.mundoTipo,
             estado: 'BORRADOR',
             tipo: 'TAREA',
             creadorId: creadorId,
@@ -137,8 +137,8 @@ export class AdminPlanificacionesService {
           numero: i,
           titulo: `Clase ${i}`,
           descripcion: null,
-          teoria_id: teoria.id,
-          practica_id: practica.id,
+          teoriaId: teoria.id,
+          practicaId: practica.id,
         });
       }
 
@@ -147,9 +147,9 @@ export class AdminPlanificacionesService {
         data: {
           titulo: dto.titulo,
           descripcion: dto.descripcion ?? null,
-          cantidad_clases: dto.cantidad_clases,
-          casa_tipo: dto.casa_tipo,
-          mundo_tipo: dto.mundo_tipo,
+          cantidadClases: dto.cantidadClases,
+          casaTipo: dto.casaTipo,
+          mundoTipo: dto.mundoTipo,
           estado: 'BORRADOR',
           clases: {
             create: clasesData,
@@ -230,8 +230,8 @@ export class AdminPlanificacionesService {
 
     const where = {
       ...(options?.estado && { estado: options.estado }),
-      ...(options?.casa_tipo && { casa_tipo: options.casa_tipo }),
-      ...(options?.mundo_tipo && { mundo_tipo: options.mundo_tipo }),
+      ...(options?.casaTipo && { casaTipo: options.casaTipo }),
+      ...(options?.mundoTipo && { mundoTipo: options.mundoTipo }),
     };
 
     const [planificaciones, total] = await Promise.all([
@@ -250,7 +250,7 @@ export class AdminPlanificacionesService {
             orderBy: { numero: 'asc' },
           },
         },
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
@@ -346,18 +346,18 @@ export class AdminPlanificacionesService {
     }
 
     // Validar que los contenidos existan si se proporcionan
-    if (dto.teoria_id) {
+    if (dto.teoriaId) {
       const teoria = await this.prisma.contenido.findUnique({
-        where: { id: dto.teoria_id },
+        where: { id: dto.teoriaId },
       });
       if (!teoria) {
         throw new NotFoundException('Contenido de teoría no encontrado');
       }
     }
 
-    if (dto.practica_id) {
+    if (dto.practicaId) {
       const practica = await this.prisma.contenido.findUnique({
-        where: { id: dto.practica_id },
+        where: { id: dto.practicaId },
       });
       if (!practica) {
         throw new NotFoundException('Contenido de práctica no encontrado');
@@ -369,12 +369,12 @@ export class AdminPlanificacionesService {
       data: {
         ...(dto.titulo && { titulo: dto.titulo }),
         ...(dto.descripcion !== undefined && { descripcion: dto.descripcion }),
-        ...(dto.teoria_id && { teoria_id: dto.teoria_id }),
-        ...(dto.practica_id && { practica_id: dto.practica_id }),
+        ...(dto.teoriaId && { teoriaId: dto.teoriaId }),
+        ...(dto.practicaId && { practicaId: dto.practicaId }),
       },
     });
 
-    return this.obtenerPorId(clase.planificacion_id);
+    return this.obtenerPorId(clase.planificacionId);
   }
 
   /**
@@ -404,7 +404,7 @@ export class AdminPlanificacionesService {
 
     // Validar que el contenido exista
     const contenido = await this.prisma.contenido.findUnique({
-      where: { id: dto.contenido_id },
+      where: { id: dto.contenidoId },
     });
 
     if (!contenido) {
@@ -413,7 +413,7 @@ export class AdminPlanificacionesService {
 
     // Verificar que no exista ya esa tarea
     const tareaExistente = clase.tareas.find(
-      (t) => t.contenido_id === dto.contenido_id,
+      (t) => t.contenidoId === dto.contenidoId,
     );
     if (tareaExistente) {
       throw new BadRequestException('La tarea ya está asignada a esta clase');
@@ -424,14 +424,14 @@ export class AdminPlanificacionesService {
 
     await this.prisma.tareaClase.create({
       data: {
-        clase_id: claseId,
-        contenido_id: dto.contenido_id,
+        claseId: claseId,
+        contenidoId: dto.contenidoId,
         orden,
         obligatoria: dto.obligatoria ?? false,
       },
     });
 
-    return this.obtenerPorId(clase.planificacion_id);
+    return this.obtenerPorId(clase.planificacionId);
   }
 
   /**
@@ -470,7 +470,7 @@ export class AdminPlanificacionesService {
       where: { id: tareaId },
     });
 
-    return this.obtenerPorId(tarea.clase.planificacion_id);
+    return this.obtenerPorId(tarea.clase.planificacionId);
   }
 
   /**
@@ -499,7 +499,7 @@ export class AdminPlanificacionesService {
 
     // Validar que todas las clases tengan teoría y práctica con contenido
     for (const clase of planificacion.clases) {
-      if (!clase.teoria_id || !clase.practica_id) {
+      if (!clase.teoriaId || !clase.practicaId) {
         throw new BadRequestException(
           `La clase ${clase.numero} no tiene teoría o práctica asignada`,
         );
@@ -511,14 +511,14 @@ export class AdminPlanificacionesService {
         await Promise.all([
           this.prisma.nodoContenido.count({
             where: {
-              contenidoId: clase.teoria_id,
+              contenidoId: clase.teoriaId,
               bloqueado: false, // Excluir nodos estructurales
               contenidoJson: { not: null }, // Debe tener contenido
             },
           }),
           this.prisma.nodoContenido.count({
             where: {
-              contenidoId: clase.practica_id,
+              contenidoId: clase.practicaId,
               bloqueado: false,
               contenidoJson: { not: null },
             },
@@ -550,7 +550,7 @@ export class AdminPlanificacionesService {
       for (const clase of planificacion.clases) {
         await tx.contenido.updateMany({
           where: {
-            id: { in: [clase.teoria_id, clase.practica_id] },
+            id: { in: [clase.teoriaId, clase.practicaId] },
           },
           data: { estado: 'PUBLICADO' },
         });
@@ -569,7 +569,7 @@ export class AdminPlanificacionesService {
       where: { id },
       include: {
         clases: {
-          select: { teoria_id: true, practica_id: true },
+          select: { teoriaId: true, practicaId: true },
         },
         asignaciones: true,
       },
@@ -593,7 +593,7 @@ export class AdminPlanificacionesService {
 
     // Recolectar IDs de contenidos a eliminar (teoría y práctica de cada clase)
     const contenidoIds = planificacion.clases.flatMap((c) =>
-      [c.teoria_id, c.practica_id].filter((id): id is string => Boolean(id)),
+      [c.teoriaId, c.practicaId].filter((id): id is string => Boolean(id)),
     );
 
     // Eliminar en transacción: nodos, planificación y contenidos
@@ -633,24 +633,24 @@ export class AdminPlanificacionesService {
     id: string;
     titulo: string;
     descripcion: string | null;
-    cantidad_clases: number;
-    casa_tipo: string;
-    mundo_tipo: string;
+    cantidadClases: number;
+    casaTipo: string;
+    mundoTipo: string;
     estado: string;
-    created_at: Date;
-    updated_at: Date;
+    createdAt: Date;
+    updatedAt: Date;
     clases: Array<{
       id: string;
       numero: number;
       titulo: string;
       descripcion: string | null;
-      teoria_id: string;
-      practica_id: string;
+      teoriaId: string;
+      practicaId: string;
       teoria?: { id: string; titulo: string; estado: string } | null;
       practica?: { id: string; titulo: string; estado: string } | null;
       tareas?: Array<{
         id: string;
-        contenido_id: string;
+        contenidoId: string;
         orden: number;
         obligatoria: boolean;
         contenido: { id: string; titulo: string };
@@ -661,19 +661,19 @@ export class AdminPlanificacionesService {
       id: planificacion.id,
       titulo: planificacion.titulo,
       descripcion: planificacion.descripcion,
-      cantidad_clases: planificacion.cantidad_clases,
-      casa_tipo: planificacion.casa_tipo as CasaTipo,
-      mundo_tipo: planificacion.mundo_tipo as MundoTipo,
+      cantidadClases: planificacion.cantidadClases,
+      casaTipo: planificacion.casaTipo as CasaTipo,
+      mundoTipo: planificacion.mundoTipo as MundoTipo,
       estado: planificacion.estado as EstadoPlanificacion,
-      created_at: planificacion.created_at,
-      updated_at: planificacion.updated_at,
+      createdAt: planificacion.createdAt,
+      updatedAt: planificacion.updatedAt,
       clases: planificacion.clases.map((c) => ({
         id: c.id,
         numero: c.numero,
         titulo: c.titulo,
         descripcion: c.descripcion,
-        teoria_id: c.teoria_id,
-        practica_id: c.practica_id,
+        teoriaId: c.teoriaId,
+        practicaId: c.practicaId,
         teoria: c.teoria
           ? {
               id: c.teoria.id,
@@ -690,7 +690,7 @@ export class AdminPlanificacionesService {
           : undefined,
         tareas: c.tareas?.map((t) => ({
           id: t.id,
-          contenido_id: t.contenido_id,
+          contenidoId: t.contenidoId,
           orden: t.orden,
           obligatoria: t.obligatoria,
           contenido: {

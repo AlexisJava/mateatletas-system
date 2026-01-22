@@ -37,7 +37,7 @@ export class MiProgresoService {
       gamificacion: recursos,
       racha,
       logros: logrosData,
-      actividad_reciente: actividadesData,
+      actividadReciente: actividadesData,
     };
   }
 
@@ -74,20 +74,20 @@ export class MiProgresoService {
    */
   private async getRecursosConNivel(estudianteId: string) {
     let recursos = await this.prisma.recursosEstudiante.findUnique({
-      where: { estudiante_id: estudianteId },
+      where: { estudianteId: estudianteId },
     });
 
     // Si no existe, crear registro inicial
     if (!recursos) {
       recursos = await this.prisma.recursosEstudiante.create({
         data: {
-          estudiante_id: estudianteId,
-          xp_total: 0,
+          estudianteId: estudianteId,
+          xpTotal: 0,
         },
       });
     }
 
-    const xpTotal = recursos.xp_total;
+    const xpTotal = recursos.xpTotal;
     const nivel = this.calcularNivel(xpTotal);
     const xpParaSiguienteNivel = this.xpParaNivel(nivel + 1);
     const xpNivelActual = this.xpParaNivel(nivel);
@@ -95,11 +95,11 @@ export class MiProgresoService {
     const xpNecesario = xpParaSiguienteNivel - xpNivelActual;
 
     return {
-      xp_total: xpTotal,
+      xpTotal: xpTotal,
       nivel,
-      xp_progreso: xpProgreso,
-      xp_necesario: xpNecesario,
-      porcentaje_nivel:
+      xpProgreso: xpProgreso,
+      xpNecesario: xpNecesario,
+      porcentajeNivel:
         xpNecesario > 0 ? Math.floor((xpProgreso / xpNecesario) * 100) : 0,
     };
   }
@@ -125,26 +125,26 @@ export class MiProgresoService {
    */
   private async getRacha(estudianteId: string) {
     let racha = await this.prisma.rachaEstudiante.findUnique({
-      where: { estudiante_id: estudianteId },
+      where: { estudianteId: estudianteId },
     });
 
     // Si no existe, crear registro inicial
     if (!racha) {
       racha = await this.prisma.rachaEstudiante.create({
         data: {
-          estudiante_id: estudianteId,
-          racha_actual: 0,
-          racha_maxima: 0,
-          total_dias_activos: 0,
+          estudianteId: estudianteId,
+          rachaActual: 0,
+          rachaMaxima: 0,
+          totalDiasActivos: 0,
         },
       });
     }
 
     return {
-      racha_actual: racha.racha_actual,
-      racha_maxima: racha.racha_maxima,
-      total_dias_activos: racha.total_dias_activos,
-      ultima_actividad: racha.ultima_actividad,
+      rachaActual: racha.rachaActual,
+      rachaMaxima: racha.rachaMaxima,
+      totalDiasActivos: racha.totalDiasActivos,
+      ultimaActividad: racha.ultimaActividad,
     };
   }
 
@@ -155,7 +155,7 @@ export class MiProgresoService {
     const [desbloqueados, totales, recientes] = await Promise.all([
       // Contar logros desbloqueados
       this.prisma.logroEstudiante.count({
-        where: { estudiante_id: estudianteId },
+        where: { estudianteId: estudianteId },
       }),
       // Contar logros totales activos (no secretos)
       this.prisma.logro.count({
@@ -163,7 +163,7 @@ export class MiProgresoService {
       }),
       // Obtener últimos 5 logros desbloqueados
       this.prisma.logroEstudiante.findMany({
-        where: { estudiante_id: estudianteId },
+        where: { estudianteId: estudianteId },
         include: {
           logro: {
             select: {
@@ -173,7 +173,7 @@ export class MiProgresoService {
             },
           },
         },
-        orderBy: { fecha_desbloqueo: 'desc' },
+        orderBy: { fechaDesbloqueo: 'desc' },
         take: 5,
       }),
     ]);
@@ -185,7 +185,7 @@ export class MiProgresoService {
         nombre: le.logro.nombre,
         icono: le.logro.icono,
         rareza: le.logro.rareza,
-        fecha_desbloqueo: le.fecha_desbloqueo,
+        fechaDesbloqueo: le.fechaDesbloqueo,
       })),
     };
   }
@@ -195,22 +195,22 @@ export class MiProgresoService {
    */
   private async getActividadesRecientes(estudianteId: string) {
     const actividades = await this.prisma.actividadFeed.findMany({
-      where: { estudiante_id: estudianteId },
+      where: { estudianteId: estudianteId },
       select: {
         tipo: true,
         mensaje: true,
-        xp_ganado: true,
-        creado_en: true,
+        xpGanado: true,
+        creadoEn: true,
       },
-      orderBy: { creado_en: 'desc' },
+      orderBy: { creadoEn: 'desc' },
       take: 10,
     });
 
     return actividades.map((a) => ({
       tipo: a.tipo,
       mensaje: a.mensaje,
-      xp_ganado: a.xp_ganado,
-      creado_en: a.creado_en,
+      xpGanado: a.xpGanado,
+      creadoEn: a.creadoEn,
     }));
   }
 }

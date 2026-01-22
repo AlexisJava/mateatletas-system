@@ -29,8 +29,8 @@ type _EstudianteBasico = {
 type _PagosPendientesResult = {
   id: string;
   periodo: string;
-  precio_final: number;
-  estado_pago: string;
+  precioFinal: number;
+  estadoPago: string;
   estudiante: {
     id: string;
     nombre: string;
@@ -43,8 +43,8 @@ type _PagosPendientesResult = {
 
 type _ClaseConInscripcion = {
   id: string;
-  fecha_hora_inicio: Date;
-  duracion_minutos: number;
+  fechaHoraInicio: Date;
+  duracionMinutos: number;
   estado: string;
   docente: {
     nombre: string;
@@ -150,12 +150,12 @@ export class TutorStatsService {
 
     // 1. Total de hijos
     const totalHijos = await this.prisma.estudiante.count({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
     });
 
     // 2. Clases del mes actual (de TODOS los hijos)
     const estudiantesIds = await this.prisma.estudiante.findMany({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
       select: { id: true },
     });
 
@@ -163,9 +163,9 @@ export class TutorStatsService {
 
     const clasesDelMes = await this.prisma.inscripcionClase.count({
       where: {
-        estudiante_id: { in: estudiantesIdsArray },
+        estudianteId: { in: estudiantesIdsArray },
         clase: {
-          fecha_hora_inicio: {
+          fechaHoraInicio: {
             gte: inicioMes,
             lte: finMes,
           },
@@ -178,25 +178,25 @@ export class TutorStatsService {
     const inscripcionesPagadas = await this.prisma.inscripcionMensual.aggregate(
       {
         where: {
-          tutor_id: tutorId,
-          estado_pago: 'Pagado',
+          tutorId: tutorId,
+          estadoPago: 'Pagado',
           createdAt: { gte: inicioAnio },
         },
         _sum: {
-          precio_final: true,
+          precioFinal: true,
         },
       },
     );
 
-    const totalPagadoAnio = inscripcionesPagadas._sum.precio_final
-      ? Math.round(Number(inscripcionesPagadas._sum.precio_final))
+    const totalPagadoAnio = inscripcionesPagadas._sum.precioFinal
+      ? Math.round(Number(inscripcionesPagadas._sum.precioFinal))
       : 0;
 
     // 4. Asistencia promedio (de todos los hijos)
     const asistencias = await this.prisma.asistencia.groupBy({
       by: ['estado'],
       where: {
-        estudiante_id: { in: estudiantesIdsArray },
+        estudianteId: { in: estudiantesIdsArray },
       },
       _count: {
         estado: true,
@@ -241,8 +241,8 @@ export class TutorStatsService {
     const inscripcionesPendientes =
       await this.prisma.inscripcionMensual.findMany({
         where: {
-          tutor_id: tutorId,
-          estado_pago: { in: ['Pendiente', 'Vencido'] },
+          tutorId: tutorId,
+          estadoPago: { in: ['Pendiente', 'Vencido'] },
         },
         include: {
           estudiante: {
@@ -283,13 +283,13 @@ export class TutorStatsService {
 
       return {
         id: inscripcion.id,
-        monto: Math.round(Number(inscripcion.precio_final)),
+        monto: Math.round(Number(inscripcion.precioFinal)),
         concepto: inscripcion.producto?.nombre || 'Inscripción mensual',
         fechaVencimiento,
         diasParaVencer,
         estudianteId: inscripcion.estudiante.id,
         estudianteNombre: `${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido}`,
-        estaVencido: inscripcion.estado_pago === 'Vencido',
+        estaVencido: inscripcion.estadoPago === 'Vencido',
       };
     });
   }
@@ -312,7 +312,7 @@ export class TutorStatsService {
 
     // Obtener estudiantes del tutor
     const estudiantesIds = await this.prisma.estudiante.findMany({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
       select: { id: true },
     });
 
@@ -321,14 +321,14 @@ export class TutorStatsService {
     // Obtener clases de hoy
     const clasesHoy = await this.prisma.clase.findMany({
       where: {
-        fecha_hora_inicio: {
+        fechaHoraInicio: {
           gte: hoy,
           lt: manana,
         },
         estado: 'Programada',
         inscripciones: {
           some: {
-            estudiante_id: { in: estudiantesIdsArray },
+            estudianteId: { in: estudiantesIdsArray },
           },
         },
       },
@@ -341,7 +341,7 @@ export class TutorStatsService {
         },
         inscripciones: {
           where: {
-            estudiante_id: { in: estudiantesIdsArray },
+            estudianteId: { in: estudiantesIdsArray },
           },
           include: {
             estudiante: {
@@ -355,7 +355,7 @@ export class TutorStatsService {
         },
       },
       orderBy: {
-        fecha_hora_inicio: 'asc',
+        fechaHoraInicio: 'asc',
       },
     });
 
@@ -368,13 +368,13 @@ export class TutorStatsService {
       if (!inscripcion) {
         return [];
       }
-      const fechaHoraInicio = new Date(clase.fecha_hora_inicio);
+      const fechaHoraInicio = new Date(clase.fechaHoraInicio);
 
       // Puede unirse si faltan menos de 10 minutos
       const diffMinutos =
         (fechaHoraInicio.getTime() - ahora.getTime()) / (1000 * 60);
       const puedeUnirse =
-        diffMinutos <= 10 && diffMinutos >= -clase.duracion_minutos;
+        diffMinutos <= 10 && diffMinutos >= -clase.duracionMinutos;
 
       return [
         {
@@ -519,7 +519,7 @@ export class TutorStatsService {
     tutorId: string,
   ): Promise<void> {
     const estudiantes = await this.prisma.estudiante.findMany({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
       select: { id: true, nombre: true, apellido: true },
     });
 
@@ -555,7 +555,7 @@ export class TutorStatsService {
   ): Promise<number | null> {
     const asistencias = await this.prisma.asistencia.groupBy({
       by: ['estado'],
-      where: { estudiante_id: estudianteId },
+      where: { estudianteId: estudianteId },
       _count: { estado: true },
     });
 
@@ -601,13 +601,13 @@ export class TutorStatsService {
    */
   async obtenerHijos(tutorId: string): Promise<HijoInfo[]> {
     const estudiantes = await this.prisma.estudiante.findMany({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
       include: {
         casa: {
           select: { nombre: true },
         },
         recursos: {
-          select: { xp_total: true },
+          select: { xpTotal: true },
         },
       },
       orderBy: { nombre: 'asc' },
@@ -620,7 +620,7 @@ export class TutorStatsService {
       // Obtener asistencias del estudiante
       const asistencias = await this.prisma.asistencia.groupBy({
         by: ['estado'],
-        where: { estudiante_id: estudiante.id },
+        where: { estudianteId: estudiante.id },
         _count: { estado: true },
       });
 
@@ -646,7 +646,7 @@ export class TutorStatsService {
         edad: estudiante.edad,
         nivelEscolar: estudiante.nivelEscolar,
         casa: estudiante.casa?.nombre ?? null,
-        puntosTotales: estudiante.recursos?.xp_total ?? 0,
+        puntosTotales: estudiante.recursos?.xpTotal ?? 0,
         asistenciaPromedio,
         avatarUrl: null,
       });

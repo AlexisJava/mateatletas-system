@@ -29,15 +29,15 @@ describe('SuscripcionAccesoService', () => {
     diasGracia = 0,
   ) => ({
     id: 'suscripcion-123',
-    tutor_id: 'tutor-456',
-    plan_id: 'plan-789',
+    tutorId: 'tutor-456',
+    planId: 'plan-789',
     estado,
-    mp_preapproval_id: 'mp-abc',
-    precio_final: 40000,
-    dias_gracia_usados: diasGracia,
-    fecha_inicio_gracia: diasGracia > 0 ? new Date() : null,
-    created_at: new Date(),
-    updated_at: new Date(),
+    mpPreapprovalId: 'mp-abc',
+    precioFinal: 40000,
+    diasGraciaUsados: diasGracia,
+    fechaInicioGracia: diasGracia > 0 ? new Date() : null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
     plan: {
       id: 'plan-789',
       nombre: 'STEAM_LIBROS',
@@ -211,7 +211,7 @@ describe('SuscripcionAccesoService', () => {
       // Arrange
       const mockEstudiante = {
         id: 'estudiante-111',
-        tutor_id: 'tutor-456',
+        tutorId: 'tutor-456',
         nombre: 'Juan',
       };
       const suscripcion = createMockSuscripcion(EstadoSuscripcion.ACTIVA);
@@ -230,7 +230,7 @@ describe('SuscripcionAccesoService', () => {
       expect(result.tieneAcceso).toBe(true);
       expect(prisma.estudiante.findUnique).toHaveBeenCalledWith({
         where: { id: 'estudiante-111' },
-        select: { tutor_id: true },
+        select: { tutorId: true },
       });
     });
 
@@ -252,7 +252,7 @@ describe('SuscripcionAccesoService', () => {
       // Arrange
       const mockEstudiante = {
         id: 'estudiante-111',
-        tutor_id: 'tutor-456',
+        tutorId: 'tutor-456',
       };
       const suscripcionMorosa = createMockSuscripcion(EstadoSuscripcion.MOROSA);
 
@@ -289,7 +289,7 @@ describe('SuscripcionAccesoService', () => {
       expect(prisma.suscripcion.findFirst).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            tutor_id: 'tutor-456',
+            tutorId: 'tutor-456',
             estado: expect.objectContaining({
               in: expect.arrayContaining([
                 EstadoSuscripcion.ACTIVA,
@@ -297,7 +297,7 @@ describe('SuscripcionAccesoService', () => {
               ]),
             }),
           }),
-          orderBy: { created_at: 'desc' },
+          orderBy: { createdAt: 'desc' },
         }),
       );
     });

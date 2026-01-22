@@ -19,16 +19,16 @@ describe('DocenteCommandService', () => {
   const mockDocente = {
     id: 'docente-123',
     email: 'juan@example.com',
-    password_hash: 'hashed_password',
+    passwordHash: 'hashed_password',
     nombre: 'Juan',
     apellido: 'Pérez',
     titulo: 'Licenciado en Matemáticas',
     bio: 'Docente con experiencia',
     telefono: '+54123456789',
     especialidades: ['Álgebra'],
-    experiencia_anos: 10,
-    disponibilidad_horaria: {},
-    nivel_educativo: ['Secundaria'],
+    experienciaAnos: 10,
+    disponibilidadHoraria: {},
+    nivelEducativo: ['Secundaria'],
     estado: 'activo',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -91,7 +91,7 @@ describe('DocenteCommandService', () => {
         'juan@example.com',
       );
       expect(bcrypt.hash).toHaveBeenCalled();
-      expect(result).not.toHaveProperty('password_hash');
+      expect(result).not.toHaveProperty('passwordHash');
       expect(result).not.toHaveProperty('generatedPassword'); // No se generó
       expect(result.nombre).toBe('Juan');
     });
@@ -115,7 +115,7 @@ describe('DocenteCommandService', () => {
       );
     });
 
-    it('should exclude password_hash from response', async () => {
+    it('should exclude passwordHash from response', async () => {
       jest.spyOn(validator, 'validarEmailUnico').mockResolvedValue();
       jest.spyOn(prisma.docente, 'create').mockResolvedValue(mockDocente);
 
@@ -129,7 +129,7 @@ describe('DocenteCommandService', () => {
 
       const result = await service.create(createDto);
 
-      expect(result).not.toHaveProperty('password_hash');
+      expect(result).not.toHaveProperty('passwordHash');
     });
   });
 
@@ -152,7 +152,7 @@ describe('DocenteCommandService', () => {
         'docente-123',
       );
       expect(result.nombre).toBe('Juan Carlos');
-      expect(result).not.toHaveProperty('password_hash');
+      expect(result).not.toHaveProperty('passwordHash');
     });
 
     it('should validate unique email when updating email', async () => {
@@ -189,7 +189,7 @@ describe('DocenteCommandService', () => {
       expect(prisma.docente.update).toHaveBeenCalledWith({
         where: { id: 'docente-123' },
         data: expect.objectContaining({
-          password_hash: 'hashed_password',
+          passwordHash: 'hashed_password',
         }),
       });
     });
@@ -219,7 +219,7 @@ describe('DocenteCommandService', () => {
       );
     });
 
-    it('should exclude password_hash from response', async () => {
+    it('should exclude passwordHash from response', async () => {
       jest.spyOn(validator, 'validarDocenteExiste').mockResolvedValue();
       jest.spyOn(prisma.docente, 'update').mockResolvedValue(mockDocente);
 
@@ -227,7 +227,7 @@ describe('DocenteCommandService', () => {
 
       const result = await service.update('docente-123', updateDto);
 
-      expect(result).not.toHaveProperty('password_hash');
+      expect(result).not.toHaveProperty('passwordHash');
     });
   });
 
@@ -303,8 +303,8 @@ describe('DocenteCommandService', () => {
         'docente-456',
       );
       expect(prisma.clase.updateMany).toHaveBeenCalledWith({
-        where: { docente_id: 'docente-123' },
-        data: { docente_id: 'docente-456' },
+        where: { docenteId: 'docente-123' },
+        data: { docenteId: 'docente-456' },
       });
       expect(result.clasesReasignadas).toBe(5);
       expect(result.desde).toBe('Juan Pérez');

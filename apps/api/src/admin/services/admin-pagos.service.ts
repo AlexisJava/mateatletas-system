@@ -54,7 +54,7 @@ export class AdminPagosService {
       );
     }
 
-    if (inscripcion.estado_pago === 'Pagado') {
+    if (inscripcion.estadoPago === 'Pagado') {
       throw new BadRequestException(
         'Esta inscripción ya está marcada como pagada',
       );
@@ -69,8 +69,8 @@ export class AdminPagosService {
       throw new BadRequestException('El monto debe ser mayor a 0');
     }
 
-    const precioFinal = Number(inscripcion.precio_final);
-    const montoYaPagado = Number(inscripcion.monto_pagado ?? 0);
+    const precioFinal = Number(inscripcion.precioFinal);
+    const montoYaPagado = Number(inscripcion.montoPagado ?? 0);
     const montoAcumulado = montoYaPagado + dto.monto;
 
     // Determinar el nuevo estado según el monto ACUMULADO (no solo el pago actual)
@@ -81,17 +81,17 @@ export class AdminPagosService {
       nuevoEstado = 'Parcial';
     }
 
-    const estadoAnterior = inscripcion.estado_pago;
+    const estadoAnterior = inscripcion.estadoPago;
 
     // Actualizar la inscripción con el pago acumulado
     await this.prisma.inscripcionMensual.update({
       where: { id: dto.inscripcionId },
       data: {
-        estado_pago: nuevoEstado,
-        monto_pagado: montoAcumulado,
-        fecha_pago: new Date(),
-        metodo_pago: dto.metodoPago,
-        comprobante_url: dto.comprobante || null,
+        estadoPago: nuevoEstado,
+        montoPagado: montoAcumulado,
+        fechaPago: new Date(),
+        metodoPago: dto.metodoPago,
+        comprobanteUrl: dto.comprobante || null,
         observaciones: dto.observaciones || null,
       },
     });
@@ -123,7 +123,7 @@ export class AdminPagosService {
     const skip = (page - 1) * limit;
 
     const where = {
-      estado_pago: { in: ['Pendiente', 'Vencido', 'Parcial'] as EstadoPago[] },
+      estadoPago: { in: ['Pendiente', 'Vencido', 'Parcial'] as EstadoPago[] },
       ...(options?.search && {
         OR: [
           {
@@ -164,7 +164,7 @@ export class AdminPagosService {
           },
           producto: { select: { id: true, nombre: true } },
         },
-        orderBy: [{ periodo: 'desc' }, { fecha_vencimiento: 'asc' }],
+        orderBy: [{ periodo: 'desc' }, { fechaVencimiento: 'asc' }],
         skip,
         take: limit,
       }),
@@ -185,9 +185,9 @@ export class AdminPagosService {
           email: i.tutor.email,
         },
         producto: i.producto.nombre,
-        precioFinal: Number(i.precio_final),
-        estadoPago: i.estado_pago,
-        fechaVencimiento: i.fecha_vencimiento,
+        precioFinal: Number(i.precioFinal),
+        estadoPago: i.estadoPago,
+        fechaVencimiento: i.fechaVencimiento,
       })),
       meta: {
         total,

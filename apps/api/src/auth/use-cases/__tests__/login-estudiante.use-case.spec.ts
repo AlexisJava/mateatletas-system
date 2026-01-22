@@ -63,16 +63,16 @@ describe('LoginEstudianteUseCase', () => {
         id: 'est-123',
         username: 'juanito2024',
         email: 'juanito@test.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Juan',
         apellido: 'Pérez',
         edad: 12,
         nivelEscolar: 'PRIMARIA',
         fotoUrl: null,
         avatarUrl: 'https://avatar.url',
-        animacion_idle_url: null,
-        xp_total: 100,
-        nivel_actual: 5,
+        animacionIdleUrl: null,
+        xpTotal: 100,
+        nivelActual: 5,
         roles: '["estudiante"]',
         tutor: {
           id: 'tutor-123',
@@ -125,16 +125,16 @@ describe('LoginEstudianteUseCase', () => {
       const mockEstudiante = {
         id: 'est-avatar',
         username: 'gamer2024',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Gamer',
         apellido: 'Pro',
         edad: 10,
         nivelEscolar: 'PRIMARIA',
         fotoUrl: 'https://foto.url',
         avatarUrl: 'https://readyplayerme.avatar.url',
-        animacion_idle_url: 'https://animation.idle.url',
-        xp_total: 500,
-        nivel_actual: 10,
+        animacionIdleUrl: 'https://animation.idle.url',
+        xpTotal: 500,
+        nivelActual: 10,
         roles: '["estudiante"]',
         tutor: null,
         casa: null,
@@ -153,7 +153,7 @@ describe('LoginEstudianteUseCase', () => {
       );
 
       expect(result.user.avatarUrl).toBe('https://readyplayerme.avatar.url');
-      expect(result.user.animacion_idle_url).toBe('https://animation.idle.url');
+      expect(result.user.animacionIdleUrl).toBe('https://animation.idle.url');
       expect(result.user.fotoUrl).toBe('https://foto.url');
     });
   });
@@ -191,7 +191,7 @@ describe('LoginEstudianteUseCase', () => {
       const mockEstudiante = {
         id: 'est-123',
         username: 'student1',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Test',
         apellido: 'User',
         roles: '["estudiante"]',
@@ -213,13 +213,13 @@ describe('LoginEstudianteUseCase', () => {
     });
 
     /**
-     * TEST 5: should_throw_unauthorized_when_no_password_hash
+     * TEST 5: should_throw_unauthorized_when_no_passwordHash
      */
-    it('should_throw_unauthorized_when_no_password_hash', async () => {
+    it('should_throw_unauthorized_when_no_passwordHash', async () => {
       const mockEstudiante = {
         id: 'est-no-hash',
         username: 'student-no-hash',
-        password_hash: null, // Sin credenciales propias
+        passwordHash: null, // Sin credenciales propias
         nombre: 'No',
         apellido: 'Credentials',
         roles: '["estudiante"]',
@@ -294,7 +294,7 @@ describe('LoginEstudianteUseCase', () => {
       const mockEstudiante = {
         id: 'est-success',
         username: 'success-student',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Success',
         apellido: 'Student',
         roles: '["estudiante"]',
@@ -331,16 +331,16 @@ describe('LoginEstudianteUseCase', () => {
         id: 'est-structure',
         username: 'structure-test',
         email: 'structure@test.com',
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'Structure',
         apellido: 'Test',
         edad: 11,
         nivelEscolar: 'SECUNDARIA',
         fotoUrl: null,
         avatarUrl: null,
-        animacion_idle_url: null,
-        xp_total: 250,
-        nivel_actual: 7,
+        animacionIdleUrl: null,
+        xpTotal: 250,
+        nivelActual: 7,
         roles: '["estudiante"]',
         tutor: {
           id: 'tutor-1',
@@ -376,8 +376,8 @@ describe('LoginEstudianteUseCase', () => {
       expect(result.user).toHaveProperty('nivelEscolar');
       expect(result.user).toHaveProperty('fotoUrl');
       expect(result.user).toHaveProperty('avatarUrl');
-      expect(result.user).toHaveProperty('animacion_idle_url');
-      expect(result.user).toHaveProperty('xp_total');
+      expect(result.user).toHaveProperty('animacionIdleUrl');
+      expect(result.user).toHaveProperty('xpTotal');
       expect(result.user).toHaveProperty('nivel_actual');
       expect(result.user).toHaveProperty('casa');
       expect(result.user).toHaveProperty('tutor');
@@ -394,7 +394,7 @@ describe('LoginEstudianteUseCase', () => {
         id: 'est-no-email',
         username: 'no-email-student',
         email: null, // Sin email
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         nombre: 'No',
         apellido: 'Email',
         roles: '["estudiante"]',

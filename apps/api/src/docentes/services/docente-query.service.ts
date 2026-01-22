@@ -7,7 +7,7 @@ import { PrismaService } from '../../core/database/prisma.service';
  * Responsabilidades:
  * - Búsquedas y listados de docentes
  * - Solo operaciones READ (sin side effects)
- * - Excluye password_hash de las respuestas (excepto findByEmail para auth)
+ * - Excluye passwordHash de las respuestas (excepto findByEmail para auth)
  *
  * Patrón: CQRS (Command Query Responsibility Segregation)
  */
@@ -19,7 +19,7 @@ export class DocenteQueryService {
    * Lista todos los docentes con paginación
    * @param page - Número de página (default: 1)
    * @param limit - Registros por página (default: 20)
-   * @returns Lista paginada de docentes sin password_hash
+   * @returns Lista paginada de docentes sin passwordHash
    */
   async findAll(page: number = 1, limit: number = 20) {
     const skip = (page - 1) * limit;
@@ -35,9 +35,9 @@ export class DocenteQueryService {
       this.prisma.docente.count(),
     ]);
 
-    // Excluir password_hash de todos los docentes
+    // Excluir passwordHash de todos los docentes
     const docentesSinPassword = docentes.map(
-      ({ password_hash: _password_hash, ...docente }) => docente,
+      ({ passwordHash: _passwordHash, ...docente }) => docente,
     );
 
     return {
@@ -53,9 +53,9 @@ export class DocenteQueryService {
 
   /**
    * Busca un docente por email (usado para autenticación)
-   * IMPORTANTE: Este método SÍ retorna password_hash para verificación
+   * IMPORTANTE: Este método SÍ retorna passwordHash para verificación
    * @param email - Email del docente
-   * @returns Docente con password_hash incluido, o null si no existe
+   * @returns Docente con passwordHash incluido, o null si no existe
    */
   async findByEmail(email: string) {
     return await this.prisma.docente.findUnique({
@@ -66,7 +66,7 @@ export class DocenteQueryService {
   /**
    * Busca un docente por ID
    * @param id - ID del docente
-   * @returns Docente sin password_hash, incluye sectores únicos
+   * @returns Docente sin passwordHash, incluye sectores únicos
    * @throws NotFoundException si el docente no existe
    */
   async findById(id: string) {
@@ -91,8 +91,8 @@ export class DocenteQueryService {
       throw new NotFoundException('Docente no encontrado');
     }
 
-    // Excluir password_hash del resultado (ignoreRestSiblings en eslint config)
-    const { password_hash, ...docenteSinPassword } = docente;
+    // Excluir passwordHash del resultado (ignoreRestSiblings en eslint config)
+    const { passwordHash, ...docenteSinPassword } = docente;
 
     // Extraer sectores únicos de las rutas de especialidad
     const sectoresMap = new Map();
@@ -114,7 +114,7 @@ export class DocenteQueryService {
    * Busca múltiples docentes por sus IDs
    * Helper interno para operaciones que necesitan múltiples docentes
    * @param ids - Array de IDs de docentes
-   * @returns Array de docentes sin password_hash
+   * @returns Array de docentes sin passwordHash
    */
   async findByIds(ids: string[]) {
     const docentes = await this.prisma.docente.findMany({
@@ -125,9 +125,9 @@ export class DocenteQueryService {
       },
     });
 
-    // Excluir password_hash
+    // Excluir passwordHash
     return docentes.map(
-      ({ password_hash: _password_hash, ...docente }) => docente,
+      ({ passwordHash: _passwordHash, ...docente }) => docente,
     );
   }
 
@@ -141,13 +141,13 @@ export class DocenteQueryService {
     const [claseGrupos, comisiones] = await Promise.all([
       this.prisma.claseGrupo.count({
         where: {
-          docente_id: id,
+          docenteId: id,
           activo: true,
         },
       }),
       this.prisma.comision.count({
         where: {
-          docente_id: id,
+          docenteId: id,
           activo: true,
         },
       }),
@@ -171,12 +171,12 @@ export class DocenteQueryService {
     // Usar groupBy para obtener todos los conteos en 2 queries (en paralelo)
     const [claseGruposPorDocente, comisionesPorDocente] = await Promise.all([
       this.prisma.claseGrupo.groupBy({
-        by: ['docente_id'],
+        by: ['docenteId'],
         where: { activo: true },
         _count: { id: true },
       }),
       this.prisma.comision.groupBy({
-        by: ['docente_id'],
+        by: ['docenteId'],
         where: { activo: true },
         _count: { id: true },
       }),
@@ -185,25 +185,25 @@ export class DocenteQueryService {
     // Crear mapas para lookup rápido (filtrando nulls en runtime)
     const claseGruposMap = new Map<string, number>();
     for (const item of claseGruposPorDocente) {
-      if (item.docente_id) {
-        claseGruposMap.set(item.docente_id, item._count.id);
+      if (item.docenteId) {
+        claseGruposMap.set(item.docenteId, item._count.id);
       }
     }
 
     const comisionesMap = new Map<string, number>();
     for (const item of comisionesPorDocente) {
-      if (item.docente_id) {
-        comisionesMap.set(item.docente_id, item._count.id);
+      if (item.docenteId) {
+        comisionesMap.set(item.docenteId, item._count.id);
       }
     }
 
     // Obtener todos los IDs de docentes únicos
     const docenteIds = new Set<string>();
     for (const item of claseGruposPorDocente) {
-      if (item.docente_id) docenteIds.add(item.docente_id);
+      if (item.docenteId) docenteIds.add(item.docenteId);
     }
     for (const item of comisionesPorDocente) {
-      if (item.docente_id) docenteIds.add(item.docente_id);
+      if (item.docenteId) docenteIds.add(item.docenteId);
     }
 
     // Construir resultado

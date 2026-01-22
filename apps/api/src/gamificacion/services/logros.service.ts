@@ -46,11 +46,11 @@ export class LogrosService {
    */
   async obtenerLogrosEstudiante(estudianteId: string) {
     const logrosDesbloqueados = await this.prisma.logroEstudiante.findMany({
-      where: { estudiante_id: estudianteId },
+      where: { estudianteId: estudianteId },
       include: {
         logro: true,
       },
-      orderBy: { fecha_desbloqueo: 'desc' },
+      orderBy: { fechaDesbloqueo: 'desc' },
     });
 
     return logrosDesbloqueados;
@@ -62,7 +62,7 @@ export class LogrosService {
   async obtenerProgresoLogros(estudianteId: string) {
     const [logrosDesbloqueados, logrosActivos] = await Promise.all([
       this.prisma.logroEstudiante.count({
-        where: { estudiante_id: estudianteId },
+        where: { estudianteId: estudianteId },
       }),
       this.prisma.logro.count({
         where: { activo: true, secreto: false },
@@ -94,25 +94,25 @@ export class LogrosService {
     // Verificar si ya está desbloqueado
     const yaDesbloqueado = await this.prisma.logroEstudiante.findUnique({
       where: {
-        estudiante_id_logro_id: {
-          estudiante_id: estudianteId,
-          logro_id: logro.id,
+        estudianteId_logroId: {
+          estudianteId: estudianteId,
+          logroId: logro.id,
         },
       },
     });
 
     if (yaDesbloqueado) {
       return {
-        logro_desbloqueado: yaDesbloqueado,
-        ya_desbloqueado: true,
+        logroDesbloqueado: yaDesbloqueado,
+        yaDesbloqueado: true,
       };
     }
 
     // Desbloquear logro
     const logroDesbloqueado = await this.prisma.logroEstudiante.create({
       data: {
-        estudiante_id: estudianteId,
-        logro_id: logro.id,
+        estudianteId: estudianteId,
+        logroId: logro.id,
         visto: false,
       },
       include: {
@@ -123,27 +123,27 @@ export class LogrosService {
     // Otorgar recompensas (solo XP)
     const resultadoXP = await this.recursosService.agregarXP(
       estudianteId,
-      logro.xp_recompensa,
+      logro.xpRecompensa,
       `Logro desbloqueado: ${logro.nombre}`,
-      { logro_id: logro.id },
+      { logroId: logro.id },
     );
 
     // Emitir evento LOGRO_DESBLOQUEADO
     this.eventEmitter.emit(
       'logro.desbloqueado',
       new LogroDesbloqueadoEvent(estudianteId, logro.codigo, logro.nombre, {
-        xp: logro.xp_recompensa,
+        xp: logro.xpRecompensa,
       }),
     );
 
     return {
-      logro_desbloqueado: logroDesbloqueado,
-      ya_desbloqueado: false,
+      logroDesbloqueado: logroDesbloqueado,
+      yaDesbloqueado: false,
       recompensas: {
-        xp: logro.xp_recompensa,
+        xp: logro.xpRecompensa,
       },
-      subio_nivel: resultadoXP.subio_nivel,
-      nivel_nuevo: resultadoXP.nivel_nuevo,
+      subioNivel: resultadoXP.subioNivel,
+      nivelNuevo: resultadoXP.nivelNuevo,
     };
   }
 
@@ -153,8 +153,8 @@ export class LogrosService {
   async marcarLogroVisto(estudianteId: string, logroId: string) {
     return this.prisma.logroEstudiante.updateMany({
       where: {
-        estudiante_id: estudianteId,
-        logro_id: logroId,
+        estudianteId: estudianteId,
+        logroId: logroId,
       },
       data: {
         visto: true,
@@ -168,14 +168,14 @@ export class LogrosService {
   async obtenerLogrosNoVistos(estudianteId: string) {
     return this.prisma.logroEstudiante.findMany({
       where: {
-        estudiante_id: estudianteId,
+        estudianteId: estudianteId,
         visto: false,
       },
       include: {
         logro: true,
       },
       orderBy: {
-        fecha_desbloqueo: 'desc',
+        fechaDesbloqueo: 'desc',
       },
     });
   }
@@ -199,7 +199,7 @@ export class LogrosService {
         }),
         this.prisma.logroEstudiante.count({
           where: {
-            estudiante_id: estudianteId,
+            estudianteId: estudianteId,
             logro: { categoria, activo: true },
           },
         }),
@@ -230,7 +230,7 @@ export class LogrosService {
         }),
         this.prisma.logroEstudiante.count({
           where: {
-            estudiante_id: estudianteId,
+            estudianteId: estudianteId,
             logro: { rareza, activo: true },
           },
         }),

@@ -103,6 +103,60 @@ export default tseslint.config(
       'prefer-const': 'error',
       eqeqeq: ['error', 'always'],
 
+      // ===== 🐫 NAMING CONVENTIONS: camelCase obligatorio =====
+      // Previene crear propiedades en snake_case (ej: fecha_inicio)
+      // La base de datos usa snake_case pero el código debe usar camelCase
+      '@typescript-eslint/naming-convention': [
+        'error',
+        // Variables y funciones: camelCase o UPPER_CASE para constantes
+        {
+          selector: 'variableLike',
+          format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+          leadingUnderscore: 'allow',
+        },
+        // Propiedades de clase/interface: camelCase
+        {
+          selector: 'classProperty',
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+          // Excepciones para:
+          // - Constantes estáticas readonly en UPPER_CASE
+          // - APIs externas (MercadoPago, MFA) que requieren snake_case
+          filter: {
+            regex:
+              '^([A-Z][A-Z0-9_]*|mfa_token|totp_code|backup_code|live_mode|date_created|api_version|card_token_id|payer_email|external_reference)$',
+            match: false,
+          },
+        },
+        // Parámetros: camelCase
+        {
+          selector: 'parameter',
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+        },
+        // Constantes globales: camelCase o UPPER_CASE
+        {
+          selector: 'variable',
+          modifiers: ['const', 'global'],
+          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+        },
+        // Tipos e interfaces: PascalCase (permitir underscore para tipos internos)
+        {
+          selector: 'typeLike',
+          format: ['PascalCase'],
+          leadingUnderscore: 'allow',
+        },
+        // Enum members: UPPER_CASE o PascalCase (Prisma genera ambos formatos)
+        {
+          selector: 'enumMember',
+          format: ['UPPER_CASE', 'PascalCase'],
+        },
+        // Object literal properties: NO se valida formato
+        // Razón: El CamelCaseResponseInterceptor transforma todo a camelCase
+        // antes de enviar al frontend. Validar esto sería redundante y
+        // generaría falsos positivos con Prisma queries y APIs externas.
+      ],
+
       // ===== SONARJS: Desactivar regla duplicada =====
       // Usamos @typescript-eslint/no-unused-vars que tiene ignoreRestSiblings
       complexity: ['warn', 15],

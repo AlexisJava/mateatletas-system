@@ -18,12 +18,12 @@ describe('AdminStatsService', () => {
     {
       id: '1',
       estado: 'Programada',
-      fecha_hora_inicio: new Date('2025-12-01'),
+      fechaHoraInicio: new Date('2025-12-01'),
     },
     {
       id: '2',
       estado: 'Programada',
-      fecha_hora_inicio: new Date('2025-12-02'),
+      fechaHoraInicio: new Date('2025-12-02'),
     },
   ];
 
@@ -121,7 +121,7 @@ describe('AdminStatsService', () => {
 
       // Assert
       expect(countSpy).toHaveBeenCalledWith({
-        where: { fecha_baja: null },
+        where: { fechaBaja: null },
       });
     });
 
@@ -144,7 +144,7 @@ describe('AdminStatsService', () => {
       expect(claseSpy).toHaveBeenCalledWith({
         where: {
           estado: 'Programada',
-          fecha_hora_inicio: { gte: expect.any(Date) },
+          fechaHoraInicio: { gte: expect.any(Date) },
         },
       });
     });
@@ -219,14 +219,14 @@ describe('AdminStatsService', () => {
           {
             id: '1',
             periodo,
-            estado_pago: 'Pagado',
-            precio_final: { toNumber: () => 1000 },
+            estadoPago: 'Pagado',
+            precioFinal: { toNumber: () => 1000 },
           },
           {
             id: '2',
             periodo,
-            estado_pago: 'Pendiente',
-            precio_final: { toNumber: () => 500 },
+            estadoPago: 'Pendiente',
+            precioFinal: { toNumber: () => 500 },
           },
         ] as any);
 

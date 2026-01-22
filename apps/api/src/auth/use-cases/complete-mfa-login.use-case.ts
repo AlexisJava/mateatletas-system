@@ -18,7 +18,7 @@ export interface CompleteMfaLoginResult {
     email: string;
     nombre: string;
     apellido: string;
-    fecha_registro: Date;
+    fechaRegistro: Date;
     dni: string | null;
     telefono: string | null;
     role: string;
@@ -117,7 +117,7 @@ export class CompleteMfaLoginUseCase {
         email: admin.email,
         nombre: admin.nombre,
         apellido: admin.apellido,
-        fecha_registro: admin.fecha_registro,
+        fechaRegistro: admin.fechaRegistro,
         dni: admin.dni ?? null,
         telefono: admin.telefono ?? null,
         role: Role.ADMIN,
@@ -164,11 +164,11 @@ export class CompleteMfaLoginUseCase {
    * Valida que MFA esté habilitado para el admin
    */
   private validateMfaEnabled(admin: {
-    mfa_enabled: boolean;
-    mfa_secret: string | null;
+    mfaEnabled: boolean;
+    mfaSecret: string | null;
     email: string;
   }): void {
-    if (!admin.mfa_enabled || !admin.mfa_secret) {
+    if (!admin.mfaEnabled || !admin.mfaSecret) {
       throw new UnauthorizedException(
         'MFA no está habilitado para este usuario',
       );
@@ -182,19 +182,19 @@ export class CompleteMfaLoginUseCase {
     admin: {
       id: string;
       email: string;
-      mfa_secret: string | null;
-      mfa_backup_codes: string[];
+      mfaSecret: string | null;
+      mfaBackupCodes: string[];
     },
     totpCode?: string,
     backupCode?: string,
   ): Promise<void> {
     let isValid = false;
 
-    if (totpCode && admin.mfa_secret) {
+    if (totpCode && admin.mfaSecret) {
       // Verificar código TOTP
       isValid = authenticator.verify({
         token: totpCode,
-        secret: admin.mfa_secret,
+        secret: admin.mfaSecret,
       });
     } else if (backupCode) {
       // Verificar backup code
@@ -215,19 +215,17 @@ export class CompleteMfaLoginUseCase {
    * Verifica un código de backup y lo elimina si es válido
    */
   private async verifyBackupCode(
-    admin: { id: string; email: string; mfa_backup_codes: string[] },
+    admin: { id: string; email: string; mfaBackupCodes: string[] },
     backupCode: string,
   ): Promise<boolean> {
-    for (const [index, hashedCode] of admin.mfa_backup_codes.entries()) {
+    for (const [index, hashedCode] of admin.mfaBackupCodes.entries()) {
       const isMatch = await bcrypt.compare(backupCode, hashedCode);
       if (isMatch) {
         // Eliminar el código usado (single-use)
-        const updatedCodes = admin.mfa_backup_codes.filter(
-          (_, i) => i !== index,
-        );
+        const updatedCodes = admin.mfaBackupCodes.filter((_, i) => i !== index);
         await this.prisma.admin.update({
           where: { id: admin.id },
-          data: { mfa_backup_codes: updatedCodes },
+          data: { mfaBackupCodes: updatedCodes },
         });
         this.logger.warn(
           `⚠️ Código de backup usado para ${admin.email}. Códigos restantes: ${updatedCodes.length}`,

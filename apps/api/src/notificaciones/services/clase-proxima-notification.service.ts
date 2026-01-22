@@ -20,16 +20,16 @@ const JS_DAY_TO_DIA_SEMANA: Record<number, DiaSemana> = {
 interface ClaseConInscripciones {
   id: string;
   nombre: string;
-  hora_inicio: string;
-  docente_id: string;
+  horaInicio: string;
+  docenteId: string;
   docente: {
     id: string;
     nombre: string;
     apellido: string;
   };
   inscripcionesUnificadas: Array<{
-    estudiante_id: string;
-    tutor_id: string;
+    estudianteId: string;
+    tutorId: string;
     estado: string;
     estudiante: {
       id: string;
@@ -45,7 +45,7 @@ interface ClaseConInscripciones {
  * REGLA DE NEGOCIO:
  * - Notifica a docentes, estudiantes y tutores sobre clases que ocurren mañana
  * - Se ejecuta diariamente a las 8:00 AM (hora Argentina)
- * - Evita duplicados verificando notificaciones previas con metadata.clase_id
+ * - Evita duplicados verificando notificaciones previas con metadata.claseId
  *
  * DESTINATARIOS:
  * - Docente: "Mañana tienes clase X a las HH:MM"
@@ -105,10 +105,10 @@ export class ClaseProximaNotificationService {
     // Buscar clases activas que ocurren mañana
     const clases = await this.prisma.claseGrupo.findMany({
       where: {
-        dia_semana: diaSemanaManana,
+        diaSemana: diaSemanaManana,
         activo: true,
-        fecha_inicio: { lte: manana },
-        fecha_fin: { gte: manana },
+        fechaInicio: { lte: manana },
+        fechaFin: { gte: manana },
       },
       include: {
         docente: {
@@ -123,8 +123,8 @@ export class ClaseProximaNotificationService {
             estado: 'ACTIVA',
           },
           select: {
-            estudiante_id: true,
-            tutor_id: true,
+            estudianteId: true,
+            tutorId: true,
             estado: true,
             estudiante: {
               select: {
@@ -177,7 +177,7 @@ export class ClaseProximaNotificationService {
     // Verificar si ya existe notificación para esta clase/docente hoy
     const existeNotificacion = await this.existeNotificacionHoy(
       'docente',
-      clase.docente_id,
+      clase.docenteId,
       clase.id,
     );
 
@@ -186,10 +186,10 @@ export class ClaseProximaNotificationService {
     }
 
     await this.notificacionesService.notificarClaseProxima(
-      clase.docente_id,
+      clase.docenteId,
       clase.id,
       clase.nombre,
-      this.buildFechaHoraManana(clase.hora_inicio),
+      this.buildFechaHoraManana(clase.horaInicio),
     );
 
     return true;
@@ -210,21 +210,21 @@ export class ClaseProximaNotificationService {
     for (const inscripcion of clase.inscripcionesUnificadas) {
       // Notificar al estudiante
       const estudianteNotificado = await this.notificarEstudiante(
-        inscripcion.estudiante_id,
+        inscripcion.estudianteId,
         clase,
       );
       if (estudianteNotificado) estudiantes++;
 
       // Notificar al tutor (solo una vez por clase, aunque tenga varios hijos)
-      if (!tutoresNotificados.has(inscripcion.tutor_id)) {
+      if (!tutoresNotificados.has(inscripcion.tutorId)) {
         const tutorNotificado = await this.notificarTutor(
-          inscripcion.tutor_id,
+          inscripcion.tutorId,
           inscripcion.estudiante,
           clase,
         );
         if (tutorNotificado) {
           tutores++;
-          tutoresNotificados.add(inscripcion.tutor_id);
+          tutoresNotificados.add(inscripcion.tutorId);
         }
       }
     }
@@ -252,8 +252,8 @@ export class ClaseProximaNotificationService {
     await this.notificacionesService.createParaEstudiante(estudianteId, {
       tipo: TipoNotificacion.ESTUDIANTE_CLASE_PROXIMA,
       titulo: 'Clase mañana',
-      mensaje: `Mañana tienes "${clase.nombre}" a las ${clase.hora_inicio}`,
-      metadata: { clase_id: clase.id },
+      mensaje: `Mañana tienes "${clase.nombre}" a las ${clase.horaInicio}`,
+      metadata: { claseId: clase.id },
     });
 
     return true;
@@ -280,10 +280,10 @@ export class ClaseProximaNotificationService {
     await this.notificacionesService.createParaTutor(tutorId, {
       tipo: TipoNotificacion.TUTOR_CLASE_PROXIMA_HIJO,
       titulo: 'Clase de tu hijo mañana',
-      mensaje: `${estudiante.nombre} tiene "${clase.nombre}" mañana a las ${clase.hora_inicio}`,
+      mensaje: `${estudiante.nombre} tiene "${clase.nombre}" mañana a las ${clase.horaInicio}`,
       metadata: {
-        clase_id: clase.id,
-        estudiante_id: estudiante.id,
+        claseId: clase.id,
+        estudianteId: estudiante.id,
       },
     });
 
@@ -292,7 +292,7 @@ export class ClaseProximaNotificationService {
 
   /**
    * Verifica si ya existe una notificación de clase próxima para hoy
-   * Usa metadata.clase_id para identificar notificaciones duplicadas
+   * Usa metadata.claseId para identificar notificaciones duplicadas
    */
   private async existeNotificacionHoy(
     tipo: 'docente' | 'estudiante' | 'tutor',
@@ -306,9 +306,9 @@ export class ClaseProximaNotificationService {
     manana.setDate(manana.getDate() + 1);
 
     const whereClause: Record<string, string> = {};
-    if (tipo === 'docente') whereClause['docente_id'] = destinatarioId;
-    if (tipo === 'estudiante') whereClause['estudiante_id'] = destinatarioId;
-    if (tipo === 'tutor') whereClause['tutor_id'] = destinatarioId;
+    if (tipo === 'docente') whereClause['docenteId'] = destinatarioId;
+    if (tipo === 'estudiante') whereClause['estudianteId'] = destinatarioId;
+    if (tipo === 'tutor') whereClause['tutorId'] = destinatarioId;
 
     const notificacion = await this.prisma.notificacion.findFirst({
       where: {
@@ -325,7 +325,7 @@ export class ClaseProximaNotificationService {
           lt: manana,
         },
         metadata: {
-          path: ['clase_id'],
+          path: ['claseId'],
           equals: claseId,
         },
       },

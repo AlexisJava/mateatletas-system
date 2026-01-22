@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
-import { DLQStatus, Prisma } from '@prisma/client';
+import { DlqStatus, Prisma } from '@prisma/client';
 import { MercadoPagoWebhookDto } from '../dto/mercadopago-webhook.dto';
 
 /**
@@ -19,7 +19,7 @@ export interface AddToDLQData {
  * Filtros para listar webhooks en DLQ
  */
 export interface DLQFilters {
-  status?: DLQStatus;
+  status?: DlqStatus;
   paymentId?: string;
   webhookType?: string;
   fromDate?: Date;
@@ -59,21 +59,21 @@ export class WebhookDLQService {
    */
   async addToDLQ(data: AddToDLQData): Promise<{ id: string }> {
     this.logger.warn(
-      `🚨 Webhook agregado a DLQ: payment_id=${data.paymentId}, ` +
+      `🚨 Webhook agregado a DLQ: paymentId=${data.paymentId}, ` +
         `type=${data.webhookType}, retries=${data.retries}, ` +
         `error=${data.errorMessage}`,
     );
 
     const record = await this.prisma.webhookFailed.create({
       data: {
-        payment_id: data.paymentId,
-        webhook_type: data.webhookType,
+        paymentId: data.paymentId,
+        webhookType: data.webhookType,
         payload: data.payload as unknown as Prisma.InputJsonValue,
-        error_message: data.errorMessage,
-        error_stack: data.errorStack,
+        errorMessage: data.errorMessage,
+        errorStack: data.errorStack,
         retries: data.retries,
-        status: DLQStatus.PENDING,
-        last_retry_at: new Date(),
+        status: DlqStatus.PENDING,
+        lastRetryAt: new Date(),
       },
     });
 
@@ -100,27 +100,27 @@ export class WebhookDLQService {
     }
 
     if (filters.paymentId) {
-      where.payment_id = filters.paymentId;
+      where.paymentId = filters.paymentId;
     }
 
     if (filters.webhookType) {
-      where.webhook_type = filters.webhookType;
+      where.webhookType = filters.webhookType;
     }
 
     if (filters.fromDate || filters.toDate) {
-      where.created_at = {};
+      where.createdAt = {};
       if (filters.fromDate) {
-        where.created_at.gte = filters.fromDate;
+        where.createdAt.gte = filters.fromDate;
       }
       if (filters.toDate) {
-        where.created_at.lte = filters.toDate;
+        where.createdAt.lte = filters.toDate;
       }
     }
 
     const [items, total] = await Promise.all([
       this.prisma.webhookFailed.findMany({
         where,
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
         take: limit,
         skip: offset,
       }),
@@ -164,7 +164,7 @@ export class WebhookDLQService {
       throw new NotFoundException(`Webhook DLQ ${id} no encontrado`);
     }
 
-    if (existing.status !== DLQStatus.PENDING) {
+    if (existing.status !== DlqStatus.PENDING) {
       this.logger.warn(
         `Intentando procesar webhook DLQ ${id} con status ${existing.status}`,
       );
@@ -173,8 +173,8 @@ export class WebhookDLQService {
     return this.prisma.webhookFailed.update({
       where: { id },
       data: {
-        status: DLQStatus.PROCESSING,
-        last_retry_at: new Date(),
+        status: DlqStatus.PROCESSING,
+        lastRetryAt: new Date(),
       },
     });
   }
@@ -203,10 +203,10 @@ export class WebhookDLQService {
     return this.prisma.webhookFailed.update({
       where: { id },
       data: {
-        status: DLQStatus.RESOLVED,
-        resolved_at: new Date(),
-        resolved_by: data.resolvedBy,
-        resolution_notes: data.resolutionNotes,
+        status: DlqStatus.RESOLVED,
+        resolvedAt: new Date(),
+        resolvedBy: data.resolvedBy,
+        resolutionNotes: data.resolutionNotes,
       },
     });
   }
@@ -235,10 +235,10 @@ export class WebhookDLQService {
     return this.prisma.webhookFailed.update({
       where: { id },
       data: {
-        status: DLQStatus.ABANDONED,
-        resolved_at: new Date(),
-        resolved_by: data.resolvedBy,
-        resolution_notes: data.resolutionNotes,
+        status: DlqStatus.ABANDONED,
+        resolvedAt: new Date(),
+        resolvedBy: data.resolvedBy,
+        resolutionNotes: data.resolutionNotes,
       },
     });
   }
@@ -254,9 +254,9 @@ export class WebhookDLQService {
     return this.prisma.webhookFailed.update({
       where: { id },
       data: {
-        status: DLQStatus.PENDING,
-        error_message: errorMessage,
-        last_retry_at: new Date(),
+        status: DlqStatus.PENDING,
+        errorMessage: errorMessage,
+        lastRetryAt: new Date(),
         retries: { increment: 1 },
       },
     });
@@ -277,14 +277,14 @@ export class WebhookDLQService {
 
       // Total pendientes
       this.prisma.webhookFailed.count({
-        where: { status: DLQStatus.PENDING },
+        where: { status: DlqStatus.PENDING },
       }),
 
       // Webhook pendiente más antiguo
       this.prisma.webhookFailed.findFirst({
-        where: { status: DLQStatus.PENDING },
-        orderBy: { created_at: 'asc' },
-        select: { id: true, created_at: true, payment_id: true },
+        where: { status: DlqStatus.PENDING },
+        orderBy: { createdAt: 'asc' },
+        select: { id: true, createdAt: true, paymentId: true },
       }),
     ]);
 
@@ -313,9 +313,9 @@ export class WebhookDLQService {
     const result = await this.prisma.webhookFailed.deleteMany({
       where: {
         status: {
-          in: [DLQStatus.RESOLVED, DLQStatus.ABANDONED],
+          in: [DlqStatus.RESOLVED, DlqStatus.ABANDONED],
         },
-        resolved_at: {
+        resolvedAt: {
           lt: thirtyDaysAgo,
         },
       },

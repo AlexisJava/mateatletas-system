@@ -39,7 +39,7 @@ type PrismaTransactionClient = Prisma.TransactionClient;
 interface SuscripcionTransitionData {
   id: string;
   estado: EstadoSuscripcion;
-  tutor_id: string;
+  tutorId: string;
   version: number;
 }
 
@@ -101,13 +101,13 @@ export class SuscripcionStateTransitionService {
           },
           data: {
             estado: EstadoSuscripcion.ACTIVA,
-            mp_status: 'authorized',
-            fecha_proximo_cobro: detail.next_payment_date
+            mpStatus: 'authorized',
+            fechaProximoCobro: detail.next_payment_date
               ? new Date(detail.next_payment_date)
               : null,
             // Limpiar grace period si existía
-            dias_gracia_usados: 0,
-            fecha_inicio_gracia: null,
+            diasGraciaUsados: 0,
+            fechaInicioGracia: null,
             version: { increment: 1 }, // Incrementar versión
           },
         });
@@ -115,13 +115,13 @@ export class SuscripcionStateTransitionService {
         // Registrar historial
         await tx.historialEstadoSuscripcion.create({
           data: {
-            suscripcion_id: suscripcion.id,
-            estado_anterior: estadoAnterior,
-            estado_nuevo: EstadoSuscripcion.ACTIVA,
+            suscripcionId: suscripcion.id,
+            estadoAnterior: estadoAnterior,
+            estadoNuevo: EstadoSuscripcion.ACTIVA,
             motivo: 'Pago autorizado por MercadoPago',
-            realizado_por: 'mercadopago',
+            realizadoPor: 'mercadopago',
             metadata: {
-              mp_preapproval_id: detail.id,
+              mpPreapprovalId: detail.id,
               next_payment_date: detail.next_payment_date,
             },
           },
@@ -150,7 +150,7 @@ export class SuscripcionStateTransitionService {
         eventName: 'suscripcion.activada',
         payload: new SuscripcionActivadaEvent({
           suscripcionId: suscripcion.id,
-          tutorId: suscripcion.tutor_id,
+          tutorId: suscripcion.tutorId,
           mpPaymentId: detail.id,
         }),
       },
@@ -193,10 +193,10 @@ export class SuscripcionStateTransitionService {
           },
           data: {
             estado: EstadoSuscripcion.CANCELADA,
-            mp_status: 'cancelled',
-            fecha_cancelacion: new Date(),
-            motivo_cancelacion: motivo,
-            cancelado_por: 'mercadopago',
+            mpStatus: 'cancelled',
+            fechaCancelacion: new Date(),
+            motivoCancelacion: motivo,
+            canceladoPor: 'mercadopago',
             version: { increment: 1 },
           },
         });
@@ -204,12 +204,12 @@ export class SuscripcionStateTransitionService {
         // Registrar historial
         await tx.historialEstadoSuscripcion.create({
           data: {
-            suscripcion_id: suscripcion.id,
-            estado_anterior: estadoAnterior,
-            estado_nuevo: EstadoSuscripcion.CANCELADA,
+            suscripcionId: suscripcion.id,
+            estadoAnterior: estadoAnterior,
+            estadoNuevo: EstadoSuscripcion.CANCELADA,
             motivo,
-            realizado_por: 'mercadopago',
-            metadata: { mp_preapproval_id: detail.id },
+            realizadoPor: 'mercadopago',
+            metadata: { mpPreapprovalId: detail.id },
           },
         });
       });
@@ -236,7 +236,7 @@ export class SuscripcionStateTransitionService {
         eventName: 'suscripcion.cancelada',
         payload: new SuscripcionCanceladaEvent({
           suscripcionId: suscripcion.id,
-          tutorId: suscripcion.tutor_id,
+          tutorId: suscripcion.tutorId,
           motivo,
           canceladoPor: 'system',
           estadoAnterior,

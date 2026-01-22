@@ -129,7 +129,7 @@ describe('EstudianteBusinessValidator', () => {
     it('no debe lanzar error si el estudiante pertenece al tutor', async () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
         id: 'estudiante-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
       } as any);
 
       await expect(
@@ -137,7 +137,7 @@ describe('EstudianteBusinessValidator', () => {
       ).resolves.not.toThrow();
       expect(prisma.estudiante.findUnique).toHaveBeenCalledWith({
         where: { id: 'estudiante-123' },
-        select: { id: true, tutor_id: true },
+        select: { id: true, tutorId: true },
       });
     });
 
@@ -155,7 +155,7 @@ describe('EstudianteBusinessValidator', () => {
     it('debe lanzar BadRequestException si el estudiante no pertenece al tutor', async () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
         id: 'estudiante-123',
-        tutor_id: 'otro-tutor-456',
+        tutorId: 'otro-tutor-456',
       } as any);
 
       await expect(

@@ -53,19 +53,19 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
       expect(
         mockPrismaService.webhookProcessed.findUnique,
       ).toHaveBeenCalledWith({
-        where: { payment_id: 'payment-123' },
+        where: { paymentId: 'payment-123' },
       });
     });
 
     it('should return true if webhook was already processed', async () => {
       const mockProcessedWebhook = {
         id: 'webhook-1',
-        payment_id: 'payment-123',
-        webhook_type: 'inscripcion',
+        paymentId: 'payment-123',
+        webhookType: 'inscripcion',
         status: 'approved',
-        external_reference: 'inscripcion-1-estudiante-1-producto-1',
-        processed_at: new Date('2025-01-15T10:00:00Z'),
-        created_at: new Date('2025-01-15T10:00:00Z'),
+        externalReference: 'inscripcion-1-estudiante-1-producto-1',
+        processedAt: new Date('2025-01-15T10:00:00Z'),
+        createdAt: new Date('2025-01-15T10:00:00Z'),
       };
 
       mockPrismaService.webhookProcessed.findUnique.mockResolvedValue(
@@ -82,8 +82,8 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
 
       mockPrismaService.webhookProcessed.findUnique.mockResolvedValue({
         id: 'webhook-1',
-        payment_id: 'payment-123',
-        processed_at: new Date('2025-01-15T10:00:00Z'),
+        paymentId: 'payment-123',
+        processedAt: new Date('2025-01-15T10:00:00Z'),
       });
 
       await service.wasProcessed('payment-123');
@@ -105,12 +105,12 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
 
       const mockCreated = {
         id: 'webhook-2',
-        payment_id: 'payment-456',
-        webhook_type: 'membresia',
+        paymentId: 'payment-456',
+        webhookType: 'membresia',
         status: 'approved',
-        external_reference: 'membresia-1-tutor-1-producto-1',
-        processed_at: new Date(),
-        created_at: new Date(),
+        externalReference: 'membresia-1-tutor-1-producto-1',
+        processedAt: new Date(),
+        createdAt: new Date(),
       };
 
       mockPrismaService.webhookProcessed.create.mockResolvedValue(mockCreated);
@@ -119,10 +119,10 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
 
       expect(mockPrismaService.webhookProcessed.create).toHaveBeenCalledWith({
         data: {
-          payment_id: 'payment-456',
-          webhook_type: 'membresia',
+          paymentId: 'payment-456',
+          webhookType: 'membresia',
           status: 'approved',
-          external_reference: 'membresia-1-tutor-1-producto-1',
+          externalReference: 'membresia-1-tutor-1-producto-1',
         },
       });
     });
@@ -137,7 +137,7 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
 
       // Simular error de unique constraint (otro proceso ya guardó el registro)
       const uniqueConstraintError: any = new Error(
-        'Unique constraint failed on the fields: (`payment_id`)',
+        'Unique constraint failed on the fields: (`paymentId`)',
       );
       uniqueConstraintError.code = 'P2002';
 
@@ -179,7 +179,7 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
 
       mockPrismaService.webhookProcessed.create.mockResolvedValue({
         id: 'webhook-3',
-        payment_id: 'payment-111',
+        paymentId: 'payment-111',
       });
 
       await service.markAsProcessed({
@@ -210,7 +210,7 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
       // Verificar que se calculó correctamente la fecha de hace 30 días
       const callArgs =
         mockPrismaService.webhookProcessed.deleteMany.mock.calls[0][0];
-      const thirtyDaysAgo = callArgs.where.processed_at.lt;
+      const thirtyDaysAgo = callArgs.where.processedAt.lt;
 
       const now = new Date();
       const expectedDate = new Date();
@@ -251,12 +251,12 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
     it('should return webhook info if it exists', async () => {
       const mockWebhook = {
         id: 'webhook-100',
-        payment_id: 'payment-200',
-        webhook_type: 'inscripcion',
+        paymentId: 'payment-200',
+        webhookType: 'inscripcion',
         status: 'approved',
-        external_reference: 'inscripcion-1-estudiante-1-producto-1',
-        processed_at: new Date('2025-01-15T10:00:00Z'),
-        created_at: new Date('2025-01-15T10:00:00Z'),
+        externalReference: 'inscripcion-1-estudiante-1-producto-1',
+        processedAt: new Date('2025-01-15T10:00:00Z'),
+        createdAt: new Date('2025-01-15T10:00:00Z'),
       };
 
       mockPrismaService.webhookProcessed.findUnique.mockResolvedValue(
@@ -281,8 +281,8 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
     it('should return aggregated statistics', async () => {
       mockPrismaService.webhookProcessed.count.mockResolvedValueOnce(100); // total
       mockPrismaService.webhookProcessed.groupBy.mockResolvedValueOnce([
-        { webhook_type: 'inscripcion', _count: 60 },
-        { webhook_type: 'membresia', _count: 40 },
+        { webhookType: 'inscripcion', _count: 60 },
+        { webhookType: 'membresia', _count: 40 },
       ]); // byType
       mockPrismaService.webhookProcessed.groupBy.mockResolvedValueOnce([
         { status: 'approved', _count: 85 },
@@ -295,8 +295,8 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
       expect(stats).toEqual({
         total: 100,
         byType: [
-          { webhook_type: 'inscripcion', _count: 60 },
-          { webhook_type: 'membresia', _count: 40 },
+          { webhookType: 'inscripcion', _count: 60 },
+          { webhookType: 'membresia', _count: 40 },
         ],
         byStatus: [
           { status: 'approved', _count: 85 },
@@ -318,7 +318,7 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
       // 2. Marcar como procesado
       mockPrismaService.webhookProcessed.create.mockResolvedValueOnce({
         id: 'webhook-lifecycle',
-        payment_id: paymentId,
+        paymentId: paymentId,
       });
       await service.markAsProcessed({
         paymentId,
@@ -330,8 +330,8 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
       // 3. Segunda vez: webhook ya procesado
       mockPrismaService.webhookProcessed.findUnique.mockResolvedValueOnce({
         id: 'webhook-lifecycle',
-        payment_id: paymentId,
-        processed_at: new Date(),
+        paymentId: paymentId,
+        processedAt: new Date(),
       });
       expect(await service.wasProcessed(paymentId)).toBe(true);
     });

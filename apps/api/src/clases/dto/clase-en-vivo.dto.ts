@@ -21,7 +21,7 @@ export class ClaseEnVivoResponseDto {
     enum: ['Programada', 'EnVivo', 'Finalizada', 'Cancelada'],
     example: 'EnVivo',
   })
-  estado_clase!: string;
+  estadoClase!: string;
 
   @ApiProperty({
     description:
@@ -29,7 +29,7 @@ export class ClaseEnVivoResponseDto {
     example: '2025-01-06T14:00:00.000Z',
     nullable: true,
   })
-  iniciada_en!: Date | null;
+  iniciadaEn!: Date | null;
 
   @ApiProperty({
     description:
@@ -37,14 +37,14 @@ export class ClaseEnVivoResponseDto {
     example: null,
     nullable: true,
   })
-  finalizada_en!: Date | null;
+  finalizadaEn!: Date | null;
 
   @ApiProperty({
     description: 'Nombre de la sala en LiveKit',
     example: 'clase-grupo-cmh6d8pqn0001xwd0wf5sv4d8',
     nullable: true,
   })
-  livekit_room_name!: string | null;
+  livekitRoomName!: string | null;
 }
 
 /**
@@ -72,5 +72,5 @@ export class FinalizarClaseResponseDto extends ClaseEnVivoResponseDto {
     description: 'Duración total de la clase en minutos',
     example: 45,
   })
-  duracion_minutos!: number;
+  duracionMinutos!: number;
 }

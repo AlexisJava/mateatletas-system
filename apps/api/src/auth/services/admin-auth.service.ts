@@ -20,7 +20,7 @@ export interface AdminLoginResult {
     email: string;
     nombre: string;
     apellido: string;
-    fecha_registro: Date | null;
+    fechaRegistro: Date | null;
     role: Role;
     roles: Role[];
   };
@@ -99,7 +99,7 @@ export class AdminAuthService {
     const verificationResult =
       await this.passwordService.verifyWithTimingProtection(
         password,
-        admin?.password_hash ?? null,
+        admin?.passwordHash ?? null,
       );
 
     // 3. Validar credenciales
@@ -123,7 +123,7 @@ export class AdminAuthService {
     }
 
     // 7. Si tiene MFA habilitado, retornar token temporal
-    if (admin.mfa_enabled) {
+    if (admin.mfaEnabled) {
       this.logger.log(`Admin ${admin.email} requiere verificación MFA`);
 
       const mfaToken = this.tokenService.generateMfaToken(
@@ -170,7 +170,7 @@ export class AdminAuthService {
         email: admin.email,
         nombre: admin.nombre,
         apellido: admin.apellido,
-        fecha_registro: admin.fecha_registro,
+        fechaRegistro: admin.fechaRegistro,
         role: Role.ADMIN,
         roles: finalRoles,
       },
@@ -187,7 +187,7 @@ export class AdminAuthService {
     const newHash = await this.passwordService.hash(plainPassword);
     await this.prisma.admin.update({
       where: { id: adminId },
-      data: { password_hash: newHash },
+      data: { passwordHash: newHash },
     });
     this.logger.log(`Password hash upgraded for admin ${adminId}`);
   }

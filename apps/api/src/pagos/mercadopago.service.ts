@@ -170,7 +170,7 @@ export class MercadoPagoService {
       id: String(payment.id),
       status: payment.status as MercadoPagoPayment['status'],
       status_detail: payment.status_detail || '',
-      external_reference: payment.external_reference || null,
+      externalReference: payment.external_reference || null,
       transaction_amount: payment.transaction_amount || 0,
       date_approved: payment.date_approved || null,
       date_created: payment.date_created || '',
@@ -245,7 +245,7 @@ export class MercadoPagoService {
         name: tutor.nombre || undefined,
         surname: tutor.apellido || undefined,
       },
-      external_reference: EXTERNAL_REFERENCE_FORMATS.membresia(
+      externalReference: EXTERNAL_REFERENCE_FORMATS.membresia(
         membresiaId,
         tutorId,
         producto.id,
@@ -309,7 +309,7 @@ export class MercadoPagoService {
         name: tutor.nombre || undefined,
         surname: tutor.apellido || undefined,
       },
-      external_reference: EXTERNAL_REFERENCE_FORMATS.inscripcionMensual(
+      externalReference: EXTERNAL_REFERENCE_FORMATS.inscripcionMensual(
         inscripcionId,
         estudianteId,
         producto.id,

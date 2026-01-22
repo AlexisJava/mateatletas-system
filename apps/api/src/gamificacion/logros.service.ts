@@ -85,7 +85,7 @@ export class LogrosService {
     // Verificar cuáles están desbloqueados
     const asistencias = await this.prisma.asistencia.findMany({
       where: {
-        estudiante_id: estudianteId,
+        estudianteId: estudianteId,
         estado: EstadoAsistencia.Presente,
       },
     });
@@ -106,7 +106,7 @@ export class LogrosService {
     return logrosDefinidos.map((logro) => ({
       ...logro,
       desbloqueado: logrosDesbloqueados.includes(logro.id),
-      fecha_desbloqueo: logrosDesbloqueados.includes(logro.id)
+      fechaDesbloqueo: logrosDesbloqueados.includes(logro.id)
         ? new Date()
         : null,
     }));
@@ -139,7 +139,7 @@ export class LogrosService {
   async calcularRacha(estudianteId: string): Promise<number> {
     const asistencias = await this.prisma.asistencia.findMany({
       where: {
-        estudiante_id: estudianteId,
+        estudianteId: estudianteId,
         estado: EstadoAsistencia.Presente,
       },
       orderBy: { createdAt: 'desc' },

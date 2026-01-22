@@ -108,7 +108,7 @@ describe('PaymentWebhookService', () => {
       expect(mercadoPagoService.getPayment).not.toHaveBeenCalled();
     });
 
-    it('debe ignorar pagos sin external_reference', async () => {
+    it('debe ignorar pagos sin externalReference', async () => {
       const webhookData: MercadoPagoWebhookDto = {
         type: 'payment',
         action: 'updated',
@@ -118,12 +118,12 @@ describe('PaymentWebhookService', () => {
       mercadoPagoService.getPayment.mockResolvedValue({
         id: 123,
         status: 'approved',
-        external_reference: null,
+        externalReference: null,
       } as any);
 
       const result = await service.procesarWebhookMercadoPago(webhookData);
 
-      expect(result.message).toBe('Payment without external_reference');
+      expect(result.message).toBe('Payment without externalReference');
     });
 
     it('debe procesar webhook de inscripción exitosamente', async () => {
@@ -136,14 +136,14 @@ describe('PaymentWebhookService', () => {
       mercadoPagoService.getPayment.mockResolvedValue({
         id: 456,
         status: 'approved',
-        external_reference:
+        externalReference:
           'inscripcion-INS001-estudiante-EST001-producto-PROD001',
       } as any);
 
       stateMapper.mapearEstadoPago.mockReturnValue(EstadoPago.PAGADO);
       commandService.actualizarEstadoInscripcion.mockResolvedValue({
         id: 'INS001',
-        estado_pago: 'Pagado',
+        estadoPago: 'Pagado',
       } as any);
 
       const result = await service.procesarWebhookMercadoPago(webhookData);
@@ -175,14 +175,14 @@ describe('PaymentWebhookService', () => {
       mercadoPagoService.getPayment.mockResolvedValue({
         id: 789,
         status: 'rejected',
-        external_reference:
+        externalReference:
           'inscripcion-INS002-estudiante-EST002-producto-PROD002',
       } as any);
 
       stateMapper.mapearEstadoPago.mockReturnValue(EstadoPago.RECHAZADO);
       commandService.actualizarEstadoInscripcion.mockResolvedValue({
         id: 'INS002',
-        estado_pago: 'Pendiente',
+        estadoPago: 'Pendiente',
       } as any);
 
       const result = await service.procesarWebhookMercadoPago(webhookData);
@@ -193,7 +193,7 @@ describe('PaymentWebhookService', () => {
       expect(result.paymentStatus).toBe('rejected');
     });
 
-    it('debe manejar external_reference con formato desconocido', async () => {
+    it('debe manejar externalReference con formato desconocido', async () => {
       const webhookData: MercadoPagoWebhookDto = {
         type: 'payment',
         action: 'updated',
@@ -203,12 +203,12 @@ describe('PaymentWebhookService', () => {
       mercadoPagoService.getPayment.mockResolvedValue({
         id: 999,
         status: 'approved',
-        external_reference: 'unknown-format-ABC123',
+        externalReference: 'unknown-format-ABC123',
       } as any);
 
       const result = await service.procesarWebhookMercadoPago(webhookData);
 
-      expect(result.message).toBe('Unknown external_reference format');
+      expect(result.message).toBe('Unknown externalReference format');
       expect(commandService.actualizarEstadoInscripcion).not.toHaveBeenCalled();
     });
 
@@ -238,7 +238,7 @@ describe('PaymentWebhookService', () => {
       mercadoPagoService.getPayment.mockResolvedValue({
         id: null as any,
         status: null as any,
-        external_reference:
+        externalReference:
           'inscripcion-INS003-estudiante-EST003-producto-PROD003',
       } as any);
 

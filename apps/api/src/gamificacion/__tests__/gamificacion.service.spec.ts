@@ -39,8 +39,8 @@ describe.skip('GamificacionService', () => {
     nombre: 'María',
     apellido: 'González',
     fotoUrl: 'https://example.com/foto.jpg', // camelCase para coincidir con servicio
-    avatar_gradient: 1,
-    xp_total: 350,
+    avatarGradient: 1,
+    xpTotal: 350,
     casaId: 'equipo-1', // camelCase para coincidir con servicio
     casa: {
       id: 'casa-1',
@@ -51,14 +51,14 @@ describe.skip('GamificacionService', () => {
       nombre: 'Juan',
       apellido: 'Pérez',
     },
-    inscripciones_clase: [
+    inscripcionesClase: [
       {
         id: 'inscripcion-1',
         clase: {
           id: 'clase-1',
           nombre: 'Matemáticas 101',
-          fecha_hora_inicio: new Date('2025-10-20T10:00:00Z'),
-          fecha_hora_fin: new Date('2025-10-20T11:00:00Z'),
+          fechaHoraInicio: new Date('2025-10-20T10:00:00Z'),
+          fecha_horaFin: new Date('2025-10-20T11:00:00Z'),
           estado: 'Programada',
           rutaCurricular: { nombre: 'Álgebra', color: '#00FF00' },
           docente: { nombre: 'Prof.', apellido: 'García' },
@@ -69,8 +69,8 @@ describe.skip('GamificacionService', () => {
         clase: {
           id: 'clase-2',
           nombre: 'Geometría Básica',
-          fecha_hora_inicio: new Date('2025-10-21T14:00:00Z'),
-          fecha_hora_fin: new Date('2025-10-21T15:00:00Z'),
+          fechaHoraInicio: new Date('2025-10-21T14:00:00Z'),
+          fecha_horaFin: new Date('2025-10-21T15:00:00Z'),
           estado: 'Programada',
           rutaCurricular: { nombre: 'Geometría', color: '#0000FF' },
           docente: { nombre: 'Prof.', apellido: 'Martínez' },
@@ -85,7 +85,7 @@ describe.skip('GamificacionService', () => {
         clase: {
           id: 'clase-1',
           nombre: 'Matemáticas 101',
-          fecha_hora_inicio: new Date('2025-10-18T10:00:00Z'),
+          fechaHoraInicio: new Date('2025-10-18T10:00:00Z'),
           rutaCurricular: { nombre: 'Álgebra', color: '#00FF00' },
         },
       },
@@ -96,7 +96,7 @@ describe.skip('GamificacionService', () => {
         clase: {
           id: 'clase-2',
           nombre: 'Geometría Básica',
-          fecha_hora_inicio: new Date('2025-10-17T14:00:00Z'),
+          fechaHoraInicio: new Date('2025-10-17T14:00:00Z'),
           rutaCurricular: { nombre: 'Geometría', color: '#0000FF' },
         },
       },
@@ -107,7 +107,7 @@ describe.skip('GamificacionService', () => {
         clase: {
           id: 'clase-3',
           nombre: 'Cálculo 101',
-          fecha_hora_inicio: new Date('2025-10-16T10:00:00Z'),
+          fechaHoraInicio: new Date('2025-10-16T10:00:00Z'),
           rutaCurricular: { nombre: 'Cálculo', color: '#FFFF00' },
         },
       },
@@ -119,8 +119,8 @@ describe.skip('GamificacionService', () => {
       id: 'clase-futuro-1',
       nombre: 'Matemáticas Avanzadas',
       descripcion: 'Clase de matemáticas',
-      fecha_hora_inicio: new Date('2025-10-25T10:00:00Z'),
-      fecha_hora_fin: new Date('2025-10-25T11:00:00Z'),
+      fechaHoraInicio: new Date('2025-10-25T10:00:00Z'),
+      fecha_horaFin: new Date('2025-10-25T11:00:00Z'),
       estado: 'Programada',
       rutaCurricular: {
         nombre: 'Álgebra',
@@ -135,8 +135,8 @@ describe.skip('GamificacionService', () => {
     nivel: 2,
     nombre: 'Aprendiz Matemático',
     descripcion: 'Estás progresando bien',
-    puntos_minimos: 100,
-    puntos_maximos: 499,
+    puntosMinimos: 100,
+    puntosMaximos: 499,
     color: '#3b82f6',
     icono: '📚',
   };
@@ -145,16 +145,16 @@ describe.skip('GamificacionService', () => {
     nivel: 3,
     nombre: 'Maestro de Números',
     descripcion: 'Dominas las matemáticas',
-    puntos_minimos: 500,
-    puntos_maximos: 999,
+    puntosMinimos: 500,
+    puntosMaximos: 999,
     color: '#8b5cf6',
     icono: '🏆',
   };
 
   const mockRacha = 5;
   const mockEquipoRanking = [
-    { id: 'estudiante-123', nombre: 'María', xp_total: 350, posicion: 1 },
-    { id: 'estudiante-456', nombre: 'Pedro', xp_total: 280, posicion: 2 },
+    { id: 'estudiante-123', nombre: 'María', xpTotal: 350, posicion: 1 },
+    { id: 'estudiante-456', nombre: 'Pedro', xpTotal: 280, posicion: 2 },
   ];
 
   beforeEach(async () => {
@@ -214,8 +214,8 @@ describe.skip('GamificacionService', () => {
             crearRecursosEstudiante: jest.fn(),
             actualizarXP: jest.fn(),
             obtenerRecursosConNivel: jest.fn().mockResolvedValue({
-              xp_total: 350,
-              nivel_actual: 2,
+              xpTotal: 350,
+              nivelActual: 2,
               monedas: 100,
               gemas: 10,
               vidas: 5,
@@ -399,11 +399,11 @@ describe.skip('GamificacionService', () => {
       expect(prisma.clase.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            fecha_hora_inicio: { gte: expect.any(Date) }, // Future dates only
+            fechaHoraInicio: { gte: expect.any(Date) }, // Future dates only
             estado: 'Programada',
           }),
           take: 5, // Limit to 5
-          orderBy: { fecha_hora_inicio: 'asc' }, // Earliest first
+          orderBy: { fechaHoraInicio: 'asc' }, // Earliest first
         }),
       );
     });
@@ -517,8 +517,8 @@ describe.skip('GamificacionService', () => {
       // Arrange
       const nivelMaxPuntos = {
         ...mockNivelActual,
-        puntos_minimos: 100,
-        puntos_maximos: 200,
+        puntosMinimos: 100,
+        puntosMaximos: 200,
       };
 
       jest
@@ -544,9 +544,9 @@ describe.skip('GamificacionService', () => {
     it('should return all niveles ordered by nivel asc', async () => {
       // Arrange
       const mockNiveles = [
-        { nivel: 1, nombre: 'Explorador Numérico', puntos_minimos: 0 },
-        { nivel: 2, nombre: 'Aprendiz Matemático', puntos_minimos: 500 },
-        { nivel: 3, nombre: 'Maestro de Números', puntos_minimos: 1000 },
+        { nivel: 1, nombre: 'Explorador Numérico', puntosMinimos: 0 },
+        { nivel: 2, nombre: 'Aprendiz Matemático', puntosMinimos: 500 },
+        { nivel: 3, nombre: 'Maestro de Números', puntosMinimos: 1000 },
       ];
 
       jest
@@ -680,7 +680,7 @@ describe.skip('GamificacionService', () => {
       const mockPunto = {
         id: 'punto-1',
         puntos: 10,
-        estudiante_id: 'estudiante-123',
+        estudianteId: 'estudiante-123',
       };
       jest
         .spyOn(puntosService, 'otorgarPuntos')

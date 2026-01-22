@@ -54,11 +54,11 @@ export class PaymentQueryService {
     } = params;
 
     const where: Prisma.InscripcionMensualWhereInput = {};
-    if (tutorId) where.tutor_id = String(tutorId);
-    if (estudianteId) where.estudiante_id = String(estudianteId);
+    if (tutorId) where.tutorId = String(tutorId);
+    if (estudianteId) where.estudianteId = String(estudianteId);
     if (anio) where.anio = anio;
     if (mes) where.mes = mes;
-    if (estado) where.estado_pago = estado as EstadoPago;
+    if (estado) where.estadoPago = estado as EstadoPago;
 
     const [data, total] = await Promise.all([
       this.prisma.inscripcionMensual.findMany({
@@ -149,10 +149,10 @@ export class PaymentQueryService {
   ): Promise<boolean> {
     const inscripcion = await this.prisma.inscripcionMensual.findFirst({
       where: {
-        estudiante_id: estudianteId,
+        estudianteId: estudianteId,
         anio,
         mes,
-        estado_pago: EstadoPago.Pendiente,
+        estadoPago: EstadoPago.Pendiente,
       },
     });
 
@@ -174,7 +174,7 @@ export class PaymentQueryService {
   ) {
     return this.prisma.inscripcionMensual.findFirst({
       where: {
-        estudiante_id: estudianteId,
+        estudianteId: estudianteId,
         anio,
         mes,
       },
@@ -261,10 +261,10 @@ export class PaymentQueryService {
   ) {
     return this.prisma.inscripcionMensual.findMany({
       where: {
-        estudiante_id: estudianteId,
-        tutor_id: tutorId,
+        estudianteId: estudianteId,
+        tutorId: tutorId,
         periodo,
-        estado_pago: 'Pendiente',
+        estadoPago: 'Pendiente',
       },
       include: {
         estudiante: {

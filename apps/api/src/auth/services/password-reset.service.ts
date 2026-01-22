@@ -85,7 +85,7 @@ export class PasswordResetService {
       data: {
         email: normalizedEmail,
         token: hashedToken,
-        user_type: userResult.userType,
+        userType: userResult.userType,
         expiresAt,
         used: false,
       },
@@ -202,7 +202,7 @@ export class PasswordResetService {
     // 5. Actualizar contraseña según tipo de usuario
     await this.updateUserPassword(
       userResult.user.id,
-      resetToken.user_type as UserType,
+      resetToken.userType as UserType,
       newHash,
     );
 
@@ -216,7 +216,7 @@ export class PasswordResetService {
     await this.invalidatePreviousTokens(normalizedEmail);
 
     this.logger.log(
-      `Password reset completado para ${normalizedEmail} (${resetToken.user_type})`,
+      `Password reset completado para ${normalizedEmail} (${resetToken.userType})`,
     );
 
     return {
@@ -256,8 +256,8 @@ export class PasswordResetService {
     newHash: string,
   ): Promise<void> {
     const updateData = {
-      password_hash: newHash,
-      fecha_ultimo_cambio: new Date(),
+      passwordHash: newHash,
+      fechaUltimoCambio: new Date(),
     };
 
     switch (userType) {

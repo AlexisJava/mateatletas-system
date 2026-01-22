@@ -45,7 +45,7 @@ export class TutorBusinessValidator {
    */
   async validarTutorTieneEstudiantes(tutorId: string): Promise<void> {
     const count = await this.prisma.estudiante.count({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
     });
 
     if (count === 0) {

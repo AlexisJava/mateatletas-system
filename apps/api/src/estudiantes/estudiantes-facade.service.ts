@@ -141,8 +141,8 @@ export class EstudiantesFacadeService {
   /**
    * Actualiza la URL de animación idle del estudiante
    */
-  async updateAnimacionIdle(id: string, animacion_idle_url: string) {
-    return this.commandService.updateAnimacionIdle(id, animacion_idle_url);
+  async updateAnimacionIdle(id: string, animacionIdleUrl: string) {
+    return this.commandService.updateAnimacionIdle(id, animacionIdleUrl);
   }
 
   /**

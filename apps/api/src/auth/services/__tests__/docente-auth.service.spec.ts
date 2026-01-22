@@ -23,12 +23,12 @@ describe('DocenteAuthService', () => {
     apellido: 'García',
     dni: '87654321',
     telefono: '+5491198765432',
-    password_hash: 'hashed-password',
-    fecha_registro: new Date('2024-01-01'),
+    passwordHash: 'hashed-password',
+    fechaRegistro: new Date('2024-01-01'),
     titulo: 'Licenciada en Matemáticas',
     bio: 'Profesora con 10 años de experiencia',
     roles: 'Docente',
-    must_change_password: true,
+    mustChangePassword: true,
   };
 
   beforeEach(async () => {
@@ -174,7 +174,7 @@ describe('DocenteAuthService', () => {
       expect(passwordService.hash).toHaveBeenCalledWith('password123');
       expect(prisma.docente.update).toHaveBeenCalledWith({
         where: { id: 'docente-123' },
-        data: { password_hash: 'new-hash' },
+        data: { passwordHash: 'new-hash' },
       });
     });
 
@@ -220,8 +220,8 @@ describe('DocenteAuthService', () => {
       expect(result.user.bio).toBeNull();
     });
 
-    it('should return must_change_password flag from docente', async () => {
-      // Test con must_change_password = true (primer ingreso)
+    it('should return mustChangePassword flag from docente', async () => {
+      // Test con mustChangePassword = true (primer ingreso)
       prisma.docente.findUnique.mockResolvedValue(mockDocente as any);
       passwordService.verifyWithTimingProtection.mockResolvedValue({
         isValid: true,
@@ -235,12 +235,12 @@ describe('DocenteAuthService', () => {
         '127.0.0.1',
       );
 
-      expect(result.must_change_password).toBe(true);
+      expect(result.mustChangePassword).toBe(true);
 
-      // Test con must_change_password = false (ya cambió password)
+      // Test con mustChangePassword = false (ya cambió password)
       const docentePasswordChanged = {
         ...mockDocente,
-        must_change_password: false,
+        mustChangePassword: false,
       };
       prisma.docente.findUnique.mockResolvedValue(
         docentePasswordChanged as any,
@@ -252,7 +252,7 @@ describe('DocenteAuthService', () => {
         '127.0.0.1',
       );
 
-      expect(result2.must_change_password).toBe(false);
+      expect(result2.mustChangePassword).toBe(false);
     });
   });
 });

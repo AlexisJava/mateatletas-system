@@ -99,10 +99,10 @@ describe('VerificacionMorosidadService', () => {
         {
           id: 'insc-1',
           periodo: periodoVencido,
-          precio_final: 10000,
-          estado_pago: 'Pendiente',
-          estudiante_id: 'est-1',
-          tutor_id: 'tutor-1',
+          precioFinal: 10000,
+          estadoPago: 'Pendiente',
+          estudianteId: 'est-1',
+          tutorId: 'tutor-1',
           estudiante: { id: 'est-1', nombre: 'Juan', apellido: 'Pérez' },
           tutor: {
             id: 'tutor-1',
@@ -115,10 +115,10 @@ describe('VerificacionMorosidadService', () => {
         {
           id: 'insc-2',
           periodo: periodoVencido,
-          precio_final: 15000,
-          estado_pago: 'Pendiente',
-          estudiante_id: 'est-2',
-          tutor_id: 'tutor-1',
+          precioFinal: 15000,
+          estadoPago: 'Pendiente',
+          estudianteId: 'est-2',
+          tutorId: 'tutor-1',
           estudiante: { id: 'est-2', nombre: 'Ana', apellido: 'Pérez' },
           tutor: {
             id: 'tutor-1',
@@ -148,10 +148,10 @@ describe('VerificacionMorosidadService', () => {
         {
           id: 'insc-1',
           periodo: periodoVencido,
-          precio_final: 10000,
-          estado_pago: 'Pendiente',
-          estudiante_id: 'est-1',
-          tutor_id: 'tutor-1',
+          precioFinal: 10000,
+          estadoPago: 'Pendiente',
+          estudianteId: 'est-1',
+          tutorId: 'tutor-1',
           estudiante: { id: 'est-1', nombre: 'Juan', apellido: 'Pérez' },
           tutor: {
             id: 'tutor-1',
@@ -197,12 +197,12 @@ describe('VerificacionMorosidadService', () => {
             email: 'maria@test.com',
             telefono: '123',
           },
-          inscripciones_mensuales: [
+          inscripcionesMensuales: [
             {
               id: 'insc-1',
               periodo: periodoFuturo,
-              precio_final: 10000,
-              estado_pago: 'Pendiente',
+              precioFinal: 10000,
+              estadoPago: 'Pendiente',
             },
           ],
         },
@@ -232,12 +232,12 @@ describe('VerificacionMorosidadService', () => {
             email: 'maria@test.com',
             telefono: '123456789',
           },
-          inscripciones_mensuales: [
+          inscripcionesMensuales: [
             {
               id: 'insc-1',
               periodo: periodoVencido,
-              precio_final: 10000,
-              estado_pago: 'Pendiente',
+              precioFinal: 10000,
+              estadoPago: 'Pendiente',
             },
           ],
         },
@@ -275,7 +275,7 @@ describe('VerificacionMorosidadService', () => {
           {
             id: 'insc-1',
             periodo: periodoVencido,
-            precio_final: 10000,
+            precioFinal: 10000,
           },
         ]);
 
@@ -300,8 +300,8 @@ describe('VerificacionMorosidadService', () => {
         .mockResolvedValueOnce([{ periodo: periodo1 }, { periodo: periodo2 }])
         // Segunda llamada: verificarAccesoEstudiante
         .mockResolvedValueOnce([
-          { id: 'insc-1', periodo: periodo1, precio_final: 10000 },
-          { id: 'insc-2', periodo: periodo2, precio_final: 15000 },
+          { id: 'insc-1', periodo: periodo1, precioFinal: 10000 },
+          { id: 'insc-2', periodo: periodo2, precioFinal: 15000 },
         ]);
 
       const resultado = await service.verificarAccesoEstudiante('est-1');

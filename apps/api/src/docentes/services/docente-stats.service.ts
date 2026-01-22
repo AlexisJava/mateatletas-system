@@ -42,7 +42,7 @@ type EstudianteConGrupos = EstudianteBasico & {
 };
 
 type AsistenciaEstudiante = {
-  estudiante_id: string;
+  estudianteId: string;
   nombre: string;
   apellido: string;
   fotoUrl: string | null;
@@ -51,9 +51,9 @@ type AsistenciaEstudiante = {
     nombre: string;
     codigo: string;
   }>;
-  total_asistencias: number;
+  totalAsistencias: number;
   presentes: number;
-  porcentaje_asistencia: number;
+  porcentajeAsistencia: number;
 };
 
 @Injectable()
@@ -124,20 +124,20 @@ export class DocenteStatsService {
     const inscripciones = await this.prisma.inscripcionUnificada.findMany({
       where: {
         claseGrupo: {
-          docente_id: docenteId,
+          docenteId: docenteId,
           activo: true,
         },
         estado: 'ACTIVA',
       },
       select: {
-        estudiante_id: true,
-        clase_grupo_id: true,
+        estudianteId: true,
+        claseGrupoId: true,
       },
     });
 
     // Obtener datos completos de estudiantes únicos
     const estudiantesIdsUnicos = Array.from(
-      new Set(inscripciones.map((i) => i.estudiante_id)),
+      new Set(inscripciones.map((i) => i.estudianteId)),
     );
 
     const estudiantes = await this.prisma.estudiante.findMany({
@@ -156,7 +156,7 @@ export class DocenteStatsService {
 
     // Obtener datos completos de grupos
     const gruposIds = Array.from(
-      new Set(inscripciones.map((i) => i.clase_grupo_id)),
+      new Set(inscripciones.map((i) => i.claseGrupoId)),
     );
 
     const grupos = await this.prisma.claseGrupo.findMany({
@@ -176,8 +176,8 @@ export class DocenteStatsService {
     const estudiantesUnicosMap = new Map<string, EstudianteConGrupos>();
     estudiantes.forEach((est) => {
       const gruposDelEstudiante = inscripciones
-        .filter((i) => i.estudiante_id === est.id)
-        .map((i) => grupos.find((g) => g.id === i.clase_grupo_id))
+        .filter((i) => i.estudianteId === est.id)
+        .map((i) => grupos.find((g) => g.id === i.claseGrupoId))
         .filter(
           (g): g is { id: string; nombre: string; codigo: string } =>
             g !== undefined,
@@ -243,17 +243,17 @@ export class DocenteStatsService {
 
     const clasesGrupo = await this.prisma.claseGrupo.findMany({
       where: {
-        docente_id: docenteId,
+        docenteId: docenteId,
         activo: true,
-        dia_semana: diaActual,
+        diaSemana: diaActual,
       },
       select: {
         id: true,
         nombre: true,
         codigo: true,
-        hora_inicio: true,
-        hora_fin: true,
-        cupo_maximo: true,
+        horaInicio: true,
+        horaFin: true,
+        cupoMaximo: true,
         _count: {
           select: {
             inscripcionesUnificadas: {
@@ -266,7 +266,7 @@ export class DocenteStatsService {
 
     // Buscar la clase más próxima de hoy
     for (const claseGrupo of clasesGrupo) {
-      const [horas, minutos] = claseGrupo.hora_inicio.split(':').map(Number);
+      const [horas, minutos] = claseGrupo.horaInicio.split(':').map(Number);
       const fechaHoraClase = new Date(now);
       fechaHoraClase.setHours(horas ?? 0, minutos ?? 0, 0, 0);
 
@@ -276,7 +276,7 @@ export class DocenteStatsService {
 
       // Solo considerar si falta menos de 60 minutos o empezó hace menos de 10 minutos
       if (minutosParaEmpezar <= 60 && minutosParaEmpezar >= -10) {
-        const [horaFin, minFin] = claseGrupo.hora_fin.split(':').map(Number);
+        const [horaFin, minFin] = claseGrupo.horaFin.split(':').map(Number);
         const duracion =
           (horaFin ?? 0) * 60 +
           (minFin ?? 0) -
@@ -286,11 +286,11 @@ export class DocenteStatsService {
           id: claseGrupo.id,
           titulo: claseGrupo.nombre,
           grupoNombre: claseGrupo.codigo,
-          grupo_id: claseGrupo.id,
-          fecha_hora: fechaHoraClase.toISOString(),
+          grupoId: claseGrupo.id,
+          fechaHora: fechaHoraClase.toISOString(),
           duracion,
           estudiantesInscritos: claseGrupo._count.inscripcionesUnificadas,
-          cupo_maximo: claseGrupo.cupo_maximo,
+          cupoMaximo: claseGrupo.cupoMaximo,
           minutosParaEmpezar,
         };
       }
@@ -321,9 +321,9 @@ export class DocenteStatsService {
     // UNA SOLA QUERY con include - elimina N+1
     const clasesGrupo = await this.prisma.claseGrupo.findMany({
       where: {
-        docente_id: docenteId,
+        docenteId: docenteId,
         activo: true,
-        dia_semana: diaActual,
+        diaSemana: diaActual,
       },
       include: {
         inscripcionesUnificadas: {
@@ -334,7 +334,7 @@ export class DocenteStatsService {
                 id: true,
                 nombre: true,
                 apellido: true,
-                avatar_gradient: true,
+                avatarGradient: true,
               },
             },
           },
@@ -346,17 +346,17 @@ export class DocenteStatsService {
       id: claseGrupo.id,
       nombre: claseGrupo.nombre,
       codigo: claseGrupo.codigo,
-      dia_semana: claseGrupo.dia_semana,
-      hora_inicio: claseGrupo.hora_inicio,
-      hora_fin: claseGrupo.hora_fin,
+      diaSemana: claseGrupo.diaSemana,
+      horaInicio: claseGrupo.horaInicio,
+      horaFin: claseGrupo.horaFin,
       estudiantes: claseGrupo.inscripcionesUnificadas.map((insc) => ({
         id: insc.estudiante.id,
         nombre: insc.estudiante.nombre,
         apellido: insc.estudiante.apellido,
-        avatar_gradient: insc.estudiante.avatar_gradient,
+        avatarGradient: insc.estudiante.avatarGradient,
       })),
-      cupo_maximo: claseGrupo.cupo_maximo,
-      grupo_id: claseGrupo.id,
+      cupoMaximo: claseGrupo.cupoMaximo,
+      grupoId: claseGrupo.id,
     }));
   }
 
@@ -367,17 +367,17 @@ export class DocenteStatsService {
   private async obtenerMisGrupos(docenteId: string): Promise<GrupoResumen[]> {
     const todosLosGrupos = await this.prisma.claseGrupo.findMany({
       where: {
-        docente_id: docenteId,
+        docenteId: docenteId,
         activo: true,
       },
       select: {
         id: true,
         nombre: true,
         codigo: true,
-        dia_semana: true,
-        hora_inicio: true,
-        hora_fin: true,
-        cupo_maximo: true,
+        diaSemana: true,
+        horaInicio: true,
+        horaFin: true,
+        cupoMaximo: true,
         nivel: true,
         _count: {
           select: {
@@ -387,18 +387,18 @@ export class DocenteStatsService {
           },
         },
       },
-      orderBy: [{ dia_semana: 'asc' }, { hora_inicio: 'asc' }],
+      orderBy: [{ diaSemana: 'asc' }, { horaInicio: 'asc' }],
     });
 
     return todosLosGrupos.map((grupo) => ({
       id: grupo.id,
       nombre: grupo.nombre,
       codigo: grupo.codigo,
-      dia_semana: grupo.dia_semana,
-      hora_inicio: grupo.hora_inicio,
-      hora_fin: grupo.hora_fin,
+      diaSemana: grupo.diaSemana,
+      horaInicio: grupo.horaInicio,
+      horaFin: grupo.horaFin,
       estudiantesActivos: grupo._count.inscripcionesUnificadas,
-      cupo_maximo: grupo.cupo_maximo,
+      cupoMaximo: grupo.cupoMaximo,
       nivel: grupo.nivel,
     }));
   }
@@ -414,7 +414,7 @@ export class DocenteStatsService {
   ): Promise<ComisionResumen[]> {
     const comisiones = await this.prisma.comision.findMany({
       where: {
-        docente_id: docenteId,
+        docenteId: docenteId,
         activo: true,
       },
       include: {
@@ -451,10 +451,10 @@ export class DocenteStatsService {
     return comisiones.map((comision) => {
       // Combinar estudiantes de ambas fuentes (evitar duplicados)
       const estudiantesIdsManuales = new Set(
-        comision.inscripciones.map((i) => i.estudiante_id),
+        comision.inscripciones.map((i) => i.estudianteId),
       );
       const estudiantesSuscripcion = comision.inscripcionesActividad.filter(
-        (i) => !estudiantesIdsManuales.has(i.estudiante_id),
+        (i) => !estudiantesIdsManuales.has(i.estudianteId),
       );
       const totalInscritos =
         comision.inscripciones.length + estudiantesSuscripcion.length;
@@ -476,9 +476,9 @@ export class DocenteStatsService {
             }
           : null,
         horario: comision.horario,
-        fecha_inicio: comision.fecha_inicio?.toISOString() ?? null,
-        fecha_fin: comision.fecha_fin?.toISOString() ?? null,
-        cupo_maximo: comision.cupo_maximo,
+        fechaInicio: comision.fechaInicio?.toISOString() ?? null,
+        fechaFin: comision.fechaFin?.toISOString() ?? null,
+        cupoMaximo: comision.cupoMaximo,
         estudiantesInscritos: totalInscritos,
         activo: comision.activo,
       };
@@ -489,12 +489,12 @@ export class DocenteStatsService {
     docenteId: string,
   ): Promise<EstudianteConFalta[]> {
     type QueryEstudianteFalta = {
-      estudiante_id: string;
+      estudianteId: string;
       nombre: string;
       apellido: string;
-      faltas_consecutivas: number;
-      ultimo_grupo: string;
-      tutor_email: string | null;
+      faltasConsecutivas: number;
+      ultimoGrupo: string;
+      tutorEmail: string | null;
     };
 
     // Usa vista unificada para incluir inscripciones manuales y via suscripción
@@ -502,29 +502,29 @@ export class DocenteStatsService {
       await this.prisma.$queryRaw(
         Prisma.sql`
         SELECT DISTINCT
-          e.id as estudiante_id,
+          e.id as estudianteId,
           e.nombre,
           e.apellido,
           2 as faltas_consecutivas,
           cg.nombre as ultimo_grupo,
           t.email as tutor_email
         FROM "estudiantes" e
-        INNER JOIN "inscripciones_unificadas" iu ON e.id = iu.estudiante_id
-        INNER JOIN "clase_grupos" cg ON iu.clase_grupo_id = cg.id
-        LEFT JOIN "tutores" t ON e.tutor_id = t.id
-        WHERE cg.docente_id = ${docenteId}
+        INNER JOIN "inscripciones_unificadas" iu ON e.id = iu.estudianteId
+        INNER JOIN "claseGrupos" cg ON iu.claseGrupoId = cg.id
+        LEFT JOIN "tutores" t ON e.tutorId = t.id
+        WHERE cg.docenteId = ${docenteId}
           AND iu.estado = 'ACTIVA'
         LIMIT 10
       `,
       );
 
     return estudiantesConFaltasData.map((est) => ({
-      id: est.estudiante_id,
+      id: est.estudianteId,
       nombre: est.nombre,
       apellido: est.apellido,
-      faltas_consecutivas: est.faltas_consecutivas,
-      ultimo_grupo: est.ultimo_grupo,
-      tutor_email: est.tutor_email,
+      faltasConsecutivas: est.faltasConsecutivas,
+      ultimoGrupo: est.ultimoGrupo,
+      tutorEmail: est.tutorEmail,
     }));
   }
 
@@ -563,16 +563,16 @@ export class DocenteStatsService {
       // Query 1: Clases de hoy
       this.prisma.claseGrupo.count({
         where: {
-          docente_id: docenteId,
+          docenteId: docenteId,
           activo: true,
-          dia_semana: diaActual,
+          diaSemana: diaActual,
         },
       }),
 
       // Query 2: Total clases activas
       this.prisma.claseGrupo.count({
         where: {
-          docente_id: docenteId,
+          docenteId: docenteId,
           activo: true,
         },
       }),
@@ -582,7 +582,7 @@ export class DocenteStatsService {
         by: ['estado'],
         where: {
           claseGrupo: {
-            docente_id: docenteId,
+            docenteId: docenteId,
           },
           fecha: {
             gte: hace14Dias,
@@ -594,10 +594,10 @@ export class DocenteStatsService {
 
       // Query 4: Estudiantes únicos (count en vez de findMany)
       this.prisma.inscripcionUnificada.groupBy({
-        by: ['estudiante_id'],
+        by: ['estudianteId'],
         where: {
           claseGrupo: {
-            docente_id: docenteId,
+            docenteId: docenteId,
             activo: true,
           },
           estado: 'ACTIVA',
@@ -607,7 +607,7 @@ export class DocenteStatsService {
       // Query 5: Puntos otorgados
       this.prisma.puntoObtenido.aggregate({
         where: {
-          docente_id: docenteId,
+          docenteId: docenteId,
         },
         _sum: {
           puntos: true,
@@ -673,33 +673,30 @@ export class DocenteStatsService {
   ) {
     const puntosObtenidosRaw = await this.prisma.puntoObtenido.findMany({
       where: {
-        estudiante_id: {
+        estudianteId: {
           in: estudiantesUnicos.map((e) => e.id),
         },
       },
       select: {
-        estudiante_id: true,
+        estudianteId: true,
         puntos: true,
       },
     });
 
     const puntosPorEstudiante = new Map<string, number>();
     puntosObtenidosRaw.forEach((punto) => {
-      const currentPuntos = puntosPorEstudiante.get(punto.estudiante_id) || 0;
-      puntosPorEstudiante.set(
-        punto.estudiante_id,
-        currentPuntos + punto.puntos,
-      );
+      const currentPuntos = puntosPorEstudiante.get(punto.estudianteId) || 0;
+      puntosPorEstudiante.set(punto.estudianteId, currentPuntos + punto.puntos);
     });
 
     const topEstudiantesPorPuntos = Array.from(puntosPorEstudiante.entries())
-      .map(([estudiante_id, total]) => {
-        const estudiante = estudiantes.find((e) => e.id === estudiante_id);
+      .map(([estudianteId, total]) => {
+        const estudiante = estudiantes.find((e) => e.id === estudianteId);
         return {
-          estudiante_id,
+          estudianteId,
           total,
           estudiante: estudiante || {
-            id: estudiante_id,
+            id: estudianteId,
             nombre: '',
             apellido: '',
             fotoUrl: null,
@@ -717,7 +714,7 @@ export class DocenteStatsService {
 
     return topEstudiantesPorPuntos.map((top) => {
       const asistenciaData = asistenciasPorEstudiante.find(
-        (a) => a.estudiante_id === top.estudiante_id,
+        (a) => a.estudianteId === top.estudianteId,
       );
 
       return {
@@ -725,8 +722,8 @@ export class DocenteStatsService {
         nombre: top.estudiante.nombre,
         apellido: top.estudiante.apellido,
         fotoUrl: top.estudiante.fotoUrl,
-        xp_total: top.total,
-        porcentaje_asistencia: asistenciaData?.porcentaje_asistencia || 0,
+        xpTotal: top.total,
+        porcentajeAsistencia: asistenciaData?.porcentajeAsistencia || 0,
       };
     });
   }
@@ -750,7 +747,7 @@ export class DocenteStatsService {
 
     // Query 1: Obtener IDs de claseGrupo del docente
     const clasesGrupoDocente = await this.prisma.claseGrupo.findMany({
-      where: { docente_id: docenteId, activo: true },
+      where: { docenteId: docenteId, activo: true },
       select: { id: true },
     });
     const clasesGrupoIds = clasesGrupoDocente.map((c) => c.id);
@@ -762,10 +759,10 @@ export class DocenteStatsService {
     // Query 2: Agregación de asistencias por estudiante (1 query para todos)
     const asistenciasAgregadas = await this.prisma.asistenciaClaseGrupo.groupBy(
       {
-        by: ['estudiante_id', 'estado'],
+        by: ['estudianteId', 'estado'],
         where: {
-          estudiante_id: { in: estudiantesIds },
-          clase_grupo_id: { in: clasesGrupoIds },
+          estudianteId: { in: estudiantesIds },
+          claseGrupoId: { in: clasesGrupoIds },
         },
         _count: { id: true },
       },
@@ -775,7 +772,7 @@ export class DocenteStatsService {
     const statsMap = new Map<string, { total: number; presentes: number }>();
 
     asistenciasAgregadas.forEach((row) => {
-      const current = statsMap.get(row.estudiante_id) || {
+      const current = statsMap.get(row.estudianteId) || {
         total: 0,
         presentes: 0,
       };
@@ -783,7 +780,7 @@ export class DocenteStatsService {
       if (row.estado === 'Presente') {
         current.presentes += row._count.id;
       }
-      statsMap.set(row.estudiante_id, current);
+      statsMap.set(row.estudianteId, current);
     });
 
     // Mapear resultados con datos de estudiantes
@@ -793,23 +790,22 @@ export class DocenteStatsService {
         stats.total > 0 ? Math.round((stats.presentes / stats.total) * 100) : 0;
 
       return {
-        estudiante_id: est.id,
+        estudianteId: est.id,
         nombre: est.nombre,
         apellido: est.apellido,
         fotoUrl: est.fotoUrl,
         grupos: est.grupos,
-        total_asistencias: stats.total,
+        totalAsistencias: stats.total,
         presentes: stats.presentes,
-        porcentaje_asistencia: porcentaje,
+        porcentajeAsistencia: porcentaje,
       };
     });
 
     return asistenciasPorEstudiante
       .filter(
-        (est) =>
-          est.porcentaje_asistencia === 100 && est.total_asistencias >= 3,
+        (est) => est.porcentajeAsistencia === 100 && est.totalAsistencias >= 3,
       )
-      .sort((a, b) => b.total_asistencias - a.total_asistencias)
+      .sort((a, b) => b.totalAsistencias - a.totalAsistencias)
       .slice(0, 10);
   }
 
@@ -831,19 +827,19 @@ export class DocenteStatsService {
    */
   private async calcularRankingGrupos(
     docenteId: string,
-    inscripciones: Array<{ estudiante_id: string; clase_grupo_id: string }>,
+    inscripciones: Array<{ estudianteId: string; claseGrupoId: string }>,
     _gruposIds: string[],
   ) {
     const gruposDelDocente = await this.prisma.claseGrupo.findMany({
       where: {
-        docente_id: docenteId,
+        docenteId: docenteId,
         activo: true,
       },
       select: {
         id: true,
         nombre: true,
         codigo: true,
-        cupo_maximo: true,
+        cupoMaximo: true,
       },
     });
 
@@ -856,31 +852,28 @@ export class DocenteStatsService {
     // Query 1: Obtener puntos por estudiante (ya optimizado)
     const puntosObtenidosRaw = await this.prisma.puntoObtenido.findMany({
       where: {
-        estudiante_id: {
-          in: inscripciones.map((i) => i.estudiante_id),
+        estudianteId: {
+          in: inscripciones.map((i) => i.estudianteId),
         },
       },
       select: {
-        estudiante_id: true,
+        estudianteId: true,
         puntos: true,
       },
     });
 
     const puntosPorEstudiante = new Map<string, number>();
     puntosObtenidosRaw.forEach((punto) => {
-      const currentPuntos = puntosPorEstudiante.get(punto.estudiante_id) || 0;
-      puntosPorEstudiante.set(
-        punto.estudiante_id,
-        currentPuntos + punto.puntos,
-      );
+      const currentPuntos = puntosPorEstudiante.get(punto.estudianteId) || 0;
+      puntosPorEstudiante.set(punto.estudianteId, currentPuntos + punto.puntos);
     });
 
     // Query 2: Agregación de asistencias por grupo (1 query para todos)
     const asistenciasAgregadas = await this.prisma.asistenciaClaseGrupo.groupBy(
       {
-        by: ['clase_grupo_id', 'estado'],
+        by: ['claseGrupoId', 'estado'],
         where: {
-          clase_grupo_id: { in: gruposIds },
+          claseGrupoId: { in: gruposIds },
         },
         _count: { id: true },
       },
@@ -893,7 +886,7 @@ export class DocenteStatsService {
     >();
 
     asistenciasAgregadas.forEach((row) => {
-      const current = asistenciasPorGrupo.get(row.clase_grupo_id) || {
+      const current = asistenciasPorGrupo.get(row.claseGrupoId) || {
         total: 0,
         presentes: 0,
       };
@@ -901,16 +894,16 @@ export class DocenteStatsService {
       if (row.estado === 'Presente') {
         current.presentes += row._count.id;
       }
-      asistenciasPorGrupo.set(row.clase_grupo_id, current);
+      asistenciasPorGrupo.set(row.claseGrupoId, current);
     });
 
     // Obtener inscripciones por grupo
     const inscripcionesPorGrupo = new Map<string, string[]>();
     inscripciones.forEach((insc) => {
-      if (!inscripcionesPorGrupo.has(insc.clase_grupo_id)) {
-        inscripcionesPorGrupo.set(insc.clase_grupo_id, []);
+      if (!inscripcionesPorGrupo.has(insc.claseGrupoId)) {
+        inscripcionesPorGrupo.set(insc.claseGrupoId, []);
       }
-      inscripcionesPorGrupo.get(insc.clase_grupo_id)!.push(insc.estudiante_id);
+      inscripcionesPorGrupo.get(insc.claseGrupoId)!.push(insc.estudianteId);
     });
 
     // Mapear resultados (sin queries adicionales)
@@ -936,18 +929,18 @@ export class DocenteStatsService {
           : 0;
 
       return {
-        grupo_id: grupo.id,
+        grupoId: grupo.id,
         nombre: grupo.nombre,
         codigo: grupo.codigo,
-        estudiantes_activos: estudiantesIdsGrupo.length,
-        cupo_maximo: grupo.cupo_maximo,
-        xp_total: puntosGrupoTotal,
-        asistencia_promedio: porcentajeAsistenciaGrupo,
+        estudiantesActivos: estudiantesIdsGrupo.length,
+        cupoMaximo: grupo.cupoMaximo,
+        xpTotal: puntosGrupoTotal,
+        asistenciaPromedio: porcentajeAsistenciaGrupo,
       };
     });
 
     // Ordenar grupos por XP total
-    rankingGrupos.sort((a, b) => b.xp_total - a.xp_total);
+    rankingGrupos.sort((a, b) => b.xpTotal - a.xpTotal);
 
     return rankingGrupos;
   }
@@ -965,17 +958,17 @@ export class DocenteStatsService {
     // Obtener grupos activos del docente
     const gruposDocente = await this.prisma.claseGrupo.findMany({
       where: {
-        docente_id: docenteId,
+        docenteId: docenteId,
         activo: true,
       },
       select: {
         id: true,
         nombre: true,
         codigo: true,
-        dia_semana: true,
-        hora_inicio: true,
-        hora_fin: true,
-        cupo_maximo: true,
+        diaSemana: true,
+        horaInicio: true,
+        horaFin: true,
+        cupoMaximo: true,
         inscripciones: {
           select: {
             estudiante: {
@@ -1009,15 +1002,15 @@ export class DocenteStatsService {
       fecha: string;
       nombre: string;
       codigo: string;
-      hora_inicio: string;
-      hora_fin: string;
+      horaInicio: string;
+      horaFin: string;
       estudiantesCount: number;
-      cupo_maximo: number;
-      grupo_id: string;
+      cupoMaximo: number;
+      grupoId: string;
     }> = [];
 
     for (const grupo of gruposDocente) {
-      const diaSemanaNum = diasSemanaMap[grupo.dia_semana];
+      const diaSemanaNum = diasSemanaMap[grupo.diaSemana];
 
       // Encontrar el primer día del mes que coincida con el día de la semana
       const fechaInicial = new Date(primerDiaDelMes);
@@ -1033,11 +1026,11 @@ export class DocenteStatsService {
           fecha: fechaActual.toISOString().split('T')[0]!,
           nombre: grupo.nombre,
           codigo: grupo.codigo,
-          hora_inicio: grupo.hora_inicio,
-          hora_fin: grupo.hora_fin,
+          horaInicio: grupo.horaInicio,
+          horaFin: grupo.horaFin,
           estudiantesCount: grupo.inscripciones.length,
-          cupo_maximo: grupo.cupo_maximo,
-          grupo_id: grupo.id,
+          cupoMaximo: grupo.cupoMaximo,
+          grupoId: grupo.id,
         });
 
         // Avanzar una semana (7 días en milisegundos)
@@ -1049,7 +1042,7 @@ export class DocenteStatsService {
     clasesDelMes.sort((a, b) => {
       const fechaComparison = a.fecha.localeCompare(b.fecha);
       if (fechaComparison !== 0) return fechaComparison;
-      return a.hora_inicio.localeCompare(b.hora_inicio);
+      return a.horaInicio.localeCompare(b.horaInicio);
     });
 
     // Calcular stats del mes
@@ -1088,7 +1081,7 @@ export class DocenteStatsService {
     const comision = await this.prisma.comision.findFirst({
       where: {
         id: comisionId,
-        docente_id: docenteId,
+        docenteId: docenteId,
       },
       include: {
         producto: {
@@ -1200,9 +1193,9 @@ export class DocenteStatsService {
           }
         : null,
       horario: comision.horario,
-      fecha_inicio: comision.fecha_inicio?.toISOString() ?? null,
-      fecha_fin: comision.fecha_fin?.toISOString() ?? null,
-      cupo_maximo: comision.cupo_maximo,
+      fechaInicio: comision.fechaInicio?.toISOString() ?? null,
+      fechaFin: comision.fechaFin?.toISOString() ?? null,
+      cupoMaximo: comision.cupoMaximo,
       activo: comision.activo,
       estudiantes: Array.from(estudiantesMap.values()),
     };
@@ -1228,9 +1221,9 @@ export class DocenteStatsService {
     // Query 1: Agregación de asistencias por estudiante (1 query para todos)
     const asistenciasAgregadas = await this.prisma.asistenciaClaseGrupo.groupBy(
       {
-        by: ['estudiante_id', 'estado'],
+        by: ['estudianteId', 'estado'],
         where: {
-          estudiante_id: { in: estudiantesIds },
+          estudianteId: { in: estudiantesIds },
         },
         _count: { id: true },
       },
@@ -1240,7 +1233,7 @@ export class DocenteStatsService {
     const statsMap = new Map<string, { total: number; presentes: number }>();
 
     asistenciasAgregadas.forEach((row) => {
-      const current = statsMap.get(row.estudiante_id) || {
+      const current = statsMap.get(row.estudianteId) || {
         total: 0,
         presentes: 0,
       };
@@ -1248,7 +1241,7 @@ export class DocenteStatsService {
       if (row.estado === 'Presente') {
         current.presentes += row._count.id;
       }
-      statsMap.set(row.estudiante_id, current);
+      statsMap.set(row.estudianteId, current);
     });
 
     // Mapear resultados con datos de estudiantes (sin queries adicionales)
@@ -1258,14 +1251,14 @@ export class DocenteStatsService {
         stats.total > 0 ? Math.round((stats.presentes / stats.total) * 100) : 0;
 
       return {
-        estudiante_id: est.id,
+        estudianteId: est.id,
         nombre: est.nombre,
         apellido: est.apellido,
         fotoUrl: est.fotoUrl,
         grupos: est.grupos,
-        total_asistencias: stats.total,
+        totalAsistencias: stats.total,
         presentes: stats.presentes,
-        porcentaje_asistencia: porcentaje,
+        porcentajeAsistencia: porcentaje,
       };
     });
   }
@@ -1273,7 +1266,7 @@ export class DocenteStatsService {
   /**
    * Obtiene todas las comisiones asignadas al docente
    * Incluye: producto, casa, inscripciones_count, proxima_clase
-   * Filtra comisiones con fecha_fin pasada
+   * Filtra comisiones con fechaFin pasada
    * Ordena por próxima clase (más cercana primero)
    *
    * IMPORTANTE: Cuenta estudiantes de ambas fuentes:
@@ -1291,15 +1284,15 @@ export class DocenteStatsService {
     // Obtener comisiones del docente que no hayan finalizado
     const comisiones = await this.prisma.comision.findMany({
       where: {
-        docente_id: docenteId,
-        OR: [{ fecha_fin: null }, { fecha_fin: { gte: now } }],
+        docenteId: docenteId,
+        OR: [{ fechaFin: null }, { fechaFin: { gte: now } }],
       },
       select: {
         id: true,
         nombre: true,
         horario: true,
-        cupo_maximo: true,
-        fecha_fin: true,
+        cupoMaximo: true,
+        fechaFin: true,
         producto: {
           select: {
             id: true,
@@ -1324,7 +1317,7 @@ export class DocenteStatsService {
           },
           select: {
             id: true,
-            estudiante_id: true,
+            estudianteId: true,
           },
         },
         // FUENTE 2: Inscripciones via suscripción 2026
@@ -1334,7 +1327,7 @@ export class DocenteStatsService {
           },
           select: {
             id: true,
-            estudiante_id: true,
+            estudianteId: true,
           },
         },
       },
@@ -1344,15 +1337,15 @@ export class DocenteStatsService {
     const comisionesConProxima = comisiones.map((comision) => {
       const proximaClase = this.calcularProximaClase(
         comision.horario,
-        comision.fecha_fin,
+        comision.fechaFin,
       );
 
       // Combinar estudiantes de ambas fuentes (evitar duplicados)
       const estudiantesIdsManuales = new Set(
-        comision.inscripciones.map((i) => i.estudiante_id),
+        comision.inscripciones.map((i) => i.estudianteId),
       );
       const estudiantesSuscripcion = comision.inscripcionesActividad.filter(
-        (i) => !estudiantesIdsManuales.has(i.estudiante_id),
+        (i) => !estudiantesIdsManuales.has(i.estudianteId),
       );
       const totalInscritos =
         comision.inscripciones.length + estudiantesSuscripcion.length;
@@ -1361,22 +1354,21 @@ export class DocenteStatsService {
         id: comision.id,
         nombre: comision.nombre,
         horario: comision.horario,
-        cupo_maximo: comision.cupo_maximo,
+        cupoMaximo: comision.cupoMaximo,
         producto: comision.producto,
         casa: comision.casa,
-        inscripciones_count: totalInscritos,
-        proxima_clase: proximaClase?.toISOString() ?? null,
+        inscripcionesCount: totalInscritos,
+        proximaClase: proximaClase?.toISOString() ?? null,
       };
     });
 
     // Ordenar por próxima clase (más cercana primero, nulls al final)
     comisionesConProxima.sort((a, b) => {
-      if (!a.proxima_clase && !b.proxima_clase) return 0;
-      if (!a.proxima_clase) return 1;
-      if (!b.proxima_clase) return -1;
+      if (!a.proximaClase && !b.proximaClase) return 0;
+      if (!a.proximaClase) return 1;
+      if (!b.proximaClase) return -1;
       return (
-        new Date(a.proxima_clase).getTime() -
-        new Date(b.proxima_clase).getTime()
+        new Date(a.proximaClase).getTime() - new Date(b.proximaClase).getTime()
       );
     });
 
@@ -1394,8 +1386,8 @@ export class DocenteStatsService {
       nombre: string;
       horario: string | null;
     };
-    fecha_hora: string;
-    minutos_restantes: number;
+    fechaHora: string;
+    minutosRestantes: number;
   } | null> {
     await this.validator.validarDocenteExiste(docenteId);
 
@@ -1404,15 +1396,15 @@ export class DocenteStatsService {
     // Obtener comisiones activas del docente
     const comisiones = await this.prisma.comision.findMany({
       where: {
-        docente_id: docenteId,
+        docenteId: docenteId,
         activo: true,
-        OR: [{ fecha_fin: null }, { fecha_fin: { gte: now } }],
+        OR: [{ fechaFin: null }, { fechaFin: { gte: now } }],
       },
       select: {
         id: true,
         nombre: true,
         horario: true,
-        fecha_fin: true,
+        fechaFin: true,
       },
     });
 
@@ -1423,24 +1415,24 @@ export class DocenteStatsService {
     // Calcular la próxima clase para cada comisión
     let proximaClase: {
       comision: { id: string; nombre: string; horario: string | null };
-      fecha_hora: Date;
+      fechaHora: Date;
     } | null = null;
 
     for (const comision of comisiones) {
       const fechaProxima = this.calcularProximaClase(
         comision.horario,
-        comision.fecha_fin,
+        comision.fechaFin,
       );
 
       if (fechaProxima) {
-        if (!proximaClase || fechaProxima < proximaClase.fecha_hora) {
+        if (!proximaClase || fechaProxima < proximaClase.fechaHora) {
           proximaClase = {
             comision: {
               id: comision.id,
               nombre: comision.nombre,
               horario: comision.horario,
             },
-            fecha_hora: fechaProxima,
+            fechaHora: fechaProxima,
           };
         }
       }
@@ -1452,13 +1444,13 @@ export class DocenteStatsService {
 
     // Calcular minutos restantes
     const minutosRestantes = Math.floor(
-      (proximaClase.fecha_hora.getTime() - now.getTime()) / (60 * 1000),
+      (proximaClase.fechaHora.getTime() - now.getTime()) / (60 * 1000),
     );
 
     return {
       comision: proximaClase.comision,
-      fecha_hora: proximaClase.fecha_hora.toISOString(),
-      minutos_restantes: minutosRestantes,
+      fechaHora: proximaClase.fechaHora.toISOString(),
+      minutosRestantes: minutosRestantes,
     };
   }
 
@@ -1628,7 +1620,7 @@ export class DocenteStatsService {
     await this.validator.validarDocenteExiste(docenteId);
 
     const comisiones = await this.prisma.comision.findMany({
-      where: { docente_id: docenteId, activo: true },
+      where: { docenteId: docenteId, activo: true },
       select: { horario: true },
     });
 
@@ -1674,7 +1666,7 @@ export class DocenteStatsService {
 
     // Obtener IDs de comisiones del docente
     const comisiones = await this.prisma.comision.findMany({
-      where: { docente_id: docenteId },
+      where: { docenteId: docenteId },
       select: { id: true },
     });
 
@@ -1702,7 +1694,7 @@ export class DocenteStatsService {
       const asistencias = await this.prisma.asistenciaComision.groupBy({
         by: ['estado'],
         where: {
-          comision_id: { in: comisionIds },
+          comisionId: { in: comisionIds },
           fecha: {
             gte: inicioSemana,
             lte: finSemana,
@@ -1740,7 +1732,7 @@ export class DocenteStatsService {
     // Obtener comisiones con inscripciones activas (Pendiente o Confirmada)
     const comisiones = await this.prisma.comision.findMany({
       where: {
-        docente_id: docenteId,
+        docenteId: docenteId,
         activo: true,
       },
       select: {
@@ -1785,12 +1777,12 @@ export class DocenteStatsService {
     const comision = await this.prisma.comision.findFirst({
       where: {
         id: comisionId,
-        docente_id: docenteId,
+        docenteId: docenteId,
       },
       select: {
         id: true,
-        fecha_inicio: true,
-        fecha_fin: true,
+        fechaInicio: true,
+        fechaFin: true,
         horario: true,
       },
     });
@@ -1803,7 +1795,7 @@ export class DocenteStatsService {
     const sesionesCompletadas = await this.prisma.asistenciaComision.groupBy({
       by: ['fecha'],
       where: {
-        comision_id: comisionId,
+        comisionId: comisionId,
       },
     });
 
@@ -1813,10 +1805,10 @@ export class DocenteStatsService {
     // y duración de la comisión
     let totalSesiones = 24; // Default
 
-    if (comision.fecha_inicio && comision.fecha_fin && comision.horario) {
+    if (comision.fechaInicio && comision.fechaFin && comision.horario) {
       const diasPorSemana = this.contarDiasPorSemana(comision.horario);
       const duracionSemanas = Math.ceil(
-        (comision.fecha_fin.getTime() - comision.fecha_inicio.getTime()) /
+        (comision.fechaFin.getTime() - comision.fechaInicio.getTime()) /
           (7 * 24 * 60 * 60 * 1000),
       );
       totalSesiones = diasPorSemana * duracionSemanas;
@@ -1840,7 +1832,7 @@ export class DocenteStatsService {
 
     const resultado = await this.prisma.puntoObtenido.aggregate({
       where: {
-        docente_id: docenteId,
+        docenteId: docenteId,
       },
       _sum: {
         puntos: true,

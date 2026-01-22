@@ -466,9 +466,7 @@ export class DocentesController {
     @Body() dto: AsignarTareaDto = {},
     @GetUser() user: AuthUser,
   ) {
-    const fechaLimite = dto.fecha_limite
-      ? new Date(dto.fecha_limite)
-      : undefined;
+    const fechaLimite = dto.fechaLimite ? new Date(dto.fechaLimite) : undefined;
     return this.planificacionesService.asignarTarea(
       id,
       tareaClaseId,

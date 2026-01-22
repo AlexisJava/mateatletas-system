@@ -27,22 +27,22 @@ describe('PuntosService - Transaction Security', () => {
 
   const mockPuntoObtenido = {
     id: 'punto-1',
-    estudiante_id: 'est-1',
-    docente_id: 'doc-1',
-    tipo_accion: 'PARTICIPACION',
-    clase_id: 'clase-1',
+    estudianteId: 'est-1',
+    docenteId: 'doc-1',
+    tipoAccion: 'PARTICIPACION',
+    claseId: 'clase-1',
     puntos: 5,
     contexto: 'Test',
-    fecha_otorgado: new Date(),
+    fechaOtorgado: new Date(),
     estudiante: mockEstudiante,
     docente: mockDocente,
   };
 
   const mockRecursosResult = {
-    recursos: { id: 'rec-1', estudiante_id: 'est-1', xp_total: 105 },
-    nivel_anterior: 1,
-    nivel_nuevo: 1,
-    subio_nivel: false,
+    recursos: { id: 'rec-1', estudianteId: 'est-1', xpTotal: 105 },
+    nivelAnterior: 1,
+    nivelNuevo: 1,
+    subioNivel: false,
   };
 
   beforeEach(async () => {
@@ -128,7 +128,7 @@ describe('PuntosService - Transaction Security', () => {
       expect(prisma.puntoObtenido.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            tipo_accion: 'PARTICIPACION',
+            tipoAccion: 'PARTICIPACION',
             puntos: 5,
           }),
         }),
@@ -269,7 +269,7 @@ describe('PuntosService - Transaction Security', () => {
         .mockResolvedValue(mockDocente as any);
       jest
         .spyOn(prisma.puntoObtenido, 'create')
-        .mockResolvedValue({ ...mockPuntoObtenido, clase_id: null } as any);
+        .mockResolvedValue({ ...mockPuntoObtenido, claseId: null } as any);
       jest
         .spyOn(recursosService, 'agregarXP')
         .mockResolvedValue(mockRecursosResult as any);
@@ -289,12 +289,12 @@ describe('PuntosService - Transaction Security', () => {
     it('should return points summary using RecursosService', async () => {
       jest.spyOn(recursosService, 'obtenerRecursosConNivel').mockResolvedValue({
         id: 'rec-1',
-        estudiante_id: 'est-1',
-        xp_total: 150,
+        estudianteId: 'est-1',
+        xpTotal: 150,
         nivel: 2,
-        xp_progreso: 50,
-        xp_necesario: 100,
-        porcentaje_nivel: 50,
+        xpProgreso: 50,
+        xpNecesario: 100,
+        porcentajeNivel: 50,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -308,7 +308,7 @@ describe('PuntosService - Transaction Security', () => {
 
       expect(result.total).toBe(150);
       expect(result.nivel).toBe(2);
-      expect(result.porcentaje_nivel).toBe(50);
+      expect(result.porcentajeNivel).toBe(50);
       expect(result.asistencia).toBe(20); // 2 presentes × 10 puntos
     });
   });

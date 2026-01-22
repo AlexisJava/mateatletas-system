@@ -239,9 +239,9 @@ describe.skip('SecurityMonitoringService', () => {
   it('debe obtener top IPs sospechosas', async () => {
     // Arrange: IPs con múltiples fraudes
     const mockTopIPs = [
-      { ip_address: '192.168.1.100', _count: { id: 25 } },
-      { ip_address: '10.0.0.50', _count: { id: 18 } },
-      { ip_address: '172.16.0.200', _count: { id: 12 } },
+      { ipAddress: '192.168.1.100', _count: { id: 25 } },
+      { ipAddress: '10.0.0.50', _count: { id: 18 } },
+      { ipAddress: '172.16.0.200', _count: { id: 12 } },
     ];
 
     mockPrisma.auditLog.groupBy.mockResolvedValue(mockTopIPs);
@@ -258,7 +258,7 @@ describe.skip('SecurityMonitoringService', () => {
     // Debe agrupar por IP y contar
     expect(prisma.auditLog.groupBy).toHaveBeenCalledWith(
       expect.objectContaining({
-        by: ['ip_address'],
+        by: ['ipAddress'],
         where: expect.objectContaining({
           category: 'fraud_detection',
         }),

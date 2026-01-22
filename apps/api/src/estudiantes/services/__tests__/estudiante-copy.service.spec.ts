@@ -55,11 +55,11 @@ describe('EstudianteCopyService', () => {
         edad: 10,
         nivelEscolar: 'Primaria',
         email: 'juan@test.com',
-        tutor_id: 'tutor-1',
-        sector_id: 'sector-1',
-        nivel_actual: 5,
-        xp_total: 100,
-        avatar_gradient: 1,
+        tutorId: 'tutor-1',
+        sectorId: 'sector-1',
+        nivelActual: 5,
+        xpTotal: 100,
+        avatarGradient: 1,
         casaId: null,
         tutor: { id: 'tutor-1', nombre: 'Pedro', apellido: 'López' },
       };
@@ -72,11 +72,11 @@ describe('EstudianteCopyService', () => {
         edad: 10,
         nivelEscolar: 'Primaria',
         email: 'juan@test.com',
-        tutor_id: 'tutor-1',
-        sector_id: 'sector-2',
-        nivel_actual: 5,
-        xp_total: 100,
-        avatar_gradient: 1,
+        tutorId: 'tutor-1',
+        sectorId: 'sector-2',
+        nivelActual: 5,
+        xpTotal: 100,
+        avatarGradient: 1,
         casaId: null,
         sector: { id: 'sector-2', nombre: 'Matemática' },
         tutor: { id: 'tutor-1', nombre: 'Pedro', apellido: 'López' },
@@ -97,7 +97,7 @@ describe('EstudianteCopyService', () => {
       const result = await service.copiarEstudianteASector('est-1', 'sector-2');
 
       expect(result.id).toBe('est-nuevo');
-      expect(result.sector_id).toBe('sector-2');
+      expect(result.sectorId).toBe('sector-2');
       expect(validator.validateSectorExists).toHaveBeenCalledWith('sector-2');
     });
 
@@ -117,8 +117,8 @@ describe('EstudianteCopyService', () => {
         id: 'est-1',
         nombre: 'Juan',
         apellido: 'Pérez',
-        tutor_id: 'tutor-1',
-        sector_id: 'sector-1',
+        tutorId: 'tutor-1',
+        sectorId: 'sector-1',
         tutor: {},
       };
 
@@ -126,8 +126,8 @@ describe('EstudianteCopyService', () => {
         id: 'est-duplicado',
         nombre: 'Juan',
         apellido: 'Pérez',
-        tutor_id: 'tutor-1',
-        sector_id: 'sector-2',
+        tutorId: 'tutor-1',
+        sectorId: 'sector-2',
       };
 
       jest
@@ -158,11 +158,11 @@ describe('EstudianteCopyService', () => {
         edad: 10,
         nivelEscolar: 'Primaria',
         email: 'juan@test.com',
-        tutor_id: 'tutor-1',
-        sector_id: 'sector-1',
-        nivel_actual: 1,
-        xp_total: 0,
-        avatar_gradient: 1,
+        tutorId: 'tutor-1',
+        sectorId: 'sector-1',
+        nivelActual: 1,
+        xpTotal: 0,
+        avatarGradient: 1,
         casaId: null,
         tutor: {},
       };
@@ -191,10 +191,10 @@ describe('EstudianteCopyService', () => {
     });
 
     /**
-     * NOTA: xp_total ya NO se copia porque está en RecursosEstudiante (SUB-FASE 1.3)
-     * Solo se copian: nivel_actual, avatar_gradient, casaId
+     * NOTA: xpTotal ya NO se copia porque está en RecursosEstudiante (SUB-FASE 1.3)
+     * Solo se copian: nivel_actual, avatarGradient, casaId
      */
-    it('debe copiar datos de gamificación del estudiante original (sin xp_total)', async () => {
+    it('debe copiar datos de gamificación del estudiante original (sin xpTotal)', async () => {
       const mockEstudiante = {
         id: 'est-1',
         nombre: 'Juan',
@@ -202,10 +202,10 @@ describe('EstudianteCopyService', () => {
         edad: 10,
         nivelEscolar: 'Primaria',
         email: 'juan@test.com',
-        tutor_id: 'tutor-1',
-        sector_id: 'sector-1',
-        nivel_actual: 8,
-        avatar_gradient: 3,
+        tutorId: 'tutor-1',
+        sectorId: 'sector-1',
+        nivelActual: 8,
+        avatarGradient: 3,
         casaId: 'equipo-1',
         tutor: {},
       };
@@ -227,8 +227,8 @@ describe('EstudianteCopyService', () => {
       expect(prisma.estudiante.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            nivel_actual: 8,
-            avatar_gradient: 3,
+            nivelActual: 8,
+            avatarGradient: 3,
             casaId: 'equipo-1',
           }),
         }),
@@ -243,10 +243,10 @@ describe('EstudianteCopyService', () => {
         nombre: 'Juan',
         apellido: 'Pérez',
         email: 'juan@test.com',
-        tutor_id: 'tutor-1',
-        sector_id: 'sector-1',
-        nivel_actual: 5,
-        avatar_gradient: 1,
+        tutorId: 'tutor-1',
+        sectorId: 'sector-1',
+        nivelActual: 5,
+        avatarGradient: 1,
         casaId: null,
         edad: 10,
         nivelEscolar: 'Primaria',
@@ -267,7 +267,7 @@ describe('EstudianteCopyService', () => {
         .mockResolvedValue(undefined);
       jest.spyOn(prisma.estudiante, 'create').mockResolvedValue({
         id: 'est-nuevo',
-        sector_id: 'sector-2',
+        sectorId: 'sector-2',
       } as any);
 
       const result = await service.copiarEstudiantePorDNIASector(
@@ -279,7 +279,7 @@ describe('EstudianteCopyService', () => {
         where: { email: 'juan@test.com' },
         include: { sector: true, tutor: true },
       });
-      expect(result.sector_id).toBe('sector-2');
+      expect(result.sectorId).toBe('sector-2');
     });
 
     it('debe lanzar error si no encuentra estudiante con el email', async () => {
@@ -311,11 +311,11 @@ describe('EstudianteCopyService', () => {
         edad: 10,
         nivelEscolar: 'Primaria',
         email: 'juan@test.com',
-        tutor_id: 'tutor-1',
-        sector_id: 'sector-1',
-        nivel_actual: 1,
-        xp_total: 0,
-        avatar_gradient: 1,
+        tutorId: 'tutor-1',
+        sectorId: 'sector-1',
+        nivelActual: 1,
+        xpTotal: 0,
+        avatarGradient: 1,
         casaId: null,
         tutor: {},
       };

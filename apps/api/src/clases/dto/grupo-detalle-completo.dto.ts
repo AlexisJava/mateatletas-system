@@ -33,7 +33,7 @@ export interface EstudianteConStatsDto {
   id: string;
   nombre: string;
   apellido: string;
-  avatar_gradient: number;
+  avatarGradient: number;
   casa: CasaDto | null;
   stats: EstadisticasEstudianteDto;
 }
@@ -86,8 +86,8 @@ export interface StatsGrupoDto {
  * Información de la próxima clase
  */
 export interface ProximaClaseDto {
-  fecha: string; // Próximo día que coincide con dia_semana
-  hora: string; // hora_inicio del grupo
+  fecha: string; // Próximo día que coincide con diaSemana
+  hora: string; // horaInicio del grupo
   minutosParaEmpezar: number | null; // null si no es hoy
 }
 
@@ -100,10 +100,10 @@ export interface GrupoDetalleCompletoDto {
   id: string;
   nombre: string;
   codigo: string;
-  dia_semana: string;
-  hora_inicio: string;
-  hora_fin: string;
-  cupo_maximo: number;
+  diaSemana: string;
+  horaInicio: string;
+  horaFin: string;
+  cupoMaximo: number;
 
   // Estudiantes con estadísticas completas
   estudiantes: EstudianteConStatsDto[];

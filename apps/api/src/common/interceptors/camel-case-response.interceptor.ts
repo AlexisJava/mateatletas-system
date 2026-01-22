@@ -87,7 +87,7 @@ function convertDecimals(data: unknown): unknown {
  *
  * Motivación:
  * - Prisma devuelve Decimal como objeto {s, e, d} que no es parseable en frontend
- * - Prisma (con PostgreSQL) retorna campos en snake_case (nivel_escolar, foto_url, etc.)
+ * - Prisma (con PostgreSQL) retorna campos en snake_case (nivelEscolar, foto_url, etc.)
  * - El frontend (Next.js/React) espera números y camelCase según convención JavaScript
  *
  * IMPORTANTE: Este interceptor debe ejecutarse ANTES de TransformResponseInterceptor
@@ -99,7 +99,7 @@ function convertDecimals(data: unknown): unknown {
  *
  * @example
  * // Antes del interceptor (de Prisma):
- * { id: '123', nivel_escolar: 'PRIMARIA', precio: { s: 1, e: 4, d: [15000] } }
+ * { id: '123', nivelEscolar: 'PRIMARIA', precio: { s: 1, e: 4, d: [15000] } }
  *
  * // Después del interceptor:
  * { id: '123', nivelEscolar: 'PRIMARIA', precio: 15000 }

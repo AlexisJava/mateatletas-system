@@ -11,7 +11,7 @@ import { PrismaService } from '../../core/database/prisma.service';
  * - Validación de parámetros (page, limit)
  * - Límites de seguridad (max 100 por página)
  *
- * NOTA: getRankingGlobal ahora usa RecursosEstudiante.xp_total (SUB-FASE 1.3)
+ * NOTA: getRankingGlobal ahora usa RecursosEstudiante.xpTotal (SUB-FASE 1.3)
  */
 
 describe('RankingService - Pagination', () => {
@@ -20,13 +20,13 @@ describe('RankingService - Pagination', () => {
 
   /**
    * Crear mock de RecursosEstudiante con estudiante incluido
-   * Estructura: { xp_total, estudiante: { id, nombre, apellido, fotoUrl, casa } }
+   * Estructura: { xpTotal, estudiante: { id, nombre, apellido, fotoUrl, casa } }
    */
   const createMockRecursos = (count: number) => {
     return Array.from({ length: count }, (_, i) => ({
       id: `recursos-${i + 1}`,
       estudianteId: `est-${i + 1}`,
-      xp_total: 1000 - i * 10, // Descendente
+      xpTotal: 1000 - i * 10, // Descendente
       estudiante: {
         id: `est-${i + 1}`,
         nombre: `Estudiante${i + 1}`,
@@ -324,7 +324,7 @@ describe('RankingService - Pagination', () => {
       });
     });
 
-    it('should order by xp_total desc', async () => {
+    it('should order by xpTotal desc', async () => {
       // Arrange
       jest.spyOn(prisma.recursosEstudiante, 'findMany').mockResolvedValue([]);
       jest.spyOn(prisma.recursosEstudiante, 'count').mockResolvedValue(0);
@@ -336,7 +336,7 @@ describe('RankingService - Pagination', () => {
       expect(prisma.recursosEstudiante.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           orderBy: {
-            xp_total: 'desc',
+            xpTotal: 'desc',
           },
         }),
       );

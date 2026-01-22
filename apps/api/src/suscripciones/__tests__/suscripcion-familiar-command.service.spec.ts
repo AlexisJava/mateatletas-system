@@ -123,10 +123,10 @@ describe('SuscripcionFamiliarCommandService', () => {
       // Mock creación de suscripción
       mockPrisma.suscripcionFamiliar.create.mockResolvedValue({
         id: 'sus-fam-new',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         tier: 'STEAM_SINCRONICO',
         estado: 'PENDING',
-        monto_mensual: 95000,
+        montoMensual: 95000,
       });
 
       mockPrisma.suscripcionFamiliar.update.mockResolvedValue({});
@@ -189,10 +189,10 @@ describe('SuscripcionFamiliarCommandService', () => {
 
       mockPrisma.suscripcionFamiliar.create.mockResolvedValue({
         id: 'sus-fam-new',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         tier: 'STEAM_SINCRONICO',
         estado: 'PENDING',
-        monto_mensual: 180500, // 95000 + 85500 (10% desc)
+        montoMensual: 180500, // 95000 + 85500 (10% desc)
       });
 
       mockPrisma.inscripcionActividad.createMany.mockResolvedValue({
@@ -282,10 +282,10 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_add_inscriptions_and_recalculate_amount', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         tier: 'STEAM_SINCRONICO',
         estado: EstadoSuscripcionFamiliar.ACTIVA,
-        monto_mensual: 95000,
+        montoMensual: 95000,
         inscripciones: [
           {
             id: 'insc-existing',
@@ -330,10 +330,10 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_throw_unauthorized_when_tutor_not_owner', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'otro-tutor', // Diferente tutor
+        tutorId: 'otro-tutor', // Diferente tutor
         tier: 'STEAM_SINCRONICO',
         estado: EstadoSuscripcionFamiliar.ACTIVA,
-        monto_mensual: 95000,
+        montoMensual: 95000,
         inscripciones: [],
         tutor: { estudiantes: [] },
       });
@@ -354,10 +354,10 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_throw_invalid_state_when_subscription_cancelled', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         tier: 'STEAM_SINCRONICO',
         estado: EstadoSuscripcionFamiliar.CANCELLED,
-        monto_mensual: 0,
+        montoMensual: 0,
         inscripciones: [],
         tutor: { estudiantes: [{ id: 'est-1' }] },
       });
@@ -383,9 +383,9 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_remove_inscriptions_and_recalculate_amount', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         tier: 'STEAM_SINCRONICO',
-        monto_mensual: 180500, // 2 inscripciones
+        montoMensual: 180500, // 2 inscripciones
         inscripciones: [
           {
             id: 'insc-1',
@@ -413,9 +413,9 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_set_amount_to_zero_when_all_inscriptions_removed', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         tier: 'STEAM_SINCRONICO',
-        monto_mensual: 95000,
+        montoMensual: 95000,
         inscripciones: [
           {
             id: 'insc-1',
@@ -442,10 +442,10 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_cancel_subscription_and_all_inscriptions', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         estado: EstadoSuscripcionFamiliar.ACTIVA,
-        monto_mensual: 95000,
-        preapproval_id: null,
+        montoMensual: 95000,
+        preapprovalId: null,
       });
 
       await service.cancelar({
@@ -460,7 +460,7 @@ describe('SuscripcionFamiliarCommandService', () => {
           where: { id: 'sus-fam-123' },
           data: expect.objectContaining({
             estado: EstadoSuscripcionFamiliar.CANCELLED,
-            monto_mensual: 0,
+            montoMensual: 0,
           }),
         }),
       );
@@ -484,9 +484,9 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_throw_invalid_state_when_already_cancelled', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         estado: EstadoSuscripcionFamiliar.CANCELLED,
-        monto_mensual: 0,
+        montoMensual: 0,
       });
 
       await expect(
@@ -515,10 +515,10 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_allow_admin_to_cancel_any_subscription', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'otro-tutor',
+        tutorId: 'otro-tutor',
         estado: EstadoSuscripcionFamiliar.ACTIVA,
-        monto_mensual: 95000,
-        preapproval_id: null,
+        montoMensual: 95000,
+        preapprovalId: null,
       });
 
       // Admin cancela suscripción de otro tutor - no debe lanzar error
@@ -537,16 +537,16 @@ describe('SuscripcionFamiliarCommandService', () => {
   // cambiarHorario()
   // ============================================================================
   describe('cambiarHorario', () => {
-    it('should_change_clase_grupo_without_affecting_amount', async () => {
+    it('should_change_claseGrupo_without_affecting_amount', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
-        monto_mensual: 95000,
+        tutorId: 'tutor-123',
+        montoMensual: 95000,
         inscripciones: [
           {
             id: 'insc-1',
             producto: { id: 'prod-1' },
-            clase_grupo_id: 'cg-old',
+            claseGrupoId: 'cg-old',
           },
         ],
       });
@@ -554,7 +554,7 @@ describe('SuscripcionFamiliarCommandService', () => {
       mockPrisma.claseGrupo.findUnique.mockResolvedValue({
         id: 'cg-new',
         nombre: 'Martes 19:00',
-        producto_id: 'prod-1', // Mismo producto
+        productoId: 'prod-1', // Mismo producto
       });
 
       const result = await service.cambiarHorario({
@@ -572,13 +572,13 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_throw_when_new_grupo_belongs_to_different_product', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
-        monto_mensual: 95000,
+        tutorId: 'tutor-123',
+        montoMensual: 95000,
         inscripciones: [
           {
             id: 'insc-1',
             producto: { id: 'prod-1' },
-            clase_grupo_id: 'cg-old',
+            claseGrupoId: 'cg-old',
           },
         ],
       });
@@ -586,7 +586,7 @@ describe('SuscripcionFamiliarCommandService', () => {
       mockPrisma.claseGrupo.findUnique.mockResolvedValue({
         id: 'cg-new',
         nombre: 'Otro horario',
-        producto_id: 'prod-diferente', // Producto diferente
+        productoId: 'prod-diferente', // Producto diferente
       });
 
       await expect(
@@ -620,10 +620,10 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_change_product_and_recalculate_amount', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         tier: 'STEAM_SINCRONICO',
-        monto_mensual: 95000,
-        preapproval_id: null,
+        montoMensual: 95000,
+        preapprovalId: null,
         inscripciones: [
           {
             id: 'insc-1',
@@ -654,9 +654,9 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_throw_when_product_not_found', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         tier: 'STEAM_SINCRONICO',
-        monto_mensual: 95000,
+        montoMensual: 95000,
         inscripciones: [
           {
             id: 'insc-1',
@@ -685,11 +685,11 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_change_tier_and_recalculate_for_inscriptions_without_price', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         tier: 'STEAM_LIBROS',
         estado: EstadoSuscripcionFamiliar.ACTIVA,
-        monto_mensual: 40000,
-        preapproval_id: null,
+        montoMensual: 40000,
+        preapprovalId: null,
         inscripciones: [
           {
             id: 'insc-1',
@@ -714,10 +714,10 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_throw_invalid_state_when_subscription_cancelled', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         tier: 'STEAM_LIBROS',
         estado: EstadoSuscripcionFamiliar.CANCELLED,
-        monto_mensual: 0,
+        montoMensual: 0,
         inscripciones: [],
       });
 
@@ -745,11 +745,11 @@ describe('SuscripcionFamiliarCommandService', () => {
     it('should_keep_prices_for_inscriptions_with_specific_price', async () => {
       mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue({
         id: 'sus-fam-123',
-        tutor_id: 'tutor-123',
+        tutorId: 'tutor-123',
         tier: 'STEAM_LIBROS',
         estado: EstadoSuscripcionFamiliar.ACTIVA,
-        monto_mensual: 120000,
-        preapproval_id: null,
+        montoMensual: 120000,
+        preapprovalId: null,
         inscripciones: [
           {
             id: 'insc-1',

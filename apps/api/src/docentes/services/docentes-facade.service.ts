@@ -31,7 +31,7 @@ export class DocentesFacade {
   /**
    * Crea un nuevo docente
    * @param createDto - Datos del docente a crear
-   * @returns Docente creado (sin password_hash) + generatedPassword si se auto-generó
+   * @returns Docente creado (sin passwordHash) + generatedPassword si se auto-generó
    */
   async create(createDto: CreateDocenteDto) {
     return this.commandService.create(createDto);
@@ -41,7 +41,7 @@ export class DocentesFacade {
    * Actualiza un docente existente
    * @param id - ID del docente
    * @param updateDto - Datos a actualizar
-   * @returns Docente actualizado sin password_hash
+   * @returns Docente actualizado sin passwordHash
    */
   async update(id: string, updateDto: UpdateDocenteDto) {
     return this.commandService.update(id, updateDto);
@@ -74,7 +74,7 @@ export class DocentesFacade {
    * Lista todos los docentes con paginación
    * @param page - Número de página (default: 1)
    * @param limit - Registros por página (default: 20)
-   * @returns Lista paginada de docentes sin password_hash
+   * @returns Lista paginada de docentes sin passwordHash
    */
   async findAll(page?: number, limit?: number) {
     return this.queryService.findAll(page, limit);
@@ -82,9 +82,9 @@ export class DocentesFacade {
 
   /**
    * Busca un docente por email (usado para autenticación)
-   * IMPORTANTE: Este método SÍ retorna password_hash para verificación
+   * IMPORTANTE: Este método SÍ retorna passwordHash para verificación
    * @param email - Email del docente
-   * @returns Docente con password_hash incluido, o null si no existe
+   * @returns Docente con passwordHash incluido, o null si no existe
    */
   async findByEmail(email: string) {
     return this.queryService.findByEmail(email);
@@ -93,7 +93,7 @@ export class DocentesFacade {
   /**
    * Busca un docente por ID
    * @param id - ID del docente
-   * @returns Docente sin password_hash, incluye sectores únicos
+   * @returns Docente sin passwordHash, incluye sectores únicos
    */
   async findById(id: string) {
     return this.queryService.findById(id);

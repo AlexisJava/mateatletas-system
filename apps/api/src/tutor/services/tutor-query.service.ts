@@ -187,7 +187,7 @@ export class TutorQueryService {
 
     // Obtener estudiantes del tutor
     const estudiantesIds = await this.prisma.estudiante.findMany({
-      where: { tutor_id: tutorId },
+      where: { tutorId: tutorId },
       select: { id: true },
     });
 
@@ -198,11 +198,11 @@ export class TutorQueryService {
     // ============================================================================
     const clasesAntiguas = await this.prisma.clase.findMany({
       where: {
-        fecha_hora_inicio: { gte: ahora },
+        fechaHoraInicio: { gte: ahora },
         estado: 'Programada',
         inscripciones: {
           some: {
-            estudiante_id: { in: estudiantesIdsArray },
+            estudianteId: { in: estudiantesIdsArray },
           },
         },
       },
@@ -216,7 +216,7 @@ export class TutorQueryService {
         },
         inscripciones: {
           where: {
-            estudiante_id: { in: estudiantesIdsArray },
+            estudianteId: { in: estudiantesIdsArray },
           },
           include: {
             estudiante: {
@@ -230,7 +230,7 @@ export class TutorQueryService {
         },
       },
       orderBy: {
-        fecha_hora_inicio: 'asc',
+        fechaHoraInicio: 'asc',
       },
       take: limit,
     });
@@ -241,10 +241,10 @@ export class TutorQueryService {
     const inscripcionesActividad =
       await this.prisma.inscripcionActividad.findMany({
         where: {
-          estudiante_id: { in: estudiantesIdsArray },
+          estudianteId: { in: estudiantesIdsArray },
           estado: 'ACTIVA',
-          clase_grupo_id: { not: null },
-          suscripcion_familiar: {
+          claseGrupoId: { not: null },
+          suscripcionFamiliar: {
             estado: 'AUTHORIZED', // EstadoSuscripcionFamiliar.AUTHORIZED
           },
         },
@@ -258,17 +258,17 @@ export class TutorQueryService {
               apellido: true,
             },
           },
-          clase_grupo: {
+          claseGrupo: {
             select: {
               id: true,
               nombre: true,
-              dia_semana: true,
-              hora_inicio: true,
-              hora_fin: true,
-              fecha_inicio: true,
-              fecha_fin: true,
+              diaSemana: true,
+              horaInicio: true,
+              horaFin: true,
+              fechaInicio: true,
+              fechaFin: true,
               activo: true,
-              estado_clase: true,
+              estadoClase: true,
               docente: {
                 select: {
                   id: true,
@@ -297,9 +297,9 @@ export class TutorQueryService {
         const inscripcion = clase.inscripciones[0];
         if (!inscripcion) return [];
 
-        const fechaHoraInicio = new Date(clase.fecha_hora_inicio);
+        const fechaHoraInicio = new Date(clase.fechaHoraInicio);
         const fechaHoraFin = new Date(
-          fechaHoraInicio.getTime() + clase.duracion_minutos * 60 * 1000,
+          fechaHoraInicio.getTime() + clase.duracionMinutos * 60 * 1000,
         );
 
         const fechaClase = new Date(fechaHoraInicio);
@@ -317,14 +317,14 @@ export class TutorQueryService {
         const diffMinutos =
           (fechaHoraInicio.getTime() - ahora.getTime()) / (1000 * 60);
         const puedeUnirse =
-          diffMinutos <= 10 && diffMinutos >= -clase.duracion_minutos;
+          diffMinutos <= 10 && diffMinutos >= -clase.duracionMinutos;
 
         return [
           {
             id: clase.id,
             fechaHoraInicio,
             fechaHoraFin,
-            duracionMinutos: clase.duracion_minutos,
+            duracionMinutos: clase.duracionMinutos,
             nombre: clase.nombre,
             docente: {
               id: clase.docente.id,
@@ -350,26 +350,26 @@ export class TutorQueryService {
     // Procesar clases del sistema 2026 (ClaseGrupo recurrentes)
     const clasesProximasNuevas: ClaseProxima[] = inscripcionesActividad.flatMap(
       (inscripcion) => {
-        const claseGrupo = inscripcion.clase_grupo;
+        const claseGrupo = inscripcion.claseGrupo;
         if (!claseGrupo || !claseGrupo.activo) return [];
 
         // Verificar que el ClaseGrupo está dentro de su rango de vigencia
-        const fechaFin = new Date(claseGrupo.fecha_fin);
+        const fechaFin = new Date(claseGrupo.fechaFin);
         if (fechaFin < ahora) return [];
 
         // Calcular próxima fecha de la clase recurrente
         const fechaHoraInicio = this.calcularProximaFecha(
-          claseGrupo.dia_semana,
-          claseGrupo.hora_inicio,
+          claseGrupo.diaSemana,
+          claseGrupo.horaInicio,
           ahora,
         );
 
         // Verificar que no excede la fecha de fin del grupo
         if (fechaHoraInicio > fechaFin) return [];
 
-        // Calcular duración desde hora_inicio y hora_fin
-        const partesInicio = claseGrupo.hora_inicio.split(':');
-        const partesFin = claseGrupo.hora_fin.split(':');
+        // Calcular duración desde horaInicio y hora_fin
+        const partesInicio = claseGrupo.horaInicio.split(':');
+        const partesFin = claseGrupo.horaFin.split(':');
         const minutosInicio =
           (Number(partesInicio[0]) || 0) * 60 + (Number(partesInicio[1]) || 0);
         const minutosFin =
@@ -418,7 +418,7 @@ export class TutorQueryService {
               nombre: inscripcion.estudiante.nombre,
               apellido: inscripcion.estudiante.apellido,
             },
-            estado: claseGrupo.estado_clase,
+            estado: claseGrupo.estadoClase,
             urlReunion: undefined,
             puedeUnirse,
             esHoy,

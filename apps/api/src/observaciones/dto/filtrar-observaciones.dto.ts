@@ -21,7 +21,7 @@ import {
  * Reglas de negocio:
  * - RN-040: Docente solo ve sus propias observaciones (filtrar en service)
  * - RN-041: ADMIN y PEDAGOGIA ven todas las observaciones
- * - RN-042: Por defecto, ordenar por created_at DESC
+ * - RN-042: Por defecto, ordenar por createdAt DESC
  * - RN-043: Filtros disponibles: tipo, prioridad, estado, fecha, estudiante, comisión
  */
 export class FiltrarObservacionesDto {

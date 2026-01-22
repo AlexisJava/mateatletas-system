@@ -69,7 +69,7 @@ export class WebhookPaymentQueueService {
     const paymentId = payload.data.id;
 
     this.logger.log(
-      `📨 Encolando webhook: payment_id=${paymentId}, ` +
+      `📨 Encolando webhook: paymentId=${paymentId}, ` +
         `correlationId=${correlationId}, ip=${clientIp}`,
     );
 
@@ -91,7 +91,7 @@ export class WebhookPaymentQueueService {
       );
 
       this.logger.log(
-        `✅ Webhook encolado: jobId=${job.id}, payment_id=${paymentId}`,
+        `✅ Webhook encolado: jobId=${job.id}, paymentId=${paymentId}`,
       );
 
       return {
@@ -104,7 +104,7 @@ export class WebhookPaymentQueueService {
         error instanceof Error ? error.message : 'Unknown error';
 
       this.logger.error(
-        `❌ Error encolando webhook: payment_id=${paymentId}, ` +
+        `❌ Error encolando webhook: paymentId=${paymentId}, ` +
           `error=${errorMessage}`,
       );
 
