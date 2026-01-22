@@ -463,7 +463,7 @@ export class AuthService {
 
     // 7. Retornar token y datos del usuario
     return {
-      access_token: accessToken,
+      accessToken: accessToken,
       user: {
         id: admin.id,
         email: admin.email,

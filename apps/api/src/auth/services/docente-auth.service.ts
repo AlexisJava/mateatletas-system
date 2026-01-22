@@ -13,7 +13,7 @@ import { UserLoggedInEvent } from '../../common/events';
 // ============================================================================
 
 export interface DocenteLoginResult {
-  access_token: string;
+  accessToken: string;
   user: {
     id: string;
     email: string;
@@ -119,7 +119,7 @@ export class DocenteAuthService {
     this.logger.log(`Login exitoso docente: ${docente.id} (${docente.email})`);
 
     return {
-      access_token: accessToken,
+      accessToken: accessToken,
       user: {
         id: docente.id,
         email: docente.email,

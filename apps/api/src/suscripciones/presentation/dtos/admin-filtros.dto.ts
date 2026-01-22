@@ -76,8 +76,8 @@ export interface MorosasResponseDto {
 export interface MetricasSuscripcionesDto {
   totalActivas: number;
   totalMorosas: number;
-  total_en_gracia: number;
-  total_canceladas_mes: number;
+  totalEnGracia: number;
+  totalCanceladasMes: number;
   ingresosMes: number;
   tasaCancelacion: number;
 }

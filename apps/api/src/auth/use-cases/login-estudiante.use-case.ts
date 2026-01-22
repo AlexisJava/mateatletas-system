@@ -30,7 +30,7 @@ export interface TutorData {
  * Resultado del login de estudiante
  */
 export interface LoginEstudianteResult {
-  access_token: string;
+  accessToken: string;
   user: {
     id: string;
     email: string;
@@ -150,7 +150,7 @@ export class LoginEstudianteUseCase {
 
     // 7. Construir y retornar respuesta
     return {
-      access_token: accessToken,
+      accessToken: accessToken,
       user: {
         id: estudiante.id,
         email: estudiante.email || estudiante.username, // Fallback a username

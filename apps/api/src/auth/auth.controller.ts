@@ -183,7 +183,7 @@ export class AuthController {
 
     // Login exitoso - configurar cookies httpOnly
     const loginResult = result as {
-      access_token: string;
+      accessToken: string;
       user: {
         id: string;
         email: string;
@@ -198,7 +198,7 @@ export class AuthController {
     );
     this.tokenService.setTokenCookies(
       res,
-      loginResult.access_token,
+      loginResult.accessToken,
       refreshToken,
     );
 
@@ -288,7 +288,7 @@ export class AuthController {
     const { token: refreshToken, jti } = this.tokenService.generateRefreshToken(
       result.user.id,
     );
-    this.tokenService.setTokenCookies(res, result.access_token, refreshToken);
+    this.tokenService.setTokenCookies(res, result.accessToken, refreshToken);
 
     // Crear sesión para tracking
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 días
@@ -510,7 +510,7 @@ export class AuthController {
     const { token: refreshToken, jti } = this.tokenService.generateRefreshToken(
       result.user.id,
     );
-    this.tokenService.setTokenCookies(res, result.access_token, refreshToken);
+    this.tokenService.setTokenCookies(res, result.accessToken, refreshToken);
 
     // Crear sesión para tracking
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 días

@@ -13,7 +13,7 @@ import { UserLoggedInEvent } from '../../common/events';
 // ============================================================================
 
 export interface TutorLoginResult {
-  access_token: string;
+  accessToken: string;
   user: {
     id: string;
     email: string;
@@ -125,7 +125,7 @@ export class TutorAuthService {
     this.logger.log(`Login exitoso tutor: ${tutor.id} (${tutor.email})`);
 
     return {
-      access_token: accessToken,
+      accessToken: accessToken,
       user: {
         id: tutor.id,
         email: tutor.email,

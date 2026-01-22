@@ -31,7 +31,7 @@ const isAdminUser = (user: AuthenticatedUser): user is AdminModel =>
  * Resultado de login para Tutor
  */
 interface TutorLoginResult {
-  access_token: string;
+  accessToken: string;
   user: {
     id: string;
     email: string | null;
@@ -50,7 +50,7 @@ interface TutorLoginResult {
  * Resultado de login para Docente
  */
 interface DocenteLoginResult {
-  access_token: string;
+  accessToken: string;
   user: {
     id: string;
     email: string | null;
@@ -67,7 +67,7 @@ interface DocenteLoginResult {
  * Resultado de login para Admin
  */
 interface AdminLoginResult {
-  access_token: string;
+  accessToken: string;
   user: {
     id: string;
     email: string | null;
@@ -85,8 +85,8 @@ interface AdminLoginResult {
  * Resultado cuando se requiere MFA
  */
 interface MfaRequiredResult {
-  requires_mfa: true;
-  mfa_token: string;
+  requiresMfa: true;
+  mfaToken: string;
   user: {
     id: string;
     email: string | null;
@@ -94,7 +94,7 @@ interface MfaRequiredResult {
     apellido: string;
   };
   message: string;
-  access_token?: undefined;
+  accessToken?: undefined;
 }
 
 /**
@@ -216,8 +216,8 @@ export class LoginUseCase {
     const mfaToken = this.generateMfaToken(user.id, user.email);
 
     return {
-      requires_mfa: true,
-      mfa_token: mfaToken,
+      requiresMfa: true,
+      mfaToken: mfaToken,
       user: {
         id: user.id,
         email: user.email,
@@ -282,7 +282,7 @@ export class LoginUseCase {
 
     if (isTutorUser(user)) {
       return {
-        access_token: accessToken,
+        accessToken: accessToken,
         user: {
           id: user.id,
           email: user.email,
@@ -300,7 +300,7 @@ export class LoginUseCase {
 
     if (isDocenteUser(user)) {
       return {
-        access_token: accessToken,
+        accessToken: accessToken,
         user: {
           id: user.id,
           email: user.email,
@@ -316,7 +316,7 @@ export class LoginUseCase {
 
     // Admin
     return {
-      access_token: accessToken,
+      accessToken: accessToken,
       user: {
         id: user.id,
         email: user.email,

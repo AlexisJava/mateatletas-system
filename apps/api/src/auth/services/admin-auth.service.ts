@@ -13,8 +13,8 @@ import { UserLoggedInEvent } from '../../common/events';
 // ============================================================================
 
 export interface AdminLoginResult {
-  access_token: string;
-  requires_mfa?: false;
+  accessToken: string;
+  requiresMfa?: false;
   user: {
     id: string;
     email: string;
@@ -27,8 +27,8 @@ export interface AdminLoginResult {
 }
 
 export interface AdminMfaRequiredResult {
-  requires_mfa: true;
-  mfa_token: string;
+  requiresMfa: true;
+  mfaToken: string;
   user: {
     id: string;
     email: string;
@@ -47,7 +47,7 @@ export type AdminLoginResponse = AdminLoginResult | AdminMfaRequiredResult;
 export function isMfaRequired(
   result: AdminLoginResponse,
 ): result is AdminMfaRequiredResult {
-  return 'requires_mfa' in result && result.requires_mfa === true;
+  return 'requiresMfa' in result && result.requiresMfa === true;
 }
 
 // ============================================================================
@@ -132,8 +132,8 @@ export class AdminAuthService {
       );
 
       return {
-        requires_mfa: true,
-        mfa_token: mfaToken,
+        requiresMfa: true,
+        mfaToken: mfaToken,
         user: {
           id: admin.id,
           email: admin.email,
@@ -164,7 +164,7 @@ export class AdminAuthService {
     this.logger.log(`Login exitoso admin: ${admin.id} (${admin.email})`);
 
     return {
-      access_token: accessToken,
+      accessToken: accessToken,
       user: {
         id: admin.id,
         email: admin.email,

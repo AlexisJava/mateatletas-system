@@ -151,10 +151,30 @@ export default tseslint.config(
           selector: 'enumMember',
           format: ['UPPER_CASE', 'PascalCase'],
         },
-        // Object literal properties: NO se valida formato
-        // Razón: El CamelCaseResponseInterceptor transforma todo a camelCase
-        // antes de enviar al frontend. Validar esto sería redundante y
-        // generaría falsos positivos con Prisma queries y APIs externas.
+        // Object literal properties: camelCase o UPPER_CASE (para constantes/enums)
+        // Excepciones para Prisma operators, compound keys, error codes, y APIs externas
+        {
+          selector: 'objectLiteralProperty',
+          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+          leadingUnderscore: 'allow',
+          filter: {
+            // Excepciones:
+            // - _count, _sum, _avg, _min, _max (Prisma aggregates)
+            // - MercadoPago/external APIs: card_token_id, payer_email, unit_price, etc.
+            // - Prisma operators: OR, AND, NOT
+            // - Prisma error codes: P2000, P2001, etc.
+            // - Prisma compound unique keys: *Id_*, *_* patterns
+            // - Numeric keys: 1, 2, 3... for mappings
+            // Regex que cubre:
+            // - Prisma: _count, _sum, _avg, _min, _max, OR, AND, NOT, P2xxx
+            // - Prisma compound keys: *Id_*, *_*Id, *Id_*Id_*
+            // - Numeric keys for mappings
+            // - MercadoPago API: todas las propiedades snake_case de su SDK
+            regex:
+              '^(_count|_sum|_avg|_min|_max|OR|AND|NOT|P[0-9]+|[0-9]+|[a-zA-Z]+Id_[a-zA-Z_]+|[a-zA-Z]+_[a-zA-Z]+Id|card_token_id|payer_email|payer_id|external_reference|live_mode|date_created|date_approved|api_version|mfa_token|totp_code|backup_code|unit_price|currency_id|back_urls|back_url|auto_return|notification_url|require_protocol|status_detail|transaction_amount|additional_info|category_id|statement_descriptor|error_type|in_process|charged_back|init_point|payment_status|auto_recurring|frequency_type|next_payment_date|last_modified|jwt_secret|webhook_secret)$',
+            match: false,
+          },
+        },
       ],
 
       // ===== SONARJS: Desactivar regla duplicada =====

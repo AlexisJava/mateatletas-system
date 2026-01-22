@@ -16,7 +16,7 @@ import {
 // ============================================================================
 
 export interface EstudianteLoginResult {
-  access_token: string;
+  accessToken: string;
   user: {
     id: string;
     email: string;
@@ -155,7 +155,7 @@ export class EstudianteAuthService {
     );
 
     return {
-      access_token: accessToken,
+      accessToken: accessToken,
       user: {
         id: estudiante.id,
         email: estudiante.email || estudiante.username,

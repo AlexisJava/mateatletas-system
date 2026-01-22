@@ -239,7 +239,7 @@ export class EstudianteAulaService {
           (sum, p) => sum + p.progreso.tareasTotal,
           0,
         ),
-        total_tareasCompletadas: planificaciones.reduce(
+        totalTareasCompletadas: planificaciones.reduce(
           (sum, p) => sum + p.progreso.tareasCompletadas,
           0,
         ),

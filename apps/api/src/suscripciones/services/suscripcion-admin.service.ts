@@ -179,8 +179,8 @@ export class SuscripcionAdminService {
     return {
       totalActivas: totalActivas,
       totalMorosas: totalMorosas,
-      total_en_gracia: totalEnGracia,
-      total_canceladas_mes: canceladasMes,
+      totalEnGracia: totalEnGracia,
+      totalCanceladasMes: canceladasMes,
       ingresosMes: ingresosMes._sum.monto?.toNumber() || 0,
       tasaCancelacion: Math.round(tasaCancelacion * 100) / 100,
     };
