@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   VideoTrack,
   useLocalParticipant,
@@ -10,11 +10,11 @@ import {
 } from '@livekit/components-react';
 import { Track, RoomEvent } from 'livekit-client';
 import { Users, Clock, Wifi, MessageSquare, X } from 'lucide-react';
-import { toast } from '@/components/ui/Toast';
 import { ControlBar } from './ControlBar';
 import { ChatPanel } from './ChatPanel';
 import { ParticipantsList } from './ParticipantsList';
 import type { MensajeChat, ChatConnectionState } from './types';
+import { useAulaViva } from '@/hooks/useAulaViva';
 
 interface ClassRoomProps {
   title: string;
@@ -57,6 +57,11 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({
   const [participantCount, setParticipantCount] = React.useState(1);
   const [isChatOpen, setIsChatOpen] = useState(chat !== undefined);
 
+  // Estado de Aula Viva (para obtener userId para el ControlBar)
+  const aulaViva = useAulaViva();
+  // El userId viene del socket auth data - usamos el identity de LiveKit como fallback
+  const currentUserId = localParticipant?.identity;
+
   const isStudent = mode === 'student';
 
   // Timer
@@ -83,42 +88,9 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({
     };
   }, [room]);
 
-  // Listener para notificaciones de mano levantada (solo docente)
-  const handleDataReceived = useCallback(
-    (payload: Uint8Array, participant: { identity: string; name?: string } | undefined) => {
-      if (isStudent) return; // Solo el docente recibe notificaciones
-
-      try {
-        const decoder = new TextDecoder();
-        const message = JSON.parse(decoder.decode(payload));
-
-        if (message.type === 'hand_raised' && message.raised === true) {
-          const studentName = message.participantName || participant?.name || 'Un estudiante';
-          toast(`✋ ${studentName} levantó la mano`, {
-            duration: 5000,
-            icon: '🙋',
-            style: {
-              background: '#1e293b',
-              color: 'var(--color-xp)',
-              border: '1px solid #f59e0b',
-            },
-          });
-        }
-      } catch {
-        // Ignorar mensajes que no sean JSON válido
-      }
-    },
-    [isStudent],
-  );
-
-  useEffect(() => {
-    if (isStudent) return;
-
-    room.on(RoomEvent.DataReceived, handleDataReceived);
-    return () => {
-      room.off(RoomEvent.DataReceived, handleDataReceived);
-    };
-  }, [room, isStudent, handleDataReceived]);
+  // Las manos levantadas ahora se manejan via WebSocket en useAulaViva
+  // y el ControlBar usa useAulaVivaManos directamente
+  void aulaViva; // Avoid unused variable warning (se usa en conexión)
 
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
@@ -254,7 +226,11 @@ export const ClassRoom: React.FC<ClassRoomProps> = ({
       </div>
 
       {/* Control Bar */}
-      <ControlBar onEndClass={onEndClass} variant={isStudent ? 'student' : 'teacher'} />
+      <ControlBar
+        onEndClass={onEndClass}
+        variant={isStudent ? 'student' : 'teacher'}
+        currentUserId={currentUserId}
+      />
     </div>
   );
 };

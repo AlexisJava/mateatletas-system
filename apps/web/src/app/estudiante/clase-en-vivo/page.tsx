@@ -5,7 +5,79 @@ import { Suspense, useCallback } from 'react';
 import { LiveKitRoom, RoomAudioRenderer } from '@livekit/components-react';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { ClassRoom } from '@/components/docente/live/ClassRoom';
-import { useAulaVivaChat } from '@/hooks/useAulaVivaChat';
+import { AulaVivaProvider, useAulaVivaChat } from '@/hooks/useAulaViva';
+
+/**
+ * Contenido interno que usa los hooks de AulaViva
+ * Debe estar dentro del AulaVivaProvider
+ */
+function ClaseEnVivoInner({
+  token,
+  wsUrl,
+  nombreClase,
+  claseGrupoId,
+  comisionId,
+  onLeave,
+}: {
+  token: string;
+  wsUrl: string;
+  nombreClase: string;
+  claseGrupoId?: string;
+  comisionId?: string;
+  onLeave: () => void;
+}) {
+  // Hook de chat WebSocket (ahora del sistema unificado)
+  const {
+    mensajes,
+    connectionState,
+    error: chatError,
+    chatHabilitado,
+    enviarMensaje,
+  } = useAulaVivaChat();
+
+  // Handler para enviar mensajes
+  const handleSendMessage = useCallback(
+    async (contenido: string) => {
+      const result = await enviarMensaje(contenido);
+      return { exito: result.exito, error: result.error };
+    },
+    [enviarMensaje],
+  );
+
+  // Placeholder reconectar (el provider maneja reconexión automática)
+  const handleReconnect = useCallback(() => {
+    // El AulaVivaProvider maneja reconexión automática
+    window.location.reload();
+  }, []);
+
+  return (
+    <LiveKitRoom
+      token={token}
+      serverUrl={wsUrl}
+      connect={true}
+      video={false} // Estudiante no transmite video
+      audio={false} // Estudiante no transmite audio inicialmente
+      className="h-full"
+    >
+      <RoomAudioRenderer />
+      <ClassRoom
+        title={nombreClase}
+        onEndClass={onLeave}
+        mode="student"
+        claseGrupoId={claseGrupoId}
+        comisionId={comisionId}
+        chat={{
+          mensajes,
+          connectionState,
+          error: chatError,
+          chatHabilitado,
+          onSendMessage: handleSendMessage,
+          onReconnect: handleReconnect,
+        }}
+      />
+    </LiveKitRoom>
+  );
+}
 
 /**
  * Página de Clase en Vivo - Portal Estudiante
@@ -30,28 +102,6 @@ function ClaseEnVivoEstudianteContent() {
   const nombreClase = searchParams.get('nombreClase') || 'Clase en Vivo';
   const claseGrupoId = searchParams.get('claseGrupoId') || undefined;
   const comisionId = searchParams.get('comisionId') || undefined;
-
-  // Hook de chat WebSocket
-  const {
-    mensajes,
-    connectionState,
-    error: chatError,
-    chatHabilitado,
-    enviarMensaje,
-    reconectar,
-  } = useAulaVivaChat({
-    claseGrupoId,
-    comisionId,
-  });
-
-  // Handler para enviar mensajes
-  const handleSendMessage = useCallback(
-    async (contenido: string) => {
-      const result = await enviarMensaje(contenido);
-      return { exito: result.exito, error: result.error };
-    },
-    [enviarMensaje],
-  );
 
   // Validar parámetros requeridos
   if (!token || !wsUrl || !roomName) {
@@ -84,29 +134,16 @@ function ClaseEnVivoEstudianteContent() {
 
   return (
     <div className="h-screen bg-slate-950">
-      <LiveKitRoom
-        token={token}
-        serverUrl={wsUrl}
-        connect={true}
-        video={false} // Estudiante no transmite video
-        audio={false} // Estudiante no transmite audio
-        className="h-full"
-      >
-        <RoomAudioRenderer />
-        <ClassRoom
-          title={nombreClase}
-          onEndClass={handleLeaveClass}
-          mode="student"
-          chat={{
-            mensajes,
-            connectionState,
-            error: chatError,
-            chatHabilitado,
-            onSendMessage: handleSendMessage,
-            onReconnect: reconectar,
-          }}
+      <AulaVivaProvider claseGrupoId={claseGrupoId} comisionId={comisionId}>
+        <ClaseEnVivoInner
+          token={token}
+          wsUrl={wsUrl}
+          nombreClase={nombreClase}
+          claseGrupoId={claseGrupoId}
+          comisionId={comisionId}
+          onLeave={handleLeaveClass}
         />
-      </LiveKitRoom>
+      </AulaVivaProvider>
     </div>
   );
 }

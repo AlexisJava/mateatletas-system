@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Mic,
   MicOff,
@@ -14,24 +14,33 @@ import {
 } from 'lucide-react';
 import { useTrackToggle, useRoomContext } from '@livekit/components-react';
 import { Track, RoomEvent } from 'livekit-client';
+import { useAulaVivaManos } from '@/hooks/useAulaViva';
 
 interface ControlBarProps {
   onEndClass: () => void;
   variant?: 'teacher' | 'student';
+  /** ID del usuario actual (para verificar si tiene mano levantada) */
+  currentUserId?: string;
 }
 
-export const ControlBar: React.FC<ControlBarProps> = ({ onEndClass, variant = 'teacher' }) => {
+export const ControlBar: React.FC<ControlBarProps> = ({
+  onEndClass,
+  variant = 'teacher',
+  currentUserId,
+}) => {
   const room = useRoomContext();
-  const [handRaised, setHandRaised] = useState(false);
   const [canPublish, setCanPublish] = useState(false);
-  const handRaisedRef = useRef(handRaised);
-  const prevCanPublishRef = useRef(false);
+  const prevCanPublishRef = React.useRef(false);
 
-  // Mantener ref actualizado
-  useEffect(() => {
-    handRaisedRef.current = handRaised;
-  }, [handRaised]);
+  // WebSocket hooks para manos (via aula-viva)
+  const { manosLevantadas, levantarMano, bajarMano } = useAulaVivaManos();
 
+  // Verificar si el usuario actual tiene la mano levantada
+  const handRaised = currentUserId
+    ? manosLevantadas.some((m) => m.odooId === currentUserId)
+    : false;
+
+  // LiveKit hooks para audio/video
   const { toggle: toggleMic, enabled: isMicEnabled } = useTrackToggle({
     source: Track.Source.Microphone,
   });
@@ -51,7 +60,6 @@ export const ControlBar: React.FC<ControlBarProps> = ({ onEndClass, variant = 't
     let timer: NodeJS.Timeout | undefined;
 
     if (isStudent && canPublish && !prevCanPublishRef.current && !isMicEnabled) {
-      // Pequeño delay para asegurar que LiveKit esté listo
       timer = setTimeout(() => {
         toggleMic();
       }, 300);
@@ -66,7 +74,6 @@ export const ControlBar: React.FC<ControlBarProps> = ({ onEndClass, variant = 't
 
   // Callback estable para actualizar permisos
   const updatePermissions = useCallback(() => {
-    // Solo procesar si el participante local está disponible
     if (!room.localParticipant?.identity) {
       return;
     }
@@ -76,23 +83,19 @@ export const ControlBar: React.FC<ControlBarProps> = ({ onEndClass, variant = 't
 
     setCanPublish(newCanPublish);
 
-    // Si perdimos permiso de publicar, bajamos la mano automáticamente
-    if (!newCanPublish && handRaisedRef.current) {
-      setHandRaised(false);
+    // Si perdimos permiso de publicar y teníamos mano levantada, bajarla
+    if (!newCanPublish && handRaised) {
+      bajarMano();
     }
-  }, [room]);
+  }, [room, handRaised, bajarMano]);
 
   // Escuchar cambios de permisos (cuando el docente da/quita palabra)
   useEffect(() => {
     if (!isStudent) return;
 
-    // Verificar estado inicial (con pequeño delay para asegurar que LiveKit esté listo)
     const initialCheck = setTimeout(updatePermissions, 500);
 
-    // Escuchar eventos de cambio de permisos a nivel Room
     room.on(RoomEvent.ParticipantPermissionsChanged, updatePermissions);
-
-    // También escuchar cuando el participante local cambia (conexión inicial)
     room.on(RoomEvent.LocalTrackPublished, updatePermissions);
     room.on(RoomEvent.ConnectionStateChanged, updatePermissions);
 
@@ -105,29 +108,13 @@ export const ControlBar: React.FC<ControlBarProps> = ({ onEndClass, variant = 't
   }, [room, isStudent, updatePermissions]);
 
   /**
-   * Toggle levantar mano - envía un mensaje data a la sala
+   * Toggle levantar mano - envía via WebSocket a aula-viva
    */
   const handleRaiseHand = async () => {
-    const newState = !handRaised;
-    setHandRaised(newState);
-
-    // Enviar mensaje a todos los participantes (especialmente al docente)
-    try {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(
-        JSON.stringify({
-          type: 'hand_raised',
-          raised: newState,
-          participantName: room.localParticipant.name || room.localParticipant.identity,
-          timestamp: Date.now(),
-        }),
-      );
-
-      await room.localParticipant.publishData(data, {
-        reliable: true,
-      });
-    } catch (error) {
-      console.error('Error enviando señal de mano levantada:', error);
+    if (handRaised) {
+      await bajarMano();
+    } else {
+      await levantarMano();
     }
   };
 

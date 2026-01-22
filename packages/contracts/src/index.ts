@@ -58,3 +58,6 @@ export * from './schemas/pago-curso.schema';
 
 // Content system schemas (Microlecciones)
 export * from './schemas/content';
+
+// Aula Viva (WebSocket real-time)
+export * from './schemas/aula-viva.schema';

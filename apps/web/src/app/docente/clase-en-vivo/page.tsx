@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { LiveKitRoom, RoomAudioRenderer } from '@livekit/components-react';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { ClassRoom } from '@/components/docente/live/ClassRoom';
+import { AulaVivaProvider } from '@/hooks/useAulaViva';
 
 /**
  * Página de Clase en Vivo
@@ -64,22 +65,24 @@ function ClaseEnVivoContent() {
 
   return (
     <div className="h-screen bg-slate-950">
-      <LiveKitRoom
-        token={token}
-        serverUrl={wsUrl}
-        connect={true}
-        video={true}
-        audio={true}
-        className="h-full"
-      >
-        <RoomAudioRenderer />
-        <ClassRoom
-          title={title}
-          onEndClass={handleEndClass}
-          claseGrupoId={claseGrupoId}
-          comisionId={comisionId}
-        />
-      </LiveKitRoom>
+      <AulaVivaProvider claseGrupoId={claseGrupoId} comisionId={comisionId}>
+        <LiveKitRoom
+          token={token}
+          serverUrl={wsUrl}
+          connect={true}
+          video={true}
+          audio={true}
+          className="h-full"
+        >
+          <RoomAudioRenderer />
+          <ClassRoom
+            title={title}
+            onEndClass={handleEndClass}
+            claseGrupoId={claseGrupoId}
+            comisionId={comisionId}
+          />
+        </LiveKitRoom>
+      </AulaVivaProvider>
     </div>
   );
 }
