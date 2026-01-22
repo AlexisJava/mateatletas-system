@@ -367,7 +367,7 @@ export class TutorQueryService {
         // Verificar que no excede la fecha de fin del grupo
         if (fechaHoraInicio > fechaFin) return [];
 
-        // Calcular duración desde horaInicio y hora_fin
+        // Calcular duración desde horaInicio y horaFin
         const partesInicio = claseGrupo.horaInicio.split(':');
         const partesFin = claseGrupo.horaFin.split(':');
         const minutosInicio =
