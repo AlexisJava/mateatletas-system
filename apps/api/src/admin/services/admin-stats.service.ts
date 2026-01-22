@@ -129,13 +129,14 @@ export class AdminStatsService {
     const periodoActual = `${anioActual}-${mesActual.toString().padStart(2, '0')}`;
 
     // Usar raw query porque Prisma views no soportan findMany con tipos
+    // NOTA: Raw SQL usa nombres de columna de PostgreSQL (snake_case)
     const facturacionAgregada = await this.prisma.$queryRaw<
       Array<{ estadoPago: string; total: string }>
     >`
-      SELECT estadoPago, SUM(monto)::text as total
+      SELECT estado_pago AS "estadoPago", SUM(monto)::text as total
       FROM facturacion_unificada
       WHERE periodo = ${periodoActual}
-      GROUP BY estadoPago
+      GROUP BY estado_pago
     `;
 
     // Calcular ingresos y pagos pendientes por estado
@@ -237,11 +238,12 @@ export class AdminStatsService {
       `,
 
       // Query 2: Pagos activos por período (usa vista unificada SSOT)
+      // NOTA: Raw SQL usa nombres de columna de PostgreSQL (snake_case)
       this.prisma.$queryRaw<Array<{ periodo: string; count: bigint }>>`
         SELECT periodo, COUNT(*)::bigint as count
         FROM facturacion_unificada
         WHERE periodo = ANY(${periodos})
-          AND estadoPago IN ('Pagado', 'Pendiente')
+          AND estado_pago IN ('Pagado', 'Pendiente')
         GROUP BY periodo
       `,
 
@@ -322,13 +324,14 @@ export class AdminStatsService {
     }
 
     // UNA SOLA QUERY: Obtener todos los datos agrupados por período y estado (SSOT)
+    // NOTA: Raw SQL usa nombres de columnas PostgreSQL (snake_case), no Prisma fields
     const aggregations = await this.prisma.$queryRaw<
       Array<{ periodo: string; estadoPago: string; total: string }>
     >`
-      SELECT periodo, estadoPago, SUM(monto)::text as total
+      SELECT periodo, estado_pago AS "estadoPago", SUM(monto)::text as total
       FROM facturacion_unificada
       WHERE periodo = ANY(${periodos})
-      GROUP BY periodo, estadoPago
+      GROUP BY periodo, estado_pago
     `;
 
     // Construir mapa de resultados

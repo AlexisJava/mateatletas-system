@@ -604,17 +604,18 @@ export class EstudianteAulaService {
 
     if (tipo === 'teoria') {
       // UPSERT atómico para teoría con DO UPDATE condicionado
+      // NOTA: Raw SQL usa nombres de columnas PostgreSQL (snake_case), no Prisma fields
       const result = await this.prisma.$queryRawUnsafe<
         Array<{ was_insert: boolean }>
       >(
         `INSERT INTO progresos_clase_estudiante
-           (id, estudianteId, claseId, teoriaCompletada, teoriaCompletadaEn, tiempoTeoriaSegundos)
+           (id, estudiante_id, clase_id, teoria_completada, teoria_completada_en, tiempo_teoria_segundos)
          VALUES (gen_random_uuid()::text, $1, $2, true, NOW(), $3)
-         ON CONFLICT (estudianteId, claseId) DO UPDATE SET
-           teoriaCompletada = true,
-           teoriaCompletadaEn = COALESCE(progresos_clase_estudiante.teoriaCompletadaEn, NOW()),
-           tiempoTeoriaSegundos = progresos_clase_estudiante.tiempoTeoriaSegundos + EXCLUDED.tiempoTeoriaSegundos
-         WHERE progresos_clase_estudiante.teoriaCompletada = false
+         ON CONFLICT (estudiante_id, clase_id) DO UPDATE SET
+           teoria_completada = true,
+           teoria_completada_en = COALESCE(progresos_clase_estudiante.teoria_completada_en, NOW()),
+           tiempo_teoria_segundos = progresos_clase_estudiante.tiempo_teoria_segundos + EXCLUDED.tiempo_teoria_segundos
+         WHERE progresos_clase_estudiante.teoria_completada = false
          RETURNING (xmax = 0) as was_insert`,
         estudianteId,
         claseId,
@@ -625,17 +626,18 @@ export class EstudianteAulaService {
       esPrimeraCompletacion = result.length > 0;
     } else {
       // UPSERT atómico para práctica
+      // NOTA: Raw SQL usa nombres de columnas PostgreSQL (snake_case), no Prisma fields
       const result = await this.prisma.$queryRawUnsafe<
         Array<{ was_insert: boolean }>
       >(
         `INSERT INTO progresos_clase_estudiante
-           (id, estudianteId, claseId, practicaCompletada, practicaCompletadaEn, tiempoPracticaSegundos)
+           (id, estudiante_id, clase_id, practica_completada, practica_completada_en, tiempo_practica_segundos)
          VALUES (gen_random_uuid()::text, $1, $2, true, NOW(), $3)
-         ON CONFLICT (estudianteId, claseId) DO UPDATE SET
-           practicaCompletada = true,
-           practicaCompletadaEn = COALESCE(progresos_clase_estudiante.practicaCompletadaEn, NOW()),
-           tiempoPracticaSegundos = progresos_clase_estudiante.tiempoPracticaSegundos + EXCLUDED.tiempoPracticaSegundos
-         WHERE progresos_clase_estudiante.practicaCompletada = false
+         ON CONFLICT (estudiante_id, clase_id) DO UPDATE SET
+           practica_completada = true,
+           practica_completada_en = COALESCE(progresos_clase_estudiante.practica_completada_en, NOW()),
+           tiempo_practica_segundos = progresos_clase_estudiante.tiempo_practica_segundos + EXCLUDED.tiempo_practica_segundos
+         WHERE progresos_clase_estudiante.practica_completada = false
          RETURNING (xmax = 0) as was_insert`,
         estudianteId,
         claseId,

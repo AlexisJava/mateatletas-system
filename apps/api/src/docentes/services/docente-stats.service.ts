@@ -498,21 +498,22 @@ export class DocenteStatsService {
     };
 
     // Usa vista unificada para incluir inscripciones manuales y via suscripción
+    // NOTA: Raw SQL usa nombres de tablas/columnas PostgreSQL (snake_case), no Prisma
     const estudiantesConFaltasData: QueryEstudianteFalta[] =
       await this.prisma.$queryRaw(
         Prisma.sql`
         SELECT DISTINCT
-          e.id as estudianteId,
+          e.id as "estudianteId",
           e.nombre,
           e.apellido,
-          2 as faltas_consecutivas,
-          cg.nombre as ultimo_grupo,
-          t.email as tutor_email
+          2 as "faltasConsecutivas",
+          cg.nombre as "ultimoGrupo",
+          t.email as "tutorEmail"
         FROM "estudiantes" e
-        INNER JOIN "inscripciones_unificadas" iu ON e.id = iu.estudianteId
-        INNER JOIN "claseGrupos" cg ON iu.claseGrupoId = cg.id
-        LEFT JOIN "tutores" t ON e.tutorId = t.id
-        WHERE cg.docenteId = ${docenteId}
+        INNER JOIN "inscripciones_unificadas" iu ON e.id = iu.estudiante_id
+        INNER JOIN "clase_grupos" cg ON iu.clase_grupo_id = cg.id
+        LEFT JOIN "tutores" t ON e.tutor_id = t.id
+        WHERE cg.docente_id = ${docenteId}
           AND iu.estado = 'ACTIVA'
         LIMIT 10
       `,
