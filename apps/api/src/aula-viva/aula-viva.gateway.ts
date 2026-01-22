@@ -16,6 +16,7 @@ import type { AuthenticatedSocket } from './interfaces';
 import { PresenciaService, Participante } from './services/presencia.service';
 import { ManosService } from './services/manos.service';
 import { ModeracionService, TipoMuteo } from './services/moderacion.service';
+import { ReaccionesService } from './services/reacciones.service';
 import {
   UnirseSalaDto,
   SalirSalaDto,
@@ -30,6 +31,7 @@ import {
   DesmutearTodosDto,
   ExpulsarParticipanteDto,
   HablandoDto,
+  EnviarReaccionDto,
 } from './dto';
 import { randomUUID } from 'crypto';
 
@@ -99,6 +101,7 @@ export class AulaVivaGateway
     private readonly presenciaService: PresenciaService,
     private readonly manosService: ManosService,
     private readonly moderacionService: ModeracionService,
+    private readonly reaccionesService: ReaccionesService,
   ) {}
 
   afterInit(server: Server): void {
@@ -770,6 +773,48 @@ export class AulaVivaGateway
       odooId: client.data.userId,
       activo,
     });
+
+    return { exito: true };
+  }
+
+  // ============================================================================
+  // HANDLERS: REACCIONES EN TIEMPO REAL
+  // ============================================================================
+
+  /**
+   * Permite a cualquier participante enviar una reacción
+   * Incluye rate limiting (1 reacción cada 2 segundos) y agregación
+   *
+   * Evento emitido: reaccion (broadcast a toda la sala)
+   * Payload emitido: { tipo, emoji, contador, ultimosUsuarios }
+   */
+  @SubscribeMessage('enviar-reaccion')
+  handleEnviarReaccion(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: EnviarReaccionDto & { salaId: string },
+  ): { exito: boolean; error?: string } {
+    const { salaId, tipo } = payload;
+
+    // Verificar que el usuario está en la sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Enviar reacción con rate limiting
+    const result = this.reaccionesService.enviarReaccion(
+      salaId,
+      client.data.userId,
+      client.data.nombre,
+      tipo,
+    );
+
+    if (!result.exito) {
+      return { exito: false, error: result.error };
+    }
+
+    // Broadcast la reacción agregada a toda la sala
+    this.server.to(salaId).emit('reaccion', result.reaccion);
 
     return { exito: true };
   }

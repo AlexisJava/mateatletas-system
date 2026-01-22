@@ -5,6 +5,7 @@ import { AulaVivaController } from './aula-viva.controller';
 import { PresenciaService } from './services/presencia.service';
 import { ManosService } from './services/manos.service';
 import { ModeracionService } from './services/moderacion.service';
+import { ReaccionesService } from './services/reacciones.service';
 
 /**
  * Módulo de Aula Virtual en Vivo
@@ -27,7 +28,13 @@ import { ModeracionService } from './services/moderacion.service';
     PresenciaService,
     ManosService,
     ModeracionService,
+    ReaccionesService,
   ],
-  exports: [PresenciaService, ManosService, ModeracionService],
+  exports: [
+    PresenciaService,
+    ManosService,
+    ModeracionService,
+    ReaccionesService,
+  ],
 })
 export class AulaVivaModule {}

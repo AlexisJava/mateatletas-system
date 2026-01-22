@@ -11,3 +11,4 @@ export {
   ExpulsarParticipanteDto,
 } from './moderacion.dto';
 export { HablandoDto } from './hablando.dto';
+export { EnviarReaccionDto } from './reacciones.dto';

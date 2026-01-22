@@ -115,6 +115,42 @@ export const usuarioHablandoEventSchema = z.object({
 export type UsuarioHablandoEvent = z.infer<typeof usuarioHablandoEventSchema>;
 
 // ----------------------------------------------------------------------------
+// REACCIONES EN TIEMPO REAL
+// ----------------------------------------------------------------------------
+
+export const tipoReaccionEnum = z.enum(['thumbsUp', 'heart', 'laugh', 'celebrate', 'thinking']);
+export type TipoReaccion = z.infer<typeof tipoReaccionEnum>;
+
+export const EMOJI_MAP: Record<TipoReaccion, string> = {
+  thumbsUp: '\u{1F44D}',
+  heart: '\u{2764}\u{FE0F}',
+  laugh: '\u{1F602}',
+  celebrate: '\u{1F389}',
+  thinking: '\u{1F914}',
+};
+
+export const reaccionAgregadaSchema = z.object({
+  tipo: tipoReaccionEnum,
+  emoji: z.string(),
+  contador: z.number().int().positive(),
+  ultimosUsuarios: z.array(
+    z.object({
+      odooId: z.string(),
+      nombre: z.string(),
+    }),
+  ),
+});
+
+export type ReaccionAgregada = z.infer<typeof reaccionAgregadaSchema>;
+
+export const enviarReaccionPayloadSchema = z.object({
+  salaId: z.string().min(1),
+  tipo: tipoReaccionEnum,
+});
+
+export type EnviarReaccionPayload = z.infer<typeof enviarReaccionPayloadSchema>;
+
+// ----------------------------------------------------------------------------
 // CHAT
 // ----------------------------------------------------------------------------
 

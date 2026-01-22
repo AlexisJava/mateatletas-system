@@ -19,6 +19,8 @@ import type {
   UsuarioHablandoEvent,
   MensajeChat,
   ChatToggleEvent,
+  ReaccionAgregada,
+  TipoReaccion,
 } from '@mateatletas/contracts';
 
 // ============================================================================
@@ -43,6 +45,8 @@ interface AulaVivaState {
   /** Si el usuario actual fue expulsado */
   expulsado: boolean;
   motivoExpulsion: string | null;
+  /** Reacciones recientes (últimos 5 segundos por tipo) */
+  reaccionesRecientes: ReaccionAgregada[];
 }
 
 interface AulaVivaContextValue extends AulaVivaState {
@@ -87,6 +91,7 @@ export function AulaVivaProvider({
     chatHabilitado: true,
     expulsado: false,
     motivoExpulsion: null,
+    reaccionesRecientes: [],
   });
 
   const socketRef = useRef<Socket | null>(null);
@@ -301,6 +306,26 @@ export function AulaVivaProvider({
           chatHabilitado: data.habilitado,
         }));
       });
+
+      // --- Reacciones Events ---
+      socket.on('reaccion', (data: ReaccionAgregada) => {
+        setState((prev) => {
+          // Actualizar o agregar la reacción por tipo
+          const existingIndex = prev.reaccionesRecientes.findIndex((r) => r.tipo === data.tipo);
+          let newReacciones: ReaccionAgregada[];
+
+          if (existingIndex >= 0) {
+            // Actualizar la existente
+            newReacciones = [...prev.reaccionesRecientes];
+            newReacciones[existingIndex] = data;
+          } else {
+            // Agregar nueva
+            newReacciones = [...prev.reaccionesRecientes, data];
+          }
+
+          return { ...prev, reaccionesRecientes: newReacciones };
+        });
+      });
     } catch (err) {
       setState((prev) => ({
         ...prev,
@@ -331,6 +356,7 @@ export function AulaVivaProvider({
       chatHabilitado: true,
       expulsado: false,
       motivoExpulsion: null,
+      reaccionesRecientes: [],
     });
   }, []);
 
@@ -575,5 +601,31 @@ export function useAulaVivaChat() {
     error,
     enviarMensaje,
     toggleChat,
+  };
+}
+
+/**
+ * Hook para reacciones en tiempo real
+ * Incluye rate limiting automático del servidor (2 segundos)
+ */
+export function useAulaVivaReacciones() {
+  const { socket, salaId, reaccionesRecientes } = useAulaViva();
+
+  const enviarReaccion = useCallback(
+    (tipo: TipoReaccion) => {
+      if (!socket?.connected || !salaId) {
+        return Promise.resolve({ exito: false, error: 'No conectado' });
+      }
+
+      return new Promise<{ exito: boolean; error?: string }>((resolve) => {
+        socket.emit('enviar-reaccion', { salaId, tipo }, resolve);
+      });
+    },
+    [socket, salaId],
+  );
+
+  return {
+    reaccionesRecientes,
+    enviarReaccion,
   };
 }
