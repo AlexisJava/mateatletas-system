@@ -699,12 +699,12 @@ export class GamificacionLiveService {
 
 **Checklist TDD**:
 
-- [ ] Test: XP se persiste en DB
-- [ ] Test: evento XP se broadcast
-- [ ] Test: logro desbloqueado se notifica
-- [ ] Test: racha se actualiza
-- [ ] Implementar `GamificacionLiveService`
-- [ ] Implementar handlers
+- [x] Test: XP se persiste en DB
+- [x] Test: evento XP se broadcast (20 E2E tests Sprint 3.3-3.5)
+- [x] Test: logro desbloqueado se notifica
+- [x] Test: racha se actualiza
+- [x] Implementar `GamificacionLiveService` (GamificacionRealtimeService)
+- [x] Implementar handlers (GamificacionRealtimeListener)
 
 ---
 
@@ -2002,13 +2002,13 @@ Docente otorga puntos → PuntoObtenido (registro)
 - [x] 2.2 "¿Están siguiendo?" (pulso atención)
 - [x] 2.3 Selector aleatorio
 
-#### Sprint 3: Gamificación Live
+#### Sprint 3: Gamificación Live ✅ (20 E2E tests passing)
 
 - [x] 3.1 Quiz en vivo ✅
 - [x] 3.2 Contador compartido ✅
-- [x] 3.3 Notificación de puntos (solo privado, sin ranking público) ✅
-- [x] 3.4 XP y logros en vivo ✅
-- [x] 3.5 Puntos de casa en vivo ✅
+- [x] 3.3 Notificación de puntos (solo privado, sin ranking público) ✅ (6 tests)
+- [x] 3.4 XP y logros en vivo ✅ (6 tests)
+- [x] 3.5 Puntos de casa en vivo ✅ (5 tests + 3 edge cases)
 
 #### Sprint 4: Contenido Sincronizado y Analytics
 
@@ -2645,13 +2645,13 @@ packages/lesson-engine/src/
 - [x] 2.2 "¿Están siguiendo?" (pulso atención)
 - [x] 2.3 Selector aleatorio
 
-#### Sprint 3: Gamificación Live
+#### Sprint 3: Gamificación Live ✅ (20 E2E tests passing)
 
 - [x] 3.1 Quiz en vivo ✅
 - [x] 3.2 Contador compartido ✅
-- [x] 3.3 Notificación de puntos (solo privado, sin ranking público) ✅
-- [x] 3.4 XP y logros en vivo ✅
-- [x] 3.5 Puntos de casa en vivo ✅
+- [x] 3.3 Notificación de puntos (solo privado, sin ranking público) ✅ (6 tests)
+- [x] 3.4 XP y logros en vivo ✅ (6 tests)
+- [x] 3.5 Puntos de casa en vivo ✅ (5 tests + 3 edge cases)
 
 #### Sprint 4: Contenido Sincronizado y Analytics
 
@@ -2741,3 +2741,7 @@ yarn test       # todos pasan
 | 2026-01-20 | NOTA: Sprint 4 requiere integración con Planificaciones                         | Claude |
 | 2026-01-23 | Fix: Tests E2E Sprint 3.2 Contador - CUIDs 25 chars, DTO validadores a handler  | Claude |
 | 2026-01-23 | Sprint 3.3-3.5: Gamificación WebSocket - Notificaciones puntos, XP/logros, casa | Claude |
+| 2026-01-23 | Tests E2E Sprint 3.3-3.5: 20 tests gamificación realtime (100% passing)         | Claude |
+| 2026-01-23 | Fix typo puntosToales → puntosTotales en contracts y backend                    | Claude |
+| 2026-01-23 | Agregado WsBadRequestFilter + WsErrorInterceptor para manejo errores WebSocket  | Claude |
+| 2026-01-23 | Documentada regla CUID (25 chars) en CLAUDE.md                                  | Claude |
