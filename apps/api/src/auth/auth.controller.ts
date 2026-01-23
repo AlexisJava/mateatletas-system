@@ -263,6 +263,8 @@ export class AuthController {
       'Credenciales inválidas o estudiante sin credenciales configuradas',
   })
   @ApiBody({ type: LoginEstudianteDto })
+  // TODO [HIGH-002]: Agregar @RequireCsrf() igual que en login tutor (línea 169)
+  // Ver: /docs/TODO_PRE_LAUNCH.md
   @Public()
   @Post('estudiante/login')
   @Throttle({

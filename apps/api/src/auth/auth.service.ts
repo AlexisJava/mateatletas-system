@@ -306,6 +306,8 @@ export class AuthService {
     const usuario = estudiante || tutor || docente || admin;
 
     // 2. Verificar que la contraseña actual sea correcta
+    // TODO [HIGH-003]: Reemplazar usuario!.passwordHash! por validación explícita
+    // Ver: /docs/TODO_PRE_LAUNCH.md
     const passwordValida = await this.passwordService.verify(
       passwordActual,
       usuario!.passwordHash!,

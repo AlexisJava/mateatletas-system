@@ -2010,11 +2010,11 @@ Docente otorga puntos → PuntoObtenido (registro)
 - [x] 3.4 XP y logros en vivo ✅ (6 tests)
 - [x] 3.5 Puntos de casa en vivo ✅ (5 tests + 3 edge cases)
 
-#### Sprint 4: Contenido Sincronizado y Analytics
+#### Sprint 4: Contenido Sincronizado ✅ (17 E2E tests passing)
 
-- [ ] 4.1 Compartir Teoría (slides, video, documento)
-- [ ] 4.2 Práctica en Vivo (ejercicios sincronizados)
-- [ ] 4.3 Analytics en Vivo (métricas en tiempo real)
+- [x] 4.1 Compartir Teoría (slides sincronizados) ✅ (7 tests)
+- [x] 4.2 Práctica en Vivo (ejercicios sincronizados) ✅ (10 tests)
+- [ ] ~~4.3 Analytics en Vivo~~ (pospuesto - posible implementación futura)
 
 ### Portal Docente
 
@@ -2059,11 +2059,10 @@ WEBSOCKET SPRINT 3 (Gamificación Live): ✅ COMPLETADO
   └── 3.4 XP/Logros live ✅
   └── 3.5 Puntos de casa ✅
 
-WEBSOCKET SPRINT 4 (Contenido Sincronizado):
-  └── 4.1 Compartir Teoría
-  └── 4.2 Práctica en Vivo
-  └── 4.3 Analytics en Vivo
-  ⚠️  REQUIERE: Integración con Planificaciones (ver PLAN_CONSOLIDADO_PREPROD.md)
+WEBSOCKET SPRINT 4 (Contenido Sincronizado): ✅ COMPLETADO
+  └── 4.1 Compartir Teoría ✅
+  └── 4.2 Práctica en Vivo ✅
+  └── 4.3 Analytics en Vivo (pospuesto)
 
 POST-WEBSOCKET:
   └── Sistema de Anuncios Docente → Grupo
@@ -2653,11 +2652,11 @@ packages/lesson-engine/src/
 - [x] 3.4 XP y logros en vivo ✅ (6 tests)
 - [x] 3.5 Puntos de casa en vivo ✅ (5 tests + 3 edge cases)
 
-#### Sprint 4: Contenido Sincronizado y Analytics
+#### Sprint 4: Contenido Sincronizado ✅ (17 E2E tests passing)
 
-- [ ] 4.1 Compartir Teoría (slides, video, documento)
-- [ ] 4.2 Práctica en Vivo (ejercicios sincronizados)
-- [ ] 4.3 Analytics en Vivo (métricas en tiempo real)
+- [x] 4.1 Compartir Teoría (slides sincronizados) ✅ (7 tests)
+- [x] 4.2 Práctica en Vivo (ejercicios sincronizados) ✅ (10 tests)
+- [ ] ~~4.3 Analytics en Vivo~~ (pospuesto - posible implementación futura)
 
 ### Portal Docente
 
@@ -2745,3 +2744,6 @@ yarn test       # todos pasan
 | 2026-01-23 | Fix typo puntosToales → puntosTotales en contracts y backend                    | Claude |
 | 2026-01-23 | Agregado WsBadRequestFilter + WsErrorInterceptor para manejo errores WebSocket  | Claude |
 | 2026-01-23 | Documentada regla CUID (25 chars) en CLAUDE.md                                  | Claude |
+| 2026-01-23 | Sprint 4.1-4.2: Teoría Sincronizada y Práctica en Vivo - 17 E2E tests passing   | Claude |
+| 2026-01-23 | Fix: clearAll() en servicios para limpieza de estado entre tests E2E            | Claude |
+| 2026-01-23 | Sprint 4.3 Analytics pospuesto (posible implementación futura)                  | Claude |

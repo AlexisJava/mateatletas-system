@@ -82,6 +82,8 @@ export class AsistenciaController {
    * GET /api/asistencia/estudiantes/:estudianteId
    * Rol: Tutor, Docente, Admin
    */
+  // TODO [HIGH-001]: IDOR - Validar que el tutor tenga ownership del estudiante
+  // Ver: /docs/TODO_PRE_LAUNCH.md
   @Get('estudiantes/:estudianteId')
   @Roles(Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerHistorialEstudiante(

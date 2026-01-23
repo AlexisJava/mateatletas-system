@@ -359,6 +359,8 @@ export class AccesoEstudianteService {
       };
     }>,
   ): ResultadoAccesoEstudiante {
+    // TODO [HIGH-003]: Reemplazar estudiante.plan! por validación explícita
+    // Ver: /docs/TODO_PRE_LAUNCH.md
     const plan = estudiante.plan!;
     const tieneClasesVivo =
       PLANES_CON_CLASES_VIVO.includes(plan.nombre) ||

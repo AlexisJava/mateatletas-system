@@ -2,6 +2,9 @@
 const nextConfig = {
   output: 'standalone',
   transpilePackages: ['@mateatletas/contracts'],
+  // TODO [HIGH-004]: Cambiar ignoreDuringBuilds y ignoreBuildErrors a false
+  // Estos flags ocultan errores que deberían corregirse antes de producción
+  // Ver: /docs/TODO_PRE_LAUNCH.md
   eslint: {
     ignoreDuringBuilds: true,
   },

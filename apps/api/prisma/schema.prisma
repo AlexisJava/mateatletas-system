@@ -157,6 +157,9 @@ model Estudiante {
   asistencias             Asistencia[]
   casa                    Casa?                   @relation(fields: [casaId], references: [id])
   sector                  Sector?                 @relation("EstudianteSectorLegacy", fields: [sectorId], references: [id])
+  // TODO [CRIT-005]: Cambiar onDelete: Cascade a onDelete: Restrict
+  // Borrar un tutor no debería eliminar automáticamente sus estudiantes
+  // Ver: /docs/TODO_PRE_LAUNCH.md
   tutor                   Tutor                   @relation(fields: [tutorId], references: [id], onDelete: Cascade)
   inscripcionesClase      InscripcionClase[]
   inscripcionesClaseGrupo InscripcionClaseGrupo[]

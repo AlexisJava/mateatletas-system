@@ -111,6 +111,8 @@ export function AulaVivaProvider({
   const isConnectingRef = useRef(false);
   const isDocenteRef = useRef(false);
 
+  // TODO [CRIT-004]: Validar NEXT_PUBLIC_API_URL en producción, no permitir fallback a localhost
+  // Ver: /docs/TODO_PRE_LAUNCH.md
   const wsUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
   // --------------------------------------------------------------------------

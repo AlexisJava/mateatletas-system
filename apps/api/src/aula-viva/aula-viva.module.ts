@@ -12,6 +12,9 @@ import { QuizService } from './services/quiz.service';
 import { ContadorService } from './services/contador.service';
 import { GamificacionRealtimeService } from './services/gamificacion-realtime.service';
 import { GamificacionRealtimeListener } from './listeners/gamificacion-realtime.listener';
+import { TeoriaSyncService } from './services/teoria-sync.service';
+import { PracticaLiveService } from './services/practica-live.service';
+import { NodoService } from '../contenidos/services/nodo.service';
 
 /**
  * Módulo de Aula Virtual en Vivo
@@ -24,6 +27,8 @@ import { GamificacionRealtimeListener } from './listeners/gamificacion-realtime.
  * - Sistema de levantar la mano
  * - Moderación (mutear/expulsar)
  * - Notificaciones de gamificación en tiempo real (Sprint 3.3-3.5)
+ * - Teoría sincronizada (Sprint 4.1)
+ * - Práctica en vivo con dashboard (Sprint 4.2)
  *
  * Depende de AuthModule para validar tokens JWT en conexiones WebSocket
  */
@@ -42,6 +47,9 @@ import { GamificacionRealtimeListener } from './listeners/gamificacion-realtime.
     ContadorService,
     GamificacionRealtimeService,
     GamificacionRealtimeListener,
+    TeoriaSyncService,
+    PracticaLiveService,
+    NodoService,
   ],
   exports: [
     PresenciaService,
@@ -53,6 +61,8 @@ import { GamificacionRealtimeListener } from './listeners/gamificacion-realtime.
     QuizService,
     ContadorService,
     GamificacionRealtimeService,
+    TeoriaSyncService,
+    PracticaLiveService,
   ],
 })
 export class AulaVivaModule {}

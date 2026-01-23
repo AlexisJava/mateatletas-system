@@ -14,6 +14,9 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles, Role } from '../../auth/decorators/roles.decorator';
 
+// TODO [CRIT-001]: IDOR - Agregar EstudianteOwnershipGuard para validar ownership del estudiante
+// TODO [CRIT-002]: Restringir @Roles() a solo ADMIN en endpoint desbloquear (línea 99)
+// Ver: /docs/TODO_PRE_LAUNCH.md
 @Controller('gamificacion/logros')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)

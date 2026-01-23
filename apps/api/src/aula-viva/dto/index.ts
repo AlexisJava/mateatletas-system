@@ -14,3 +14,16 @@ export { HablandoDto } from './hablando.dto';
 export { EnviarReaccionDto } from './reacciones.dto';
 export { CrearPulsoDto, ResponderPulsoDto, CerrarPulsoDto } from './pulso.dto';
 export { SeleccionarAleatorioDto, ResetearSelectorDto } from './selector.dto';
+export {
+  IniciarTeoriaDto,
+  CambiarSlideDto,
+  SincronizarScrollDto,
+  CerrarTeoriaDto,
+} from './teoria-sync.dto';
+export {
+  IniciarPracticaDto,
+  ResponderPreguntaDto,
+  PausarPracticaDto,
+  CerrarPracticaDto,
+  SolicitarProgresoDto,
+} from './practica-live.dto';

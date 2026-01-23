@@ -151,11 +151,11 @@ const DEMO_LESSON: LessonDefinition = {
   ],
 };
 
-// House color presets
+// House color presets - Sincronizado con @mateatletas/ui/tokens/colors.ts
 const HOUSE_COLORS = {
-  quantum: { primary: '#00d4ff', secondary: '#0066ff', accent: '#00ffaa' },
-  vertex: { primary: '#ff00ff', secondary: '#9900ff', accent: '#ff66ff' },
-  pulsar: { primary: '#ffaa00', secondary: '#ff6600', accent: '#ffdd00' },
+  quantum: { primary: '#F472B6', secondary: '#EC4899', accent: '#FBCFE8' }, // Pink (6-9 años)
+  vertex: { primary: '#60A5FA', secondary: '#3B82F6', accent: '#BFDBFE' }, // Blue (10-12 años)
+  pulsar: { primary: '#34D399', secondary: '#10B981', accent: '#A7F3D0' }, // Emerald (13-17 años)
 };
 
 // =============================================================================

@@ -1,3 +1,5 @@
+// TODO [HIGH-003]: Hay ~10 non-null assertions (!) en este archivo que necesitan validación explícita
+// Ver: /docs/TODO_PRE_LAUNCH.md
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -28,6 +30,8 @@ import { SelectorService } from './services/selector.service';
 import { QuizService } from './services/quiz.service';
 import { ContadorService } from './services/contador.service';
 import { GamificacionRealtimeService } from './services/gamificacion-realtime.service';
+import { TeoriaSyncService } from './services/teoria-sync.service';
+import { PracticaLiveService } from './services/practica-live.service';
 import {
   UnirseSalaDto,
   SalirSalaDto,
@@ -63,6 +67,19 @@ import {
   CancelarContadorDto,
   ContadorIniciadoPayload,
 } from './dto/contador.dto';
+import {
+  IniciarTeoriaDto,
+  CambiarSlideDto,
+  SincronizarScrollDto,
+  CerrarTeoriaDto,
+} from './dto/teoria-sync.dto';
+import {
+  IniciarPracticaDto,
+  ResponderPreguntaDto,
+  PausarPracticaDto,
+  CerrarPracticaDto,
+  SolicitarProgresoDto,
+} from './dto/practica-live.dto';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../core/database/prisma.service';
 
@@ -140,6 +157,8 @@ export class AulaVivaGateway
     private readonly contadorService: ContadorService,
     private readonly gamificacionRealtimeService: GamificacionRealtimeService,
     private readonly prisma: PrismaService,
+    private readonly teoriaSyncService: TeoriaSyncService,
+    private readonly practicaLiveService: PracticaLiveService,
   ) {}
 
   afterInit(server: Server): void {
@@ -1585,6 +1604,549 @@ export class AulaVivaGateway
     this.server.to(salaId).emit('contador-cancelado', {});
 
     this.logger.log(`Contador cancelado en sala ${salaId}`);
+
+    return { exito: true };
+  }
+
+  // ============================================================================
+  // HANDLERS: TEORÍA SINCRONIZADA (Sprint 4.1)
+  // ============================================================================
+
+  /**
+   * Permite al docente iniciar una sesión de teoría compartida
+   * Los estudiantes verán los slides sincronizados con el docente
+   *
+   * Evento emitido: teoria:iniciada (broadcast a toda la sala)
+   */
+  @SubscribeMessage('teoria:iniciar')
+  async handleIniciarTeoria(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: IniciarTeoriaDto,
+  ): Promise<{ exito: boolean; error?: string }> {
+    // 1. Solo docentes pueden iniciar teoría
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo docentes pueden compartir teoría' };
+    }
+
+    // 2. Validar payload
+    const salaId = payload.salaId;
+    const contenidoId = payload.contenidoId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+    if (!contenidoId) {
+      return { exito: false, error: 'contenidoId es requerido' };
+    }
+
+    // 3. Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // 4. Iniciar teoría
+    const resultado = await this.teoriaSyncService.iniciarTeoria(
+      salaId,
+      contenidoId,
+      client.data.userId,
+      client.data.nombre,
+    );
+
+    if (!resultado.exito) {
+      return { exito: false, error: resultado.error };
+    }
+
+    // 5. Broadcast a toda la sala
+    this.server.to(salaId).emit('teoria:iniciada', resultado.result);
+
+    this.logger.log(
+      `Teoría iniciada en sala ${salaId} por ${client.data.nombre}`,
+    );
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente cambiar el slide actual
+   * Todos los estudiantes verán el nuevo slide
+   *
+   * Evento emitido: teoria:slide-cambiado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('teoria:cambiar-slide')
+  handleCambiarSlide(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: CambiarSlideDto,
+  ): { exito: boolean; error?: string } {
+    // 1. Solo docentes pueden cambiar slides
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo docentes pueden cambiar slides' };
+    }
+
+    // 2. Validar payload
+    const salaId = payload.salaId;
+    const nodoId = payload.nodoId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+    if (!nodoId) {
+      return { exito: false, error: 'nodoId es requerido' };
+    }
+
+    // 3. Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // 4. Cambiar slide
+    const resultado = this.teoriaSyncService.cambiarSlide(salaId, nodoId);
+
+    if (!resultado.exito) {
+      return { exito: false, error: resultado.error };
+    }
+
+    // 5. Broadcast a toda la sala
+    this.server.to(salaId).emit('teoria:slide-cambiado', resultado.result);
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente sincronizar posición de scroll
+   * Para contenido largo que requiere scrollear
+   *
+   * Evento emitido: teoria:scroll-sincronizado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('teoria:scroll')
+  handleSincronizarScroll(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: SincronizarScrollDto,
+  ): { exito: boolean; error?: string } {
+    // 1. Solo docentes pueden sincronizar scroll
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo docentes pueden sincronizar scroll' };
+    }
+
+    // 2. Validar payload
+    const salaId = payload.salaId;
+    const scrollPosition = payload.scrollPosition;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+    if (scrollPosition === undefined) {
+      return { exito: false, error: 'scrollPosition es requerido' };
+    }
+
+    // 3. Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // 4. Actualizar scroll
+    const resultado = this.teoriaSyncService.actualizarScroll(
+      salaId,
+      scrollPosition,
+    );
+
+    if (!resultado.exito) {
+      return { exito: false, error: resultado.error };
+    }
+
+    // 5. Broadcast a toda la sala (excepto el docente que envía)
+    client.to(salaId).emit('teoria:scroll-sincronizado', resultado.result);
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente cerrar la sesión de teoría
+   *
+   * Evento emitido: teoria:cerrada (broadcast a toda la sala)
+   */
+  @SubscribeMessage('teoria:cerrar')
+  handleCerrarTeoria(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: CerrarTeoriaDto,
+  ): { exito: boolean; error?: string } {
+    // 1. Solo docentes pueden cerrar teoría
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo docentes pueden cerrar teoría' };
+    }
+
+    // 2. Validar payload
+    const salaId = payload.salaId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+
+    // 3. Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // 4. Cerrar teoría
+    const resultado = this.teoriaSyncService.cerrarTeoria(salaId);
+
+    if (!resultado.exito) {
+      return { exito: false, error: resultado.error };
+    }
+
+    // 5. Broadcast a toda la sala
+    this.server.to(salaId).emit('teoria:cerrada', {
+      timestamp: new Date().toISOString(),
+    });
+
+    this.logger.log(
+      `Teoría cerrada en sala ${salaId} por ${client.data.nombre}`,
+    );
+
+    return { exito: true };
+  }
+
+  // ============================================================================
+  // HANDLERS: PRÁCTICA EN VIVO (Sprint 4.2)
+  // ============================================================================
+
+  /**
+   * Permite al docente iniciar una sesión de práctica en vivo
+   * Los estudiantes resuelven ejercicios mientras el docente ve progreso
+   *
+   * Evento emitido: practica:iniciada (broadcast a toda la sala)
+   */
+  @SubscribeMessage('practica:iniciar')
+  async handleIniciarPractica(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: IniciarPracticaDto,
+  ): Promise<{ exito: boolean; error?: string }> {
+    // 1. Solo docentes pueden iniciar práctica
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo docentes pueden iniciar práctica' };
+    }
+
+    // 2. Validar payload
+    const salaId = payload.salaId;
+    const contenidoId = payload.contenidoId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+    if (!contenidoId) {
+      return { exito: false, error: 'contenidoId es requerido' };
+    }
+
+    // 3. Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // 4. Iniciar práctica con callback para timeout
+    const resultado = await this.practicaLiveService.iniciarPractica(
+      salaId,
+      contenidoId,
+      client.data.userId,
+      client.data.nombre,
+      payload.tiempoLimiteSeg,
+      () => {
+        // Callback cuando se acaba el tiempo
+        const resultadoCierre = this.practicaLiveService.cerrarPractica(salaId);
+        if (resultadoCierre.exito) {
+          this.server
+            .to(salaId)
+            .emit('practica:cerrada', resultadoCierre.result);
+          this.logger.log(`Práctica cerrada por timeout en sala ${salaId}`);
+        }
+      },
+    );
+
+    if (!resultado.exito) {
+      return { exito: false, error: resultado.error };
+    }
+
+    // 5. Broadcast a toda la sala
+    this.server.to(salaId).emit('practica:iniciada', resultado.result);
+
+    this.logger.log(
+      `Práctica iniciada en sala ${salaId} por ${client.data.nombre}`,
+    );
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite a un estudiante responder una pregunta
+   *
+   * Eventos emitidos:
+   * - practica:respuesta-registrada (solo al estudiante)
+   * - practica:estudiante-completo (solo al docente, cuando completa)
+   */
+  @SubscribeMessage('practica:responder')
+  handleResponderPregunta(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: ResponderPreguntaDto,
+  ): { exito: boolean; error?: string } {
+    // 1. Solo estudiantes pueden responder
+    if (client.data.rol !== 'ESTUDIANTE') {
+      return { exito: false, error: 'Solo estudiantes pueden responder' };
+    }
+
+    // 2. Validar payload
+    const salaId = payload.salaId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+    if (payload.preguntaIndex === undefined) {
+      return { exito: false, error: 'preguntaIndex es requerido' };
+    }
+    if (!payload.respuesta && !payload.respuestas) {
+      return { exito: false, error: 'respuesta es requerida' };
+    }
+
+    // 3. Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // 4. Registrar respuesta
+    const respuesta = payload.respuestas ?? payload.respuesta!;
+    const resultado = this.practicaLiveService.registrarRespuesta(
+      salaId,
+      client.data.userId,
+      client.data.nombre,
+      payload.preguntaIndex,
+      respuesta,
+    );
+
+    if (!resultado.exito) {
+      return { exito: false, error: resultado.error };
+    }
+
+    // 5. Enviar feedback al estudiante
+    client.emit(
+      'practica:respuesta-registrada',
+      resultado.result!.respuestaPayload,
+    );
+
+    // 6. Si completó, notificar al docente
+    if (resultado.result!.completado && resultado.result!.completadoPayload) {
+      // Buscar el socket del docente
+      const practica = this.practicaLiveService.getPracticaActiva(salaId);
+      if (practica) {
+        const socketDocente = this.presenciaService.getSocketsByUserId(
+          practica.docenteId,
+        );
+        for (const socketId of socketDocente) {
+          this.server
+            .to(socketId)
+            .emit(
+              'practica:estudiante-completo',
+              resultado.result!.completadoPayload,
+            );
+        }
+      }
+    }
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente solicitar el progreso actual
+   *
+   * Evento emitido: practica:progreso (solo al docente)
+   */
+  @SubscribeMessage('practica:solicitar-progreso')
+  handleSolicitarProgreso(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: SolicitarProgresoDto,
+  ): { exito: boolean; error?: string } {
+    // 1. Solo docentes pueden solicitar progreso
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo docentes pueden ver el progreso' };
+    }
+
+    // 2. Validar payload
+    const salaId = payload.salaId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+
+    // 3. Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // 4. Obtener progreso
+    const resultado = this.practicaLiveService.getProgreso(salaId);
+
+    if (!resultado.exito) {
+      return { exito: false, error: resultado.error };
+    }
+
+    // 5. Agregar nombres de los participantes desde PresenciaService
+    const participantes = this.presenciaService.getParticipantesDeSala(salaId);
+    const nombresPorId = new Map(
+      participantes.map((p) => [p.odidentidadUsuario, p.nombre]),
+    );
+
+    for (const est of resultado.result!.progreso) {
+      est.nombre = nombresPorId.get(est.odooId) ?? est.odooId;
+    }
+
+    // 6. Enviar al docente
+    client.emit('practica:progreso', resultado.result);
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente pausar la práctica
+   *
+   * Evento emitido: practica:pausada (broadcast a toda la sala)
+   */
+  @SubscribeMessage('practica:pausar')
+  handlePausarPractica(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: PausarPracticaDto,
+  ): { exito: boolean; error?: string } {
+    // 1. Solo docentes pueden pausar
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo docentes pueden pausar la práctica' };
+    }
+
+    // 2. Validar payload
+    const salaId = payload.salaId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+
+    // 3. Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // 4. Pausar práctica
+    const resultado = this.practicaLiveService.pausarPractica(salaId);
+
+    if (!resultado.exito) {
+      return { exito: false, error: resultado.error };
+    }
+
+    // 5. Broadcast a toda la sala
+    this.server.to(salaId).emit('practica:pausada', resultado.result);
+
+    this.logger.log(`Práctica pausada en sala ${salaId}`);
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente reanudar la práctica
+   *
+   * Evento emitido: practica:reanudada (broadcast a toda la sala)
+   */
+  @SubscribeMessage('practica:reanudar')
+  handleReanudarPractica(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: PausarPracticaDto,
+  ): { exito: boolean; error?: string } {
+    // 1. Solo docentes pueden reanudar
+    if (client.data.rol !== 'DOCENTE') {
+      return {
+        exito: false,
+        error: 'Solo docentes pueden reanudar la práctica',
+      };
+    }
+
+    // 2. Validar payload
+    const salaId = payload.salaId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+
+    // 3. Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // 4. Reanudar práctica con callback para timeout
+    const resultado = this.practicaLiveService.reanudarPractica(salaId, () => {
+      const resultadoCierre = this.practicaLiveService.cerrarPractica(salaId);
+      if (resultadoCierre.exito) {
+        this.server.to(salaId).emit('practica:cerrada', resultadoCierre.result);
+        this.logger.log(`Práctica cerrada por timeout en sala ${salaId}`);
+      }
+    });
+
+    if (!resultado.exito) {
+      return { exito: false, error: resultado.error };
+    }
+
+    // 5. Broadcast a toda la sala
+    this.server.to(salaId).emit('practica:reanudada', {
+      tiempoRestanteSeg: resultado.result!.tiempoRestanteSeg,
+      timestamp: new Date().toISOString(),
+    });
+
+    this.logger.log(`Práctica reanudada en sala ${salaId}`);
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente cerrar la práctica
+   *
+   * Evento emitido: practica:cerrada (broadcast a toda la sala)
+   */
+  @SubscribeMessage('practica:cerrar')
+  handleCerrarPractica(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: CerrarPracticaDto,
+  ): { exito: boolean; error?: string } {
+    // 1. Solo docentes pueden cerrar
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo docentes pueden cerrar la práctica' };
+    }
+
+    // 2. Validar payload
+    const salaId = payload.salaId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+
+    // 3. Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // 4. Cerrar práctica
+    const resultado = this.practicaLiveService.cerrarPractica(salaId);
+
+    if (!resultado.exito) {
+      return { exito: false, error: resultado.error };
+    }
+
+    // 5. Agregar nombres de los participantes
+    const participantes = this.presenciaService.getParticipantesDeSala(salaId);
+    const nombresPorId = new Map(
+      participantes.map((p) => [p.odidentidadUsuario, p.nombre]),
+    );
+
+    for (const est of resultado.result!.resultados) {
+      est.nombre = nombresPorId.get(est.odooId) ?? est.odooId;
+    }
+
+    // 6. Broadcast a toda la sala
+    this.server.to(salaId).emit('practica:cerrada', resultado.result);
+
+    this.logger.log(
+      `Práctica cerrada en sala ${salaId} por ${client.data.nombre}`,
+    );
 
     return { exito: true };
   }
