@@ -4,7 +4,6 @@ import {
   IsInt,
   IsOptional,
   IsNotEmpty,
-  Min,
 } from 'class-validator';
 
 /**
@@ -32,19 +31,22 @@ export class CrearPulsoDto {
 
 /**
  * DTO para responder a un pulso
+ *
+ * NOTA: Validaciones de frontera se hacen manualmente en el handler
+ * Ver: https://github.com/nestjs/nest/issues/5267
  */
 export class ResponderPulsoDto {
   @IsString()
-  @IsNotEmpty()
-  salaId: string;
+  @IsOptional()
+  salaId?: string;
 
   @IsString()
-  @IsNotEmpty()
-  pulsoId: string;
+  @IsOptional()
+  pulsoId?: string;
 
   @IsInt()
-  @Min(0)
-  opcionIndex: number;
+  @IsOptional()
+  opcionIndex?: number;
 }
 
 /**

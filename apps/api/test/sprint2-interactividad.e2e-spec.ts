@@ -77,17 +77,24 @@ describe('Sprint 2 E2E - Interactividad (AulaVivaGateway)', () => {
   };
 
   // CUIDs de prueba válidos (25 caracteres: c + 24 alfanuméricos)
+  // IMPORTANTE: Cada test debe usar su propio CUID para evitar rate limiting
   const TEST_CUIDS = {
     reacciones1: 'ctest0sprint2reacciones01',
     reacciones2: 'ctest0sprint2reacciones02',
     reacciones3: 'ctest0sprint2reacciones03',
+    reacciones4: 'ctest0sprint2reacciones04', // Para test de agregación
+    reacciones5: 'ctest0sprint2reacciones05', // Para test de aislamiento
     pulso1: 'ctest0sprint2pulso0000001',
     pulso2: 'ctest0sprint2pulso0000002',
     pulso3: 'ctest0sprint2pulso0000003',
     pulso4: 'ctest0sprint2pulso0000004',
+    pulso5: 'ctest0sprint2pulso0000005', // Para test de broadcast
     selector1: 'ctest0sprint2selector0001',
     selector2: 'ctest0sprint2selector0002',
     selector3: 'ctest0sprint2selector0003',
+    selector4: 'ctest0sprint2selector0004', // Para test de no repetir
+    selector5: 'ctest0sprint2selector0005', // Para test de reset
+    selector6: 'ctest0sprint2selector0006', // Para test de ronda completa
   };
 
   beforeAll(async () => {
@@ -422,12 +429,13 @@ describe('Sprint 2 E2E - Interactividad (AulaVivaGateway)', () => {
       clienteEstudianteA = await crearCliente(tokenA);
       clienteEstudianteB = await crearCliente(tokenB);
 
+      // Usar sala única para evitar rate limiting de tests anteriores
       const { salaId } = await unirseSala(
         clienteDocente,
-        TEST_CUIDS.reacciones1,
+        TEST_CUIDS.reacciones4,
       );
-      await unirseSala(clienteEstudianteA, TEST_CUIDS.reacciones1);
-      await unirseSala(clienteEstudianteB, TEST_CUIDS.reacciones1);
+      await unirseSala(clienteEstudianteA, TEST_CUIDS.reacciones4);
+      await unirseSala(clienteEstudianteB, TEST_CUIDS.reacciones4);
 
       const reacciones: ReaccionAgregada[] = [];
       clienteDocente!.on('reaccion', (data: ReaccionAgregada) => {
@@ -459,10 +467,10 @@ describe('Sprint 2 E2E - Interactividad (AulaVivaGateway)', () => {
       clienteEstudianteA = await crearCliente(tokenA);
       clienteEstudianteB = await crearCliente(tokenB);
 
-      // A en sala 1, B en sala 2
+      // A en sala 5, B en sala 2 (salas únicas para evitar rate limiting)
       const { salaId } = await unirseSala(
         clienteEstudianteA,
-        TEST_CUIDS.reacciones1,
+        TEST_CUIDS.reacciones5,
       );
       await unirseSala(clienteEstudianteB, TEST_CUIDS.reacciones2);
 
@@ -778,9 +786,9 @@ describe('Sprint 2 E2E - Interactividad (AulaVivaGateway)', () => {
       clienteEstudianteA = await crearCliente(tokenA);
       clienteEstudianteB = await crearCliente(tokenB);
 
-      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.selector1);
-      await unirseSala(clienteEstudianteA, TEST_CUIDS.selector1);
-      await unirseSala(clienteEstudianteB, TEST_CUIDS.selector1);
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.selector4);
+      await unirseSala(clienteEstudianteA, TEST_CUIDS.selector4);
+      await unirseSala(clienteEstudianteB, TEST_CUIDS.selector4);
 
       const seleccionados: string[] = [];
 
@@ -902,9 +910,10 @@ describe('Sprint 2 E2E - Interactividad (AulaVivaGateway)', () => {
       clienteEstudianteA = await crearCliente(tokenA);
       clienteEstudianteB = await crearCliente(tokenB);
 
-      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.pulso1);
-      await unirseSala(clienteEstudianteA, TEST_CUIDS.pulso1);
-      await unirseSala(clienteEstudianteB, TEST_CUIDS.pulso1);
+      // Usar sala única para evitar colisión con pulsos activos de otros tests
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.pulso5);
+      await unirseSala(clienteEstudianteA, TEST_CUIDS.pulso5);
+      await unirseSala(clienteEstudianteB, TEST_CUIDS.pulso5);
 
       const eventosRecibidos: PulsoCreadoEvent[] = [];
 
@@ -915,10 +924,17 @@ describe('Sprint 2 E2E - Interactividad (AulaVivaGateway)', () => {
         eventosRecibidos.push(data);
       });
 
-      await crearPulso(clienteDocente, salaId, '¿Todos ven esto?', [
-        'Sí',
-        'No',
-      ]);
+      const response = await crearPulso(
+        clienteDocente,
+        salaId,
+        '¿Todos ven esto?',
+        ['Sí', 'No'],
+      );
+
+      // Verificar que el pulso se creó exitosamente
+      expect(response.exito).toBe(true);
+      expect(response.pulsoId).toBeDefined();
+
       await new Promise((resolve) => setTimeout(resolve, 200));
 
       expect(eventosRecibidos.length).toBeGreaterThanOrEqual(2);

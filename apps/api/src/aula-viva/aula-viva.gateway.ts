@@ -910,6 +910,25 @@ export class AulaVivaGateway
   ): { exito: boolean; error?: string } {
     const { salaId, pulsoId, opcionIndex } = payload;
 
+    // Validación manual para evitar timeout por ValidationPipe silencioso
+    // (ver: https://github.com/nestjs/nest/issues/5267)
+    if (!salaId || typeof salaId !== 'string' || salaId.trim().length === 0) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+    if (
+      !pulsoId ||
+      typeof pulsoId !== 'string' ||
+      pulsoId.trim().length === 0
+    ) {
+      return { exito: false, error: 'pulsoId es requerido' };
+    }
+    if (typeof opcionIndex !== 'number' || !Number.isInteger(opcionIndex)) {
+      return { exito: false, error: 'opcionIndex debe ser un número entero' };
+    }
+    if (opcionIndex < 0) {
+      return { exito: false, error: 'opcionIndex debe ser >= 0' };
+    }
+
     // Solo estudiantes pueden responder
     if (client.data.rol !== 'ESTUDIANTE') {
       return {
