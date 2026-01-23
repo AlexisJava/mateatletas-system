@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../core/database/prisma.service';
 import { EstadoAsistencia } from '@prisma/client';
 import { PuntosService, TipoAccionPuntos } from './puntos.service';
@@ -6,6 +7,7 @@ import { LogrosService } from './logros.service';
 import { RankingService } from './ranking.service';
 import { RecursosService } from './services/recursos.service';
 import { AsignarInsigniaDto } from './dto/asignar-insignia.dto';
+import { PuntosOtorgadosEnVivoEvent } from '../common/events/domain-events';
 
 /**
  * Servicio de Gamificación (Coordinador)
@@ -20,6 +22,7 @@ export class GamificacionService {
     private logrosService: LogrosService,
     private rankingService: RankingService,
     private recursosService: RecursosService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -353,6 +356,7 @@ export class GamificacionService {
 
   /**
    * Otorgar puntos a un estudiante
+   * Emite evento para notificación WebSocket en tiempo real (Sprint 3.3)
    * @delegated PuntosService
    */
   async otorgarPuntos(
@@ -361,14 +365,48 @@ export class GamificacionService {
     tipoAccion: TipoAccionPuntos,
     claseId?: string,
     contexto?: string,
+    salaId?: string,
   ) {
-    return this.puntosService.otorgarPuntos(
+    const resultado = await this.puntosService.otorgarPuntos(
       docenteId,
       estudianteId,
       tipoAccion,
       claseId,
       contexto,
     );
+
+    // Emitir evento para notificación en tiempo real
+    if (resultado?.success) {
+      // Obtener nombre del docente para la notificación
+      const docente = await this.prisma.docente.findUnique({
+        where: { id: docenteId },
+        select: { nombre: true, apellido: true },
+      });
+
+      const docenteNombre = docente
+        ? `${docente.nombre} ${docente.apellido}`
+        : 'Docente';
+
+      // XP total actualizado del estudiante (viene del resultado)
+      const xpTotal = resultado.xp?.recursos?.xpTotal ?? 0;
+      const puntosOtorgados = resultado.puntoObtenido?.puntos ?? 0;
+
+      this.eventEmitter.emit(
+        'puntos.otorgados.envivo',
+        new PuntosOtorgadosEnVivoEvent(
+          estudianteId,
+          docenteId,
+          docenteNombre,
+          puntosOtorgados,
+          tipoAccion,
+          contexto,
+          xpTotal,
+          salaId,
+        ),
+      );
+    }
+
+    return resultado;
   }
 
   /**

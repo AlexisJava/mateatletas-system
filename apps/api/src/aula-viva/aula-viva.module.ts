@@ -10,6 +10,8 @@ import { PulsoService } from './services/pulso.service';
 import { SelectorService } from './services/selector.service';
 import { QuizService } from './services/quiz.service';
 import { ContadorService } from './services/contador.service';
+import { GamificacionRealtimeService } from './services/gamificacion-realtime.service';
+import { GamificacionRealtimeListener } from './listeners/gamificacion-realtime.listener';
 
 /**
  * Módulo de Aula Virtual en Vivo
@@ -21,6 +23,7 @@ import { ContadorService } from './services/contador.service';
  * - Chat en tiempo real
  * - Sistema de levantar la mano
  * - Moderación (mutear/expulsar)
+ * - Notificaciones de gamificación en tiempo real (Sprint 3.3-3.5)
  *
  * Depende de AuthModule para validar tokens JWT en conexiones WebSocket
  */
@@ -37,6 +40,8 @@ import { ContadorService } from './services/contador.service';
     SelectorService,
     QuizService,
     ContadorService,
+    GamificacionRealtimeService,
+    GamificacionRealtimeListener,
   ],
   exports: [
     PresenciaService,
@@ -47,6 +52,7 @@ import { ContadorService } from './services/contador.service';
     SelectorService,
     QuizService,
     ContadorService,
+    GamificacionRealtimeService,
   ],
 })
 export class AulaVivaModule {}

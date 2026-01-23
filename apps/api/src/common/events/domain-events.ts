@@ -271,3 +271,51 @@ export class TareaPerfectaEvent {
     public readonly xpBonus: number,
   ) {}
 }
+
+// ============================================
+// EVENTOS AULA VIVA - GAMIFICACIÓN EN TIEMPO REAL
+// ============================================
+
+/**
+ * Evento: Puntos otorgados a estudiante durante clase en vivo
+ *
+ * Se emite cuando:
+ * - Un docente otorga puntos a un estudiante durante una clase en vivo
+ *
+ * Listeners:
+ * - AulaVivaModule: Enviar notificación WebSocket privada al estudiante
+ *
+ * @see https://medium.com/@marufpulok98/building-a-production-ready-real-time-notification-system
+ */
+export class PuntosOtorgadosEnVivoEvent {
+  constructor(
+    public readonly estudianteId: string,
+    public readonly docenteId: string,
+    public readonly docenteNombre: string,
+    public readonly puntos: number,
+    public readonly tipoAccion: string,
+    public readonly contexto: string | undefined,
+    public readonly xpTotal: number,
+    public readonly salaId: string | undefined,
+  ) {}
+}
+
+/**
+ * Evento: Puntos de casa actualizados
+ *
+ * Se emite cuando:
+ * - Cualquier estudiante de una casa gana XP
+ *
+ * Listeners:
+ * - AulaVivaModule: Broadcast a todos los estudiantes de la casa conectados
+ */
+export class CasaPuntosActualizadosEvent {
+  constructor(
+    public readonly casaId: string,
+    public readonly casaNombre: string,
+    public readonly estudianteId: string,
+    public readonly estudianteNombre: string,
+    public readonly xpGanado: number,
+    public readonly xpTotalEstudiante: number,
+  ) {}
+}

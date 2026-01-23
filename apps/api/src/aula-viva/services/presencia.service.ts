@@ -211,4 +211,54 @@ export class PresenciaService {
   isChatHabilitado(salaId: string): boolean {
     return this.salaChatHabilitado.get(salaId) ?? true;
   }
+
+  /**
+   * Obtiene todos los socketIds de un usuario específico
+   * Un usuario puede tener múltiples conexiones (tabs, dispositivos)
+   *
+   * @see https://www.lorenstew.art/blog/nestjs-websockets-real-time
+   * Best practice: User-to-Socket mapping para notificaciones privadas
+   */
+  getSocketsByUserId(userId: string): string[] {
+    const socketIds: string[] = [];
+
+    for (const participantes of this.salaToParticipantes.values()) {
+      for (const [socketId, participante] of participantes) {
+        if (
+          participante.odidentidadUsuario === userId &&
+          !socketIds.includes(socketId)
+        ) {
+          socketIds.push(socketId);
+        }
+      }
+    }
+
+    return socketIds;
+  }
+
+  /**
+   * Obtiene información de un usuario por su userId
+   */
+  getParticipanteByUserId(userId: string): Participante | undefined {
+    for (const participantes of this.salaToParticipantes.values()) {
+      for (const participante of participantes.values()) {
+        if (participante.odidentidadUsuario === userId) {
+          return participante;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Obtiene todos los usuarios conectados de una casa específica
+   * Usado para broadcasts de puntos de casa
+   */
+  getSocketsByCasaRoom(casaRoom: string): string[] {
+    const participantes = this.salaToParticipantes.get(casaRoom);
+    if (!participantes) {
+      return [];
+    }
+    return Array.from(participantes.keys());
+  }
 }

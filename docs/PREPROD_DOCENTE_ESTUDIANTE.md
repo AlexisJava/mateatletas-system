@@ -2006,9 +2006,9 @@ Docente otorga puntos → PuntoObtenido (registro)
 
 - [x] 3.1 Quiz en vivo ✅
 - [x] 3.2 Contador compartido ✅
-- [ ] 3.3 Notificación de puntos (solo privado, sin ranking público)
-- [ ] 3.4 XP y logros en vivo
-- [ ] 3.5 Puntos de casa en vivo
+- [x] 3.3 Notificación de puntos (solo privado, sin ranking público) ✅
+- [x] 3.4 XP y logros en vivo ✅
+- [x] 3.5 Puntos de casa en vivo ✅
 
 #### Sprint 4: Contenido Sincronizado y Analytics
 
@@ -2052,12 +2052,12 @@ WEBSOCKET SPRINT 2 (Interactividad): ✅ COMPLETADO
   └── 2.2 Pulso atención ✅
   └── 2.3 Selector aleatorio ✅
 
-WEBSOCKET SPRINT 3 (Gamificación Live): ⏳ EN PROGRESO
+WEBSOCKET SPRINT 3 (Gamificación Live): ✅ COMPLETADO
   └── 3.1 Quiz en vivo ✅
   └── 3.2 Contador compartido ✅
-  └── 3.3 Notificación de puntos (privado)
-  └── 3.4 XP/Logros live
-  └── 3.5 Puntos de casa
+  └── 3.3 Notificación de puntos (privado) ✅
+  └── 3.4 XP/Logros live ✅
+  └── 3.5 Puntos de casa ✅
 
 WEBSOCKET SPRINT 4 (Contenido Sincronizado):
   └── 4.1 Compartir Teoría
@@ -2649,9 +2649,9 @@ packages/lesson-engine/src/
 
 - [x] 3.1 Quiz en vivo ✅
 - [x] 3.2 Contador compartido ✅
-- [ ] 3.3 Notificación de puntos (solo privado, sin ranking público)
-- [ ] 3.4 XP y logros en vivo
-- [ ] 3.5 Puntos de casa en vivo
+- [x] 3.3 Notificación de puntos (solo privado, sin ranking público) ✅
+- [x] 3.4 XP y logros en vivo ✅
+- [x] 3.5 Puntos de casa en vivo ✅
 
 #### Sprint 4: Contenido Sincronizado y Analytics
 
@@ -2724,19 +2724,20 @@ yarn test       # todos pasan
 
 ## Historial de Cambios
 
-| Fecha      | Cambio                                                                         | Autor  |
-| ---------- | ------------------------------------------------------------------------------ | ------ |
-| 2026-01-20 | Creación del documento                                                         | Claude |
-| 2026-01-20 | Documentados 3 bugs actuales                                                   | Claude |
-| 2026-01-20 | Agregado plan completo WebSocket Aula Viva (backend)                           | Claude |
-| 2026-01-20 | Investigación mejores prácticas 2025/2026                                      | Claude |
-| 2026-01-20 | Agregada sección UX/UI Frontend completa                                       | Claude |
-| 2026-01-20 | Especificados componentes React para ambos portales                            | Claude |
-| 2026-01-20 | Definido hook `useAulaVivaWebSocket` unificado                                 | Claude |
-| 2026-01-20 | Agregada sección Optimización de Performance                                   | Claude |
-| 2026-01-20 | Agregada sección Notificaciones Push completa                                  | Claude |
-| 2026-01-20 | Agregada sección Integración Lesson-Engine                                     | Claude |
-| 2026-01-20 | Actualizado checklist con todos los ítems nuevos                               | Claude |
-| 2026-01-20 | Agregado Sprint 4: Compartir Teoría, Práctica, Analytics                       | Claude |
-| 2026-01-20 | NOTA: Sprint 4 requiere integración con Planificaciones                        | Claude |
-| 2026-01-23 | Fix: Tests E2E Sprint 3.2 Contador - CUIDs 25 chars, DTO validadores a handler | Claude |
+| Fecha      | Cambio                                                                          | Autor  |
+| ---------- | ------------------------------------------------------------------------------- | ------ |
+| 2026-01-20 | Creación del documento                                                          | Claude |
+| 2026-01-20 | Documentados 3 bugs actuales                                                    | Claude |
+| 2026-01-20 | Agregado plan completo WebSocket Aula Viva (backend)                            | Claude |
+| 2026-01-20 | Investigación mejores prácticas 2025/2026                                       | Claude |
+| 2026-01-20 | Agregada sección UX/UI Frontend completa                                        | Claude |
+| 2026-01-20 | Especificados componentes React para ambos portales                             | Claude |
+| 2026-01-20 | Definido hook `useAulaVivaWebSocket` unificado                                  | Claude |
+| 2026-01-20 | Agregada sección Optimización de Performance                                    | Claude |
+| 2026-01-20 | Agregada sección Notificaciones Push completa                                   | Claude |
+| 2026-01-20 | Agregada sección Integración Lesson-Engine                                      | Claude |
+| 2026-01-20 | Actualizado checklist con todos los ítems nuevos                                | Claude |
+| 2026-01-20 | Agregado Sprint 4: Compartir Teoría, Práctica, Analytics                        | Claude |
+| 2026-01-20 | NOTA: Sprint 4 requiere integración con Planificaciones                         | Claude |
+| 2026-01-23 | Fix: Tests E2E Sprint 3.2 Contador - CUIDs 25 chars, DTO validadores a handler  | Claude |
+| 2026-01-23 | Sprint 3.3-3.5: Gamificación WebSocket - Notificaciones puntos, XP/logros, casa | Claude |

@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Prisma } from '@prisma/client';
-import { XpGainedEvent, EstudianteNivelUpEvent } from '../../common/events';
+import {
+  XpGainedEvent,
+  EstudianteNivelUpEvent,
+  CasaPuntosActualizadosEvent,
+} from '../../common/events';
 
 @Injectable()
 export class RecursosService {
@@ -99,6 +103,36 @@ export class RecursosService {
       this.eventEmitter.emit(
         'estudiante.nivel-up',
         new EstudianteNivelUpEvent(estudianteId, nivelAnterior, nivelNuevo, {}),
+      );
+    }
+
+    // Sprint 3.5: Emitir evento de puntos de casa si el estudiante tiene casa
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: estudianteId },
+      select: {
+        nombre: true,
+        apellido: true,
+        casaId: true,
+        casa: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
+      },
+    });
+
+    if (estudiante?.casa) {
+      this.eventEmitter.emit(
+        'casa.puntos.actualizado',
+        new CasaPuntosActualizadosEvent(
+          estudiante.casa.id,
+          estudiante.casa.nombre,
+          estudianteId,
+          `${estudiante.nombre} ${estudiante.apellido}`,
+          cantidad,
+          nuevoTotalXP,
+        ),
       );
     }
 

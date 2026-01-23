@@ -21,6 +21,7 @@ import { PulsoService } from './services/pulso.service';
 import { SelectorService } from './services/selector.service';
 import { QuizService } from './services/quiz.service';
 import { ContadorService } from './services/contador.service';
+import { GamificacionRealtimeService } from './services/gamificacion-realtime.service';
 import {
   UnirseSalaDto,
   SalirSalaDto,
@@ -57,6 +58,7 @@ import {
   ContadorIniciadoPayload,
 } from './dto/contador.dto';
 import { randomUUID } from 'crypto';
+import { PrismaService } from '../core/database/prisma.service';
 
 /** Respuesta al unirse a una sala */
 interface UnirseSalaResponse {
@@ -129,11 +131,17 @@ export class AulaVivaGateway
     private readonly selectorService: SelectorService,
     private readonly quizService: QuizService,
     private readonly contadorService: ContadorService,
+    private readonly gamificacionRealtimeService: GamificacionRealtimeService,
+    private readonly prisma: PrismaService,
   ) {}
 
   afterInit(server: Server): void {
     server.use(createWsJwtMiddleware(this.jwtService));
-    this.logger.log('Gateway inicializado con middleware JWT');
+    // Configurar server para notificaciones de gamificación en tiempo real
+    this.gamificacionRealtimeService.setServer(server);
+    this.logger.log(
+      'Gateway inicializado con middleware JWT y gamificación realtime',
+    );
   }
 
   handleConnection(client: AuthenticatedSocket): void {
@@ -226,6 +234,22 @@ export class AulaVivaGateway
 
     // Retornar lista de participantes actuales
     const participantes = this.presenciaService.getParticipantesDeSala(salaId);
+
+    // Sprint 3.5: Auto-unir estudiantes a su room de casa para recibir broadcast de puntos
+    if (client.data.rol === 'ESTUDIANTE') {
+      const estudiante = await this.prisma.estudiante.findUnique({
+        where: { id: client.data.userId },
+        select: { casaId: true },
+      });
+
+      if (estudiante?.casaId) {
+        const casaRoom = `casa:${estudiante.casaId}`;
+        await client.join(casaRoom);
+        this.logger.debug(
+          `Estudiante ${client.data.nombre} unido a room de casa ${casaRoom}`,
+        );
+      }
+    }
 
     this.logger.log(
       `Usuario ${client.data.nombre} unido a sala ${salaId} | Total: ${participantes.length}`,

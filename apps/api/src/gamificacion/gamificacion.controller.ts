@@ -51,6 +51,14 @@ export class OtorgarPuntosDto {
   @IsString()
   @IsOptional()
   contexto?: string;
+
+  /**
+   * ID de la sala WebSocket (clase:{claseGrupoId})
+   * Si se proporciona, se emite notificación en tiempo real al estudiante
+   */
+  @IsString()
+  @IsOptional()
+  salaId?: string;
 }
 
 /**
@@ -160,6 +168,7 @@ export class GamificacionController {
       dto.tipoAccion,
       dto.claseId,
       dto.contexto,
+      dto.salaId,
     );
   }
 
