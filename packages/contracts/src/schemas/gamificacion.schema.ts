@@ -73,7 +73,7 @@ export const dashboardGamificacionSchema = z.object({
     equipo: equipoSchema,
   }),
   stats: z.object({
-    puntosToales: z.number().int().nonnegative(),
+    puntosTotales: z.number().int().nonnegative(),
     clasesAsistidas: z.number().int().nonnegative(),
     clasesTotales: z.number().int().nonnegative(),
     racha: z.number().int().nonnegative(),

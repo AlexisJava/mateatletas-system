@@ -10,7 +10,13 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
-import { Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Logger,
+  UseInterceptors,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
+import { WsErrorInterceptor } from './interceptors/ws-error.interceptor';
 import { createWsJwtMiddleware } from './middleware/ws-jwt.middleware';
 import type { AuthenticatedSocket } from './interfaces';
 import { PresenciaService, Participante } from './services/presencia.service';
@@ -112,6 +118,7 @@ interface EnviarMensajeResponse {
     credentials: true,
   },
 })
+@UseInterceptors(new WsErrorInterceptor())
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class AulaVivaGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect

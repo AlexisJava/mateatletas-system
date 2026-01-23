@@ -115,7 +115,7 @@ print_section "3. DASHBOARD ESTUDIANTE"
 DASHBOARD=$(curl -s -X GET "$API_URL/gamificacion/dashboard/$ESTUDIANTE_ID" \
   -H "Authorization: Bearer $ESTUDIANTE_TOKEN")
 
-PUNTOS=$(echo $DASHBOARD | grep -o '"puntosToales":[0-9]*' | cut -d':' -f2)
+PUNTOS=$(echo $DASHBOARD | grep -o '"puntosTotales":[0-9]*' | cut -d':' -f2)
 CLASES_ASISTIDAS=$(echo $DASHBOARD | grep -o '"clasesAsistidas":[0-9]*' | cut -d':' -f2)
 RACHA=$(echo $DASHBOARD | grep -o '"racha":[0-9]*' | cut -d':' -f2)
 
@@ -333,7 +333,7 @@ print_section "13. DASHBOARD ACTUALIZADO"
 DASHBOARD_FINAL=$(curl -s -X GET "$API_URL/gamificacion/dashboard/$ESTUDIANTE_ID" \
   -H "Authorization: Bearer $ESTUDIANTE_TOKEN")
 
-PUNTOS_FINAL=$(echo $DASHBOARD_FINAL | grep -o '"puntosToales":[0-9]*' | cut -d':' -f2)
+PUNTOS_FINAL=$(echo $DASHBOARD_FINAL | grep -o '"puntosTotales":[0-9]*' | cut -d':' -f2)
 
 if [ ! -z "$PUNTOS_FINAL" ] && [ "$PUNTOS_FINAL" -ge "$PUNTOS" ]; then
   print_test 0 "Dashboard muestra puntos actualizados: $PUNTOS_FINAL pts"

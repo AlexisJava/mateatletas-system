@@ -153,7 +153,7 @@ export class GamificacionService {
           : null,
       },
       stats: {
-        puntosToales: recursosConNivel.xpTotal, // Ahora usa RecursosEstudiante.xpTotal
+        puntosTotales: recursosConNivel.xpTotal, // Ahora usa RecursosEstudiante.xpTotal
         clasesAsistidas: estudiante.asistencias.filter(
           (a) => a.estado === EstadoAsistencia.Presente,
         ).length,

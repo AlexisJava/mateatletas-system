@@ -24,6 +24,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - OBLIGATORIO: Tipos explícitos en parámetros y retornos
 - OBLIGATORIO: Clean Architecture - separar responsabilidades
 
+#### ⚠️ CUIDs: REGLA MATEMÁTICA INQUEBRANTABLE
+
+**El regex `/^c[a-z0-9]{24}$/` significa:**
+
+- `c` = 1 carácter literal
+- `[a-z0-9]{24}` = 24 caracteres alfanuméricos
+- **TOTAL = 25 caracteres** (NO 24)
+
+**Error recurrente a EVITAR:**
+
+```typescript
+// ❌ INCORRECTO - 24 caracteres (falta 1)
+const testCuid = 'ctest0gamif3clasegr00001'; // length = 24
+
+// ✅ CORRECTO - 25 caracteres
+const testCuid = 'ctest0gamif3clasegr000001'; // length = 25
+```
+
+**ANTES de escribir cualquier CUID de prueba:**
+
+1. Escribir el CUID
+2. Contar caracteres: `'cuid'.length === 25`
+3. Validar regex: `/^c[a-z0-9]{24}$/.test('cuid')`
+
+**Ejemplo de CUIDs válidos (25 chars):**
+
+- `cjld2cjxh0000qzrmn831i7rn` (generado por Prisma)
+- `ctest0000000000000000001` (test - exactamente 25 chars)
+
 ### Testing
 
 - PROHIBIDO: Mocks de base de datos en tests de integración (usar DB real con docker-compose.test.yml)

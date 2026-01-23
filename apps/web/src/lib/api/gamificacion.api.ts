@@ -119,7 +119,7 @@ export const gamificacionApi = {
             avatarGradient: 0,
             equipo: { id: '', nombre: 'Sin equipo', color: '#cccccc' },
           },
-          stats: { puntosToales: 0, clasesAsistidas: 0, clasesTotales: 0, racha: 0 },
+          stats: { puntosTotales: 0, clasesAsistidas: 0, clasesTotales: 0, racha: 0 },
           nivel: {
             nivelActual: 1,
             nombre: 'Iniciante',

@@ -295,7 +295,7 @@ describe.skip('GamificacionService', () => {
       });
 
       // Verify stats
-      expect(result.stats.puntosToales).toBe(350); // typo intencional para match con schema
+      expect(result.stats.puntosTotales).toBe(350); // typo intencional para match con schema
       expect(result.stats.clasesAsistidas).toBe(2); // 2 Presente out of 3 total
       expect(result.stats.clasesTotales).toBe(2); // 2 inscripciones_clase
       expect(result.stats.racha).toBe(mockRacha);
