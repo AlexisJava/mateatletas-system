@@ -136,6 +136,11 @@ export class SelectorService {
 
     const restantes = estudiantesDisponibles.length - state.seleccionados.size;
 
+    // Si esta selección completa la ronda, marcarlo
+    if (restantes === 0) {
+      rondaCompletada = true;
+    }
+
     this.logger.debug(
       `Estudiante seleccionado en sala ${salaId}: ${seleccionado.nombre} (quedan ${restantes})`,
     );

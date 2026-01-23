@@ -1,33 +1,33 @@
 import {
   IsString,
-  IsNotEmpty,
   IsArray,
-  ArrayMinSize,
-  ArrayMaxSize,
-  MaxLength,
   IsInt,
+  IsOptional,
+  IsNotEmpty,
   Min,
 } from 'class-validator';
 
 /**
  * DTO para crear un pulso/encuesta
+ *
+ * NOTA: Validaciones de frontera (MaxLength, ArrayMinSize, etc.) se hacen
+ * manualmente en el handler porque ValidationPipe en WebSockets no llama
+ * el callback de acknowledgement cuando falla la validación.
+ * Ver: https://github.com/nestjs/nest/issues/5267
  */
 export class CrearPulsoDto {
   @IsString()
-  @IsNotEmpty()
-  salaId: string;
+  @IsOptional()
+  salaId?: string;
 
   @IsString()
-  @IsNotEmpty()
-  @MaxLength(200)
-  pregunta: string;
+  @IsOptional()
+  pregunta?: string;
 
   @IsArray()
-  @ArrayMinSize(2)
-  @ArrayMaxSize(6)
   @IsString({ each: true })
-  @MaxLength(100, { each: true })
-  opciones: string[];
+  @IsOptional()
+  opciones?: string[];
 }
 
 /**

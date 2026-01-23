@@ -842,8 +842,29 @@ export class AulaVivaGateway
   handleCrearPulso(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: CrearPulsoDto,
-  ): { exito: boolean; error?: string } {
+  ): { exito: boolean; pulsoId?: string; error?: string } {
     const { salaId, pregunta, opciones } = payload;
+
+    // Validación manual para evitar timeout por ValidationPipe silencioso
+    // (ver: https://github.com/nestjs/nest/issues/5267)
+    if (!salaId || salaId.trim().length === 0) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+    if (!pregunta || pregunta.trim().length === 0) {
+      return { exito: false, error: 'La pregunta es requerida' };
+    }
+    if (pregunta.length > 200) {
+      return {
+        exito: false,
+        error: 'La pregunta no puede exceder 200 caracteres',
+      };
+    }
+    if (!opciones || opciones.length < 2) {
+      return { exito: false, error: 'Se requieren al menos 2 opciones' };
+    }
+    if (opciones.length > 6) {
+      return { exito: false, error: 'No se permiten más de 6 opciones' };
+    }
 
     // Solo docentes pueden crear pulsos
     if (client.data.rol !== 'DOCENTE') {
@@ -873,7 +894,7 @@ export class AulaVivaGateway
 
     this.logger.log(`Pulso creado en sala ${salaId} por ${client.data.nombre}`);
 
-    return { exito: true };
+    return { exito: true, pulsoId: result.pulso!.id };
   }
 
   /**
@@ -980,7 +1001,17 @@ export class AulaVivaGateway
   handleSeleccionarAleatorio(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: SeleccionarAleatorioDto,
-  ): { exito: boolean; error?: string } {
+  ): {
+    exito: boolean;
+    error?: string;
+    estudiante?: {
+      odooId: string;
+      nombre: string;
+      timestamp: string;
+      restantes: number;
+      rondaCompletada: boolean;
+    };
+  } {
     const { salaId } = payload;
 
     // Solo docentes pueden usar el selector
@@ -1026,7 +1057,16 @@ export class AulaVivaGateway
       `Estudiante seleccionado en sala ${salaId}: ${result.seleccionado?.nombre}`,
     );
 
-    return { exito: true };
+    return {
+      exito: true,
+      estudiante: {
+        odooId: result.seleccionado!.odooId,
+        nombre: result.seleccionado!.nombre,
+        timestamp: result.seleccionado!.timestamp,
+        restantes: result.restantes!,
+        rondaCompletada: result.rondaCompletada!,
+      },
+    };
   }
 
   /**
@@ -1038,7 +1078,7 @@ export class AulaVivaGateway
   handleResetearSelector(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: ResetearSelectorDto,
-  ): { exito: boolean; error?: string } {
+  ): { exito: boolean; ronda?: number; error?: string } {
     const { salaId } = payload;
 
     // Solo docentes pueden resetear
@@ -1071,6 +1111,6 @@ export class AulaVivaGateway
       `Selector reseteado en sala ${salaId}, ronda ${result.ronda}`,
     );
 
-    return { exito: true };
+    return { exito: true, ronda: result.ronda! };
   }
 }
