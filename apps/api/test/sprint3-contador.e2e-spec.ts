@@ -55,16 +55,32 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
     rol: 'ESTUDIANTE',
   };
 
-  // CUIDs de prueba únicos para cada test
+  // CUIDs de prueba únicos para cada test (25 chars: c + 24 alfanuméricos)
+  // IMPORTANTE: Cada test necesita su propio CUID único para evitar conflictos de estado
+  // Verificado: cada string tiene exactamente 25 caracteres
   const TEST_CUIDS = {
-    contador1: 'ctest0sprint3contador001',
-    contador2: 'ctest0sprint3contador002',
-    contador3: 'ctest0sprint3contador003',
-    contador4: 'ctest0sprint3contador004',
-    contador5: 'ctest0sprint3contador005',
-    contador6: 'ctest0sprint3contador006',
-    contador7: 'ctest0sprint3contador007',
-    contador8: 'ctest0sprint3contador008',
+    // iniciar-contador tests (25 chars each)
+    iniciar1: 'ctest0sp3cntinit000000001', // c + 24 = 25
+    iniciar2: 'ctest0sp3cntinit000000002',
+    iniciar3: 'ctest0sp3cntinit000000003',
+    iniciar4: 'ctest0sp3cntinit000000004',
+    iniciar5: 'ctest0sp3cntinit000000005',
+    // pausar-contador tests (25 chars each)
+    pausar1: 'ctest0sp3cntpaus000000001',
+    pausar2: 'ctest0sp3cntpaus000000002',
+    pausar3: 'ctest0sp3cntpaus000000003',
+    // reanudar-contador tests (25 chars each)
+    reanudar1: 'ctest0sp3cntresu000000001',
+    reanudar2: 'ctest0sp3cntresu000000002',
+    // cancelar-contador tests (25 chars each)
+    cancelar1: 'ctest0sp3cntcanc000000001',
+    cancelar2: 'ctest0sp3cntcanc000000002',
+    cancelar3: 'ctest0sp3cntcanc000000003',
+    // contador-terminado tests (25 chars each)
+    terminado1: 'ctest0sp3cntterm000000001',
+    // aislamiento tests (25 chars each)
+    aislamiento1: 'ctest0sp3cntisol000000001',
+    aislamiento2: 'ctest0sp3cntisol000000002',
   };
 
   beforeAll(async () => {
@@ -256,7 +272,7 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
     it('should_allow_docente_to_start_contador', async () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
-      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.contador1);
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.iniciar1);
 
       // Act
       const result = await iniciarContador(
@@ -276,7 +292,7 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
       clienteEstudiante = await crearCliente(generarToken(estudianteData));
       const { salaId } = await unirseSala(
         clienteEstudiante,
-        TEST_CUIDS.contador2,
+        TEST_CUIDS.iniciar2,
       );
 
       // Act
@@ -291,8 +307,8 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
       clienteEstudiante = await crearCliente(generarToken(estudianteData));
-      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.contador3);
-      await unirseSala(clienteEstudiante, TEST_CUIDS.contador3);
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.iniciar3);
+      await unirseSala(clienteEstudiante, TEST_CUIDS.iniciar3);
 
       // Setup listener for broadcast
       const broadcastPromise = new Promise<{
@@ -316,7 +332,7 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
     it('should_reject_second_contador_while_one_is_active', async () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
-      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.contador4);
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.iniciar4);
 
       // Act - Iniciar primero
       const first = await iniciarContador(clienteDocente, salaId, 30);
@@ -333,7 +349,7 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
     it('should_reject_invalid_seconds_range', async () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
-      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.contador5);
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.iniciar5);
 
       // Act - segundos = 0
       const zeroResult = await iniciarContador(clienteDocente, salaId, 0);
@@ -355,7 +371,7 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
     it('should_pause_and_return_remaining_seconds', async () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
-      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.contador6);
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.pausar1);
       await iniciarContador(clienteDocente, salaId, 30);
 
       // Wait a bit
@@ -375,8 +391,8 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
       clienteEstudiante = await crearCliente(generarToken(estudianteData));
-      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.contador7);
-      await unirseSala(clienteEstudiante, TEST_CUIDS.contador7);
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.pausar2);
+      await unirseSala(clienteEstudiante, TEST_CUIDS.pausar2);
       await iniciarContador(clienteDocente, salaId, 30);
 
       // Act
@@ -391,8 +407,8 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
       clienteEstudiante = await crearCliente(generarToken(estudianteData));
-      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.contador8);
-      await unirseSala(clienteEstudiante, TEST_CUIDS.contador8);
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.pausar3);
+      await unirseSala(clienteEstudiante, TEST_CUIDS.pausar3);
       await iniciarContador(clienteDocente, salaId, 30);
 
       // Setup listener
@@ -420,14 +436,7 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
     it('should_resume_paused_contador', async () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
-      const salaId = `clase:${TEST_CUIDS.contador1}resume`;
-      await new Promise<void>((resolve) => {
-        clienteDocente!.emit(
-          'unirse-sala',
-          { claseGrupoId: TEST_CUIDS.contador1 + 'resume' },
-          () => resolve(),
-        );
-      });
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.reanudar1);
 
       await iniciarContador(clienteDocente, salaId, 30);
       await pausarContador(clienteDocente, salaId);
@@ -442,14 +451,7 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
     it('should_reject_resume_when_not_paused', async () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
-      const salaId = `clase:${TEST_CUIDS.contador2}resume`;
-      await new Promise<void>((resolve) => {
-        clienteDocente!.emit(
-          'unirse-sala',
-          { claseGrupoId: TEST_CUIDS.contador2 + 'resume' },
-          () => resolve(),
-        );
-      });
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.reanudar2);
 
       // No contador exists
       const result = await reanudarContador(clienteDocente, salaId);
@@ -468,14 +470,7 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
     it('should_cancel_active_contador', async () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
-      const salaId = `clase:${TEST_CUIDS.contador3}cancel`;
-      await new Promise<void>((resolve) => {
-        clienteDocente!.emit(
-          'unirse-sala',
-          { claseGrupoId: TEST_CUIDS.contador3 + 'cancel' },
-          () => resolve(),
-        );
-      });
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.cancelar1);
 
       await iniciarContador(clienteDocente, salaId, 30);
 
@@ -490,21 +485,8 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
       clienteEstudiante = await crearCliente(generarToken(estudianteData));
-      const salaId = `clase:${TEST_CUIDS.contador4}cancel`;
-      await new Promise<void>((resolve) => {
-        clienteDocente!.emit(
-          'unirse-sala',
-          { claseGrupoId: TEST_CUIDS.contador4 + 'cancel' },
-          () => resolve(),
-        );
-      });
-      await new Promise<void>((resolve) => {
-        clienteEstudiante!.emit(
-          'unirse-sala',
-          { claseGrupoId: TEST_CUIDS.contador4 + 'cancel' },
-          () => resolve(),
-        );
-      });
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.cancelar2);
+      await unirseSala(clienteEstudiante, TEST_CUIDS.cancelar2);
 
       await iniciarContador(clienteDocente, salaId, 30);
 
@@ -525,21 +507,8 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
       clienteEstudiante = await crearCliente(generarToken(estudianteData));
-      const salaId = `clase:${TEST_CUIDS.contador5}cancel`;
-      await new Promise<void>((resolve) => {
-        clienteDocente!.emit(
-          'unirse-sala',
-          { claseGrupoId: TEST_CUIDS.contador5 + 'cancel' },
-          () => resolve(),
-        );
-      });
-      await new Promise<void>((resolve) => {
-        clienteEstudiante!.emit(
-          'unirse-sala',
-          { claseGrupoId: TEST_CUIDS.contador5 + 'cancel' },
-          () => resolve(),
-        );
-      });
+      const { salaId } = await unirseSala(clienteDocente, TEST_CUIDS.cancelar3);
+      await unirseSala(clienteEstudiante, TEST_CUIDS.cancelar3);
 
       // Setup listener for terminado (should NOT fire)
       let terminadoReceived = false;
@@ -568,21 +537,11 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
       // Arrange
       clienteDocente = await crearCliente(generarToken(docenteData));
       clienteEstudiante = await crearCliente(generarToken(estudianteData));
-      const salaId = `clase:${TEST_CUIDS.contador6}term`;
-      await new Promise<void>((resolve) => {
-        clienteDocente!.emit(
-          'unirse-sala',
-          { claseGrupoId: TEST_CUIDS.contador6 + 'term' },
-          () => resolve(),
-        );
-      });
-      await new Promise<void>((resolve) => {
-        clienteEstudiante!.emit(
-          'unirse-sala',
-          { claseGrupoId: TEST_CUIDS.contador6 + 'term' },
-          () => resolve(),
-        );
-      });
+      const { salaId } = await unirseSala(
+        clienteDocente,
+        TEST_CUIDS.terminado1,
+      );
+      await unirseSala(clienteEstudiante, TEST_CUIDS.terminado1);
 
       // Setup listener
       const terminadoPromise = new Promise<Record<string, never>>((resolve) => {
@@ -616,23 +575,14 @@ describe('Sprint 3.2 E2E - Contador Compartido (AulaVivaGateway)', () => {
         generarToken({ ...docenteData, sub: 'docente-b' }),
       );
 
-      const salaA = `clase:${TEST_CUIDS.contador7}iso`;
-      const salaB = `clase:${TEST_CUIDS.contador8}iso`;
-
-      await new Promise<void>((resolve) => {
-        docenteA.emit(
-          'unirse-sala',
-          { claseGrupoId: TEST_CUIDS.contador7 + 'iso' },
-          () => resolve(),
-        );
-      });
-      await new Promise<void>((resolve) => {
-        docenteB.emit(
-          'unirse-sala',
-          { claseGrupoId: TEST_CUIDS.contador8 + 'iso' },
-          () => resolve(),
-        );
-      });
+      const { salaId: salaA } = await unirseSala(
+        docenteA,
+        TEST_CUIDS.aislamiento1,
+      );
+      const { salaId: salaB } = await unirseSala(
+        docenteB,
+        TEST_CUIDS.aislamiento2,
+      );
 
       // Act - Start contador in room A
       const resultA = await iniciarContador(

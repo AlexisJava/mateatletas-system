@@ -1,18 +1,12 @@
-import {
-  IsString,
-  IsOptional,
-  IsInt,
-  Min,
-  Max,
-  MaxLength,
-} from 'class-validator';
+import { IsString, IsOptional, IsInt } from 'class-validator';
 
 /**
  * DTO para iniciar un contador compartido
  *
  * NOTA: @IsOptional() por bug de ValidationPipe en WebSockets
  * https://github.com/nestjs/nest/issues/5267
- * Validación real se hace en el handler
+ * ValidationPipe rechaza silenciosamente (sin callback) cuando falla,
+ * por eso la validación de rangos se hace en el handler que sí retorna callback.
  */
 export class IniciarContadorDto {
   @IsString()
@@ -20,14 +14,13 @@ export class IniciarContadorDto {
   salaId?: string;
 
   @IsInt()
-  @Min(1)
-  @Max(3600)
   @IsOptional()
+  // Validación de rango (1-3600) se hace en handler para retornar callback con error
   segundos?: number;
 
   @IsString()
-  @MaxLength(200)
   @IsOptional()
+  // MaxLength se valida en handler
   mensaje?: string;
 }
 

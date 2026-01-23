@@ -1028,19 +1028,20 @@ Semana 4+: FASE 7 + FASE 9 (Mensajería + Contenido)
 
 ## Historial de Cambios
 
-| Fecha      | Cambio                                                                                                       | Autor  |
-| ---------- | ------------------------------------------------------------------------------------------------------------ | ------ |
-| 2026-01-19 | Creación inicial del documento                                                                               | Claude |
-| 2026-01-19 | ✅ Completados Quick Wins 0.1 + 0.2                                                                          | Claude |
-| 2026-01-19 | 📝 Documentado BUG-001 (tier inconsistente)                                                                  | Claude |
-| 2026-01-20 | ✅ FASE 3.1: CRUD completo de ClaseGrupos (crear, editar, soft delete, hard delete)                          | Claude |
-| 2026-01-20 | ✅ Planificación override por Comisión (Evento/Taller)                                                       | Claude |
-| 2026-01-20 | ✅ VentasSection para productos Físico/Digital                                                               | Claude |
-| 2026-01-20 | ✅ FASE 3.2+3.3: Admin pausar/reactivar/cancelar suscripciones + cambiar tier                                | Claude |
-| 2026-01-20 | ✅ Tests de integración BBT (28 tests) para endpoints admin suscripciones                                    | Claude |
-| 2026-01-20 | ✅ Dashboard Admin refactor: 5 tabs (Resumen, Estudiantes, Finanzas, Retención, Contenido) con glassmorphism | Claude |
-| 2026-01-20 | ✅ Eliminados TODOS los mocks del dashboard - datos reales del backend                                       | Claude |
-| 2026-01-20 | ✅ Endpoint tiempoPromedioMinutos en admin-stats.service.ts                                                  | Claude |
-| 2026-01-20 | ✅ crecimientoMensual calculado desde retention data (no hardcodeado)                                        | Claude |
-| 2026-01-20 | ✅ FASE 4.1+5.1+6.1: Recuperación de contraseña - páginas /forgot-password y /reset-password                 | Claude |
-| 2026-01-20 | ✅ FASE 5.3: Pausar suscripción - Endpoints y UI granular para pausar/reactivar inscripciones o suscripción  | Claude |
+| Fecha      | Cambio                                                                                                        | Autor  |
+| ---------- | ------------------------------------------------------------------------------------------------------------- | ------ |
+| 2026-01-19 | Creación inicial del documento                                                                                | Claude |
+| 2026-01-19 | ✅ Completados Quick Wins 0.1 + 0.2                                                                           | Claude |
+| 2026-01-19 | 📝 Documentado BUG-001 (tier inconsistente)                                                                   | Claude |
+| 2026-01-20 | ✅ FASE 3.1: CRUD completo de ClaseGrupos (crear, editar, soft delete, hard delete)                           | Claude |
+| 2026-01-20 | ✅ Planificación override por Comisión (Evento/Taller)                                                        | Claude |
+| 2026-01-20 | ✅ VentasSection para productos Físico/Digital                                                                | Claude |
+| 2026-01-20 | ✅ FASE 3.2+3.3: Admin pausar/reactivar/cancelar suscripciones + cambiar tier                                 | Claude |
+| 2026-01-20 | ✅ Tests de integración BBT (28 tests) para endpoints admin suscripciones                                     | Claude |
+| 2026-01-20 | ✅ Dashboard Admin refactor: 5 tabs (Resumen, Estudiantes, Finanzas, Retención, Contenido) con glassmorphism  | Claude |
+| 2026-01-20 | ✅ Eliminados TODOS los mocks del dashboard - datos reales del backend                                        | Claude |
+| 2026-01-20 | ✅ Endpoint tiempoPromedioMinutos en admin-stats.service.ts                                                   | Claude |
+| 2026-01-20 | ✅ crecimientoMensual calculado desde retention data (no hardcodeado)                                         | Claude |
+| 2026-01-20 | ✅ FASE 4.1+5.1+6.1: Recuperación de contraseña - páginas /forgot-password y /reset-password                  | Claude |
+| 2026-01-20 | ✅ FASE 5.3: Pausar suscripción - Endpoints y UI granular para pausar/reactivar inscripciones o suscripción   | Claude |
+| 2026-01-23 | ✅ Fix: Tests E2E Sprint 3.2 Contador Compartido - CUIDs corregidos a 25 chars, validadores movidos a handler | Claude |
