@@ -2004,9 +2004,9 @@ Docente otorga puntos → PuntoObtenido (registro)
 
 #### Sprint 3: Gamificación Live
 
-- [ ] 3.1 Quiz en vivo
-- [ ] 3.2 Contador compartido
-- [ ] 3.3 Ranking en vivo
+- [x] 3.1 Quiz en vivo ✅
+- [x] 3.2 Contador compartido ✅
+- [ ] 3.3 Notificación de puntos (solo privado, sin ranking público)
 - [ ] 3.4 XP y logros en vivo
 - [ ] 3.5 Puntos de casa en vivo
 
@@ -2053,9 +2053,9 @@ WEBSOCKET SPRINT 2 (Interactividad): ✅ COMPLETADO
   └── 2.3 Selector aleatorio ✅
 
 WEBSOCKET SPRINT 3 (Gamificación Live): ⏳ EN PROGRESO
-  └── 3.1 Quiz en vivo
-  └── 3.2 Contador compartido
-  └── 3.3 Ranking en vivo
+  └── 3.1 Quiz en vivo ✅
+  └── 3.2 Contador compartido ✅
+  └── 3.3 Notificación de puntos (privado)
   └── 3.4 XP/Logros live
   └── 3.5 Puntos de casa
 
@@ -2647,9 +2647,9 @@ packages/lesson-engine/src/
 
 #### Sprint 3: Gamificación Live
 
-- [ ] 3.1 Quiz en vivo
-- [ ] 3.2 Contador compartido
-- [ ] 3.3 Ranking en vivo
+- [x] 3.1 Quiz en vivo ✅
+- [x] 3.2 Contador compartido ✅
+- [ ] 3.3 Notificación de puntos (solo privado, sin ranking público)
 - [ ] 3.4 XP y logros en vivo
 - [ ] 3.5 Puntos de casa en vivo
 

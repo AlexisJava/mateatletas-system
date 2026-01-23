@@ -20,6 +20,7 @@ import { ReaccionesService } from './services/reacciones.service';
 import { PulsoService } from './services/pulso.service';
 import { SelectorService } from './services/selector.service';
 import { QuizService } from './services/quiz.service';
+import { ContadorService } from './services/contador.service';
 import {
   UnirseSalaDto,
   SalirSalaDto,
@@ -48,6 +49,13 @@ import {
   QuizPublico,
   QuizResultado,
 } from './dto/quiz.dto';
+import {
+  IniciarContadorDto,
+  PausarContadorDto,
+  ReanudarContadorDto,
+  CancelarContadorDto,
+  ContadorIniciadoPayload,
+} from './dto/contador.dto';
 import { randomUUID } from 'crypto';
 
 /** Respuesta al unirse a una sala */
@@ -120,6 +128,7 @@ export class AulaVivaGateway
     private readonly pulsoService: PulsoService,
     private readonly selectorService: SelectorService,
     private readonly quizService: QuizService,
+    private readonly contadorService: ContadorService,
   ) {}
 
   afterInit(server: Server): void {
@@ -1338,5 +1347,214 @@ export class AulaVivaGateway
         error: error instanceof Error ? error.message : 'Error desconocido',
       };
     }
+  }
+
+  // ============================================================================
+  // HANDLERS: CONTADOR COMPARTIDO
+  // ============================================================================
+
+  /**
+   * Permite al docente iniciar un contador compartido
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   *
+   * Evento emitido: contador-iniciado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('iniciar-contador')
+  handleIniciarContador(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: IniciarContadorDto,
+  ): { exito: boolean; error?: string } {
+    // Solo docentes pueden iniciar contadores
+    if (client.data.rol !== 'DOCENTE') {
+      return {
+        exito: false,
+        error: 'Solo el docente puede iniciar contadores',
+      };
+    }
+
+    const salaId = payload.salaId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+
+    // Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // Validar segundos
+    const segundos = payload.segundos;
+    if (!segundos || segundos < 1 || segundos > 3600) {
+      return { exito: false, error: 'Segundos debe ser entre 1 y 3600' };
+    }
+
+    // Iniciar contador con callback para broadcast de terminación
+    const contador = this.contadorService.iniciar(
+      salaId,
+      segundos,
+      payload.mensaje,
+      () => {
+        this.server.to(salaId).emit('contador-terminado', {});
+        this.logger.log(`Contador terminado en sala ${salaId}`);
+      },
+    );
+
+    if (!contador) {
+      return { exito: false, error: 'Ya hay un contador activo en esta sala' };
+    }
+
+    // Broadcast a toda la sala
+    const contadorPayload: ContadorIniciadoPayload = {
+      segundos: contador.segundosTotal,
+      mensaje: contador.mensaje,
+      timestampInicio: contador.timestampInicio.toISOString(),
+    };
+    this.server.to(salaId).emit('contador-iniciado', contadorPayload);
+
+    this.logger.log(
+      `Contador iniciado en sala ${salaId}: ${segundos}s por ${client.data.nombre}`,
+    );
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente pausar el contador
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   *
+   * Evento emitido: contador-pausado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('pausar-contador')
+  handlePausarContador(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: PausarContadorDto,
+  ): { exito: boolean; segundosRestantes?: number; error?: string } {
+    if (client.data.rol !== 'DOCENTE') {
+      return {
+        exito: false,
+        error: 'Solo el docente puede pausar el contador',
+      };
+    }
+
+    const salaId = payload.salaId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    const segundosRestantes = this.contadorService.pausar(salaId);
+
+    if (segundosRestantes === null) {
+      return {
+        exito: false,
+        error: 'No hay contador activo o ya está pausado',
+      };
+    }
+
+    // Broadcast a toda la sala
+    this.server.to(salaId).emit('contador-pausado', { segundosRestantes });
+
+    this.logger.log(
+      `Contador pausado en sala ${salaId}: ${segundosRestantes}s restantes`,
+    );
+
+    return { exito: true, segundosRestantes };
+  }
+
+  /**
+   * Permite al docente reanudar el contador pausado
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   *
+   * Evento emitido: contador-reanudado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('reanudar-contador')
+  handleReanudarContador(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: ReanudarContadorDto,
+  ): { exito: boolean; error?: string } {
+    if (client.data.rol !== 'DOCENTE') {
+      return {
+        exito: false,
+        error: 'Solo el docente puede reanudar el contador',
+      };
+    }
+
+    const salaId = payload.salaId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    const reanudado = this.contadorService.reanudar(salaId);
+
+    if (!reanudado) {
+      return { exito: false, error: 'No hay contador pausado para reanudar' };
+    }
+
+    const contador = this.contadorService.getContador(salaId);
+    const segundosRestantes = this.contadorService.getSegundosRestantes(salaId);
+
+    // Broadcast a toda la sala
+    this.server.to(salaId).emit('contador-reanudado', {
+      segundosRestantes,
+      timestampReanudacion: contador?.timestampInicio.toISOString(),
+    });
+
+    this.logger.log(
+      `Contador reanudado en sala ${salaId}: ${segundosRestantes}s restantes`,
+    );
+
+    return { exito: true };
+  }
+
+  /**
+   * Permite al docente cancelar el contador
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   *
+   * Evento emitido: contador-cancelado (broadcast a toda la sala)
+   */
+  @SubscribeMessage('cancelar-contador')
+  handleCancelarContador(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: CancelarContadorDto,
+  ): { exito: boolean; error?: string } {
+    if (client.data.rol !== 'DOCENTE') {
+      return {
+        exito: false,
+        error: 'Solo el docente puede cancelar el contador',
+      };
+    }
+
+    const salaId = payload.salaId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    const cancelado = this.contadorService.cancelar(salaId);
+
+    if (!cancelado) {
+      return { exito: false, error: 'No hay contador activo para cancelar' };
+    }
+
+    // Broadcast a toda la sala
+    this.server.to(salaId).emit('contador-cancelado', {});
+
+    this.logger.log(`Contador cancelado en sala ${salaId}`);
+
+    return { exito: true };
   }
 }
