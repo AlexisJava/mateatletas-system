@@ -1990,17 +1990,17 @@ Docente otorga puntos → PuntoObtenido (registro)
 
 ### WebSocket Aula Viva
 
-#### Sprint 1: Control de Clase
+#### Sprint 1: Control de Clase ✅
 
-- [ ] 1.1 Levantar la mano
-- [ ] 1.2 Control de moderación (mutear/expulsar)
-- [ ] 1.3 Indicador "está hablando"
+- [x] 1.1 Levantar la mano
+- [x] 1.2 Control de moderación (mutear/expulsar)
+- [x] 1.3 Indicador "está hablando"
 
-#### Sprint 2: Interactividad
+#### Sprint 2: Interactividad ✅
 
-- [ ] 2.1 Reacciones en tiempo real
-- [ ] 2.2 "¿Están siguiendo?" (pulso atención)
-- [ ] 2.3 Selector aleatorio
+- [x] 2.1 Reacciones en tiempo real
+- [x] 2.2 "¿Están siguiendo?" (pulso atención)
+- [x] 2.3 Selector aleatorio
 
 #### Sprint 3: Gamificación Live
 
@@ -2037,22 +2037,22 @@ Docente otorga puntos → PuntoObtenido (registro)
 ## Orden de Ejecución
 
 ```
-INMEDIATO (Bugs):
-  └── BUG-001: Asignar Puntos
-  └── BUG-002: Observaciones
-  └── BUG-003: Inconsistencia XP
+INMEDIATO (Bugs): ✅ COMPLETADO
+  └── BUG-001: Asignar Puntos ✅
+  └── BUG-002: Observaciones ✅
+  └── BUG-003: Inconsistencia XP ✅
 
-WEBSOCKET SPRINT 1 (Control de Clase):
-  └── 1.1 Levantar la mano
-  └── 1.2 Moderación (mutear/expulsar)
-  └── 1.3 Indicador hablando
+WEBSOCKET SPRINT 1 (Control de Clase): ✅ COMPLETADO
+  └── 1.1 Levantar la mano ✅
+  └── 1.2 Moderación (mutear/expulsar) ✅
+  └── 1.3 Indicador hablando ✅
 
-WEBSOCKET SPRINT 2 (Interactividad):
-  └── 2.1 Reacciones
-  └── 2.2 Pulso atención
-  └── 2.3 Selector aleatorio
+WEBSOCKET SPRINT 2 (Interactividad): ✅ COMPLETADO
+  └── 2.1 Reacciones ✅
+  └── 2.2 Pulso atención ✅
+  └── 2.3 Selector aleatorio ✅
 
-WEBSOCKET SPRINT 3 (Gamificación Live):
+WEBSOCKET SPRINT 3 (Gamificación Live): ⏳ EN PROGRESO
   └── 3.1 Quiz en vivo
   └── 3.2 Contador compartido
   └── 3.3 Ranking en vivo
@@ -2633,17 +2633,17 @@ packages/lesson-engine/src/
 
 ### WebSocket Aula Viva
 
-#### Sprint 1: Control de Clase
+#### Sprint 1: Control de Clase ✅
 
-- [ ] 1.1 Levantar la mano
-- [ ] 1.2 Control de moderación (mutear/expulsar)
-- [ ] 1.3 Indicador "está hablando"
+- [x] 1.1 Levantar la mano
+- [x] 1.2 Control de moderación (mutear/expulsar)
+- [x] 1.3 Indicador "está hablando"
 
-#### Sprint 2: Interactividad
+#### Sprint 2: Interactividad ✅
 
-- [ ] 2.1 Reacciones en tiempo real
-- [ ] 2.2 "¿Están siguiendo?" (pulso atención)
-- [ ] 2.3 Selector aleatorio
+- [x] 2.1 Reacciones en tiempo real
+- [x] 2.2 "¿Están siguiendo?" (pulso atención)
+- [x] 2.3 Selector aleatorio
 
 #### Sprint 3: Gamificación Live
 

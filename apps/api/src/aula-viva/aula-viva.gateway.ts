@@ -19,6 +19,7 @@ import { ModeracionService, TipoMuteo } from './services/moderacion.service';
 import { ReaccionesService } from './services/reacciones.service';
 import { PulsoService } from './services/pulso.service';
 import { SelectorService } from './services/selector.service';
+import { QuizService } from './services/quiz.service';
 import {
   UnirseSalaDto,
   SalirSalaDto,
@@ -40,6 +41,13 @@ import {
   SeleccionarAleatorioDto,
   ResetearSelectorDto,
 } from './dto';
+import {
+  CrearQuizDto,
+  ResponderQuizDto,
+  CerrarQuizDto,
+  QuizPublico,
+  QuizResultado,
+} from './dto/quiz.dto';
 import { randomUUID } from 'crypto';
 
 /** Respuesta al unirse a una sala */
@@ -111,6 +119,7 @@ export class AulaVivaGateway
     private readonly reaccionesService: ReaccionesService,
     private readonly pulsoService: PulsoService,
     private readonly selectorService: SelectorService,
+    private readonly quizService: QuizService,
   ) {}
 
   afterInit(server: Server): void {
@@ -1131,5 +1140,203 @@ export class AulaVivaGateway
     );
 
     return { exito: true, ronda: result.ronda! };
+  }
+
+  // ============================================================================
+  // HANDLERS: QUIZ EN VIVO (ESTILO KAHOOT)
+  // ============================================================================
+
+  /**
+   * Valida los datos de un quiz (validación manual por bug ValidationPipe)
+   * @returns null si es válido, o mensaje de error
+   */
+  private validarDatosQuiz(payload: CrearQuizDto): string | null {
+    if (!payload.pregunta || payload.pregunta.length > 500) {
+      return 'Pregunta inválida (máx 500 caracteres)';
+    }
+    if (
+      !payload.opciones ||
+      payload.opciones.length < 2 ||
+      payload.opciones.length > 6
+    ) {
+      return 'Debe haber 2-6 opciones';
+    }
+    if (
+      payload.respuestaCorrecta === undefined ||
+      payload.respuestaCorrecta < 0 ||
+      payload.respuestaCorrecta >= payload.opciones.length
+    ) {
+      return 'Respuesta correcta inválida';
+    }
+    const tiempoSeg = payload.tiempoSeg ?? 20;
+    if (tiempoSeg < 5 || tiempoSeg > 120) {
+      return 'Tiempo debe ser 5-120 segundos';
+    }
+    return null;
+  }
+
+  /**
+   * Permite al docente crear un quiz en vivo
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   *
+   * Evento emitido: quiz:nuevo (broadcast a toda la sala, sin respuesta correcta)
+   */
+  @SubscribeMessage('quiz:crear')
+  handleCrearQuiz(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: CrearQuizDto,
+  ): { exito: boolean; quiz?: QuizPublico; error?: string } {
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo docentes pueden crear quiz' };
+    }
+
+    const salaId = payload.salaId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    const errorValidacion = this.validarDatosQuiz(payload);
+    if (errorValidacion) {
+      return { exito: false, error: errorValidacion };
+    }
+
+    try {
+      const tiempoSeg = payload.tiempoSeg ?? 20;
+      const quiz = this.quizService.crearQuiz(salaId, {
+        ...payload,
+        tiempoSeg,
+      });
+
+      const quizPublico: QuizPublico = {
+        id: quiz.id,
+        pregunta: quiz.pregunta,
+        opciones: quiz.opciones,
+        tiempoSeg: quiz.tiempoSeg,
+        timestampInicio: quiz.timestampInicio.toISOString(),
+      };
+
+      this.server.to(salaId).emit('quiz:nuevo', quizPublico);
+      this.logger.log(
+        `Quiz creado en sala ${salaId} por ${client.data.nombre}`,
+      );
+
+      return { exito: true, quiz: quizPublico };
+    } catch (error) {
+      return {
+        exito: false,
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      };
+    }
+  }
+
+  /**
+   * Permite a un estudiante responder a un quiz activo
+   * Solo usuarios con rol ESTUDIANTE pueden usar este evento
+   * Puntos basados en velocidad de respuesta (estilo Kahoot)
+   *
+   * Evento emitido: quiz:respuesta-recibida (broadcast contador de respuestas)
+   */
+  @SubscribeMessage('quiz:responder')
+  handleResponderQuiz(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: ResponderQuizDto,
+  ): { exito: boolean; puntosObtenidos?: number; error?: string } {
+    // 1. Solo estudiantes pueden responder
+    if (client.data.rol !== 'ESTUDIANTE') {
+      return { exito: false, error: 'Solo estudiantes pueden responder' };
+    }
+
+    // 2. Obtener salaId
+    const salaId = payload.salaId;
+    if (!salaId) {
+      return { exito: false, error: 'salaId es requerido' };
+    }
+
+    // 3. Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    // 4. Validaciones
+    if (!payload.quizId) {
+      return { exito: false, error: 'quizId es requerido' };
+    }
+    if (payload.opcionIndex === undefined || payload.opcionIndex < 0) {
+      return { exito: false, error: 'opcionIndex inválido' };
+    }
+
+    // 5. Registrar respuesta
+    const resultado = this.quizService.responderQuiz(
+      salaId,
+      payload.quizId,
+      client.data.userId,
+      payload.opcionIndex,
+    );
+
+    if (resultado.exito) {
+      // Notificar contador de respuestas (sin revelar respuestas individuales)
+      const quizActivo = this.quizService.getQuizActivo(salaId);
+      this.server.to(salaId).emit('quiz:respuesta-recibida', {
+        quizId: payload.quizId,
+        totalRespuestas: quizActivo?.respuestas.size ?? 0,
+      });
+    }
+
+    return resultado;
+  }
+
+  /**
+   * Permite al docente cerrar un quiz y ver resultados
+   * Solo usuarios con rol DOCENTE pueden usar este evento
+   *
+   * Evento emitido: quiz:resultado (broadcast con ranking y distribución)
+   */
+  @SubscribeMessage('quiz:cerrar')
+  handleCerrarQuiz(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: CerrarQuizDto,
+  ): { exito: boolean; resultado?: QuizResultado; error?: string } {
+    // 1. Solo docentes pueden cerrar quiz
+    if (client.data.rol !== 'DOCENTE') {
+      return { exito: false, error: 'Solo docentes pueden cerrar quiz' };
+    }
+
+    // 2. Validar payload
+    if (!payload.salaId || !payload.quizId) {
+      return { exito: false, error: 'salaId y quizId son requeridos' };
+    }
+
+    // 3. Verificar presencia en sala
+    const salasDelUsuario = this.presenciaService.getSalasDeSocket(client.id);
+    if (!salasDelUsuario.includes(payload.salaId)) {
+      return { exito: false, error: 'No estás en esta sala' };
+    }
+
+    try {
+      const resultado = this.quizService.cerrarQuiz(
+        payload.salaId,
+        payload.quizId,
+      );
+
+      // Broadcast resultados completos a toda la sala
+      this.server.to(payload.salaId).emit('quiz:resultado', resultado);
+
+      this.logger.log(
+        `Quiz cerrado en sala ${payload.salaId} por ${client.data.nombre}`,
+      );
+
+      return { exito: true, resultado };
+    } catch (error) {
+      return {
+        exito: false,
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      };
+    }
   }
 }
