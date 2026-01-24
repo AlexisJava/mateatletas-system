@@ -1,13 +1,16 @@
 /**
  * Analytics Components - Barrel exports
+ *
+ * Vista completa de analytics con 4 tabs:
+ * - Overview: KPIs principales, distribución tiers, ingresos
+ * - Casas: Distribución por casa y ranking de puntos
+ * - Retención: Métricas de retención y churn
+ * - Suscripciones MP: Métricas de Mercado Pago
+ *
+ * Nota: BibliotecaTab removido - contenidos tiene su página dedicada /admin/contenidos
  */
 
-export { AnalyticsStatCard } from './AnalyticsStatCard';
-export { SectionHeader } from './SectionHeader';
-export { AnalyticsTabNav } from './AnalyticsTabNav';
+export { OverviewTab } from './OverviewTab';
 export { CasasTab } from './CasasTab';
-export { BibliotecaTab } from './BibliotecaTab';
 export { RetencionTab } from './RetencionTab';
-export { RetentionStatCard } from './RetentionStatCard';
-export { RetentionRateCard } from './RetentionRateCard';
-export { RecommendedActionsCard } from './RecommendedActionsCard';
+export { SuscripcionesMPTab } from './SuscripcionesMPTab';

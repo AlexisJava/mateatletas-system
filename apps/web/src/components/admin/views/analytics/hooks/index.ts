@@ -1,7 +1,9 @@
-export { useAnalytics } from './useAnalytics';
+export { useAnalytics, ANALYTICS_KEY } from './useAnalytics';
 export type {
   CasaDistribution,
   RetentionDataPoint,
-  AnalyticsStats,
+  OverviewStats,
+  TierDistributionData,
+  SuscripcionesMPData,
   AnalyticsData,
 } from './useAnalytics';

@@ -18,6 +18,8 @@ export interface CasaColorConfig {
   bg: string;
   /** Tailwind text class */
   text: string;
+  /** Tailwind border class */
+  border: string;
   /** Glow color with alpha for effects */
   glow: string;
   /** Gradient classes */
@@ -29,6 +31,7 @@ export const CASA_COLORS: Record<CasaTipo, CasaColorConfig> = {
     solid: '#06b6d4', // cyan-500
     bg: 'bg-cyan-500/20',
     text: 'text-cyan-400',
+    border: 'border-cyan-500/30',
     glow: '#00d4ff40',
     gradient: 'from-cyan-500 to-blue-600',
   },
@@ -36,6 +39,7 @@ export const CASA_COLORS: Record<CasaTipo, CasaColorConfig> = {
     solid: '#a855f7', // purple-500
     bg: 'bg-purple-500/20',
     text: 'text-purple-400',
+    border: 'border-purple-500/30',
     glow: '#8b5cf640',
     gradient: 'from-purple-500 to-violet-600',
   },
@@ -43,6 +47,7 @@ export const CASA_COLORS: Record<CasaTipo, CasaColorConfig> = {
     solid: '#f59e0b', // amber-500
     bg: 'bg-amber-500/20',
     text: 'text-amber-400',
+    border: 'border-amber-500/30',
     glow: '#f59e0b40',
     gradient: 'from-amber-500 to-orange-600',
   },

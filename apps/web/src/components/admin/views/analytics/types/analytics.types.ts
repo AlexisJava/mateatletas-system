@@ -1,5 +1,5 @@
 /**
- * Analytics Types - Tipos para la vista de analytics
+ * Analytics Types - Tipos para la vista de analytics completa
  */
 
 import type { LucideIcon } from 'lucide-react';
@@ -8,12 +8,13 @@ import type { LucideIcon } from 'lucide-react';
 // TAB TYPES
 // =============================================================================
 
-export type AnalyticsTabId = 'casas' | 'biblioteca' | 'retencion';
+export type AnalyticsTabId = 'overview' | 'casas' | 'retencion' | 'suscripciones';
 
 export interface AnalyticsTab {
   id: AnalyticsTabId;
   label: string;
   icon: LucideIcon;
+  color: string;
 }
 
 // =============================================================================
@@ -26,33 +27,6 @@ export interface AnalyticsStatCardProps {
   change?: number;
   icon: LucideIcon;
   color: string;
-}
-
-// =============================================================================
-// SECTION HEADER
-// =============================================================================
-
-export interface SectionHeaderProps {
-  icon: LucideIcon;
-  title: string;
-  iconColor: string;
-}
-
-// =============================================================================
-// LIBRARY DATA
-// =============================================================================
-
-export interface LibraryMonthData {
-  month: string;
-  lecturas: number;
-  completados: number;
-  promedio: number;
-}
-
-export interface BookData {
-  title: string;
-  reads: number;
-  rating: number;
 }
 
 // =============================================================================

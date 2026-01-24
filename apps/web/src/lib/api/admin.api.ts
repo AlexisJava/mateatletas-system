@@ -2594,3 +2594,60 @@ export const cleanupDlq = async (): Promise<{ deletedCount: number; message: str
     throw error;
   }
 };
+
+// ============================================================================
+// MÉTRICAS DE SUSCRIPCIONES (Mercado Pago)
+// ============================================================================
+
+/** Métricas de suscripciones */
+export interface SuscripcionesMetricas {
+  totalActivas: number;
+  totalMorosas: number;
+  totalEnGracia: number;
+  totalCanceladasMes: number;
+  ingresosMes: number;
+  tasaCancelacion: number;
+}
+
+/**
+ * Obtener métricas de suscripciones
+ * GET /suscripciones/admin/metricas
+ */
+export const getSuscripcionesMetricas = async (): Promise<SuscripcionesMetricas> => {
+  try {
+    return await axios.get<SuscripcionesMetricas>('/suscripciones/admin/metricas');
+  } catch (error) {
+    console.error('Error al obtener métricas de suscripciones:', error);
+    throw error;
+  }
+};
+
+/** Suscripción morosa */
+export interface SuscripcionMorosa {
+  id: string;
+  tutorNombre: string;
+  tutorEmail: string | null;
+  montoMensual: number;
+  diasMorosos: number;
+  enGracia: boolean;
+  fechaUltimoPago: string | null;
+}
+
+/** Response de suscripciones morosas */
+export interface MorosasResponse {
+  morosas: SuscripcionMorosa[];
+  total: number;
+}
+
+/**
+ * Obtener suscripciones morosas
+ * GET /suscripciones/admin/morosas
+ */
+export const getSuscripcionesMorosas = async (): Promise<MorosasResponse> => {
+  try {
+    return await axios.get<MorosasResponse>('/suscripciones/admin/morosas');
+  } catch (error) {
+    console.error('Error al obtener suscripciones morosas:', error);
+    throw error;
+  }
+};

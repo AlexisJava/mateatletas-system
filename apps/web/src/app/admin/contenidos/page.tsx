@@ -24,6 +24,7 @@ import {
   type EstadoContenido,
 } from '@/lib/api/contenidos.api';
 import { LessonRenderer, HOUSE_COLORS } from '@/components/lesson-renderer';
+import { CASA_COLORS } from '@/components/admin/constants/colors.constants';
 
 // ============================================================================
 // TYPES
@@ -32,16 +33,6 @@ import { LessonRenderer, HOUSE_COLORS } from '@/components/lesson-renderer';
 interface ContenidoConNodos extends ContenidoBackend {
   _count?: { nodos: number };
 }
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
-const CASA_COLORS: Record<CasaTipo, { bg: string; text: string; border: string }> = {
-  QUANTUM: { bg: 'bg-pink-500/20', text: 'text-pink-400', border: 'border-pink-500/30' },
-  VERTEX: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30' },
-  PULSAR: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/30' },
-};
 
 const MUNDO_LABELS: Record<MundoTipo, { label: string; icon: string }> = {
   MATEMATICA: { label: 'Matemática', icon: '📐' },
