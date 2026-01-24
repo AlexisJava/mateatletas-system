@@ -13,6 +13,7 @@ import {
   Code2,
   Repeat,
   Activity,
+  ScrollText,
   ChevronLeft,
   ChevronRight,
   type LucideIcon,
@@ -42,6 +43,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Code2,
   Repeat,
   Activity,
+  ScrollText,
 };
 
 function getIcon(iconName: string): LucideIcon {
