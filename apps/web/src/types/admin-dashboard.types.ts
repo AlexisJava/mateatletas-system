@@ -51,6 +51,7 @@ export const AdminView = {
   CONTENIDOS: 'contenidos',
   MONITORING: 'monitoring',
   AUDIT_LOGS: 'audit-logs',
+  SETTINGS: 'settings',
   SANDBOX: 'sandbox',
 } as const;
 
@@ -223,6 +224,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     href: '/admin/audit-logs',
     icon: 'ScrollText',
   },
+  { view: AdminView.SETTINGS, label: 'Configuración', href: '/admin/settings', icon: 'Settings' },
   { view: AdminView.SANDBOX, label: 'Sandbox', href: '/admin/sandbox', icon: 'Code2' },
 ];
 
