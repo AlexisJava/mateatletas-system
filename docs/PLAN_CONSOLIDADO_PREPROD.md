@@ -18,7 +18,7 @@ Este documento consolida TODOS los items pendientes de las auditorías individua
 | Portal Estudiante    | ~65%      | -       | ~35%      | ~30   |
 | Portal Tutor         | ~70%      | -       | ~30%      | 29    |
 | Portal Docente       | ~90%      | -       | ~10%      | 66    |
-| Portal Admin         | ~80%      | -       | ~20%      | 152   |
+| Portal Admin         | **100%**  | -       | **0%**    | 152   |
 | Notificaciones       | ~85%      | -       | ~15%      | 48    |
 | MercadoPago 2026     | ~87%      | -       | ~13%      | 112   |
 | Sistema de Contenido | ~65%      | -       | ~35%      | 114   |
@@ -888,19 +888,17 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 - [x] 2.4 Event Listeners para cambios de Suscripción ✅ (2026-01-19)
 - [x] Tests de integración (131 tests passing) ✅ (2026-01-19)
 
-### FASE 3: Portal Admin
+### FASE 3: Portal Admin ✅ COMPLETADA
 
 - [x] 3.1 CRUD de ClaseGrupos ✅ (2026-01-20)
 - [x] 3.2 UI pausar/cancelar Suscripciones ✅ (2026-01-20)
 - [x] 3.3 UI cambiar tier de inscripción ✅ (2026-01-20)
+- [x] 3.4 Dashboard de Monitoring (DLQ) ✅ (2026-01-24)
+- [x] 3.5 Dashboard de Audit Logs ✅ (2026-01-24)
+- [x] 3.6 UI para configurar MFA ✅ (2026-01-24)
 - [x] 3.7 Dashboard refactor: 5 tabs con glassmorphism ✅ (2026-01-20)
 - [x] 3.8 Dashboard: tiempoPromedioMinutos endpoint ✅ (2026-01-20)
 - [x] 3.9 Dashboard: crecimientoMensual calculado real ✅ (2026-01-20)
-- [ ] 3.4 Dashboard de Monitoring (DLQ) ⏸️ DIFERIDO
-- [ ] 3.5 Dashboard de Audit Logs ⏸️ DIFERIDO
-- [ ] 3.6 UI para configurar MFA ⏸️ DIFERIDO
-
-> **Nota**: Items 3.4-3.6 diferidos para priorizar fases de usuarios finales (4, 5, 6)
 
 ### FASE 4: Portal Docente
 
@@ -1090,3 +1088,4 @@ Semana 4+: FASE 7 + FASE 9 (Mensajería + Contenido)
 | 2026-01-23 | ✅ Fix: Tests E2E Sprint 3.2 Contador Compartido - CUIDs corregidos a 25 chars, validadores movidos a handler | Claude |
 | 2026-01-23 | ✅ FASE 10: Aula Viva WebSocket completa - Sprint 1-4 con 37+ E2E tests                                       | Claude |
 | 2026-01-23 | ✅ Sprint 4: Teoría Sincronizada y Práctica en Vivo (17 tests)                                                | Claude |
+| 2026-01-24 | ✅ FASE 3 COMPLETADA: 3.4 Monitoring DLQ, 3.5 Audit Logs, 3.6 MFA Settings UI                                 | Claude |
