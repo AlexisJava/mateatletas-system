@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AdminController } from './admin.controller';
 import { PlanificacionesAdminController } from './planificaciones-admin.controller';
 import { AdminDlqController } from './controllers/admin-dlq.controller';
+import { AdminAuditLogsController } from './controllers/admin-audit-logs.controller';
 import { AdminService } from './admin.service';
 import { AdminStatsService } from './services/admin-stats.service';
 import { AdminAlertasService } from './services/admin-alertas.service';
@@ -36,6 +37,7 @@ import { NotificacionesModule } from '../notificaciones/notificaciones.module';
     AdminController,
     PlanificacionesAdminController,
     AdminDlqController,
+    AdminAuditLogsController,
   ],
   providers: [
     AdminService,

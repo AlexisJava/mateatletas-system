@@ -878,6 +878,49 @@ export class AuditLogService {
   }
 
   /**
+   * Cuenta logs agrupados por un campo específico
+   *
+   * @param field - Campo por el cual agrupar (category, severity, action)
+   * @returns Objeto con conteo por valor del campo
+   */
+  async countGroupedBy(
+    field: 'category' | 'severity' | 'action',
+  ): Promise<Record<string, number>> {
+    const logs = await this.prisma.auditLog.groupBy({
+      by: [field],
+      _count: { id: true },
+    });
+
+    const result: Record<string, number> = {};
+    for (const log of logs) {
+      const key = log[field] ?? 'unknown';
+      result[key] = log._count.id;
+    }
+    return result;
+  }
+
+  /**
+   * Cuenta el total de logs en el sistema
+   *
+   * @returns Total de logs
+   */
+  async countTotal(): Promise<number> {
+    return this.prisma.auditLog.count();
+  }
+
+  /**
+   * Obtiene un audit log por ID
+   *
+   * @param id - ID del log
+   * @returns El log o null si no existe
+   */
+  async getById(id: string) {
+    return this.prisma.auditLog.findUnique({
+      where: { id },
+    });
+  }
+
+  /**
    * HELPER: Determinar severidad del evento
    *
    * @param action - Acción realizada

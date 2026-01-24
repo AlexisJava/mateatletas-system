@@ -49,6 +49,7 @@ export const AdminView = {
   PRODUCTOS: 'productos',
   SUSCRIPCIONES: 'suscripciones',
   CONTENIDOS: 'contenidos',
+  MONITORING: 'monitoring',
   SANDBOX: 'sandbox',
 } as const;
 
@@ -214,6 +215,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     icon: 'Repeat',
   },
   { view: AdminView.CONTENIDOS, label: 'Contenidos', href: '/admin/contenidos', icon: 'BookOpen' },
+  { view: AdminView.MONITORING, label: 'Monitoring', href: '/admin/monitoring', icon: 'Activity' },
   { view: AdminView.SANDBOX, label: 'Sandbox', href: '/admin/sandbox', icon: 'Code2' },
 ];
 

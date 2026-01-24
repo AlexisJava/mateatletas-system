@@ -2651,3 +2651,217 @@ export const getSuscripcionesMorosas = async (): Promise<MorosasResponse> => {
     throw error;
   }
 };
+
+// ============================================================================
+// QUEUE METRICS (BullMQ)
+// ============================================================================
+
+/** Estado de salud de la cola */
+export type QueueHealth = 'healthy' | 'degraded' | 'critical';
+
+/** Estadísticas de cola BullMQ */
+export interface QueueStats {
+  waiting: number;
+  active: number;
+  completed: number;
+  failed: number;
+  delayed: number;
+  health: QueueHealth;
+  failedRate: string;
+  timestamp: string;
+}
+
+/** Job fallido */
+export interface FailedJob {
+  id: string;
+  name: string;
+  data: Record<string, unknown>;
+  failedReason: string;
+  attemptsMade: number;
+  timestamp: number;
+  processedOn: number | null;
+  finishedOn: number | null;
+}
+
+/**
+ * Obtener estadísticas de colas BullMQ
+ * GET /queues/metrics/stats
+ */
+export const getQueueStats = async (): Promise<QueueStats> => {
+  try {
+    return await axios.get<QueueStats>('/queues/metrics/stats');
+  } catch (error) {
+    console.error('Error al obtener estadísticas de cola:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener últimos jobs fallidos
+ * GET /queues/metrics/failed
+ */
+export const getFailedJobs = async (limit = 50): Promise<FailedJob[]> => {
+  try {
+    return await axios.get<FailedJob[]>(`/queues/metrics/failed?limit=${limit}`);
+  } catch (error) {
+    console.error('Error al obtener jobs fallidos:', error);
+    throw error;
+  }
+};
+
+// ============================================================================
+// AUDIT LOGS
+// ============================================================================
+
+/** Severidad de audit log */
+export type AuditSeverity = 'info' | 'warning' | 'error' | 'critical';
+
+/** Categoría de audit log */
+export type AuditCategory =
+  | 'auth'
+  | 'payment'
+  | 'user_management'
+  | 'data_modification'
+  | 'security'
+  | 'system';
+
+/** Item de audit log */
+export interface AuditLogItem {
+  id: string;
+  timestamp: string;
+  userId: string | null;
+  userType: string | null;
+  userEmail: string | null;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  description: string;
+  changes: Record<string, unknown> | null;
+  metadata: Record<string, unknown> | null;
+  severity: AuditSeverity;
+  category: AuditCategory;
+  ipAddress: string | null;
+  userAgent: string | null;
+  requestId: string | null;
+  createdAt: string;
+}
+
+/** Estadísticas de audit logs */
+export interface AuditLogsStats {
+  byCategory: Record<string, number>;
+  bySeverity: Record<string, number>;
+  topActions: Record<string, number>;
+  total: number;
+  totalCritical: number;
+  mostRecent: {
+    id: string;
+    timestamp: string;
+    action: string;
+  } | null;
+}
+
+/** Respuesta paginada de audit logs */
+export interface AuditLogsListResponse {
+  items: AuditLogItem[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+/** Filtros para listar audit logs */
+export interface AuditLogsFilters {
+  userId?: string;
+  userEmail?: string;
+  action?: string;
+  entityType?: string;
+  category?: AuditCategory;
+  severity?: AuditSeverity;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+  offset?: number;
+}
+
+/**
+ * Obtener estadísticas de audit logs
+ * GET /admin/audit-logs/stats
+ */
+export const getAuditLogsStats = async (): Promise<AuditLogsStats> => {
+  try {
+    return await axios.get<AuditLogsStats>('/admin/audit-logs/stats');
+  } catch (error) {
+    console.error('Error al obtener estadísticas de audit logs:', error);
+    throw error;
+  }
+};
+
+/**
+ * Listar audit logs con filtros
+ * GET /admin/audit-logs
+ */
+export const getAuditLogsList = async (
+  filters?: AuditLogsFilters,
+): Promise<AuditLogsListResponse> => {
+  try {
+    const params = new URLSearchParams();
+    if (filters?.userId) params.append('userId', filters.userId);
+    if (filters?.userEmail) params.append('userEmail', filters.userEmail);
+    if (filters?.action) params.append('action', filters.action);
+    if (filters?.entityType) params.append('entityType', filters.entityType);
+    if (filters?.category) params.append('category', filters.category);
+    if (filters?.severity) params.append('severity', filters.severity);
+    if (filters?.startDate) params.append('startDate', filters.startDate);
+    if (filters?.endDate) params.append('endDate', filters.endDate);
+    if (filters?.limit) params.append('limit', String(filters.limit));
+    if (filters?.offset) params.append('offset', String(filters.offset));
+
+    const url = params.toString() ? `/admin/audit-logs?${params}` : '/admin/audit-logs';
+    return await axios.get<AuditLogsListResponse>(url);
+  } catch (error) {
+    console.error('Error al obtener lista de audit logs:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener detalle de un audit log
+ * GET /admin/audit-logs/:id
+ */
+export const getAuditLogById = async (id: string): Promise<AuditLogItem> => {
+  try {
+    return await axios.get<AuditLogItem>(`/admin/audit-logs/${id}`);
+  } catch (error) {
+    console.error('Error al obtener detalle de audit log:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener historial de una entidad
+ * GET /admin/audit-logs/entity/:entityType/:entityId
+ */
+export const getAuditLogEntityHistory = async (
+  entityType: string,
+  entityId: string,
+): Promise<AuditLogItem[]> => {
+  try {
+    return await axios.get<AuditLogItem[]>(`/admin/audit-logs/entity/${entityType}/${entityId}`);
+  } catch (error) {
+    console.error('Error al obtener historial de entidad:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener logs de un usuario
+ * GET /admin/audit-logs/user/:userId
+ */
+export const getAuditLogUserHistory = async (userId: string): Promise<AuditLogItem[]> => {
+  try {
+    return await axios.get<AuditLogItem[]>(`/admin/audit-logs/user/${userId}`);
+  } catch (error) {
+    console.error('Error al obtener logs de usuario:', error);
+    throw error;
+  }
+};
