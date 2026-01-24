@@ -1,9 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { X, UserPlus, Users, Search } from 'lucide-react';
+import { X, UserPlus, Users, Search, Check, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from '@/lib/axios';
+import { AdminModal } from './primitives/AdminModal';
+import { AdminButton } from './primitives/AdminButton';
+import { AdminInput } from './primitives/AdminInput';
+import { AdminSelect } from './primitives/AdminSelect';
+import { AdminCard } from './primitives/AdminCard';
+import { AdminBadge } from './primitives/AdminBadge';
 
 interface Estudiante {
   id: string;
@@ -52,6 +58,12 @@ interface Props {
   onSuccess: () => void;
 }
 
+const NIVEL_OPTIONS = [
+  { value: 'Primaria', label: 'Primaria' },
+  { value: 'Secundaria', label: 'Secundaria' },
+  { value: 'Universidad', label: 'Universidad' },
+];
+
 export default function GestionarEstudiantesModal({
   claseId,
   claseNombre,
@@ -77,7 +89,6 @@ export default function GestionarEstudiantesModal({
     tutorTelefono: '',
   });
 
-  // Ref para controlar el request actual y evitar race conditions
   const currentRequestRef = useRef<string | null>(null);
 
   const fetchData = useCallback(
@@ -90,27 +101,22 @@ export default function GestionarEstudiantesModal({
           axios.get('/admin/estudiantes'),
         ]);
 
-        // Verificar que este request siga siendo el actual (evita race condition)
         if (currentRequestRef.current !== requestId) return;
 
         const clase = (claseResponse as ClaseEstudiantes) ?? null;
         setClaseData(clase);
-        // El backend devuelve { data: [], metadata: {} }
         const estudiantes =
           (Array.isArray(estudiantesResponse)
             ? estudiantesResponse
             : (estudiantesResponse as { data?: Estudiante[] })?.data) ?? [];
         setTodosEstudiantes(estudiantes as Estudiante[]);
-      } catch (error) {
-        // Solo actualizar estado si el request sigue siendo actual
+      } catch (err) {
         if (currentRequestRef.current !== requestId) return;
-
-        console.error('Error al cargar datos:', error);
+        console.error('Error al cargar datos:', err);
         setError('Error al cargar datos');
         toast.error('Error al cargar datos de la clase');
-        setTodosEstudiantes([]); // Ensure we always have an array even on error
+        setTodosEstudiantes([]);
       } finally {
-        // Solo actualizar loading si el request sigue siendo actual
         if (currentRequestRef.current === requestId) {
           setLoading(false);
         }
@@ -120,13 +126,9 @@ export default function GestionarEstudiantesModal({
   );
 
   useEffect(() => {
-    // Generar ID único para este request
     const requestId = `clase-${claseId}-${Date.now()}`;
     currentRequestRef.current = requestId;
-
     void fetchData(requestId);
-
-    // Cleanup: invalidar el request anterior
     return () => {
       currentRequestRef.current = null;
     };
@@ -143,14 +145,13 @@ export default function GestionarEstudiantesModal({
         estudianteIds: selectedEstudiantes,
       });
 
-      // Generar nuevo request ID para el refresh
       const requestId = `clase-${claseId}-${Date.now()}`;
       currentRequestRef.current = requestId;
       await fetchData(requestId);
       setSelectedEstudiantes([]);
       onSuccess();
-    } catch (error) {
-      console.error('Error al asignar estudiantes:', error);
+    } catch (err) {
+      console.error('Error al asignar estudiantes:', err);
       setError('Error al asignar estudiantes');
       toast.error('Error al asignar estudiantes');
     } finally {
@@ -172,7 +173,6 @@ export default function GestionarEstudiantesModal({
     setError(null);
 
     try {
-      // Agregar el sectorId del docente de la clase al formulario
       const dataToSend = {
         ...createForm,
         sectorId: claseData?.docente?.sector?.id || undefined,
@@ -180,19 +180,12 @@ export default function GestionarEstudiantesModal({
 
       const nuevoEstudiante = await axios.post<Estudiante>('/admin/estudiantes', dataToSend);
 
-      // Validar que la respuesta tenga el estudiante
       if (!nuevoEstudiante || !nuevoEstudiante.id) {
-        console.error('Respuesta del servidor:', nuevoEstudiante);
         throw new Error('Respuesta inválida del servidor');
       }
 
-      // Agregar el nuevo estudiante a la lista
       setTodosEstudiantes((prev) => [...(prev || []), nuevoEstudiante]);
-
-      // Auto-seleccionarlo
       setSelectedEstudiantes((prev) => [...prev, nuevoEstudiante.id]);
-
-      // Resetear formulario
       setCreateForm({
         nombre: '',
         apellido: '',
@@ -203,10 +196,9 @@ export default function GestionarEstudiantesModal({
         tutorEmail: '',
         tutorTelefono: '',
       });
-
       setShowCreateForm(false);
-    } catch (error) {
-      console.error('Error al crear estudiante:', error);
+    } catch (err) {
+      console.error('Error al crear estudiante:', err);
       setError('Error al crear el estudiante');
       toast.error('Error al crear el estudiante');
     } finally {
@@ -214,12 +206,10 @@ export default function GestionarEstudiantesModal({
     }
   };
 
-  // Filtrar estudiantes que no están ya inscritos (con defensive check)
   const estudiantesDisponibles = (todosEstudiantes || []).filter(
     (est) => !claseData?.estudiantes.some((inscrito) => inscrito.id === est.id),
   );
 
-  // Filtrar por búsqueda (con defensive check)
   const estudiantesFiltrados = (estudiantesDisponibles || []).filter(
     (est) =>
       est.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -230,336 +220,272 @@ export default function GestionarEstudiantesModal({
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="backdrop-blur-xl bg-emerald-500/[0.08] rounded-2xl p-8 border border-emerald-500/20 shadow-2xl shadow-emerald-500/20">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-emerald-500/20 border-t-emerald-400"></div>
-          <p className="mt-4 text-white/60 font-medium">Cargando datos...</p>
+      <AdminModal open={true} onClose={onClose} title="Cargando..." size="lg">
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="w-12 h-12 text-[var(--admin-accent)] animate-spin" />
+          <p className="mt-4 text-[var(--admin-text-muted)]">Cargando datos...</p>
         </div>
-      </div>
+      </AdminModal>
     );
   }
 
-  return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="backdrop-blur-xl bg-emerald-500/[0.08] rounded-2xl max-w-5xl w-full shadow-2xl shadow-emerald-500/20 border border-emerald-500/20 max-h-[95vh] sm:max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-emerald-500/20">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2">
-              <Users className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400 flex-shrink-0" />
-              <span className="truncate">Gestionar Estudiantes</span>
-            </h3>
-            <p className="text-xs sm:text-sm text-white/60 mt-1 truncate">{claseNombre}</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-emerald-500/10 rounded-xl transition-colors flex-shrink-0 ml-2"
-          >
-            <X className="w-5 h-5 text-white/50" />
-          </button>
-        </div>
+  const footer = (
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 w-full">
+      <div className="text-sm text-[var(--admin-text-muted)]">
+        Cupos disponibles:{' '}
+        <span className="text-[var(--status-success)] font-semibold">
+          {claseData?.cuposDisponibles || 0}
+        </span>
+      </div>
+      <AdminButton variant="secondary" onClick={onClose}>
+        Cerrar
+      </AdminButton>
+    </div>
+  );
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-          {error && (
-            <div className="mb-4 backdrop-blur-xl bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3 rounded-xl text-sm font-medium">
-              {error}
+  return (
+    <AdminModal
+      open={true}
+      onClose={onClose}
+      title="Gestionar Estudiantes"
+      description={claseNombre}
+      size="xl"
+      footer={footer}
+    >
+      {error && (
+        <div className="mb-4 bg-[var(--status-danger-muted)] border border-[var(--status-danger)]/30 text-[var(--status-danger)] px-4 py-3 rounded-xl text-sm">
+          {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Columna izquierda: Estudiantes inscritos */}
+        <AdminCard padding="md" animate={false}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+            <h4 className="text-sm font-semibold text-[var(--admin-text)] flex items-center gap-2">
+              <Users className="w-4 h-4 text-[var(--admin-accent)]" />
+              Estudiantes Inscritos
+            </h4>
+            <div className="text-sm">
+              <span className="text-[var(--status-success)] font-semibold">
+                {claseData?.cuposOcupados || 0}
+              </span>
+              <span className="text-[var(--admin-text-muted)]">
+                {' '}
+                / {claseData?.cuposMaximo || 0} cupos
+              </span>
+            </div>
+          </div>
+
+          {claseData && claseData.estudiantes.length === 0 ? (
+            <div className="text-center py-8 text-[var(--admin-text-muted)] bg-white/[0.02] rounded-xl border border-dashed border-white/[0.08]">
+              <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No hay estudiantes inscritos aún</p>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {claseData?.estudiantes.map((estudiante) => (
+                <EstudianteRow key={estudiante.id} estudiante={estudiante} />
+              ))}
             </div>
           )}
+        </AdminCard>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Columna izquierda: Estudiantes inscritos */}
-            <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl p-4 border border-emerald-500/20">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-                <h4 className="text-base sm:text-lg font-bold text-white">Estudiantes Inscritos</h4>
-                <div className="text-sm">
-                  <span className="text-emerald-400 font-bold">
-                    {claseData?.cuposOcupados || 0}
-                  </span>
-                  <span className="text-white/60"> / {claseData?.cuposMaximo || 0} cupos</span>
+        {/* Columna derecha: Asignar estudiantes */}
+        <AdminCard padding="md" animate={false}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+            <h4 className="text-sm font-semibold text-[var(--admin-text)]">
+              Asignar Nuevos Estudiantes
+            </h4>
+            <AdminButton
+              variant={showCreateForm ? 'secondary' : 'primary'}
+              size="sm"
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              icon={<UserPlus className="w-4 h-4" />}
+            >
+              {showCreateForm ? 'Cancelar' : 'Crear Nuevo'}
+            </AdminButton>
+          </div>
+
+          {showCreateForm ? (
+            <form onSubmit={handleCrearEstudiante} className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <AdminInput
+                  label="Nombre *"
+                  required
+                  value={createForm.nombre}
+                  onChange={(e) => setCreateForm({ ...createForm, nombre: e.target.value })}
+                />
+                <AdminInput
+                  label="Apellido *"
+                  required
+                  value={createForm.apellido}
+                  onChange={(e) => setCreateForm({ ...createForm, apellido: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <AdminInput
+                  label="Edad *"
+                  type="number"
+                  required
+                  min={3}
+                  max={99}
+                  value={createForm.edad}
+                  onChange={(e) => setCreateForm({ ...createForm, edad: e.target.value })}
+                  placeholder="ej: 8"
+                />
+                <AdminSelect
+                  label="Nivel Escolar *"
+                  value={createForm.nivelEscolar}
+                  onChange={(e) =>
+                    setCreateForm({
+                      ...createForm,
+                      nivelEscolar: e.target.value as 'Primaria' | 'Secundaria' | 'Universidad',
+                    })
+                  }
+                  options={NIVEL_OPTIONS}
+                />
+              </div>
+              <div className="border-t border-white/[0.08] pt-3">
+                <p className="text-xs text-[var(--admin-text-muted)] mb-2">
+                  Datos del Tutor (opcional)
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <AdminInput
+                    label="Nombre Tutor"
+                    value={createForm.tutorNombre}
+                    onChange={(e) => setCreateForm({ ...createForm, tutorNombre: e.target.value })}
+                  />
+                  <AdminInput
+                    label="Apellido Tutor"
+                    value={createForm.tutorApellido}
+                    onChange={(e) =>
+                      setCreateForm({ ...createForm, tutorApellido: e.target.value })
+                    }
+                  />
                 </div>
               </div>
+              <AdminButton
+                type="submit"
+                variant="primary"
+                loading={submitting}
+                icon={<UserPlus className="w-4 h-4" />}
+                className="w-full"
+              >
+                Crear y Seleccionar
+              </AdminButton>
+            </form>
+          ) : (
+            <>
+              <div className="mb-4">
+                <AdminInput
+                  placeholder="Buscar estudiante o tutor..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  leftIcon={<Search className="w-4 h-4" />}
+                />
+              </div>
 
-              {claseData && claseData.estudiantes.length === 0 ? (
-                <div className="text-center py-8 text-white/50 bg-black/30 rounded-lg border border-dashed border-emerald-500/20">
-                  <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No hay estudiantes inscritos aún</p>
+              {claseData && claseData.cuposDisponibles === 0 ? (
+                <div className="text-center py-6 text-[var(--status-warning)] bg-[var(--status-warning-muted)] rounded-xl border border-[var(--status-warning)]/30">
+                  <p className="text-sm font-medium">⚠️ No hay cupos disponibles</p>
+                </div>
+              ) : estudiantesFiltrados.length === 0 ? (
+                <div className="text-center py-6 text-[var(--admin-text-muted)] bg-white/[0.02] rounded-xl border border-dashed border-white/[0.08]">
+                  <p className="text-sm">
+                    {searchTerm
+                      ? 'No se encontraron estudiantes'
+                      : 'No hay más estudiantes disponibles'}
+                  </p>
                 </div>
               ) : (
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {claseData?.estudiantes.map((estudiante) => (
-                    <div
+                <div className="space-y-2 max-h-64 overflow-y-auto mb-4">
+                  {estudiantesFiltrados.map((estudiante) => (
+                    <SelectableEstudianteRow
                       key={estudiante.id}
-                      className="flex items-center justify-between p-3 backdrop-blur-xl bg-black/40 border border-emerald-500/20 rounded-lg hover:bg-emerald-500/10 transition-all"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-emerald-500/30">
-                          {estudiante.nombre.charAt(0)}
-                          {estudiante.apellido.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-white">
-                            {estudiante.nombre} {estudiante.apellido}
-                          </p>
-                          <p className="text-xs text-white/60">
-                            Tutor: {estudiante.tutor.nombre} {estudiante.tutor.apellido}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                      estudiante={estudiante}
+                      selected={selectedEstudiantes.includes(estudiante.id)}
+                      onToggle={() => toggleEstudiante(estudiante.id)}
+                    />
                   ))}
                 </div>
               )}
-            </div>
 
-            {/* Columna derecha: Asignar estudiantes */}
-            <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl p-4 border border-emerald-500/20">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-                <h4 className="text-base sm:text-lg font-bold text-white">
-                  Asignar Nuevos Estudiantes
-                </h4>
-                <button
-                  onClick={() => setShowCreateForm(!showCreateForm)}
-                  className="px-3 py-1.5 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-lg font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all shadow-lg shadow-teal-500/30 text-sm flex items-center justify-center gap-2 whitespace-nowrap"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  {showCreateForm ? 'Cancelar' : 'Crear Nuevo'}
-                </button>
-              </div>
-
-              {/* Formulario de creación */}
-              {showCreateForm ? (
-                <form
-                  onSubmit={handleCrearEstudiante}
-                  className="space-y-3 mb-4 backdrop-blur-xl bg-black/30 p-4 rounded-lg border border-emerald-500/30"
-                >
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-emerald-100 mb-1">
-                        Nombre *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={createForm.nombre}
-                        onChange={(e) => setCreateForm({ ...createForm, nombre: e.target.value })}
-                        className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-emerald-100 mb-1">
-                        Apellido *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={createForm.apellido}
-                        onChange={(e) => setCreateForm({ ...createForm, apellido: e.target.value })}
-                        className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-emerald-100 mb-1">
-                        Edad *
-                      </label>
-                      <input
-                        type="number"
-                        required
-                        min="3"
-                        max="99"
-                        value={createForm.edad}
-                        onChange={(e) => setCreateForm({ ...createForm, edad: e.target.value })}
-                        placeholder="ej: 8"
-                        className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-emerald-100 mb-1">
-                        Nivel Escolar *
-                      </label>
-                      <select
-                        required
-                        value={createForm.nivelEscolar}
-                        onChange={(e) =>
-                          setCreateForm({
-                            ...createForm,
-                            nivelEscolar: e.target.value as
-                              | 'Primaria'
-                              | 'Secundaria'
-                              | 'Universidad',
-                          })
-                        }
-                        className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
-                      >
-                        <option value="Primaria">Primaria</option>
-                        <option value="Secundaria">Secundaria</option>
-                        <option value="Universidad">Universidad</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-emerald-500/20 pt-3">
-                    <p className="text-xs text-white/60 mb-2">Datos del Tutor (opcional)</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-emerald-100 mb-1">
-                          Nombre Tutor
-                        </label>
-                        <input
-                          type="text"
-                          value={createForm.tutorNombre}
-                          onChange={(e) =>
-                            setCreateForm({ ...createForm, tutorNombre: e.target.value })
-                          }
-                          className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-emerald-100 mb-1">
-                          Apellido Tutor
-                        </label>
-                        <input
-                          type="text"
-                          value={createForm.tutorApellido}
-                          onChange={(e) =>
-                            setCreateForm({ ...createForm, tutorApellido: e.target.value })
-                          }
-                          className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full px-4 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-lg font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all shadow-lg shadow-teal-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    {submitting ? 'Creando...' : 'Crear y Seleccionar'}
-                  </button>
-                </form>
-              ) : (
-                <>
-                  {/* Buscador */}
-                  <div className="mb-4">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
-                      <input
-                        type="text"
-                        placeholder="Buscar estudiante o tutor..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Lista de estudiantes disponibles */}
-              {!showCreateForm && (
-                <>
-                  {claseData && claseData.cuposDisponibles === 0 ? (
-                    <div className="text-center py-8 text-yellow-300 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
-                      <p className="text-sm font-medium">⚠️ No hay cupos disponibles</p>
-                    </div>
-                  ) : estudiantesFiltrados.length === 0 ? (
-                    <div className="text-center py-8 text-white/50 bg-black/30 rounded-lg border border-dashed border-emerald-500/20">
-                      <p className="text-sm">
-                        {searchTerm
-                          ? 'No se encontraron estudiantes'
-                          : 'No hay más estudiantes disponibles'}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2 max-h-72 overflow-y-auto mb-4">
-                      {estudiantesFiltrados.map((estudiante) => (
-                        <div
-                          key={estudiante.id}
-                          onClick={() => toggleEstudiante(estudiante.id)}
-                          className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
-                            selectedEstudiantes.includes(estudiante.id)
-                              ? 'bg-emerald-500/20 border-2 border-emerald-400'
-                              : 'backdrop-blur-xl bg-black/40 border border-emerald-500/20 hover:bg-emerald-500/10'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-emerald-500/30">
-                              {estudiante.nombre.charAt(0)}
-                              {estudiante.apellido.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="text-sm font-bold text-white">
-                                {estudiante.nombre} {estudiante.apellido}
-                              </p>
-                              <p className="text-xs text-white/60">
-                                {estudiante.nivelEscolar} • Tutor: {estudiante.tutor.nombre}
-                              </p>
-                            </div>
-                          </div>
-                          {selectedEstudiantes.includes(estudiante.id) && (
-                            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-400 flex items-center justify-center">
-                              <svg
-                                className="w-3 h-3 text-white"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={3}
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-
-              {/* Botón de asignar */}
-              {!showCreateForm && selectedEstudiantes.length > 0 && (
-                <button
+              {selectedEstudiantes.length > 0 && (
+                <AdminButton
+                  variant="primary"
                   onClick={handleAsignarEstudiantes}
-                  disabled={
-                    submitting || (claseData?.cuposDisponibles || 0) < selectedEstudiantes.length
-                  }
-                  className="w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  loading={submitting}
+                  disabled={(claseData?.cuposDisponibles || 0) < selectedEstudiantes.length}
+                  icon={<UserPlus className="w-4 h-4" />}
+                  className="w-full"
                 >
-                  <UserPlus className="w-5 h-5" />
-                  {submitting
-                    ? 'Asignando...'
-                    : `Asignar ${selectedEstudiantes.length} estudiante(s)`}
-                </button>
+                  Asignar {selectedEstudiantes.length} estudiante(s)
+                </AdminButton>
               )}
-            </div>
-          </div>
-        </div>
+            </>
+          )}
+        </AdminCard>
+      </div>
+    </AdminModal>
+  );
+}
 
-        {/* Footer */}
-        <div className="border-t border-emerald-500/20 p-4 sm:p-6 backdrop-blur-xl bg-emerald-500/[0.05]">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-            <div className="text-xs sm:text-sm text-white/60 text-center sm:text-left">
-              Cupos disponibles:{' '}
-              <span className="text-emerald-400 font-bold">{claseData?.cuposDisponibles || 0}</span>
-            </div>
-            <button
-              onClick={onClose}
-              className="w-full sm:w-auto px-6 py-2.5 border-2 border-emerald-500/30 text-emerald-100 rounded-xl font-semibold hover:bg-emerald-500/10 transition-all"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
+function EstudianteRow({ estudiante }: { estudiante: EstudianteInscrito }) {
+  return (
+    <div className="flex items-center gap-3 p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+      <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-gradient-to-br from-[var(--admin-accent)] to-[var(--admin-accent-hover)] flex items-center justify-center text-white font-semibold text-sm">
+        {estudiante.nombre.charAt(0)}
+        {estudiante.apellido.charAt(0)}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-[var(--admin-text)] truncate">
+          {estudiante.nombre} {estudiante.apellido}
+        </p>
+        <p className="text-xs text-[var(--admin-text-muted)] truncate">
+          Tutor: {estudiante.tutor.nombre} {estudiante.tutor.apellido}
+        </p>
       </div>
     </div>
+  );
+}
+
+function SelectableEstudianteRow({
+  estudiante,
+  selected,
+  onToggle,
+}: {
+  estudiante: Estudiante;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${
+        selected
+          ? 'bg-[var(--admin-accent)]/10 border-2 border-[var(--admin-accent)]'
+          : 'bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04]'
+      }`}
+    >
+      <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-gradient-to-br from-[var(--admin-accent)] to-[var(--admin-accent-hover)] flex items-center justify-center text-white font-semibold text-sm">
+        {estudiante.nombre.charAt(0)}
+        {estudiante.apellido.charAt(0)}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-[var(--admin-text)] truncate">
+          {estudiante.nombre} {estudiante.apellido}
+        </p>
+        <p className="text-xs text-[var(--admin-text-muted)] truncate">
+          {estudiante.nivelEscolar} • Tutor: {estudiante.tutor.nombre}
+        </p>
+      </div>
+      {selected && (
+        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--admin-accent)] flex items-center justify-center">
+          <Check className="w-3 h-3 text-white" />
+        </div>
+      )}
+    </button>
   );
 }
