@@ -115,6 +115,30 @@ export const SUSCRIPCION_ESTADO_COLORS: Record<string, EstadoColorConfig> = {
 } as const;
 
 /**
+ * Mapeo de estados de suscripción Mercado Pago a colores
+ */
+export const SUSCRIPCION_MP_ESTADO_COLORS: Record<string, EstadoColorConfig> = {
+  AUTHORIZED: {
+    bg: 'var(--status-success-muted)',
+    text: 'var(--status-success)',
+    variant: 'success',
+  },
+  PENDING: { bg: 'var(--status-pending-muted)', text: 'var(--status-pending)', variant: 'pending' },
+  PAUSED: { bg: 'var(--status-warning-muted)', text: 'var(--status-warning)', variant: 'warning' },
+  CANCELLED: { bg: 'var(--status-danger-muted)', text: 'var(--status-danger)', variant: 'danger' },
+} as const;
+
+/**
+ * Mapeo de estados de suscripción Mercado Pago a labels en español
+ */
+export const SUSCRIPCION_MP_ESTADO_LABELS: Record<string, string> = {
+  AUTHORIZED: 'Activa',
+  PENDING: 'Pendiente',
+  PAUSED: 'Pausada',
+  CANCELLED: 'Cancelada',
+} as const;
+
+/**
  * Obtener variant de badge para un estado genérico
  */
 export function getEstadoVariant(estado: string): EstadoVariant {
@@ -146,6 +170,45 @@ export function getEstadoVariant(estado: string): EstadoVariant {
   }
 
   return 'neutral';
+}
+
+// ============================================================================
+// PLANES - Colores por tipo de plan
+// ============================================================================
+
+export type PlanTipo = 'STEAM_SINCRONICO' | 'STEAM_ASINCRONICO' | 'STEAM_LIBROS' | 'SIN_PLAN';
+
+export interface PlanColorConfig {
+  bg: string;
+  text: string;
+}
+
+export const PLAN_COLORS: Record<PlanTipo, PlanColorConfig> = {
+  STEAM_SINCRONICO: {
+    bg: 'bg-emerald-500/20',
+    text: 'text-emerald-400',
+  },
+  STEAM_ASINCRONICO: {
+    bg: 'bg-blue-500/20',
+    text: 'text-blue-400',
+  },
+  STEAM_LIBROS: {
+    bg: 'bg-amber-500/20',
+    text: 'text-amber-400',
+  },
+  SIN_PLAN: {
+    bg: 'bg-gray-500/20',
+    text: 'text-gray-400',
+  },
+} as const;
+
+/**
+ * Obtener colores de un plan de forma segura
+ */
+export function getPlanColors(planNombre: string | null | undefined): PlanColorConfig {
+  if (!planNombre) return PLAN_COLORS.SIN_PLAN;
+  const key = planNombre.toUpperCase() as PlanTipo;
+  return PLAN_COLORS[key] ?? PLAN_COLORS.SIN_PLAN;
 }
 
 // ============================================================================
@@ -184,9 +247,22 @@ export const MUNDO_COLORS: Record<MundoTipo, MundoColorConfig> = {
 
 /**
  * Obtener colores de un mundo de forma segura
+ * Maneja variantes: MATEMATICA/MATEMATICAS, PROGRAMACION, CIENCIAS/CIENCIA
  */
 export function getMundoColors(mundo: string | null | undefined): MundoColorConfig {
-  const key = (mundo?.toUpperCase() ?? 'MATEMATICAS') as MundoTipo;
+  if (!mundo) return MUNDO_COLORS.MATEMATICAS;
+
+  const normalized = mundo.toUpperCase();
+
+  // Normalizar variantes
+  if (normalized === 'MATEMATICA' || normalized === 'MATEMATICAS') {
+    return MUNDO_COLORS.MATEMATICAS;
+  }
+  if (normalized === 'CIENCIA' || normalized === 'CIENCIAS') {
+    return MUNDO_COLORS.CIENCIAS;
+  }
+
+  const key = normalized as MundoTipo;
   return MUNDO_COLORS[key] ?? MUNDO_COLORS.MATEMATICAS;
 }
 

@@ -3,6 +3,13 @@
 import { Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { SuscripcionFamiliarDetalle } from '@/lib/api/suscripcion-familiar.api';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
+import { AdminBadge } from '@/components/admin/primitives';
+import {
+  SUSCRIPCION_MP_ESTADO_COLORS,
+  SUSCRIPCION_MP_ESTADO_LABELS,
+  getPlanColors,
+  type EstadoVariant,
+} from '@/components/admin/constants/colors.constants';
 
 interface SuscripcionesTableProps {
   suscripciones: SuscripcionFamiliarDetalle[];
@@ -12,63 +19,30 @@ interface SuscripcionesTableProps {
   onPageChange: (page: number) => void;
 }
 
-/** Badge de estado con colores */
+/** Badge de estado con colores - usa CSS variables */
 function EstadoBadge({ estado }: { estado: string }) {
-  const config: Record<string, { label: string; className: string }> = {
-    AUTHORIZED: {
-      label: 'Activa',
-      className: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    },
-    PENDING: {
-      label: 'Pendiente',
-      className: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    },
-    PAUSED: {
-      label: 'Pausada',
-      className: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    },
-    CANCELLED: {
-      label: 'Cancelada',
-      className: 'bg-red-500/20 text-red-400 border-red-500/30',
-    },
-  };
+  const config = SUSCRIPCION_MP_ESTADO_COLORS[estado];
+  const label = SUSCRIPCION_MP_ESTADO_LABELS[estado] ?? estado;
+  const variant: EstadoVariant = config?.variant ?? 'neutral';
 
-  const { label, className } = config[estado] ?? {
-    label: estado,
-    className: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-  };
-
-  return (
-    <span className={`px-2 py-1 text-xs font-medium rounded-full border ${className}`}>
-      {label}
-    </span>
-  );
+  return <AdminBadge variant={variant}>{label}</AdminBadge>;
 }
 
-/** Badge de tier con colores */
+/** Badge de tier con colores - usa constantes centralizadas */
 function TierBadge({ tier }: { tier: string }) {
-  const config: Record<string, { label: string; className: string }> = {
-    STEAM_LIBROS: {
-      label: 'Libros',
-      className: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    },
-    STEAM_ASINCRONICO: {
-      label: 'Asincrónico',
-      className: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-    },
-    STEAM_SINCRONICO: {
-      label: 'Sincrónico',
-      className: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
-    },
+  const TIER_LABELS: Record<string, string> = {
+    STEAM_LIBROS: 'Libros',
+    STEAM_ASINCRONICO: 'Asincrónico',
+    STEAM_SINCRONICO: 'Sincrónico',
   };
 
-  const { label, className } = config[tier] ?? {
-    label: tier,
-    className: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-  };
+  const planColors = getPlanColors(tier);
+  const label = TIER_LABELS[tier] ?? tier;
 
   return (
-    <span className={`px-2 py-1 text-xs font-medium rounded-full border ${className}`}>
+    <span
+      className={`px-2 py-1 text-xs font-medium rounded-md ${planColors.bg} ${planColors.text}`}
+    >
       {label}
     </span>
   );

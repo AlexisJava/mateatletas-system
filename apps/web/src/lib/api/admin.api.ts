@@ -2438,3 +2438,159 @@ export const getProductoConPlanificacion = async (
     throw error;
   }
 };
+
+// ============================================================================
+// DEAD LETTER QUEUE (DLQ) - WEBHOOKS FALLIDOS
+// ============================================================================
+
+/** Estado de webhook en DLQ */
+export type DlqStatus = 'PENDING' | 'PROCESSING' | 'RESOLVED' | 'ABANDONED';
+
+/** Item de webhook fallido */
+export interface WebhookFailedItem {
+  id: string;
+  paymentId: string;
+  webhookType: string;
+  payload: Record<string, unknown>;
+  errorMessage: string;
+  errorStack: string | null;
+  retries: number;
+  status: DlqStatus;
+  lastRetryAt: string | null;
+  resolvedAt: string | null;
+  resolvedBy: string | null;
+  resolutionNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Estadísticas de DLQ */
+export interface DlqStats {
+  byStatus: Record<DlqStatus, number>;
+  totalPending: number;
+  oldestPending: {
+    id: string;
+    createdAt: string;
+    paymentId: string;
+  } | null;
+}
+
+/** Respuesta paginada de DLQ */
+export interface DlqListResponse {
+  items: WebhookFailedItem[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+/** Filtros para listar DLQ */
+export interface DlqFilters {
+  status?: DlqStatus;
+  paymentId?: string;
+  webhookType?: string;
+  fromDate?: string;
+  toDate?: string;
+  limit?: number;
+  offset?: number;
+}
+
+/**
+ * Obtener estadísticas de webhooks en DLQ
+ * GET /admin/webhooks/dlq/stats
+ */
+export const getDlqStats = async (): Promise<DlqStats> => {
+  try {
+    return await axios.get<DlqStats>('/admin/webhooks/dlq/stats');
+  } catch (error) {
+    console.error('Error al obtener estadísticas de DLQ:', error);
+    throw error;
+  }
+};
+
+/**
+ * Listar webhooks en DLQ con filtros
+ * GET /admin/webhooks/dlq
+ */
+export const getDlqList = async (filters?: DlqFilters): Promise<DlqListResponse> => {
+  try {
+    const params = new URLSearchParams();
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.paymentId) params.append('paymentId', filters.paymentId);
+    if (filters?.webhookType) params.append('webhookType', filters.webhookType);
+    if (filters?.fromDate) params.append('fromDate', filters.fromDate);
+    if (filters?.toDate) params.append('toDate', filters.toDate);
+    if (filters?.limit) params.append('limit', String(filters.limit));
+    if (filters?.offset) params.append('offset', String(filters.offset));
+
+    const url = params.toString() ? `/admin/webhooks/dlq?${params}` : '/admin/webhooks/dlq';
+    return await axios.get<DlqListResponse>(url);
+  } catch (error) {
+    console.error('Error al obtener lista de DLQ:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener detalle de un webhook fallido
+ * GET /admin/webhooks/dlq/:id
+ */
+export const getDlqById = async (id: string): Promise<WebhookFailedItem> => {
+  try {
+    return await axios.get<WebhookFailedItem>(`/admin/webhooks/dlq/${id}`);
+  } catch (error) {
+    console.error('Error al obtener detalle de webhook:', error);
+    throw error;
+  }
+};
+
+/**
+ * Marcar webhook como resuelto
+ * POST /admin/webhooks/dlq/:id/resolve
+ */
+export const resolveDlqWebhook = async (
+  id: string,
+  resolutionNotes?: string,
+): Promise<WebhookFailedItem> => {
+  try {
+    return await axios.post<WebhookFailedItem>(`/admin/webhooks/dlq/${id}/resolve`, {
+      resolutionNotes,
+    });
+  } catch (error) {
+    console.error('Error al resolver webhook:', error);
+    throw error;
+  }
+};
+
+/**
+ * Marcar webhook como abandonado
+ * POST /admin/webhooks/dlq/:id/abandon
+ */
+export const abandonDlqWebhook = async (
+  id: string,
+  resolutionNotes?: string,
+): Promise<WebhookFailedItem> => {
+  try {
+    return await axios.post<WebhookFailedItem>(`/admin/webhooks/dlq/${id}/abandon`, {
+      resolutionNotes,
+    });
+  } catch (error) {
+    console.error('Error al abandonar webhook:', error);
+    throw error;
+  }
+};
+
+/**
+ * Limpiar webhooks antiguos resueltos/abandonados
+ * POST /admin/webhooks/dlq/cleanup
+ */
+export const cleanupDlq = async (): Promise<{ deletedCount: number; message: string }> => {
+  try {
+    return await axios.post<{ deletedCount: number; message: string }>(
+      '/admin/webhooks/dlq/cleanup',
+    );
+  } catch (error) {
+    console.error('Error al limpiar DLQ:', error);
+    throw error;
+  }
+};

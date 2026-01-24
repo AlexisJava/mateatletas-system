@@ -6,6 +6,11 @@ import { MoreVertical, Eye, Edit, Trash2, Home, CreditCard, Key } from 'lucide-r
 import { formatDate } from '@/lib/utils/format';
 import type { PersonRowProps } from '../types/personas.types';
 import { ROLE_CONFIG } from '../constants/role-config';
+import {
+  getCasaColors,
+  getMundoColors,
+  getPlanColors,
+} from '@/components/admin/constants/colors.constants';
 
 /**
  * PersonRow - Fila de persona en tabla
@@ -92,17 +97,16 @@ export function PersonRow({ person, onView, onEdit, onDelete, onCredenciales }: 
             )}
             <div className="flex items-center gap-1.5">
               <CreditCard className="w-3.5 h-3.5 text-[var(--admin-text-muted)]" />
-              <span
-                className={`text-xs px-1.5 py-0.5 rounded ${
-                  person.planNombre === 'STEAM_SINCRONICO'
-                    ? 'bg-emerald-500/20 text-emerald-400'
-                    : person.planNombre
-                      ? 'bg-blue-500/20 text-blue-400'
-                      : 'bg-gray-500/20 text-gray-400'
-                }`}
-              >
-                {formatPlanName(person.planNombre)}
-              </span>
+              {(() => {
+                const planColors = getPlanColors(person.planNombre);
+                return (
+                  <span
+                    className={`text-xs px-1.5 py-0.5 rounded ${planColors.bg} ${planColors.text}`}
+                  >
+                    {formatPlanName(person.planNombre)}
+                  </span>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -111,20 +115,17 @@ export function PersonRow({ person, onView, onEdit, onDelete, onCredenciales }: 
             {/* Casas asignadas */}
             {person.casasAsignadas && person.casasAsignadas.length > 0 ? (
               <div className="flex items-center gap-1 flex-wrap">
-                {person.casasAsignadas.map((casa) => (
-                  <span
-                    key={casa}
-                    className={`text-xs px-1.5 py-0.5 rounded ${
-                      casa === 'QUANTUM'
-                        ? 'bg-cyan-500/20 text-cyan-400'
-                        : casa === 'VERTEX'
-                          ? 'bg-orange-500/20 text-orange-400'
-                          : 'bg-purple-500/20 text-purple-400'
-                    }`}
-                  >
-                    {casa}
-                  </span>
-                ))}
+                {person.casasAsignadas.map((casa) => {
+                  const casaColors = getCasaColors(casa);
+                  return (
+                    <span
+                      key={casa}
+                      className={`text-xs px-1.5 py-0.5 rounded ${casaColors.bg} ${casaColors.text}`}
+                    >
+                      {casa}
+                    </span>
+                  );
+                })}
               </div>
             ) : (
               <span className="text-xs text-[var(--admin-text-muted)]">Sin casas</span>
@@ -132,20 +133,17 @@ export function PersonRow({ person, onView, onEdit, onDelete, onCredenciales }: 
             {/* Mundos asignados */}
             {person.mundosAsignados && person.mundosAsignados.length > 0 && (
               <div className="flex items-center gap-1 flex-wrap">
-                {person.mundosAsignados.map((mundo) => (
-                  <span
-                    key={mundo}
-                    className={`text-xs px-1.5 py-0.5 rounded ${
-                      mundo === 'MATEMATICA'
-                        ? 'bg-blue-500/20 text-blue-400'
-                        : mundo === 'PROGRAMACION'
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-amber-500/20 text-amber-400'
-                    }`}
-                  >
-                    {mundo.slice(0, 4)}
-                  </span>
-                ))}
+                {person.mundosAsignados.map((mundo) => {
+                  const mundoColors = getMundoColors(mundo);
+                  return (
+                    <span
+                      key={mundo}
+                      className={`text-xs px-1.5 py-0.5 rounded ${mundoColors.bg} ${mundoColors.text}`}
+                    >
+                      {mundo.slice(0, 4)}
+                    </span>
+                  );
+                })}
               </div>
             )}
           </div>
