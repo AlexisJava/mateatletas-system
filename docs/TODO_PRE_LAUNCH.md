@@ -1,7 +1,7 @@
 # TODO PRE-LANZAMIENTO MATEATLETAS
 
 **Última actualización:** 2026-01-23
-**Estado:** 1/28 completados
+**Estado:** 1/29 completados
 
 ---
 
@@ -125,6 +125,17 @@
   - Archivo: `apps/api/src/suscripciones/services/suscripcion-query.service.ts:289`
   - El campo `estudiantes` retorna array vacío
   - **Fix:** Implementar cuando se vincule modelo con estudiantes
+
+- [ ] **[MED-009]** Categorías de Contenido
+  - Agregar modelo `CategoriaContenido` para agrupar microlecciones por tema dentro de cada mundo
+  - **Subtareas:**
+    - [ ] Modelo `CategoriaContenido` (nombre, mundoTipo, orden, icono)
+    - [ ] FK `categoriaId` en `Contenido`
+    - [ ] Migración
+    - [ ] CRUD admin de categorías
+    - [ ] Endpoint estudiante filtrar/agrupar por categoría
+    - [ ] Seeds iniciales
+  - **Contexto:** Necesario para navegación de mundos en nuevo portal estudiante
 
 ---
 

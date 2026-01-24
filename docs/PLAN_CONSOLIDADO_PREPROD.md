@@ -1,7 +1,7 @@
 # Plan Consolidado Pre-Producción 2026
 
-> **Estado**: EN PLANIFICACIÓN
-> **Fecha**: 2026-01-19
+> **Estado**: EN PROGRESO
+> **Fecha**: 2026-01-23
 > **Basado en**: AUDITORIA_PREPROD_2026.md + PLAN_IMPLEMENTACION_CROSS_PORTAL.md
 > **Branch sugerido**: `feat/preprod-fixes`
 
@@ -11,18 +11,19 @@
 
 Este documento consolida TODOS los items pendientes de las auditorías individuales y cross-portal en un solo plan de acción ordenado estratégicamente.
 
-### Estadísticas Globales
+### Estadísticas Globales (Actualizado 2026-01-23)
 
 | Portal/Sistema       | Funcional | Parcial | Pendiente | Total |
 | -------------------- | --------- | ------- | --------- | ----- |
-| Portal Estudiante    | ~55%      | -       | ~45%      | ~30   |
-| Portal Tutor         | ~62%      | -       | ~38%      | 29    |
-| Portal Docente       | ~80%      | -       | ~20%      | 66    |
-| Portal Admin         | ~71%      | -       | ~29%      | 152   |
-| Notificaciones       | ~40%      | -       | ~60%      | 48    |
+| Portal Estudiante    | ~65%      | -       | ~35%      | ~30   |
+| Portal Tutor         | ~70%      | -       | ~30%      | 29    |
+| Portal Docente       | ~90%      | -       | ~10%      | 66    |
+| Portal Admin         | ~80%      | -       | ~20%      | 152   |
+| Notificaciones       | ~85%      | -       | ~15%      | 48    |
 | MercadoPago 2026     | ~87%      | -       | ~13%      | 112   |
-| Sistema de Contenido | ~59%      | -       | ~41%      | 114   |
-| Cross-Portal         | ~69%      | -       | ~31%      | 70    |
+| Sistema de Contenido | ~65%      | -       | ~35%      | 114   |
+| Cross-Portal         | ~75%      | -       | ~25%      | 70    |
+| **Aula Viva WS**     | **100%**  | -       | **0%**    | 37    |
 
 ---
 
@@ -943,6 +944,36 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 - [ ] 9.3 Drag & drop para reordenar nodos
 - [ ] 9.4 Asegurar TODO el contenido sea autocorregible (P1 ALTO)
 
+### FASE 10: Aula Viva WebSocket ✅ COMPLETADA
+
+> **37+ tests E2E passing** - Ver `docs/PREPROD_DOCENTE_ESTUDIANTE.md` para detalles
+
+#### Sprint 1: Control de Clase ✅ (2026-01-21)
+
+- [x] 10.1.1 Levantar la mano
+- [x] 10.1.2 Control de moderación (mutear/expulsar)
+- [x] 10.1.3 Indicador "está hablando"
+
+#### Sprint 2: Interactividad ✅ (2026-01-21)
+
+- [x] 10.2.1 Reacciones en tiempo real
+- [x] 10.2.2 "¿Están siguiendo?" (pulso atención)
+- [x] 10.2.3 Selector aleatorio de estudiante
+
+#### Sprint 3: Gamificación Live ✅ (2026-01-22) - 20 E2E tests
+
+- [x] 10.3.1 Quiz en vivo
+- [x] 10.3.2 Contador compartido
+- [x] 10.3.3 Notificación de puntos privada
+- [x] 10.3.4 XP y logros en vivo
+- [x] 10.3.5 Puntos de casa en vivo
+
+#### Sprint 4: Contenido Sincronizado ✅ (2026-01-23) - 17 E2E tests
+
+- [x] 10.4.1 Compartir Teoría (slides sincronizados)
+- [x] 10.4.2 Práctica en Vivo (ejercicios sincronizados)
+- [ ] ~~10.4.3 Analytics en Vivo~~ ⏸️ DIFERIDO
+
 ---
 
 ## Orden de Ejecución Recomendado
@@ -986,9 +1017,21 @@ Semana 4+: FASE 7 + FASE 9 (Mensajería + Contenido)
 
 ---
 
+## Bugs Resueltos (Portal Docente-Estudiante)
+
+> Documentados en `docs/PREPROD_DOCENTE_ESTUDIANTE.md`
+
+| Bug     | Descripción                                    | Fecha Resolución |
+| ------- | ---------------------------------------------- | ---------------- |
+| BUG-001 | Asignar Puntos: DTO mismatch frontend/backend  | 2026-01-21       |
+| BUG-002 | Observaciones: endpoint no conectado           | 2026-01-21       |
+| BUG-003 | Inconsistencia XP Otorgados vs Top Estudiantes | 2026-01-21       |
+
+---
+
 ## Bugs Conocidos / A Investigar
 
-### BUG-001: Inconsistencia de Tier en Estudiante Mateo Martínez
+### BUG-004: Inconsistencia de Tier en Estudiante Mateo Martínez
 
 | Campo          | Valor                                |
 | -------------- | ------------------------------------ |
@@ -1032,7 +1075,7 @@ Semana 4+: FASE 7 + FASE 9 (Mensajería + Contenido)
 | ---------- | ------------------------------------------------------------------------------------------------------------- | ------ |
 | 2026-01-19 | Creación inicial del documento                                                                                | Claude |
 | 2026-01-19 | ✅ Completados Quick Wins 0.1 + 0.2                                                                           | Claude |
-| 2026-01-19 | 📝 Documentado BUG-001 (tier inconsistente)                                                                   | Claude |
+| 2026-01-19 | 📝 Documentado BUG-004 (tier inconsistente - renumerado)                                                      | Claude |
 | 2026-01-20 | ✅ FASE 3.1: CRUD completo de ClaseGrupos (crear, editar, soft delete, hard delete)                           | Claude |
 | 2026-01-20 | ✅ Planificación override por Comisión (Evento/Taller)                                                        | Claude |
 | 2026-01-20 | ✅ VentasSection para productos Físico/Digital                                                                | Claude |
@@ -1045,3 +1088,5 @@ Semana 4+: FASE 7 + FASE 9 (Mensajería + Contenido)
 | 2026-01-20 | ✅ FASE 4.1+5.1+6.1: Recuperación de contraseña - páginas /forgot-password y /reset-password                  | Claude |
 | 2026-01-20 | ✅ FASE 5.3: Pausar suscripción - Endpoints y UI granular para pausar/reactivar inscripciones o suscripción   | Claude |
 | 2026-01-23 | ✅ Fix: Tests E2E Sprint 3.2 Contador Compartido - CUIDs corregidos a 25 chars, validadores movidos a handler | Claude |
+| 2026-01-23 | ✅ FASE 10: Aula Viva WebSocket completa - Sprint 1-4 con 37+ E2E tests                                       | Claude |
+| 2026-01-23 | ✅ Sprint 4: Teoría Sincronizada y Práctica en Vivo (17 tests)                                                | Claude |
