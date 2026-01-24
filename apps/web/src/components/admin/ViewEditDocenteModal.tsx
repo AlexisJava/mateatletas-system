@@ -18,6 +18,12 @@ import {
   Plus,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { AdminModal } from './primitives/AdminModal';
+import { AdminButton } from './primitives/AdminButton';
+import { AdminInput } from './primitives/AdminInput';
+import { AdminSelect } from './primitives/AdminSelect';
+import { AdminCard } from './primitives/AdminCard';
+import { AdminBadge } from './primitives/AdminBadge';
 
 interface Docente {
   id: string;
@@ -55,6 +61,24 @@ const ESPECIALIDADES_MATE = [
 
 const NIVELES_EDUCATIVOS = ['Primaria', 'Secundaria', 'Universidad'];
 const DIAS_SEMANA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+
+const ESTADO_OPTIONS = [
+  { value: 'activo', label: 'Activo' },
+  { value: 'inactivo', label: 'Inactivo' },
+  { value: 'vacaciones', label: 'De vacaciones' },
+];
+
+function getEstadoBadgeVariant(estado: string): 'success' | 'warning' | 'danger' {
+  if (estado === 'activo') return 'success';
+  if (estado === 'vacaciones') return 'warning';
+  return 'danger';
+}
+
+function getEstadoLabel(estado: string): string {
+  if (estado === 'activo') return '✓ Activo';
+  if (estado === 'vacaciones') return '🏖️ Vacaciones';
+  return '✗ Inactivo';
+}
 
 export default function ViewEditDocenteModal({
   docente,
@@ -149,491 +173,393 @@ export default function ViewEditDocenteModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="backdrop-blur-2xl bg-slate-900/90 rounded-3xl max-w-5xl w-full shadow-2xl border border-blue-500/30 max-h-[90vh] flex flex-col">
-        {/* Header Fijo */}
-        <div className="flex items-center justify-between p-8 border-b border-white/10">
-          <div className="flex items-center gap-6">
-            <div className="flex-shrink-0 h-20 w-20 rounded-3xl bg-gradient-to-br from-blue-600 via-cyan-500 to-blue-600 flex items-center justify-center text-white font-black text-3xl shadow-2xl shadow-blue-500/50">
-              {docente.nombre?.charAt(0)?.toUpperCase() || 'D'}
-            </div>
-            <div>
-              <h3 className="text-3xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                {docente.nombre} {docente.apellido}
-              </h3>
-              <p className="text-base text-white/70 font-bold mt-1">
-                {docente.titulo || 'Docente de Matemática'}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            {!isEditMode && (
-              <button
-                onClick={() => setIsEditMode(true)}
-                className="p-3 hover:bg-blue-500/20 rounded-2xl transition-all group"
-              >
-                <Edit2 className="w-6 h-6 text-blue-400 group-hover:text-blue-300" />
-              </button>
-            )}
-            <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all">
-              <X className="w-6 h-6 text-white/70" />
-            </button>
-          </div>
+  const headerContent = (
+    <div className="flex items-center justify-between w-full">
+      <div className="flex items-center gap-4">
+        <div className="flex-shrink-0 h-16 w-16 rounded-2xl bg-gradient-to-br from-[var(--admin-accent)] to-[var(--admin-accent-hover)] flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-[var(--admin-accent)]/30">
+          {docente.nombre?.charAt(0)?.toUpperCase() || 'D'}
         </div>
+        <div>
+          <h3 className="text-2xl font-bold text-[var(--admin-text)]">
+            {docente.nombre} {docente.apellido}
+          </h3>
+          <p className="text-sm text-[var(--admin-text-muted)]">
+            {docente.titulo || 'Docente de Matemática'}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        {!isEditMode && (
+          <AdminButton variant="ghost" size="sm" onClick={() => setIsEditMode(true)}>
+            <Edit2 className="w-5 h-5" />
+          </AdminButton>
+        )}
+        <AdminButton variant="ghost" size="sm" onClick={onClose}>
+          <X className="w-5 h-5" />
+        </AdminButton>
+      </div>
+    </div>
+  );
 
-        {/* Contenido Scrollable */}
-        <div className="overflow-y-auto px-6 py-4 flex-1">
-          <div className="space-y-4">
-            {/* Sección 1: Información Básica */}
-            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-6 border border-white/10">
-              <h4 className="text-lg font-black text-white mb-4 flex items-center gap-3">
-                <User className="w-5 h-5 text-blue-400" />
-                Información Básica
-              </h4>
+  const footerContent = isEditMode ? (
+    <div className="flex gap-3 w-full">
+      <AdminButton variant="secondary" onClick={() => setIsEditMode(false)} disabled={isLoading}>
+        Cancelar
+      </AdminButton>
+      <AdminButton
+        variant="primary"
+        onClick={handleSave}
+        loading={isLoading}
+        icon={<Save className="w-4 h-4" />}
+      >
+        Guardar Cambios
+      </AdminButton>
+    </div>
+  ) : (
+    <AdminButton variant="primary" onClick={onClose} className="w-full">
+      Cerrar
+    </AdminButton>
+  );
 
-              {isEditMode ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-black text-white/70 uppercase tracking-wider mb-2">
-                        Nombre *
-                      </label>
-                      <input
-                        type="text"
-                        value={form.nombre}
-                        onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                        className="w-full px-4 py-3 border-2 border-white/10 bg-white/5 text-white rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-black text-white/70 uppercase tracking-wider mb-2">
-                        Apellido *
-                      </label>
-                      <input
-                        type="text"
-                        value={form.apellido}
-                        onChange={(e) => setForm({ ...form, apellido: e.target.value })}
-                        className="w-full px-4 py-3 border-2 border-white/10 bg-white/5 text-white rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-black text-white/70 uppercase tracking-wider mb-2">
-                        Email
-                      </label>
-                      <div className="w-full px-4 py-3 border-2 border-white/10 bg-white/5 text-white/40 rounded-2xl font-bold cursor-not-allowed">
-                        {docente.email}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-black text-white/70 uppercase tracking-wider mb-2">
-                        Teléfono
-                      </label>
-                      <input
-                        type="tel"
-                        value={form.telefono}
-                        onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-                        className="w-full px-4 py-3 border-2 border-white/10 bg-white/5 text-white rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold"
-                        placeholder="+54 11 1234-5678"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-black text-white/70 uppercase tracking-wider mb-2">
-                      Estado
-                    </label>
-                    <select
-                      value={form.estado}
-                      onChange={(e) => setForm({ ...form, estado: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-white/10 bg-white/5 text-white rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold"
-                    >
-                      <option value="activo">Activo</option>
-                      <option value="inactivo">Inactivo</option>
-                      <option value="vacaciones">De vacaciones</option>
-                    </select>
-                  </div>
+  return (
+    <AdminModal
+      open={true}
+      onClose={onClose}
+      title=""
+      size="xl"
+      showCloseButton={false}
+      footer={footerContent}
+    >
+      {/* Custom Header */}
+      <div className="-mt-6 -mx-6 mb-6 p-6 border-b border-white/[0.08]">{headerContent}</div>
+
+      <div className="space-y-4">
+        {/* Sección 1: Información Básica */}
+        <AdminCard padding="md" animate={false}>
+          <h4 className="text-base font-semibold text-[var(--admin-text)] mb-4 flex items-center gap-2">
+            <User className="w-4 h-4 text-[var(--admin-accent)]" />
+            Información Básica
+          </h4>
+
+          {isEditMode ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <AdminInput
+                  label="Nombre *"
+                  value={form.nombre}
+                  onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                />
+                <AdminInput
+                  label="Apellido *"
+                  value={form.apellido}
+                  onChange={(e) => setForm({ ...form, apellido: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <AdminInput label="Email" value={docente.email} disabled />
+                <AdminInput
+                  label="Teléfono"
+                  type="tel"
+                  value={form.telefono}
+                  onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+                  placeholder="+54 11 1234-5678"
+                />
+              </div>
+              <AdminSelect
+                label="Estado"
+                value={form.estado}
+                onChange={(e) => setForm({ ...form, estado: e.target.value })}
+                options={ESTADO_OPTIONS}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <InfoItem icon={<Mail className="w-4 h-4" />} label="Email" value={docente.email} />
+              <InfoItem
+                icon={<Phone className="w-4 h-4" />}
+                label="Teléfono"
+                value={docente.telefono || 'No especificado'}
+              />
+              <InfoItem
+                icon={<Calendar className="w-4 h-4" />}
+                label="Registro"
+                value={new Date(docente.createdAt).toLocaleDateString('es-ES', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              />
+              <div className="bg-white/[0.03] rounded-xl p-3 border border-white/[0.06]">
+                <div className="text-xs text-[var(--admin-text-muted)] mb-1 flex items-center gap-1.5">
+                  <MapPin className="w-3 h-3" /> Estado
                 </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 border border-white/10">
-                    <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2 flex items-center gap-2">
-                      <Mail className="w-4 h-4" /> Email
-                    </div>
-                    <div className="text-base font-bold text-white break-all">{docente.email}</div>
-                  </div>
-                  <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 border border-white/10">
-                    <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2 flex items-center gap-2">
-                      <Phone className="w-4 h-4" /> Teléfono
-                    </div>
-                    <div className="text-base font-bold text-white">
-                      {docente.telefono || 'No especificado'}
-                    </div>
-                  </div>
-                  <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 border border-white/10">
-                    <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2 flex items-center gap-2">
-                      <Calendar className="w-4 h-4" /> Registro
-                    </div>
-                    <div className="text-base font-bold text-white">
-                      {new Date(docente.createdAt).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </div>
-                  </div>
-                  <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 border border-white/10">
-                    <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2 flex items-center gap-2">
-                      <MapPin className="w-4 h-4" /> Estado
-                    </div>
-                    <span
-                      className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-black shadow-lg ${
-                        docente.estado === 'activo'
-                          ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
-                          : docente.estado === 'vacaciones'
-                            ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white'
-                            : 'bg-gradient-to-r from-red-600 to-rose-600 text-white'
+                <AdminBadge variant={getEstadoBadgeVariant(docente.estado || 'activo')} size="md">
+                  {getEstadoLabel(docente.estado || 'activo')}
+                </AdminBadge>
+              </div>
+            </div>
+          )}
+        </AdminCard>
+
+        {/* Sección 2: Información Profesional */}
+        <AdminCard padding="md" animate={false}>
+          <h4 className="text-base font-semibold text-[var(--admin-text)] mb-4 flex items-center gap-2">
+            <Award className="w-4 h-4 text-purple-400" />
+            Información Profesional
+          </h4>
+
+          {isEditMode ? (
+            <div className="space-y-4">
+              <AdminInput
+                label="Título Profesional"
+                value={form.titulo}
+                onChange={(e) => setForm({ ...form, titulo: e.target.value })}
+                placeholder="Ej: Licenciado en Matemática"
+              />
+
+              {/* Niveles Educativos */}
+              <div>
+                <label className="block text-sm font-medium text-[var(--admin-text-secondary)] mb-2">
+                  Niveles Educativos
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {NIVELES_EDUCATIVOS.map((nivel) => (
+                    <button
+                      key={nivel}
+                      type="button"
+                      onClick={() => toggleNivelEducativo(nivel)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        form.nivelEducativo?.includes(nivel)
+                          ? 'bg-[var(--admin-accent)] text-white shadow-lg shadow-[var(--admin-accent)]/30'
+                          : 'bg-white/[0.05] text-[var(--admin-text-secondary)] border border-[var(--admin-border)] hover:bg-white/[0.08]'
                       }`}
                     >
-                      {docente.estado === 'activo'
-                        ? '✓ Activo'
-                        : docente.estado === 'vacaciones'
-                          ? '🏖️ Vacaciones'
-                          : '✗ Inactivo'}
-                    </span>
-                  </div>
+                      {nivel}
+                    </button>
+                  ))}
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Sección 2: Información Profesional */}
-            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-6 border border-white/10">
-              <h4 className="text-lg font-black text-white mb-4 flex items-center gap-3">
-                <Award className="w-5 h-5 text-purple-400" />
-                Información Profesional
-              </h4>
-
-              {isEditMode ? (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                        Título Profesional
-                      </label>
-                      <input
-                        type="text"
-                        value={form.titulo}
-                        onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-                        className="w-full px-3 py-2 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all text-sm"
-                        placeholder="Ej: Licenciado en Matemática"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Niveles Educativos */}
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                      Niveles Educativos que puede impartir
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {NIVELES_EDUCATIVOS.map((nivel) => (
-                        <button
-                          key={nivel}
-                          type="button"
-                          onClick={() => toggleNivelEducativo(nivel)}
-                          className={`px-3 py-1.5 rounded-lg font-semibold transition-all text-sm ${
-                            form.nivelEducativo?.includes(nivel)
-                              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30'
-                              : 'bg-emerald-500/[0.08]/60 text-gray-700 dark:text-gray-300 border-2 border-emerald-500/20 hover:bg-emerald-500/10'
-                          }`}
-                        >
-                          {nivel}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Especialidades */}
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                      Especialidades
-                    </label>
-                    <div className="flex gap-2 mb-2">
-                      <select
-                        value={especialidadInput}
-                        onChange={(e) => setEspecialidadInput(e.target.value)}
-                        className="flex-1 px-3 py-2 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all text-sm"
-                      >
-                        <option value="">Seleccionar especialidad...</option>
-                        {ESPECIALIDADES_MATE.map((esp) => (
-                          <option key={esp} value={esp}>
-                            {esp}
-                          </option>
-                        ))}
-                      </select>
+              {/* Especialidades */}
+              <div>
+                <label className="block text-sm font-medium text-[var(--admin-text-secondary)] mb-2">
+                  Especialidades
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <AdminSelect
+                    value={especialidadInput}
+                    onChange={(e) => setEspecialidadInput(e.target.value)}
+                    options={ESPECIALIDADES_MATE.map((esp) => ({ value: esp, label: esp }))}
+                    placeholder="Seleccionar..."
+                    className="flex-1"
+                  />
+                  <AdminButton
+                    variant="primary"
+                    size="sm"
+                    onClick={() => agregarEspecialidad(especialidadInput)}
+                    disabled={!especialidadInput}
+                    icon={<Plus className="w-4 h-4" />}
+                  >
+                    Agregar
+                  </AdminButton>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {form.especialidades?.map((esp) => (
+                    <AdminBadge key={esp} variant="info" size="md">
+                      {esp}
                       <button
                         type="button"
-                        onClick={() => agregarEspecialidad(especialidadInput)}
-                        disabled={!especialidadInput}
-                        className="px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg font-semibold hover:from-violet-600 hover:to-purple-700 transition-all shadow-lg shadow-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                        onClick={() => eliminarEspecialidad(esp)}
+                        className="ml-1.5 hover:text-white/80"
                       >
-                        <Plus className="w-4 h-4" />
-                        Agregar
+                        <Trash2 className="w-3 h-3" />
                       </button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {form.especialidades?.map((esp) => (
-                        <div
-                          key={esp}
-                          className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg shadow-md"
-                        >
-                          <span className="text-sm font-medium">{esp}</span>
-                          <button
-                            type="button"
-                            onClick={() => eliminarEspecialidad(esp)}
-                            className="hover:bg-emerald-500/[0.05]/20 rounded p-0.5 transition-colors"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                    </AdminBadge>
+                  ))}
                 </div>
-              ) : (
-                <div className="space-y-5">
-                  <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 border border-white/10">
-                    <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2 flex items-center gap-2">
-                      <Award className="w-4 h-4" /> Título Profesional
-                    </div>
-                    <div className="text-base font-bold text-white">
-                      {docente.titulo || 'No especificado'}
-                    </div>
-                  </div>
-
-                  {/* Sectores */}
-                  {docente.sectores && docente.sectores.length > 0 && (
-                    <div>
-                      <div className="text-sm font-black text-white/70 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <Award className="w-4 h-4" /> Sectores
-                      </div>
-                      <div className="flex flex-wrap gap-3">
-                        {docente.sectores.map((sector) => (
-                          <span
-                            key={sector.nombre}
-                            className="px-5 py-3 text-white rounded-2xl shadow-2xl text-base font-black flex items-center gap-3"
-                            style={{ backgroundColor: sector.color }}
-                          >
-                            <span className="text-2xl">{sector.icono}</span>
-                            <span>{sector.nombre}</span>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {docente.nivelEducativo && docente.nivelEducativo.length > 0 && (
-                    <div>
-                      <div className="text-sm font-black text-white/70 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <GraduationCap className="w-4 h-4" /> Niveles Educativos
-                      </div>
-                      <div className="flex flex-wrap gap-3">
-                        {docente.nivelEducativo.map((nivel) => (
-                          <span
-                            key={nivel}
-                            className="px-5 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl shadow-2xl shadow-blue-500/30 text-base font-black"
-                          >
-                            {nivel}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {docente.especialidades && docente.especialidades.length > 0 && (
-                    <div>
-                      <div className="text-sm font-black text-white/70 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <BookOpen className="w-4 h-4" /> Especialidades
-                      </div>
-                      <div className="flex flex-wrap gap-3">
-                        {docente.especialidades.map((esp) => (
-                          <span
-                            key={esp}
-                            className="px-5 py-3 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-2xl shadow-2xl shadow-purple-500/30 text-base font-black"
-                          >
-                            {esp}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+              </div>
             </div>
+          ) : (
+            <div className="space-y-4">
+              <InfoItem
+                icon={<Award className="w-4 h-4" />}
+                label="Título Profesional"
+                value={docente.titulo || 'No especificado'}
+              />
 
-            {/* Sección 3: Disponibilidad Horaria */}
-            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-6 border border-white/10">
-              <h4 className="text-lg font-black text-white mb-4 flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-green-400" />
-                Disponibilidad Horaria
-              </h4>
-
-              {isEditMode ? (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-4 gap-2">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                        Día
-                      </label>
-                      <select
-                        value={selectedDia}
-                        onChange={(e) => setSelectedDia(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all text-sm"
-                      >
-                        {DIAS_SEMANA.map((dia) => (
-                          <option key={dia} value={dia}>
-                            {dia.charAt(0).toUpperCase() + dia.slice(1)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                        Desde
-                      </label>
-                      <input
-                        type="time"
-                        value={horaInicio}
-                        onChange={(e) => setHoraInicio(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                        Hasta
-                      </label>
-                      <input
-                        type="time"
-                        value={horaFin}
-                        onChange={(e) => setHoraFin(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all text-sm"
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <button
-                        type="button"
-                        onClick={agregarHorario}
-                        className="w-full px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all shadow-lg shadow-emerald-500/40 flex items-center justify-center gap-2 text-sm"
-                      >
-                        <Clock className="w-4 h-4" />
-                        Agregar
-                      </button>
-                    </div>
+              {docente.sectores && docente.sectores.length > 0 && (
+                <div>
+                  <div className="text-xs text-[var(--admin-text-muted)] mb-2 flex items-center gap-1.5">
+                    <Award className="w-3 h-3" /> Sectores
                   </div>
-
-                  <div className="space-y-2">
-                    {Object.entries(form.disponibilidadHoraria || {}).map(([dia, horarios]) => (
-                      <div
-                        key={dia}
-                        className="backdrop-blur-xl bg-emerald-500/[0.05]/60 dark:bg-black/60 rounded-lg p-2.5 border border-emerald-500/20"
+                  <div className="flex flex-wrap gap-2">
+                    {docente.sectores.map((sector) => (
+                      <span
+                        key={sector.nombre}
+                        className="px-3 py-1.5 text-white rounded-xl text-sm font-medium flex items-center gap-2"
+                        style={{ backgroundColor: sector.color }}
                       >
-                        <div className="font-semibold text-white text-xs mb-1.5">
-                          {dia.charAt(0).toUpperCase() + dia.slice(1)}
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {horarios.map((horario) => (
-                            <div
-                              key={horario}
-                              className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg shadow-md text-xs"
-                            >
-                              <Clock className="w-3 h-3" />
-                              <span className="font-medium">{horario}</span>
-                              <button
-                                type="button"
-                                onClick={() => eliminarHorario(dia, horario)}
-                                className="hover:bg-emerald-500/[0.05]/20 rounded p-0.5 transition-colors"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                        <span>{sector.icono}</span>
+                        <span>{sector.nombre}</span>
+                      </span>
                     ))}
                   </div>
                 </div>
-              ) : (
+              )}
+
+              {docente.nivelEducativo && docente.nivelEducativo.length > 0 && (
                 <div>
-                  {docente.disponibilidadHoraria &&
-                  Object.keys(docente.disponibilidadHoraria).length > 0 ? (
-                    <div className="space-y-3">
-                      {Object.entries(docente.disponibilidadHoraria).map(([dia, horarios]) => (
-                        <div
-                          key={dia}
-                          className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 border border-white/10"
-                        >
-                          <div className="font-black text-white text-sm uppercase tracking-wider mb-3">
-                            {dia.charAt(0).toUpperCase() + dia.slice(1)}
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {horarios.map((horario) => (
-                              <span
-                                key={horario}
-                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl shadow-lg text-sm font-bold"
-                              >
-                                <Clock className="w-4 h-4" />
-                                {horario}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-8 border border-white/10 text-center">
-                      <div className="text-5xl mb-3">📅</div>
-                      <div className="text-base text-white/60 font-bold">
-                        No hay disponibilidad horaria configurada
-                      </div>
-                    </div>
-                  )}
+                  <div className="text-xs text-[var(--admin-text-muted)] mb-2 flex items-center gap-1.5">
+                    <GraduationCap className="w-3 h-3" /> Niveles Educativos
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {docente.nivelEducativo.map((nivel) => (
+                      <AdminBadge key={nivel} variant="info" size="md">
+                        {nivel}
+                      </AdminBadge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {docente.especialidades && docente.especialidades.length > 0 && (
+                <div>
+                  <div className="text-xs text-[var(--admin-text-muted)] mb-2 flex items-center gap-1.5">
+                    <BookOpen className="w-3 h-3" /> Especialidades
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {docente.especialidades.map((esp) => (
+                      <AdminBadge key={esp} variant="pending" size="md">
+                        {esp}
+                      </AdminBadge>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
-          </div>
-        </div>
+          )}
+        </AdminCard>
 
-        {/* Footer Fijo */}
-        <div className="border-t border-white/10 p-8 bg-white/5">
+        {/* Sección 3: Disponibilidad Horaria */}
+        <AdminCard padding="md" animate={false}>
+          <h4 className="text-base font-semibold text-[var(--admin-text)] mb-4 flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-[var(--status-success)]" />
+            Disponibilidad Horaria
+          </h4>
+
           {isEditMode ? (
-            <div className="flex gap-4">
-              <button
-                onClick={() => setIsEditMode(false)}
-                disabled={isLoading}
-                className="flex-1 px-6 py-4 border-2 border-white/20 text-white rounded-2xl font-bold hover:bg-white/10 transition-all disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={isLoading}
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                <Save className="w-5 h-5" />
-                {isLoading ? 'Guardando...' : 'Guardar Cambios'}
-              </button>
+            <div className="space-y-4">
+              <div className="grid grid-cols-4 gap-2">
+                <AdminSelect
+                  label="Día"
+                  value={selectedDia}
+                  onChange={(e) => setSelectedDia(e.target.value)}
+                  options={DIAS_SEMANA.map((dia) => ({
+                    value: dia,
+                    label: dia.charAt(0).toUpperCase() + dia.slice(1),
+                  }))}
+                />
+                <AdminInput
+                  label="Desde"
+                  type="time"
+                  value={horaInicio}
+                  onChange={(e) => setHoraInicio(e.target.value)}
+                />
+                <AdminInput
+                  label="Hasta"
+                  type="time"
+                  value={horaFin}
+                  onChange={(e) => setHoraFin(e.target.value)}
+                />
+                <div className="flex items-end">
+                  <AdminButton
+                    variant="primary"
+                    size="md"
+                    onClick={agregarHorario}
+                    icon={<Clock className="w-4 h-4" />}
+                    className="w-full"
+                  >
+                    Agregar
+                  </AdminButton>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {Object.entries(form.disponibilidadHoraria || {}).map(([dia, horarios]) => (
+                  <div
+                    key={dia}
+                    className="bg-white/[0.03] rounded-xl p-3 border border-white/[0.06]"
+                  >
+                    <div className="font-medium text-[var(--admin-text)] text-sm mb-2">
+                      {dia.charAt(0).toUpperCase() + dia.slice(1)}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {horarios.map((horario) => (
+                        <AdminBadge key={horario} variant="success" size="md">
+                          <Clock className="w-3 h-3 mr-1" />
+                          {horario}
+                          <button
+                            type="button"
+                            onClick={() => eliminarHorario(dia, horario)}
+                            className="ml-1.5 hover:text-white/80"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </AdminBadge>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
-            <button
-              onClick={onClose}
-              className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-105 transition-all"
-            >
-              Cerrar
-            </button>
+            <div>
+              {docente.disponibilidadHoraria &&
+              Object.keys(docente.disponibilidadHoraria).length > 0 ? (
+                <div className="space-y-2">
+                  {Object.entries(docente.disponibilidadHoraria).map(([dia, horarios]) => (
+                    <div
+                      key={dia}
+                      className="bg-white/[0.03] rounded-xl p-3 border border-white/[0.06]"
+                    >
+                      <div className="font-medium text-[var(--admin-text)] text-sm mb-2">
+                        {dia.charAt(0).toUpperCase() + dia.slice(1)}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {horarios.map((horario) => (
+                          <AdminBadge key={horario} variant="success" size="md">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {horario}
+                          </AdminBadge>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white/[0.03] rounded-xl p-6 border border-white/[0.06] text-center">
+                  <div className="text-3xl mb-2">📅</div>
+                  <div className="text-sm text-[var(--admin-text-muted)]">
+                    No hay disponibilidad horaria configurada
+                  </div>
+                </div>
+              )}
+            </div>
           )}
-        </div>
+        </AdminCard>
       </div>
+    </AdminModal>
+  );
+}
+
+// Helper component for info display
+function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="bg-white/[0.03] rounded-xl p-3 border border-white/[0.06]">
+      <div className="text-xs text-[var(--admin-text-muted)] mb-1 flex items-center gap-1.5">
+        {icon} {label}
+      </div>
+      <div className="text-sm font-medium text-[var(--admin-text)] break-all">{value}</div>
     </div>
   );
 }
