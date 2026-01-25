@@ -76,7 +76,7 @@ export async function createTestTutor(
       nombre: options?.nombre ?? 'Tutor',
       apellido: options?.apellido ?? 'Test',
       email: options?.email ?? `tutor_${uniqueSuffix}@test.com`,
-      password_hash: passwordHash,
+      passwordHash: passwordHash,
     },
   });
 
@@ -110,8 +110,8 @@ export async function createTestDocente(
       nombre: options?.nombre ?? 'Docente',
       apellido: options?.apellido ?? 'Test',
       email: options?.email ?? `docente_${uniqueSuffix}@test.com`,
-      password_hash: passwordHash,
-      must_change_password: false,
+      passwordHash: passwordHash,
+      mustChangePassword: false,
     },
   });
 
@@ -142,7 +142,7 @@ export async function createTestAdmin(
       nombre: options?.nombre ?? 'Admin',
       apellido: options?.apellido ?? 'Test',
       email: options?.email ?? `admin_${uniqueSuffix}@test.com`,
-      password_hash: await hashPassword(DEFAULT_PASSWORD),
+      passwordHash: await hashPassword(DEFAULT_PASSWORD),
     },
   });
 }
@@ -165,7 +165,7 @@ export interface CreateEstudianteOptions {
   rachaInicial?: number;
   suspendido?: boolean;
   override?: {
-    acceso_clases_vivo?: boolean;
+    accesoClasesVivo?: boolean;
     hasta?: Date | null;
     motivo?: string;
   };
@@ -200,37 +200,37 @@ export async function createTestEstudiante(
       nombre: options?.nombre ?? 'Test',
       apellido: options?.apellido ?? 'Student',
       username: options?.username ?? `test_${uniqueSuffix}`,
-      password_hash: passwordHash,
-      estado_acceso: options?.suspendido
+      passwordHash: passwordHash,
+      estadoAcceso: options?.suspendido
         ? EstadoAccesoEstudiante.SUSPENDIDO
         : EstadoAccesoEstudiante.ACTIVO,
       nivelEscolar: options?.nivelEscolar ?? '1ro Primaria',
       edad: options?.edad ?? 10,
-      tutor_id: tutorId,
-      plan_id: options?.planId,
+      tutorId: tutorId,
+      planId: options?.planId,
       casaId: options?.casaId,
       // Override de acceso
-      acceso_override: options?.override?.acceso_clases_vivo ?? false,
-      acceso_override_hasta: options?.override?.hasta,
-      acceso_override_motivo: options?.override?.motivo,
+      accesoOverride: options?.override?.accesoClasesVivo ?? false,
+      accesoOverrideHasta: options?.override?.hasta,
+      accesoOverrideMotivo: options?.override?.motivo,
     },
   });
 
   // Crear recursos
   await prisma.recursosEstudiante.create({
     data: {
-      estudiante_id: estudiante.id,
-      xp_total: options?.xpInicial ?? 0,
+      estudianteId: estudiante.id,
+      xpTotal: options?.xpInicial ?? 0,
     },
   });
 
   // Crear racha
   await prisma.rachaEstudiante.create({
     data: {
-      estudiante_id: estudiante.id,
-      racha_actual: options?.rachaInicial ?? 0,
-      racha_maxima: options?.rachaInicial ?? 0,
-      total_dias_activos: 0,
+      estudianteId: estudiante.id,
+      rachaActual: options?.rachaInicial ?? 0,
+      rachaMaxima: options?.rachaInicial ?? 0,
+      totalDiasActivos: 0,
     },
   });
 

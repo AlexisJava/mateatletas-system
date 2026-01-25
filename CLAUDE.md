@@ -351,6 +351,26 @@ interface ClaseGrupo {
 - ❌ Transformar manualmente en frontend (`data.dia_semana || data.diaSemana`)
 - ❌ Fallbacks innecesarios por "compatibilidad"
 
+### ⚠️ ANTES de escribir código que use Prisma (factories, services, etc.)
+
+**OBLIGATORIO:**
+
+1. Leer el modelo en `prisma/schema.prisma` para verificar nombres exactos
+2. Los campos SIEMPRE son camelCase en código TypeScript
+3. NUNCA adivinar ni usar snake_case - si no sabés, leé el schema
+
+**Ejemplo de error común:**
+
+```typescript
+// ❌ INCORRECTO - snake_case causa "Unknown argument"
+prisma.docente.create({ data: { password_hash: '...' } });
+
+// ✅ CORRECTO - camelCase como está en el schema
+prisma.docente.create({ data: { passwordHash: '...' } });
+```
+
+**Si Prisma tira `Unknown argument 'xxx'. Did you mean 'yyy'?`** → Estás usando snake_case donde debería ser camelCase.
+
 ---
 
 ## PREVENCIÓN DE BUGS COMUNES

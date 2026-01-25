@@ -3,6 +3,7 @@ import { AdminController } from './admin.controller';
 import { PlanificacionesAdminController } from './planificaciones-admin.controller';
 import { AdminDlqController } from './controllers/admin-dlq.controller';
 import { AdminAuditLogsController } from './controllers/admin-audit-logs.controller';
+import { AdminVeranoController } from './controllers/admin-verano.controller';
 import { AdminService } from './admin.service';
 import { AdminStatsService } from './services/admin-stats.service';
 import { AdminAlertasService } from './services/admin-alertas.service';
@@ -15,6 +16,7 @@ import { AdminTareasService } from './services/admin-tareas.service';
 import { AdminPlanificacionesService } from './services/admin-planificaciones.service';
 import { DocenteAsignacionesService } from './services/docente-asignaciones.service';
 import { GrupoPedagogicoService } from './services/grupo-pedagogico.service';
+import { VeranoAdminService } from './services/verano-admin.service';
 import { ClaseGruposService } from './clase-grupos.service';
 import { AsistenciasService } from './asistencias.service';
 import { ComisionesService } from './comisiones.service';
@@ -38,6 +40,7 @@ import { NotificacionesModule } from '../notificaciones/notificaciones.module';
     PlanificacionesAdminController,
     AdminDlqController,
     AdminAuditLogsController,
+    AdminVeranoController,
   ],
   providers: [
     AdminService,
@@ -53,6 +56,7 @@ import { NotificacionesModule } from '../notificaciones/notificaciones.module';
     AdminPlanificacionesService,
     DocenteAsignacionesService,
     GrupoPedagogicoService,
+    VeranoAdminService,
     ClaseGruposService,
     AsistenciasService,
     ComisionesService,

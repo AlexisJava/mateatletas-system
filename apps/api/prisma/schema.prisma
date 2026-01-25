@@ -207,6 +207,9 @@ model Estudiante {
   /// SISTEMA 2026: Pagos de cursos temporales
   pagosCurso             PagoCurso[]
 
+  /// VERANO 2026: Decisiones de verano (una por año)
+  decisionesVerano DecisionVeranoEstudiante[]
+
   /// Vista unificada: todas las inscripciones (manual + suscripción)
   inscripcionesUnificadas InscripcionUnificada[] @relation("InscripcionUnificadaEstudiante")
 
@@ -1098,6 +1101,9 @@ model ClaseGrupo {
   /// Vista unificada: todas las inscripciones (manual + suscripción)
   inscripcionesUnificadas InscripcionUnificada[] @relation("InscripcionUnificadaClaseGrupo")
 
+  /// VERANO 2026: Estudiantes asignados a este grupo de Colonia
+  asignacionesColoniaVerano DecisionVeranoEstudiante[]
+
   @@index([docenteId])
   @@index([diaSemana])
   @@index([fechaInicio, fechaFin])
@@ -1773,6 +1779,7 @@ enum EstadoSuscripcionFamiliar {
   AUTHORIZED // Activa y cobrando
   PAUSED // Pausada por fallo de pago
   CANCELLED // Cancelada por tutor o admin
+  CONTINUIDAD // Verano: mantiene cupo sin colonia ($20k/mes)
 
   @@map("estado_suscripcion_familiar")
 }
@@ -1784,6 +1791,15 @@ enum EstadoInscripcionActividad {
   CANCELADA // Cancelada (baja)
 
   @@map("estado_inscripcion_actividad")
+}
+
+/// Decisión de verano del estudiante (Spec Verano 2026)
+enum DecisionVerano {
+  COLONIA // Quiere Colonia de Verano (matrícula $40k + $95k/mes)
+  CONTINUIDAD // Solo mantener cupo ($20k/mes)
+  PENDIENTE // Aún no decidió
+
+  @@map("decision_verano")
 }
 
 /// Tipo de cambio en inscripción (para historial)
@@ -3837,6 +3853,11 @@ model SuscripcionFamiliar {
   /// Período de gracia por fallo de pago (fecha límite)
   fechaGracia DateTime? @map("fecha_gracia")
 
+  // === VERANO ===
+
+  /// Monto original del tier (para restaurar en marzo después de verano)
+  montoOriginal Int? @map("monto_original")
+
   // === TIMESTAMPS ===
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -3850,9 +3871,68 @@ model SuscripcionFamiliar {
   /// Historial de cambios en inscripciones
   historialCambios CambioInscripcion[]
 
+  /// VERANO: Decisiones de verano de cada estudiante de la familia
+  decisionesVerano DecisionVeranoEstudiante[]
+
   @@index([estado])
   @@index([fechaProximoCobro])
   @@map("suscripciones_familiares")
+}
+
+// =============================================================================
+// VERANO 2026: Decisiones de Verano por Estudiante
+// =============================================================================
+
+/// Decisión de verano de un estudiante dentro de una suscripción familiar
+/// Cada estudiante puede elegir COLONIA o CONTINUIDAD independientemente
+/// Se crea una entrada por estudiante por año
+model DecisionVeranoEstudiante {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  // === RELACIONES ===
+
+  /// Estudiante que toma la decisión
+  estudianteId String     @map("estudiante_id")
+  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+
+  /// Suscripción familiar a la que pertenece
+  suscripcionFamiliarId String              @map("suscripcion_familiar_id")
+  suscripcionFamiliar   SuscripcionFamiliar @relation(fields: [suscripcionFamiliarId], references: [id], onDelete: Cascade)
+
+  /// Si eligió COLONIA, grupo de Colonia asignado
+  claseGrupoColoniaId String?     @map("clase_grupo_colonia_id")
+  claseGrupoColonia   ClaseGrupo? @relation(fields: [claseGrupoColoniaId], references: [id])
+
+  // === DATOS DE DECISIÓN ===
+
+  /// Año de la decisión (2025, 2026, etc.)
+  anio Int
+
+  /// Decisión tomada
+  decision DecisionVerano @default(PENDIENTE)
+
+  /// Fecha y hora en que tomó la decisión
+  fechaDecision DateTime? @map("fecha_decision")
+
+  /// Si ya pagó la matrícula de Colonia ($40k) - NO REEMBOLSABLE
+  matriculaColoniaPagada Boolean @default(false) @map("matricula_colonia_pagada")
+
+  /// Motivo si fue forzado por admin (null si decidió el tutor)
+  motivoAdmin String? @map("motivo_admin")
+
+  // === TIMESTAMPS ===
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // === CONSTRAINTS ===
+
+  /// Un estudiante solo puede tener una decisión por año
+  @@unique([estudianteId, anio])
+  @@index([suscripcionFamiliarId])
+  @@index([anio, decision])
+  @@map("decisiones_verano_estudiante")
 }
 
 /// Inscripción de un estudiante a una actividad

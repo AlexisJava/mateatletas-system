@@ -70,7 +70,7 @@ export async function createTestGrupo(
     data: {
       codigo: options?.codigo ?? `GP_${uniqueSuffix}`,
       nombre: options?.nombre ?? `Grupo Test ${uniqueSuffix}`,
-      sector_id: options?.sectorId,
+      sectorId: options?.sectorId,
       activo: true,
     },
   });
@@ -118,16 +118,16 @@ export async function createTestClaseGrupo(
       codigo: options.codigo ?? `CG_${uniqueSuffix}`,
       nombre: options.nombre ?? `ClaseGrupo_${uniqueSuffix}`,
       tipo: TipoClaseGrupo.GRUPO_REGULAR,
-      dia_semana: options.diaSemana ?? DiaSemana.LUNES,
-      hora_inicio: options.horaInicio ?? '19:30',
-      hora_fin: options.horaFin ?? '21:00',
-      fecha_inicio: options.fechaInicio ?? now,
-      fecha_fin: options.fechaFin ?? yearEnd,
-      anio_lectivo: now.getFullYear(),
-      cupo_maximo: options.cupoMaximo ?? 15,
-      grupo_id: grupoId,
-      docente_id: options.docenteId,
-      sector_id: options.sectorId,
+      diaSemana: options.diaSemana ?? DiaSemana.LUNES,
+      horaInicio: options.horaInicio ?? '19:30',
+      horaFin: options.horaFin ?? '21:00',
+      fechaInicio: options.fechaInicio ?? now,
+      fechaFin: options.fechaFin ?? yearEnd,
+      anioLectivo: now.getFullYear(),
+      cupoMaximo: options.cupoMaximo ?? 15,
+      grupoId: grupoId,
+      docenteId: options.docenteId,
+      sectorId: options.sectorId,
       activo: options.activo ?? true,
     },
   });
@@ -148,9 +148,9 @@ export async function createTestInscripcionClaseGrupo(
 ) {
   return prisma.inscripcionClaseGrupo.create({
     data: {
-      clase_grupo_id: claseGrupoId,
-      estudiante_id: estudianteId,
-      tutor_id: tutorId,
+      claseGrupoId: claseGrupoId,
+      estudianteId: estudianteId,
+      tutorId: tutorId,
     },
   });
 }
@@ -185,11 +185,11 @@ export async function createTestClase(
     data: {
       nombre: options.nombre ?? `Clase_${uniqueSuffix}`,
       descripcion: options.descripcion ?? 'Clase de test',
-      docente_id: options.docenteId,
-      fecha_hora_inicio: options.fechaHoraInicio ?? tomorrow,
-      duracion_minutos: options.duracionMinutos ?? 60,
-      cupos_maximo: options.cuposMaximo ?? 10,
-      sector_id: options.sectorId,
+      docenteId: options.docenteId,
+      fechaHoraInicio: options.fechaHoraInicio ?? tomorrow,
+      duracionMinutos: options.duracionMinutos ?? 60,
+      cuposMaximo: options.cuposMaximo ?? 10,
+      sectorId: options.sectorId,
     },
   });
 }
