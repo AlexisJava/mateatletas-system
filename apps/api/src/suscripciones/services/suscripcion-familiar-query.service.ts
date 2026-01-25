@@ -298,10 +298,12 @@ export class SuscripcionFamiliarQueryService {
 
     // MODELO 2026: Preparar inscripciones con sus tiers para cálculo
     // Incluimos el ID para poder matchear después del ordenamiento
+    // IMPORTANTE: Si tier es null, usar STEAM_ASINCRONICO como fallback
+    // (consistente con vista inscripciones_unificadas donde null != SINCRONICO → ASINCRONICO)
     const inscripcionesParaCalculo: InscripcionConTier[] =
       suscripcion.inscripciones.map((insc) => ({
         id: insc.id,
-        tier: (insc.tier as InscripcionConTier['tier']) ?? tierSuscripcion,
+        tier: (insc.tier as InscripcionConTier['tier']) ?? 'STEAM_ASINCRONICO',
       }));
 
     // Calcular precios con la nueva lógica que ordena por precio DESCENDENTE
@@ -318,8 +320,10 @@ export class SuscripcionFamiliarQueryService {
     const inscripcionesDetalle: InscripcionActividadDetalle[] =
       suscripcion.inscripciones.map((insc, index) => {
         // Buscar resultado para esta inscripción
+        // IMPORTANTE: Si tier es null, usar STEAM_ASINCRONICO (consistente con vista SQL)
         const tierInsc =
-          (insc.tier as InscripcionActividadDetalle['tier']) ?? tierSuscripcion;
+          (insc.tier as InscripcionActividadDetalle['tier']) ??
+          'STEAM_ASINCRONICO';
         // Convertir Decimal a number para compatibilidad
         const precioProducto = insc.producto.precio?.toNumber() ?? null;
         const precioBase = obtenerPrecioInscripcion(

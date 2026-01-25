@@ -33,6 +33,8 @@ describe('SuscripcionFamiliarQueryService', () => {
   };
 
   // Mock de suscripción para reutilizar
+  // IMPORTANTE: El tier debe especificarse en cada inscripción
+  // Si tier es null, el servicio usa STEAM_ASINCRONICO como fallback (consistente con vista SQL)
   const createMockSuscripcion = (overrides = {}) => ({
     id: 'sus-fam-123',
     tutorId: 'tutor-123',
@@ -60,6 +62,7 @@ describe('SuscripcionFamiliarQueryService', () => {
         comisionId: null,
         comision: null,
         estado: 'ACTIVA',
+        tier: 'STEAM_SINCRONICO', // Tier explícito de la inscripción
         fechaInicio: new Date('2026-01-01'),
         fechaFin: null,
       },
@@ -135,6 +138,7 @@ describe('SuscripcionFamiliarQueryService', () => {
             comisionId: null,
             comision: null,
             estado: 'ACTIVA',
+            tier: 'STEAM_SINCRONICO', // Tier explícito
             fechaInicio: new Date('2026-01-01'),
             fechaFin: null,
           },
@@ -153,6 +157,7 @@ describe('SuscripcionFamiliarQueryService', () => {
             comisionId: null,
             comision: null,
             estado: 'ACTIVA',
+            tier: 'STEAM_SINCRONICO', // Tier explícito
             fechaInicio: new Date('2026-01-01'),
             fechaFin: null,
           },
@@ -192,6 +197,7 @@ describe('SuscripcionFamiliarQueryService', () => {
             comisionId: null,
             comision: null,
             estado: 'ACTIVA',
+            tier: 'STEAM_SINCRONICO', // Tier explícito
             fechaInicio: new Date(),
             fechaFin: null,
           },
@@ -210,6 +216,7 @@ describe('SuscripcionFamiliarQueryService', () => {
             comisionId: null,
             comision: null,
             estado: 'ACTIVA',
+            tier: 'STEAM_SINCRONICO', // Tier explícito
             fechaInicio: new Date(),
             fechaFin: null,
           },
@@ -225,6 +232,45 @@ describe('SuscripcionFamiliarQueryService', () => {
       // 2 actividades pero solo 1 estudiante único
       expect(result?.cantidadActividades).toBe(2);
       expect(result?.cantidadEstudiantes).toBe(1);
+    });
+
+    it('should_use_STEAM_ASINCRONICO_as_fallback_when_tier_is_null', async () => {
+      // BUG-004: Cuando tier es null, debe usar STEAM_ASINCRONICO (no el tier de la familia)
+      // Esto es consistente con la vista SQL inscripciones_unificadas
+      const mockSuscripcion = createMockSuscripcion({
+        tier: 'STEAM_SINCRONICO', // Tier de la familia
+        inscripciones: [
+          {
+            id: 'insc-1',
+            estudianteId: 'est-1',
+            estudiante: { id: 'est-1', nombre: 'Lucas', apellido: 'Pérez' },
+            productoId: 'prod-1',
+            producto: {
+              id: 'prod-1',
+              nombre: 'Club Matemática',
+              precio: { toNumber: () => 95000 },
+            },
+            claseGrupoId: 'cg-1',
+            claseGrupo: { id: 'cg-1', nombre: 'Lunes 18:00' },
+            comisionId: null,
+            comision: null,
+            estado: 'ACTIVA',
+            tier: null, // Sin tier explícito - debe usar STEAM_ASINCRONICO como fallback
+            fechaInicio: new Date('2026-01-01'),
+            fechaFin: null,
+          },
+        ],
+      });
+
+      mockPrisma.suscripcionFamiliar.findUnique.mockResolvedValue(
+        mockSuscripcion,
+      );
+
+      const result = await service.obtenerPorTutorId('tutor-123');
+
+      // Debe usar STEAM_ASINCRONICO ($65,000) NO STEAM_SINCRONICO ($95,000)
+      expect(result?.inscripciones[0].tier).toBe('STEAM_ASINCRONICO');
+      expect(result?.inscripciones[0].precioBase).toBe(65000);
     });
   });
 
