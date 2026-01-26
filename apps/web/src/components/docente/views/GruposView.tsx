@@ -14,15 +14,25 @@ interface GruposViewProps {
 }
 
 // Casa colors for visual distinction
-const CASA_COLORS: Record<string, { bg: string; text: string; glow: string }> = {
+type CasaKey = 'QUANTUM' | 'VERTEX' | 'PULSAR';
+interface CasaStyle {
+  bg: string;
+  text: string;
+  glow: string;
+}
+
+const CASA_COLORS: Record<CasaKey, CasaStyle> = {
   QUANTUM: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', glow: '#00d4ff40' },
   VERTEX: { bg: 'bg-purple-500/20', text: 'text-purple-400', glow: '#8b5cf640' },
   PULSAR: { bg: 'bg-amber-500/20', text: 'text-amber-400', glow: '#f59e0b40' },
 };
 
-function getCasaStyle(casa: string): { bg: string; text: string; glow: string } {
-  const key = casa?.toUpperCase() || 'VERTEX';
-  return CASA_COLORS[key] ?? CASA_COLORS.VERTEX!;
+// Fallback constante - TypeScript sabe que VERTEX existe
+const DEFAULT_CASA_STYLE = CASA_COLORS.VERTEX;
+
+function getCasaStyle(casa: string): CasaStyle {
+  const key = (casa?.toUpperCase() || 'VERTEX') as CasaKey;
+  return CASA_COLORS[key] ?? DEFAULT_CASA_STYLE;
 }
 
 export function GruposView({

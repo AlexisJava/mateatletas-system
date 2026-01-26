@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../core/database/prisma.service';
@@ -169,6 +169,13 @@ export class DocenteCommandService {
       }),
     ]);
 
+    // Defensive check: aunque el validator ya validó, protegemos contra race conditions
+    if (!fromDocente || !toDocente) {
+      throw new NotFoundException(
+        'Uno de los docentes ya no existe en el sistema',
+      );
+    }
+
     // Reasignar todas las clases
     const result = await this.prisma.clase.updateMany({
       where: { docenteId: fromDocenteId },
@@ -178,8 +185,8 @@ export class DocenteCommandService {
     return {
       message: `${result.count} clase(s) reasignada(s) correctamente`,
       clasesReasignadas: result.count,
-      desde: `${fromDocente!.nombre} ${fromDocente!.apellido}`,
-      hacia: `${toDocente!.nombre} ${toDocente!.apellido}`,
+      desde: `${fromDocente.nombre} ${fromDocente.apellido}`,
+      hacia: `${toDocente.nombre} ${toDocente.apellido}`,
     };
   }
 

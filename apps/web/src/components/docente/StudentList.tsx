@@ -67,6 +67,24 @@ const ACCION_EMOJIS: Record<string, string> = {
   ASISTENCIA: '✓',
 };
 
+// Type guards para validación segura de selects
+const TIPOS_OBSERVACION: TipoObservacion[] = [
+  'Academica',
+  'Conductual',
+  'Asistencia',
+  'Logro',
+  'Incidente',
+];
+const PRIORIDADES_OBSERVACION: PrioridadObservacion[] = ['Baja', 'Media', 'Alta', 'Urgente'];
+
+function isTipoObservacion(value: string): value is TipoObservacion {
+  return TIPOS_OBSERVACION.includes(value as TipoObservacion);
+}
+
+function isPrioridadObservacion(value: string): value is PrioridadObservacion {
+  return PRIORIDADES_OBSERVACION.includes(value as PrioridadObservacion);
+}
+
 interface StudentListProps {
   comisionId: string;
   onBack?: () => void;
@@ -590,13 +608,10 @@ export const StudentList: React.FC<StudentListProps> = ({
     }
 
     // Agrupar puntos por tipo de acción para el mini gráfico
-    const puntosPorTipo = historialPuntos.puntos.reduce(
-      (acc, p) => {
-        acc[p.tipoAccion] = (acc[p.tipoAccion] || 0) + p.puntos;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
+    const puntosPorTipo = historialPuntos.puntos.reduce<Record<string, number>>((acc, p) => {
+      acc[p.tipoAccion] = (acc[p.tipoAccion] || 0) + p.puntos;
+      return acc;
+    }, {});
     const tiposOrdenados = Object.entries(puntosPorTipo).sort((a, b) => b[1] - a[1]);
     const maxPuntosTipo = Math.max(...Object.values(puntosPorTipo));
 
@@ -1439,7 +1454,10 @@ export const StudentList: React.FC<StudentListProps> = ({
                 <label className="block text-xs text-slate-400 mb-1">Tipo</label>
                 <select
                   value={obsTipo}
-                  onChange={(e) => setObsTipo(e.target.value as TipoObservacion)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (isTipoObservacion(value)) setObsTipo(value);
+                  }}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
                 >
                   <option value="Academica">Académica</option>
@@ -1453,7 +1471,10 @@ export const StudentList: React.FC<StudentListProps> = ({
                 <label className="block text-xs text-slate-400 mb-1">Prioridad</label>
                 <select
                   value={obsPrioridad}
-                  onChange={(e) => setObsPrioridad(e.target.value as PrioridadObservacion)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (isPrioridadObservacion(value)) setObsPrioridad(value);
+                  }}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
                 >
                   <option value="Baja">Baja</option>

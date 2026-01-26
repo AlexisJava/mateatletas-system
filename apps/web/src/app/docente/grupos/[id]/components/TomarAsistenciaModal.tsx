@@ -68,6 +68,11 @@ export default function TomarAsistenciaModal({
     );
   };
 
+  // Type guard para filtrar estudiantes con estado asignado
+  const tieneEstado = (
+    est: EstadoEstudiante,
+  ): est is EstadoEstudiante & { estado: EstadoAsistencia } => est.estado !== null;
+
   const handleSubmit = async () => {
     // Validar que todos tengan estado
     const sinEstado = estadosEstudiantes.filter((est) => !est.estado);
@@ -81,11 +86,14 @@ export default function TomarAsistenciaModal({
     try {
       setIsSubmitting(true);
 
-      const asistencias: AsistenciaEstudianteItem[] = estadosEstudiantes.map((est) => ({
-        estudianteId: est.estudiante.id,
-        estado: est.estado!,
-        observaciones: est.observaciones || undefined,
-      }));
+      // Usar type guard para que TypeScript sepa que estado no es null
+      const asistencias: AsistenciaEstudianteItem[] = estadosEstudiantes
+        .filter(tieneEstado)
+        .map((est) => ({
+          estudianteId: est.estudiante.id,
+          estado: est.estado,
+          observaciones: est.observaciones || undefined,
+        }));
 
       const fechaHoy = new Date().toISOString().split('T')[0] as string; // YYYY-MM-DD
 

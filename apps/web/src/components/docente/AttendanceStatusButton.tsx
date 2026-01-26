@@ -78,16 +78,25 @@ export default function AttendanceStatusButton({
     },
   };
 
+  // Array de estados para iteración type-safe (evita cast de Object.entries)
+  const estados: EstadoAsistencia[] = [
+    EstadoAsistencia.Presente,
+    EstadoAsistencia.Ausente,
+    EstadoAsistencia.Justificado,
+    EstadoAsistencia.Tardanza,
+  ];
+
   return (
     <div className="flex flex-wrap gap-2">
-      {Object.entries(statusConfig).map(([status, config]) => {
+      {estados.map((status) => {
+        const config = statusConfig[status];
         const isActive = currentStatus === status;
         const buttonClass = isActive ? config.activeClass : config.inactiveClass;
 
         return (
           <button
             key={status}
-            onClick={() => onStatusChange(status as EstadoAsistencia)}
+            onClick={() => onStatusChange(status)}
             disabled={disabled}
             className={`
               px-3 py-2 rounded-lg border-2 font-semibold text-sm
