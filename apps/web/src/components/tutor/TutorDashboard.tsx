@@ -52,23 +52,24 @@ export function TutorDashboard() {
   const [showPagosModal, setShowPagosModal] = useState(false);
   const [showNovedadesModal, setShowNovedadesModal] = useState(false);
 
+  const fetchData = async (showLoading = true) => {
+    try {
+      if (showLoading) setIsLoading(true);
+      setError(null);
+      const [dashboard, clases] = await Promise.all([
+        tutoresApi.getDashboardResumen(),
+        tutoresApi.getProximasClases(6),
+      ]);
+      setDashboardData(dashboard);
+      setProximasClases(clases);
+    } catch {
+      setError('No pudimos cargar los datos. Intentá de nuevo.');
+    } finally {
+      if (showLoading) setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const [dashboard, clases] = await Promise.all([
-          tutoresApi.getDashboardResumen(),
-          tutoresApi.getProximasClases(6),
-        ]);
-        setDashboardData(dashboard);
-        setProximasClases(clases);
-      } catch {
-        setError('No pudimos cargar los datos. Intentá de nuevo.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchData();
   }, []);
 
@@ -399,7 +400,11 @@ export function TutorDashboard() {
 
       {/* Modales */}
       {selectedHijo && (
-        <HijoDetalleModal hijo={selectedHijo} onClose={() => setSelectedHijo(null)} />
+        <HijoDetalleModal
+          hijo={selectedHijo}
+          onClose={() => setSelectedHijo(null)}
+          onUpdate={() => fetchData(false)}
+        />
       )}
 
       {selectedClase && (

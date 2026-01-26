@@ -175,6 +175,13 @@ export interface CrearHijoRequest {
   nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
 }
 
+export interface UpdateEstudianteRequest {
+  nombre?: string;
+  apellido?: string;
+  edad?: number;
+  nivelEscolar?: 'Primaria' | 'Secundaria' | 'Universidad';
+}
+
 export interface EstudianteCreado {
   id: string;
   nombre: string;
@@ -203,6 +210,18 @@ export const tutoresApi = {
    */
   crearHijo: async (data: CrearHijoRequest): Promise<CrearHijoResponse> => {
     return apiClient.post<CrearHijoResponse>('/estudiantes', data);
+  },
+
+  /**
+   * PATCH /estudiantes/:id
+   * Actualiza los datos de un estudiante (hijo del tutor autenticado)
+   * El backend verifica ownership automáticamente
+   */
+  updateEstudiante: async (
+    id: string,
+    data: UpdateEstudianteRequest,
+  ): Promise<EstudianteCreado> => {
+    return apiClient.patch<EstudianteCreado>(`/estudiantes/${id}`, data);
   },
 
   /**

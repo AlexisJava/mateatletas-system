@@ -565,17 +565,23 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 
 ---
 
-### 5.5 Flujo de compra de eventos/cursos temporales
+### ~~5.5 Flujo de compra de eventos/cursos temporales~~ ⏸️ DIFERIDO
 
-| Campo            | Valor                                    |
-| ---------------- | ---------------------------------------- |
-| **Prioridad**    | P2 MEDIO                                 |
-| **Complejidad**  | 🔴 DIFÍCIL                               |
-| **Dependencias** | 🔓 Ninguna pero es complejo              |
-| **Archivos**     | Múltiples archivos nuevos                |
-| **Descripción**  | Modelo existe pero no hay flujo completo |
+| Campo            | Valor                                             |
+| ---------------- | ------------------------------------------------- |
+| **Prioridad**    | P2 MEDIO → ⏸️ DIFERIDO                            |
+| **Complejidad**  | 🔴 DIFÍCIL                                        |
+| **Dependencias** | 🔓 Ninguna pero es complejo                       |
+| **Archivos**     | Múltiples archivos nuevos                         |
+| **Descripción**  | Modelo existe pero no hay flujo completo          |
+| **Estado**       | ⏸️ **DIFERIDO** - Implementación post-lanzamiento |
 
-**Pasos**:
+> **NOTA (2026-01-26)**: Esta funcionalidad se difiere para post-lanzamiento.
+> El modelo de datos ya existe (Producto.tipo = 'Evento' | 'Curso'), pero el flujo
+> completo de compra/inscripción requiere diseño adicional y no es crítico para MVP.
+> No se cuenta en el porcentaje de completitud de FASE 5.
+
+**Pasos** (para implementación futura):
 
 1. [ ] Crear vista `/tutor/cursos` con productos Evento/Curso
 2. [ ] Wizard de inscripción (diferente a suscripción)
@@ -912,13 +918,13 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 - [x] 4.8 Auditoría de tipos P0-P3 ✅ (2026-01-26) - Type safety completo, cero `any`/`!`/casts
 - [x] 4.9 Tests integración asistencia ✅ (2026-01-26) - 99 tests passing + ownership checks
 
-### FASE 5: Portal Tutor
+### FASE 5: Portal Tutor ✅ COMPLETADA
 
 - [x] 5.1 Recuperación de contraseña ✅ (2026-01-20) - Compartido con Docente
-- [ ] 5.2 Editar datos de estudiante
+- [x] 5.2 Editar datos de estudiante ✅ (2026-01-26) - Modal edición en HijoDetalleModal + endpoint PATCH /estudiantes/:id
 - [x] 5.3 Pausar suscripción ✅ (2026-01-20) - Endpoints y UI para pausar/reactivar inscripciones individuales y suscripción completa
-- [ ] 5.4 UI cambiar horario de inscripción
-- [ ] 5.5 Flujo de eventos/cursos temporales
+- [x] 5.4 UI cambiar horario de inscripción ✅ (2026-01-26) - UI completa: sección "Tus actividades con horario" + modal de selección + endpoint horarios-disponibles + API cambiarHorario
+- [ ] ~~5.5 Flujo de eventos/cursos temporales~~ ⏸️ DIFERIDO - Implementación post-lanzamiento
 
 ### FASE 6: Portal Estudiante
 
@@ -1092,3 +1098,4 @@ Semana 4+: FASE 7 + FASE 9 (Mensajería + Contenido)
 | 2026-01-23 | ✅ FASE 10: Aula Viva WebSocket completa - Sprint 1-4 con 37+ E2E tests                                       | Claude |
 | 2026-01-23 | ✅ Sprint 4: Teoría Sincronizada y Práctica en Vivo (17 tests)                                                | Claude |
 | 2026-01-24 | ✅ FASE 3 COMPLETADA: 3.4 Monitoring DLQ, 3.5 Audit Logs, 3.6 MFA Settings UI                                 | Claude |
+| 2026-01-26 | ✅ FASE 5 COMPLETADA: 5.2 Editar estudiante, 5.4 Cambiar horario (API), ⏸️ 5.5 DIFERIDO                       | Claude |

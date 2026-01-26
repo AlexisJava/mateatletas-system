@@ -325,6 +325,46 @@ export interface ReactivarSuscripcionResponse {
   readonly mensaje: string;
 }
 
+/**
+ * Response de cambiar horario de inscripción
+ *
+ * NOTA: El interceptor de axios desenvuelve automáticamente las respuestas,
+ * por lo que este tipo refleja el contenido interno, no el wrapper { success, data }.
+ *
+ * Sincronizado con CambiarHorarioResult del backend:
+ * apps/api/src/suscripciones/types/suscripcion-familiar.types.ts
+ */
+export interface CambiarHorarioResponse {
+  /** ID de la inscripción modificada */
+  readonly inscripcionId: string;
+  /** ID del ClaseGrupo anterior (string vacío si era null) */
+  readonly claseGrupoAnteriorId: string;
+  /** ID del nuevo ClaseGrupo */
+  readonly nuevoClaseGrupoId: string;
+  /** Nombre descriptivo del nuevo horario/grupo */
+  readonly nuevoHorarioNombre: string;
+}
+
+/**
+ * Horario disponible para cambio de inscripción
+ */
+export interface HorarioDisponible {
+  readonly id: string;
+  readonly nombre: string;
+  readonly diaSemana: string;
+  readonly horaInicio: string;
+  readonly horaFin: string;
+  readonly cuposDisponibles: number;
+}
+
+/**
+ * Response de obtener horarios disponibles
+ */
+/**
+ * NOTA: El interceptor de axios desenvuelve automáticamente,
+ * por lo que getHorariosDisponibles devuelve HorarioDisponible[] directamente.
+ */
+
 // ============================================================================
 // API CLIENT
 // ============================================================================
@@ -346,6 +386,29 @@ export const suscripcionFamiliarApi = {
       }
       throw error;
     }
+  },
+
+  /**
+   * GET /suscripciones/familiar/horarios-disponibles/:productoId
+   * Obtiene los horarios disponibles para un producto
+   *
+   * Usado para cambiar el horario de una inscripción activa.
+   * Excluye el ClaseGrupo actual de la inscripción.
+   *
+   * @param productoId - ID del producto
+   * @param claseGrupoActualId - ID del ClaseGrupo actual a excluir (opcional)
+   * @returns Lista de horarios disponibles con cupos
+   */
+  getHorariosDisponibles: async (
+    productoId: string,
+    claseGrupoActualId?: string,
+  ): Promise<HorarioDisponible[]> => {
+    const params = claseGrupoActualId ? { excluir: claseGrupoActualId } : {};
+    // El interceptor de axios desenvuelve automáticamente { data: [...] } → [...]
+    return apiClient.get<HorarioDisponible[]>(
+      `/suscripciones/familiar/horarios-disponibles/${productoId}`,
+      { params },
+    );
   },
 
   /**
@@ -517,6 +580,30 @@ export const suscripcionFamiliarApi = {
    */
   reactivarSuscripcion: async (): Promise<ReactivarSuscripcionResponse> => {
     return apiClient.post<ReactivarSuscripcionResponse>('/suscripciones/familiar/reactivar');
+  },
+
+  /**
+   * PATCH /suscripciones/familiar/inscripciones/horario
+   * Cambia el horario (ClaseGrupo) de una inscripción
+   *
+   * Permite al tutor cambiar el grupo de clase de una inscripción activa.
+   * El nuevo ClaseGrupo debe pertenecer al mismo Producto.
+   *
+   * @param inscripcionId - ID de la inscripción a modificar
+   * @param nuevoClaseGrupoId - ID del nuevo ClaseGrupo
+   * @returns Resultado con datos de la inscripción actualizada
+   */
+  cambiarHorario: async (
+    inscripcionId: string,
+    nuevoClaseGrupoId: string,
+  ): Promise<CambiarHorarioResponse> => {
+    return apiClient.patch<CambiarHorarioResponse>(
+      '/suscripciones/familiar/inscripciones/horario',
+      {
+        inscripcionId,
+        nuevoClaseGrupoId,
+      },
+    );
   },
 } as const;
 

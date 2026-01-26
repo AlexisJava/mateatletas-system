@@ -385,4 +385,62 @@ export class SuscripcionFamiliarQueryService {
       updatedAt: suscripcion.updatedAt,
     };
   }
+
+  /**
+   * Obtiene los horarios (ClaseGrupos) disponibles para un producto
+   * Excluye el ClaseGrupo actual de la inscripción si se proporciona
+   *
+   * @param productoId - ID del producto
+   * @param claseGrupoActualId - ID del ClaseGrupo actual a excluir (opcional)
+   * @returns Lista de ClaseGrupos disponibles con sus horarios
+   */
+  async obtenerHorariosDisponibles(
+    productoId: string,
+    claseGrupoActualId?: string,
+  ): Promise<
+    Array<{
+      id: string;
+      nombre: string;
+      diaSemana: string;
+      horaInicio: string;
+      horaFin: string;
+      cuposDisponibles: number;
+    }>
+  > {
+    // Obtener ClaseGrupos del producto que estén activos y vigentes
+    const claseGrupos = await this.prisma.claseGrupo.findMany({
+      where: {
+        productoId: productoId,
+        activo: true,
+        fechaFin: { gte: new Date() },
+        // Excluir el ClaseGrupo actual si se proporciona
+        ...(claseGrupoActualId ? { id: { not: claseGrupoActualId } } : {}),
+      },
+      select: {
+        id: true,
+        nombre: true,
+        diaSemana: true,
+        horaInicio: true,
+        horaFin: true,
+        cupoMaximo: true,
+        _count: {
+          select: {
+            inscripcionesActividad: {
+              where: { estado: EstadoInscripcionActividad.ACTIVA },
+            },
+          },
+        },
+      },
+      orderBy: [{ diaSemana: 'asc' }, { horaInicio: 'asc' }],
+    });
+
+    return claseGrupos.map((cg) => ({
+      id: cg.id,
+      nombre: cg.nombre,
+      diaSemana: cg.diaSemana,
+      horaInicio: cg.horaInicio,
+      horaFin: cg.horaFin,
+      cuposDisponibles: cg.cupoMaximo - cg._count.inscripcionesActividad,
+    }));
+  }
 }

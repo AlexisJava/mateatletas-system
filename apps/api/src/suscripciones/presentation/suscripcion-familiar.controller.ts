@@ -146,6 +146,26 @@ export class SuscripcionFamiliarController {
     };
   }
 
+  @Get('horarios-disponibles/:productoId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ExactRoles(Role.TUTOR)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener horarios disponibles para un producto' })
+  async obtenerHorariosDisponibles(
+    @Param('productoId', ParseIdPipe) productoId: string,
+    @Query('excluir') claseGrupoActualId?: string,
+  ) {
+    const horarios = await this.queryService.obtenerHorariosDisponibles(
+      productoId,
+      claseGrupoActualId,
+    );
+
+    return {
+      success: true,
+      data: horarios,
+    };
+  }
+
   @Post('inscripciones')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ExactRoles(Role.TUTOR)

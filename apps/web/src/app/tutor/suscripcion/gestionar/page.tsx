@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -10,11 +10,14 @@ import {
   XCircle,
   Trash2,
   PauseCircle,
+  PlayCircle,
   Settings,
   CreditCard,
   Calendar,
   Users,
   ChevronRight,
+  Clock,
+  RefreshCw,
 } from 'lucide-react';
 import {
   useSuscripcionFamiliar,
@@ -25,6 +28,8 @@ import {
   suscripcionFamiliarApi,
   type BajaInscripcionesResponse,
   type CancelarSuscripcionResponse,
+  type HorarioDisponible,
+  type InscripcionActividadDetalle,
 } from '@/lib/api/suscripcion-familiar.api';
 import toast from 'react-hot-toast';
 
@@ -32,7 +37,23 @@ import toast from 'react-hot-toast';
 // TIPOS
 // ============================================================================
 
-type ModalType = 'cancelar' | 'baja' | null;
+type ModalType = 'cancelar' | 'baja' | 'pausar' | 'cambiarHorario' | null;
+
+/** Días de la semana para formato de horario */
+const DIAS_SEMANA: Record<string, string> = {
+  LUNES: 'Lunes',
+  MARTES: 'Martes',
+  MIERCOLES: 'Miércoles',
+  JUEVES: 'Jueves',
+  VIERNES: 'Viernes',
+  SABADO: 'Sábado',
+  DOMINGO: 'Domingo',
+};
+
+/** Formatear hora de HH:MM:SS a HH:MM */
+function formatHora(hora: string): string {
+  return hora.slice(0, 5);
+}
 
 // ============================================================================
 // COMPONENTE PRINCIPAL
@@ -50,6 +71,13 @@ export default function GestionarSuscripcionPage(): React.ReactElement {
   const [resultadoBaja, setResultadoBaja] = useState<BajaInscripcionesResponse | null>(null);
   const [resultadoCancelacion, setResultadoCancelacion] =
     useState<CancelarSuscripcionResponse | null>(null);
+
+  // Estados para cambiar horario
+  const [inscripcionParaCambio, setInscripcionParaCambio] =
+    useState<InscripcionActividadDetalle | null>(null);
+  const [horariosDisponibles, setHorariosDisponibles] = useState<HorarioDisponible[]>([]);
+  const [loadingHorarios, setLoadingHorarios] = useState(false);
+  const [selectedHorario, setSelectedHorario] = useState<string | null>(null);
 
   // Toggle inscripción para baja
   const toggleInscripcion = (id: string): void => {
@@ -98,6 +126,87 @@ export default function GestionarSuscripcionPage(): React.ReactElement {
       await refetch();
     } catch {
       toast.error('Error al cancelar la suscripción');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handler para pausar suscripción
+  const handlePausarSuscripcion = async (): Promise<void> => {
+    setIsSubmitting(true);
+    try {
+      await suscripcionFamiliarApi.pausarSuscripcion({
+        motivo: motivo.trim() || undefined,
+      });
+      toast.success('Suscripción pausada exitosamente');
+      setModalOpen(null);
+      setMotivo('');
+      await refetch();
+    } catch {
+      toast.error('Error al pausar la suscripción');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handler para reactivar suscripción
+  const handleReactivarSuscripcion = async (): Promise<void> => {
+    setIsSubmitting(true);
+    try {
+      await suscripcionFamiliarApi.reactivarSuscripcion();
+      toast.success('Suscripción reactivada exitosamente');
+      await refetch();
+    } catch {
+      toast.error('Error al reactivar la suscripción');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Abrir modal de cambiar horario y cargar horarios disponibles
+  const handleOpenCambiarHorario = useCallback(
+    async (inscripcion: InscripcionActividadDetalle): Promise<void> => {
+      setInscripcionParaCambio(inscripcion);
+      setSelectedHorario(null);
+      setModalOpen('cambiarHorario');
+      setLoadingHorarios(true);
+
+      try {
+        const horarios = await suscripcionFamiliarApi.getHorariosDisponibles(
+          inscripcion.productoId,
+          inscripcion.claseGrupoId ?? undefined,
+        );
+        setHorariosDisponibles(horarios);
+      } catch {
+        toast.error('Error al cargar los horarios disponibles');
+        setHorariosDisponibles([]);
+      } finally {
+        setLoadingHorarios(false);
+      }
+    },
+    [],
+  );
+
+  // Handler para confirmar cambio de horario
+  const handleConfirmarCambioHorario = async (): Promise<void> => {
+    if (!inscripcionParaCambio || !selectedHorario) {
+      toast.error('Seleccioná un horario');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await suscripcionFamiliarApi.cambiarHorario(
+        inscripcionParaCambio.id,
+        selectedHorario,
+      );
+      toast.success(`Horario cambiado a ${response.nuevoHorarioNombre}`);
+      setModalOpen(null);
+      setInscripcionParaCambio(null);
+      setSelectedHorario(null);
+      await refetch();
+    } catch {
+      toast.error('Error al cambiar el horario');
     } finally {
       setIsSubmitting(false);
     }
@@ -276,40 +385,129 @@ export default function GestionarSuscripcionPage(): React.ReactElement {
 
         {/* Acciones */}
         <div className="space-y-4">
-          {/* Dar de baja inscripciones */}
-          <button
-            onClick={() => setModalOpen('baja')}
-            className="w-full bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 rounded-2xl p-5 text-left transition-all flex items-center justify-between group"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
-                <Trash2 className="w-6 h-6 text-amber-400" />
+          {/* Pausar suscripción - solo visible cuando está AUTHORIZED */}
+          {suscripcion.estado === 'AUTHORIZED' && (
+            <button
+              onClick={() => setModalOpen('pausar')}
+              className="w-full bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 rounded-2xl p-5 text-left transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
+                  <PauseCircle className="w-6 h-6 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-white font-medium">Pausar suscripción</h3>
+                  <p className="text-sm text-slate-400">
+                    Pausá temporalmente tu plan y los cobros automáticos
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-white font-medium">Dar de baja actividades</h3>
-                <p className="text-sm text-slate-400">Eliminá actividades de tu suscripción</p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" />
-          </button>
+              <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" />
+            </button>
+          )}
 
-          {/* Cancelar suscripción */}
-          <button
-            onClick={() => setModalOpen('cancelar')}
-            className="w-full bg-red-500/10 backdrop-blur-xl border border-red-500/20 hover:bg-red-500/20 rounded-2xl p-5 text-left transition-all flex items-center justify-between group"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
-                <XCircle className="w-6 h-6 text-red-400" />
+          {/* Reactivar suscripción - solo visible cuando está PAUSED */}
+          {suscripcion.estado === 'PAUSED' && (
+            <button
+              onClick={handleReactivarSuscripcion}
+              disabled={isSubmitting}
+              className="w-full bg-green-500/10 backdrop-blur-xl border border-green-500/20 hover:bg-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl p-5 text-left transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                  {isSubmitting ? (
+                    <Loader2 className="w-6 h-6 text-green-400 animate-spin" />
+                  ) : (
+                    <PlayCircle className="w-6 h-6 text-green-400" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-green-400 font-medium">Reactivar suscripción</h3>
+                  <p className="text-sm text-slate-400">
+                    Reactivá tu plan y volvé a tener acceso completo
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-red-400 font-medium">Cancelar suscripción</h3>
-                <p className="text-sm text-slate-400">Cancelá completamente tu plan familiar</p>
+              <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-green-400 transition-colors" />
+            </button>
+          )}
+
+          {/* Dar de baja inscripciones - solo cuando hay inscripciones activas */}
+          {suscripcion.inscripciones.filter((i) => i.estado === 'ACTIVA').length > 0 && (
+            <button
+              onClick={() => setModalOpen('baja')}
+              className="w-full bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 rounded-2xl p-5 text-left transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
+                  <Trash2 className="w-6 h-6 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-white font-medium">Dar de baja actividades</h3>
+                  <p className="text-sm text-slate-400">Eliminá actividades de tu suscripción</p>
+                </div>
               </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-red-400 transition-colors" />
-          </button>
+              <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" />
+            </button>
+          )}
+
+          {/* Cancelar suscripción - solo cuando no está cancelada */}
+          {suscripcion.estado !== 'CANCELLED' && (
+            <button
+              onClick={() => setModalOpen('cancelar')}
+              className="w-full bg-red-500/10 backdrop-blur-xl border border-red-500/20 hover:bg-red-500/20 rounded-2xl p-5 text-left transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
+                  <XCircle className="w-6 h-6 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-red-400 font-medium">Cancelar suscripción</h3>
+                  <p className="text-sm text-slate-400">Cancelá completamente tu plan familiar</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-red-400 transition-colors" />
+            </button>
+          )}
         </div>
+
+        {/* Sección de inscripciones activas con opción de cambiar horario */}
+        {suscripcion.inscripciones.filter((i) => i.estado === 'ACTIVA' && i.claseGrupoId).length >
+          0 && (
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-cyan-400" />
+              Tus actividades con horario
+            </h2>
+            <div className="space-y-3">
+              {suscripcion.inscripciones
+                .filter((i) => i.estado === 'ACTIVA' && i.claseGrupoId)
+                .map((inscripcion) => (
+                  <div
+                    key={inscripcion.id}
+                    className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center justify-between"
+                  >
+                    <div className="flex-1">
+                      <p className="text-white font-medium">{inscripcion.productoNombre}</p>
+                      <p className="text-sm text-slate-400">
+                        {inscripcion.estudianteNombre}
+                        {inscripcion.claseGrupoNombre && (
+                          <span className="text-cyan-400"> • {inscripcion.claseGrupoNombre}</span>
+                        )}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleOpenCambiarHorario(inscripcion)}
+                      className="flex items-center gap-2 px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-xl text-cyan-400 text-sm font-medium transition-colors"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      Cambiar horario
+                    </button>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal de baja de inscripciones */}
@@ -456,6 +654,199 @@ export default function GestionarSuscripcionPage(): React.ReactElement {
                   </>
                 ) : (
                   'Sí, cancelar'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de pausar suscripción */}
+      {modalOpen === 'pausar' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setModalOpen(null)}
+          />
+          <div className="relative bg-[#12121a] border border-white/10 rounded-3xl p-6 max-w-lg w-full">
+            <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <PauseCircle className="w-8 h-8 text-amber-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white text-center mb-2">¿Pausar suscripción?</h3>
+            <p className="text-slate-400 text-sm text-center mb-4">Al pausar tu suscripción:</p>
+
+            {/* Información sobre lo que implica pausar */}
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+                  <span className="text-slate-300">
+                    Se pausarán los cobros automáticos de MercadoPago
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+                  <span className="text-slate-300">
+                    Todas las inscripciones activas quedarán pausadas
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+                  <span className="text-slate-300">Podés reactivar en cualquier momento</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Motivo opcional */}
+            <div className="mb-6">
+              <label className="block text-sm text-slate-400 mb-2">
+                Motivo de la pausa (opcional)
+              </label>
+              <textarea
+                value={motivo}
+                onChange={(e) => setMotivo(e.target.value)}
+                placeholder="Contanos por qué pausás tu suscripción..."
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 resize-none focus:outline-none focus:border-amber-500"
+                rows={2}
+              />
+            </div>
+
+            {/* Botones */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setModalOpen(null);
+                  setMotivo('');
+                }}
+                className="flex-1 py-3 bg-white/10 hover:bg-white/15 text-white rounded-xl font-medium transition-colors"
+              >
+                Volver
+              </button>
+              <button
+                onClick={handlePausarSuscripcion}
+                disabled={isSubmitting}
+                className="flex-1 py-3 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  'Sí, pausar'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de cambiar horario */}
+      {modalOpen === 'cambiarHorario' && inscripcionParaCambio && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => {
+              setModalOpen(null);
+              setInscripcionParaCambio(null);
+              setSelectedHorario(null);
+            }}
+          />
+          <div className="relative bg-[#12121a] border border-white/10 rounded-3xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
+            <div className="w-16 h-16 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <RefreshCw className="w-8 h-8 text-cyan-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white text-center mb-2">Cambiar horario</h3>
+            <p className="text-slate-400 text-sm text-center mb-2">
+              {inscripcionParaCambio.productoNombre}
+            </p>
+            <p className="text-cyan-400 text-sm text-center mb-6">
+              {inscripcionParaCambio.estudianteNombre} •{' '}
+              {inscripcionParaCambio.claseGrupoNombre ?? 'Sin horario actual'}
+            </p>
+
+            {/* Lista de horarios disponibles */}
+            {loadingHorarios ? (
+              <div className="flex flex-col items-center py-8">
+                <Loader2 className="w-8 h-8 text-cyan-400 animate-spin mb-2" />
+                <p className="text-slate-400 text-sm">Cargando horarios disponibles...</p>
+              </div>
+            ) : horariosDisponibles.length === 0 ? (
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-center mb-6">
+                <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+                <p className="text-amber-400 text-sm">No hay otros horarios disponibles</p>
+                <p className="text-slate-400 text-xs mt-1">
+                  Todos los grupos están llenos o no hay alternativas.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2 mb-6 max-h-64 overflow-y-auto">
+                {horariosDisponibles.map((horario) => (
+                  <label
+                    key={horario.id}
+                    className={`flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-all ${
+                      selectedHorario === horario.id
+                        ? 'bg-cyan-500/20 border border-cyan-500/50'
+                        : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                    } ${horario.cuposDisponibles === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="horario"
+                      checked={selectedHorario === horario.id}
+                      onChange={() => setSelectedHorario(horario.id)}
+                      disabled={horario.cuposDisponibles === 0}
+                      className="w-5 h-5 text-cyan-500 focus:ring-cyan-500 border-slate-500"
+                    />
+                    <div className="flex-1">
+                      <p className="text-white font-medium">{horario.nombre}</p>
+                      <p className="text-slate-400 text-sm">
+                        {DIAS_SEMANA[horario.diaSemana] ?? horario.diaSemana} •{' '}
+                        {formatHora(horario.horaInicio)} - {formatHora(horario.horaFin)}
+                      </p>
+                    </div>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        horario.cuposDisponibles > 3
+                          ? 'bg-green-500/20 text-green-400'
+                          : horario.cuposDisponibles > 0
+                            ? 'bg-amber-500/20 text-amber-400'
+                            : 'bg-red-500/20 text-red-400'
+                      }`}
+                    >
+                      {horario.cuposDisponibles > 0
+                        ? `${horario.cuposDisponibles} cupos`
+                        : 'Completo'}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
+
+            {/* Botones */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setModalOpen(null);
+                  setInscripcionParaCambio(null);
+                  setSelectedHorario(null);
+                }}
+                className="flex-1 py-3 bg-white/10 hover:bg-white/15 text-white rounded-xl font-medium transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmarCambioHorario}
+                disabled={isSubmitting || !selectedHorario || horariosDisponibles.length === 0}
+                className="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  'Confirmar cambio'
                 )}
               </button>
             </div>
