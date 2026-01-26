@@ -45,7 +45,7 @@ export default function DocentePerfilPage() {
           bio: data.bio || '',
         });
       } catch (err) {
-        setError(getErrorMessage(err as Error, 'Error al cargar perfil'));
+        setError(getErrorMessage(err, 'Error al cargar perfil'));
       } finally {
         setIsLoading(false);
       }
@@ -75,7 +75,7 @@ export default function DocentePerfilPage() {
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      setError(getErrorMessage(err as Error, 'Error al actualizar perfil'));
+      setError(getErrorMessage(err, 'Error al actualizar perfil'));
     } finally {
       setIsSaving(false);
     }

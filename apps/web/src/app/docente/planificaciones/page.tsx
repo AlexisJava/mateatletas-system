@@ -45,7 +45,7 @@ export default function DocentePlanificacionesPage() {
         setExpandedAsignaciones(new Set([firstAsignacion.id]));
       }
     } catch (err) {
-      const errorMessage = getErrorMessage(err as Error, 'Error al cargar planificaciones');
+      const errorMessage = getErrorMessage(err, 'Error al cargar planificaciones');
       setError(errorMessage);
       console.error('Error loading asignaciones:', err);
     } finally {
@@ -71,7 +71,7 @@ export default function DocentePlanificacionesPage() {
       }
       await loadAsignaciones();
     } catch (err) {
-      const errorMessage = getErrorMessage(err as Error, 'Error al actualizar teoría');
+      const errorMessage = getErrorMessage(err, 'Error al actualizar teoría');
       alert(errorMessage);
     } finally {
       setLoadingToggles((prev) => {
@@ -100,7 +100,7 @@ export default function DocentePlanificacionesPage() {
       }
       await loadAsignaciones();
     } catch (err) {
-      const errorMessage = getErrorMessage(err as Error, 'Error al actualizar práctica');
+      const errorMessage = getErrorMessage(err, 'Error al actualizar práctica');
       alert(errorMessage);
     } finally {
       setLoadingToggles((prev) => {
@@ -125,7 +125,7 @@ export default function DocentePlanificacionesPage() {
       }
       await loadAsignaciones();
     } catch (err) {
-      const errorMessage = getErrorMessage(err as Error, 'Error al actualizar clase');
+      const errorMessage = getErrorMessage(err, 'Error al actualizar clase');
       alert(errorMessage);
     } finally {
       setLoadingToggles((prev) => {
@@ -143,7 +143,7 @@ export default function DocentePlanificacionesPage() {
       setSelectedAsignacionId(asignacionId);
       setShowProgressModal(true);
     } catch (err) {
-      const errorMessage = getErrorMessage(err as Error, 'Error al cargar progreso');
+      const errorMessage = getErrorMessage(err, 'Error al cargar progreso');
       alert(errorMessage);
     }
   };
