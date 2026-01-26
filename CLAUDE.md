@@ -130,6 +130,109 @@ Este ciclo se repite cuantas veces sea necesario hasta que todos los tests pasen
 
 ---
 
+## MÉTODO DE DESARROLLO (POLYA)
+
+Antes de escribir una sola línea de código, Claude debe aplicar el método Polya:
+
+### 1. ENTENDER (Comprensión del problema)
+
+- ¿Qué se pide exactamente?
+- ¿Cuáles son los inputs y outputs esperados?
+- ¿Existen restricciones o casos especiales?
+- ¿Hay documentación o specs que deba leer?
+
+### 2. PLANIFICAR (Diseño de la solución)
+
+- ¿Cuál es la estrategia general?
+- ¿Qué patrones de diseño aplican?
+- ¿Qué dependencias o servicios necesito?
+- ¿Cómo divido el problema en partes manejables?
+
+### 3. EJECUTAR (Implementación)
+
+- Implementar paso a paso según el plan
+- Escribir código limpio y documentado
+- Seguir las convenciones del proyecto
+- Aplicar TDD cuando corresponda
+
+### 4. VERIFICAR (Validación)
+
+- ¿El código hace lo que se pidió?
+- ¿Pasan todos los tests?
+- ¿Funciona en el browser/entorno real?
+- ¿Hay edge cases sin cubrir?
+
+---
+
+## ANTES DE CUALQUIER TAREA
+
+Claude DEBE leer en este orden:
+
+1. **CLAUDE.md** (este archivo) - Reglas y convenciones del proyecto
+2. **SPEC del feature** (si existe) - Requisitos específicos de lo que se va a implementar
+3. **Código existente relacionado** - Para entender patrones y no duplicar
+
+---
+
+## SPECS COMO FUENTE DE VERDAD
+
+Cuando el usuario indica "creé un spec", Claude debe:
+
+### 1. Localizar el spec
+
+```bash
+# Buscar en ubicaciones comunes
+ls -la docs/specs/
+ls -la specs/
+```
+
+### 2. Leer el spec COMPLETO
+
+El spec define:
+
+- Requisitos funcionales
+- Casos de uso
+- Restricciones técnicas
+- Criterios de aceptación
+
+### 3. Implementar según el spec
+
+- NO agregar features no especificadas
+- NO modificar requisitos sin autorización
+- Si hay ambigüedad, PREGUNTAR
+
+### 4. Validar contra el spec
+
+Antes de marcar como "terminado", verificar que:
+
+- [ ] Cada requisito del spec está implementado
+- [ ] Los criterios de aceptación se cumplen
+- [ ] No se agregaron features no solicitadas
+
+---
+
+## MEJORES PRÁCTICAS
+
+### Quién define las mejores prácticas
+
+Las mejores prácticas las define el USUARIO, no Claude:
+
+- **PROHIBIDO**: Claude buscando en internet "mejores prácticas" por iniciativa propia
+- **OBLIGATORIO**: Esperar a que el usuario indique qué estándares seguir
+
+### Flujo correcto
+
+1. Usuario: "Quiero implementar X usando [patrón/estándar específico]"
+2. Claude: Implementa siguiendo exactamente ese patrón
+3. Claude: Pregunta si hay dudas sobre el estándar indicado
+
+### Flujo incorrecto
+
+1. Usuario: "Quiero implementar X"
+2. Claude: "Según las mejores prácticas de internet deberías usar Y..." ❌
+
+---
+
 ## CICLO DE CONSTRUCCIÓN ROBUSTO (INDEFECTIBLE)
 
 > ⚠️ **ESTE CICLO ES OBLIGATORIO PARA TODA IMPLEMENTACIÓN. SIN EXCEPCIONES.**

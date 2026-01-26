@@ -2747,3 +2747,7 @@ yarn test       # todos pasan
 | 2026-01-23 | Sprint 4.1-4.2: Teoría Sincronizada y Práctica en Vivo - 17 E2E tests passing   | Claude |
 | 2026-01-23 | Fix: clearAll() en servicios para limpieza de estado entre tests E2E            | Claude |
 | 2026-01-23 | Sprint 4.3 Analytics pospuesto (posible implementación futura)                  | Claude |
+| 2026-01-26 | Tests integración asistencia: 99 tests passing + ownership checks + factories   | Claude |
+| 2026-01-26 | Auditoría tipos P0-P3 Portal Docente: type guards, cero `any`/`!`/casts         | Claude |
+| 2026-01-26 | Notificaciones UI Docente 100%: dropdown, página, filtros, polling 60s          | Claude |
+| 2026-01-26 | SPEC verificación completa: 32/32 requisitos implementados                      | Claude |

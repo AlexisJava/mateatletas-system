@@ -17,9 +17,9 @@ Este documento consolida TODOS los items pendientes de las auditorías individua
 | -------------------- | --------- | ------- | --------- | ----- |
 | Portal Estudiante    | ~65%      | -       | ~35%      | ~30   |
 | Portal Tutor         | ~70%      | -       | ~30%      | 29    |
-| Portal Docente       | ~90%      | -       | ~10%      | 66    |
+| Portal Docente       | **~98%**  | -       | ~2%       | 66    |
 | Portal Admin         | **100%**  | -       | **0%**    | 152   |
-| Notificaciones       | ~85%      | -       | ~15%      | 48    |
+| Notificaciones       | **~95%**  | -       | ~5%       | 48    |
 | MercadoPago 2026     | ~87%      | -       | ~13%      | 112   |
 | Sistema de Contenido | ~65%      | -       | ~35%      | 114   |
 | Cross-Portal         | ~75%      | -       | ~25%      | 70    |
@@ -908,6 +908,9 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 - [x] 4.4 Reportes gráficos de asistencia ✅
 - [x] 4.5 Historial de puntos otorgados ✅
 - [x] ~~4.6 Endpoint para calificar tareas~~ ❌ ELIMINADO (2026-01-20) - Todo debe ser autocorregible, ver 9.4
+- [x] 4.7 Notificaciones UI Docente ✅ (2026-01-26) - Dropdown + página completa + polling 60s
+- [x] 4.8 Auditoría de tipos P0-P3 ✅ (2026-01-26) - Type safety completo, cero `any`/`!`/casts
+- [x] 4.9 Tests integración asistencia ✅ (2026-01-26) - 99 tests passing + ownership checks
 
 ### FASE 5: Portal Tutor
 
