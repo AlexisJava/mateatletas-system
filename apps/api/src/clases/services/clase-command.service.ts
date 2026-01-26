@@ -86,7 +86,13 @@ export class ClaseCommandService {
     const clase = await this.prisma.clase.findUnique({
       where: { id },
       include: {
-        inscripciones: true,
+        inscripciones: {
+          include: {
+            estudiante: {
+              select: { id: true, nombre: true, apellido: true, tutorId: true },
+            },
+          },
+        },
       },
     });
 
@@ -142,6 +148,29 @@ export class ClaseCommandService {
         `✅ Notificación enviada al docente sobre cancelación de clase ${id}`,
       );
     }
+
+    // Notificar a los tutores de los estudiantes inscritos (best-effort)
+    const claseNombre = clase.nombre || 'Clase';
+    const fechaOriginal = clase.fechaHoraInicio;
+    const tutorNotificaciones = clase.inscripciones.map(async (inscripcion) => {
+      const estudiante = inscripcion.estudiante;
+      const estudianteNombre = `${estudiante.nombre} ${estudiante.apellido}`;
+      try {
+        await this.notificacionesService.notificarClaseCanceladaATutor(
+          estudiante.tutorId,
+          estudianteNombre,
+          estudiante.id,
+          claseNombre,
+          id,
+          fechaOriginal,
+        );
+      } catch (error) {
+        this.logger.warn(
+          `⚠️ Falló notificación a tutor de ${estudianteNombre}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    });
+    await Promise.allSettled(tutorNotificaciones);
 
     this.logger.warn(
       `Clase ${id} cancelada. ${clase.inscripciones.length} inscripciones afectadas`,

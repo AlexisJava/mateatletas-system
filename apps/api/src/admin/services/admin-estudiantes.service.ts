@@ -14,6 +14,7 @@ import {
   generateTutorUsername,
   generateTutorPassword,
 } from '../../common/utils/credential-generator';
+import { NotificacionesService } from '../../notificaciones/notificaciones.service';
 
 /**
  * Servicio especializado para gestión de estudiantes desde admin
@@ -23,7 +24,10 @@ import {
 export class AdminEstudiantesService {
   private readonly logger = new Logger(AdminEstudiantesService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificacionesService: NotificacionesService,
+  ) {}
 
   /**
    * Genera un username único basado en nombre y apellido
@@ -669,7 +673,13 @@ export class AdminEstudiantesService {
     // Verificar que el estudiante existe
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: estudianteId },
-      select: { id: true, nombre: true, apellido: true },
+      select: {
+        id: true,
+        nombre: true,
+        apellido: true,
+        tutorId: true,
+        estadoAcceso: true,
+      },
     });
 
     if (!estudiante) {
@@ -713,6 +723,19 @@ export class AdminEstudiantesService {
         },
       },
     });
+
+    // Notificar al tutor si se asignó BECA (y no tenía BECA antes)
+    if (data.estadoAcceso === 'BECA' && estudiante.estadoAcceso !== 'BECA') {
+      const estudianteNombre = `${estudiante.nombre} ${estudiante.apellido}`;
+      const planNombre = estudianteActualizado.plan?.nombre ?? 'Plan con beca';
+      await this.notificacionesService.notificarBecaAsignada(
+        estudiante.tutorId,
+        estudianteNombre,
+        estudianteActualizado.id,
+        planNombre,
+        100, // Beca completa (100%)
+      );
+    }
 
     this.logger.log(
       `Plan asignado a estudiante ${estudiante.nombre} ${estudiante.apellido}: ${data.planId ?? 'heredado del tutor'}`,

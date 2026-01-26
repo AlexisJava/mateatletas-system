@@ -3,8 +3,10 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
+import { NotificacionesService } from '../notificaciones/notificaciones.service';
 import {
   TipoObservacion,
   PrioridadObservacion,
@@ -57,7 +59,12 @@ function esAdminOPedagogia(user: AuthUser): boolean {
  */
 @Injectable()
 export class ObservacionesService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(ObservacionesService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private notificacionesService: NotificacionesService,
+  ) {}
 
   /**
    * Crear una nueva observación
@@ -224,7 +231,7 @@ export class ObservacionesService {
         ? true
         : (dto.requiereSeguimiento ?? false);
 
-    return this.prisma.observacion.create({
+    const observacion = await this.prisma.observacion.create({
       data: {
         docenteId: docenteId,
         comisionId: dto.comisionId || null,
@@ -246,7 +253,7 @@ export class ObservacionesService {
         estudiantes: {
           include: {
             estudiante: {
-              select: { id: true, nombre: true, apellido: true },
+              select: { id: true, nombre: true, apellido: true, tutorId: true },
             },
           },
         },
@@ -256,6 +263,32 @@ export class ObservacionesService {
         seguimientos: true,
       },
     });
+
+    // Notificar a tutores si la observación es Urgente
+    if (dto.prioridad === PrioridadObservacion.Urgente) {
+      const docenteNombre = `${observacion.docente.nombre} ${observacion.docente.apellido}`;
+      const notificaciones = observacion.estudiantes.map(async (oe) => {
+        const estudiante = oe.estudiante;
+        const estudianteNombre = `${estudiante.nombre} ${estudiante.apellido}`;
+        try {
+          await this.notificacionesService.notificarObservacionUrgente(
+            estudiante.tutorId,
+            estudiante.id,
+            estudianteNombre,
+            observacion.id,
+            dto.tipo,
+            docenteNombre,
+          );
+        } catch (error) {
+          this.logger.warn(
+            `⚠️ Falló notificación de observación urgente a tutor de ${estudianteNombre}: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+      });
+      await Promise.allSettled(notificaciones);
+    }
+
+    return observacion;
   }
 
   /**

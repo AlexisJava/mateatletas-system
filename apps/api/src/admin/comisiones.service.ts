@@ -13,6 +13,7 @@ import {
 } from './dto/comision.dto';
 import { Prisma, EstadoInscripcionComision } from '@prisma/client';
 import { AdminEstudiantesService } from './services/admin-estudiantes.service';
+import { NotificacionesService } from '../notificaciones/notificaciones.service';
 
 /**
  * ComisionesService - CRUD de Comisiones de Productos
@@ -30,6 +31,7 @@ export class ComisionesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly estudiantesService: AdminEstudiantesService,
+    private readonly notificacionesService: NotificacionesService,
   ) {}
 
   /**
@@ -136,6 +138,17 @@ export class ComisionesService {
         },
       },
     });
+
+    // Notificar al docente si fue asignado
+    if (comision.docente) {
+      await this.notificacionesService.notificarComisionAsignada(
+        comision.docente.id,
+        comision.id,
+        comision.nombre,
+        comision.producto.nombre,
+        comision.horario ?? undefined,
+      );
+    }
 
     return {
       success: true,
@@ -313,6 +326,7 @@ export class ComisionesService {
   async update(id: string, dto: UpdateComisionDto) {
     const comisionExistente = await this.prisma.comision.findUnique({
       where: { id },
+      include: { producto: { select: { nombre: true } } },
     });
 
     if (!comisionExistente) {
@@ -327,6 +341,17 @@ export class ComisionesService {
       data: updateData,
       include: this.getComisionInclude(),
     });
+
+    // Notificar si se asignó un nuevo docente (diferente al anterior)
+    if (dto.docenteId && dto.docenteId !== comisionExistente.docenteId) {
+      await this.notificacionesService.notificarComisionAsignada(
+        dto.docenteId,
+        comision.id,
+        comision.nombre,
+        comisionExistente.producto.nombre,
+        comision.horario ?? undefined,
+      );
+    }
 
     return {
       success: true,

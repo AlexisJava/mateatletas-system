@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { CasaTipo, MundoTipo, TipoAsignacionDocente } from '@prisma/client';
+import { NotificacionesService } from '../../notificaciones/notificaciones.service';
 
 /**
  * DTOs para asignaciones de docentes
@@ -36,7 +37,10 @@ export interface FiltrosDocentesDto {
 export class DocenteAsignacionesService {
   private readonly logger = new Logger(DocenteAsignacionesService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificacionesService: NotificacionesService,
+  ) {}
 
   // ============================================================================
   // ASIGNACIONES DE CASAS
@@ -80,6 +84,14 @@ export class DocenteAsignacionesService {
     this.logger.log(
       `Casa ${dto.casaTipo} asignada a docente ${docente.nombre} ${docente.apellido}`,
     );
+
+    // Notificar al docente
+    await this.notificacionesService.notificarAsignacionEstrategica(
+      docenteId,
+      'CASA',
+      dto.casaTipo,
+    );
+
     return asignacion;
   }
 
@@ -192,6 +204,14 @@ export class DocenteAsignacionesService {
     this.logger.log(
       `Mundo ${dto.mundoTipo} asignado a docente ${docente.nombre} ${docente.apellido}`,
     );
+
+    // Notificar al docente
+    await this.notificacionesService.notificarAsignacionEstrategica(
+      docenteId,
+      'MUNDO',
+      dto.mundoTipo,
+    );
+
     return asignacion;
   }
 

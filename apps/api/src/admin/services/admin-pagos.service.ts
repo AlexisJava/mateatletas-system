@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { EstadoPago } from '@prisma/client';
+import { NotificacionesService } from '../../notificaciones/notificaciones.service';
 
 export interface RegistrarPagoManualDto {
   inscripcionId: string;
@@ -33,7 +34,10 @@ export interface PagoManualResult {
  */
 @Injectable()
 export class AdminPagosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificacionesService: NotificacionesService,
+  ) {}
 
   /**
    * Registrar un pago manual para una inscripción mensual
@@ -45,6 +49,7 @@ export class AdminPagosService {
       where: { id: dto.inscripcionId },
       include: {
         estudiante: { select: { id: true, nombre: true, apellido: true } },
+        tutor: { select: { id: true, nombre: true, apellido: true } },
       },
     });
 
@@ -95,6 +100,16 @@ export class AdminPagosService {
         observaciones: dto.observaciones || null,
       },
     });
+
+    // Notificar al tutor del pago registrado
+    const estudianteNombre = `${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido}`;
+    const concepto = `Inscripción ${inscripcion.periodo} - ${estudianteNombre}`;
+    await this.notificacionesService.notificarPagoManualRegistrado(
+      inscripcion.tutor.id,
+      dto.monto,
+      concepto,
+      dto.metodoPago,
+    );
 
     return {
       success: true,

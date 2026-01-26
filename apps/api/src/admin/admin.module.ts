@@ -4,9 +4,11 @@ import { PlanificacionesAdminController } from './planificaciones-admin.controll
 import { AdminDlqController } from './controllers/admin-dlq.controller';
 import { AdminAuditLogsController } from './controllers/admin-audit-logs.controller';
 import { AdminVeranoController } from './controllers/admin-verano.controller';
+import { AlertaSistemaController } from './controllers/alerta-sistema.controller';
 import { AdminService } from './admin.service';
 import { AdminStatsService } from './services/admin-stats.service';
 import { AdminAlertasService } from './services/admin-alertas.service';
+import { AlertaSistemaService } from './services/alerta-sistema.service';
 import { AdminUsuariosService } from './services/admin-usuarios.service';
 import { AdminRolesService } from './services/admin-roles.service';
 import { AdminEstudiantesService } from './services/admin-estudiantes.service';
@@ -41,12 +43,14 @@ import { NotificacionesModule } from '../notificaciones/notificaciones.module';
     AdminDlqController,
     AdminAuditLogsController,
     AdminVeranoController,
+    AlertaSistemaController,
   ],
   providers: [
     AdminService,
     // Servicios especializados (extraídos de AdminService monolítico)
     AdminStatsService,
     AdminAlertasService,
+    AlertaSistemaService,
     AdminUsuariosService,
     AdminRolesService,
     AdminEstudiantesService,
@@ -65,6 +69,7 @@ import { NotificacionesModule } from '../notificaciones/notificaciones.module';
     AdminService,
     AdminStatsService,
     AdminAlertasService,
+    AlertaSistemaService,
     AdminUsuariosService,
     AdminRolesService,
     AdminEstudiantesService,

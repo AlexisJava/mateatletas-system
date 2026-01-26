@@ -606,6 +606,8 @@ model Docente {
   puntosOtorgados       PuntoObtenido[] @relation("PuntosOtorgados")
   /// Comisiones a cargo de este docente
   comisiones            Comision[]
+  /// Anuncios publicados por este docente
+  anuncios              Anuncio[]
 
   /// Asignaciones de planificaciones a grupos
   asignacionesPlanificacion AsignacionPlanificacion[]
@@ -1889,6 +1891,12 @@ enum TipoNotificacion {
   TUTOR_SUSCRIPCION_CANCELADA
   /// Suscripción pausada
   TUTOR_SUSCRIPCION_PAUSADA
+  /// Suscripción reactivada después de pausa
+  TUTOR_SUSCRIPCION_REACTIVADA
+  /// Beca asignada a estudiante (hijo del tutor)
+  TUTOR_BECA_ASIGNADA
+  /// Cambio de tier de suscripción (upgrade/downgrade)
+  TUTOR_CAMBIO_TIER
   /// Hijo inscrito exitosamente a una clase/actividad
   TUTOR_HIJO_INSCRITO
   /// Clase de hijo próxima (24h antes)
@@ -1911,6 +1919,10 @@ enum TipoNotificacion {
   TUTOR_PERIODO_INSCRIPCION_ABIERTO
   /// Recordatorio general del sistema
   TUTOR_RECORDATORIO
+  /// Anuncio importante de docente
+  TUTOR_ANUNCIO_IMPORTANTE
+  /// Anuncio urgente de docente
+  TUTOR_ANUNCIO_URGENTE
 
   // ═══════════════════════════════════════════════════════════════
   // NOTIFICACIONES PARA ESTUDIANTES (16 tipos)
@@ -1948,6 +1960,10 @@ enum TipoNotificacion {
   ESTUDIANTE_BIENVENIDA
   /// Recordatorio general
   ESTUDIANTE_RECORDATORIO
+  /// Anuncio importante de docente
+  ESTUDIANTE_ANUNCIO_IMPORTANTE
+  /// Anuncio urgente de docente
+  ESTUDIANTE_ANUNCIO_URGENTE
 
   // ═══════════════════════════════════════════════════════════════
   // NOTIFICACIONES PARA DOCENTES (16 tipos)
@@ -1987,6 +2003,10 @@ enum TipoNotificacion {
   DOCENTE_RECORDATORIO
   /// Asignado a un nuevo horario/clase grupal
   DOCENTE_CLASE_ASIGNADA
+  /// Asignado a comisión de producto (evento/curso)
+  DOCENTE_COMISION_ASIGNADA
+  /// Asignación estratégica de Casa o Mundo
+  DOCENTE_ASIGNACION_ESTRATEGICA
 
   // ═══════════════════════════════════════════════════════════════
   // NOTIFICACIONES PARA ADMINS (15 tipos)
@@ -3221,6 +3241,9 @@ model Comision {
   /// SISTEMA 2026: Pagos de cursos temporales
   pagosCurso PagoCurso[]
 
+  /// Anuncios publicados para esta comisión
+  anuncios Anuncio[]
+
   @@index([productoId])
   @@index([docenteId])
   @@index([casaId])
@@ -4198,4 +4221,126 @@ view FacturacionUnificada {
   estudiante Estudiante? @relation("FacturacionUnificadaEstudiante", fields: [estudianteId], references: [id])
 
   @@map("facturacion_unificada")
+}
+
+// ============================================================================
+// SISTEMA DE ANUNCIOS DOCENTE → GRUPO
+// ============================================================================
+
+/// Tipo de anuncio que define su nivel de importancia
+enum TipoAnuncio {
+  /// Información general, no urgente
+  INFORMATIVO
+  /// Información relevante que requiere atención
+  IMPORTANTE
+  /// Información crítica que requiere acción inmediata
+  URGENTE
+}
+
+/// Modelo para anuncios de docentes a sus grupos/comisiones
+/// Permite comunicación unidireccional docente → tutores/estudiantes
+model Anuncio {
+  /// Identificador único del anuncio
+  id String @id @default(cuid())
+
+  /// Docente que crea el anuncio
+  docenteId String  @map("docente_id")
+  docente   Docente @relation(fields: [docenteId], references: [id], onDelete: Cascade)
+
+  /// Comisión destinataria (null = todas las comisiones del docente)
+  comisionId String?   @map("comision_id")
+  comision   Comision? @relation(fields: [comisionId], references: [id], onDelete: Cascade)
+
+  /// Título del anuncio (máx 200 caracteres)
+  titulo String @db.VarChar(200)
+
+  /// Contenido del anuncio
+  contenido String @db.Text
+
+  /// Tipo/prioridad del anuncio
+  tipo TipoAnuncio @default(INFORMATIVO)
+
+  /// Fecha de expiración (después de esta fecha el anuncio no se muestra)
+  fechaExpiracion DateTime? @map("fecha_expiracion")
+
+  /// Indica si el anuncio está activo (permite desactivar sin eliminar)
+  activo Boolean @default(true)
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now()) @map("created_at")
+
+  /// Timestamp de última actualización
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([docenteId])
+  @@index([comisionId])
+  @@index([tipo])
+  @@index([activo])
+  @@index([fechaExpiracion])
+  @@index([createdAt])
+  @@map("anuncios")
+}
+
+// ============================================================================
+// SISTEMA DE ALERTAS PARA ADMIN
+// ============================================================================
+
+/// Tipos de alertas que puede recibir un administrador
+enum TipoAlertaAdmin {
+  /// Nueva suscripción creada por un tutor
+  NUEVA_SUSCRIPCION
+  /// Tutor canceló su suscripción
+  SUSCRIPCION_CANCELADA
+  /// Pago rechazado o fallido
+  PAGO_FALLIDO
+  /// Estudiante sin actividad por X días
+  ESTUDIANTE_INACTIVO
+  /// Posible actividad fraudulenta detectada
+  FRAUDE_DETECTADO
+  /// Webhook de MercadoPago falló
+  WEBHOOK_FALLIDO
+  /// Alerta del sistema (errores, problemas técnicos)
+  SISTEMA
+  /// Suscripción en período de gracia
+  SUSCRIPCION_GRACE_PERIOD
+}
+
+/// Modelo para alertas del administrador
+/// Centraliza eventos importantes que requieren atención del admin
+model AlertaAdmin {
+  /// Identificador único de la alerta
+  id String @id @default(cuid())
+
+  /// Tipo de alerta
+  tipo TipoAlertaAdmin
+
+  /// Título breve de la alerta
+  titulo String @db.VarChar(200)
+
+  /// Mensaje detallado de la alerta
+  mensaje String @db.Text
+
+  /// Prioridad de la alerta (usa el enum existente)
+  prioridad PrioridadNotificacion @default(MEDIA)
+
+  /// Indica si la alerta fue resuelta/atendida
+  resuelta Boolean @default(false)
+
+  /// ID del admin que resolvió la alerta
+  resueltaPorId String? @map("resuelta_por_id")
+
+  /// Fecha en que se resolvió la alerta
+  fechaResolucion DateTime? @map("fecha_resolucion")
+
+  /// Metadata adicional (IDs relacionados, detalles, etc.)
+  metadata Json?
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([tipo])
+  @@index([prioridad])
+  @@index([resuelta])
+  @@index([createdAt])
+  @@map("alertas_admin")
 }

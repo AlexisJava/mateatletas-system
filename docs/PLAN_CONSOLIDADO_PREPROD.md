@@ -1099,3 +1099,860 @@ Semana 4+: FASE 7 + FASE 9 (Mensajería + Contenido)
 | 2026-01-23 | ✅ Sprint 4: Teoría Sincronizada y Práctica en Vivo (17 tests)                                                | Claude |
 | 2026-01-24 | ✅ FASE 3 COMPLETADA: 3.4 Monitoring DLQ, 3.5 Audit Logs, 3.6 MFA Settings UI                                 | Claude |
 | 2026-01-26 | ✅ FASE 5 COMPLETADA: 5.2 Editar estudiante, 5.4 Cambiar horario (API), ⏸️ 5.5 DIFERIDO                       | Claude |
+| 2026-01-26 | 📋 AUDITORÍA COMPLETA: Flujos de comunicación inter-portal (Admin/Docente/Tutor)                              | Claude |
+
+---
+
+## AUDITORÍA: FLUJOS DE COMUNICACIÓN INTER-PORTAL
+
+> **Fecha**: 2026-01-26
+> **Objetivo**: Mapear TODOS los flujos de comunicación entre portales Admin, Docente y Tutor para el lanzamiento del 2 de febrero.
+
+---
+
+### DEPENDENCY MAP (Diagrama de Comunicación)
+
+```
+                    ┌─────────────────────────────────────────────────────┐
+                    │                  PORTAL ADMIN                        │
+                    │  (Gestión completa - 152 endpoints)                  │
+                    └─────────────────────────────────────────────────────┘
+                           │                           │
+                           │ ✅ 2 flujos con notif     │ ⚠️ 4/13 con notif
+                           │ ❌ 6 sin notificación     │ ❌ 9 sin notificación
+                           ▼                           ▼
+        ┌─────────────────────────┐         ┌─────────────────────────┐
+        │    PORTAL DOCENTE       │         │     PORTAL TUTOR        │
+        │  (66 endpoints)         │         │   (29 endpoints)        │
+        └─────────────────────────┘         └─────────────────────────┘
+                           │                           │
+                           │ ❌ 0 flujos directos      │ ❌ 0 flujos directos
+                           │ (TODO: mensajería)        │ (TODO: mensajería)
+                           ▼                           ▼
+                    ┌─────────────────────────────────────────────────────┐
+                    │              ❌ SIN COMUNICACIÓN DIRECTA              │
+                    │   Docente ↔ Tutor: NO HAY ENDPOINTS NI MENSAJERÍA   │
+                    └─────────────────────────────────────────────────────┘
+
+        ┌─────────────────────────────────────────────────────────────────┐
+        │                      EVENTOS BIDIRECCIONALES                     │
+        │                                                                  │
+        │  ✅ 4 eventos con WebSocket (tiempo real):                       │
+        │     - estudiante.nivel-up → Estudiante                          │
+        │     - logro.desbloqueado → Estudiante + Tutor                   │
+        │     - puntos.otorgados.envivo → Estudiante + Casa               │
+        │     - casa.puntos.actualizado → Broadcast a Casa                │
+        │                                                                  │
+        │  ✅ 6 eventos de suscripción → Tutor + Admin (DB)               │
+        │  ✅ 5 eventos de lección → Estudiante + Docente + Tutor (Feed)  │
+        └─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### PARTE 1: FLUJOS ADMIN → DOCENTE
+
+| #   | Acción Admin                  | Endpoint                                   | DTO                       | Notifica Docente?                | Test? |
+| --- | ----------------------------- | ------------------------------------------ | ------------------------- | -------------------------------- | ----- |
+| 1   | Crear ClaseGrupo con docente  | `POST /admin/clase-grupos`                 | `CrearClaseGrupoDto`      | ✅ SÍ (`DOCENTE_CLASE_ASIGNADA`) | ✅    |
+| 2   | Cambiar docente de ClaseGrupo | `PUT /admin/clase-grupos/:id`              | `ActualizarClaseGrupoDto` | ✅ SÍ (si cambia docenteId)      | ✅    |
+| 3   | Eliminar ClaseGrupo           | `DELETE /admin/clase-grupos/:id`           | -                         | ❌ NO                            | ✅    |
+| 4   | Crear Comisión con docente    | `POST /admin/comisiones`                   | `CreateComisionDto`       | ❌ NO                            | ✅    |
+| 5   | Cambiar docente de Comisión   | `PUT /admin/comisiones/:id`                | `UpdateComisionDto`       | ❌ NO                            | ✅    |
+| 6   | Publicar Planificación        | `POST /admin/planificaciones/:id/publicar` | -                         | ❌ NO                            | ✅    |
+| 7   | Asignar Casa a Docente        | `POST /admin/docentes/:id/casas`           | `AsignarCasaDto`          | ❌ NO                            | ❌    |
+| 8   | Asignar Mundo a Docente       | `POST /admin/docentes/:id/mundos`          | `AsignarMundoDto`         | ❌ NO                            | ❌    |
+
+**GAPS IDENTIFICADOS (Admin → Docente):**
+
+- ❌ Comisiones NO notifican al docente cuando se asignan
+- ❌ Casa/Mundo NO notifican al docente
+- ❌ Publicación de planificación NO notifica
+
+---
+
+### PARTE 2: FLUJOS ADMIN → TUTOR
+
+| #   | Acción Admin                     | Endpoint                                                     | DTO                              | Notifica Tutor?                  | Test? |
+| --- | -------------------------------- | ------------------------------------------------------------ | -------------------------------- | -------------------------------- | ----- |
+| 1   | Registrar pago manual            | `POST /admin/pagos/registrar`                                | `{ inscripcionId, monto, ... }`  | ❌ NO                            | ❌    |
+| 2   | Anular inscripciones vencidas    | `POST /admin/pagos/anular-vencidas`                          | -                                | ✅ SÍ (evento cancelación)       | ❌    |
+| 3   | Crear estudiante                 | `POST /admin/estudiantes`                                    | `CrearEstudianteDto`             | ❌ NO (crea tutor sin notificar) | ❌    |
+| 4   | Asignar plan/beca a estudiante   | `PATCH /admin/estudiantes/:id/plan`                          | `AsignarPlanDto`                 | ❌ NO                            | ❌    |
+| 5   | Resetear contraseña tutor        | `POST /admin/credenciales/:id/reset`                         | `{ tipoUsuario: "tutor" }`       | ❌ NO (admin envía manualmente)  | ❌    |
+| 6   | Pausar suscripción (Admin)       | `POST /suscripciones/familiar/admin/:id/pausar`              | `AdminPausarSuscripcionDto`      | ⚠️ PARCIAL (evento genérico)     | ✅    |
+| 7   | Reactivar suscripción (Admin)    | `POST /suscripciones/familiar/admin/:id/reactivar`           | `AdminReactivarSuscripcionDto`   | ⚠️ PARCIAL (evento genérico)     | ✅    |
+| 8   | Cancelar suscripción (Admin)     | `POST /suscripciones/familiar/admin/:id/cancelar`            | `AdminCancelarSuscripcionDto`    | ✅ SÍ (ALTA prioridad)           | ✅    |
+| 9   | Cambiar tier inscripción (Admin) | `PATCH /suscripciones/familiar/admin/inscripciones/:id/tier` | `AdminCambiarTierInscripcionDto` | ⚠️ PARCIAL (sin notif explícita) | ✅    |
+
+**Estadísticas:** 4/13 flujos con notificación (31%)
+
+**GAPS IDENTIFICADOS (Admin → Tutor):**
+
+- ❌ Pago manual NO notifica al tutor
+- ❌ Creación de estudiante NO notifica
+- ❌ Asignación de beca NO notifica
+- ❌ Pausar/Reactivar NO tienen notificación EXPLÍCITA (solo eventos genéricos)
+- ❌ Cambio de tier NO notifica el cambio de precio
+
+---
+
+### PARTE 3: FLUJOS DOCENTE → TUTOR
+
+| #   | Acción Docente                      | Endpoint                                             | DTO                      | Notifica Tutor?                    | Test? |
+| --- | ----------------------------------- | ---------------------------------------------------- | ------------------------ | ---------------------------------- | ----- |
+| 1   | Registrar asistencia                | `POST /clases/:id/asistencia`                        | `RegistrarAsistenciaDto` | ⚠️ PARCIAL (solo si 2+ faltas)     | ✅    |
+| 2   | Crear observación                   | `POST /observaciones`                                | `CreateObservacionDto`   | ❌ NO (solo admin/pedagogía)       | ✅    |
+| 3   | Otorgar puntos/XP                   | `POST /gamificacion/puntos`                          | `OtorgarPuntosDto`       | ❌ NO                              | ✅    |
+| 4   | Asignar tarea                       | `POST /docentes/asignaciones/:id/tareas/.../asignar` | `AsignarTareaDto`        | ⚠️ DISPONIBLE pero NO implementado | ✅    |
+| 5   | Cancelar clase                      | `PATCH /clases/:id/cancelar`                         | -                        | ❌ NO (solo notifica docente)      | ✅    |
+| 6   | Activar contenido (teoría/práctica) | `POST /docentes/asignaciones/.../activar`            | -                        | ❌ NO                              | ✅    |
+
+**Estadísticas:** 0/6 flujos con notificación completa al tutor
+
+**GAPS CRÍTICOS (Docente → Tutor):**
+
+- ❌ **NO HAY SISTEMA DE MENSAJERÍA** Docente → Tutor
+- ❌ Observaciones urgentes NO notifican al tutor
+- ❌ Tareas asignadas NO notifican al tutor
+- ❌ Cancelación de clase NO notifica al tutor (padre)
+- ❌ Puntos/logros NO notifican al tutor (excepto por logro.desbloqueado event)
+
+---
+
+### PARTE 4: FLUJOS TUTOR → ADMIN
+
+| #   | Acción Tutor                              | Endpoint                                               | Notifica Admin?        | Dashboard Admin?                  | Test? |
+| --- | ----------------------------------------- | ------------------------------------------------------ | ---------------------- | --------------------------------- | ----- |
+| 1   | Crear suscripción                         | `POST /suscripciones/familiar`                         | ❌ NO                  | ✅ `GET /familiar/admin`          | ✅    |
+| 2   | Agregar inscripciones                     | `POST /suscripciones/familiar/inscripciones`           | ❌ NO                  | ✅ Visible en detalle             | ✅    |
+| 3   | Dar de baja inscripción                   | `DELETE /suscripciones/familiar/inscripciones`         | ❌ NO                  | ✅ Estado actualizado             | ✅    |
+| 4   | Cambiar horario                           | `PATCH /suscripciones/familiar/inscripciones/horario`  | ❌ NO                  | ✅ Visible                        | ✅    |
+| 5   | Cambiar tier                              | `PATCH /suscripciones/familiar/inscripciones/:id/tier` | ❌ NO                  | ✅ Visible                        | ✅    |
+| 6   | Pausar suscripción                        | `POST /suscripciones/familiar/pausar`                  | ❌ NO                  | ✅ Estado PAUSED                  | ✅    |
+| 7   | Cancelar suscripción                      | `POST /suscripciones/familiar/cancelar`                | ❌ NO (evento interno) | ✅ Estado CANCELLED               | ✅    |
+| 8   | Decidir verano (COLONIA/CONTINUIDAD/BAJA) | `POST /tutor/verano/decidir`                           | ❌ NO                  | ✅ `GET /admin/verano/decisiones` | ✅    |
+
+**Arquitectura:** El admin CONSULTA dashboards. NO hay notificaciones push al admin.
+
+**GAPS IDENTIFICADOS (Tutor → Admin):**
+
+- ❌ NO hay sistema de "solicitudes pendientes" donde el admin vea cola de trabajo
+- ❌ Admin debe revisar dashboards activamente (modelo PULL, no PUSH)
+
+---
+
+### PARTE 5: FLUJOS TUTOR → DOCENTE
+
+| #   | Acción Tutor             | Endpoint | Notifica Docente? | Test? |
+| --- | ------------------------ | -------- | ----------------- | ----- |
+| -   | **NO EXISTEN ENDPOINTS** | -        | -                 | -     |
+
+**GAPS CRÍTICOS:**
+
+- ❌ **NO HAY SISTEMA DE MENSAJERÍA** Tutor → Docente
+- ❌ NO puede justificar ausencias
+- ❌ NO puede enviar mensajes al docente
+- ❌ NO puede solicitar reuniones
+- ❌ NO puede hacer consultas sobre el estudiante
+
+---
+
+### PARTE 6: EVENTOS BIDIRECCIONALES (Multi-Portal)
+
+| Evento                     | Trigger                           | Afecta a                     | Notificaciones                    | WebSocket?   |
+| -------------------------- | --------------------------------- | ---------------------------- | --------------------------------- | ------------ |
+| `suscripcion.creada`       | Tutor crea suscripción            | Tutor + Admin                | ✅ Tutor                          | ❌           |
+| `suscripcion.activada`     | Primer pago confirmado            | Tutor + Admin + Estudiantes  | ✅ Tutor + Acceso desbloqueado    | ❌           |
+| `suscripcion.cancelada`    | Cancelación (tutor/admin/sistema) | Tutor + Admin + Estudiantes  | ✅ Tutor (ALTA) + Acceso revocado | ❌           |
+| `suscripcion.en_gracia`    | Pago fallido                      | Tutor + Admin                | ✅ Tutor (ALTA)                   | ❌           |
+| `suscripcion.morosa`       | Grace period expiró               | Tutor + Admin                | ✅ Tutor (CRÍTICA)                | ❌           |
+| `pago_registrado`          | MercadoPago aprueba               | Tutor + Admin                | ✅ Tutor                          | ❌           |
+| `estudiante.nivel-up`      | XP acumulado                      | Estudiante + Tutor           | ✅ Estudiante                     | ✅ WebSocket |
+| `logro.desbloqueado`       | Criterio cumplido                 | Estudiante + Tutor + Docente | ✅ Estudiante + Feed              | ✅ WebSocket |
+| `puntos.otorgados.envivo`  | Docente da puntos                 | Estudiante + Casa            | ✅ Estudiante (privado)           | ✅ WebSocket |
+| `casa.puntos.actualizado`  | XP ganado en casa                 | Todos en casa                | ✅ Broadcast                      | ✅ WebSocket |
+| `leccion.completada`       | Estudiante completa               | Estudiante + Docente + Tutor | ✅ XP + Feed                      | ❌           |
+| `tarea.completada`         | Estudiante entrega                | Estudiante + Docente + Tutor | ✅ XP + Feed                      | ❌           |
+| `clase.completada`         | Teoría + Práctica done            | Estudiante + Docente + Tutor | ✅ XP bonus 50 + Feed             | ❌           |
+| `planificacion.completada` | Todas las clases done             | Estudiante + Docente + Tutor | ✅ XP bonus 200 + Badge           | ❌           |
+
+---
+
+### PARTE 7: GAPS CRÍTICOS PRIORIZADOS
+
+#### **P0 - CRÍTICO PARA LANZAMIENTO**
+
+| Gap                                               | Impacto                                      | Solución Propuesta                                  |
+| ------------------------------------------------- | -------------------------------------------- | --------------------------------------------------- |
+| **Sistema de Mensajería Tutor ↔ Docente**        | Padres no pueden comunicarse con profesores  | Crear modelo `Mensaje` + endpoints + UI             |
+| **Notificación de tareas asignadas al tutor**     | Padres no saben qué tareas tienen sus hijos  | Emitir evento `TUTOR_TAREA_ASIGNADA_HIJO`           |
+| **Notificación de cancelación de clase al tutor** | Padres no se enteran que la clase se canceló | Agregar notificación en `notificarClaseCancelada()` |
+
+#### **P1 - ALTO**
+
+| Gap                                     | Impacto                                   | Solución Propuesta                       |
+| --------------------------------------- | ----------------------------------------- | ---------------------------------------- |
+| Pago manual NO notifica al tutor        | Tutor no sabe si pagó                     | Crear evento `PagoManualRegistradoEvent` |
+| Comisiones NO notifican al docente      | Docente no sabe que le asignaron comisión | Crear `notificarComisionAsignada()`      |
+| Pausar/Reactivar sin notificación clara | Tutor no sabe por qué cambió su estado    | Crear eventos específicos                |
+| Cambio de tier sin notificación         | Tutor no sabe que cambió el precio        | Crear `InscripcionTierCambiadoEvent`     |
+
+#### **P2 - MEDIO**
+
+| Gap                                       | Impacto                             | Solución Propuesta                   |
+| ----------------------------------------- | ----------------------------------- | ------------------------------------ |
+| Admin no recibe notificaciones push       | Debe revisar dashboards manualmente | Crear alertas en-app para admin      |
+| Observaciones urgentes no notifican tutor | Padre no sabe de incidentes         | Flag `notificarTutor` en observación |
+| Sistema de Anuncios Docente → Grupo       | Docente no puede comunicar a todos  | Crear modelo `Anuncio`               |
+
+---
+
+### RESUMEN EJECUTIVO
+
+| Flujo                    | Total Acciones | Con Notificación | Cobertura | Estado      |
+| ------------------------ | -------------- | ---------------- | --------- | ----------- |
+| Admin → Docente          | 8              | 2                | **25%**   | ⚠️ PARCIAL  |
+| Admin → Tutor            | 13             | 4                | **31%**   | ⚠️ PARCIAL  |
+| Docente → Tutor          | 6              | 0                | **0%**    | ❌ CRÍTICO  |
+| Tutor → Admin            | 8              | 0 (pull)         | **0%**    | ⚠️ DISEÑO   |
+| Tutor → Docente          | 0              | 0                | **N/A**   | ❌ CRÍTICO  |
+| **Eventos Multi-Portal** | 14             | 14               | **100%**  | ✅ COMPLETO |
+
+**Conclusión:**
+
+- ✅ Los eventos de sistema (suscripciones, gamificación) están bien implementados
+- ❌ La comunicación DIRECTA entre portales es prácticamente inexistente
+- ❌ El flujo Docente ↔ Tutor es el GAP más crítico (0% implementado)
+- ⚠️ Las notificaciones Admin → X están parcialmente implementadas
+
+---
+
+## PLAN DE ACCIÓN: AUTOPISTA INTER-PORTAL
+
+> **Objetivo**: Que TODOS los flujos de comunicación funcionen al 100%
+> **Deadline**: 2 de febrero 2026
+
+---
+
+### SPRINT A: NOTIFICACIONES FALTANTES (2 días)
+
+Agregar notificaciones a flujos que YA existen pero no notifican.
+
+#### A.1 Admin → Docente (Comisiones + Casa/Mundo)
+
+**Archivos a modificar:**
+
+- `apps/api/src/admin/comisiones.service.ts`
+- `apps/api/src/admin/services/docente-asignaciones.service.ts`
+
+**Tareas:**
+
+```typescript
+// 1. En comisiones.service.ts - método crear() y actualizar()
+// Después de guardar, si hay docenteId:
+await this.notificacionesService.notificarComisionAsignada(
+  docenteId,
+  comision.id,
+  comision.nombre,
+  comision.horario,
+);
+
+// 2. En docente-asignaciones.service.ts - asignarCasa() y asignarMundo()
+await this.notificacionesService.notificarAsignacionEstrategica(
+  docenteId,
+  'CASA', // o 'MUNDO'
+  casaTipo, // o mundoTipo
+);
+```
+
+**Nuevos métodos en NotificacionesService:**
+
+```typescript
+// apps/api/src/notificaciones/notificaciones.service.ts
+async notificarComisionAsignada(docenteId, comisionId, nombre, horario)
+async notificarAsignacionEstrategica(docenteId, tipo, valor)
+```
+
+---
+
+#### A.2 Admin → Tutor (Pagos + Becas + Tier)
+
+**Archivos a modificar:**
+
+- `apps/api/src/admin/services/admin-pagos.service.ts`
+- `apps/api/src/admin/services/admin-estudiantes.service.ts`
+- `apps/api/src/suscripciones/services/suscripcion-familiar-command.service.ts`
+
+**Tareas:**
+
+```typescript
+// 1. En admin-pagos.service.ts - registrarPagoManual()
+await this.notificacionesService.notificarPagoManualRegistrado(
+  tutorId,
+  estudianteNombre,
+  monto,
+  metodoPago,
+);
+
+// 2. En admin-estudiantes.service.ts - asignarPlan()
+if (estadoAcceso === 'BECA') {
+  await this.notificacionesService.notificarBecaAsignada(tutorId, estudianteNombre, planNombre);
+}
+
+// 3. En suscripcion-familiar-command.service.ts - cambiarTierInscripcion() (admin)
+await this.notificacionesService.notificarCambioTier(
+  tutorId,
+  estudianteNombre,
+  tierAnterior,
+  nuevoTier,
+  diferenciaPrecio,
+);
+
+// 4. Eventos específicos para pausar/reactivar
+// Crear SuscripcionPausadaEvent y SuscripcionReactivadaEvent
+// Agregar handlers en suscripcion-notificaciones.listener.ts
+```
+
+**Nuevos métodos en NotificacionesService:**
+
+```typescript
+async notificarPagoManualRegistrado(tutorId, estudianteNombre, monto, metodoPago)
+async notificarBecaAsignada(tutorId, estudianteNombre, planNombre)
+async notificarCambioTier(tutorId, estudianteNombre, tierAnterior, nuevoTier, diferencia)
+async notificarSuscripcionPausada(tutorId, motivo, fechaReactivacion?)
+async notificarSuscripcionReactivada(tutorId)
+```
+
+---
+
+#### A.3 Docente → Tutor (Tareas + Clases + Observaciones)
+
+**Archivos a modificar:**
+
+- `apps/api/src/docentes/services/docente-tareas.service.ts`
+- `apps/api/src/clases/services/clases.service.ts`
+- `apps/api/src/observaciones/observaciones.service.ts`
+
+**Tareas:**
+
+```typescript
+// 1. En docente-tareas.service.ts - asignarTarea()
+// Obtener todos los estudiantes de la comisión
+for (const estudiante of estudiantesComision) {
+  const tutor = await this.getTutorDeEstudiante(estudiante.id);
+  await this.notificacionesService.notificarTareaAsignada(
+    tutor.id,
+    estudiante.nombre,
+    tarea.titulo,
+    tarea.fechaLimite,
+  );
+}
+
+// 2. En clases.service.ts - cancelarClase()
+// Además de notificar al docente, notificar a tutores
+const estudiantes = await this.getEstudiantesDeClase(claseId);
+const tutoresNotificados = new Set<string>();
+for (const est of estudiantes) {
+  if (!tutoresNotificados.has(est.tutorId)) {
+    await this.notificacionesService.notificarClaseCanceladaATutor(
+      est.tutorId,
+      est.nombre,
+      clase.titulo,
+      motivo,
+    );
+    tutoresNotificados.add(est.tutorId);
+  }
+}
+
+// 3. En observaciones.service.ts - crear()
+// Agregar flag notificarTutor al DTO
+if (dto.tipo === 'Incidente' || dto.prioridad === 'Urgente' || dto.notificarTutor) {
+  for (const estudianteId of dto.estudianteIds) {
+    const tutor = await this.getTutor(estudianteId);
+    await this.notificacionesService.notificarObservacionUrgente(
+      tutor.id,
+      estudianteNombre,
+      dto.tipo,
+      dto.contenido.substring(0, 100),
+    );
+  }
+}
+```
+
+**Nuevos métodos en NotificacionesService:**
+
+```typescript
+async notificarTareaAsignada(tutorId, estudianteNombre, tareaTitulo, fechaLimite)
+async notificarClaseCanceladaATutor(tutorId, estudianteNombre, claseTitulo, motivo?)
+async notificarObservacionUrgente(tutorId, estudianteNombre, tipo, resumen)
+```
+
+**Modificar DTO:**
+
+```typescript
+// apps/api/src/observaciones/dto/create-observacion.dto.ts
+notificarTutor?: boolean; // default: true si tipo='Incidente' o prioridad='Urgente'
+```
+
+---
+
+### SPRINT B: SISTEMA DE MENSAJERÍA (3 días)
+
+#### B.1 Modelo de Datos
+
+**Nuevo archivo:** `apps/api/prisma/migrations/YYYYMMDD_create_mensajes/migration.sql`
+
+```prisma
+// En schema.prisma
+model Mensaje {
+  id              String   @id @default(cuid())
+
+  // Participantes (uno de cada par)
+  tutorId         String?  @map("tutor_id")
+  docenteId       String?  @map("docente_id")
+
+  // Contexto (opcional - sobre qué estudiante hablan)
+  estudianteId    String?  @map("estudiante_id")
+
+  // Quién envía
+  enviadoPor      TipoRemitente  // TUTOR | DOCENTE
+
+  // Contenido
+  asunto          String   @db.VarChar(200)
+  contenido       String   @db.Text
+
+  // Estado
+  leido           Boolean  @default(false)
+  fechaLeido      DateTime? @map("fecha_leido")
+
+  // Timestamps
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  tutor           Tutor?    @relation(fields: [tutorId], references: [id])
+  docente         Docente?  @relation(fields: [docenteId], references: [id])
+  estudiante      Estudiante? @relation(fields: [estudianteId], references: [id])
+
+  // Para threading (respuestas)
+  mensajePadreId  String?  @map("mensaje_padre_id")
+  mensajePadre    Mensaje? @relation("Respuestas", fields: [mensajePadreId], references: [id])
+  respuestas      Mensaje[] @relation("Respuestas")
+
+  @@map("mensajes")
+  @@index([tutorId, docenteId])
+  @@index([docenteId])
+  @@index([tutorId])
+}
+
+enum TipoRemitente {
+  TUTOR
+  DOCENTE
+}
+```
+
+---
+
+#### B.2 Backend - Endpoints
+
+**Nuevos archivos:**
+
+- `apps/api/src/mensajes/mensajes.module.ts`
+- `apps/api/src/mensajes/mensajes.controller.ts`
+- `apps/api/src/mensajes/mensajes.service.ts`
+- `apps/api/src/mensajes/dto/`
+
+**Endpoints para TUTOR:**
+
+```typescript
+@Controller('tutor/mensajes')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Rol.TUTOR)
+export class TutorMensajesController {
+  // Listar conversaciones (agrupadas por docente)
+  @Get('conversaciones')
+  async getConversaciones(@GetUser() tutor) {
+    // Retorna lista de docentes con último mensaje y count no leídos
+  }
+
+  // Obtener mensajes con un docente específico
+  @Get('conversacion/:docenteId')
+  async getConversacion(
+    @GetUser() tutor,
+    @Param('docenteId') docenteId: string,
+    @Query('estudianteId') estudianteId?: string,
+  ) {
+    // Retorna todos los mensajes entre tutor y docente
+    // Opcionalmente filtrado por estudiante
+  }
+
+  // Enviar mensaje
+  @Post()
+  async enviarMensaje(@GetUser() tutor, @Body() dto: EnviarMensajeDto) {
+    // dto: { docenteId, estudianteId?, asunto, contenido, mensajePadreId? }
+  }
+
+  // Marcar como leído
+  @Patch(':id/leer')
+  async marcarLeido(@GetUser() tutor, @Param('id') id: string) {}
+
+  // Contar no leídos
+  @Get('count')
+  async countNoLeidos(@GetUser() tutor) {}
+}
+```
+
+**Endpoints para DOCENTE:**
+
+```typescript
+@Controller('docentes/mensajes')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Rol.DOCENTE)
+export class DocenteMensajesController {
+  // Listar conversaciones (agrupadas por tutor)
+  @Get('conversaciones')
+  async getConversaciones(@GetUser() docente) {}
+
+  // Obtener mensajes con un tutor específico
+  @Get('conversacion/:tutorId')
+  async getConversacion(@GetUser() docente, @Param('tutorId') tutorId: string) {}
+
+  // Enviar mensaje
+  @Post()
+  async enviarMensaje(@GetUser() docente, @Body() dto: EnviarMensajeDto) {
+    // dto: { tutorId, estudianteId?, asunto, contenido, mensajePadreId? }
+  }
+
+  // Marcar como leído
+  @Patch(':id/leer')
+  async marcarLeido(@GetUser() docente, @Param('id') id: string) {}
+
+  // Contar no leídos
+  @Get('count')
+  async countNoLeidos(@GetUser() docente) {}
+
+  // EXTRA: Enviar mensaje masivo a todos los tutores de una comisión
+  @Post('comision/:comisionId')
+  async enviarMensajeComision(
+    @GetUser() docente,
+    @Param('comisionId') comisionId: string,
+    @Body() dto: { asunto: string; contenido: string },
+  ) {}
+}
+```
+
+---
+
+#### B.3 Frontend - UI Tutor
+
+**Nuevos archivos:**
+
+- `apps/web/src/app/tutor/mensajes/page.tsx` - Lista de conversaciones
+- `apps/web/src/app/tutor/mensajes/[docenteId]/page.tsx` - Chat con docente
+- `apps/web/src/components/tutor/MensajesDropdown.tsx` - Dropdown en header
+- `apps/web/src/hooks/useTutorMensajes.ts`
+- `apps/web/src/lib/api/tutor-mensajes.api.ts`
+
+**Diseño UI:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  📬 Mensajes                                    [+ Nuevo]   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 👩‍🏫 Prof. María García           hace 2h  ●         │   │
+│  │    Re: Consulta sobre Juan                          │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 👨‍🏫 Prof. Carlos López           ayer               │   │
+│  │    Excelente progreso de Sofía                      │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Chat individual:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ← Prof. María García                         📋 Juan      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────────────────────────────┐                   │
+│  │ Hola, quería consultar sobre...     │  Yo - 10:30      │
+│  └─────────────────────────────────────┘                   │
+│                                                             │
+│                   ┌─────────────────────────────────────┐   │
+│    Prof - 11:45   │ Hola! Juan está progresando muy...  │   │
+│                   └─────────────────────────────────────┘   │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│  [Escribe tu mensaje...                              ] 📤  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### B.4 Frontend - UI Docente
+
+**Nuevos archivos:**
+
+- `apps/web/src/app/docente/mensajes/page.tsx`
+- `apps/web/src/app/docente/mensajes/[tutorId]/page.tsx`
+- `apps/web/src/components/docente/MensajesDropdown.tsx`
+- `apps/web/src/hooks/useDocenteMensajes.ts`
+
+**Agregar en sidebar docente:**
+
+- Icono de mensajes con badge de no leídos
+- Link a `/docente/mensajes`
+
+---
+
+#### B.5 Notificaciones de Mensajes
+
+**Cuando se envía un mensaje:**
+
+```typescript
+// En mensajes.service.ts - enviarMensaje()
+if (dto.enviadoPor === 'TUTOR') {
+  await this.notificacionesService.createParaDocente(docenteId, {
+    tipo: TipoNotificacion.DOCENTE_MENSAJE_TUTOR,
+    titulo: `Mensaje de ${tutorNombre}`,
+    mensaje: `Nuevo mensaje sobre ${estudianteNombre || 'consulta general'}`,
+    metadata: { mensajeId, tutorId, estudianteId },
+  });
+} else {
+  await this.notificacionesService.createParaTutor(tutorId, {
+    tipo: TipoNotificacion.TUTOR_MENSAJE_DOCENTE,
+    titulo: `Mensaje de ${docenteNombre}`,
+    mensaje: `Nuevo mensaje sobre ${estudianteNombre || 'consulta general'}`,
+    metadata: { mensajeId, docenteId, estudianteId },
+  });
+}
+```
+
+---
+
+### SPRINT C: SISTEMA DE ANUNCIOS (1 día)
+
+#### C.1 Modelo Anuncio
+
+```prisma
+model Anuncio {
+  id              String   @id @default(cuid())
+  docenteId       String   @map("docente_id")
+  comisionId      String?  @map("comision_id")  // null = todas las comisiones del docente
+
+  titulo          String   @db.VarChar(200)
+  contenido       String   @db.Text
+  tipo            TipoAnuncio  // INFORMATIVO | IMPORTANTE | URGENTE
+
+  fechaExpiracion DateTime? @map("fecha_expiracion")
+  activo          Boolean  @default(true)
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  docente         Docente  @relation(fields: [docenteId], references: [id])
+  comision        Comision? @relation(fields: [comisionId], references: [id])
+
+  @@map("anuncios")
+}
+
+enum TipoAnuncio {
+  INFORMATIVO
+  IMPORTANTE
+  URGENTE
+}
+```
+
+#### C.2 Endpoints
+
+```typescript
+// Para DOCENTE
+@Post('anuncios')           // Crear anuncio
+@Get('anuncios')            // Mis anuncios
+@Patch('anuncios/:id')      // Editar
+@Delete('anuncios/:id')     // Eliminar
+
+// Para TUTOR (lectura)
+@Get('tutor/anuncios')      // Anuncios de docentes de mis hijos
+
+// Para ESTUDIANTE (lectura)
+@Get('estudiantes/anuncios') // Anuncios de mis comisiones
+```
+
+#### C.3 Notificaciones
+
+Al crear anuncio IMPORTANTE o URGENTE:
+
+- Notificar a todos los tutores de la comisión
+- Notificar a todos los estudiantes de la comisión
+
+---
+
+### SPRINT D: ALERTAS ADMIN (1 día)
+
+#### D.1 Sistema de Alertas Push para Admin
+
+Crear notificaciones para el admin cuando:
+
+- Nueva suscripción creada
+- Suscripción cancelada
+- Pago fallido
+- Estudiante inactivo X días
+
+**Nuevo modelo:**
+
+```prisma
+model AlertaAdmin {
+  id          String   @id @default(cuid())
+  tipo        TipoAlertaAdmin
+  titulo      String
+  mensaje     String
+  prioridad   PrioridadNotificacion @default(MEDIA)
+  resuelta    Boolean  @default(false)
+  resueltaPor String?  @map("resuelta_por")
+  fechaResolucion DateTime? @map("fecha_resolucion")
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@map("alertas_admin")
+}
+
+enum TipoAlertaAdmin {
+  NUEVA_SUSCRIPCION
+  SUSCRIPCION_CANCELADA
+  PAGO_FALLIDO
+  ESTUDIANTE_INACTIVO
+  FRAUDE_DETECTADO
+  WEBHOOK_FALLIDO
+  SISTEMA
+}
+```
+
+**Listeners:**
+
+```typescript
+@OnEvent(SuscripcionCreadaEvent.EVENT_NAME)
+async handleNuevaSuscripcion(event) {
+  await this.alertaAdminService.crear({
+    tipo: 'NUEVA_SUSCRIPCION',
+    titulo: 'Nueva suscripción',
+    mensaje: `${event.tutorNombre} creó una suscripción por $${event.monto}`,
+    prioridad: 'BAJA'
+  });
+}
+
+@OnEvent(SuscripcionCanceladaEvent.EVENT_NAME)
+async handleCancelacion(event) {
+  await this.alertaAdminService.crear({
+    tipo: 'SUSCRIPCION_CANCELADA',
+    titulo: 'Suscripción cancelada',
+    mensaje: `${event.tutorNombre} canceló su suscripción. Motivo: ${event.motivo}`,
+    prioridad: 'MEDIA'
+  });
+}
+```
+
+**UI Admin:**
+
+- Badge en header con count de alertas no resueltas
+- Dropdown con últimas alertas
+- Página `/admin/alertas` con lista completa y filtros
+
+---
+
+### CHECKLIST DE IMPLEMENTACIÓN
+
+#### Sprint A: Notificaciones (2 días)
+
+- [ ] A.1.1 Crear `notificarComisionAsignada()` en NotificacionesService
+- [ ] A.1.2 Llamar desde `comisiones.service.ts`
+- [ ] A.1.3 Crear `notificarAsignacionEstrategica()` en NotificacionesService
+- [ ] A.1.4 Llamar desde `docente-asignaciones.service.ts`
+- [ ] A.2.1 Crear `notificarPagoManualRegistrado()` en NotificacionesService
+- [ ] A.2.2 Llamar desde `admin-pagos.service.ts`
+- [ ] A.2.3 Crear `notificarBecaAsignada()` en NotificacionesService
+- [ ] A.2.4 Llamar desde `admin-estudiantes.service.ts`
+- [ ] A.2.5 Crear `notificarCambioTier()` en NotificacionesService
+- [ ] A.2.6 Llamar desde `suscripcion-familiar-command.service.ts`
+- [ ] A.2.7 Crear eventos `SuscripcionPausadaEvent` y `SuscripcionReactivadaEvent`
+- [ ] A.2.8 Agregar handlers en listener
+- [ ] A.3.1 Crear `notificarTareaAsignada()` en NotificacionesService
+- [ ] A.3.2 Llamar desde `docente-tareas.service.ts`
+- [ ] A.3.3 Crear `notificarClaseCanceladaATutor()` en NotificacionesService
+- [ ] A.3.4 Modificar `clases.service.ts` para notificar tutores
+- [ ] A.3.5 Agregar `notificarTutor` flag al DTO de observaciones
+- [ ] A.3.6 Crear `notificarObservacionUrgente()` en NotificacionesService
+- [ ] A.3.7 Llamar desde `observaciones.service.ts`
+
+#### Sprint B: Mensajería (3 días)
+
+- [ ] B.1.1 Crear migración para modelo Mensaje
+- [ ] B.1.2 Actualizar schema.prisma
+- [ ] B.1.3 Generar cliente Prisma
+- [ ] B.2.1 Crear MensajesModule
+- [ ] B.2.2 Crear MensajesService
+- [ ] B.2.3 Crear TutorMensajesController
+- [ ] B.2.4 Crear DocenteMensajesController
+- [ ] B.2.5 Crear DTOs (EnviarMensajeDto, etc.)
+- [ ] B.3.1 Crear página `/tutor/mensajes`
+- [ ] B.3.2 Crear página `/tutor/mensajes/[docenteId]`
+- [ ] B.3.3 Crear MensajesDropdown para tutor
+- [ ] B.3.4 Crear hook `useTutorMensajes`
+- [ ] B.3.5 Agregar link en sidebar tutor
+- [ ] B.4.1 Crear página `/docente/mensajes`
+- [ ] B.4.2 Crear página `/docente/mensajes/[tutorId]`
+- [ ] B.4.3 Crear MensajesDropdown para docente
+- [ ] B.4.4 Crear hook `useDocenteMensajes`
+- [ ] B.4.5 Agregar link en sidebar docente
+- [ ] B.5.1 Agregar notificación al enviar mensaje
+
+#### Sprint C: Anuncios (1 día)
+
+- [ ] C.1.1 Crear migración para modelo Anuncio
+- [ ] C.1.2 Actualizar schema.prisma
+- [ ] C.2.1 Crear AnunciosController (docente)
+- [ ] C.2.2 Crear endpoints de lectura (tutor, estudiante)
+- [ ] C.3.1 Notificar al crear anuncio importante/urgente
+- [ ] C.4.1 UI para crear anuncios (docente)
+- [ ] C.4.2 UI para ver anuncios (tutor)
+- [ ] C.4.3 UI para ver anuncios (estudiante)
+
+#### Sprint D: Alertas Admin (1 día)
+
+- [ ] D.1.1 Crear migración para modelo AlertaAdmin
+- [ ] D.1.2 Crear AlertaAdminService
+- [ ] D.1.3 Crear listeners para eventos
+- [ ] D.2.1 Crear endpoints CRUD alertas
+- [ ] D.3.1 Badge en header admin
+- [ ] D.3.2 Dropdown de alertas
+- [ ] D.3.3 Página `/admin/alertas`
+
+---
+
+### RESULTADO ESPERADO
+
+Después de implementar todo:
+
+| Flujo                | Cobertura Actual | Cobertura Final |
+| -------------------- | ---------------- | --------------- |
+| Admin → Docente      | 25%              | **100%**        |
+| Admin → Tutor        | 31%              | **100%**        |
+| Docente → Tutor      | 0%               | **100%**        |
+| Tutor → Admin        | 0%               | **100%**        |
+| Tutor → Docente      | N/A              | **100%**        |
+| Eventos Multi-Portal | 100%             | **100%**        |
+
+**Timeline:**
+
+- Sprint A: Día 1-2
+- Sprint B: Día 3-5
+- Sprint C: Día 6
+- Sprint D: Día 7
+- Testing + Fixes: Día 8
+
+**Total: 8 días de trabajo = 1 semana antes del lanzamiento**

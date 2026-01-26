@@ -4,6 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
+import { NotificacionesService } from '../../notificaciones/notificaciones.service';
 
 /**
  * Interfaces para respuestas tipadas - Modelo v2 (Clases)
@@ -65,7 +66,10 @@ export interface ProgresoEstudianteClase {
  */
 @Injectable()
 export class DocentePlanificacionesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificacionesService: NotificacionesService,
+  ) {}
 
   /**
    * Obtiene todas las asignaciones de planificaciones del docente autenticado
@@ -554,7 +558,10 @@ export class DocentePlanificacionesService {
     // Verificar que la tarea existe
     const tareaClase = await this.prisma.tareaClase.findUnique({
       where: { id: tareaClaseId },
-      include: { clase: true },
+      include: {
+        clase: true,
+        contenido: { select: { titulo: true } },
+      },
     });
 
     if (!tareaClase) {
@@ -562,12 +569,30 @@ export class DocentePlanificacionesService {
     }
 
     // Verificar que la clase pertenece a la planificación de la asignación
+    // y obtener estudiantes del grupo para notificar a sus tutores
     const asignacion = await this.prisma.asignacionPlanificacion.findUnique({
       where: { id: asignacionId },
       include: {
         planificacion: {
           include: {
             clases: { where: { id: tareaClase.claseId } },
+          },
+        },
+        claseGrupo: {
+          include: {
+            inscripciones: {
+              where: { fechaBaja: null },
+              include: {
+                estudiante: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    tutorId: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -597,6 +622,25 @@ export class DocentePlanificacionesService {
         fechaLimite: fechaLimite ?? null,
       },
     });
+
+    // Notificar a los tutores de los estudiantes del grupo
+    const tareaTitulo = tareaClase.contenido.titulo;
+    const tareaId = tareaAsignada.id;
+    const notificacionesPromises = asignacion.claseGrupo.inscripciones.map(
+      async (inscripcion) => {
+        const estudiante = inscripcion.estudiante;
+        const estudianteNombre = `${estudiante.nombre} ${estudiante.apellido}`;
+        await this.notificacionesService.notificarTareaAsignadaATutor(
+          estudiante.tutorId,
+          estudianteNombre,
+          estudiante.id,
+          tareaTitulo,
+          tareaId,
+          fechaLimite,
+        );
+      },
+    );
+    await Promise.all(notificacionesPromises);
 
     return { success: true, tareaAsignadaId: tareaAsignada.id };
   }

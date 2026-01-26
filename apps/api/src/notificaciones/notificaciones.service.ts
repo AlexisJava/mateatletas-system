@@ -358,6 +358,51 @@ export class NotificacionesService {
     });
   }
 
+  /**
+   * Notificar al docente que fue asignado a una comisión de producto
+   * Sprint A - Admin → Docente
+   */
+  async notificarComisionAsignada(
+    docenteId: string,
+    comisionId: string,
+    comisionNombre: string,
+    productoNombre: string,
+    horario?: string,
+  ) {
+    return this.createParaDocente(docenteId, {
+      tipo: TipoNotificacion.DOCENTE_COMISION_ASIGNADA,
+      titulo: 'Nueva comisión asignada',
+      mensaje: `Te asignaron la comisión "${comisionNombre}" de ${productoNombre}${horario ? ` (${horario})` : ''}`,
+      metadata: {
+        comisionId: comisionId,
+        comisionNombre: comisionNombre,
+        productoNombre: productoNombre,
+        ...(horario && { horario }),
+      },
+    });
+  }
+
+  /**
+   * Notificar al docente que fue asignado estratégicamente a Casa o Mundo
+   * Sprint A - Admin → Docente
+   */
+  async notificarAsignacionEstrategica(
+    docenteId: string,
+    tipoAsignacion: 'CASA' | 'MUNDO',
+    nombre: string,
+  ) {
+    const tipoPretty = tipoAsignacion === 'CASA' ? 'Casa' : 'Mundo';
+    return this.createParaDocente(docenteId, {
+      tipo: TipoNotificacion.DOCENTE_ASIGNACION_ESTRATEGICA,
+      titulo: `${tipoPretty} asignada`,
+      mensaje: `Te asignaron a ${tipoPretty} ${nombre}. Podés ver tus estudiantes en el portal.`,
+      metadata: {
+        tipoAsignacion: tipoAsignacion,
+        nombre: nombre,
+      },
+    });
+  }
+
   // ═══════════════════════════════════════════════════════════════
   // MÉTODOS DE NOTIFICACIÓN AUTOMÁTICA (TUTORES)
   // ═══════════════════════════════════════════════════════════════
@@ -412,6 +457,191 @@ export class NotificacionesService {
       titulo: `${hijoNombre} desbloqueó un logro`,
       mensaje: `${hijoNombre} ha desbloqueado: "${logroTitulo}"`,
       metadata: { estudianteId: hijoId, logroTitulo: logroTitulo },
+    });
+  }
+
+  /**
+   * Notificar pago manual registrado por admin
+   * Sprint A - Admin → Tutor
+   */
+  async notificarPagoManualRegistrado(
+    tutorId: string,
+    monto: number,
+    concepto: string,
+    registradoPor: string,
+  ) {
+    return this.createParaTutor(tutorId, {
+      tipo: TipoNotificacion.TUTOR_PAGO_EXITOSO,
+      titulo: 'Pago registrado',
+      mensaje: `Se registró un pago de $${monto.toLocaleString('es-AR')} por "${concepto}"`,
+      metadata: { monto, concepto, registradoPor, esPagoManual: true },
+    });
+  }
+
+  /**
+   * Notificar beca asignada a estudiante
+   * Sprint A - Admin → Tutor
+   */
+  async notificarBecaAsignada(
+    tutorId: string,
+    estudianteNombre: string,
+    estudianteId: string,
+    tipoBeca: string,
+    porcentajeDescuento: number,
+  ) {
+    return this.createParaTutor(tutorId, {
+      tipo: TipoNotificacion.TUTOR_BECA_ASIGNADA,
+      titulo: 'Beca asignada',
+      mensaje: `${estudianteNombre} recibió una beca "${tipoBeca}" con ${porcentajeDescuento}% de descuento`,
+      prioridad: PrioridadNotificacion.ALTA,
+      metadata: {
+        estudianteId: estudianteId,
+        tipoBeca: tipoBeca,
+        porcentajeDescuento: porcentajeDescuento,
+      },
+    });
+  }
+
+  /**
+   * Notificar cambio de tier de suscripción
+   * Sprint A - Admin → Tutor
+   */
+  async notificarCambioTier(
+    tutorId: string,
+    tierAnterior: string,
+    tierNuevo: string,
+    razon?: string,
+  ) {
+    const esUpgrade = this.esTierSuperior(tierNuevo, tierAnterior);
+    return this.createParaTutor(tutorId, {
+      tipo: TipoNotificacion.TUTOR_CAMBIO_TIER,
+      titulo: esUpgrade ? 'Plan mejorado' : 'Cambio de plan',
+      mensaje: `Tu plan cambió de ${tierAnterior} a ${tierNuevo}${razon ? `. Motivo: ${razon}` : ''}`,
+      prioridad: esUpgrade
+        ? PrioridadNotificacion.MEDIA
+        : PrioridadNotificacion.ALTA,
+      metadata: {
+        tierAnterior: tierAnterior,
+        tierNuevo: tierNuevo,
+        esUpgrade: esUpgrade,
+        ...(razon && { razon }),
+      },
+    });
+  }
+
+  /**
+   * Notificar suscripción reactivada
+   * Sprint A - Admin → Tutor
+   */
+  async notificarSuscripcionReactivada(tutorId: string, planNombre: string) {
+    return this.createParaTutor(tutorId, {
+      tipo: TipoNotificacion.TUTOR_SUSCRIPCION_REACTIVADA,
+      titulo: 'Suscripción reactivada',
+      mensaje: `Tu suscripción "${planNombre}" fue reactivada. Ya podés acceder a todos los beneficios.`,
+      prioridad: PrioridadNotificacion.ALTA,
+      metadata: { planNombre: planNombre },
+    });
+  }
+
+  /**
+   * Notificar suscripción pausada
+   * Sprint A - Admin → Tutor
+   */
+  async notificarSuscripcionPausadaATutor(
+    tutorId: string,
+    planNombre: string,
+    motivo?: string,
+  ) {
+    return this.createParaTutor(tutorId, {
+      tipo: TipoNotificacion.TUTOR_SUSCRIPCION_PAUSADA,
+      titulo: 'Suscripción pausada',
+      mensaje: `Tu suscripción "${planNombre}" fue pausada${motivo ? `. Motivo: ${motivo}` : ''}`,
+      prioridad: PrioridadNotificacion.ALTA,
+      metadata: { planNombre: planNombre, ...(motivo && { motivo }) },
+    });
+  }
+
+  /**
+   * Notificar al tutor que se asignó tarea al hijo
+   * Sprint A - Docente → Tutor
+   */
+  async notificarTareaAsignadaATutor(
+    tutorId: string,
+    estudianteNombre: string,
+    estudianteId: string,
+    tareaTitulo: string,
+    tareaId: string,
+    fechaVencimiento?: Date,
+  ) {
+    const fechaStr = fechaVencimiento
+      ? ` para el ${fechaVencimiento.toLocaleDateString('es-AR')}`
+      : '';
+    return this.createParaTutor(tutorId, {
+      tipo: TipoNotificacion.TUTOR_TAREA_ASIGNADA_HIJO,
+      titulo: 'Nueva tarea asignada',
+      mensaje: `${estudianteNombre} tiene una nueva tarea: "${tareaTitulo}"${fechaStr}`,
+      metadata: {
+        estudianteId: estudianteId,
+        tareaId: tareaId,
+        tareaTitulo: tareaTitulo,
+        ...(fechaVencimiento && {
+          fechaVencimiento: fechaVencimiento.toISOString(),
+        }),
+      },
+    });
+  }
+
+  /**
+   * Notificar al tutor que se canceló clase de su hijo
+   * Sprint A - Docente → Tutor
+   */
+  async notificarClaseCanceladaATutor(
+    tutorId: string,
+    estudianteNombre: string,
+    estudianteId: string,
+    claseNombre: string,
+    claseId: string,
+    fechaOriginal: Date,
+    motivo?: string,
+  ) {
+    return this.createParaTutor(tutorId, {
+      tipo: TipoNotificacion.TUTOR_CLASE_CANCELADA_HIJO,
+      titulo: 'Clase cancelada',
+      mensaje: `La clase "${claseNombre}" de ${estudianteNombre} del ${fechaOriginal.toLocaleDateString('es-AR')} fue cancelada${motivo ? `: ${motivo}` : ''}`,
+      prioridad: PrioridadNotificacion.ALTA,
+      metadata: {
+        estudianteId: estudianteId,
+        claseId: claseId,
+        claseNombre: claseNombre,
+        fechaOriginal: fechaOriginal.toISOString(),
+        ...(motivo && { motivo }),
+      },
+    });
+  }
+
+  /**
+   * Notificar al tutor una observación urgente del docente
+   * Sprint A - Docente → Tutor
+   */
+  async notificarObservacionUrgente(
+    tutorId: string,
+    estudianteNombre: string,
+    estudianteId: string,
+    docenteNombre: string,
+    observacion: string,
+    observacionId: string,
+  ) {
+    return this.createParaTutor(tutorId, {
+      tipo: TipoNotificacion.TUTOR_MENSAJE_DOCENTE,
+      titulo: `Mensaje de ${docenteNombre}`,
+      mensaje: `Sobre ${estudianteNombre}: ${observacion.substring(0, 100)}${observacion.length > 100 ? '...' : ''}`,
+      prioridad: PrioridadNotificacion.ALTA,
+      metadata: {
+        estudianteId: estudianteId,
+        docenteNombre: docenteNombre,
+        observacionId: observacionId,
+        observacionCompleta: observacion,
+      },
     });
   }
 
@@ -492,6 +722,106 @@ export class NotificacionesService {
   }
 
   // ═══════════════════════════════════════════════════════════════
+  // MÉTODOS DE NOTIFICACIÓN AUTOMÁTICA (ANUNCIOS)
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * Notificar al tutor un anuncio importante del docente
+   * Sprint C - Docente → Tutor
+   */
+  async notificarAnuncioImportanteATutor(
+    tutorId: string,
+    docenteNombre: string,
+    anuncioId: string,
+    anuncioTitulo: string,
+    comisionId?: string,
+  ) {
+    return this.createParaTutor(tutorId, {
+      tipo: TipoNotificacion.TUTOR_ANUNCIO_IMPORTANTE,
+      titulo: `📢 Anuncio de ${docenteNombre}`,
+      mensaje: anuncioTitulo,
+      prioridad: PrioridadNotificacion.ALTA,
+      metadata: {
+        anuncioId,
+        docenteNombre,
+        ...(comisionId && { comisionId }),
+      },
+    });
+  }
+
+  /**
+   * Notificar al tutor un anuncio urgente del docente
+   * Sprint C - Docente → Tutor
+   */
+  async notificarAnuncioUrgenteATutor(
+    tutorId: string,
+    docenteNombre: string,
+    anuncioId: string,
+    anuncioTitulo: string,
+    comisionId?: string,
+  ) {
+    return this.createParaTutor(tutorId, {
+      tipo: TipoNotificacion.TUTOR_ANUNCIO_URGENTE,
+      titulo: `🚨 URGENTE de ${docenteNombre}`,
+      mensaje: anuncioTitulo,
+      prioridad: PrioridadNotificacion.CRITICA,
+      metadata: {
+        anuncioId,
+        docenteNombre,
+        ...(comisionId && { comisionId }),
+      },
+    });
+  }
+
+  /**
+   * Notificar al estudiante un anuncio importante
+   * Sprint C - Docente → Estudiante
+   */
+  async notificarAnuncioImportanteAEstudiante(
+    estudianteId: string,
+    docenteNombre: string,
+    anuncioId: string,
+    anuncioTitulo: string,
+    comisionId?: string,
+  ) {
+    return this.createParaEstudiante(estudianteId, {
+      tipo: TipoNotificacion.ESTUDIANTE_ANUNCIO_IMPORTANTE,
+      titulo: '📢 Nuevo anuncio',
+      mensaje: anuncioTitulo,
+      prioridad: PrioridadNotificacion.ALTA,
+      metadata: {
+        anuncioId,
+        docenteNombre,
+        ...(comisionId && { comisionId }),
+      },
+    });
+  }
+
+  /**
+   * Notificar al estudiante un anuncio urgente
+   * Sprint C - Docente → Estudiante
+   */
+  async notificarAnuncioUrgenteAEstudiante(
+    estudianteId: string,
+    docenteNombre: string,
+    anuncioId: string,
+    anuncioTitulo: string,
+    comisionId?: string,
+  ) {
+    return this.createParaEstudiante(estudianteId, {
+      tipo: TipoNotificacion.ESTUDIANTE_ANUNCIO_URGENTE,
+      titulo: '🚨 Anuncio URGENTE',
+      mensaje: anuncioTitulo,
+      prioridad: PrioridadNotificacion.CRITICA,
+      metadata: {
+        anuncioId,
+        docenteNombre,
+        ...(comisionId && { comisionId }),
+      },
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════
   // UTILIDADES Y MANTENIMIENTO
   // ═══════════════════════════════════════════════════════════════
 
@@ -544,5 +874,20 @@ export class NotificacionesService {
         'Solo puede especificar un destinatario por notificación',
       );
     }
+  }
+
+  /**
+   * Determina si un tier es superior a otro
+   * Orden: STEAM_LIBROS < STEAM_ASINCRONICO < STEAM_SINCRONICO
+   */
+  private esTierSuperior(tierNuevo: string, tierAnterior: string): boolean {
+    const ordenTiers: Record<string, number> = {
+      STEAM_LIBROS: 1,
+      STEAM_ASINCRONICO: 2,
+      STEAM_SINCRONICO: 3,
+    };
+    const ordenNuevo = ordenTiers[tierNuevo] ?? 0;
+    const ordenAnterior = ordenTiers[tierAnterior] ?? 0;
+    return ordenNuevo > ordenAnterior;
   }
 }

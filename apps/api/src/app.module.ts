@@ -39,6 +39,7 @@ import { LivekitModule } from './livekit/livekit.module';
 import { AulaVivaModule } from './aula-viva/aula-viva.module';
 import { ObservacionesModule } from './observaciones/observaciones.module';
 import { ComisionesModule } from './comisiones/comisiones.module';
+import { AnunciosModule } from './anuncios/anuncios.module';
 
 /**
  * AppModule
@@ -96,6 +97,7 @@ import { ComisionesModule } from './comisiones/comisiones.module';
     AulaVivaModule, // WebSocket para aula virtual en tiempo real
     ObservacionesModule, // Sistema de observaciones docente
     ComisionesModule, // Comisiones (cursos temporales) con LiveKit
+    AnunciosModule, // Sistema de anuncios docente → grupo
     // [ELIMINADO] CursosModule, StudioModule - sistema legacy de contenido
   ],
   controllers: [AppController],

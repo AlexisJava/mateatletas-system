@@ -69,6 +69,7 @@ import {
   obtenerPrecioTier,
   type InscripcionConTier,
 } from '../domain/constants/suscripcion-familiar.constants';
+import { NotificacionesService } from '../../notificaciones/notificaciones.service';
 
 type PrismaTransactionClient = Prisma.TransactionClient;
 
@@ -83,6 +84,7 @@ export class SuscripcionFamiliarCommandService {
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
     private readonly mpClient: MercadoPagoPreApprovalClientService,
+    private readonly notificacionesService: NotificacionesService,
   ) {
     // CRIT-04: Fail fast si FRONTEND_URL no está configurado
     this.frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
@@ -1150,6 +1152,13 @@ export class SuscripcionFamiliarCommandService {
       data: { estado: EstadoSuscripcionFamiliar.PAUSED },
     });
 
+    // Notificar al tutor sobre la pausa
+    await this.notificacionesService.notificarSuscripcionPausadaATutor(
+      suscripcion.tutorId,
+      suscripcionFamiliarId,
+      motivo,
+    );
+
     this.logger.log(
       `Suscripción ${suscripcionFamiliarId} pausada por admin. Motivo: ${motivo}`,
     );
@@ -1205,6 +1214,12 @@ export class SuscripcionFamiliarCommandService {
       where: { id: suscripcionFamiliarId },
       data: { estado: EstadoSuscripcionFamiliar.AUTHORIZED },
     });
+
+    // Notificar al tutor sobre la reactivación
+    await this.notificacionesService.notificarSuscripcionReactivada(
+      suscripcion.tutorId,
+      suscripcionFamiliarId,
+    );
 
     this.logger.log(
       `Suscripción ${suscripcionFamiliarId} reactivada por admin. Motivo: ${motivo ?? 'No especificado'}`,
@@ -1329,6 +1344,14 @@ export class SuscripcionFamiliarCommandService {
         nuevoMontoMensual,
       );
     }
+
+    // Notificar al tutor sobre el cambio de tier
+    await this.notificacionesService.notificarCambioTier(
+      inscripcion.suscripcionFamiliar.tutorId,
+      tierAnterior ?? 'Sin tier',
+      nuevoTier,
+      motivo,
+    );
 
     this.logger.log(
       `Admin cambió tier inscripción ${inscripcionId}: ${tierAnterior} → ${nuevoTier}. Motivo: ${motivo ?? 'No especificado'}`,
