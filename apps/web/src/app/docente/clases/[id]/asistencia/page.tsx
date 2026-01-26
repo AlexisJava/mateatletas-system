@@ -18,7 +18,7 @@ import { MarcarAsistenciaDto } from '@/types/asistencia.types';
  * - Agregar observaciones
  * - Ver estadísticas en tiempo real
  */
-export default function AsistenciaPage() {
+export default function AsistenciaPage(): React.ReactNode {
   const params = useParams();
   const router = useRouter();
   const claseId = params.id as string;

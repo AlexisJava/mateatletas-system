@@ -19,7 +19,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-export default function DocentePlanificacionesPage() {
+export default function DocentePlanificacionesPage(): React.ReactNode {
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

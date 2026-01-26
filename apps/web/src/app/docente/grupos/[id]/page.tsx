@@ -42,7 +42,7 @@ import { StudentAvatar } from '@/components/ui/StudentAvatar';
  * - Botón para asignar puntos
  */
 
-export default function GrupoDetalleCompletoPage() {
+export default function GrupoDetalleCompletoPage(): React.ReactNode {
   const params = useParams();
   const router = useRouter();
   const [grupo, setGrupo] = useState<GrupoDetalleCompletoDto | null>(null);

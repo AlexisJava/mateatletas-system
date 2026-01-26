@@ -50,7 +50,7 @@ interface EventoDia {
   color: string;
 }
 
-export default function DocenteCalendarioPage() {
+export default function DocenteCalendarioPage(): React.ReactNode {
   const { user, isAuthenticated } = useAuthStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);

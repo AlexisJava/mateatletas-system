@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { BookOpen, CheckCircle, Clock } from 'lucide-react';
 
-export default function DocentePlanificacionesDemoPage() {
+export default function DocentePlanificacionesDemoPage(): React.ReactNode {
   const [mensaje, setMensaje] = useState('¡Esperando tu input!');
 
   return (

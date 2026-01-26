@@ -31,7 +31,7 @@ import { Comision, DashboardStats, Alerta } from '@/types/docente.types';
  * Dashboard Docente - TeacherDash Pro Design
  * Replica exacta del App.tsx original adaptado a Next.js
  */
-export default function DocenteDashboard() {
+export default function DocenteDashboard(): React.ReactNode {
   const router = useRouter();
   const { user, logout } = useAuthStore();
 

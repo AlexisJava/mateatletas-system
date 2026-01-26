@@ -98,7 +98,7 @@ const getTipoLabel = (tipo: string): string => {
 
 type FilterEstado = 'todas' | 'no_leidas' | 'leidas';
 
-export default function NotificacionesPage() {
+export default function NotificacionesPage(): React.ReactNode {
   const router = useRouter();
 
   // Estado

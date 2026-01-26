@@ -87,7 +87,7 @@ function ClaseEnVivoContent() {
   );
 }
 
-export default function ClaseEnVivoPage() {
+export default function ClaseEnVivoPage(): React.ReactNode {
   return (
     <Suspense
       fallback={

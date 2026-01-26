@@ -40,7 +40,7 @@ interface EstudianteConFalta {
   tutorEmail: string | null;
 }
 
-export default function DocenteObservacionesPage() {
+export default function DocenteObservacionesPage(): React.ReactNode {
   const [observaciones, setObservaciones] = useState<Observacion[]>([]);
   const [estudiantesConFaltas, setEstudiantesConFaltas] = useState<EstudianteConFalta[]>([]);
 

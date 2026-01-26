@@ -13,7 +13,7 @@ const fadeIn = {
   transition: { duration: 0.4 },
 };
 
-export default function DocentePerfilPage() {
+export default function DocentePerfilPage(): React.ReactNode {
   const {} = useAuthStore();
   const [docente, setDocente] = useState<Docente | null>(null);
   const [isLoading, setIsLoading] = useState(true);

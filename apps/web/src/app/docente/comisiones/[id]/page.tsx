@@ -52,7 +52,7 @@ interface ComisionDetalle {
   estadoClase?: EstadoClase;
 }
 
-export default function ComisionDetallePage() {
+export default function ComisionDetallePage(): React.ReactNode {
   const params = useParams();
   const router = useRouter();
   const comisionId = params.id as string;

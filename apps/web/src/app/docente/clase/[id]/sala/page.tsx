@@ -32,7 +32,7 @@ interface Estudiante {
   avatar?: string;
 }
 
-export default function SalaClaseDocentePage() {
+export default function SalaClaseDocentePage(): React.ReactNode {
   const params = useParams();
   const router = useRouter();
   const [clase, setClase] = useState<ClaseData | null>(null);
