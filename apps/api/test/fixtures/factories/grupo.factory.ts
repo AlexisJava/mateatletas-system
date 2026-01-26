@@ -156,6 +156,29 @@ export async function createTestInscripcionClaseGrupo(
 }
 
 // ============================================================================
+// FACTORY: INSCRIPCIÓN CLASE (para sistema de reservas individuales)
+// ============================================================================
+
+/**
+ * Inscribe un estudiante en una Clase individual (sistema de reservas)
+ * Nota: Diferente de createTestInscripcionClaseGrupo que es para comisiones
+ */
+export async function createTestInscripcionClase(
+  prisma: PrismaService,
+  estudianteId: string,
+  claseId: string,
+  tutorId: string,
+) {
+  return prisma.inscripcionClase.create({
+    data: {
+      claseId,
+      estudianteId,
+      tutorId,
+    },
+  });
+}
+
+// ============================================================================
 // FACTORY: CLASE (individual con reservas)
 // ============================================================================
 

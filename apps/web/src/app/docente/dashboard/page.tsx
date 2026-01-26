@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import {
   docentesApi,
+  notificacionesApi,
   ComisionResumen,
   GrupoResumen,
   EstudianteConFalta,
@@ -22,7 +23,6 @@ import { NotificationsDropdown } from '@/components/docente/NotificationsDropdow
 import { HoyView } from '@/components/docente/views/HoyView';
 import { GruposView } from '@/components/docente/views/GruposView';
 import { CalendarioView } from '@/components/docente/views/CalendarioView';
-import { AlertsPage } from '@/components/docente/AlertsPage';
 
 // Types
 import { Comision, DashboardStats, Alerta } from '@/types/docente.types';
@@ -55,6 +55,7 @@ export default function DocenteDashboard() {
   const [comisiones, setComisiones] = useState<Comision[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [alertas, setAlertas] = useState<Alerta[]>([]);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   // Close dropdown when clicking outside
   const headerRef = useRef<HTMLDivElement>(null);
@@ -98,7 +99,23 @@ export default function DocenteDashboard() {
   // Fetch data
   useEffect(() => {
     fetchDashboardData();
+    fetchNotificationCount();
   }, []);
+
+  // Polling para badge de notificaciones cada 60 segundos
+  useEffect(() => {
+    const interval = setInterval(fetchNotificationCount, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchNotificationCount = async () => {
+    try {
+      const response = await notificacionesApi.getCountNoLeidas();
+      setNotificationCount(response.count);
+    } catch (error) {
+      console.error('Error al obtener contador de notificaciones:', error);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -241,20 +258,17 @@ export default function DocenteDashboard() {
               size={22}
               className="transition-transform duration-300 group-active:rotate-12 group-hover:scale-110"
             />
-            {alertas.filter((a) => !a.leida).length > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-amber-500 rounded-full ring-2 ring-[#020617] animate-pulse" />
+            {notificationCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold bg-red-500 text-white rounded-full ring-2 ring-[#020617]">
+                {notificationCount > 99 ? '99+' : notificationCount}
+              </span>
             )}
           </button>
 
           {showNotifications && (
             <NotificationsDropdown
-              alertas={alertas}
               onClose={() => setShowNotifications(false)}
-              onViewAll={() => setShowNotifications(false)}
-              onMarkAsRead={(id) =>
-                setAlertas((prev) => prev.map((a) => (a.id === id ? { ...a, leida: true } : a)))
-              }
-              onMarkAllAsRead={() => setAlertas((prev) => prev.map((a) => ({ ...a, leida: true })))}
+              onNotificationsUpdated={fetchNotificationCount}
             />
           )}
 
@@ -271,7 +285,11 @@ export default function DocenteDashboard() {
       </header>
 
       {/* 2. Navbar (Horizontal Sidebar) */}
-      <Sidebar currentView={currentView} onNavigate={handleNavigate} />
+      <Sidebar
+        currentView={currentView}
+        onNavigate={handleNavigate}
+        notificationCount={notificationCount}
+      />
 
       {/* 3. Main Content */}
       <main className="flex-1 min-h-0 p-6 lg:p-8 overflow-hidden w-full relative">

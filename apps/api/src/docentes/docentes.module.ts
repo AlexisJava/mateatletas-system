@@ -12,6 +12,12 @@ import { DocentesFacade } from './services/docentes-facade.service';
 import { DocentePlanificacionesService } from './services/docente-planificaciones.service';
 import { DocenteComisionQueriesService } from './services/docente-comision-queries.service';
 
+// Refactored stats services (split from DocenteStatsService)
+import { DocenteDashboardQueriesService } from './services/docente-dashboard-queries.service';
+import { DocenteEstudiantesStatsService } from './services/docente-estudiantes-stats.service';
+import { DocenteCalendarioQueriesService } from './services/docente-calendario-queries.service';
+import { DocenteDashboardGraphsService } from './services/docente-dashboard-graphs.service';
+
 @Module({
   controllers: [DocentesController],
   providers: [
@@ -27,6 +33,11 @@ import { DocenteComisionQueriesService } from './services/docente-comision-queri
     DocentePlanificacionesService,
     // Comisión Queries
     DocenteComisionQueriesService,
+    // Refactored stats services (delegated from DocenteStatsService)
+    DocenteDashboardQueriesService,
+    DocenteEstudiantesStatsService,
+    DocenteCalendarioQueriesService,
+    DocenteDashboardGraphsService,
   ],
   exports: [DocentesService], // Exportar para uso en AuthService
 })

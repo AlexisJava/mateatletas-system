@@ -53,6 +53,8 @@ export class NotificacionesService {
    * @param soloNoLeidas - Filtrar solo no leídas
    * @param page - Página (default: 1)
    * @param limit - Límite por página (default: 20)
+   * @param tipoNotificacion - Filtrar por tipo de notificación
+   * @param busqueda - Buscar en título y mensaje
    */
   async findAll(
     tipo: TipoDestinatario,
@@ -60,11 +62,20 @@ export class NotificacionesService {
     soloNoLeidas = false,
     page = 1,
     limit = 20,
+    tipoNotificacion?: string,
+    busqueda?: string,
   ) {
     const skip = (page - 1) * limit;
-    const where = {
+    const where: Record<string, unknown> = {
       ...this.buildWhereClause(tipo, destinatarioId),
       ...(soloNoLeidas && { leida: false }),
+      ...(tipoNotificacion && { tipo: tipoNotificacion as TipoNotificacion }),
+      ...(busqueda && {
+        OR: [
+          { titulo: { contains: busqueda, mode: 'insensitive' } },
+          { mensaje: { contains: busqueda, mode: 'insensitive' } },
+        ],
+      }),
     };
 
     const [notificaciones, total] = await Promise.all([
@@ -212,8 +223,18 @@ export class NotificacionesService {
     soloNoLeidas = false,
     page = 1,
     limit = 20,
+    tipoNotificacion?: string,
+    busqueda?: string,
   ) {
-    return this.findAll('docente', docenteId, soloNoLeidas, page, limit);
+    return this.findAll(
+      'docente',
+      docenteId,
+      soloNoLeidas,
+      page,
+      limit,
+      tipoNotificacion,
+      busqueda,
+    );
   }
 
   async countNoLeidasDocente(docenteId: string): Promise<number> {

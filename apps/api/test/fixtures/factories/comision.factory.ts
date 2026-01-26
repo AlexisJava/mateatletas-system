@@ -48,9 +48,9 @@ export async function createTestProducto(
       nombre: options?.nombre ?? `Producto_${uniqueSuffix}`,
       tipo: options?.tipo ?? TipoProducto.Curso,
       precio: options?.precio ?? 10000,
-      fecha_inicio: options?.fechaInicio,
-      fecha_fin: options?.fechaFin,
-      cupo_maximo: options?.cupoMaximo,
+      fechaInicio: options?.fechaInicio,
+      fechaFin: options?.fechaFin,
+      cupoMaximo: options?.cupoMaximo,
       activo: true,
     },
   });
@@ -85,13 +85,13 @@ export async function createTestComision(
   return prisma.comision.create({
     data: {
       nombre: options.nombre ?? `Comision_${uniqueSuffix}`,
-      producto_id: options.productoId,
-      docente_id: options.docenteId,
-      casa_id: options.casaId,
+      productoId: options.productoId,
+      docenteId: options.docenteId,
+      casaId: options.casaId,
       horario: options.horario ?? 'Lun-Vie 9:00-12:00',
-      fecha_inicio: options.fechaInicio,
-      fecha_fin: options.fechaFin,
-      cupo_maximo: options.cupoMaximo,
+      fechaInicio: options.fechaInicio,
+      fechaFin: options.fechaFin,
+      cupoMaximo: options.cupoMaximo,
       activo: options.activo ?? true,
       modalidad: options.modalidad ?? TipoAccesoInscripcion.SINCRONICO,
     },
@@ -113,8 +113,8 @@ export async function createTestInscripcionComision(
 ) {
   return prisma.inscripcionComision.create({
     data: {
-      comision_id: comisionId,
-      estudiante_id: estudianteId,
+      comisionId,
+      estudianteId,
       estado,
     },
   });

@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Patch,
-  Delete,
   Param,
   Query,
   UseGuards,
@@ -41,11 +40,15 @@ export class NotificacionesController {
   @Get()
   @ApiOperation({ summary: 'Listar notificaciones del docente' })
   @ApiQuery({ name: 'soloNoLeidas', required: false, type: Boolean })
+  @ApiQuery({ name: 'tipo', required: false, type: String })
+  @ApiQuery({ name: 'busqueda', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
   async findAll(
     @GetUser('id') docenteId: string,
     @Query('soloNoLeidas') soloNoLeidas?: string,
+    @Query('tipo') tipo?: string,
+    @Query('busqueda') busqueda?: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
   ) {
@@ -55,6 +58,8 @@ export class NotificacionesController {
       filtrarNoLeidas,
       page,
       limit,
+      tipo,
+      busqueda,
     );
   }
 
@@ -102,19 +107,5 @@ export class NotificacionesController {
       message: 'Todas las notificaciones marcadas como leídas',
       count: result.count,
     };
-  }
-
-  /**
-   * DELETE /notificaciones/:id
-   * Eliminar una notificación
-   */
-  @Delete(':id')
-  @ApiOperation({ summary: 'Eliminar una notificación' })
-  async remove(
-    @Param('id', ParseIdPipe) id: string,
-    @GetUser('id') docenteId: string,
-  ) {
-    await this.notificacionesService.remove(id, 'docente' as const, docenteId);
-    return { message: 'Notificación eliminada correctamente' };
   }
 }

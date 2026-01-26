@@ -41,7 +41,16 @@ export class AsistenciaService {
       );
     }
 
-    // 2. Verify that student is enrolled in the class
+    // 2. Verify that student exists
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: estudianteId },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException('Estudiante no encontrado');
+    }
+
+    // 3. Verify that student is enrolled in the class
     const inscripcion = await this.prisma.inscripcionClase.findFirst({
       where: {
         claseId: claseId,
@@ -55,7 +64,7 @@ export class AsistenciaService {
       );
     }
 
-    // 3. Check if attendance record already exists
+    // 4. Check if attendance record already exists
     const asistenciaExistente = await this.prisma.asistencia.findFirst({
       where: {
         claseId: claseId,
@@ -63,7 +72,7 @@ export class AsistenciaService {
       },
     });
 
-    // 4. Create or update attendance record
+    // 5. Create or update attendance record
     let asistencia;
     if (asistenciaExistente) {
       asistencia = await this.prisma.asistencia.update({
@@ -191,7 +200,7 @@ export class AsistenciaService {
       totalPresentes: totalPresentes,
       totalAusentes: totalAusentes,
       totalJustificados: totalJustificados,
-      lista,
+      asistencias: lista,
     };
   }
 
@@ -222,7 +231,16 @@ export class AsistenciaService {
     }>;
     mensaje: string;
   }> {
+    // 0. Validación temprana de parámetros requeridos (antes de queries)
+    if (!claseGrupoId) {
+      throw new BadRequestException('claseGrupoId es requerido');
+    }
+    if (!fecha) {
+      throw new BadRequestException('fecha es requerida');
+    }
+
     // 1. Verificar que el ClaseGrupo existe y el docente es el titular
+    // (se hace ANTES de validar asistencias para retornar 404 correcto)
     const claseGrupo = await this.prisma.claseGrupo.findUnique({
       where: { id: claseGrupoId },
     });
@@ -237,7 +255,15 @@ export class AsistenciaService {
       );
     }
 
-    // 2. Verificar que todos los estudiantes están inscritos en el grupo
+    // 2. Validación del array de asistencias (después de confirmar recurso existe)
+    if (!asistencias || !Array.isArray(asistencias)) {
+      throw new BadRequestException('asistencias debe ser un array');
+    }
+    if (asistencias.length === 0) {
+      throw new BadRequestException('Debe incluir al menos un estudiante');
+    }
+
+    // 3. Verificar que todos los estudiantes están inscritos en el grupo
     // Usa vista unificada para incluir inscripciones manuales y via suscripción
     const estudiantesIds = asistencias.map((a) => a.estudianteId);
     const inscripciones = await this.prisma.inscripcionUnificada.findMany({
@@ -365,7 +391,16 @@ export class AsistenciaService {
     }>;
     mensaje: string;
   }> {
+    // 0. Validación temprana de parámetros requeridos (antes de queries)
+    if (!comisionId) {
+      throw new BadRequestException('comisionId es requerido');
+    }
+    if (!fecha) {
+      throw new BadRequestException('fecha es requerida');
+    }
+
     // 1. Verificar que la comisión existe y el docente es el titular
+    // (se hace ANTES de validar asistencias para retornar 404 correcto)
     const comision = await this.prisma.comision.findUnique({
       where: { id: comisionId },
     });
@@ -380,7 +415,15 @@ export class AsistenciaService {
       );
     }
 
-    // 2. Verificar que todos los estudiantes están inscritos en la comisión
+    // 2. Validación del array de asistencias (después de confirmar recurso existe)
+    if (!asistencias || !Array.isArray(asistencias)) {
+      throw new BadRequestException('asistencias debe ser un array');
+    }
+    if (asistencias.length === 0) {
+      throw new BadRequestException('Debe incluir al menos un estudiante');
+    }
+
+    // 3. Verificar que todos los estudiantes están inscritos en la comisión
     const estudiantesIds = asistencias.map((a) => a.estudianteId);
     const inscripciones = await this.prisma.inscripcionComision.findMany({
       where: {

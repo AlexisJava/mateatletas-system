@@ -5,7 +5,6 @@ import {
   IsEnum,
   IsOptional,
   IsDateString,
-  ArrayMinSize,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { EstadoAsistencia } from '@prisma/client';
@@ -65,10 +64,8 @@ export class TomarAsistenciaBatchDto {
   @ApiProperty({
     description: 'Array de asistencias de estudiantes',
     type: [AsistenciaItemDto],
-    minItems: 1,
   })
   @IsArray()
-  @ArrayMinSize(1, { message: 'Debe incluir al menos un estudiante' })
   @ValidateNested({ each: true })
   @Type(() => AsistenciaItemDto)
   asistencias!: AsistenciaItemDto[];

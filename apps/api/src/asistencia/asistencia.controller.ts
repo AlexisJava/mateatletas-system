@@ -13,6 +13,8 @@ import { AsistenciaService } from './asistencia.service';
 import { AsistenciaReportesService } from './asistencia-reportes.service';
 import { MarcarAsistenciaDto } from './dto/marcar-asistencia.dto';
 import { FiltrarAsistenciaDto } from './dto/filtrar-asistencia.dto';
+import { TomarAsistenciaBatchDto } from './dto/tomar-asistencia-batch.dto';
+import { TomarAsistenciaComisionDto } from './dto/tomar-asistencia-comision.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
@@ -73,8 +75,11 @@ export class AsistenciaController {
   @Roles(Role.DOCENTE, Role.ADMIN)
   async obtenerEstadisticasClase(
     @Param('claseId', ParseIdPipe) claseId: string,
+    @GetUser() user: AuthUser,
   ) {
-    return this.reportesService.obtenerEstadisticasClase(claseId);
+    // Si es docente, verificar ownership en el service
+    const docenteId = user.role === Role.DOCENTE ? user.id : undefined;
+    return this.reportesService.obtenerEstadisticasClase(claseId, docenteId);
   }
 
   /**
@@ -82,17 +87,17 @@ export class AsistenciaController {
    * GET /api/asistencia/estudiantes/:estudianteId
    * Rol: Tutor, Docente, Admin
    */
-  // TODO [HIGH-001]: IDOR - Validar que el tutor tenga ownership del estudiante
-  // Ver: /docs/TODO_PRE_LAUNCH.md
   @Get('estudiantes/:estudianteId')
   @Roles(Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerHistorialEstudiante(
     @Param('estudianteId', ParseIdPipe) estudianteId: string,
     @Query() filtros: FiltrarAsistenciaDto,
+    @GetUser() user: AuthUser,
   ) {
     return this.reportesService.obtenerHistorialEstudiante(
       estudianteId,
       filtros,
+      user,
     );
   }
 
@@ -182,8 +187,7 @@ export class AsistenciaController {
   @Post('clase-grupo/batch')
   @Roles(Role.DOCENTE)
   async tomarAsistenciaBatch(
-    @Body()
-    dto: import('./dto/tomar-asistencia-batch.dto').TomarAsistenciaBatchDto,
+    @Body() dto: TomarAsistenciaBatchDto,
     @GetUser() user: AuthUser,
   ) {
     return this.asistenciaService.tomarAsistenciaClaseGrupoBatch(
@@ -204,8 +208,7 @@ export class AsistenciaController {
   @Post('comision/batch')
   @Roles(Role.DOCENTE)
   async tomarAsistenciaComisionBatch(
-    @Body()
-    dto: import('./dto/tomar-asistencia-comision.dto').TomarAsistenciaComisionDto,
+    @Body() dto: TomarAsistenciaComisionDto,
     @GetUser() user: AuthUser,
   ) {
     return this.asistenciaService.tomarAsistenciaComisionBatch(

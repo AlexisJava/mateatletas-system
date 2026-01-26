@@ -136,6 +136,10 @@ export class DocenteComisionQueriesService {
    * - InscripcionComision (manual/admin/becas)
    * - InscripcionActividad (tutor via suscripción 2026)
    *
+   * OPTIMIZACIÓN N+1:
+   * - ANTES: 3N + 2 queries (N = número de estudiantes)
+   * - AHORA: 3 queries fijas (batch + lookups O(1))
+   *
    * @param comisionId - ID de la comisión
    * @param docenteId - ID del docente (para verificar ownership)
    * @returns Lista de estudiantes con stats y fuente de inscripción
@@ -147,6 +151,7 @@ export class DocenteComisionQueriesService {
     await this.validator.validarDocenteExiste(docenteId);
     await this.verificarOwnershipComision(comisionId, docenteId);
 
+    // Query 1 & 2: Fetch inscripciones de ambas fuentes
     const [inscripcionesManuales, inscripcionesSuscripcion] = await Promise.all(
       [
         this.fetchInscripcionesManuales(comisionId),
@@ -154,36 +159,46 @@ export class DocenteComisionQueriesService {
       ],
     );
 
+    // Query 3: Batch fetch ALL asistencias de la comisión (elimina N+1)
+    const allAsistencias = await this.prisma.asistenciaComision.findMany({
+      where: { comisionId },
+      select: { estudianteId: true, fecha: true, estado: true },
+      orderBy: { fecha: 'desc' },
+    });
+
+    // Build lookup maps in memory (O(1) access)
+    const asistenciasLookup = this.buildAsistenciasLookup(allAsistencias);
+
     const estudiantesMap = new Map<string, EstudianteComisionResponse>();
 
-    // Procesar inscripciones manuales (FUENTE 1)
+    // Procesar inscripciones manuales (FUENTE 1) - now sync, no queries
     for (const inscripcion of inscripcionesManuales) {
       if (estudiantesMap.has(inscripcion.estudiante.id)) continue;
-      const response = await this.mapEstudianteToResponse(
+      const response = this.mapEstudianteToResponseSync(
         inscripcion.estudiante,
-        comisionId,
         inscripcion.estado,
         inscripcion.fechaInscripcion,
         'MANUAL',
         inscripcion.estudiante.tutor,
+        asistenciasLookup,
       );
       estudiantesMap.set(inscripcion.estudiante.id, response);
     }
 
-    // Procesar inscripciones via suscripción (FUENTE 2)
+    // Procesar inscripciones via suscripción (FUENTE 2) - now sync, no queries
     for (const inscripcion of inscripcionesSuscripcion) {
       if (estudiantesMap.has(inscripcion.estudiante.id)) continue;
       const tutorData =
         inscripcion.estudiante.tutor ??
         inscripcion.suscripcionFamiliar?.tutor ??
         null;
-      const response = await this.mapEstudianteToResponse(
+      const response = this.mapEstudianteToResponseSync(
         inscripcion.estudiante,
-        comisionId,
         inscripcion.estado,
         inscripcion.fechaInicio,
         'SUSCRIPCION_2026',
         tutorData,
+        asistenciasLookup,
       );
       estudiantesMap.set(inscripcion.estudiante.id, response);
     }
@@ -530,24 +545,74 @@ export class DocenteComisionQueriesService {
     });
   }
 
+  // ============================================================================
+  // OPTIMIZED HELPERS - Batch queries + in-memory lookups (O(1))
+  // ============================================================================
+
   /**
-   * Mapea un estudiante a la respuesta de la API
+   * Type for pre-computed asistencias lookup
    */
-  private async mapEstudianteToResponse(
+  private asistenciasLookupType!: {
+    ultimaAsistencia: Map<string, { fecha: Date; estado: string }>;
+    totalAsistencias: Map<string, number>;
+    presentes: Map<string, number>;
+  };
+
+  /**
+   * Builds lookup maps from batch-fetched asistencias
+   * Complexity: O(n) where n = number of asistencias
+   */
+  private buildAsistenciasLookup(
+    asistencias: Array<{ estudianteId: string; fecha: Date; estado: string }>,
+  ): typeof this.asistenciasLookupType {
+    const ultimaAsistencia = new Map<string, { fecha: Date; estado: string }>();
+    const totalAsistencias = new Map<string, number>();
+    const presentes = new Map<string, number>();
+
+    for (const a of asistencias) {
+      // Track ultima asistencia (first occurrence since sorted desc)
+      if (!ultimaAsistencia.has(a.estudianteId)) {
+        ultimaAsistencia.set(a.estudianteId, {
+          fecha: a.fecha,
+          estado: a.estado,
+        });
+      }
+
+      // Count total
+      totalAsistencias.set(
+        a.estudianteId,
+        (totalAsistencias.get(a.estudianteId) ?? 0) + 1,
+      );
+
+      // Count presentes
+      if (a.estado === 'Presente') {
+        presentes.set(a.estudianteId, (presentes.get(a.estudianteId) ?? 0) + 1);
+      }
+    }
+
+    return { ultimaAsistencia, totalAsistencias, presentes };
+  }
+
+  /**
+   * Mapea un estudiante a la respuesta de la API (sync version)
+   * Uses pre-computed lookups instead of database queries
+   * Complexity: O(1)
+   */
+  private mapEstudianteToResponseSync(
     est: EstudianteFromInscripcion,
-    comisionId: string,
     estadoInscripcion: string,
     fechaInscripcion: Date,
     fuente: 'MANUAL' | 'SUSCRIPCION_2026',
     tutorData: TutorFromEstudiante | null,
-  ): Promise<EstudianteComisionResponse> {
-    const [ultimaAsistencia, asistenciaPorcentaje] = await Promise.all([
-      this.prisma.asistenciaComision.findFirst({
-        where: { estudianteId: est.id, comisionId: comisionId },
-        orderBy: { fecha: 'desc' },
-      }),
-      this.calcularAsistenciaPorcentaje(est.id, comisionId),
-    ]);
+    lookup: typeof this.asistenciasLookupType,
+  ): EstudianteComisionResponse {
+    const ultimaAsistencia = lookup.ultimaAsistencia.get(est.id) ?? null;
+    const total = lookup.totalAsistencias.get(est.id) ?? 0;
+    const presentesCount = lookup.presentes.get(est.id) ?? 0;
+
+    // Calculate percentage (100% if no records)
+    const asistenciaPorcentaje =
+      total === 0 ? 100 : Math.round((presentesCount / total) * 100);
 
     return {
       id: est.id,
@@ -567,10 +632,8 @@ export class DocenteComisionQueriesService {
         xpTotal: est.recursos?.xpTotal ?? 0,
         nivel: est.nivelActual ?? 1,
         rachaActual: est.racha?.rachaActual ?? 0,
-        asistenciaPorcentaje: asistenciaPorcentaje,
-        ultimaAsistencia: ultimaAsistencia
-          ? { fecha: ultimaAsistencia.fecha, estado: ultimaAsistencia.estado }
-          : null,
+        asistenciaPorcentaje,
+        ultimaAsistencia,
       },
       tutor: tutorData
         ? {
@@ -581,35 +644,9 @@ export class DocenteComisionQueriesService {
             telefono: tutorData.telefono,
           }
         : null,
-      estadoInscripcion: estadoInscripcion,
+      estadoInscripcion,
       inscripcionFecha: fechaInscripcion,
       fuente,
     };
-  }
-
-  /**
-   * Calcula el porcentaje de asistencia de un estudiante en una comisión
-   */
-  private async calcularAsistenciaPorcentaje(
-    estudianteId: string,
-    comisionId: string,
-  ): Promise<number> {
-    const totalAsistencias = await this.prisma.asistenciaComision.count({
-      where: { estudianteId: estudianteId, comisionId: comisionId },
-    });
-
-    if (totalAsistencias === 0) {
-      return 100; // Sin registros = 100% por defecto
-    }
-
-    const presentes = await this.prisma.asistenciaComision.count({
-      where: {
-        estudianteId: estudianteId,
-        comisionId: comisionId,
-        estado: 'Presente',
-      },
-    });
-
-    return Math.round((presentes / totalAsistencias) * 100);
   }
 }

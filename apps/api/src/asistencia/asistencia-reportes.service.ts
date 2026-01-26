@@ -1,7 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Prisma, EstadoAsistencia } from '@prisma/client';
 import { PrismaService } from '../core/database/prisma.service';
 import { FiltrarAsistenciaDto } from './dto/filtrar-asistencia.dto';
+import { AuthUser } from '../auth/interfaces';
+import { Role } from '../auth/decorators/roles.decorator';
 
 /**
  * Service responsible for attendance reports, statistics, and analytics
@@ -14,14 +20,23 @@ export class AsistenciaReportesService {
   /**
    * Get attendance statistics for a specific class
    * Calculates total enrolled, present, absent, justified, pending, and attendance percentage
+   * @param claseId - ID of the class
+   * @param docenteId - Optional docente ID for ownership validation (required for DOCENTE role)
    */
-  async obtenerEstadisticasClase(claseId: string) {
+  async obtenerEstadisticasClase(claseId: string, docenteId?: string) {
     const clase = await this.prisma.clase.findUnique({
       where: { id: claseId },
     });
 
     if (!clase) {
       throw new NotFoundException('Clase no encontrada');
+    }
+
+    // Ownership check: docente can only see their own classes
+    if (docenteId && clase.docenteId !== docenteId) {
+      throw new ForbiddenException(
+        'Solo el docente titular puede ver las estadísticas de esta clase',
+      );
     }
 
     // Optimized: Execute queries in parallel
@@ -73,10 +88,14 @@ export class AsistenciaReportesService {
   /**
    * Get attendance history for a specific student
    * Returns historical attendance records with statistics
+   * @param estudianteId - ID of the student
+   * @param filtros - Filter options
+   * @param user - Authenticated user for ownership validation
    */
   async obtenerHistorialEstudiante(
     estudianteId: string,
     filtros: FiltrarAsistenciaDto,
+    user: AuthUser,
   ) {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: estudianteId },
@@ -85,6 +104,40 @@ export class AsistenciaReportesService {
     if (!estudiante) {
       throw new NotFoundException('Estudiante no encontrado');
     }
+
+    // Ownership validation based on role
+    if (user.role === Role.TUTOR) {
+      // Tutors can only see their own students
+      if (estudiante.tutorId !== user.id) {
+        throw new ForbiddenException(
+          'No tienes permiso para ver el historial de este estudiante',
+        );
+      }
+    } else if (user.role === Role.DOCENTE) {
+      // Docentes can only see students enrolled in their classes
+      const tieneEstudiante = await this.prisma.inscripcionClase.findFirst({
+        where: {
+          estudianteId,
+          clase: { docenteId: user.id },
+        },
+      });
+
+      // Also check InscripcionClaseGrupo for class groups
+      const tieneEstudianteGrupo =
+        await this.prisma.inscripcionClaseGrupo.findFirst({
+          where: {
+            estudianteId,
+            claseGrupo: { docenteId: user.id },
+          },
+        });
+
+      if (!tieneEstudiante && !tieneEstudianteGrupo) {
+        throw new ForbiddenException(
+          'No tienes permiso para ver el historial de este estudiante',
+        );
+      }
+    }
+    // Admin has full access - no additional check needed
 
     // Build filters for inscriptions
     const whereInscripcion: Prisma.InscripcionClaseWhereInput = {

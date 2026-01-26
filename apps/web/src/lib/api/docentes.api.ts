@@ -365,23 +365,68 @@ export interface HistorialPuntosComisionResponse {
 // NOTIFICACIONES DOCENTE - Endpoints para gestión de notificaciones
 // ============================================================================
 
+export type PrioridadNotificacion = 'BAJA' | 'MEDIA' | 'ALTA' | 'CRITICA';
+
+export type TipoNotificacionDocente =
+  | 'DOCENTE_CLASE_PROXIMA'
+  | 'DOCENTE_CLASE_ASIGNADA'
+  | 'DOCENTE_ASISTENCIA_PENDIENTE'
+  | 'DOCENTE_ESTUDIANTE_ALERTA'
+  | 'DOCENTE_CLASE_CANCELADA'
+  | 'DOCENTE_LOGRO_ESTUDIANTE'
+  | 'DOCENTE_NUEVO_ESTUDIANTE'
+  | 'DOCENTE_ESTUDIANTE_BAJA'
+  | 'DOCENTE_MENSAJE_TUTOR'
+  | 'DOCENTE_TAREAS_PENDIENTES'
+  | 'DOCENTE_EVALUACION_PENDIENTE'
+  | 'DOCENTE_MATERIAL_ASIGNADO'
+  | 'DOCENTE_CLASE_REPROGRAMADA'
+  | 'DOCENTE_REPORTE_MENSUAL'
+  | 'DOCENTE_RECORDATORIO_PLANIFICACION';
+
 export interface Notificacion {
   id: string;
-  tipo: string;
+  tipo: TipoNotificacionDocente | string;
   titulo: string;
   mensaje: string;
+  prioridad: PrioridadNotificacion;
   leida: boolean;
+  metadata?: Record<string, unknown>;
   createdAt: string;
+}
+
+export interface NotificacionesListResponse {
+  data: Notificacion[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface NotificacionesParams {
+  soloNoLeidas?: boolean;
+  tipo?: TipoNotificacionDocente | string;
+  busqueda?: string;
+  page?: number;
+  limit?: number;
 }
 
 export const notificacionesApi = {
   /**
-   * Obtener todas las notificaciones del docente
-   * @param soloNoLeidas - Filtrar solo no leídas
+   * Obtener notificaciones del docente con paginación y filtros
    */
-  getAll: async (soloNoLeidas = false): Promise<Notificacion[]> => {
-    const url = soloNoLeidas ? '/notificaciones?soloNoLeidas=true' : '/notificaciones';
-    return apiClient.get<Notificacion[]>(url);
+  getAll: async (params: NotificacionesParams = {}): Promise<NotificacionesListResponse> => {
+    const searchParams = new URLSearchParams();
+    if (params.soloNoLeidas) searchParams.append('soloNoLeidas', 'true');
+    if (params.tipo) searchParams.append('tipo', params.tipo);
+    if (params.busqueda) searchParams.append('busqueda', params.busqueda);
+    if (params.page) searchParams.append('page', params.page.toString());
+    if (params.limit) searchParams.append('limit', params.limit.toString());
+    const queryString = searchParams.toString();
+    const url = `/notificaciones${queryString ? `?${queryString}` : ''}`;
+    return apiClient.get<NotificacionesListResponse>(url);
   },
 
   /**
@@ -393,10 +438,9 @@ export const notificacionesApi = {
 
   /**
    * Marcar una notificación como leída
-   * @param id - ID de la notificación
    */
-  marcarComoLeida: async (id: string): Promise<{ success: boolean }> => {
-    return apiClient.patch<{ success: boolean }>(`/notificaciones/${id}/leer`);
+  marcarComoLeida: async (id: string): Promise<Notificacion> => {
+    return apiClient.patch<Notificacion>(`/notificaciones/${id}/leer`);
   },
 
   /**
@@ -404,14 +448,6 @@ export const notificacionesApi = {
    */
   marcarTodasComoLeidas: async (): Promise<{ message: string; count: number }> => {
     return apiClient.patch<{ message: string; count: number }>('/notificaciones/leer-todas');
-  },
-
-  /**
-   * Eliminar una notificación
-   * @param id - ID de la notificación
-   */
-  eliminar: async (id: string): Promise<{ message: string }> => {
-    return apiClient.delete<{ message: string }>(`/notificaciones/${id}`);
   },
 };
 

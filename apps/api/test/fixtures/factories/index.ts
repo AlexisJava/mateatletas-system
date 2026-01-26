@@ -42,6 +42,7 @@ export {
   createTestClaseGrupo,
   createTestInscripcionClaseGrupo,
   createTestClase,
+  createTestInscripcionClase,
   type CreateTestSectorOptions,
   type CreateTestGrupoOptions,
   type CreateClaseGrupoOptions,

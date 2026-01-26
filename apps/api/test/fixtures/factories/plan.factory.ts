@@ -55,7 +55,7 @@ export async function createTestPlan(
     data: {
       nombre: tipo,
       descripcion: config.descripcion,
-      precio_base: config.precio,
+      precioBase: config.precio,
       moneda: 'ARS',
       activo: true,
     },
@@ -87,11 +87,11 @@ export async function createTestSuscripcion(
 
   return prisma.suscripcion.create({
     data: {
-      tutor_id: tutorId,
-      plan_id: planId,
+      tutorId: tutorId,
+      planId: planId,
       estado: options?.estado ?? EstadoSuscripcion.ACTIVA,
-      fecha_inicio: options?.fechaInicio ?? new Date(),
-      precio_final: options?.precioFinal ?? plan?.precio_base ?? 15000,
+      fechaInicio: options?.fechaInicio ?? new Date(),
+      precioFinal: options?.precioFinal ?? plan?.precioBase ?? 15000,
     },
   });
 }
