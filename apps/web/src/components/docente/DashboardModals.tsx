@@ -29,7 +29,7 @@ interface TopEstudiante {
   id: string;
   nombre: string;
   apellido: string;
-  fotoUrl: string | null;
+  avatarUrl: string | null;
   xpTotal: number;
   porcentajeAsistencia: number;
 }
@@ -72,7 +72,7 @@ export const DashboardModal: React.FC<DashboardModalProps> = ({ type, onClose })
         id: e.id,
         nombre: e.nombre,
         apellido: e.apellido,
-        fotoUrl: e.fotoUrl,
+        avatarUrl: e.avatarUrl,
         xpTotal: e.xpTotal,
         porcentajeAsistencia: e.porcentajeAsistencia,
       }));
@@ -402,9 +402,9 @@ export const DashboardModal: React.FC<DashboardModalProps> = ({ type, onClose })
                     >
                       #{idx + 1}
                     </div>
-                    {student.fotoUrl ? (
+                    {student.avatarUrl ? (
                       <img
-                        src={student.fotoUrl}
+                        src={student.avatarUrl}
                         alt={`${student.nombre} ${student.apellido}`}
                         className="w-10 h-10 rounded-full border border-slate-700 object-cover"
                       />

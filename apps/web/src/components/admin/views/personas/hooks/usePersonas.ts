@@ -167,7 +167,7 @@ async function fetchAllPersonas(): Promise<AdminPerson[]> {
       role: 'docente' as UserRole,
       status: 'active',
       createdAt: doc.createdAt ?? new Date().toISOString(),
-      titulo: doc.titulo ?? doc.tituloProfesional ?? undefined,
+      titulo: doc.titulo ?? undefined,
       telefono: doc.telefono ?? undefined,
       casasAsignadas: asignaciones?.casas,
       mundosAsignados: asignaciones?.mundos,

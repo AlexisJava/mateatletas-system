@@ -4,6 +4,10 @@ import { z } from 'zod';
  * Schema principal de Docente
  * Coincide con el tipo Docente en lib/api/docentes.api.ts
  */
+/**
+ * Schema de respuesta para Docente
+ * NOTA: El backend solo devuelve `titulo` y `bio` (no `tituloProfesional` ni `biografia`)
+ */
 export const docenteSchema = z.object({
   id: z.string(),
   nombre: z.string(),
@@ -11,9 +15,7 @@ export const docenteSchema = z.object({
   email: z.string().email(),
   telefono: z.string().nullish(),
   titulo: z.string().nullish(),
-  tituloProfesional: z.string().nullish(),
   bio: z.string().nullish(),
-  biografia: z.string().nullish(),
   especialidades: z.array(z.string()).nullish(),
   experienciaAnos: z.number().int().nonnegative().nullish(),
   disponibilidadHoraria: z.record(z.string(), z.array(z.string())).nullish(),
@@ -62,14 +64,17 @@ export const createDocenteSchema = z.object({
  * Schema para actualizar docente
  * Coincide con UpdateDocenteData en lib/api/docentes.api.ts
  */
+/**
+ * Schema para actualizar docente
+ * NOTA: `biografia` es un alias aceptado por el backend (se mapea a `bio`)
+ */
 export const updateDocenteSchema = z.object({
   nombre: z.string().optional(),
   apellido: z.string().optional(),
   telefono: z.string().optional(),
   titulo: z.string().optional(),
-  tituloProfesional: z.string().optional(),
   bio: z.string().optional(),
-  biografia: z.string().optional(),
+  biografia: z.string().optional(), // Alias para bio (backend lo acepta)
   especialidades: z.array(z.string()).optional(),
   experienciaAnos: z.number().int().nonnegative().optional(),
   disponibilidadHoraria: z.record(z.string(), z.array(z.string())).optional(),

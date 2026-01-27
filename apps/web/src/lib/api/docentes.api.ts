@@ -18,6 +18,10 @@ import {
   notificacionesCountSchema,
 } from '@/lib/schemas/docente.schema';
 
+/**
+ * Interface de respuesta para Docente
+ * NOTA: El backend solo devuelve `titulo` y `bio` (no `tituloProfesional` ni `biografia`)
+ */
 export interface Docente {
   id: string;
   nombre: string;
@@ -25,9 +29,7 @@ export interface Docente {
   email: string;
   telefono?: string | null;
   titulo?: string | null;
-  tituloProfesional?: string | null;
   bio?: string | null;
-  biografia?: string | null;
   especialidades?: string[] | null;
   experienciaAnos?: number | null;
   disponibilidadHoraria?: Record<string, string[]> | null;
@@ -37,14 +39,17 @@ export interface Docente {
   updatedAt?: string;
 }
 
+/**
+ * Interface para actualizar docente
+ * NOTA: `biografia` es un alias aceptado por el backend (se mapea a `bio`)
+ */
 export interface UpdateDocenteData {
   nombre?: string;
   apellido?: string;
   telefono?: string;
   titulo?: string;
-  tituloProfesional?: string;
   bio?: string;
-  biografia?: string;
+  biografia?: string; // Alias para bio (backend lo acepta)
   especialidades?: string[];
   experienciaAnos?: number;
   disponibilidadHoraria?: Record<string, string[]>;
@@ -194,7 +199,7 @@ export interface EstudianteTopPuntos {
   id: string;
   nombre: string;
   apellido: string;
-  fotoUrl: string | null;
+  avatarUrl: string | null; // Backend devuelve fotoUrl, normalizado a avatarUrl
   xpTotal: number;
   porcentajeAsistencia: number;
 }
@@ -203,7 +208,7 @@ export interface EstudianteAsistenciaPerfecta {
   estudianteId: string;
   nombre: string;
   apellido: string;
-  fotoUrl: string | null;
+  avatarUrl: string | null; // Backend devuelve fotoUrl, normalizado a avatarUrl
   totalAsistencias: number;
   presentes: number;
   porcentajeAsistencia: number;
@@ -214,7 +219,7 @@ export interface EstudianteSinTareas {
   id: string;
   nombre: string;
   apellido: string;
-  fotoUrl: string | null;
+  avatarUrl: string | null; // Backend devuelve fotoUrl, normalizado a avatarUrl
 }
 
 export interface GrupoRanking {
@@ -490,12 +495,44 @@ export const docentesApi = {
   /**
    * Obtener estadísticas completas para la página de Observaciones
    * Incluye: top estudiantes por puntos, asistencia perfecta, sin tareas, ranking de grupos
+   * NOTA: El backend devuelve fotoUrl, se normaliza a avatarUrl
    */
   getEstadisticasCompletas: async (): Promise<EstadisticasCompletasResponse> => {
     try {
-      return await apiClient.get<EstadisticasCompletasResponse>(
-        '/docentes/me/estadisticas-completas',
-      );
+      // Tipo raw del backend (usa fotoUrl)
+      type RawResponse = {
+        topEstudiantesPorPuntos: Array<
+          Omit<EstudianteTopPuntos, 'avatarUrl'> & { fotoUrl: string | null }
+        >;
+        estudiantesAsistenciaPerfecta: Array<
+          Omit<EstudianteAsistenciaPerfecta, 'avatarUrl'> & { fotoUrl: string | null }
+        >;
+        estudiantesSinTareas: Array<
+          Omit<EstudianteSinTareas, 'avatarUrl'> & { fotoUrl: string | null }
+        >;
+        rankingGruposPorPuntos: GrupoRanking[];
+      };
+
+      const raw = await apiClient.get<RawResponse>('/docentes/me/estadisticas-completas');
+
+      // Normalizar fotoUrl → avatarUrl
+      return {
+        topEstudiantesPorPuntos: raw.topEstudiantesPorPuntos.map(({ fotoUrl, ...rest }) => ({
+          ...rest,
+          avatarUrl: fotoUrl,
+        })),
+        estudiantesAsistenciaPerfecta: raw.estudiantesAsistenciaPerfecta.map(
+          ({ fotoUrl, ...rest }) => ({
+            ...rest,
+            avatarUrl: fotoUrl,
+          }),
+        ),
+        estudiantesSinTareas: raw.estudiantesSinTareas.map(({ fotoUrl, ...rest }) => ({
+          ...rest,
+          avatarUrl: fotoUrl,
+        })),
+        rankingGruposPorPuntos: raw.rankingGruposPorPuntos,
+      };
     } catch (error) {
       console.error('Error al obtener las estadísticas completas:', error);
       throw error;

@@ -78,16 +78,19 @@ export interface EstadoColorConfig {
 
 /**
  * Mapeo de estados de pago a colores
+ * Coincide EXACTAMENTE con enum EstadoPago del backend (Prisma)
+ * Keys en PascalCase: Pendiente, Pagado, Vencido, Parcial, Anulado
  */
 export const PAGO_ESTADO_COLORS: Record<string, EstadoColorConfig> = {
-  PAGADO: { bg: 'var(--status-success-muted)', text: 'var(--status-success)', variant: 'success' },
-  PENDIENTE: {
+  Pagado: { bg: 'var(--status-success-muted)', text: 'var(--status-success)', variant: 'success' },
+  Pendiente: {
     bg: 'var(--status-warning-muted)',
     text: 'var(--status-warning)',
     variant: 'warning',
   },
-  VENCIDO: { bg: 'var(--status-danger-muted)', text: 'var(--status-danger)', variant: 'danger' },
-  CANCELADO: { bg: 'var(--admin-surface-1)', text: 'var(--admin-text-muted)', variant: 'neutral' },
+  Vencido: { bg: 'var(--status-danger-muted)', text: 'var(--status-danger)', variant: 'danger' },
+  Parcial: { bg: 'var(--status-info-muted)', text: 'var(--status-info)', variant: 'info' },
+  Anulado: { bg: 'var(--admin-surface-1)', text: 'var(--admin-text-muted)', variant: 'neutral' },
 } as const;
 
 /**
@@ -145,6 +148,7 @@ export const SUSCRIPCION_MP_ESTADO_LABELS: Record<string, string> = {
 
 /**
  * Obtener variant de badge para un estado genérico
+ * Normaliza a UPPERCASE para manejar PascalCase y UPPERCASE
  */
 export function getEstadoVariant(estado: string): EstadoVariant {
   const upper = estado.toUpperCase();
@@ -164,14 +168,19 @@ export function getEstadoVariant(estado: string): EstadoVariant {
     return 'danger';
   }
 
-  // Info states
-  if (['BECA', 'NUEVO', 'INFO'].includes(upper)) {
+  // Info states (incluye Parcial = pago parcial)
+  if (['BECA', 'NUEVO', 'INFO', 'PARCIAL'].includes(upper)) {
     return 'info';
   }
 
   // Pending states
   if (['ESPERANDO', 'PROCESANDO'].includes(upper)) {
     return 'pending';
+  }
+
+  // Neutral states (incluye Anulado = pago anulado)
+  if (['ANULADO', 'CANCELADO', 'CANCELADA'].includes(upper)) {
+    return 'neutral';
   }
 
   return 'neutral';
@@ -220,7 +229,11 @@ export function getPlanColors(planNombre: string | null | undefined): PlanColorC
 // MUNDOS - Colores por área temática
 // ============================================================================
 
-export type MundoTipo = 'MATEMATICAS' | 'PROGRAMACION' | 'CIENCIAS';
+/**
+ * MundoTipo - Coincide EXACTAMENTE con enum MundoTipo del backend (Prisma)
+ * NOTA: Singular (MATEMATICA, no MATEMATICAS)
+ */
+export type MundoTipo = 'MATEMATICA' | 'PROGRAMACION' | 'CIENCIAS';
 
 export interface MundoColorConfig {
   solid: string;
@@ -230,7 +243,7 @@ export interface MundoColorConfig {
 }
 
 export const MUNDO_COLORS: Record<MundoTipo, MundoColorConfig> = {
-  MATEMATICAS: {
+  MATEMATICA: {
     solid: '#3b82f6', // blue-500
     bg: 'bg-blue-500/20',
     text: 'text-blue-400',
@@ -252,23 +265,23 @@ export const MUNDO_COLORS: Record<MundoTipo, MundoColorConfig> = {
 
 /**
  * Obtener colores de un mundo de forma segura
- * Maneja variantes: MATEMATICA/MATEMATICAS, PROGRAMACION, CIENCIAS/CIENCIA
+ * Maneja variantes legacy: MATEMATICAS → MATEMATICA, CIENCIA → CIENCIAS
  */
 export function getMundoColors(mundo: string | null | undefined): MundoColorConfig {
-  if (!mundo) return MUNDO_COLORS.MATEMATICAS;
+  if (!mundo) return MUNDO_COLORS.MATEMATICA;
 
   const normalized = mundo.toUpperCase();
 
-  // Normalizar variantes
+  // Normalizar variantes legacy
   if (normalized === 'MATEMATICA' || normalized === 'MATEMATICAS') {
-    return MUNDO_COLORS.MATEMATICAS;
+    return MUNDO_COLORS.MATEMATICA;
   }
   if (normalized === 'CIENCIA' || normalized === 'CIENCIAS') {
     return MUNDO_COLORS.CIENCIAS;
   }
 
   const key = normalized as MundoTipo;
-  return MUNDO_COLORS[key] ?? MUNDO_COLORS.MATEMATICAS;
+  return MUNDO_COLORS[key] ?? MUNDO_COLORS.MATEMATICA;
 }
 
 // ============================================================================

@@ -210,7 +210,7 @@ export default function DocenteObservacionesPage(): React.ReactNode {
                 >
                   {/* Avatar */}
                   <StudentAvatar
-                    avatarUrl={est.fotoUrl}
+                    avatarUrl={est.avatarUrl}
                     nombre={est.nombre}
                     apellido={est.apellido}
                     className="w-16 h-16 mx-auto mb-3 border-3 border-yellow-400"
@@ -262,7 +262,7 @@ export default function DocenteObservacionesPage(): React.ReactNode {
                   className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10 shadow-lg hover:bg-white/10 transition-all text-center"
                 >
                   <StudentAvatar
-                    avatarUrl={est.fotoUrl}
+                    avatarUrl={est.avatarUrl}
                     nombre={est.nombre}
                     apellido={est.apellido}
                     className="w-16 h-16 mx-auto mb-3 border-3 border-green-400"
@@ -308,7 +308,7 @@ export default function DocenteObservacionesPage(): React.ReactNode {
                   className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10 shadow-lg hover:bg-white/10 transition-all text-center"
                 >
                   <StudentAvatar
-                    avatarUrl={est.fotoUrl}
+                    avatarUrl={est.avatarUrl}
                     nombre={est.nombre}
                     apellido={est.apellido}
                     className="w-14 h-14 mx-auto mb-2 border-2 border-orange-400"
@@ -575,7 +575,7 @@ export default function DocenteObservacionesPage(): React.ReactNode {
                       <div className="flex items-center gap-4 mb-3">
                         {/* Avatar */}
                         <StudentAvatar
-                          avatarUrl={obs.estudiante.fotoUrl}
+                          avatarUrl={obs.estudiante.avatarUrl}
                           nombre={obs.estudiante.nombre}
                           apellido={obs.estudiante.apellido}
                           className="w-12 h-12 border-2 border-yellow-400"

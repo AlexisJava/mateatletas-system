@@ -132,7 +132,7 @@ export interface Observacion {
     id: string;
     nombre: string;
     apellido: string;
-    fotoUrl?: string;
+    avatarUrl?: string; // Backend devuelve fotoUrl, normalizado a avatarUrl
   };
   clase: {
     id: string;
@@ -165,12 +165,25 @@ export const getObservacionesDocente = async (filtros?: {
     params.append('limit', filtros.limit.toString());
   }
 
+  // Tipo raw del backend (usa fotoUrl)
+  type RawObservacion = Omit<Observacion, 'estudiante'> & {
+    estudiante: Omit<Observacion['estudiante'], 'avatarUrl'> & { fotoUrl?: string };
+  };
+
   // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get<Observacion[]>(
+    const response = await axios.get<RawObservacion[]>(
       `/asistencia/docente/observaciones?${params.toString()}`,
     );
-    return response;
+
+    // Normalizar fotoUrl → avatarUrl
+    return response.map((obs) => ({
+      ...obs,
+      estudiante: {
+        ...obs.estudiante,
+        avatarUrl: obs.estudiante.fotoUrl,
+      },
+    }));
   } catch (error) {
     console.error('Error al obtener las observaciones del docente:', error);
     throw error;
