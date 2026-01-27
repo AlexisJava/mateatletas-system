@@ -10,9 +10,10 @@ import {
   Folder,
   BookOpen,
   Plus,
+  GripVertical,
 } from 'lucide-react';
 import { useSandboxState, useSandboxDispatch } from '../context/SandboxContext';
-import { useSandboxApi } from '../hooks';
+import { useSandboxApi, useSortableTree, useSortable, CSS } from '../hooks';
 import type { NodoContenido } from '../types/sandbox.types';
 import type { SidebarIntentCategory, SidebarIntent } from '../utils/intent.types';
 import styles from './SandboxSidebar.module.css';
@@ -163,7 +164,7 @@ const IntentCategory = memo(function IntentCategory({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TREE NODE (for Structure section)
+// TREE NODE (for Structure section) - Now with drag & drop support
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface TreeNodeProps {
@@ -171,12 +172,39 @@ interface TreeNodeProps {
   depth: number;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  isDragging?: boolean;
 }
 
-const TreeNode = memo(function TreeNode({ nodo, depth, selectedId, onSelect }: TreeNodeProps) {
+const TreeNode = memo(function TreeNode({
+  nodo,
+  depth,
+  selectedId,
+  onSelect,
+  isDragging = false,
+}: TreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const hasChildren = nodo.hijos.length > 0;
   const isSelected = selectedId === nodo.id;
+  const canDrag = !nodo.bloqueado;
+
+  // Sortable hook for drag & drop
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging: isSortableDragging,
+  } = useSortable({
+    id: nodo.id,
+    disabled: !canDrag,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isSortableDragging ? 0.5 : 1,
+  };
 
   const handleIconClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -184,13 +212,24 @@ const TreeNode = memo(function TreeNode({ nodo, depth, selectedId, onSelect }: T
   };
 
   return (
-    <div className={styles.treeNodeContainer}>
+    <div ref={setNodeRef} style={style} className={styles.treeNodeContainer}>
       <button
         type="button"
-        className={`${styles.treeNode} ${isSelected ? styles.selected : ''}`}
+        className={`${styles.treeNode} ${isSelected ? styles.selected : ''} ${isDragging ? styles.dragging : ''}`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
         onClick={() => onSelect(nodo.id)}
       >
+        {/* Drag handle */}
+        {canDrag && (
+          <span
+            className={styles.dragHandle}
+            {...attributes}
+            {...listeners}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVertical size={12} />
+          </span>
+        )}
         <span className={styles.treeNodeIcon} onClick={handleIconClick}>
           {hasChildren ? (
             isExpanded ? (
@@ -232,6 +271,21 @@ export function SandboxSidebar(): ReactElement {
 
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['presentation']);
   const [activeIntentId, setActiveIntentId] = useState<string | null>(null);
+
+  // Drag & drop for tree structure
+  const {
+    DndContext,
+    SortableContext,
+    DragOverlay,
+    sensors,
+    collisionDetection,
+    sortingStrategy,
+    sortableIds,
+    activeNode,
+    handleDragStart,
+    handleDragEnd,
+    handleDragCancel,
+  } = useSortableTree();
 
   const toggleCategory = useCallback((categoryId: string) => {
     setExpandedCategories((prev) =>
@@ -329,15 +383,33 @@ export function SandboxSidebar(): ReactElement {
               </button>
             ))
           ) : state.contenido?.nodos.length ? (
-            state.contenido.nodos.map((nodo) => (
-              <TreeNode
-                key={nodo.id}
-                nodo={nodo}
-                depth={0}
-                selectedId={state.selectedItemId}
-                onSelect={handleSelectNode}
-              />
-            ))
+            <DndContext
+              sensors={sensors}
+              collisionDetection={collisionDetection}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragCancel={handleDragCancel}
+            >
+              <SortableContext items={sortableIds} strategy={sortingStrategy}>
+                {state.contenido.nodos.map((nodo) => (
+                  <TreeNode
+                    key={nodo.id}
+                    nodo={nodo}
+                    depth={0}
+                    selectedId={state.selectedItemId}
+                    onSelect={handleSelectNode}
+                  />
+                ))}
+              </SortableContext>
+              <DragOverlay>
+                {activeNode ? (
+                  <div className={styles.dragOverlay}>
+                    <FileText size={14} />
+                    <span>{activeNode.nodo.titulo}</span>
+                  </div>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
           ) : (
             <div className={styles.emptyState}>
               <p>Sin nodos</p>

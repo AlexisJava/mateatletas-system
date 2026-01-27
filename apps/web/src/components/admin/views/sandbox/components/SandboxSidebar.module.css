@@ -286,3 +286,58 @@
   background: rgba(139, 92, 246, 0.25);
   border-color: rgba(139, 92, 246, 0.4);
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DRAG & DROP STYLES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--sb-text-muted);
+  opacity: 0;
+  cursor: grab;
+  transition: var(--sb-transition-fast);
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.treeNode:hover .dragHandle {
+  opacity: 0.6;
+}
+
+.dragHandle:hover {
+  opacity: 1 !important;
+  color: var(--sb-accent-cyan);
+}
+
+.treeNode.dragging {
+  opacity: 0.5;
+  background: rgba(6, 182, 212, 0.08);
+}
+
+.dragOverlay {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(12, 12, 18, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  border-radius: var(--sb-radius-md);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(6, 182, 212, 0.2);
+  color: var(--sb-accent-cyan);
+  font-size: var(--sb-text-sm);
+  font-weight: 500;
+  pointer-events: none;
+}

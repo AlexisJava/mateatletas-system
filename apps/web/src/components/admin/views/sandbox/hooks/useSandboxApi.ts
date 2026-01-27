@@ -10,6 +10,8 @@ import {
   updateNodo,
   createNodo,
   deleteNodo,
+  reordenarNodos,
+  moverNodo,
   type ContenidoBackend,
   type NodoBackend,
   type CreateNodoDto,
@@ -211,6 +213,38 @@ export function useSandboxApi() {
     [dispatch],
   );
 
+  const reorderNodos = useCallback(
+    async (
+      contenidoId: string,
+      parentId: string | null,
+      order: Array<{ nodoId: string; orden: number }>,
+    ) => {
+      // Optimistic update first
+      dispatch({ type: 'REORDER_NODOS', payload: { parentId, order } });
+      try {
+        await reordenarNodos(contenidoId, { orden: order });
+      } catch (error) {
+        console.error('Error reordering nodos:', error);
+        // TODO: Revert optimistic update on error
+      }
+    },
+    [dispatch],
+  );
+
+  const moveNodo = useCallback(
+    async (nodoId: string, newParentId: string | null) => {
+      // Optimistic update first
+      dispatch({ type: 'MOVE_NODO', payload: { nodoId, newParentId } });
+      try {
+        await moverNodo(nodoId, { nuevoParentId: newParentId });
+      } catch (error) {
+        console.error('Error moving nodo:', error);
+        // TODO: Revert optimistic update on error
+      }
+    },
+    [dispatch],
+  );
+
   // ─────────────────────────────────────────────────────────────────────────────
   // PLANIFICACIÓN
   // ─────────────────────────────────────────────────────────────────────────────
@@ -272,6 +306,8 @@ export function useSandboxApi() {
     addNodo,
     removeNodo,
     renameNodo,
+    reorderNodos,
+    moveNodo,
     // Planificación
     loadPlanificacion,
     updateClase,

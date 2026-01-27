@@ -83,6 +83,11 @@ export type SandboxAction =
   | { type: 'ADD_ROOT_NODO'; payload: NodoContenido }
   | { type: 'DELETE_NODO'; payload: string }
   | { type: 'RENAME_NODO'; payload: { nodoId: string; titulo: string } }
+  | {
+      type: 'REORDER_NODOS';
+      payload: { parentId: string | null; order: Array<{ nodoId: string; orden: number }> };
+    }
+  | { type: 'MOVE_NODO'; payload: { nodoId: string; newParentId: string | null } }
   // Planificación
   | { type: 'SET_PLANIFICACION'; payload: Planificacion | null }
   | { type: 'UPDATE_CLASE'; payload: { claseId: string; data: Partial<ClasePlanificacion> } }

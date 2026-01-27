@@ -2,7 +2,13 @@
 
 import { createContext, useContext, useReducer, type ReactNode, type Dispatch } from 'react';
 import type { SandboxState, SandboxAction, SaveStatus } from '../types/sandbox.types';
-import { updateNodoInTree, addNodoToParent, removeNodoFromTree } from '../utils/tree.utils';
+import {
+  updateNodoInTree,
+  addNodoToParent,
+  removeNodoFromTree,
+  reorderNodosInTree,
+  moveNodoInTree,
+} from '../utils/tree.utils';
 
 // Re-export SaveStatus for components that import from context
 export type { SaveStatus };
@@ -88,6 +94,32 @@ function sandboxReducer(state: SandboxState, action: SandboxAction): SandboxStat
           nodos: updateNodoInTree(state.contenido.nodos, action.payload.nodoId, {
             titulo: action.payload.titulo,
           }),
+        },
+      };
+    case 'REORDER_NODOS':
+      if (!state.contenido) return state;
+      return {
+        ...state,
+        contenido: {
+          ...state.contenido,
+          nodos: reorderNodosInTree(
+            state.contenido.nodos,
+            action.payload.parentId,
+            action.payload.order,
+          ),
+        },
+      };
+    case 'MOVE_NODO':
+      if (!state.contenido) return state;
+      return {
+        ...state,
+        contenido: {
+          ...state.contenido,
+          nodos: moveNodoInTree(
+            state.contenido.nodos,
+            action.payload.nodoId,
+            action.payload.newParentId,
+          ),
         },
       };
 
