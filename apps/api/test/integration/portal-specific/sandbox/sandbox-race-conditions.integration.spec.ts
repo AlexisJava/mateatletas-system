@@ -637,7 +637,7 @@ describe('[INTEGRATION] Sandbox - Race Conditions', () => {
       // Verificar integridad de cada planificación creada
       for (const plan of planificaciones) {
         const clases = await prisma.clasePlanificacion.findMany({
-          where: { planificacion_id: plan.id },
+          where: { planificacionId: plan.id },
         });
         expect(clases.length).toBe(payload.cantidadClases);
       }

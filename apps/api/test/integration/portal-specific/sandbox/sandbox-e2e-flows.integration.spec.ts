@@ -304,9 +304,9 @@ describe('[INTEGRATION] Sandbox - Flujos E2E Completos', () => {
         .send({
           titulo: 'Planificación E2E: Álgebra Básica',
           descripcion: 'Curso completo de álgebra para principiantes',
-          casa_tipo: 'VERTEX',
-          mundo_tipo: 'MATEMATICA',
-          cantidad_clases: 3,
+          casaTipo: 'VERTEX',
+          mundoTipo: 'MATEMATICA',
+          cantidadClases: 3,
         });
 
       expect(createRes.status).toBe(201);
@@ -326,22 +326,22 @@ describe('[INTEGRATION] Sandbox - Flujos E2E Completos', () => {
 
       // ==================== PASO 3: Verificar contenidos asociados ====================
       for (const clase of clases) {
-        // Cada clase debería tener teoria_id y practica_id
-        expect(clase).toHaveProperty('teoria_id');
-        expect(clase).toHaveProperty('practica_id');
+        // Cada clase debería tener teoriaId y practicaId
+        expect(clase).toHaveProperty('teoriaId');
+        expect(clase).toHaveProperty('practicaId');
 
         // Verificar que los contenidos existen
-        if (clase.teoria_id) {
+        if (clase.teoriaId) {
           const teoriaContenido = await prisma.contenido.findUnique({
-            where: { id: clase.teoria_id },
+            where: { id: clase.teoriaId },
           });
           expect(teoriaContenido).not.toBeNull();
           expect(teoriaContenido!.estado).toBe('BORRADOR');
         }
 
-        if (clase.practica_id) {
+        if (clase.practicaId) {
           const practicaContenido = await prisma.contenido.findUnique({
-            where: { id: clase.practica_id },
+            where: { id: clase.practicaId },
           });
           expect(practicaContenido).not.toBeNull();
           expect(practicaContenido!.estado).toBe('BORRADOR');
@@ -396,16 +396,16 @@ describe('[INTEGRATION] Sandbox - Flujos E2E Completos', () => {
       // Agregar contenido a todas las clases (teoría y práctica)
       for (let i = 0; i < clases.length; i++) {
         const clase = clases[i];
-        if (clase.teoria_id) {
+        if (clase.teoriaId) {
           await agregarContenidoANodo(
-            clase.teoria_id,
+            clase.teoriaId,
             'Teoría',
             `Contenido Teoría Clase ${i + 1}`,
           );
         }
-        if (clase.practica_id) {
+        if (clase.practicaId) {
           await agregarContenidoANodo(
-            clase.practica_id,
+            clase.practicaId,
             'Práctica',
             `Ejercicios Clase ${i + 1}`,
           );
@@ -431,15 +431,15 @@ describe('[INTEGRATION] Sandbox - Flujos E2E Completos', () => {
 
       // Verificar que los contenidos asociados están publicados
       for (const clase of planFinal!.clases) {
-        if (clase.teoria_id) {
+        if (clase.teoriaId) {
           const teoriaContenido = await prisma.contenido.findUnique({
-            where: { id: clase.teoria_id },
+            where: { id: clase.teoriaId },
           });
           expect(teoriaContenido!.estado).toBe('PUBLICADO');
         }
-        if (clase.practica_id) {
+        if (clase.practicaId) {
           const practicaContenido = await prisma.contenido.findUnique({
-            where: { id: clase.practica_id },
+            where: { id: clase.practicaId },
           });
           expect(practicaContenido!.estado).toBe('PUBLICADO');
         }

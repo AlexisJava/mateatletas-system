@@ -16,13 +16,13 @@
  * BUGS POTENCIALES A BUSCAR:
  * 1. ¿Se puede publicar planificación con clases vacías (sin nodos con contenido)?
  * 2. ¿Eliminar planificación elimina los Contenidos asociados?
- * 3. ¿cantidad_clases fuera de rango (0, 53)?
+ * 3. ¿cantidadClases fuera de rango (0, 53)?
  * 4. ¿Se puede editar planificación PUBLICADA?
  * 5. ¿Se puede eliminar planificación con asignaciones activas?
- * 6. ¿Qué pasa si teoria_id apunta a contenido que no existe?
+ * 6. ¿Qué pasa si teoriaId apunta a contenido que no existe?
  *
  * EQUIVALENCE CLASSES:
- * cantidad_clases:
+ * cantidadClases:
  * - [VALIDO]: 1-52 clases
  * - [CERO]: 0 clases → ERROR
  * - [EXCESO]: 53+ clases → ERROR
@@ -113,9 +113,9 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
     auth: { token: string; cookie: string },
     data: {
       titulo?: string;
-      cantidad_clases?: number;
-      casa_tipo?: string;
-      mundo_tipo?: string;
+      cantidadClases?: number;
+      casaTipo?: string;
+      mundoTipo?: string;
     } = {},
   ) {
     return request(app.getHttpServer())
@@ -125,70 +125,70 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
       .set('Origin', FRONTEND_ORIGIN)
       .send({
         titulo: data.titulo ?? 'Planificación de Test',
-        cantidad_clases: data.cantidad_clases ?? 2,
-        casa_tipo: data.casa_tipo ?? 'QUANTUM',
-        mundo_tipo: data.mundo_tipo ?? 'MATEMATICA',
+        cantidadClases: data.cantidadClases ?? 2,
+        casaTipo: data.casaTipo ?? 'QUANTUM',
+        mundoTipo: data.mundoTipo ?? 'MATEMATICA',
       });
   }
 
   // ============================================================================
-  // TESTS: Boundary Value Analysis - cantidad_clases
+  // TESTS: Boundary Value Analysis - cantidadClases
   // ============================================================================
-  describe('Boundary Value Analysis: cantidad_clases', () => {
-    it('cantidad_clases = 0 → debe retornar 400', async () => {
+  describe('Boundary Value Analysis: cantidadClases', () => {
+    it('cantidadClases = 0 → debe retornar 400', async () => {
       const { auth } = await loginAsAdmin();
 
-      const response = await crearPlanificacion(auth, { cantidad_clases: 0 });
+      const response = await crearPlanificacion(auth, { cantidadClases: 0 });
 
       expect(response.status).toBe(400);
     });
 
-    it('cantidad_clases = 1 (mínimo) → debe funcionar', async () => {
+    it('cantidadClases = 1 (mínimo) → debe funcionar', async () => {
       const { auth } = await loginAsAdmin();
 
-      const response = await crearPlanificacion(auth, { cantidad_clases: 1 });
+      const response = await crearPlanificacion(auth, { cantidadClases: 1 });
 
       expect(response.status).toBe(201);
-      expect(response.body.cantidad_clases).toBe(1);
+      expect(response.body.cantidadClases).toBe(1);
       expect(response.body.clases).toHaveLength(1);
     });
 
-    it('cantidad_clases = 52 (máximo) → debe funcionar', async () => {
+    it('cantidadClases = 52 (máximo) → debe funcionar', async () => {
       const { auth } = await loginAsAdmin();
 
-      const response = await crearPlanificacion(auth, { cantidad_clases: 52 });
+      const response = await crearPlanificacion(auth, { cantidadClases: 52 });
 
       expect(response.status).toBe(201);
-      expect(response.body.cantidad_clases).toBe(52);
+      expect(response.body.cantidadClases).toBe(52);
       expect(response.body.clases).toHaveLength(52);
     });
 
-    it('cantidad_clases = 53 (máximo+1) → debe retornar 400', async () => {
+    it('cantidadClases = 53 (máximo+1) → debe retornar 400', async () => {
       const { auth } = await loginAsAdmin();
 
-      const response = await crearPlanificacion(auth, { cantidad_clases: 53 });
+      const response = await crearPlanificacion(auth, { cantidadClases: 53 });
 
       expect(response.status).toBe(400);
     });
 
-    it('cantidad_clases negativo → debe retornar 400', async () => {
+    it('cantidadClases negativo → debe retornar 400', async () => {
       const { auth } = await loginAsAdmin();
 
-      const response = await crearPlanificacion(auth, { cantidad_clases: -1 });
+      const response = await crearPlanificacion(auth, { cantidadClases: -1 });
 
       expect(response.status).toBe(400);
     });
 
-    it('cantidad_clases decimal (2.5) → debe rechazar o truncar', async () => {
+    it('cantidadClases decimal (2.5) → debe rechazar o truncar', async () => {
       const { auth } = await loginAsAdmin();
 
       const response = await crearPlanificacion(auth, {
-        cantidad_clases: 2.5 as unknown as number,
+        cantidadClases: 2.5 as unknown as number,
       });
 
       // Debería o rechazar (400) o truncar a 2
       if (response.status === 201) {
-        expect(response.body.cantidad_clases).toBe(2);
+        expect(response.body.cantidadClases).toBe(2);
       } else {
         expect(response.status).toBe(400);
       }
@@ -202,15 +202,15 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
     it('Crear planificación → debe crear N contenidos automáticamente', async () => {
       const { auth } = await loginAsAdmin();
 
-      const response = await crearPlanificacion(auth, { cantidad_clases: 3 });
+      const response = await crearPlanificacion(auth, { cantidadClases: 3 });
 
       expect(response.status).toBe(201);
       expect(response.body.clases).toHaveLength(3);
 
-      // Verificar que cada clase tiene teoria_id y practica_id
+      // Verificar que cada clase tiene teoriaId y practicaId
       for (const clase of response.body.clases) {
-        expect(clase.teoria_id).toBeDefined();
-        expect(clase.practica_id).toBeDefined();
+        expect(clase.teoriaId).toBeDefined();
+        expect(clase.practicaId).toBeDefined();
         expect(clase.teoria).toBeDefined();
         expect(clase.practica).toBeDefined();
       }
@@ -223,20 +223,20 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
     it('Crear planificación → contenidos deben tener 3 nodos cada uno', async () => {
       const { auth } = await loginAsAdmin();
 
-      const response = await crearPlanificacion(auth, { cantidad_clases: 1 });
+      const response = await crearPlanificacion(auth, { cantidadClases: 1 });
 
       const clase = response.body.clases[0];
 
       // Verificar nodos del contenido de teoría
       const nodosTeoría = await prisma.nodoContenido.findMany({
-        where: { contenidoId: clase.teoria_id },
+        where: { contenidoId: clase.teoriaId },
       });
       expect(nodosTeoría).toHaveLength(3);
       expect(nodosTeoría.every((n) => n.bloqueado)).toBe(true);
 
       // Verificar nodos del contenido de práctica
       const nodosPractica = await prisma.nodoContenido.findMany({
-        where: { contenidoId: clase.practica_id },
+        where: { contenidoId: clase.practicaId },
       });
       expect(nodosPractica).toHaveLength(3);
     });
@@ -249,10 +249,10 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
     it('Publicar planificación BORRADOR con clases completas → PUBLICADO', async () => {
       const { auth } = await loginAsAdmin();
 
-      const createRes = await crearPlanificacion(auth, { cantidad_clases: 1 });
+      const createRes = await crearPlanificacion(auth, { cantidadClases: 1 });
       const planificacionId = createRes.body.id;
-      const teoriaId = createRes.body.clases[0].teoria_id;
-      const practicaId = createRes.body.clases[0].practica_id;
+      const teoriaId = createRes.body.clases[0].teoriaId;
+      const practicaId = createRes.body.clases[0].practicaId;
 
       // Agregar nodos con contenido real a teoría y práctica
       // (los nodos bloqueados no tienen contenidoJson, necesitamos agregar nodos con contenido)
@@ -301,10 +301,10 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
       const planificacion = await prisma.planificacion.create({
         data: {
           titulo: 'Ya Publicada',
-          cantidad_clases: 1,
-          duracion_clase_dias: 7,
-          casa_tipo: 'QUANTUM',
-          mundo_tipo: 'MATEMATICA',
+          cantidadClases: 1,
+          duracionClaseDias: 7,
+          casaTipo: 'QUANTUM',
+          mundoTipo: 'MATEMATICA',
           estado: 'PUBLICADO',
         },
       });
@@ -328,7 +328,7 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
       const { auth } = await loginAsAdmin();
 
       // Crear planificación (genera contenidos con nodos bloqueados SIN contenidoJson)
-      const createRes = await crearPlanificacion(auth, { cantidad_clases: 1 });
+      const createRes = await crearPlanificacion(auth, { cantidadClases: 1 });
       const planificacionId = createRes.body.id;
 
       // Los nodos estructurales (Teoría, Práctica, Evaluación) tienen contenidoJson: null
@@ -352,7 +352,7 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
     it('Eliminar planificación BORRADOR sin asignaciones → OK', async () => {
       const { auth } = await loginAsAdmin();
 
-      const createRes = await crearPlanificacion(auth, { cantidad_clases: 2 });
+      const createRes = await crearPlanificacion(auth, { cantidadClases: 2 });
       const planificacionId = createRes.body.id;
 
       const deleteRes = await request(app.getHttpServer())
@@ -377,10 +377,10 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
       const planificacion = await prisma.planificacion.create({
         data: {
           titulo: 'Publicada',
-          cantidad_clases: 1,
-          duracion_clase_dias: 7,
-          casa_tipo: 'QUANTUM',
-          mundo_tipo: 'MATEMATICA',
+          cantidadClases: 1,
+          duracionClaseDias: 7,
+          casaTipo: 'QUANTUM',
+          mundoTipo: 'MATEMATICA',
           estado: 'PUBLICADO',
         },
       });
@@ -397,10 +397,10 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
     it('Eliminar planificación → también elimina Contenidos asociados', async () => {
       const { auth } = await loginAsAdmin();
 
-      const createRes = await crearPlanificacion(auth, { cantidad_clases: 1 });
+      const createRes = await crearPlanificacion(auth, { cantidadClases: 1 });
       const planificacionId = createRes.body.id;
-      const teoriaId = createRes.body.clases[0].teoria_id;
-      const practicaId = createRes.body.clases[0].practica_id;
+      const teoriaId = createRes.body.clases[0].teoriaId;
+      const practicaId = createRes.body.clases[0].practicaId;
 
       // Verificar que los contenidos existen antes de eliminar
       const teoriaAntes = await prisma.contenido.findUnique({
@@ -463,10 +463,10 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
       const planificacion = await prisma.planificacion.create({
         data: {
           titulo: 'Publicada',
-          cantidad_clases: 1,
-          duracion_clase_dias: 7,
-          casa_tipo: 'QUANTUM',
-          mundo_tipo: 'MATEMATICA',
+          cantidadClases: 1,
+          duracionClaseDias: 7,
+          casaTipo: 'QUANTUM',
+          mundoTipo: 'MATEMATICA',
           estado: 'PUBLICADO',
         },
       });
@@ -506,7 +506,7 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
       ).toBe('Clase Renombrada');
     });
 
-    it('Asignar teoria_id inexistente → ERROR', async () => {
+    it('Asignar teoriaId inexistente → ERROR', async () => {
       const { auth } = await loginAsAdmin();
 
       const createRes = await crearPlanificacion(auth);
@@ -517,7 +517,7 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
         .set('Authorization', `Bearer ${auth.token}`)
         .set('Cookie', auth.cookie)
         .set('Origin', FRONTEND_ORIGIN)
-        .send({ teoria_id: '00000000-0000-0000-0000-000000000000' });
+        .send({ teoriaId: '00000000-0000-0000-0000-000000000000' });
 
       expect(response.status).toBe(404);
     });
@@ -557,21 +557,21 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
   // TESTS: Enums Inválidos
   // ============================================================================
   describe('Error Guessing: Enums Inválidos', () => {
-    it('casa_tipo inválido → 400', async () => {
+    it('casaTipo inválido → 400', async () => {
       const { auth } = await loginAsAdmin();
 
       const response = await crearPlanificacion(auth, {
-        casa_tipo: 'CASA_INVALIDA',
+        casaTipo: 'CASA_INVALIDA',
       });
 
       expect(response.status).toBe(400);
     });
 
-    it('mundo_tipo inválido → 400', async () => {
+    it('mundoTipo inválido → 400', async () => {
       const { auth } = await loginAsAdmin();
 
       const response = await crearPlanificacion(auth, {
-        mundo_tipo: 'MUNDO_INVALIDO',
+        mundoTipo: 'MUNDO_INVALIDO',
       });
 
       expect(response.status).toBe(400);
@@ -585,7 +585,7 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
     it('Al crear planificación, los números de clase son secuenciales', async () => {
       const { auth } = await loginAsAdmin();
 
-      const response = await crearPlanificacion(auth, { cantidad_clases: 5 });
+      const response = await crearPlanificacion(auth, { cantidadClases: 5 });
 
       const clases = response.body.clases;
       for (let i = 0; i < clases.length; i++) {
@@ -598,11 +598,11 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
 
       const response = await crearPlanificacion(auth, {
         titulo: 'Álgebra Básica',
-        cantidad_clases: 1,
+        cantidadClases: 1,
       });
 
-      const teoriaId = response.body.clases[0].teoria_id;
-      const practicaId = response.body.clases[0].practica_id;
+      const teoriaId = response.body.clases[0].teoriaId;
+      const practicaId = response.body.clases[0].practicaId;
 
       const teoria = await prisma.contenido.findUnique({
         where: { id: teoriaId },
@@ -624,10 +624,10 @@ describe('[INTEGRATION] Sandbox - Planificaciones', () => {
     it('Publicar planificación es idempotente (segunda vez falla)', async () => {
       const { auth } = await loginAsAdmin();
 
-      const createRes = await crearPlanificacion(auth, { cantidad_clases: 1 });
+      const createRes = await crearPlanificacion(auth, { cantidadClases: 1 });
       const planificacionId = createRes.body.id;
-      const teoriaId = createRes.body.clases[0].teoria_id;
-      const practicaId = createRes.body.clases[0].practica_id;
+      const teoriaId = createRes.body.clases[0].teoriaId;
+      const practicaId = createRes.body.clases[0].practicaId;
 
       // Agregar contenido real a teoría y práctica antes de publicar
       await request(app.getHttpServer())
