@@ -66,4 +66,30 @@ export class TutorBusinessValidator {
       );
     }
   }
+
+  /**
+   * Valida que un estudiante pertenece al tutor
+   *
+   * @param tutorId - ID del tutor
+   * @param estudianteId - ID del estudiante
+   * @throws NotFoundException si el estudiante no existe o no pertenece al tutor
+   */
+  async validarEstudiantePerteneceATutor(
+    tutorId: string,
+    estudianteId: string,
+  ): Promise<void> {
+    const estudiante = await this.prisma.estudiante.findFirst({
+      where: {
+        id: estudianteId,
+        tutorId: tutorId,
+      },
+      select: { id: true },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException(
+        `Estudiante con ID ${estudianteId} no encontrado o no pertenece al tutor`,
+      );
+    }
+  }
 }

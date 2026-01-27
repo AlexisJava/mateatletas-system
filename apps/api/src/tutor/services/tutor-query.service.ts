@@ -460,6 +460,65 @@ export class TutorQueryService {
   }
 
   // ============================================================================
+  // PROGRESO DE CONTENIDOS
+  // ============================================================================
+
+  /**
+   * Obtiene el progreso de contenidos de un estudiante
+   *
+   * @param estudianteId - ID del estudiante
+   * @returns Lista de progresos con porcentaje calculado
+   */
+  async getProgresoContenidosEstudiante(estudianteId: string) {
+    const progresos = await this.prisma.progresoContenido.findMany({
+      where: { estudianteId },
+      include: {
+        contenido: {
+          select: {
+            id: true,
+            titulo: true,
+            mundoTipo: true,
+            imagenPortada: true,
+            _count: { select: { nodos: true } },
+          },
+        },
+        nodoActual: { select: { id: true, titulo: true, orden: true } },
+      },
+      orderBy: { ultimaActividad: 'desc' },
+    });
+
+    return progresos.map((p) => {
+      const totalNodos = p.contenido._count.nodos;
+      const porcentaje = p.completado
+        ? 100
+        : p.nodoActual
+          ? Math.round(((p.nodoActual.orden + 1) / totalNodos) * 100)
+          : 0;
+      return {
+        id: p.id,
+        completado: p.completado,
+        tiempoTotalSegundos: p.tiempoTotalSegundos,
+        ultimaActividad: p.ultimaActividad,
+        fechaCompletitud: p.fechaCompletitud,
+        contenido: {
+          id: p.contenido.id,
+          titulo: p.contenido.titulo,
+          mundoTipo: p.contenido.mundoTipo,
+          imagenPortada: p.contenido.imagenPortada,
+        },
+        nodoActual: p.nodoActual
+          ? {
+              id: p.nodoActual.id,
+              titulo: p.nodoActual.titulo,
+              orden: p.nodoActual.orden,
+            }
+          : null,
+        porcentaje,
+      };
+    });
+  }
+
+  // ============================================================================
   // ALERTAS
   // ============================================================================
 

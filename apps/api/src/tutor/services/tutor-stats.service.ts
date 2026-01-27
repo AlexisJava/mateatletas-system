@@ -8,6 +8,7 @@ import {
   ClaseHoy,
   PrioridadAlerta,
   HijoInfo,
+  ComisionInfo,
 } from '../types/tutor-dashboard.types';
 
 // ============================================================================
@@ -594,10 +595,10 @@ export class TutorStatsService {
   // ============================================================================
 
   /**
-   * Obtiene la información de los hijos del tutor con métricas
+   * Obtiene la información de los hijos del tutor con métricas y comisiones
    *
    * @param tutorId - ID del tutor
-   * @returns Lista de hijos con puntos y asistencia
+   * @returns Lista de hijos con puntos, asistencia y comisiones
    */
   async obtenerHijos(tutorId: string): Promise<HijoInfo[]> {
     const estudiantes = await this.prisma.estudiante.findMany({
@@ -613,8 +614,8 @@ export class TutorStatsService {
       orderBy: { nombre: 'asc' },
     });
 
-    // Calcular asistencia para cada estudiante
-    const hijosConAsistencia: HijoInfo[] = [];
+    // Calcular asistencia y obtener comisiones para cada estudiante
+    const hijosConInfo: HijoInfo[] = [];
 
     for (const estudiante of estudiantes) {
       // Obtener asistencias del estudiante
@@ -639,7 +640,10 @@ export class TutorStatsService {
           ? Math.round((asistenciasPresente / totalAsistencias) * 100)
           : 0;
 
-      hijosConAsistencia.push({
+      // Obtener comisiones del estudiante via InscripcionActividad
+      const comisiones = await this.obtenerComisionesEstudiante(estudiante.id);
+
+      hijosConInfo.push({
         id: estudiante.id,
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
@@ -649,9 +653,73 @@ export class TutorStatsService {
         puntosTotales: estudiante.recursos?.xpTotal ?? 0,
         asistenciaPromedio,
         avatarUrl: null,
+        comisiones,
       });
     }
 
-    return hijosConAsistencia;
+    return hijosConInfo;
+  }
+
+  /**
+   * Obtiene las comisiones donde está inscripto un estudiante
+   * Busca en InscripcionActividad -> Comision
+   *
+   * @param estudianteId - ID del estudiante
+   * @returns Lista de comisiones con info relevante
+   */
+  private async obtenerComisionesEstudiante(
+    estudianteId: string,
+  ): Promise<ComisionInfo[]> {
+    // Buscar inscripciones activas del estudiante que tengan comisión
+    const inscripciones = await this.prisma.inscripcionActividad.findMany({
+      where: {
+        estudianteId,
+        estado: 'ACTIVA',
+        comisionId: { not: null },
+      },
+      select: {
+        comision: {
+          select: {
+            id: true,
+            nombre: true,
+            horario: true,
+            docente: {
+              select: {
+                nombre: true,
+                apellido: true,
+              },
+            },
+            producto: {
+              select: {
+                nombre: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Mapear a ComisionInfo (evitar duplicados)
+    const comisionesMap = new Map<string, ComisionInfo>();
+
+    for (const inscripcion of inscripciones) {
+      const comision = inscripcion.comision;
+      if (comision && !comisionesMap.has(comision.id)) {
+        comisionesMap.set(comision.id, {
+          id: comision.id,
+          nombre: comision.nombre,
+          horario: comision.horario ?? '',
+          docente: {
+            nombre: comision.docente.nombre,
+            apellido: comision.docente.apellido,
+          },
+          producto: comision.producto
+            ? { nombre: comision.producto.nombre }
+            : undefined,
+        });
+      }
+    }
+
+    return Array.from(comisionesMap.values());
   }
 }

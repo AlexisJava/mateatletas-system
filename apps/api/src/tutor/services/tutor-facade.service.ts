@@ -107,4 +107,29 @@ export class TutorFacade {
     // Delegar a QueryService
     return this.queryService.obtenerAlertas(tutorId);
   }
+
+  // ============================================================================
+  // PROGRESO DE CONTENIDOS
+  // ============================================================================
+
+  /**
+   * Obtiene el progreso de contenidos de un estudiante hijo del tutor
+   *
+   * @param tutorId - ID del tutor autenticado
+   * @param estudianteId - ID del estudiante
+   * @returns Lista de progresos con porcentaje calculado
+   */
+  async getProgresoContenidosEstudiante(tutorId: string, estudianteId: string) {
+    // Validar que el tutor existe
+    await this.validator.validarTutorExiste(tutorId);
+
+    // Validar que el estudiante pertenece al tutor
+    await this.validator.validarEstudiantePerteneceATutor(
+      tutorId,
+      estudianteId,
+    );
+
+    // Delegar a QueryService
+    return this.queryService.getProgresoContenidosEstudiante(estudianteId);
+  }
 }

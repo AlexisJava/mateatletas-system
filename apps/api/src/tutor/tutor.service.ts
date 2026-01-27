@@ -101,4 +101,19 @@ export class TutorService {
   async obtenerAlertas(tutorId: string): Promise<AlertasResponse> {
     return this.facade.obtenerAlertas(tutorId);
   }
+
+  // ============================================================================
+  // PROGRESO DE CONTENIDOS
+  // ============================================================================
+
+  /**
+   * Obtiene el progreso de contenidos de un estudiante hijo del tutor
+   *
+   * @param tutorId - ID del tutor autenticado
+   * @param estudianteId - ID del estudiante
+   * @returns Lista de progresos con porcentaje calculado
+   */
+  async getProgresoContenidosEstudiante(tutorId: string, estudianteId: string) {
+    return this.facade.getProgresoContenidosEstudiante(tutorId, estudianteId);
+  }
 }

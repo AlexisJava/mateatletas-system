@@ -1,4 +1,5 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { ParseIdPipe } from '../common/pipes';
 import {
   ApiTags,
   ApiOperation,
@@ -199,5 +200,54 @@ export class TutorController {
   })
   async getAlertas(@GetUser() user: AuthUser) {
     return this.tutorService.obtenerAlertas(user.id);
+  }
+
+  /**
+   * GET /tutor/estudiantes/:estudianteId/contenidos/progreso
+   *
+   * Obtiene el progreso de contenidos de un estudiante hijo del tutor
+   * Valida que el estudiante pertenezca al tutor autenticado
+   */
+  @Get('estudiantes/:estudianteId/contenidos/progreso')
+  @ApiOperation({
+    summary: 'Obtener progreso de contenidos de un hijo',
+    description: `
+      Retorna el progreso de contenidos educativos de un estudiante hijo del tutor.
+
+      El tutorId se obtiene automáticamente del token JWT (seguro).
+      Se valida que el estudiante pertenezca al tutor antes de retornar datos.
+
+      Respuesta incluye para cada contenido:
+      - Título, mundo (MATEMATICA, PROGRAMACION, CIENCIAS)
+      - Porcentaje de avance calculado
+      - Tiempo total invertido
+      - Estado de completitud
+      - Última actividad
+    `,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Progreso obtenido exitosamente',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autenticado',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'No tiene rol de tutor',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Estudiante no encontrado o no pertenece al tutor',
+  })
+  async getProgresoContenidosEstudiante(
+    @GetUser() user: AuthUser,
+    @Param('estudianteId', ParseIdPipe) estudianteId: string,
+  ) {
+    return this.tutorService.getProgresoContenidosEstudiante(
+      user.id,
+      estudianteId,
+    );
   }
 }

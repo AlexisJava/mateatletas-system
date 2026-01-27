@@ -81,6 +81,22 @@ export interface ClaseHoy {
 }
 
 /**
+ * Info de comisión/clase grupal para un estudiante
+ */
+export interface ComisionInfo {
+  id: string;
+  nombre: string;
+  horario: string; // Ej: "Lunes 16:00 - 17:00"
+  docente: {
+    nombre: string;
+    apellido: string;
+  };
+  producto?: {
+    nombre: string;
+  };
+}
+
+/**
  * Info de hijo para el dashboard
  */
 export interface HijoInfo {
@@ -93,6 +109,7 @@ export interface HijoInfo {
   puntosTotales: number;
   asistenciaPromedio: number;
   avatarUrl: string | null;
+  comisiones: ComisionInfo[];
 }
 
 /**
