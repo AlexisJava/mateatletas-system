@@ -1148,6 +1148,91 @@ yarn validate             # Script de validación completa
 
 ---
 
+## LECCIONES APRENDIDAS: INTEGRACIONES DE FRONTEND CON PACKAGES
+
+> **Contexto:** Estas lecciones surgen de la integración del Sandbox (Pencil.dev) con lesson-engine.
+> Aplicar para futuras integraciones (Portal Estudiante, Portal Docente, etc.)
+
+### Problema #1: Schemas Zod desactualizados
+
+**Síntoma:** Tests fallan porque la data de prueba no coincide con los schemas reales.
+
+**Causa raíz:** Los schemas en `packages/contracts` evolucionaron diferente a los props de los componentes.
+
+**Ejemplo:**
+
+```typescript
+// Schema viejo usaba "pages"
+// Componente real esperaba "segments"
+storyIntentSchema.segments; // ✅ Correcto
+storyIntentSchema.pages; // ❌ Desactualizado
+```
+
+**Prevención:**
+
+1. ANTES de escribir tests, leer TODOS los schemas Zod involucrados
+2. Comparar schemas con props de componentes React
+3. Si no coinciden, corregir schema PRIMERO
+
+### Problema #2: Duplicación de fuentes de verdad
+
+**Síntoma:** Frontend tiene lista hardcodeada de items que no coincide con backend/packages.
+
+**Ejemplo en Sandbox:**
+
+- IntentLibrary tenía 9 intents hardcodeados
+- lesson-engine tenía 25 intents reales
+- Metadata duplicada (nombres, iconos, defaults)
+
+**Prevención:**
+
+1. Crear catálogo centralizado en el package (`intent-catalog.ts`)
+2. Frontend IMPORTA del catálogo, NUNCA hardcodea
+3. Una sola fuente de verdad = `packages/{package}/src/catalog/`
+
+### Problema #3: Inconsistencia snake_case vs camelCase
+
+**Síntoma:** 20+ tests de integración fallan con 400 Bad Request.
+
+**Causa raíz:** Tests enviaban `cantidad_clases`, DTOs esperaban `cantidadClases`.
+
+**Prevención:**
+
+```bash
+# ANTES de correr tests, auditar naming
+grep -rn '_[a-z]' apps/api/test/integration/path/  # Buscar snake_case
+```
+
+**Regla:** Todo el código TypeScript usa camelCase. Ver sección "CONVENCIÓN DE NAMING".
+
+### Problema #4: Validación de unions devuelve errores genéricos
+
+**Síntoma:** Tests de errores de validación fallan porque esperan path específico.
+
+**Causa técnica:** Zod discriminatedUnion devuelve "Invalid input" genérico, no paths.
+
+**Prevención:**
+
+```typescript
+// ❌ No funciona con unions
+expect(result.errors[0].path).toContain('title');
+
+// ✅ Funciona siempre
+expect(result.errors.length).toBeGreaterThan(0);
+```
+
+### Checklist Pre-Integración (OBLIGATORIO)
+
+Antes de integrar frontend con un package interno:
+
+- [ ] Leer TODOS los schemas/types del package
+- [ ] Verificar que frontend no tiene data hardcodeada que debería venir del package
+- [ ] Grep por snake_case en tests de integración
+- [ ] Crear catálogo centralizado si el package tiene múltiples "tipos" de algo
+- [ ] Escribir tests DESPUÉS de leer schemas, no antes
+
+---
+
 ## NOTAS FINALES
 
 1. **Siempre verificar funcionamiento real** - No confiar solo en que compila

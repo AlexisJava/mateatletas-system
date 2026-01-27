@@ -12,6 +12,10 @@ import {
   matchingIntentSchema,
   fillBlankIntentSchema,
   sortingIntentSchema,
+  shortAnswerIntentSchema,
+  checklistIntentSchema,
+  rubricIntentSchema,
+  codeValidatorIntentSchema,
   interactionIntentSchema,
 } from './interaction.schema';
 
@@ -558,11 +562,554 @@ describe('sortingIntentSchema', () => {
 });
 
 // =============================================================================
+// SHORT ANSWER INTENT
+// =============================================================================
+
+describe('shortAnswerIntentSchema', () => {
+  it('should validate with keywords validation type', () => {
+    const data = {
+      intent: 'interaction:short-answer',
+      question: '¿Qué es una variable?',
+      validationType: 'keywords',
+      keywords: ['almacenar', 'dato'],
+    };
+
+    const result = shortAnswerIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it('should validate with regex validation type', () => {
+    const data = {
+      intent: 'interaction:short-answer',
+      question: 'Escribe un número par',
+      validationType: 'regex',
+      regexPattern: '^\\d*[02468]$',
+    };
+
+    const result = shortAnswerIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it('should validate with exact validation type', () => {
+    const data = {
+      intent: 'interaction:short-answer',
+      question: '¿Cuál es la capital de Francia?',
+      validationType: 'exact',
+      exactAnswer: 'París',
+    };
+
+    const result = shortAnswerIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it('should apply defaults', () => {
+    const data = {
+      intent: 'interaction:short-answer',
+      question: 'Test?',
+      validationType: 'keywords',
+      keywords: ['test'],
+    };
+
+    const result = shortAnswerIntentSchema.parse(data);
+    expect(result.caseSensitive).toBe(false);
+    expect(result.minLength).toBe(1);
+    expect(result.maxLength).toBe(500);
+    expect(result.showMascot).toBe(true);
+    expect(result.xpReward).toBe(15);
+    expect(result.fuzzyTolerance).toBe(0.8);
+  });
+
+  it('should validate with all optional fields', () => {
+    const data = {
+      intent: 'interaction:short-answer',
+      question: 'Full test',
+      validationType: 'keywords',
+      keywords: ['word1', 'word2'],
+      caseSensitive: true,
+      minLength: 10,
+      maxLength: 200,
+      hint: 'A helpful hint',
+      correctFeedback: 'Great!',
+      incorrectFeedback: 'Try again',
+      showMascot: false,
+      xpReward: 25,
+      fuzzyTolerance: 0.9,
+    };
+
+    const result = shortAnswerIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.caseSensitive).toBe(true);
+      expect(result.data.fuzzyTolerance).toBe(0.9);
+    }
+  });
+
+  it('should reject missing question', () => {
+    const data = {
+      intent: 'interaction:short-answer',
+      validationType: 'keywords',
+      keywords: ['test'],
+    };
+
+    const result = shortAnswerIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject invalid validationType', () => {
+    const data = {
+      intent: 'interaction:short-answer',
+      question: 'Test?',
+      validationType: 'invalid',
+    };
+
+    const result = shortAnswerIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject fuzzyTolerance out of range', () => {
+    const data = {
+      intent: 'interaction:short-answer',
+      question: 'Test?',
+      validationType: 'exact',
+      exactAnswer: 'test',
+      fuzzyTolerance: 1.5,
+    };
+
+    const result = shortAnswerIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+});
+
+// =============================================================================
+// CHECKLIST INTENT
+// =============================================================================
+
+describe('checklistIntentSchema', () => {
+  it('should validate with minimal required fields', () => {
+    const data = {
+      intent: 'interaction:checklist',
+      title: '¿Completaste los pasos?',
+      items: [
+        { id: '1', text: 'Leí el enunciado' },
+        { id: '2', text: 'Identifiqué los datos' },
+      ],
+    };
+
+    const result = checklistIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it('should apply defaults', () => {
+    const data = {
+      intent: 'interaction:checklist',
+      title: 'Checklist',
+      items: [{ id: '1', text: 'Item 1' }],
+    };
+
+    const result = checklistIntentSchema.parse(data);
+    expect(result.showMascot).toBe(true);
+    expect(result.xpReward).toBe(10);
+    expect(result.items[0].required).toBe(true);
+  });
+
+  it('should accept items with required flag', () => {
+    const data = {
+      intent: 'interaction:checklist',
+      title: 'Checklist',
+      items: [
+        { id: '1', text: 'Required item', required: true },
+        { id: '2', text: 'Optional item', required: false },
+      ],
+    };
+
+    const result = checklistIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.items[0].required).toBe(true);
+      expect(result.data.items[1].required).toBe(false);
+    }
+  });
+
+  it('should accept minRequired as alternative validation', () => {
+    const data = {
+      intent: 'interaction:checklist',
+      title: 'Checklist',
+      items: [
+        { id: '1', text: 'Item 1' },
+        { id: '2', text: 'Item 2' },
+        { id: '3', text: 'Item 3' },
+      ],
+      minRequired: 2,
+    };
+
+    const result = checklistIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.minRequired).toBe(2);
+    }
+  });
+
+  it('should accept optional instruction and feedback', () => {
+    const data = {
+      intent: 'interaction:checklist',
+      title: 'Checklist',
+      instruction: 'Marca los pasos completados',
+      items: [{ id: '1', text: 'Item 1' }],
+      correctFeedback: '¡Muy bien!',
+      incorrectFeedback: 'Faltan algunos pasos',
+    };
+
+    const result = checklistIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject empty items array', () => {
+    const data = {
+      intent: 'interaction:checklist',
+      title: 'Checklist',
+      items: [],
+    };
+
+    const result = checklistIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject more than 20 items', () => {
+    const data = {
+      intent: 'interaction:checklist',
+      title: 'Checklist',
+      items: Array(21)
+        .fill(null)
+        .map((_, i) => ({ id: String(i), text: `Item ${i}` })),
+    };
+
+    const result = checklistIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject empty title', () => {
+    const data = {
+      intent: 'interaction:checklist',
+      title: '',
+      items: [{ id: '1', text: 'Item' }],
+    };
+
+    const result = checklistIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+});
+
+// =============================================================================
+// RUBRIC INTENT
+// =============================================================================
+
+describe('rubricIntentSchema', () => {
+  const validCriteria = [
+    {
+      id: 'clarity',
+      name: 'Claridad',
+      levels: [
+        { score: 3, label: 'Excelente' },
+        { score: 2, label: 'Bueno' },
+        { score: 1, label: 'Mejorable' },
+      ],
+    },
+  ];
+
+  it('should validate with minimal required fields', () => {
+    const data = {
+      intent: 'interaction:rubric',
+      title: 'Autoevalúa tu trabajo',
+      criteria: validCriteria,
+    };
+
+    const result = rubricIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it('should apply defaults', () => {
+    const data = {
+      intent: 'interaction:rubric',
+      title: 'Rubric',
+      criteria: validCriteria,
+    };
+
+    const result = rubricIntentSchema.parse(data);
+    expect(result.showTotal).toBe(true);
+    expect(result.showMascot).toBe(true);
+    expect(result.xpReward).toBe(20);
+  });
+
+  it('should accept multiple criteria', () => {
+    const data = {
+      intent: 'interaction:rubric',
+      title: 'Rubric',
+      criteria: [
+        {
+          id: 'clarity',
+          name: 'Claridad',
+          levels: [
+            { score: 3, label: 'Excelente' },
+            { score: 2, label: 'Bueno' },
+          ],
+        },
+        {
+          id: 'completeness',
+          name: 'Completitud',
+          levels: [
+            { score: 3, label: 'Completo' },
+            { score: 2, label: 'Parcial' },
+          ],
+        },
+      ],
+    };
+
+    const result = rubricIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept optional passingScore', () => {
+    const data = {
+      intent: 'interaction:rubric',
+      title: 'Rubric',
+      criteria: validCriteria,
+      passingScore: 5,
+    };
+
+    const result = rubricIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.passingScore).toBe(5);
+    }
+  });
+
+  it('should accept criterion with description', () => {
+    const data = {
+      intent: 'interaction:rubric',
+      title: 'Rubric',
+      criteria: [
+        {
+          id: 'clarity',
+          name: 'Claridad',
+          description: 'Qué tan fácil es entender el trabajo',
+          levels: [
+            { score: 3, label: 'Excelente', description: 'Muy claro' },
+            { score: 2, label: 'Bueno', description: 'Mayormente claro' },
+          ],
+        },
+      ],
+    };
+
+    const result = rubricIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject empty criteria array', () => {
+    const data = {
+      intent: 'interaction:rubric',
+      title: 'Rubric',
+      criteria: [],
+    };
+
+    const result = rubricIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject criterion with less than 2 levels', () => {
+    const data = {
+      intent: 'interaction:rubric',
+      title: 'Rubric',
+      criteria: [
+        {
+          id: 'clarity',
+          name: 'Claridad',
+          levels: [{ score: 3, label: 'Only one' }],
+        },
+      ],
+    };
+
+    const result = rubricIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject more than 10 criteria', () => {
+    const data = {
+      intent: 'interaction:rubric',
+      title: 'Rubric',
+      criteria: Array(11)
+        .fill(null)
+        .map((_, i) => ({
+          id: String(i),
+          name: `Criterion ${i}`,
+          levels: [
+            { score: 2, label: 'Good' },
+            { score: 1, label: 'Bad' },
+          ],
+        })),
+    };
+
+    const result = rubricIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject empty title', () => {
+    const data = {
+      intent: 'interaction:rubric',
+      title: '',
+      criteria: validCriteria,
+    };
+
+    const result = rubricIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+});
+
+// =============================================================================
+// CODE VALIDATOR INTENT
+// =============================================================================
+
+describe('codeValidatorIntentSchema', () => {
+  const validTestCases = [{ id: '1', name: 'Basic', input: '[2, 3]', expectedOutput: '5' }];
+
+  it('should validate with minimal required fields', () => {
+    const data = {
+      intent: 'interaction:code-validator',
+      title: 'Suma',
+      description: 'Suma dos números',
+      language: 'javascript',
+      testCases: validTestCases,
+    };
+
+    const result = codeValidatorIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it('should apply defaults', () => {
+    const data = {
+      intent: 'interaction:code-validator',
+      title: 'Test',
+      description: 'Description',
+      language: 'javascript',
+      testCases: validTestCases,
+    };
+
+    const result = codeValidatorIntentSchema.parse(data);
+    expect(result.starterCode).toBe('');
+    expect(result.timeout).toBe(5000);
+    expect(result.showMascot).toBe(true);
+    expect(result.xpReward).toBe(25);
+  });
+
+  it('should accept all language values', () => {
+    const languages = ['javascript', 'python', 'lua'] as const;
+
+    for (const language of languages) {
+      const data = {
+        intent: 'interaction:code-validator',
+        title: 'Test',
+        description: 'Desc',
+        language,
+        testCases: validTestCases,
+      };
+      const result = codeValidatorIntentSchema.safeParse(data);
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it('should accept multiple test cases', () => {
+    const data = {
+      intent: 'interaction:code-validator',
+      title: 'Test',
+      description: 'Desc',
+      language: 'javascript',
+      testCases: [
+        { id: '1', name: 'Basic', input: '[2, 3]', expectedOutput: '5' },
+        { id: '2', name: 'Zero', input: '[0, 0]', expectedOutput: '0' },
+        { id: '3', name: 'Hidden', input: '[-1, 1]', expectedOutput: '0', hidden: true },
+      ],
+    };
+
+    const result = codeValidatorIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept starter code', () => {
+    const data = {
+      intent: 'interaction:code-validator',
+      title: 'Test',
+      description: 'Desc',
+      language: 'javascript',
+      testCases: validTestCases,
+      starterCode: 'function suma(a, b) {\n  // Tu código\n}',
+    };
+
+    const result = codeValidatorIntentSchema.safeParse(data);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.starterCode).toContain('function suma');
+    }
+  });
+
+  it('should reject empty test cases', () => {
+    const data = {
+      intent: 'interaction:code-validator',
+      title: 'Test',
+      description: 'Desc',
+      language: 'javascript',
+      testCases: [],
+    };
+
+    const result = codeValidatorIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject invalid language', () => {
+    const data = {
+      intent: 'interaction:code-validator',
+      title: 'Test',
+      description: 'Desc',
+      language: 'ruby',
+      testCases: validTestCases,
+    };
+
+    const result = codeValidatorIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject timeout out of range', () => {
+    const data = {
+      intent: 'interaction:code-validator',
+      title: 'Test',
+      description: 'Desc',
+      language: 'javascript',
+      testCases: validTestCases,
+      timeout: 100, // Too low (min 1000)
+    };
+
+    const result = codeValidatorIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject empty title', () => {
+    const data = {
+      intent: 'interaction:code-validator',
+      title: '',
+      description: 'Desc',
+      language: 'javascript',
+      testCases: validTestCases,
+    };
+
+    const result = codeValidatorIntentSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+});
+
+// =============================================================================
 // INTERACTION UNION
 // =============================================================================
 
 describe('interactionIntentSchema (union)', () => {
-  it('should validate all 6 interaction intents', () => {
+  it('should validate all 10 interaction intents', () => {
     const testCases = [
       {
         intent: 'interaction:quiz-mc',
@@ -598,6 +1145,41 @@ describe('interactionIntentSchema (union)', () => {
           { id: '1', label: 'A', value: 1 },
           { id: '2', label: 'B', value: 2 },
         ],
+      },
+      {
+        intent: 'interaction:short-answer',
+        question: 'Q?',
+        validationType: 'keywords',
+        keywords: ['test'],
+      },
+      {
+        intent: 'interaction:checklist',
+        title: 'Checklist',
+        items: [
+          { id: '1', text: 'Item 1' },
+          { id: '2', text: 'Item 2' },
+        ],
+      },
+      {
+        intent: 'interaction:rubric',
+        title: 'Rubric',
+        criteria: [
+          {
+            id: 'c1',
+            name: 'Criterion',
+            levels: [
+              { score: 2, label: 'Good' },
+              { score: 1, label: 'Bad' },
+            ],
+          },
+        ],
+      },
+      {
+        intent: 'interaction:code-validator',
+        title: 'Code',
+        description: 'Desc',
+        language: 'javascript',
+        testCases: [{ id: '1', name: 'Test', input: '[1]', expectedOutput: '1' }],
       },
     ];
 

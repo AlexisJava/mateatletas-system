@@ -651,7 +651,7 @@ describe('getValidIntentIds', () => {
     const ids = getValidIntentIds();
 
     expect(Array.isArray(ids)).toBe(true);
-    expect(ids.length).toBe(25); // 25 intents total
+    expect(ids.length).toBe(29); // 29 intents total (added code-validator)
   });
 
   it('should include all category prefixes', () => {

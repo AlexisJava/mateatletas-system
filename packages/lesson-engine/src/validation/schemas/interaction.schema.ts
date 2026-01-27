@@ -111,6 +111,114 @@ export const fillBlankIntentSchema = z.object({
 export type FillBlankIntentData = z.infer<typeof fillBlankIntentSchema>;
 
 // =============================================================================
+// SHORT ANSWER INTENT
+// =============================================================================
+
+export const shortAnswerIntentSchema = z.object({
+  intent: z.literal('interaction:short-answer'),
+  question: nonEmptyString,
+  validationType: z.enum(['keywords', 'regex', 'exact']),
+  keywords: z.array(z.string()).min(1).max(10).optional(),
+  regexPattern: z.string().optional(),
+  exactAnswer: z.string().optional(),
+  caseSensitive: z.boolean().default(false),
+  minLength: z.number().int().min(1).default(1),
+  maxLength: z.number().int().max(1000).default(500),
+  hint: optionalString,
+  correctFeedback: optionalString,
+  incorrectFeedback: optionalString,
+  showMascot: z.boolean().default(true),
+  xpReward: z.number().int().min(0).default(15),
+  fuzzyTolerance: z.number().min(0).max(1).default(0.8),
+});
+
+export type ShortAnswerIntentData = z.infer<typeof shortAnswerIntentSchema>;
+
+// =============================================================================
+// CHECKLIST INTENT
+// =============================================================================
+
+const checklistItemSchema = z.object({
+  id: nonEmptyString,
+  text: nonEmptyString,
+  required: z.boolean().default(true),
+});
+
+export const checklistIntentSchema = z.object({
+  intent: z.literal('interaction:checklist'),
+  title: nonEmptyString,
+  instruction: optionalString,
+  items: z.array(checklistItemSchema).min(1).max(20),
+  minRequired: z.number().int().min(1).optional(),
+  correctFeedback: optionalString,
+  incorrectFeedback: optionalString,
+  showMascot: z.boolean().default(true),
+  xpReward: z.number().int().min(0).default(10),
+});
+
+export type ChecklistIntentData = z.infer<typeof checklistIntentSchema>;
+
+// =============================================================================
+// RUBRIC INTENT
+// =============================================================================
+
+const rubricLevelSchema = z.object({
+  score: z.number().int().min(0),
+  label: nonEmptyString,
+  description: optionalString,
+});
+
+const rubricCriterionSchema = z.object({
+  id: nonEmptyString,
+  name: nonEmptyString,
+  description: optionalString,
+  levels: z.array(rubricLevelSchema).min(2).max(5),
+});
+
+export const rubricIntentSchema = z.object({
+  intent: z.literal('interaction:rubric'),
+  title: nonEmptyString,
+  instruction: optionalString,
+  criteria: z.array(rubricCriterionSchema).min(1).max(10),
+  passingScore: z.number().int().min(0).optional(),
+  showTotal: z.boolean().default(true),
+  correctFeedback: optionalString,
+  incorrectFeedback: optionalString,
+  showMascot: z.boolean().default(true),
+  xpReward: z.number().int().min(0).default(20),
+});
+
+export type RubricIntentData = z.infer<typeof rubricIntentSchema>;
+
+// =============================================================================
+// CODE VALIDATOR INTENT
+// =============================================================================
+
+const codeTestCaseSchema = z.object({
+  id: nonEmptyString,
+  name: nonEmptyString,
+  input: z.string(), // Can be empty for no-argument functions
+  expectedOutput: nonEmptyString,
+  hidden: z.boolean().default(false),
+});
+
+export const codeValidatorIntentSchema = z.object({
+  intent: z.literal('interaction:code-validator'),
+  title: nonEmptyString,
+  description: nonEmptyString,
+  language: z.enum(['javascript', 'python', 'lua']),
+  starterCode: z.string().default(''),
+  testCases: z.array(codeTestCaseSchema).min(1).max(20),
+  timeout: z.number().int().min(1000).max(30000).default(5000),
+  correctFeedback: optionalString,
+  incorrectFeedback: optionalString,
+  showMascot: z.boolean().default(true),
+  xpReward: z.number().int().min(0).default(25),
+});
+
+export type CodeValidatorIntentData = z.infer<typeof codeValidatorIntentSchema>;
+
+// =============================================================================
 // SORTING INTENT
 // =============================================================================
 
@@ -143,6 +251,10 @@ export const interactionIntentSchema = z.discriminatedUnion('intent', [
   matchingIntentSchema,
   fillBlankIntentSchema,
   sortingIntentSchema,
+  shortAnswerIntentSchema,
+  checklistIntentSchema,
+  rubricIntentSchema,
+  codeValidatorIntentSchema,
 ]);
 
 export type InteractionIntentData = z.infer<typeof interactionIntentSchema>;

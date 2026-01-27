@@ -24,3 +24,20 @@ export {
   type SortDirection,
   type SortCriterion,
 } from './SortingIntent';
+export {
+  ShortAnswerIntent,
+  type ShortAnswerIntentProps,
+  type ValidationTypeSA,
+} from './ShortAnswerIntent';
+export { ChecklistIntent, type ChecklistIntentProps, type ChecklistItem } from './ChecklistIntent';
+export {
+  RubricIntent,
+  type RubricIntentProps,
+  type RubricCriterion,
+  type RubricLevel,
+} from './RubricIntent';
+export {
+  CodeValidatorIntent,
+  type CodeValidatorIntentProps,
+  type CodeTestCase,
+} from './CodeValidatorIntent';

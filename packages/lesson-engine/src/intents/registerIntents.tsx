@@ -19,6 +19,10 @@ import { DragDropIntent } from './interaction/DragDropIntent';
 import { MatchingIntent } from './interaction/MatchingIntent';
 import { FillBlankIntent } from './interaction/FillBlankIntent';
 import { SortingIntent } from './interaction/SortingIntent';
+import { ShortAnswerIntent } from './interaction/ShortAnswerIntent';
+import { ChecklistIntent } from './interaction/ChecklistIntent';
+import { RubricIntent } from './interaction/RubricIntent';
+import { CodeValidatorIntent } from './interaction/CodeValidatorIntent';
 import { StoryIntent } from './narrative/StoryIntent';
 import { DialogueIntent } from './narrative/DialogueIntent';
 import { MascotSpeechIntent } from './narrative/MascotSpeechIntent';
@@ -69,6 +73,10 @@ export function registerAllIntents(): void {
   IntentRegistry.register('interaction:matching', createAdapter(MatchingIntent));
   IntentRegistry.register('interaction:fill-blank', createAdapter(FillBlankIntent));
   IntentRegistry.register('interaction:sorting', createAdapter(SortingIntent));
+  IntentRegistry.register('interaction:short-answer', createAdapter(ShortAnswerIntent));
+  IntentRegistry.register('interaction:checklist', createAdapter(ChecklistIntent));
+  IntentRegistry.register('interaction:rubric', createAdapter(RubricIntent));
+  IntentRegistry.register('interaction:code-validator', createAdapter(CodeValidatorIntent));
 
   // Narrative intents
   IntentRegistry.register('narrative:story', createAdapter(StoryIntent));
