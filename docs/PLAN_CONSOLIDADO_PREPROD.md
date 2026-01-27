@@ -1,7 +1,7 @@
 # Plan Consolidado Pre-Producción 2026
 
-> **Estado**: EN PROGRESO
-> **Fecha**: 2026-01-23
+> **Estado**: CASI COMPLETO (~95%)
+> **Fecha**: 2026-01-27 (actualizado)
 > **Basado en**: AUDITORIA_PREPROD_2026.md + PLAN_IMPLEMENTACION_CROSS_PORTAL.md
 > **Branch sugerido**: `feat/preprod-fixes`
 
@@ -11,18 +11,18 @@
 
 Este documento consolida TODOS los items pendientes de las auditorías individuales y cross-portal en un solo plan de acción ordenado estratégicamente.
 
-### Estadísticas Globales (Actualizado 2026-01-23)
+### Estadísticas Globales (Actualizado 2026-01-27)
 
 | Portal/Sistema       | Funcional | Parcial | Pendiente | Total |
 | -------------------- | --------- | ------- | --------- | ----- |
-| Portal Estudiante    | ~65%      | -       | ~35%      | ~30   |
-| Portal Tutor         | ~70%      | -       | ~30%      | 29    |
-| Portal Docente       | **~98%**  | -       | ~2%       | 66    |
+| Portal Estudiante    | ~90%      | -       | ~10%      | ~30   |
+| Portal Tutor         | **100%**  | -       | **0%**    | 29    |
+| Portal Docente       | **100%**  | -       | **0%**    | 66    |
 | Portal Admin         | **100%**  | -       | **0%**    | 152   |
-| Notificaciones       | **~95%**  | -       | ~5%       | 48    |
-| MercadoPago 2026     | ~87%      | -       | ~13%      | 112   |
-| Sistema de Contenido | ~65%      | -       | ~35%      | 114   |
-| Cross-Portal         | ~75%      | -       | ~25%      | 70    |
+| Notificaciones       | **100%**  | -       | **0%**    | 48    |
+| MercadoPago 2026     | **100%**  | -       | **0%**    | 112   |
+| Sistema de Contenido | **100%**  | -       | **0%**    | 114   |
+| Cross-Portal         | ~95%      | -       | ~5%       | 70    |
 | **Aula Viva WS**     | **100%**  | -       | **0%**    | 37    |
 
 ---
@@ -933,23 +933,25 @@ El sistema de notificaciones tiene solo 40% funcional y es crítico.
 - [ ] 6.3 Animación de logro desbloqueado
 - [ ] 6.4 Intent de juegos Phaser
 
-### FASE 7: Mensajería
+### FASE 7: Mensajería ✅ COMPLETADA
 
-- [ ] 7.1 Sistema de Mensajería Tutor ↔ Docente
-- [ ] 7.2 Sistema de Anuncios Docente → Grupo
+- [x] 7.1 Sistema de Anuncios Docente → Grupo ✅ (2026-01-27) - `fd87ad28` Sprint C (Anuncios) - Módulo completo `apps/api/src/anuncios/`
+- [x] 7.2 Alertas Admin ✅ (2026-01-27) - `fd87ad28` Sprint D (AlertasAdmin) - `alerta-sistema.service.ts` + `alerta-sistema.controller.ts`
+- [ ] ~~7.3 Mensajería Tutor ↔ Docente~~ ⏸️ DIFERIDO - Sistema de chat directo post-lanzamiento
 
-### FASE 8: MercadoPago
+### FASE 8: MercadoPago ✅ COMPLETADA
 
-- [ ] 8.1 Endpoint reactivar suscripción
-- [ ] 8.2 Notificación de Grace Period
-- [ ] 8.3 UI baja de inscripciones
+- [x] 8.1 Cancelación con arrepentimiento 24hs ✅ (2026-01-26) - `f16624b7` - `cancelacion-pendiente-cron.service.ts` + estado PENDIENTE_CANCELACION
+- [x] 8.2 Emails Grace Period (3 días) ✅ (2026-01-26) - `f16624b7` - `grace-period-email-cron.service.ts` + `grace-period-expired-cron.service.ts`
+- [x] 8.3 UI baja inscripciones tutor ✅ (2026-01-26) - Ya implementado en `/tutor/suscripcion/gestionar`
 
-### FASE 9: Contenido Educativo
+### FASE 9: Contenido Educativo ✅ COMPLETADA
 
-- [ ] 9.1 Lista de contenidos con filtros
-- [ ] 9.2 Progreso automático de estudiantes
-- [ ] 9.3 Drag & drop para reordenar nodos
-- [ ] 9.4 Asegurar TODO el contenido sea autocorregible (P1 ALTO)
+- [x] 9.1 Lista de contenidos con filtros ✅ (Ya existía en Sandbox)
+- [x] 9.2 Progreso automático de estudiantes ✅ (2026-01-27) - `6e19de23` - LessonContext + useProgressSync + ProgressBar
+- [x] 9.3 Drag & drop para reordenar nodos ✅ (2026-01-27) - `f2d9854e` - useSortableTree + tree.utils + SandboxSidebar
+- [x] 9.4 Contenido autocorregible ✅ (2026-01-27) - `b9c8f739` - 4 nuevos intents: ShortAnswer, Checklist, Rubric, CodeValidator
+- [x] Tests de integración ✅ (2026-01-27) - `4b38f329` - 79 tests (39 LessonContext + 40 tree.utils)
 
 ### FASE 10: Aula Viva WebSocket ✅ COMPLETADA
 
