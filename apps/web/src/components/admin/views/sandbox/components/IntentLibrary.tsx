@@ -8,25 +8,65 @@ import {
   Check,
   Plus,
   PlayCircle,
-  Dumbbell,
+  MousePointerClick,
   MessageCircle,
-  BookOpen,
-  ListChecks,
-  Code,
-  Trophy,
-  RotateCcw,
-  Variable,
-  LayoutGrid,
-  Sparkles,
-  Target,
   Gamepad2,
+  LayoutGrid,
+  Flag,
+  Sparkles,
+  BookOpen,
+  Lightbulb,
+  Images,
+  AlertCircle,
+  CircleCheck,
+  ToggleLeft,
+  GripVertical,
+  Link,
+  TextCursorInput,
+  ArrowUpDown,
+  Book,
+  MessageSquare,
+  Bot,
+  Gift,
+  Trophy,
+  Timer,
+  Medal,
+  Columns,
+  LayoutDashboard,
+  Folder,
+  GalleryHorizontal,
+  ListChecks,
+  ArrowRight,
   Award,
 } from 'lucide-react';
 import styles from './IntentLibrary.module.css';
-import type { IntentDefinition, IntentCategory } from '../utils/intent.types';
+import {
+  getIntentsByCategory,
+  INTENT_CATALOG,
+  type IntentMeta,
+  type IntentsByCategory,
+} from '@mateatletas/lesson-engine';
 
-// Re-export types for consumers
-export type { IntentDefinition, IntentCategory };
+// =============================================================================
+// TYPES
+// =============================================================================
+
+export interface IntentDefinition {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+  gradient?: boolean;
+  defaultJson: Record<string, unknown>;
+}
+
+export interface IntentCategory {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  intents: IntentDefinition[];
+}
 
 export interface IntentLibraryProps {
   onSelectIntent: (intent: IntentDefinition) => void;
@@ -34,187 +74,54 @@ export interface IntentLibraryProps {
   selectedIntentId?: string | null;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// INTENT CATALOG
-// ─────────────────────────────────────────────────────────────────────────────
-
-const INTENT_CATEGORIES: IntentCategory[] = [
-  {
-    id: 'intro',
-    name: 'Introducción',
-    icon: 'play-circle',
-    color: 'green',
-    intents: [
-      {
-        id: 'hero',
-        name: 'Hero',
-        description: 'Pantalla de inicio con imagen destacada y llamada a la acción',
-        gradient: true,
-        defaultJson: {
-          intent: 'hero',
-          title: 'Introduction to Variables',
-          subtitle: 'Learn how to store data in your programs',
-          theme: 'violet-cyan',
-          cta: { text: 'Start Learning', action: 'next' },
-        },
-      },
-      {
-        id: 'concept',
-        name: 'Concepto',
-        icon: 'book-open',
-        description: 'Introduce un nuevo concepto con explicación clara',
-        defaultJson: {
-          intent: 'concept',
-          title: 'What is a Variable?',
-          definition: 'A variable is a container that stores data values',
-          example: 'let age = 25;',
-        },
-      },
-    ],
-  },
-  {
-    id: 'practice',
-    name: 'Práctica',
-    icon: 'dumbbell',
-    color: 'blue',
-    intents: [
-      {
-        id: 'quiz',
-        name: 'Quiz',
-        icon: 'list-checks',
-        description: 'Pregunta de opción múltiple con feedback',
-        defaultJson: {
-          intent: 'quiz',
-          question: 'What is the correct way to declare a variable?',
-          options: [
-            { id: 'a', text: 'variable x = 5', correct: false },
-            { id: 'b', text: 'let x = 5', correct: true },
-            { id: 'c', text: 'x := 5', correct: false },
-          ],
-        },
-      },
-      {
-        id: 'code-block',
-        name: 'Code Block',
-        icon: 'code',
-        description: 'Bloque de código interactivo',
-        defaultJson: {
-          intent: 'code-block',
-          language: 'javascript',
-          code: 'let message = "Hello, World!";\nconsole.log(message);',
-          editable: true,
-        },
-      },
-    ],
-  },
-  {
-    id: 'feedback',
-    name: 'Feedback',
-    icon: 'message-circle',
-    color: 'orange',
-    intents: [
-      {
-        id: 'success',
-        name: 'Success',
-        icon: 'trophy',
-        description: 'Pantalla de éxito con celebración',
-        defaultJson: {
-          intent: 'success',
-          title: '¡Excelente!',
-          message: 'Has completado esta sección correctamente',
-          xp: 50,
-        },
-      },
-      {
-        id: 'retry',
-        name: 'Retry',
-        icon: 'rotate-ccw',
-        description: 'Pantalla de reintento con pista',
-        defaultJson: {
-          intent: 'retry',
-          title: 'Casi lo tienes',
-          hint: 'Recuerda que las variables se declaran con let o const',
-        },
-      },
-    ],
-  },
-  {
-    id: 'gamification',
-    name: 'Gamificación',
-    icon: 'gamepad',
-    color: 'violet',
-    intents: [
-      {
-        id: 'achievement',
-        name: 'Logro',
-        icon: 'award',
-        description: 'Muestra un logro desbloqueado',
-        defaultJson: {
-          intent: 'achievement',
-          title: 'First Steps',
-          description: 'Completaste tu primera micro-lección',
-          badge: 'beginner',
-          xp: 100,
-        },
-      },
-      {
-        id: 'challenge',
-        name: 'Desafío',
-        icon: 'target',
-        description: 'Presenta un desafío especial',
-        defaultJson: {
-          intent: 'challenge',
-          title: 'Bonus Challenge',
-          description: 'Completa esto en menos de 30 segundos',
-          timeLimit: 30,
-          reward: { xp: 200 },
-        },
-      },
-    ],
-  },
-  {
-    id: 'interactive',
-    name: 'Interactivo',
-    icon: 'sparkles',
-    color: 'cyan',
-    intents: [
-      {
-        id: 'drag-drop',
-        name: 'Drag & Drop',
-        icon: 'layout-grid',
-        description: 'Actividad de arrastrar y soltar',
-        defaultJson: {
-          intent: 'drag-drop',
-          instruction: 'Arrastra cada elemento a su categoría correcta',
-          items: [
-            { id: '1', text: 'let', category: 'variable' },
-            { id: '2', text: 'function', category: 'function' },
-          ],
-          categories: ['variable', 'function'],
-        },
-      },
-    ],
-  },
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ICON MAPPING
-// ─────────────────────────────────────────────────────────────────────────────
+// =============================================================================
+// ICON MAPPING - All Lucide icons used by intents
+// =============================================================================
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  // Category icons
   'play-circle': PlayCircle,
-  dumbbell: Dumbbell,
+  'mouse-pointer-click': MousePointerClick,
   'message-circle': MessageCircle,
-  'book-open': BookOpen,
-  'list-checks': ListChecks,
-  code: Code,
-  trophy: Trophy,
-  'rotate-ccw': RotateCcw,
-  variable: Variable,
+  'gamepad-2': Gamepad2,
   'layout-grid': LayoutGrid,
+  'flag-checkered': Flag,
+
+  // Presentation icons
   sparkles: Sparkles,
-  target: Target,
-  gamepad: Gamepad2,
+  'book-open': BookOpen,
+  lightbulb: Lightbulb,
+  images: Images,
+  'alert-circle': AlertCircle,
+
+  // Interaction icons
+  'circle-check': CircleCheck,
+  'toggle-left': ToggleLeft,
+  'grip-vertical': GripVertical,
+  link: Link,
+  'text-cursor-input': TextCursorInput,
+  'arrow-up-down': ArrowUpDown,
+
+  // Narrative icons
+  book: Book,
+  'message-square': MessageSquare,
+  bot: Bot,
+
+  // Gamification icons
+  gift: Gift,
+  trophy: Trophy,
+  timer: Timer,
+  medal: Medal,
+
+  // Layout icons
+  columns: Columns,
+  'layout-dashboard': LayoutDashboard,
+  folder: Folder,
+  'gallery-horizontal': GalleryHorizontal,
+
+  // Closure icons
+  'list-checks': ListChecks,
+  'arrow-right': ArrowRight,
   award: Award,
 };
 
@@ -222,9 +129,35 @@ function getIcon(iconName: string): React.ComponentType<{ className?: string }> 
   return iconMap[iconName] || Sparkles;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// =============================================================================
+// TRANSFORM CATALOG TO UI FORMAT
+// =============================================================================
+
+function transformCatalogToUI(): IntentCategory[] {
+  const byCategory = getIntentsByCategory();
+
+  return byCategory.map((group: IntentsByCategory) => ({
+    id: group.category.id,
+    name: group.category.name,
+    icon: group.category.icon,
+    color: group.category.color,
+    intents: group.intents.map((intent: IntentMeta) => ({
+      id: intent.id,
+      name: intent.name,
+      description: intent.description,
+      icon: intent.icon,
+      gradient: intent.id === 'presentation:hero', // Hero gets gradient treatment
+      defaultJson: intent.defaultProps,
+    })),
+  }));
+}
+
+// Generate categories from the centralized catalog
+const INTENT_CATEGORIES: IntentCategory[] = transformCatalogToUI();
+
+// =============================================================================
 // COMPONENT
-// ─────────────────────────────────────────────────────────────────────────────
+// =============================================================================
 
 export function IntentLibrary({
   onSelectIntent,
@@ -232,7 +165,10 @@ export function IntentLibrary({
   selectedIntentId,
 }: IntentLibraryProps): ReactElement {
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(['intro', 'practice']);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([
+    'presentation',
+    'interaction',
+  ]);
   const [localSelectedId, setLocalSelectedId] = useState<string | null>(selectedIntentId ?? null);
 
   // Filter intents based on search
@@ -276,6 +212,24 @@ export function IntentLibrary({
     }
   };
 
+  // Get display values from defaultJson
+  const getPreviewTitle = (intent: IntentDefinition): string => {
+    const json = intent.defaultJson;
+    return (
+      (json.title as string) ?? (json.term as string) ?? (json.question as string) ?? intent.name
+    );
+  };
+
+  const getPreviewSubtitle = (intent: IntentDefinition): string => {
+    const json = intent.defaultJson;
+    return (
+      (json.subtitle as string) ??
+      (json.definition as string) ??
+      (json.message as string) ??
+      intent.description
+    );
+  };
+
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -285,6 +239,7 @@ export function IntentLibrary({
             <LayoutGrid />
           </div>
           <h3 className={styles.headerTitle}>Intent Library</h3>
+          <span className={styles.headerCount}>{INTENT_CATALOG.length} intents</span>
         </div>
         <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Cerrar">
           <X />
@@ -335,6 +290,7 @@ export function IntentLibrary({
                     <CategoryIcon />
                   </div>
                   <span className={styles.categoryName}>{category.name}</span>
+                  <span className={styles.categoryCount}>{category.intents.length}</span>
                   <span
                     className={`${styles.categoryChevron} ${isExpanded ? styles.expanded : ''}`}
                   >
@@ -345,7 +301,7 @@ export function IntentLibrary({
                 {isExpanded && (
                   <div className={styles.intentsList}>
                     {category.intents.map((intent) => {
-                      const IntentIcon = intent.icon ? getIcon(intent.icon) : Variable;
+                      const IntentIcon = intent.icon ? getIcon(intent.icon) : Sparkles;
                       const isSelected = localSelectedId === intent.id;
 
                       return (
@@ -389,20 +345,15 @@ export function IntentLibrary({
           <h4 className={styles.previewLabel}>Vista previa</h4>
           <div className={styles.previewCard}>
             <div className={styles.previewIcon}>
-              <Variable />
+              {(() => {
+                const PreviewIcon = selectedIntent.icon ? getIcon(selectedIntent.icon) : Sparkles;
+                return <PreviewIcon />;
+              })()}
             </div>
             <div className={styles.previewContent}>
-              <h5 className={styles.previewTitle}>
-                {selectedIntent.defaultJson.title ?? selectedIntent.name}
-              </h5>
-              <p className={styles.previewSubtitle}>
-                {selectedIntent.defaultJson.subtitle ??
-                  selectedIntent.defaultJson.description ??
-                  selectedIntent.description}
-              </p>
-              {selectedIntent.defaultJson.cta && (
-                <div className={styles.previewCta}>{selectedIntent.defaultJson.cta.text}</div>
-              )}
+              <h5 className={styles.previewTitle}>{getPreviewTitle(selectedIntent)}</h5>
+              <p className={styles.previewSubtitle}>{getPreviewSubtitle(selectedIntent)}</p>
+              <p className={styles.previewId}>{selectedIntent.id}</p>
             </div>
           </div>
           <button type="button" className={styles.useButton} onClick={handleUseIntent}>
@@ -415,5 +366,5 @@ export function IntentLibrary({
   );
 }
 
-// Export catalog for external use (types already exported above)
+// Export for external use
 export { INTENT_CATEGORIES };

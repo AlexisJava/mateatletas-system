@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { LessonRenderer } from '@/components/lesson-renderer';
+import { IntentPreview } from './IntentPreview';
 import styles from './PreviewPanel.module.css';
 
 interface PreviewPanelProps {
@@ -67,7 +67,7 @@ export function PreviewPanel({ content, nodoId, isLeafNode }: PreviewPanelProps)
         >
           ⛶
         </button>
-        <LessonRenderer contenidoJson={content} />
+        <IntentPreview contenidoJson={content} />
       </div>
 
       {isFullscreen &&
@@ -82,7 +82,7 @@ export function PreviewPanel({ content, nodoId, isLeafNode }: PreviewPanelProps)
               ✕
             </button>
             <div className={styles.fullscreenContent}>
-              <LessonRenderer contenidoJson={content} />
+              <IntentPreview contenidoJson={content} />
             </div>
           </div>,
           document.body,

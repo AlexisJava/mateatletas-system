@@ -18,3 +18,6 @@ export * from './renderer';
 
 // Intents - Componentes de slide
 export * from './intents';
+
+// Catalog - Metadata centralizada de intents
+export * from './catalog';

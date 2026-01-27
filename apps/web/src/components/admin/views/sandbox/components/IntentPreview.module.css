@@ -1,0 +1,111 @@
+/**
+ * IntentPreview.module.css
+ * Styles for the intent preview component
+ */
+
+.container {
+  width: 100%;
+  height: 100%;
+  background: var(--sb-bg-deep);
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   LOADING STATE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.loading {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sb-space-md);
+  color: var(--sb-text-muted);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ERROR STATE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.error {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sb-space-xl);
+}
+
+.error > div {
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--sb-space-md);
+}
+
+.errorIcon {
+  width: 48px;
+  height: 48px;
+  color: var(--sb-accent-red);
+  opacity: 0.8;
+}
+
+.errorContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-space-sm);
+}
+
+.errorTitle {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-base);
+  font-weight: 600;
+  color: var(--sb-text-primary);
+  margin: 0;
+}
+
+.errorMessage {
+  font-family: var(--sb-font-mono);
+  font-size: var(--sb-text-sm);
+  color: var(--sb-text-secondary);
+  margin: 0;
+  background: rgba(255, 255, 255, 0.05);
+  padding: var(--sb-space-sm) var(--sb-space-md);
+  border-radius: var(--sb-radius-md);
+}
+
+.errorHint {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-xs);
+  color: var(--sb-text-muted);
+  margin: 0;
+}
+
+.code {
+  font-family: var(--sb-font-mono);
+  background: rgba(139, 92, 246, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--sb-accent-violet);
+}
