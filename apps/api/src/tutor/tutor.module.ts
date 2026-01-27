@@ -2,9 +2,11 @@ import { Module } from '@nestjs/common';
 import { TutorController } from './tutor.controller';
 import { TutorNotificacionesController } from './tutor-notificaciones.controller';
 import { TutorVeranoController } from './tutor-verano.controller';
+import { TutorSuscripcionFamiliarController } from './tutor-suscripcion-familiar.controller';
 import { TutorService } from './tutor.service';
 import { PagosModule } from '../pagos/pagos.module';
 import { NotificacionesModule } from '../notificaciones/notificaciones.module';
+import { SuscripcionesModule } from '../suscripciones/suscripciones.module';
 import { PrismaService } from '../core/database/prisma.service';
 
 // 🆕 CQRS Services
@@ -19,11 +21,12 @@ import { VeranoCommandService } from './services/verano-command.service';
 import { VeranoCronService } from './services/verano-cron.service';
 
 @Module({
-  imports: [PagosModule, NotificacionesModule],
+  imports: [PagosModule, NotificacionesModule, SuscripcionesModule],
   controllers: [
     TutorController,
     TutorNotificacionesController,
     TutorVeranoController,
+    TutorSuscripcionFamiliarController,
   ],
   providers: [
     TutorService,

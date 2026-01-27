@@ -34,6 +34,13 @@ import { SuscripcionStateTransitionService } from './services/suscripcion-state-
 import { SuscripcionFamiliarCommandService } from './services/suscripcion-familiar-command.service';
 import { SuscripcionFamiliarQueryService } from './services/suscripcion-familiar-query.service';
 
+// CRON Jobs - FASE 8.1
+import { CancelacionPendienteCronService } from './services/cancelacion-pendiente-cron.service';
+
+// CRON Jobs - FASE 8.2 (Grace Period Emails)
+import { GracePeriodEmailCronService } from './services/grace-period-email-cron.service';
+import { GracePeriodExpiredCronService } from './services/grace-period-expired-cron.service';
+
 // Jobs (BullMQ)
 import { WEBHOOK_PREAPPROVAL_QUEUE } from './jobs/webhook-preapproval.queue';
 import { WebhookPreapprovalProcessor } from './jobs/webhook-preapproval.processor';
@@ -43,10 +50,12 @@ import { PrismaService } from '../core/database/prisma.service';
 import { WebhookIdempotencyService } from '../pagos/services/webhook-idempotency.service';
 import { MercadoPagoWebhookGuard } from '../pagos/guards/mercadopago-webhook.guard';
 import { MercadoPagoIpWhitelistService } from '../pagos/services/mercadopago-ip-whitelist.service';
+import { NotificacionesModule } from '../notificaciones/notificaciones.module';
 
 @Module({
   imports: [
     ConfigModule,
+    NotificacionesModule, // Para notificaciones de cancelación (FASE 8.1)
     EventEmitterModule.forRoot(), // Para eventos de dominio
 
     // BullMQ para procesamiento async de webhooks
@@ -86,6 +95,13 @@ import { MercadoPagoIpWhitelistService } from '../pagos/services/mercadopago-ip-
     // Servicios Suscripción Familiar 2026
     SuscripcionFamiliarCommandService,
     SuscripcionFamiliarQueryService,
+
+    // CRON Jobs - FASE 8.1
+    CancelacionPendienteCronService,
+
+    // CRON Jobs - FASE 8.2 (Grace Period Emails)
+    GracePeriodEmailCronService,
+    GracePeriodExpiredCronService,
 
     // Processors (BullMQ)
     WebhookPreapprovalProcessor,

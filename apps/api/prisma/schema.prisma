@@ -1779,8 +1779,9 @@ enum NivelOlimpiada {
 enum EstadoSuscripcionFamiliar {
   PENDING // Esperando autorización de MP
   AUTHORIZED // Activa y cobrando
-  PAUSED // Pausada por fallo de pago
-  CANCELLED // Cancelada por tutor o admin
+  PAUSED // Pausada por fallo de pago (grace period)
+  PENDIENTE_CANCELACION // Tutor solicitó cancelar, 24hs para arrepentirse
+  CANCELLED // Cancelada definitivamente
   CONTINUIDAD // Verano: mantiene cupo sin colonia ($20k/mes)
 
   @@map("estado_suscripcion_familiar")
@@ -3875,6 +3876,14 @@ model SuscripcionFamiliar {
 
   /// Período de gracia por fallo de pago (fecha límite)
   fechaGracia DateTime? @map("fecha_gracia")
+
+  // === CANCELACIÓN ===
+
+  /// Fecha en que el tutor solicitó cancelar (para ventana de 24hs)
+  fechaSolicitudCancelacion DateTime? @map("fecha_solicitud_cancelacion")
+
+  /// Motivo de cancelación proporcionado por el tutor
+  motivoCancelacion String? @map("motivo_cancelacion")
 
   // === VERANO ===
 

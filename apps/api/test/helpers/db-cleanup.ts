@@ -164,6 +164,11 @@ export async function cleanAllTestTables(prisma: PrismaService) {
   await prisma.docenteMundo.deleteMany({});
 
   // ============================================================================
+  // NOTIFICACIONES (limpiar antes de usuarios)
+  // ============================================================================
+  await prisma.notificacion.deleteMany({});
+
+  // ============================================================================
   // USUARIOS (al final, después de todas sus dependencias)
   // ============================================================================
 

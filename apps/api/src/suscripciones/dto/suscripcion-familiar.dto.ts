@@ -385,6 +385,27 @@ export class AdminReactivarSuscripcionDto {
   motivo?: string;
 }
 
+// ============================================================================
+// CANCELACIÓN CON ARREPENTIMIENTO (FASE 8.1)
+// ============================================================================
+
+/**
+ * DTO para iniciar cancelación con arrepentimiento (Tutor)
+ *
+ * FASE 8.1: El tutor solicita cancelar, tiene 24hs para arrepentirse.
+ */
+export class IniciarCancelacionDto {
+  @ApiProperty({
+    description: 'Motivo de la cancelación',
+    example: 'Ya no necesitamos el servicio',
+    minLength: 10,
+  })
+  @IsString({ message: 'motivo debe ser un string' })
+  @IsNotEmpty({ message: 'motivo es requerido' })
+  @MinLength(10, { message: 'El motivo debe tener al menos 10 caracteres' })
+  motivo!: string;
+}
+
 /**
  * DTO para cambiar tier de una inscripción (Admin)
  */

@@ -6,6 +6,11 @@
  * - Múltiples inscripciones a actividades, CADA UNA CON SU PROPIO TIER
  * - Descuento 10% se aplica al producto de MENOR VALOR (no al 2do cronológicamente)
  *
+ * FASE 8.1 - Cancelación con Arrepentimiento:
+ * - POST /familiar/cancelar - Inicia cancelación con 24hs de arrepentimiento
+ * - POST /familiar/revertir-cancelacion - Revierte cancelación (si < 24hs)
+ * - CRON procesa cancelaciones expiradas (> 24hs) → BORRADO TOTAL
+ *
  * Endpoints Tutor:
  * - POST /familiar - Crear suscripción familiar
  * - GET /familiar - Obtener mi suscripción
@@ -14,17 +19,19 @@
  * - PATCH /familiar/inscripciones/horario - Cambiar horario de inscripción
  * - PATCH /familiar/inscripciones/producto - Cambiar producto de inscripción
  * - PATCH /familiar/inscripciones/:id/tier - Cambiar tier de una inscripción (NUEVO 2026)
- * - PATCH /familiar/inscripciones/:id/pausar - Pausar inscripción individual (NUEVO)
- * - PATCH /familiar/inscripciones/:id/reactivar - Reactivar inscripción pausada (NUEVO)
+ * - PATCH /familiar/inscripciones/:id/pausar - Pausar inscripción individual
+ * - PATCH /familiar/inscripciones/:id/reactivar - Reactivar inscripción pausada
  * - PATCH /familiar/tier - Cambiar tier de suscripción (deprecated)
- * - POST /familiar/cancelar - Cancelar suscripción
- * - POST /familiar/pausar - Pausar suscripción completa (NUEVO)
- * - POST /familiar/reactivar - Reactivar suscripción pausada (NUEVO)
+ * - POST /familiar/cancelar - Iniciar cancelación (24hs arrepentimiento)
+ * - POST /familiar/revertir-cancelacion - Revertir cancelación pendiente
+ * - POST /familiar/pausar - Pausar suscripción completa
+ * - POST /familiar/reactivar - Reactivar suscripción pausada
  * - GET /familiar/simular - Simular monto con nuevos productos
  *
  * Endpoints Admin:
  * - GET /familiar/admin - Listar todas las suscripciones familiares
  * - GET /familiar/admin/:id - Detalle de una suscripción
+ * - POST /familiar/admin/:id/cancelar - Cancelación directa (sin arrepentimiento)
  */
 import {
   Controller,
@@ -68,6 +75,7 @@ import {
   AdminCancelarSuscripcionDto,
   AdminReactivarSuscripcionDto,
   AdminCambiarTierInscripcionDto,
+  IniciarCancelacionDto,
 } from '../dto/suscripcion-familiar.dto';
 
 @ApiTags('Suscripciones Familiares 2026')
@@ -424,28 +432,57 @@ export class SuscripcionFamiliarController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ExactRoles(Role.TUTOR)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Cancelar suscripción familiar' })
-  async cancelar(@GetUser() user: AuthUser) {
-    const suscripcion = await this.queryService.obtenerPorTutorId(user.id);
-
-    if (!suscripcion) {
-      throw new BadRequestException({
-        message: 'No tienes una suscripción familiar activa',
-        code: SuscripcionFamiliarErrorCode.NOT_FOUND,
-      });
-    }
-
+  @ApiOperation({
+    summary: 'Iniciar cancelación con ventana de arrepentimiento (24hs)',
+    description:
+      'FASE 8.1: Inicia el proceso de cancelación. El tutor tiene 24 horas para arrepentirse. ' +
+      'Después de ese plazo, la cancelación se confirma automáticamente y se elimina TODO el progreso de los estudiantes.',
+  })
+  async cancelar(
+    @Body() dto: IniciarCancelacionDto,
+    @GetUser() user: AuthUser,
+  ) {
     try {
-      await this.commandService.cancelar({
-        suscripcionFamiliarId: suscripcion.id,
+      const result = await this.commandService.iniciarCancelacion({
         tutorId: user.id,
-        motivo: 'Cancelación solicitada por el tutor',
-        canceladoPor: 'tutor',
+        motivo: dto.motivo,
       });
 
       return {
         success: true,
-        message: 'Suscripción cancelada exitosamente',
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof SuscripcionFamiliarError) {
+        throw new BadRequestException({
+          message: error.message,
+          code: error.code,
+        });
+      }
+      throw error;
+    }
+  }
+
+  @Post('revertir-cancelacion')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ExactRoles(Role.TUTOR)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Revertir cancelación pendiente (dentro de 24hs)',
+    description:
+      'FASE 8.1: Permite al tutor arrepentirse y revertir la cancelación antes de que pasen las 24 horas. ' +
+      'Si se revierte, la suscripción vuelve a estado activo y el progreso de los estudiantes se conserva intacto.',
+  })
+  async revertirCancelacion(@GetUser() user: AuthUser) {
+    try {
+      const result = await this.commandService.revertirCancelacion({
+        tutorId: user.id,
+      });
+
+      return {
+        success: true,
+        data: result,
       };
     } catch (error) {
       if (error instanceof SuscripcionFamiliarError) {

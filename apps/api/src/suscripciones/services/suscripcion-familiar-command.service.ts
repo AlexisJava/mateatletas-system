@@ -60,6 +60,13 @@ import {
   TutorPausarSuscripcionResult,
   TutorReactivarSuscripcionInput,
   TutorReactivarSuscripcionResult,
+  // Tipos para cancelación con arrepentimiento (FASE 8.1)
+  IniciarCancelacionInput,
+  IniciarCancelacionResult,
+  RevertirCancelacionInput,
+  RevertirCancelacionResult,
+  ConfirmarCancelacionInput,
+  ConfirmarCancelacionResult,
   SuscripcionFamiliarError,
   SuscripcionFamiliarErrorCode,
 } from '../types';
@@ -615,6 +622,348 @@ export class SuscripcionFamiliarCommandService {
     });
 
     this.logger.log(`Suscripción familiar cancelada: ${suscripcionFamiliarId}`);
+  }
+
+  // ============================================================================
+  // CANCELACIÓN CON ARREPENTIMIENTO (FASE 8.1)
+  // ============================================================================
+
+  /**
+   * Inicia cancelación con ventana de arrepentimiento de 24hs (Tutor)
+   *
+   * FASE 8.1: El tutor solicita cancelar, pero tiene 24hs para arrepentirse.
+   * - Estado → PENDIENTE_CANCELACION (no CANCELLED)
+   * - NO se cancela en MercadoPago aún
+   * - NO se cancelan las inscripciones aún
+   * - Se guarda fechaSolicitudCancelacion y motivo
+   */
+  async iniciarCancelacion(
+    input: IniciarCancelacionInput,
+  ): Promise<IniciarCancelacionResult> {
+    const { tutorId, motivo } = input;
+
+    // 1. Obtener suscripción del tutor
+    const suscripcion = await this.prisma.suscripcionFamiliar.findFirst({
+      where: { tutorId: tutorId },
+    });
+
+    if (!suscripcion) {
+      throw new SuscripcionFamiliarError(
+        'No tienes una suscripción familiar activa',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    // 2. Validar estado actual
+    if (suscripcion.estado === EstadoSuscripcionFamiliar.CANCELLED) {
+      throw new SuscripcionFamiliarError(
+        'La suscripción ya está cancelada',
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    if (
+      suscripcion.estado === EstadoSuscripcionFamiliar.PENDIENTE_CANCELACION
+    ) {
+      throw new SuscripcionFamiliarError(
+        'Ya hay una cancelación pendiente. Tenés 24hs para revertirla.',
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    // Solo se puede cancelar suscripciones activas (AUTHORIZED) o pausadas (PAUSED)
+    if (
+      suscripcion.estado !== EstadoSuscripcionFamiliar.AUTHORIZED &&
+      suscripcion.estado !== EstadoSuscripcionFamiliar.PAUSED
+    ) {
+      throw new SuscripcionFamiliarError(
+        `No se puede cancelar una suscripción en estado ${suscripcion.estado}`,
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    // 3. Marcar como pendiente de cancelación
+    const fechaSolicitudCancelacion = new Date();
+    const fechaLimiteArrepentimiento = new Date(
+      fechaSolicitudCancelacion.getTime() + 24 * 60 * 60 * 1000, // +24 horas
+    );
+
+    await this.prisma.suscripcionFamiliar.update({
+      where: { id: suscripcion.id },
+      data: {
+        estado: EstadoSuscripcionFamiliar.PENDIENTE_CANCELACION,
+        fechaSolicitudCancelacion,
+        motivoCancelacion: motivo,
+      },
+    });
+
+    this.logger.log(
+      `Cancelación iniciada para suscripción ${suscripcion.id}. Límite: ${fechaLimiteArrepentimiento.toISOString()}`,
+    );
+
+    // Crear notificación in-app para el tutor (sin try-catch para que falle si hay error)
+    const notif =
+      await this.notificacionesService.notificarSuscripcionCancelacionIniciada(
+        tutorId,
+        fechaLimiteArrepentimiento,
+      );
+    this.logger.log(
+      `Notificación de cancelación creada: ${notif.id} para tutor ${tutorId}`,
+    );
+
+    return {
+      suscripcionId: suscripcion.id,
+      estado: EstadoSuscripcionFamiliar.PENDIENTE_CANCELACION,
+      fechaSolicitudCancelacion,
+      fechaLimiteArrepentimiento,
+      mensaje:
+        'Cancelación iniciada. Tenés 24 horas para arrepentirte. Después de ese plazo, se eliminará TODO el progreso de tus hijos.',
+    };
+  }
+
+  /**
+   * Revierte cancelación pendiente dentro de las 24hs (Tutor)
+   *
+   * FASE 8.1: El tutor se arrepiente antes de las 24hs.
+   * - Estado → AUTHORIZED (o el estado anterior si era PAUSED)
+   * - Limpia fechaSolicitudCancelacion y motivoCancelacion
+   * - Conserva todo (XP, logros, cupo)
+   */
+  async revertirCancelacion(
+    input: RevertirCancelacionInput,
+  ): Promise<RevertirCancelacionResult> {
+    const { tutorId } = input;
+
+    // 1. Obtener suscripción del tutor
+    const suscripcion = await this.prisma.suscripcionFamiliar.findFirst({
+      where: { tutorId: tutorId },
+    });
+
+    if (!suscripcion) {
+      throw new SuscripcionFamiliarError(
+        'No tienes una suscripción familiar',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    // 2. Validar estado actual
+    if (
+      suscripcion.estado !== EstadoSuscripcionFamiliar.PENDIENTE_CANCELACION
+    ) {
+      throw new SuscripcionFamiliarError(
+        'No hay una cancelación pendiente para revertir',
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    // 3. Validar ventana de 24hs
+    if (!suscripcion.fechaSolicitudCancelacion) {
+      throw new SuscripcionFamiliarError(
+        'Fecha de solicitud de cancelación no encontrada',
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    const ahora = new Date();
+    const horasTranscurridas =
+      (ahora.getTime() - suscripcion.fechaSolicitudCancelacion.getTime()) /
+      (1000 * 60 * 60);
+
+    if (horasTranscurridas >= 24) {
+      throw new SuscripcionFamiliarError(
+        'La ventana de arrepentimiento de 24 horas ha expirado. La cancelación será procesada automáticamente.',
+        SuscripcionFamiliarErrorCode.ARREPENTIMIENTO_EXPIRADO,
+      );
+    }
+
+    // 4. Revertir a estado AUTHORIZED
+    await this.prisma.suscripcionFamiliar.update({
+      where: { id: suscripcion.id },
+      data: {
+        estado: EstadoSuscripcionFamiliar.AUTHORIZED,
+        fechaSolicitudCancelacion: null,
+        motivoCancelacion: null,
+      },
+    });
+
+    this.logger.log(
+      `Cancelación revertida para suscripción ${suscripcion.id} después de ${horasTranscurridas.toFixed(1)} horas`,
+    );
+
+    // Crear notificación de reactivación para el tutor
+    try {
+      const notif =
+        await this.notificacionesService.notificarSuscripcionCancelacionRevertida(
+          tutorId,
+        );
+      this.logger.log(
+        `✅ Notificación de reactivación creada: ${notif.id} para tutor ${tutorId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `❌ Error creando notificación de reactivación: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+
+    return {
+      suscripcionId: suscripcion.id,
+      estado: EstadoSuscripcionFamiliar.AUTHORIZED,
+      mensaje:
+        '¡Cancelación revertida exitosamente! Tu suscripción continúa activa y el progreso de tus hijos está intacto.',
+    };
+  }
+
+  /**
+   * Confirma cancelación expirada y ejecuta borrado total (System/CRON)
+   *
+   * FASE 8.1: Después de 24hs sin arrepentimiento:
+   * - Estado → CANCELLED
+   * - Cancela PreApproval en MercadoPago
+   * - Cancela todas las inscripciones
+   * - Ejecuta BORRADO TOTAL del progreso de estudiantes
+   */
+  async confirmarCancelacion(
+    input: ConfirmarCancelacionInput,
+  ): Promise<ConfirmarCancelacionResult> {
+    const { suscripcionFamiliarId } = input;
+
+    // 1. Obtener suscripción con inscripciones y estudiantes
+    const suscripcion = await this.prisma.suscripcionFamiliar.findUnique({
+      where: { id: suscripcionFamiliarId },
+      include: {
+        inscripciones: {
+          where: { estado: EstadoInscripcionActividad.ACTIVA },
+          include: {
+            estudiante: { select: { id: true, nombre: true, apellido: true } },
+          },
+        },
+      },
+    });
+
+    if (!suscripcion) {
+      throw new SuscripcionFamiliarError(
+        'Suscripción no encontrada',
+        SuscripcionFamiliarErrorCode.NOT_FOUND,
+      );
+    }
+
+    // 2. Validar estado actual
+    if (
+      suscripcion.estado !== EstadoSuscripcionFamiliar.PENDIENTE_CANCELACION
+    ) {
+      throw new SuscripcionFamiliarError(
+        `Solo se pueden confirmar cancelaciones pendientes. Estado actual: ${suscripcion.estado}`,
+        SuscripcionFamiliarErrorCode.INVALID_STATE,
+      );
+    }
+
+    // 3. Extraer IDs de estudiantes afectados
+    const estudiantesAfectados = [
+      ...new Set(suscripcion.inscripciones.map((i) => i.estudiante)),
+    ];
+    const estudianteIds = estudiantesAfectados.map((e) => e.id);
+    const estudianteNombres = estudiantesAfectados.map(
+      (e) => `${e.nombre} ${e.apellido}`,
+    );
+
+    const montoAnterior = suscripcion.montoMensual;
+
+    // 4. Ejecutar cancelación completa en transacción
+    await this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
+      // 4.1 Cancelar en MercadoPago si tiene preapproval y está configurado
+      if (suscripcion.preapprovalId && this.mpClient.isConfigured()) {
+        await this.circuitBreaker.execute(async () => {
+          return await this.mpClient.cancel(
+            suscripcion.preapprovalId as string,
+          );
+        });
+      }
+
+      // 4.2 Actualizar estado de suscripción
+      await tx.suscripcionFamiliar.update({
+        where: { id: suscripcionFamiliarId },
+        data: {
+          estado: EstadoSuscripcionFamiliar.CANCELLED,
+          montoMensual: 0,
+        },
+      });
+
+      // 4.3 Cancelar todas las inscripciones activas
+      await tx.inscripcionActividad.updateMany({
+        where: {
+          suscripcionFamiliarId: suscripcionFamiliarId,
+          estado: EstadoInscripcionActividad.ACTIVA,
+        },
+        data: {
+          estado: EstadoInscripcionActividad.CANCELADA,
+          fechaFin: new Date(),
+        },
+      });
+
+      // 4.4 BORRADO TOTAL: Eliminar progreso de estudiantes
+      // Según spec: XP, nivel, logros, historial lecciones, progreso
+      if (estudianteIds.length > 0) {
+        // Eliminar recursos (XP)
+        await tx.recursosEstudiante.deleteMany({
+          where: { estudianteId: { in: estudianteIds } },
+        });
+
+        // Eliminar logros desbloqueados
+        await tx.logroEstudiante.deleteMany({
+          where: { estudianteId: { in: estudianteIds } },
+        });
+
+        // Eliminar progreso de contenidos (lecciones)
+        await tx.progresoContenido.deleteMany({
+          where: { estudianteId: { in: estudianteIds } },
+        });
+
+        // Eliminar progreso de clases
+        await tx.progresoClaseEstudiante.deleteMany({
+          where: { estudianteId: { in: estudianteIds } },
+        });
+
+        // Eliminar progreso de tareas
+        await tx.progresoTareaEstudiante.deleteMany({
+          where: { estudianteId: { in: estudianteIds } },
+        });
+
+        // Eliminar rachas
+        await tx.rachaEstudiante.deleteMany({
+          where: { estudianteId: { in: estudianteIds } },
+        });
+      }
+
+      // 4.5 Registrar cambio
+      await tx.cambioInscripcion.create({
+        data: {
+          suscripcionFamiliarId: suscripcionFamiliarId,
+          tipo: TipoCambioInscripcion.BAJA,
+          aplicaDesde: new Date(),
+          montoAnterior: montoAnterior,
+          montoNuevo: 0,
+          detalle: {
+            motivo: suscripcion.motivoCancelacion ?? 'Cancelación confirmada',
+            canceladoPor: 'system',
+            estudiantesBorrados: estudianteNombres,
+            borradoTotal: true,
+          },
+        },
+      });
+    });
+
+    this.logger.log(
+      `Cancelación confirmada: ${suscripcionFamiliarId}. Estudiantes borrados: ${estudianteNombres.join(', ')}`,
+    );
+
+    // TODO: Emitir evento para enviar email de confirmación de cancelación
+
+    return {
+      suscripcionId: suscripcionFamiliarId,
+      estado: EstadoSuscripcionFamiliar.CANCELLED,
+      estudiantesBorrados: estudianteNombres,
+      mensaje: `Suscripción cancelada definitivamente. El progreso de ${estudianteNombres.join(', ')} ha sido eliminado.`,
+    };
   }
 
   /**

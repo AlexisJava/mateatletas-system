@@ -123,6 +123,42 @@ export interface CancelarSuscripcionFamiliarInput {
 }
 
 /**
+ * Input para iniciar cancelación con arrepentimiento (Tutor)
+ *
+ * FASE 8.1: El tutor solicita cancelar, se da un período de 24hs
+ * para arrepentirse antes de confirmar la cancelación.
+ */
+export interface IniciarCancelacionInput {
+  /** ID del tutor (para obtener su suscripción) */
+  readonly tutorId: string;
+
+  /** Motivo de la cancelación */
+  readonly motivo: string;
+}
+
+/**
+ * Input para revertir cancelación pendiente (Tutor)
+ *
+ * FASE 8.1: El tutor se arrepiente dentro de las 24hs
+ * y quiere revertir la cancelación.
+ */
+export interface RevertirCancelacionInput {
+  /** ID del tutor (para obtener su suscripción) */
+  readonly tutorId: string;
+}
+
+/**
+ * Input para confirmar cancelación expirada (System/CRON)
+ *
+ * FASE 8.1: Cuando pasan más de 24hs y el tutor no revirtió,
+ * el sistema confirma la cancelación y ejecuta el borrado total.
+ */
+export interface ConfirmarCancelacionInput {
+  /** ID de la suscripción familiar */
+  readonly suscripcionFamiliarId: string;
+}
+
+/**
  * Input para cambiar horario de una inscripción
  */
 export interface CambiarHorarioInput {
@@ -572,6 +608,69 @@ export interface TutorReactivarSuscripcionResult {
   readonly mensaje: string;
 }
 
+// ============================================================================
+// TIPOS DE OUTPUT - CANCELACIÓN CON ARREPENTIMIENTO (FASE 8.1)
+// ============================================================================
+
+/**
+ * Resultado de iniciar cancelación con arrepentimiento
+ *
+ * FASE 8.1: Retorna la info necesaria para mostrar al tutor
+ * que tiene 24hs para arrepentirse.
+ */
+export interface IniciarCancelacionResult {
+  /** ID de la suscripción */
+  readonly suscripcionId: string;
+
+  /** Estado actual (debe ser PENDIENTE_CANCELACION) */
+  readonly estado: EstadoSuscripcionFamiliar;
+
+  /** Fecha/hora en que se solicitó la cancelación */
+  readonly fechaSolicitudCancelacion: Date;
+
+  /** Fecha/hora límite para arrepentirse (24hs después) */
+  readonly fechaLimiteArrepentimiento: Date;
+
+  /** Mensaje descriptivo */
+  readonly mensaje: string;
+}
+
+/**
+ * Resultado de revertir cancelación pendiente
+ *
+ * FASE 8.1: El tutor se arrepintió y revirtió la cancelación.
+ */
+export interface RevertirCancelacionResult {
+  /** ID de la suscripción */
+  readonly suscripcionId: string;
+
+  /** Estado actual (debe ser AUTHORIZED) */
+  readonly estado: EstadoSuscripcionFamiliar;
+
+  /** Mensaje descriptivo */
+  readonly mensaje: string;
+}
+
+/**
+ * Resultado de confirmar cancelación expirada
+ *
+ * FASE 8.1: El sistema confirmó la cancelación porque
+ * pasaron las 24hs sin que el tutor se arrepintiera.
+ */
+export interface ConfirmarCancelacionResult {
+  /** ID de la suscripción */
+  readonly suscripcionId: string;
+
+  /** Estado final (debe ser CANCELLED) */
+  readonly estado: EstadoSuscripcionFamiliar;
+
+  /** Nombres de estudiantes cuyo progreso fue borrado */
+  readonly estudiantesBorrados: string[];
+
+  /** Mensaje descriptivo */
+  readonly mensaje: string;
+}
+
 /**
  * Detalle de una inscripción de actividad
  */
@@ -659,6 +758,9 @@ export enum SuscripcionFamiliarErrorCode {
 
   /** Circuito abierto (MercadoPago no disponible) */
   CIRCUIT_OPEN = 'CIRCUIT_BREAKER_OPEN',
+
+  /** Ventana de arrepentimiento expirada (más de 24hs) */
+  ARREPENTIMIENTO_EXPIRADO = 'ARREPENTIMIENTO_EXPIRADO',
 }
 
 /**

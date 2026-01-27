@@ -544,6 +544,45 @@ export class NotificacionesService {
   }
 
   /**
+   * Notificar inicio de cancelación con ventana de arrepentimiento
+   * FASE 8.1 - Tutor inicia cancelación, tiene 24hs para revertir
+   */
+  async notificarSuscripcionCancelacionIniciada(
+    tutorId: string,
+    fechaLimite: Date,
+  ) {
+    const fechaStr = fechaLimite.toLocaleDateString('es-AR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    return this.createParaTutor(tutorId, {
+      tipo: TipoNotificacion.TUTOR_SUSCRIPCION_CANCELADA,
+      titulo: 'Cancelación iniciada - 24 horas para arrepentirte',
+      mensaje: `Iniciaste la cancelación de tu suscripción. Tenés hasta el ${fechaStr} (24 horas) para arrepentirte. Después de ese plazo, se eliminará TODO el progreso de tus hijos.`,
+      prioridad: PrioridadNotificacion.ALTA,
+      metadata: { fechaLimite: fechaLimite.toISOString(), etapa: 'iniciada' },
+    });
+  }
+
+  /**
+   * Notificar reversión de cancelación
+   * FASE 8.1 - Tutor se arrepiente y revierte la cancelación
+   */
+  async notificarSuscripcionCancelacionRevertida(tutorId: string) {
+    return this.createParaTutor(tutorId, {
+      tipo: TipoNotificacion.TUTOR_SUSCRIPCION_REACTIVADA,
+      titulo: '¡Cancelación revertida exitosamente!',
+      mensaje:
+        'Tu suscripción sigue activa. El progreso de tus hijos está intacto. ¡Gracias por quedarte con nosotros!',
+      prioridad: PrioridadNotificacion.ALTA,
+      metadata: { etapa: 'revertida' },
+    });
+  }
+
+  /**
    * Notificar suscripción pausada
    * Sprint A - Admin → Tutor
    */
