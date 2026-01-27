@@ -5,8 +5,8 @@ import { RefreshCw, Trash2, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { AdminButton, AdminCard, AdminSelect } from '@/components/admin/primitives';
 import { DLQStats } from './components/DLQStats';
-import { DLQTable } from './components/DLQTable';
-import { DLQDetailModal } from './components/DLQDetailModal';
+import { DlqTable } from './components/DlqTable';
+import { DlqDetailModal } from './components/DlqDetailModal';
 import {
   useDlqStats,
   useDlqList,
@@ -143,22 +143,19 @@ export function DLQDashboard() {
       </AdminCard>
 
       {/* Table */}
-      <DLQTable
+      <DlqTable
         items={listData?.items ?? []}
         total={listData?.total ?? 0}
         page={page}
-        limit={LIMIT}
+        pageSize={LIMIT}
         hasMore={listData?.hasMore ?? false}
-        isLoading={loadingList}
         onPageChange={setPage}
         onView={setSelectedWebhook}
-        onResolve={(item) => handleResolve(item.id)}
-        onAbandon={(item) => handleAbandon(item.id)}
       />
 
       {/* Detail Modal */}
-      <DLQDetailModal
-        webhook={selectedWebhook}
+      <DlqDetailModal
+        item={selectedWebhook}
         onClose={() => setSelectedWebhook(null)}
         onResolve={handleResolve}
         onAbandon={handleAbandon}

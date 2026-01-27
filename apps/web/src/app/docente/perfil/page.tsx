@@ -265,22 +265,26 @@ export default function DocentePerfilPage(): React.ReactNode {
         <div className="mt-8 bg-gray-50 rounded-lg p-6">
           <h3 className="text-sm font-medium text-gray-700 mb-2">Información de la Cuenta</h3>
           <div className="text-sm text-gray-600 space-y-1">
-            <p>
-              <span className="font-medium">Fecha de registro:</span>{' '}
-              {new Date(docente.createdAt).toLocaleDateString('es-AR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </p>
-            <p>
-              <span className="font-medium">Última actualización:</span>{' '}
-              {new Date(docente.updatedAt).toLocaleDateString('es-AR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </p>
+            {docente.createdAt && (
+              <p>
+                <span className="font-medium">Fecha de registro:</span>{' '}
+                {new Date(docente.createdAt).toLocaleDateString('es-AR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </p>
+            )}
+            {docente.updatedAt && (
+              <p>
+                <span className="font-medium">Última actualización:</span>{' '}
+                {new Date(docente.updatedAt).toLocaleDateString('es-AR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </p>
+            )}
           </div>
         </div>
       </motion.div>
