@@ -85,7 +85,7 @@ export function HijoCard({ hijo, onClick }: HijoCardProps) {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
               <Star className="w-4 h-4 text-amber-400" />
-              <span className="text-sm font-semibold text-white">{hijo.xpTotal}</span>
+              <span className="text-sm font-semibold text-white">{hijo.puntosTotales}</span>
               <span className="text-xs text-slate-400">pts</span>
             </div>
 

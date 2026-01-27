@@ -123,7 +123,8 @@ export const SUSCRIPCION_ESTADO_COLORS: Record<string, EstadoColorConfig> = {
 } as const;
 
 /**
- * Mapeo de estados de suscripción Mercado Pago a colores
+ * Mapeo de estados de suscripción a colores
+ * Coincide EXACTAMENTE con enum EstadoSuscripcionFamiliar del backend (Prisma)
  */
 export const SUSCRIPCION_MP_ESTADO_COLORS: Record<string, EstadoColorConfig> = {
   AUTHORIZED: {
@@ -133,17 +134,29 @@ export const SUSCRIPCION_MP_ESTADO_COLORS: Record<string, EstadoColorConfig> = {
   },
   PENDING: { bg: 'var(--status-pending-muted)', text: 'var(--status-pending)', variant: 'pending' },
   PAUSED: { bg: 'var(--status-warning-muted)', text: 'var(--status-warning)', variant: 'warning' },
+  PENDIENTE_CANCELACION: {
+    bg: 'var(--status-warning-muted)',
+    text: 'var(--status-warning)',
+    variant: 'warning',
+  },
   CANCELLED: { bg: 'var(--status-danger-muted)', text: 'var(--status-danger)', variant: 'danger' },
+  CONTINUIDAD: { bg: 'var(--status-info-muted)', text: 'var(--status-info)', variant: 'info' },
 } as const;
 
 /**
  * Mapeo de estados de suscripción Mercado Pago a labels en español
  */
+/**
+ * Labels en español para estados de suscripción
+ * Coincide con enum EstadoSuscripcionFamiliar del backend (Prisma)
+ */
 export const SUSCRIPCION_MP_ESTADO_LABELS: Record<string, string> = {
   AUTHORIZED: 'Activa',
   PENDING: 'Pendiente',
   PAUSED: 'Pausada',
+  PENDIENTE_CANCELACION: 'Cancelación Pendiente',
   CANCELLED: 'Cancelada',
+  CONTINUIDAD: 'Continuidad Verano',
 } as const;
 
 /**

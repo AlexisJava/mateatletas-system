@@ -53,6 +53,26 @@ export interface MetricasDashboard {
   asistenciaPromedio: number;
 }
 
+/**
+ * Info de comisión/clase grupal para un estudiante
+ */
+export interface ComisionInfo {
+  id: string;
+  nombre: string;
+  horario: string;
+  docente: {
+    nombre: string;
+    apellido: string;
+  };
+  producto?: {
+    nombre: string;
+  };
+}
+
+/**
+ * Info de hijo para el dashboard del tutor
+ * NOTA: Backend devuelve `puntosTotales` (no `xpTotal`)
+ */
 export interface HijoInfo {
   id: string;
   nombre: string;
@@ -60,9 +80,10 @@ export interface HijoInfo {
   edad: number | null;
   nivelEscolar: string | null;
   casa: string | null;
-  xpTotal: number;
+  puntosTotales: number;
   asistenciaPromedio: number;
   avatarUrl: string | null;
+  comisiones: ComisionInfo[];
 }
 
 export interface PagoPendiente {

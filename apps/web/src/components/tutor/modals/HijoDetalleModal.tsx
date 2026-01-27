@@ -261,7 +261,7 @@ export function HijoDetalleModal({ hijo, onClose, onUpdate }: HijoDetalleModalPr
                 <StatBox
                   icon={Star}
                   label="Puntos"
-                  value={hijo.xpTotal.toString()}
+                  value={hijo.puntosTotales.toString()}
                   color="text-amber-400"
                   bgColor="bg-amber-500/10"
                 />

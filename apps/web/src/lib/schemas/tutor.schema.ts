@@ -62,7 +62,26 @@ export const metricasDashboardSchema = z.object({
 });
 
 /**
+ * Schema para info de comisión/clase grupal
+ */
+export const comisionInfoSchema = z.object({
+  id: z.string(),
+  nombre: z.string(),
+  horario: z.string(),
+  docente: z.object({
+    nombre: z.string(),
+    apellido: z.string(),
+  }),
+  producto: z
+    .object({
+      nombre: z.string(),
+    })
+    .optional(),
+});
+
+/**
  * Schema para información de hijo
+ * NOTA: Backend devuelve `puntosTotales` (no `xpTotal`)
  */
 export const hijoInfoSchema = z.object({
   id: z.string(),
@@ -71,9 +90,10 @@ export const hijoInfoSchema = z.object({
   edad: z.number().nullable(),
   nivelEscolar: z.string().nullable(),
   casa: z.string().nullable(),
-  xpTotal: z.number(),
+  puntosTotales: z.number(),
   asistenciaPromedio: z.number(),
   avatarUrl: z.string().nullable(),
+  comisiones: z.array(comisionInfoSchema),
 });
 
 /**
