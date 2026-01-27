@@ -14,10 +14,12 @@ import {
 import { useSandboxState, useSandboxDispatch } from '../context/SandboxContext';
 import { useSandboxApi } from '../hooks';
 import type { NodoContenido } from '../types/sandbox.types';
+import type { SidebarIntentCategory, SidebarIntent } from '../utils/intent.types';
 import styles from './SandboxSidebar.module.css';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// INTENT CATEGORIES (matching pencil design)
+// INTENT CATEGORIES (Sidebar version - uses emojis for compact display)
+// Note: IntentLibrary has a richer version with icons/colors for the full modal
 // ─────────────────────────────────────────────────────────────────────────────
 
 const INTENT_CATEGORIES = [
@@ -87,10 +89,11 @@ const INTENT_CATEGORIES = [
       { id: 'celebration', name: 'Celebration', defaultJson: { intent: 'celebration' } },
     ],
   },
-] as const;
+] as const satisfies readonly SidebarIntentCategory[];
 
-type IntentCategoryType = (typeof INTENT_CATEGORIES)[number];
-type IntentType = IntentCategoryType['intents'][number];
+// Use imported types for component props
+type IntentCategoryType = SidebarIntentCategory;
+type IntentType = SidebarIntent;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INTENT ITEM

@@ -46,7 +46,7 @@ export function SandboxView(): ReactElement {
 
 /**
  * SandboxLayout - 3-panel IDE layout with resizable panels
- * Compact header with work timer | TreePanel | EditorPanel | PreviewPanel
+ * Compact header with work timer | SandboxSidebar | EditorPanel | PreviewPanel
  */
 function SandboxLayout(): ReactElement {
   useLoadFromUrl();

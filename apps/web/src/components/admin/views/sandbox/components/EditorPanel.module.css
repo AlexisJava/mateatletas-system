@@ -182,26 +182,6 @@
   height: 14px;
 }
 
-/* Legacy - keeping for backwards compatibility */
-.fileTab {
-  display: flex;
-  align-items: center;
-  gap: var(--sb-space-xs);
-  padding: var(--sb-space-xs) var(--sb-space-md);
-  background: var(--sb-bg-surface);
-  border: 1px solid var(--sb-border-glass);
-  border-radius: var(--sb-radius-sm);
-  color: var(--sb-text-primary);
-  font-family: var(--sb-font-mono);
-  font-size: var(--sb-text-sm);
-}
-
-.fileTab svg {
-  width: 14px;
-  height: 14px;
-  color: var(--sb-accent-cyan);
-}
-
 /* ═══════════════════════════════════════════════════════════════════════════════
    CLASE EDITOR (Planificaciones)
    ═══════════════════════════════════════════════════════════════════════════════ */

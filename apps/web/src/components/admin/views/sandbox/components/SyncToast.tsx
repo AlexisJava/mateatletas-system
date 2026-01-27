@@ -56,6 +56,7 @@ export function SyncToast({
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [autoHide, autoHideDelay, status, onClose]);
 
   // Reset visibility when status changes

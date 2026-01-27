@@ -23,27 +23,10 @@ import {
   Award,
 } from 'lucide-react';
 import styles from './IntentLibrary.module.css';
+import type { IntentDefinition, IntentCategory } from '../utils/intent.types';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TYPES
-// ─────────────────────────────────────────────────────────────────────────────
-
-export interface IntentDefinition {
-  id: string;
-  name: string;
-  description: string;
-  icon?: string;
-  gradient?: boolean;
-  defaultJson: Record<string, unknown>;
-}
-
-export interface IntentCategory {
-  id: string;
-  name: string;
-  icon: string;
-  color: 'green' | 'blue' | 'orange' | 'violet' | 'cyan';
-  intents: IntentDefinition[];
-}
+// Re-export types for consumers
+export type { IntentDefinition, IntentCategory };
 
 export interface IntentLibraryProps {
   onSelectIntent: (intent: IntentDefinition) => void;
@@ -410,17 +393,15 @@ export function IntentLibrary({
             </div>
             <div className={styles.previewContent}>
               <h5 className={styles.previewTitle}>
-                {(selectedIntent.defaultJson.title as string) || selectedIntent.name}
+                {selectedIntent.defaultJson.title ?? selectedIntent.name}
               </h5>
               <p className={styles.previewSubtitle}>
-                {(selectedIntent.defaultJson.subtitle as string) ||
-                  (selectedIntent.defaultJson.description as string) ||
+                {selectedIntent.defaultJson.subtitle ??
+                  selectedIntent.defaultJson.description ??
                   selectedIntent.description}
               </p>
               {selectedIntent.defaultJson.cta && (
-                <div className={styles.previewCta}>
-                  {(selectedIntent.defaultJson.cta as { text: string }).text}
-                </div>
+                <div className={styles.previewCta}>{selectedIntent.defaultJson.cta.text}</div>
               )}
             </div>
           </div>
@@ -434,6 +415,5 @@ export function IntentLibrary({
   );
 }
 
-// Export types and catalog for external use
+// Export catalog for external use (types already exported above)
 export { INTENT_CATEGORIES };
-export type { IntentCategory, IntentDefinition };
