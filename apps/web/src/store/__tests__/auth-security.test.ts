@@ -1,4 +1,8 @@
 /**
+ * @vitest-environment jsdom
+ */
+
+/**
  * ✅ SECURITY TEST: Autenticación sin localStorage
  *
  * Este test verifica que:
