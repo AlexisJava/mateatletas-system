@@ -114,7 +114,8 @@
 
 .editorTabs {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  gap: var(--sb-space-md);
   height: 100%;
 }
 
@@ -180,6 +181,42 @@
 .formatBtn svg {
   width: 14px;
   height: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   STATUS BADGE (validation status)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.statusBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--sb-radius-sm);
+  font-family: var(--sb-font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  transition: all var(--sb-transition-fast);
+}
+
+.statusBadge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.statusBadge[data-status='valid'] {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--sb-accent-green);
+}
+
+.statusBadge[data-status='invalid'] {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--sb-accent-red);
+}
+
+.statusBadge[data-status='legacy'] {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -302,17 +339,15 @@
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 .errorPanel {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 80px;
-  background: rgba(239, 68, 68, 0.1);
+  flex-shrink: 0;
+  max-height: 120px;
+  background: rgba(239, 68, 68, 0.08);
   border-top: 1px solid rgba(239, 68, 68, 0.3);
-  padding: var(--sb-space-sm);
+  padding: var(--sb-space-sm) var(--sb-space-md);
   display: flex;
   flex-direction: column;
   gap: var(--sb-space-xs);
+  overflow-y: auto;
 }
 
 .errorHeader {
@@ -322,27 +357,53 @@
 }
 
 .errorHeader svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   color: var(--sb-accent-red);
+  flex-shrink: 0;
 }
 
 .errorTitle {
   font-family: var(--sb-font-sans);
-  font-size: var(--sb-text-sm);
+  font-size: var(--sb-text-xs);
   font-weight: 600;
   color: var(--sb-accent-red);
 }
 
-.errorLine {
-  font-family: var(--sb-font-sans);
-  font-size: var(--sb-text-xs);
-  color: var(--sb-text-muted);
+.errorList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.errorDescription {
+.errorItem {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sb-space-sm);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.errorPath {
   font-family: var(--sb-font-mono);
-  font-size: var(--sb-text-xs);
+  color: var(--sb-accent-red);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.errorPath::after {
+  content: ':';
+}
+
+.errorMessage {
+  font-family: var(--sb-font-sans);
   color: var(--sb-text-secondary);
-  line-height: 1.5;
+}
+
+.errorMore {
+  font-family: var(--sb-font-sans);
+  font-size: 10px;
+  color: var(--sb-text-muted);
+  font-style: italic;
+  margin-top: 2px;
 }

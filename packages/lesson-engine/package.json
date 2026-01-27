@@ -26,6 +26,14 @@
     "./context": {
       "types": "./dist/context/index.d.ts",
       "default": "./dist/context/index.js"
+    },
+    "./catalog": {
+      "types": "./dist/catalog/index.d.ts",
+      "default": "./dist/catalog/index.js"
+    },
+    "./validation": {
+      "types": "./dist/validation/index.d.ts",
+      "default": "./dist/validation/index.js"
     }
   },
   "scripts": {
@@ -39,7 +47,8 @@
     "@mateatletas/ui": "workspace:*",
     "clsx": "^2.1.1",
     "framer-motion": "^11.15.0",
-    "lucide-react": "^0.562.0"
+    "lucide-react": "^0.562.0",
+    "zod": "^3.24.0"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

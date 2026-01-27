@@ -1,12 +1,21 @@
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState, useMemo } from 'react';
 import Editor, { type OnMount, type BeforeMount } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
-import { Braces, AlignLeft } from 'lucide-react';
+import { Braces, AlignLeft, CheckCircle2, AlertCircle, Circle } from 'lucide-react';
+import {
+  validateIntentJson,
+  type ValidationResult,
+  type ValidationIssue,
+} from '@mateatletas/lesson-engine';
 import type { NodoContenido, ClasePlanificacion, ContentType } from '../types/sandbox.types';
 import { sandboxDarkTheme, THEME_NAME } from '../utils/monacoTheme';
 import styles from './EditorPanel.module.css';
+
+// =============================================================================
+// TYPES
+// =============================================================================
 
 interface EditorPanelProps {
   contentType: ContentType;
@@ -16,22 +25,33 @@ interface EditorPanelProps {
   onOpenContenido?: (contenidoId: string) => void;
 }
 
+type ValidationStatus = 'idle' | 'valid' | 'invalid' | 'legacy';
+
+// =============================================================================
+// COMPONENT
+// =============================================================================
+
 export function EditorPanel({
   contentType,
   selectedNodo,
   selectedClase,
   onChange,
   onOpenContenido,
-}: EditorPanelProps) {
+}: EditorPanelProps): React.ReactElement {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const monacoRef = useRef<typeof import('monaco-editor') | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  const [validationStatus, setValidationStatus] = useState<ValidationStatus>('idle');
 
   const handleEditorBeforeMount: BeforeMount = (monaco) => {
     monaco.editor.defineTheme(THEME_NAME, sandboxDarkTheme);
+    monacoRef.current = monaco;
   };
 
-  const handleEditorMount: OnMount = (editor) => {
-    editorRef.current = editor;
+  const handleEditorMount: OnMount = (editorInstance) => {
+    editorRef.current = editorInstance;
   };
 
   // Force layout on container resize
@@ -43,6 +63,100 @@ export function EditorPanel({
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, []);
+
+  // Debounced validation
+  const validateContent = useCallback((content: string) => {
+    if (!content.trim()) {
+      setValidationResult(null);
+      setValidationStatus('idle');
+      return;
+    }
+
+    const result = validateIntentJson(content);
+    setValidationResult(result);
+
+    if (result.success) {
+      if (result.intentId === '') {
+        // Legacy content (no intent field)
+        setValidationStatus('legacy');
+      } else {
+        setValidationStatus('valid');
+      }
+    } else {
+      setValidationStatus('invalid');
+    }
+
+    // Set Monaco markers
+    if (editorRef.current && monacoRef.current) {
+      const model = editorRef.current.getModel();
+      if (model) {
+        const markers: editor.IMarkerData[] = [];
+
+        if (!result.success) {
+          result.errors.forEach((error: ValidationIssue) => {
+            markers.push({
+              severity: monacoRef.current!.MarkerSeverity.Error,
+              message: error.message,
+              startLineNumber: 1,
+              startColumn: 1,
+              endLineNumber: 1,
+              endColumn: 1,
+            });
+          });
+        }
+
+        monacoRef.current.editor.setModelMarkers(model, 'intent-validator', markers);
+      }
+    }
+  }, []);
+
+  // Validate on content change (debounced)
+  useEffect(() => {
+    const content = selectedNodo?.contenidoJson || '';
+    const timer = setTimeout(() => {
+      if (content) {
+        validateContent(content);
+      } else {
+        setValidationResult(null);
+        setValidationStatus('idle');
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [selectedNodo?.contenidoJson, validateContent]);
+
+  // Compute status badge
+  const statusBadge = useMemo(() => {
+    switch (validationStatus) {
+      case 'valid':
+        return (
+          <span className={styles.statusBadge} data-status="valid">
+            <CheckCircle2 />
+            <span>Intent válido</span>
+          </span>
+        );
+      case 'invalid':
+        return (
+          <span className={styles.statusBadge} data-status="invalid">
+            <AlertCircle />
+            <span>
+              {validationResult && !validationResult.success
+                ? `${validationResult.errors.length} error${validationResult.errors.length > 1 ? 'es' : ''}`
+                : 'Error'}
+            </span>
+          </span>
+        );
+      case 'legacy':
+        return (
+          <span className={styles.statusBadge} data-status="legacy">
+            <Circle />
+            <span>Contenido legacy</span>
+          </span>
+        );
+      default:
+        return null;
+    }
+  }, [validationStatus, validationResult]);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // PLANIFICACIÓN VIEW
@@ -114,26 +228,13 @@ export function EditorPanel({
     );
   }
 
-  // Template inicial para nodos hoja vacíos
+  // Template inicial para nodos hoja vacíos - ahora usa formato intent
   const defaultTemplate = JSON.stringify(
     {
-      type: 'Stage',
-      props: { pattern: 'cyber-grid' },
-      children: [
-        {
-          type: 'ContentZone',
-          children: [
-            {
-              type: 'LessonHeader',
-              props: { title: 'Título', subtitle: 'Subtítulo', icon: '📚' },
-            },
-            {
-              type: 'TextBlock',
-              children: 'Escribe tu contenido aquí...',
-            },
-          ],
-        },
-      ],
+      intent: 'presentation:hero',
+      title: '¡Bienvenido!',
+      subtitle: 'Edita este contenido para empezar',
+      ctaText: 'Continuar',
     },
     null,
     2,
@@ -146,6 +247,15 @@ export function EditorPanel({
     editorRef.current.getAction('editor.action.formatDocument')?.run();
   }, []);
 
+  const handleChange = useCallback(
+    (value: string | undefined): void => {
+      const newValue = value || '';
+      onChange(newValue);
+      validateContent(newValue);
+    },
+    [onChange, validateContent],
+  );
+
   return (
     <div className={styles.editorWrapper}>
       {/* Editor Header with Tabs */}
@@ -155,6 +265,7 @@ export function EditorPanel({
             <Braces />
             <span>JSON</span>
           </button>
+          {statusBadge}
         </div>
         <div className={styles.editorActions}>
           <button
@@ -176,7 +287,7 @@ export function EditorPanel({
           language="json"
           theme={THEME_NAME}
           value={content}
-          onChange={(value) => onChange(value || '')}
+          onChange={handleChange}
           beforeMount={handleEditorBeforeMount}
           onMount={handleEditorMount}
           options={{
@@ -200,6 +311,29 @@ export function EditorPanel({
           }}
         />
       </div>
+
+      {/* Error Panel */}
+      {validationStatus === 'invalid' && validationResult && !validationResult.success && (
+        <div className={styles.errorPanel}>
+          <div className={styles.errorHeader}>
+            <AlertCircle />
+            <span className={styles.errorTitle}>Errores de validación</span>
+          </div>
+          <div className={styles.errorList}>
+            {validationResult.errors.slice(0, 3).map((error, idx) => (
+              <div key={idx} className={styles.errorItem}>
+                <span className={styles.errorPath}>{error.path || 'root'}</span>
+                <span className={styles.errorMessage}>{error.message}</span>
+              </div>
+            ))}
+            {validationResult.errors.length > 3 && (
+              <span className={styles.errorMore}>
+                +{validationResult.errors.length - 3} errores más
+              </span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

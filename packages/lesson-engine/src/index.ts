@@ -21,3 +21,6 @@ export * from './intents';
 
 // Catalog - Metadata centralizada de intents
 export * from './catalog';
+
+// Validation - Zod schemas and validators
+export * from './validation';
