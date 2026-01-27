@@ -1,32 +1,216 @@
-/* EditorPanel.module.css - Editor Monaco con estilo elegante */
+/**
+ * EditorPanel.module.css - Frame 3 Editor
+ * Dark Glassmorphism Gaming Premium
+ */
 
-.editor {
+/* ═══════════════════════════════════════════════════════════════════════════════
+   EDITOR WRAPPER (header + editor)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.editorWrapper {
+  display: flex;
+  flex-direction: column;
   height: 100%;
   width: 100%;
-  border-radius: 0 0 12px 0;
   overflow: hidden;
+  background: var(--sb-bg-canvas);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   EDITOR CONTAINER
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.editor {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  background: var(--sb-bg-surface);
+}
+
+/* Monaco editor custom styling */
+.editor :global(.monaco-editor),
+.editor :global(.monaco-editor-background),
+.editor :global(.monaco-editor .inputarea.ime-input) {
+  background: var(--sb-bg-surface) !important;
+}
+
+.editor :global(.monaco-editor .margin) {
+  background: var(--sb-bg-deep) !important;
+}
+
+.editor :global(.monaco-editor .line-numbers) {
+  color: var(--sb-text-muted) !important;
+}
+
+.editor :global(.monaco-editor .current-line ~ .line-numbers) {
+  color: var(--sb-accent-violet) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   EMPTY STATE
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 .empty {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--admin-text-muted);
-  font-size: 0.8125rem;
-  padding: 2rem;
+  color: var(--sb-text-muted);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  padding: var(--sb-space-2xl);
   text-align: center;
+  gap: var(--sb-space-md);
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   EDITOR DE CLASE (Planificaciones)
-   ───────────────────────────────────────────────────────────────────────────── */
+.emptyIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--sb-radius-xl);
+  background: var(--sb-bg-glass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sb-text-muted);
+}
+
+.emptyIcon svg {
+  width: 36px;
+  height: 36px;
+}
+
+.emptyTitle {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-lg);
+  font-weight: 600;
+  color: var(--sb-text-primary);
+  margin: 0;
+}
+
+.emptyDescription {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  color: var(--sb-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   EDITOR HEADER (file tabs) - Frame 3 exact specs
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.editorHeader {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: var(--sb-bg-canvas);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.024);
+  flex-shrink: 0;
+}
+
+.editorTabs {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+}
+
+.editorTab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  background: transparent;
+  border: none;
+  border-radius: 10px 10px 0 0;
+  color: var(--sb-text-muted);
+  font-family: var(--sb-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--sb-transition-fast);
+}
+
+.editorTab:hover {
+  color: var(--sb-text-secondary);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.editorTabActive {
+  background: var(--sb-bg-surface);
+  color: var(--sb-text-primary);
+}
+
+.editorTab svg {
+  width: 14px;
+  height: 14px;
+  color: var(--sb-accent-cyan);
+}
+
+.editorActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.formatBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.04);
+  border: none;
+  border-radius: 8px;
+  color: var(--sb-text-muted);
+  cursor: pointer;
+  transition: var(--sb-transition-fast);
+}
+
+.formatBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--sb-text-secondary);
+}
+
+.formatBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Legacy - keeping for backwards compatibility */
+.fileTab {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-xs);
+  padding: var(--sb-space-xs) var(--sb-space-md);
+  background: var(--sb-bg-surface);
+  border: 1px solid var(--sb-border-glass);
+  border-radius: var(--sb-radius-sm);
+  color: var(--sb-text-primary);
+  font-family: var(--sb-font-mono);
+  font-size: var(--sb-text-sm);
+}
+
+.fileTab svg {
+  width: 14px;
+  height: 14px;
+  color: var(--sb-accent-cyan);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CLASE EDITOR (Planificaciones)
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 .claseEditor {
-  padding: 1.5rem;
+  padding: var(--sb-space-xl);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--sb-space-xl);
   height: 100%;
   overflow-y: auto;
 }
@@ -34,15 +218,15 @@
 .claseHeader {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--sb-space-sm);
 }
 
 .claseHeader h3 {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--admin-text);
-  background: linear-gradient(135deg, var(--admin-text) 0%, var(--admin-accent) 100%);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-xl);
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--sb-text-primary), var(--sb-accent-violet));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -50,30 +234,34 @@
 
 .claseDescripcion {
   margin: 0;
-  font-size: 0.875rem;
-  color: var(--admin-text-muted);
-  line-height: 1.5;
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-base);
+  color: var(--sb-text-secondary);
+  line-height: 1.6;
 }
 
 .claseActions {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--sb-space-md);
 }
 
 .actionBtn {
   display: flex;
   align-items: center;
-  gap: 0.875rem;
-  padding: 1rem 1.25rem;
-  background: linear-gradient(135deg, var(--admin-surface-2) 0%, var(--admin-surface-3) 100%);
-  border: 1px solid var(--admin-border);
-  border-radius: 12px;
-  color: var(--admin-text);
-  font-size: 0.875rem;
+  gap: var(--sb-space-md);
+  padding: var(--sb-space-md) var(--sb-space-lg);
+  background: var(--sb-bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--sb-border-glass);
+  border-radius: var(--sb-radius-md);
+  color: var(--sb-text-primary);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-base);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--sb-transition-normal);
   position: relative;
   overflow: hidden;
 }
@@ -82,17 +270,15 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, transparent 0%, rgba(16, 185, 129, 0.05) 100%);
+  background: linear-gradient(135deg, transparent 0%, rgba(139, 92, 246, 0.05) 100%);
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--sb-transition-fast);
 }
 
 .actionBtn:hover:not(:disabled) {
-  border-color: var(--admin-accent);
+  border-color: var(--sb-accent-violet);
   transform: translateY(-2px);
-  box-shadow:
-    0 4px 16px rgba(16, 185, 129, 0.15),
-    inset 0 0 0 1px rgba(16, 185, 129, 0.1);
+  box-shadow: var(--sb-shadow-glow-violet);
 }
 
 .actionBtn:hover:not(:disabled)::before {
@@ -107,4 +293,76 @@
 .actionIcon {
   font-size: 1.25rem;
   filter: saturate(1.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   INJECTED BADGE (when intent is selected)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.injectedBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-xs);
+  padding: var(--sb-space-xs) var(--sb-space-sm);
+  background: rgba(34, 197, 94, 0.15);
+  border-radius: var(--sb-radius-sm);
+  color: var(--sb-accent-green);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-xs);
+  font-weight: 500;
+}
+
+.injectedBadge svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ERROR PANEL
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.errorPanel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: rgba(239, 68, 68, 0.1);
+  border-top: 1px solid rgba(239, 68, 68, 0.3);
+  padding: var(--sb-space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-space-xs);
+}
+
+.errorHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-sm);
+}
+
+.errorHeader svg {
+  width: 16px;
+  height: 16px;
+  color: var(--sb-accent-red);
+}
+
+.errorTitle {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  font-weight: 600;
+  color: var(--sb-accent-red);
+}
+
+.errorLine {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-xs);
+  color: var(--sb-text-muted);
+}
+
+.errorDescription {
+  font-family: var(--sb-font-mono);
+  font-size: var(--sb-text-xs);
+  color: var(--sb-text-secondary);
+  line-height: 1.5;
 }

@@ -1,169 +1,134 @@
 'use client';
 
-import { useState } from 'react';
-import { useCreateContent, type ContentType } from '../hooks';
-import type { CasaTipo, MundoTipo, ContenidoBackend } from '@/lib/api/contenidos.api';
-import type { Planificacion as PlanificacionBackend } from '@/lib/api/planificaciones-admin.api';
+import { type ReactElement } from 'react';
+import {
+  Zap,
+  Calendar,
+  Play,
+  Flag,
+  Timer,
+  Layers,
+  GitBranch,
+  Target,
+  ArrowRight,
+} from 'lucide-react';
+import type { ContentType } from '../hooks';
 import styles from './StartModal.module.css';
 
-export interface CreatedContentResult {
-  id: string;
-  type: ContentType;
-  data: ContenidoBackend | PlanificacionBackend;
-}
-
 interface StartModalProps {
-  onCreated: (result: CreatedContentResult) => void;
+  onSelectType: (type: ContentType) => void;
 }
 
-const CASAS: { value: CasaTipo; label: string; color: string }[] = [
-  { value: 'QUANTUM', label: 'Quantum', color: '#F472B6' },
-  { value: 'VERTEX', label: 'Vertex', color: '#60A5FA' },
-  { value: 'PULSAR', label: 'Pulsar', color: '#34D399' },
+const MICRO_LECCION_FEATURES = [
+  { icon: Play, text: 'Pantalla de Inicio' },
+  { icon: Flag, text: 'Pantalla de Cierre' },
+  { icon: Timer, text: '2-5 minutos de contenido' },
 ];
 
-const MUNDOS: { value: MundoTipo; label: string }[] = [
-  { value: 'MATEMATICA', label: 'Matemática' },
-  { value: 'PROGRAMACION', label: 'Programación' },
-  { value: 'CIENCIAS', label: 'Ciencias' },
+const PLANIFICACION_FEATURES = [
+  { icon: Layers, text: '4, 6, 8 o hasta 20 clases' },
+  { icon: GitBranch, text: 'Estructura modular' },
+  { icon: Target, text: 'Objetivos por clase' },
 ];
 
-export function StartModal({ onCreated }: StartModalProps) {
-  const [contentType, setContentType] = useState<ContentType>('microleccion');
-  const [casa, setCasa] = useState<CasaTipo>('QUANTUM');
-  const [mundo, setMundo] = useState<MundoTipo>('MATEMATICA');
-  const [titulo, setTitulo] = useState('');
-  const [cantidadClases, setCantidadClases] = useState(8);
-
-  const { createMicroleccion, createPlanificacion, isCreating, error } = useCreateContent();
-
-  const handleCreate = async () => {
-    if (!titulo.trim()) return;
-
-    if (contentType === 'microleccion') {
-      const result = await createMicroleccion({
-        titulo: titulo.trim(),
-        casaTipo: casa,
-        mundoTipo: mundo,
-      });
-      if (result) {
-        onCreated({ id: result.id, type: 'microleccion', data: result });
-      }
-    } else {
-      const result = await createPlanificacion({
-        titulo: titulo.trim(),
-        casaTipo: casa,
-        mundoTipo: mundo,
-        cantidadClases,
-      });
-      if (result) {
-        onCreated({ id: result.id, type: 'planificacion', data: result });
-      }
-    }
-  };
-
+export function StartModal({ onSelectType }: StartModalProps): ReactElement {
   return (
     <div className={styles.overlay}>
-      <div className={styles.modal}>
-        <h2 className={styles.title}>Crear Contenido</h2>
+      {/* Background glows */}
+      <div className={styles.glowViolet} aria-hidden="true" />
+      <div className={styles.glowCyan} aria-hidden="true" />
 
-        {/* Tipo de contenido */}
-        <div className={styles.section}>
-          <label className={styles.label}>Tipo</label>
-          <div className={styles.typeCards}>
-            <button
-              type="button"
-              className={`${styles.typeCard} ${contentType === 'microleccion' ? styles.active : ''}`}
-              onClick={() => setContentType('microleccion')}
-            >
-              <span className={styles.typeIcon}>📄</span>
-              <span>Microlección</span>
-            </button>
-            <button
-              type="button"
-              className={`${styles.typeCard} ${contentType === 'planificacion' ? styles.active : ''}`}
-              onClick={() => setContentType('planificacion')}
-            >
-              <span className={styles.typeIcon}>📚</span>
-              <span>Planificación</span>
-            </button>
-          </div>
+      <div className={styles.content}>
+        {/* Header */}
+        <header className={styles.header}>
+          <div className={styles.logo}>S</div>
+          <h1 className={styles.title}>¿Qué quieres crear hoy?</h1>
+          <p className={styles.subtitle}>Elige el tipo de contenido educativo que vas a diseñar</p>
+        </header>
+
+        {/* Type Cards */}
+        <div className={styles.cardsContainer}>
+          {/* Micro-lección Card */}
+          <button
+            type="button"
+            className={styles.typeCard}
+            data-type="microleccion"
+            onClick={() => onSelectType('microleccion')}
+          >
+            <div className={styles.cardIcon}>
+              <Zap />
+            </div>
+            <div className={styles.cardContent}>
+              <h2 className={styles.cardTitle}>Micro-lección</h2>
+              <p className={styles.cardDescription}>
+                Contenido educativo breve y enfocado. Ideal para conceptos puntuales que se pueden
+                aprender en pocos minutos.
+              </p>
+            </div>
+            <div className={styles.cardFeatures}>
+              {MICRO_LECCION_FEATURES.map((feature) => (
+                <div key={feature.text} className={styles.feature}>
+                  <feature.icon />
+                  <span>{feature.text}</span>
+                </div>
+              ))}
+            </div>
+            <div className={styles.cardCta}>
+              <span>Crear Micro-lección</span>
+              <ArrowRight />
+            </div>
+          </button>
+
+          {/* Planificación Card */}
+          <button
+            type="button"
+            className={styles.typeCard}
+            data-type="planificacion"
+            onClick={() => onSelectType('planificacion')}
+          >
+            <div className={styles.cardIcon}>
+              <Calendar />
+            </div>
+            <div className={styles.cardContent}>
+              <h2 className={styles.cardTitle}>Planificación</h2>
+              <p className={styles.cardDescription}>
+                Diseña un curso completo con múltiples clases estructuradas. Perfecto para programas
+                de formación extensos.
+              </p>
+            </div>
+            <div className={styles.cardFeatures}>
+              {PLANIFICACION_FEATURES.map((feature) => (
+                <div key={feature.text} className={styles.feature}>
+                  <feature.icon />
+                  <span>{feature.text}</span>
+                </div>
+              ))}
+            </div>
+            <div className={styles.cardCta}>
+              <span>Crear Planificación</span>
+              <ArrowRight />
+            </div>
+          </button>
         </div>
 
-        {/* Casa */}
-        <div className={styles.section}>
-          <label className={styles.label}>Casa</label>
-          <div className={styles.options}>
-            {CASAS.map((c) => (
-              <button
-                key={c.value}
-                type="button"
-                className={`${styles.option} ${casa === c.value ? styles.active : ''}`}
-                style={{ '--option-color': c.color } as React.CSSProperties}
-                onClick={() => setCasa(c.value)}
-              >
-                {c.label}
+        {/* Recent Projects - placeholder for future implementation */}
+        {/*
+        <section className={styles.recentSection}>
+          <div className={styles.recentHeader}>
+            <h3 className={styles.recentTitle}>Proyectos recientes</h3>
+            <button type="button" className={styles.recentViewAll}>
+              Ver todos →
+            </button>
+          </div>
+          <div className={styles.recentList}>
+            {recentProjects.map((project) => (
+              <button key={project.id} className={styles.recentItem}>
+                ...
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Mundo */}
-        <div className={styles.section}>
-          <label className={styles.label}>Materia</label>
-          <div className={styles.options}>
-            {MUNDOS.map((m) => (
-              <button
-                key={m.value}
-                type="button"
-                className={`${styles.option} ${mundo === m.value ? styles.active : ''}`}
-                onClick={() => setMundo(m.value)}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Cantidad de clases (solo planificación) */}
-        {contentType === 'planificacion' && (
-          <div className={styles.section}>
-            <label className={styles.label}>Cantidad de clases</label>
-            <input
-              type="number"
-              className={styles.input}
-              value={cantidadClases}
-              onChange={(e) => setCantidadClases(Math.max(1, parseInt(e.target.value) || 1))}
-              min={1}
-              max={24}
-            />
-          </div>
-        )}
-
-        {/* Título */}
-        <div className={styles.section}>
-          <label className={styles.label}>Título</label>
-          <input
-            type="text"
-            className={styles.input}
-            placeholder="Nombre del contenido..."
-            value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-            autoFocus
-          />
-        </div>
-
-        {error && <p className={styles.error}>{error}</p>}
-
-        <button
-          type="button"
-          className={styles.createBtn}
-          onClick={handleCreate}
-          disabled={!titulo.trim() || isCreating}
-        >
-          {isCreating ? 'Creando...' : 'Crear'}
-        </button>
+        </section>
+        */}
       </div>
     </div>
   );

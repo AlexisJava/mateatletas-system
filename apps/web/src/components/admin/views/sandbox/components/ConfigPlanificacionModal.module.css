@@ -1,0 +1,426 @@
+/**
+ * ConfigPlanificacionModal.module.css - Frame 2b
+ * Configuración de planificación
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   OVERLAY
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--sb-bg-deep);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--sb-z-modal);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BACKGROUND GLOWS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.glowViolet {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  top: -200px;
+  right: -200px;
+  background: radial-gradient(circle, var(--sb-glow-violet) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.glowCyan {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  bottom: -100px;
+  left: -100px;
+  background: radial-gradient(circle, var(--sb-glow-cyan-subtle) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CONTENT
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-space-2xl);
+  padding: var(--sb-space-3xl);
+  max-width: 800px;
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BACK BUTTON
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.backBtn {
+  position: absolute;
+  top: var(--sb-space-xl);
+  left: var(--sb-space-xl);
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-xs);
+  padding: var(--sb-space-sm) var(--sb-space-md);
+  background: transparent;
+  border: none;
+  border-radius: var(--sb-radius-sm);
+  color: var(--sb-text-secondary);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  cursor: pointer;
+  transition: all var(--sb-transition-fast);
+}
+
+.backBtn:hover {
+  color: var(--sb-text-primary);
+  background: var(--sb-bg-glass);
+}
+
+.backBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sb-space-md);
+  text-align: center;
+}
+
+.headerIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--sb-radius-lg);
+  background: rgba(139, 92, 246, 0.15);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sb-accent-violet);
+}
+
+.headerIcon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.headerTitle {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-2xl);
+  font-weight: 700;
+  color: var(--sb-text-primary);
+  margin: 0;
+}
+
+.headerSubtitle {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-base);
+  color: var(--sb-text-secondary);
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   OPTIONS GRID
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--sb-space-md);
+  justify-content: center;
+}
+
+.optionCard {
+  aspect-ratio: 1;
+  max-width: 120px;
+  width: 100%;
+  padding: var(--sb-space-md);
+  border-radius: var(--sb-radius-xl);
+  background: var(--sb-bg-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--sb-border-glass);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sb-space-xs);
+  cursor: pointer;
+  transition: all var(--sb-transition-fast);
+}
+
+.optionCard:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.optionCard.selected {
+  background: rgba(139, 92, 246, 0.2);
+  border: 2px solid var(--sb-accent-violet);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+}
+
+.optionNumber {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-2xl);
+  font-weight: 700;
+  color: var(--sb-text-primary);
+}
+
+.optionCard.selected .optionNumber {
+  color: var(--sb-accent-violet);
+}
+
+.optionLabel {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-xs);
+  color: var(--sb-text-muted);
+}
+
+.optionCheck {
+  position: absolute;
+  top: var(--sb-space-xs);
+  right: var(--sb-space-xs);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--sb-accent-violet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sb-text-primary);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all var(--sb-transition-fast);
+}
+
+.optionCard {
+  position: relative;
+}
+
+.optionCard.selected .optionCheck {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.optionCheck svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CUSTOM OPTION
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.customOption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sb-space-sm);
+  color: var(--sb-text-muted);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+}
+
+.customInput {
+  width: 80px;
+  padding: var(--sb-space-sm) var(--sb-space-md);
+  border-radius: var(--sb-radius-sm);
+  background: var(--sb-bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--sb-border-glass);
+  color: var(--sb-text-primary);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-base);
+  text-align: center;
+  outline: none;
+  transition: all var(--sb-transition-fast);
+}
+
+.customInput:focus {
+  border-color: var(--sb-accent-violet);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   INPUT
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-space-sm);
+  max-width: 500px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.inputLabel {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  font-weight: 500;
+  color: var(--sb-text-secondary);
+}
+
+.input {
+  width: 100%;
+  padding: var(--sb-space-md) var(--sb-space-lg);
+  border-radius: var(--sb-radius-md);
+  background: var(--sb-bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--sb-border-glass);
+  color: var(--sb-text-primary);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-base);
+  outline: none;
+  transition: all var(--sb-transition-fast);
+}
+
+.input:focus {
+  border-color: var(--sb-accent-violet);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.input::placeholder {
+  color: var(--sb-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ERROR
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.error {
+  padding: var(--sb-space-md) var(--sb-space-lg);
+  border-radius: var(--sb-radius-md);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--sb-accent-red);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  margin: 0;
+  max-width: 500px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ACTIONS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.actions {
+  display: flex;
+  gap: var(--sb-space-md);
+  justify-content: center;
+  margin-top: var(--sb-space-md);
+}
+
+.cancelBtn {
+  padding: var(--sb-space-md) var(--sb-space-xl);
+  border-radius: var(--sb-radius-md);
+  background: transparent;
+  border: 1px solid var(--sb-border-glass-hover);
+  color: var(--sb-text-secondary);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--sb-transition-fast);
+}
+
+.cancelBtn:hover {
+  background: var(--sb-bg-glass);
+  color: var(--sb-text-primary);
+}
+
+.continueBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-xs);
+  padding: var(--sb-space-md) var(--sb-space-xl);
+  border-radius: var(--sb-radius-md);
+  background: var(--sb-accent-violet);
+  border: none;
+  color: var(--sb-text-primary);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-base);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5);
+  transition: all var(--sb-transition-fast);
+}
+
+.continueBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(139, 92, 246, 0.6);
+}
+
+.continueBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.continueBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 800px) {
+  .optionsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 500px) {
+  .content {
+    padding: var(--sb-space-xl);
+    gap: var(--sb-space-xl);
+  }
+
+  .optionsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 280px;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelBtn,
+  .continueBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}

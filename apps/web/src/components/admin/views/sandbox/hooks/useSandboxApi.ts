@@ -104,6 +104,18 @@ function mapPlanificacionBackendToFrontend(backend: PlanificacionBackend): Plani
 // Exportar mappers para uso directo (evita GET después de crear)
 export { mapContenidoBackendToFrontend, mapPlanificacionBackendToFrontend };
 
+// Helper to find first leaf node (node with content, no children)
+function findFirstLeafNode(nodos: NodoContenido[]): NodoContenido | null {
+  for (const nodo of nodos) {
+    if (nodo.hijos.length === 0) {
+      return nodo; // This is a leaf
+    }
+    const leafInChildren = findFirstLeafNode(nodo.hijos);
+    if (leafInChildren) return leafInChildren;
+  }
+  return null;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HOOK
 // ─────────────────────────────────────────────────────────────────────────────
@@ -119,6 +131,16 @@ export function useSandboxApi() {
         const backend = await getContenidoById(id);
         const contenido = mapContenidoBackendToFrontend(backend);
         dispatch({ type: 'SET_CONTENIDO', payload: contenido });
+        // Auto-select first leaf node for immediate editing
+        const firstLeaf = findFirstLeafNode(contenido.nodos);
+        if (firstLeaf) {
+          dispatch({ type: 'SELECT_ITEM', payload: firstLeaf.id });
+        } else {
+          const firstNodo = contenido.nodos[0];
+          if (firstNodo) {
+            dispatch({ type: 'SELECT_ITEM', payload: firstNodo.id });
+          }
+        }
         return true;
       } catch {
         dispatch({ type: 'SET_CONTENIDO', payload: null });
@@ -201,6 +223,11 @@ export function useSandboxApi() {
         const backend = await obtenerPlanificacion(id);
         const planificacion = mapPlanificacionBackendToFrontend(backend);
         dispatch({ type: 'SET_PLANIFICACION', payload: planificacion });
+        // Auto-select first clase
+        const firstClase = planificacion.clases[0];
+        if (firstClase) {
+          dispatch({ type: 'SELECT_ITEM', payload: firstClase.id });
+        }
         return true;
       } catch {
         dispatch({ type: 'SET_PLANIFICACION', payload: null });

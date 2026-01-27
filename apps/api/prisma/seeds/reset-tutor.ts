@@ -18,7 +18,7 @@ async function resetTutorPassword() {
 
   await prisma.tutor.update({
     where: { id: tutor.id },
-    data: { password_hash: hash },
+    data: { passwordHash: hash },
   });
 
   console.log('Contraseña reseteada');

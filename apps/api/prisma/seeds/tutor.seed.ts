@@ -14,10 +14,10 @@ export async function seedTutor(prisma: PrismaClient) {
 
   const tutor = await prisma.tutor.upsert({
     where: { email },
-    update: { password_hash: hashedPassword },
+    update: { passwordHash: hashedPassword },
     create: {
       email,
-      password_hash: hashedPassword,
+      passwordHash: hashedPassword,
       nombre: 'María Elena',
       apellido: 'García López',
       telefono: '+549261234567',
@@ -59,8 +59,8 @@ export async function seedTutor(prisma: PrismaClient) {
         edad: estData.edad,
         nivelEscolar: estData.nivel_escolar,
         email: estData.email,
-        password_hash: estudianteHashedPassword,
-        tutor_id: tutor.id,
+        passwordHash: estudianteHashedPassword,
+        tutorId: tutor.id,
       },
     });
   }

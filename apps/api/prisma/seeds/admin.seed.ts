@@ -19,13 +19,13 @@ export async function seedAdmin(prisma: PrismaClient): Promise<void> {
   const admin = await prisma.admin.upsert({
     where: { email },
     update: {
-      password_hash: hashedPassword,
+      passwordHash: hashedPassword,
       nombre: 'Admin',
       apellido: 'Mateatletas',
     },
     create: {
       email,
-      password_hash: hashedPassword,
+      passwordHash: hashedPassword,
       nombre: 'Admin',
       apellido: 'Mateatletas',
     },

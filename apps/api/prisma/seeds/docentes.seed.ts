@@ -33,7 +33,7 @@ export async function seedDocentes(prisma: PrismaClient) {
         email: doc.email,
         nombre: doc.nombre,
         apellido: doc.apellido,
-        password_hash: passwordHash,
+        passwordHash: passwordHash,
         roles: ['docente'],
       },
     });

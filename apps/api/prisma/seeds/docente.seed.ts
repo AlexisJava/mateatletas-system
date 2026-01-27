@@ -15,7 +15,7 @@ export async function seedDocente(prisma: PrismaClient) {
   await prisma.docente.upsert({
     where: { email },
     update: {
-      password_hash: hashedPassword,
+      passwordHash: hashedPassword,
       titulo: 'Profesor de Matemáticas Avanzadas',
       bio: 'Docente con 10 años de experiencia en enseñanza de matemáticas para niños y jóvenes. Especializado en álgebra, geometría y resolución de problemas matemáticos. Apasionado por hacer que las matemáticas sean divertidas y accesibles.',
       especialidades: [
@@ -24,11 +24,11 @@ export async function seedDocente(prisma: PrismaClient) {
         'Resolución de Problemas',
         'Olimpíadas',
       ],
-      experiencia_anos: 10,
+      experienciaAnos: 10,
     },
     create: {
       email,
-      password_hash: hashedPassword,
+      passwordHash: hashedPassword,
       nombre: 'Juan Carlos',
       apellido: 'Pérez Martínez',
       titulo: 'Profesor de Matemáticas Avanzadas',
@@ -39,7 +39,7 @@ export async function seedDocente(prisma: PrismaClient) {
         'Resolución de Problemas',
         'Olimpíadas',
       ],
-      experiencia_anos: 10,
+      experienciaAnos: 10,
     },
   });
 

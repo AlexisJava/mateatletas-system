@@ -261,26 +261,26 @@ async function seedTiers(prisma: PrismaClient) {
   const tiers = [
     {
       nombre: TierNombre.STEAM_LIBROS,
-      precio_mensual: 40000,
-      mundos_async: 3,
-      mundos_sync: 0,
-      tiene_docente: false,
+      precioMensual: 40000,
+      mundosAsync: 3,
+      mundosSync: 0,
+      tieneDocente: false,
       descripcion: 'Acceso a plataforma completa',
     },
     {
       nombre: TierNombre.STEAM_ASINCRONICO,
-      precio_mensual: 65000,
-      mundos_async: 3,
-      mundos_sync: 0,
-      tiene_docente: false,
+      precioMensual: 65000,
+      mundosAsync: 3,
+      mundosSync: 0,
+      tieneDocente: false,
       descripcion: 'Plataforma + clases grabadas',
     },
     {
       nombre: TierNombre.STEAM_SINCRONICO,
-      precio_mensual: 95000,
-      mundos_async: 3,
-      mundos_sync: 3,
-      tiene_docente: true,
+      precioMensual: 95000,
+      mundosAsync: 3,
+      mundosSync: 3,
+      tieneDocente: true,
       descripcion: 'Todo + clases en vivo',
     },
   ];
@@ -291,7 +291,7 @@ async function seedTiers(prisma: PrismaClient) {
       update: {},
       create: tier,
     });
-    console.log(`   ✓ Tier ${tier.nombre} ($${tier.precio_mensual})`);
+    console.log(`   ✓ Tier ${tier.nombre} ($${tier.precioMensual})`);
   }
 }
 
@@ -302,21 +302,21 @@ async function seedPlanes(prisma: PrismaClient) {
     {
       id: 'plan-libros',
       nombre: 'STEAM_LIBROS',
-      precio_base: 40000,
+      precioBase: 40000,
       descripcion: 'Acceso a plataforma completa',
       activo: true,
     },
     {
       id: 'plan-asincronico',
       nombre: 'STEAM_ASINCRONICO',
-      precio_base: 65000,
+      precioBase: 65000,
       descripcion: 'Plataforma + clases grabadas',
       activo: true,
     },
     {
       id: 'plan-sincronico',
       nombre: 'STEAM_SINCRONICO',
-      precio_base: 95000,
+      precioBase: 95000,
       descripcion: 'Todo + clases en vivo con docente',
       activo: true,
     },
@@ -340,7 +340,7 @@ async function seedAdmin(prisma: PrismaClient) {
     update: {},
     create: {
       email: 'admin@mateatletas.com',
-      password_hash: await hashPassword(PASSWORD),
+      passwordHash: await hashPassword(PASSWORD),
       nombre: 'Super',
       apellido: 'Admin',
     },
@@ -358,7 +358,7 @@ async function seedDocente(prisma: PrismaClient) {
     update: {},
     create: {
       email: 'docente@mateatletas.com',
-      password_hash: await hashPassword(PASSWORD),
+      passwordHash: await hashPassword(PASSWORD),
       nombre: 'Carlos',
       apellido: 'García',
       titulo: 'Profesor de Matemática',
@@ -390,10 +390,10 @@ async function seedGruposYClases(prisma: PrismaClient, docenteId: string) {
       codigo: 'MAT-Q1',
       nombre: 'Matemática Quantum Nivel 1',
       descripcion: 'Matemática para niños de 6-9 años',
-      casa_tipo: CasaTipo.QUANTUM,
-      mundo_tipo: MundoTipo.MATEMATICA,
-      edad_minima: 6,
-      edad_maxima: 9,
+      casaTipo: CasaTipo.QUANTUM,
+      mundoTipo: MundoTipo.MATEMATICA,
+      edadMinima: 6,
+      edadMaxima: 9,
     },
   });
 
@@ -404,10 +404,10 @@ async function seedGruposYClases(prisma: PrismaClient, docenteId: string) {
       codigo: 'MAT-V1',
       nombre: 'Matemática Vertex Nivel 1',
       descripcion: 'Matemática para niños de 10-12 años',
-      casa_tipo: CasaTipo.VERTEX,
-      mundo_tipo: MundoTipo.MATEMATICA,
-      edad_minima: 10,
-      edad_maxima: 12,
+      casaTipo: CasaTipo.VERTEX,
+      mundoTipo: MundoTipo.MATEMATICA,
+      edadMinima: 10,
+      edadMaxima: 12,
     },
   });
 
@@ -418,10 +418,10 @@ async function seedGruposYClases(prisma: PrismaClient, docenteId: string) {
       codigo: 'MAT-P1',
       nombre: 'Matemática Pulsar Nivel 1',
       descripcion: 'Matemática para adolescentes de 13-17 años',
-      casa_tipo: CasaTipo.PULSAR,
-      mundo_tipo: MundoTipo.MATEMATICA,
-      edad_minima: 13,
-      edad_maxima: 17,
+      casaTipo: CasaTipo.PULSAR,
+      mundoTipo: MundoTipo.MATEMATICA,
+      edadMinima: 13,
+      edadMaxima: 17,
     },
   });
 
@@ -432,15 +432,15 @@ async function seedGruposYClases(prisma: PrismaClient, docenteId: string) {
     create: {
       codigo: 'MAT-Q1',
       nombre: 'Matemática Quantum - Lunes 18:00',
-      dia_semana: DiaSemana.LUNES,
-      hora_inicio: '18:00',
-      hora_fin: '19:30',
-      fecha_inicio: fechaInicio,
-      fecha_fin: fechaFin,
-      anio_lectivo: 2026,
-      cupo_maximo: 15,
-      grupo_id: grupoQuantum.id,
-      docente_id: docenteId,
+      diaSemana: DiaSemana.LUNES,
+      horaInicio: '18:00',
+      horaFin: '19:30',
+      fechaInicio: fechaInicio,
+      fechaFin: fechaFin,
+      anioLectivo: 2026,
+      cupoMaximo: 15,
+      grupoId: grupoQuantum.id,
+      docenteId: docenteId,
       livekit_room_name: `clase_quantum_${Date.now()}`,
     },
   });
@@ -451,15 +451,15 @@ async function seedGruposYClases(prisma: PrismaClient, docenteId: string) {
     create: {
       codigo: 'MAT-V1',
       nombre: 'Matemática Vertex - Martes 19:00',
-      dia_semana: DiaSemana.MARTES,
-      hora_inicio: '19:00',
-      hora_fin: '20:30',
-      fecha_inicio: fechaInicio,
-      fecha_fin: fechaFin,
-      anio_lectivo: 2026,
-      cupo_maximo: 15,
-      grupo_id: grupoVertex.id,
-      docente_id: docenteId,
+      diaSemana: DiaSemana.MARTES,
+      horaInicio: '19:00',
+      horaFin: '20:30',
+      fechaInicio: fechaInicio,
+      fechaFin: fechaFin,
+      anioLectivo: 2026,
+      cupoMaximo: 15,
+      grupoId: grupoVertex.id,
+      docenteId: docenteId,
       livekit_room_name: `clase_vertex_${Date.now()}`,
     },
   });
@@ -470,15 +470,15 @@ async function seedGruposYClases(prisma: PrismaClient, docenteId: string) {
     create: {
       codigo: 'MAT-P1',
       nombre: 'Matemática Pulsar - Miércoles 20:00',
-      dia_semana: DiaSemana.MIERCOLES,
-      hora_inicio: '20:00',
-      hora_fin: '21:30',
-      fecha_inicio: fechaInicio,
-      fecha_fin: fechaFin,
-      anio_lectivo: 2026,
-      cupo_maximo: 15,
-      grupo_id: grupoPulsar.id,
-      docente_id: docenteId,
+      diaSemana: DiaSemana.MIERCOLES,
+      horaInicio: '20:00',
+      horaFin: '21:30',
+      fechaInicio: fechaInicio,
+      fechaFin: fechaFin,
+      anioLectivo: 2026,
+      cupoMaximo: 15,
+      grupoId: grupoPulsar.id,
+      docenteId: docenteId,
       livekit_room_name: `clase_pulsar_${Date.now()}`,
     },
   });
@@ -506,14 +506,14 @@ async function seedGruposYClases(prisma: PrismaClient, docenteId: string) {
     data: {
       nombre: 'Matemática Quantum - Lunes 18:00',
       descripcion: 'Clase de matemática para Casa Quantum',
-      producto_id: producto.id,
+      productoId: producto.id,
       casa_id: casaQuantum.id,
-      grupo_id: grupoQuantum.id,
-      docente_id: docenteId,
-      cupo_maximo: 15,
+      grupoId: grupoQuantum.id,
+      docenteId: docenteId,
+      cupoMaximo: 15,
       horario: 'Lunes 18:00 - 19:30',
-      fecha_inicio: fechaInicio,
-      fecha_fin: fechaFin,
+      fechaInicio: fechaInicio,
+      fechaFin: fechaFin,
       activo: true,
       modalidad: TipoAccesoInscripcion.SINCRONICO,
       livekit_room_name: `comision_quantum_${Date.now()}`,
@@ -524,14 +524,14 @@ async function seedGruposYClases(prisma: PrismaClient, docenteId: string) {
     data: {
       nombre: 'Matemática Vertex - Martes 19:00',
       descripcion: 'Clase de matemática para Casa Vertex',
-      producto_id: producto.id,
+      productoId: producto.id,
       casa_id: casaVertex.id,
-      grupo_id: grupoVertex.id,
-      docente_id: docenteId,
-      cupo_maximo: 15,
+      grupoId: grupoVertex.id,
+      docenteId: docenteId,
+      cupoMaximo: 15,
       horario: 'Martes 19:00 - 20:30',
-      fecha_inicio: fechaInicio,
-      fecha_fin: fechaFin,
+      fechaInicio: fechaInicio,
+      fechaFin: fechaFin,
       activo: true,
       modalidad: TipoAccesoInscripcion.SINCRONICO,
       livekit_room_name: `comision_vertex_${Date.now()}`,
@@ -542,14 +542,14 @@ async function seedGruposYClases(prisma: PrismaClient, docenteId: string) {
     data: {
       nombre: 'Matemática Pulsar - Miércoles 20:00',
       descripcion: 'Clase de matemática para Casa Pulsar',
-      producto_id: producto.id,
+      productoId: producto.id,
       casa_id: casaPulsar.id,
-      grupo_id: grupoPulsar.id,
-      docente_id: docenteId,
-      cupo_maximo: 15,
+      grupoId: grupoPulsar.id,
+      docenteId: docenteId,
+      cupoMaximo: 15,
       horario: 'Miércoles 20:00 - 21:30',
-      fecha_inicio: fechaInicio,
-      fecha_fin: fechaFin,
+      fechaInicio: fechaInicio,
+      fechaFin: fechaFin,
       activo: true,
       modalidad: TipoAccesoInscripcion.SINCRONICO,
       livekit_room_name: `comision_pulsar_${Date.now()}`,
@@ -597,7 +597,7 @@ async function seedTutorYFamilia(
     update: {},
     create: {
       email: 'tutor@mateatletas.com',
-      password_hash: passwordHash,
+      passwordHash: passwordHash,
       nombre: 'María',
       apellido: 'López',
       telefono: '+5491155550001',
@@ -655,7 +655,7 @@ async function seedTutorYFamilia(
   // Crear suscripción familiar
   const suscripcionFamiliar = await prisma.suscripcionFamiliar.create({
     data: {
-      tutor_id: tutor.id,
+      tutorId: tutor.id,
       estado: EstadoSuscripcionFamiliar.AUTHORIZED,
       tier: TierNombre.STEAM_SINCRONICO, // Tier máximo de la familia
       monto_mensual: 200000, // Suma aproximada
@@ -667,7 +667,7 @@ async function seedTutorYFamilia(
 
   for (const hijo of hijos) {
     // Crear estudiante
-    // IMPORTANTE: update incluye plan_id para que re-ejecutar el seed actualice estudiantes existentes
+    // IMPORTANTE: update incluye planId para que re-ejecutar el seed actualice estudiantes existentes
     const estudiante = await prisma.estudiante.upsert({
       where: { username: hijo.username },
       update: {
@@ -675,10 +675,10 @@ async function seedTutorYFamilia(
         apellido: hijo.apellido,
         edad: hijo.edad,
         nivelEscolar: hijo.nivelEscolar,
-        password_hash: passwordHash,
-        tutor_id: tutor.id,
+        passwordHash: passwordHash,
+        tutorId: tutor.id,
         casaId: hijo.casaId,
-        plan_id: hijo.planId, // CRÍTICO: actualizar plan para acceso sincrónico
+        planId: hijo.planId, // CRÍTICO: actualizar plan para acceso sincrónico
       },
       create: {
         username: hijo.username,
@@ -686,29 +686,29 @@ async function seedTutorYFamilia(
         apellido: hijo.apellido,
         edad: hijo.edad,
         nivelEscolar: hijo.nivelEscolar,
-        password_hash: passwordHash,
-        tutor_id: tutor.id,
+        passwordHash: passwordHash,
+        tutorId: tutor.id,
         casaId: hijo.casaId,
-        plan_id: hijo.planId,
+        planId: hijo.planId,
       },
     });
 
     // Crear recursos del estudiante - valores iniciales realistas (recién empezando)
     await prisma.recursosEstudiante.upsert({
-      where: { estudiante_id: estudiante.id },
+      where: { estudianteId: estudiante.id },
       update: {},
       create: {
-        estudiante_id: estudiante.id,
-        xp_total: 0, // Estudiante nuevo, sin XP
+        estudianteId: estudiante.id,
+        xpTotal: 0, // Estudiante nuevo, sin XP
       },
     });
 
     // Crear racha del estudiante - valores iniciales (recién empezando)
     await prisma.rachaEstudiante.upsert({
-      where: { estudiante_id: estudiante.id },
+      where: { estudianteId: estudiante.id },
       update: {},
       create: {
-        estudiante_id: estudiante.id,
+        estudianteId: estudiante.id,
         racha_actual: 0,
         racha_maxima: 0,
         total_dias_activos: 0,
@@ -716,7 +716,7 @@ async function seedTutorYFamilia(
     });
 
     // Crear inscripción a ClaseGrupo (manual - para docente)
-    // IMPORTANTE: update incluye tipo_acceso para garantizar acceso sincrónico
+    // IMPORTANTE: update incluye tipoAcceso para garantizar acceso sincrónico
     const tipoAccesoInscripcion =
       hijo.tier === TierNombre.STEAM_SINCRONICO
         ? TipoAccesoInscripcion.SINCRONICO
@@ -724,20 +724,20 @@ async function seedTutorYFamilia(
 
     await prisma.inscripcionClaseGrupo.upsert({
       where: {
-        clase_grupo_id_estudiante_id: {
-          clase_grupo_id: hijo.claseGrupoId,
-          estudiante_id: estudiante.id,
+        claseGrupoId_estudianteId: {
+          claseGrupoId: hijo.claseGrupoId,
+          estudianteId: estudiante.id,
         },
       },
       update: {
-        tutor_id: tutor.id,
-        tipo_acceso: tipoAccesoInscripcion,
+        tutorId: tutor.id,
+        tipoAcceso: tipoAccesoInscripcion,
       },
       create: {
-        clase_grupo_id: hijo.claseGrupoId,
-        estudiante_id: estudiante.id,
-        tutor_id: tutor.id,
-        tipo_acceso: tipoAccesoInscripcion,
+        claseGrupoId: hijo.claseGrupoId,
+        estudianteId: estudiante.id,
+        tutorId: tutor.id,
+        tipoAcceso: tipoAccesoInscripcion,
       },
     });
 
@@ -746,15 +746,15 @@ async function seedTutorYFamilia(
     if (comisionId) {
       await prisma.inscripcionComision.upsert({
         where: {
-          comision_id_estudiante_id: {
+          comision_id_estudianteId: {
             comision_id: comisionId,
-            estudiante_id: estudiante.id,
+            estudianteId: estudiante.id,
           },
         },
         update: {},
         create: {
           comision_id: comisionId,
-          estudiante_id: estudiante.id,
+          estudianteId: estudiante.id,
           estado: 'Confirmada',
         },
       });
@@ -764,10 +764,10 @@ async function seedTutorYFamilia(
     await prisma.inscripcionActividad
       .create({
         data: {
-          suscripcion_familiar_id: suscripcionFamiliar.id,
-          estudiante_id: estudiante.id,
-          producto_id: 'producto-placeholder', // Se crea si no existe
-          clase_grupo_id: hijo.claseGrupoId,
+          suscripcionFamiliarId: suscripcionFamiliar.id,
+          estudianteId: estudiante.id,
+          productoId: 'producto-placeholder', // Se crea si no existe
+          claseGrupoId: hijo.claseGrupoId,
           tier: hijo.tier,
           estado: EstadoInscripcionActividad.ACTIVA,
         },
@@ -850,13 +850,13 @@ async function seedInscripcionesMensuales(
 
     await prisma.inscripcionMensual.create({
       data: {
-        estudiante_id: estudiante.id,
-        tutor_id: tutorId,
-        producto_id: producto.id,
+        estudianteId: estudiante.id,
+        tutorId: tutorId,
+        productoId: producto.id,
         anio: anioActual,
         mes: mesActual,
         periodo: periodoActual,
-        precio_base: precioBase,
+        precioBase: precioBase,
         descuento_aplicado: descuentoMonto,
         precio_final: precioFinal,
         tipo_descuento: tipoDescuento,
@@ -866,7 +866,7 @@ async function seedInscripcionesMensuales(
             : i === 1
               ? 'Segundo hijo - 12% descuento'
               : 'Tercer hijo - 20% descuento',
-        estado_pago: EstadoPago.Pendiente, // Todos pendientes para probar "Por Cobrar"
+        estadoPago: EstadoPago.Pendiente, // Todos pendientes para probar "Por Cobrar"
         fecha_vencimiento: new Date(anioActual, mesActual - 1, 15), // Vence el 15
       },
     });

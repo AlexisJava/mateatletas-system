@@ -1,0 +1,139 @@
+/**
+ * IntentTooltip.module.css - Frame 4
+ * Tooltip for intent hover state
+ */
+
+.tooltip {
+  position: absolute;
+  width: 220px;
+  border-radius: var(--sb-radius-lg);
+  background: rgba(28, 28, 40, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  padding: var(--sb-space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-space-sm);
+  z-index: var(--sb-z-tooltip);
+  animation: tooltipFadeIn 0.15s ease-out;
+  pointer-events: none;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-sm);
+}
+
+.headerIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--sb-radius-sm);
+  background: rgba(139, 92, 246, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sb-accent-violet);
+}
+
+.headerIcon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.headerTitle {
+  font-family: var(--sb-font-mono);
+  font-size: var(--sb-text-xs);
+  font-weight: 600;
+  color: var(--sb-text-primary);
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   DESCRIPTION
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.description {
+  font-family: var(--sb-font-sans);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--sb-text-secondary);
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   DIVIDER
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: var(--sb-space-xs) 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   META
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-md);
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-xs);
+  font-family: var(--sb-font-sans);
+  font-size: 10px;
+  color: var(--sb-text-muted);
+}
+
+.metaItem svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SHORTCUT
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.shortcut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--sb-space-xs);
+}
+
+.shortcutLabel {
+  font-family: var(--sb-font-sans);
+  font-size: 10px;
+  color: var(--sb-text-muted);
+}
+
+.shortcutKey {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  font-family: var(--sb-font-mono);
+  font-size: 9px;
+  color: var(--sb-text-secondary);
+}

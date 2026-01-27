@@ -1,0 +1,138 @@
+/**
+ * JsonErrorPanel.module.css - Frame 5
+ * Error panel for JSON syntax errors
+ */
+
+.panel {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--sb-radius-md);
+  padding: var(--sb-space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-space-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-sm);
+}
+
+.headerIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--sb-radius-sm);
+  background: rgba(239, 68, 68, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sb-accent-red);
+  flex-shrink: 0;
+}
+
+.headerIcon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.headerTitle {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  font-weight: 600;
+  color: var(--sb-accent-red);
+  margin: 0;
+}
+
+.headerSubtitle {
+  font-family: var(--sb-font-mono);
+  font-size: var(--sb-text-xs);
+  color: var(--sb-text-muted);
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   DESCRIPTION
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.description {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  color: var(--sb-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  padding-left: calc(28px + var(--sb-space-sm));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ACTIONS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: calc(28px + var(--sb-space-sm));
+  margin-top: var(--sb-space-xs);
+}
+
+.fixBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-xs);
+  padding: var(--sb-space-xs) var(--sb-space-md);
+  border-radius: var(--sb-radius-sm);
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--sb-accent-red);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--sb-transition-fast);
+}
+
+.fixBtn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.fixBtn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.shortcut {
+  font-family: var(--sb-font-mono);
+  font-size: 10px;
+  color: var(--sb-text-muted);
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   INLINE VERSION
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.inline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+}

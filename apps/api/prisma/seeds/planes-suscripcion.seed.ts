@@ -22,7 +22,7 @@ export async function seedPlanesSuscripcion(
       nombre: 'STEAM_LIBROS',
       descripcion:
         'Plataforma completa STEAM: Matemáticas + Programación + Ciencias. Acceso a todo el contenido asincrónico, ejercicios interactivos y progreso gamificado.',
-      precio_base: 40000,
+      precioBase: 40000,
       moneda: 'ARS',
       activo: true,
     },
@@ -30,7 +30,7 @@ export async function seedPlanesSuscripcion(
       nombre: 'STEAM_ASINCRONICO',
       descripcion:
         'Todo el contenido de STEAM Libros + clases grabadas premium, recursos descargables y material de apoyo exclusivo.',
-      precio_base: 65000,
+      precioBase: 65000,
       moneda: 'ARS',
       activo: true,
     },
@@ -38,7 +38,7 @@ export async function seedPlanesSuscripcion(
       nombre: 'STEAM_SINCRONICO',
       descripcion:
         'Experiencia completa: Todo lo anterior + clases en vivo con docentes especializados, chat en tiempo real y seguimiento personalizado.',
-      precio_base: 95000,
+      precioBase: 95000,
       moneda: 'ARS',
       activo: true,
     },
@@ -56,7 +56,7 @@ export async function seedPlanesSuscripcion(
         where: { id: existente.id },
         data: {
           descripcion: plan.descripcion,
-          precio_base: plan.precio_base,
+          precioBase: plan.precioBase,
           moneda: plan.moneda,
           activo: plan.activo,
         },

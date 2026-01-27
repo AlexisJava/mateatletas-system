@@ -1,0 +1,147 @@
+/**
+ * SyncToast.module.css - Frame 9
+ * Toast notification for sync status
+ */
+
+.toast {
+  position: fixed;
+  bottom: var(--sb-space-xl);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-md);
+  padding: var(--sb-space-md) var(--sb-space-lg);
+  border-radius: var(--sb-radius-lg);
+  background: rgba(28, 28, 40, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  z-index: var(--sb-z-toast);
+  animation: toastSlideIn 0.3s ease-out;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.toast.exiting {
+  animation: toastSlideOut 0.2s ease-in forwards;
+}
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ICON
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--sb-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.icon.syncing {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--sb-accent-violet);
+}
+
+.icon.syncing svg {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon.success {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--sb-accent-green);
+}
+
+.icon.error {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--sb-accent-red);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CONTENT
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  font-weight: 600;
+  color: var(--sb-text-primary);
+  margin: 0;
+}
+
+.description {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-xs);
+  color: var(--sb-text-muted);
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CLOSE BUTTON
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.closeBtn {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--sb-radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--sb-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--sb-transition-fast);
+  margin-left: var(--sb-space-sm);
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--sb-text-primary);
+}
+
+.closeBtn svg {
+  width: 14px;
+  height: 14px;
+}

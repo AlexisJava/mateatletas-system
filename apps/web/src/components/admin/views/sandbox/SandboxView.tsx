@@ -12,14 +12,16 @@ import {
   mapPlanificacionBackendToFrontend,
 } from './hooks';
 import {
-  TreePanel,
+  SandboxSidebar,
   EditorPanel,
   PreviewPanel,
-  StartModal,
+  ContentCreationFlow,
   CompactHeader,
   SandboxLoading,
+  BackgroundGlows,
   type CreatedContentResult,
 } from './components';
+import './styles/tokens.css';
 import { findNodoById } from './utils/tree.utils';
 import type { ContenidoBackend } from '@/lib/api/contenidos.api';
 import type { Planificacion as PlanificacionBackend } from '@/lib/api/planificaciones-admin.api';
@@ -33,7 +35,7 @@ import styles from './SandboxView.module.css';
 export function SandboxView(): ReactElement {
   return (
     <SandboxProvider>
-      <div className={styles.wrapper}>
+      <div className={`${styles.wrapper} sandbox-root`}>
         <Suspense fallback={<SandboxLoading />}>
           <SandboxLayout />
         </Suspense>
@@ -137,10 +139,10 @@ function SandboxLayout(): ReactElement {
     return <SandboxLoading />;
   }
 
-  // Show StartModal if no ID in URL and no content loaded
+  // Show ContentCreationFlow if no ID in URL and no content loaded
   const hasContent = state.contenido !== null || state.planificacion !== null;
   if (!hasIdInUrl && !hasContent) {
-    return <StartModal onCreated={handleContentCreated} />;
+    return <ContentCreationFlow onCreated={handleContentCreated} />;
   }
 
   // Determine panel title
@@ -163,31 +165,26 @@ function SandboxLayout(): ReactElement {
 
   return (
     <div className={styles.sandboxFull}>
-      <CompactHeader
-        title={panelTitle}
-        contentType={state.contentType}
-        saveStatus={state.saveStatus}
-      />
+      <BackgroundGlows />
+      <CompactHeader title={panelTitle} saveStatus={state.saveStatus} />
 
       <div className={gridClasses}>
-        {/* Tree Panel - 20% (collapsible) */}
+        {/* Sidebar Panel - 280px (collapsible) */}
         {isTreeVisible && (
           <div className={`${styles.sandboxPanel} ${styles.sandboxPanelTree}`}>
             <div className={styles.sandboxPanelHeader}>
-              <span>Árbol</span>
+              <span>Intents & Structure</span>
               <button
                 type="button"
                 className={styles.toggleBtn}
                 onClick={() => setIsTreeVisible(false)}
-                title="Ocultar árbol"
-                aria-label="Ocultar árbol"
+                title="Ocultar sidebar"
+                aria-label="Ocultar sidebar"
               >
                 <PanelLeftClose size={14} />
               </button>
             </div>
-            <div className={styles.sandboxPanelContent}>
-              <TreePanel />
-            </div>
+            <SandboxSidebar />
           </div>
         )}
 

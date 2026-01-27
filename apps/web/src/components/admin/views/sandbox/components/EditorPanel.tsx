@@ -1,9 +1,11 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
-import Editor, { type OnMount } from '@monaco-editor/react';
+import { useRef, useEffect, useCallback } from 'react';
+import Editor, { type OnMount, type BeforeMount } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
+import { Braces, AlignLeft } from 'lucide-react';
 import type { NodoContenido, ClasePlanificacion, ContentType } from '../types/sandbox.types';
+import { sandboxDarkTheme, THEME_NAME } from '../utils/monacoTheme';
 import styles from './EditorPanel.module.css';
 
 interface EditorPanelProps {
@@ -23,6 +25,10 @@ export function EditorPanel({
 }: EditorPanelProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleEditorBeforeMount: BeforeMount = (monaco) => {
+    monaco.editor.defineTheme(THEME_NAME, sandboxDarkTheme);
+  };
 
   const handleEditorMount: OnMount = (editor) => {
     editorRef.current = editor;
@@ -135,28 +141,65 @@ export function EditorPanel({
 
   const content = selectedNodo.contenidoJson || defaultTemplate;
 
+  const handleFormat = useCallback((): void => {
+    if (!editorRef.current) return;
+    editorRef.current.getAction('editor.action.formatDocument')?.run();
+  }, []);
+
   return (
-    <div ref={containerRef} className={styles.editor}>
-      <Editor
-        height="100%"
-        language="json"
-        theme="vs-dark"
-        value={content}
-        onChange={(value) => onChange(value || '')}
-        onMount={handleEditorMount}
-        options={{
-          minimap: { enabled: false },
-          fontSize: 13,
-          lineNumbers: 'on',
-          scrollBeyondLastLine: false,
-          automaticLayout: true,
-          tabSize: 2,
-          wordWrap: 'on',
-          wrappingStrategy: 'advanced',
-          padding: { top: 8 },
-          formatOnPaste: true,
-        }}
-      />
+    <div className={styles.editorWrapper}>
+      {/* Editor Header with Tabs */}
+      <div className={styles.editorHeader}>
+        <div className={styles.editorTabs}>
+          <button type="button" className={`${styles.editorTab} ${styles.editorTabActive}`}>
+            <Braces />
+            <span>JSON</span>
+          </button>
+        </div>
+        <div className={styles.editorActions}>
+          <button
+            type="button"
+            className={styles.formatBtn}
+            onClick={handleFormat}
+            title="Format document (Shift+Alt+F)"
+            aria-label="Format document"
+          >
+            <AlignLeft />
+          </button>
+        </div>
+      </div>
+
+      {/* Monaco Editor */}
+      <div ref={containerRef} className={styles.editor}>
+        <Editor
+          height="100%"
+          language="json"
+          theme={THEME_NAME}
+          value={content}
+          onChange={(value) => onChange(value || '')}
+          beforeMount={handleEditorBeforeMount}
+          onMount={handleEditorMount}
+          options={{
+            minimap: { enabled: true, scale: 1, showSlider: 'mouseover' },
+            fontSize: 12,
+            fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
+            lineHeight: 1.7,
+            lineNumbers: 'on',
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            tabSize: 2,
+            wordWrap: 'on',
+            wrappingStrategy: 'advanced',
+            padding: { top: 12, bottom: 12 },
+            formatOnPaste: true,
+            cursorBlinking: 'smooth',
+            cursorSmoothCaretAnimation: 'on',
+            smoothScrolling: true,
+            renderLineHighlight: 'all',
+            bracketPairColorization: { enabled: true },
+          }}
+        />
+      </div>
     </div>
   );
 }

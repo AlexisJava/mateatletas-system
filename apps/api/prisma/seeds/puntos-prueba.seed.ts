@@ -108,8 +108,8 @@ export async function seedPuntosPrueba(prisma: PrismaClient) {
 
   // Generar puntos aleatorios para los últimos 30 días
   const puntosACrear: {
-    estudiante_id: string;
-    docente_id: string;
+    estudianteId: string;
+    docenteId: string;
     tipo_accion: string;
     puntos: number;
     contexto: string;
@@ -136,8 +136,8 @@ export async function seedPuntosPrueba(prisma: PrismaClient) {
       fecha.setHours(Math.floor(Math.random() * 8) + 9); // Entre 9am y 5pm
 
       puntosACrear.push({
-        estudiante_id: estudiante.id,
-        docente_id: docente.id,
+        estudianteId: estudiante.id,
+        docenteId: docente.id,
         tipo_accion: tipo.tipo,
         puntos: tipo.puntos,
         contexto: contexto,
@@ -155,20 +155,20 @@ export async function seedPuntosPrueba(prisma: PrismaClient) {
   // Actualizar XP total de estudiantes (en RecursosEstudiante)
   const xpPorEstudiante: Record<string, number> = {};
   for (const punto of puntosACrear) {
-    xpPorEstudiante[punto.estudiante_id] =
-      (xpPorEstudiante[punto.estudiante_id] || 0) + punto.puntos;
+    xpPorEstudiante[punto.estudianteId] =
+      (xpPorEstudiante[punto.estudianteId] || 0) + punto.puntos;
   }
 
   for (const estudianteId of Object.keys(xpPorEstudiante)) {
     const xpTotal = xpPorEstudiante[estudianteId];
     await prisma.recursosEstudiante.upsert({
-      where: { estudiante_id: estudianteId },
+      where: { estudianteId: estudianteId },
       create: {
-        estudiante_id: estudianteId,
-        xp_total: xpTotal,
+        estudianteId: estudianteId,
+        xpTotal: xpTotal,
       },
       update: {
-        xp_total: {
+        xpTotal: {
           increment: xpTotal,
         },
       },

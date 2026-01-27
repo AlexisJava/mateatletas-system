@@ -38,10 +38,10 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
   // 1. Crear el tutor
   const tutor = await prisma.tutor.upsert({
     where: { email },
-    update: { password_hash: hashedPassword },
+    update: { passwordHash: hashedPassword },
     create: {
       email,
-      password_hash: hashedPassword,
+      passwordHash: hashedPassword,
       nombre: 'Roberto',
       apellido: 'Martínez',
       telefono: '+549261987654',
@@ -88,9 +88,9 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
       precio: 8000,
       tipo: TipoProducto.Servicio,
       activo: true,
-      fecha_inicio: new Date(),
-      fecha_fin: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 3 meses
-      cupo_maximo: 15,
+      fechaInicio: new Date(),
+      fechaFin: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 3 meses
+      cupoMaximo: 15,
     },
   });
 
@@ -103,13 +103,13 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
     create: {
       id: 'seed-comision-quantum',
       nombre: 'Robótica QUANTUM - Mañana',
-      producto_id: tallerRobotica.id,
-      docente_id: docente?.id,
+      productoId: tallerRobotica.id,
+      docenteId: docente?.id,
       casa_id: casaQuantum.id,
       horario: 'Martes y Jueves 10:00-12:00',
-      fecha_inicio: new Date(),
-      fecha_fin: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-      cupo_maximo: 15,
+      fechaInicio: new Date(),
+      fechaFin: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      cupoMaximo: 15,
       activo: true,
       modalidad: TipoAccesoInscripcion.SINCRONICO,
     },
@@ -121,13 +121,13 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
     create: {
       id: 'seed-comision-vertex',
       nombre: 'Robótica VERTEX - Tarde',
-      producto_id: tallerRobotica.id,
-      docente_id: docente?.id,
+      productoId: tallerRobotica.id,
+      docenteId: docente?.id,
       casa_id: casaVertex.id,
       horario: 'Lunes y Miércoles 15:00-17:00',
-      fecha_inicio: new Date(),
-      fecha_fin: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-      cupo_maximo: 15,
+      fechaInicio: new Date(),
+      fechaFin: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      cupoMaximo: 15,
       activo: true,
       modalidad: TipoAccesoInscripcion.SINCRONICO,
     },
@@ -139,13 +139,13 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
     create: {
       id: 'seed-comision-pulsar',
       nombre: 'Robótica PULSAR - Avanzado',
-      producto_id: tallerRobotica.id,
-      docente_id: docente?.id,
+      productoId: tallerRobotica.id,
+      docenteId: docente?.id,
       casa_id: casaPulsar.id,
       horario: 'Viernes 14:00-18:00',
-      fecha_inicio: new Date(),
-      fecha_fin: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-      cupo_maximo: 12,
+      fechaInicio: new Date(),
+      fechaFin: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      cupoMaximo: 12,
       activo: true,
       modalidad: TipoAccesoInscripcion.SINCRONICO,
     },
@@ -282,7 +282,7 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
   for (const [index, hijo] of hijos.entries()) {
     const numeroHijo = index + 1;
     const plan = planes.find((p) => p.id === hijo.planId);
-    const precioBase = Number(plan?.precio_base ?? 0);
+    const precioBase = Number(plan?.precioBase ?? 0);
 
     // Calcular descuento usando lógica real
     const descuentoPorcentaje = calcularDescuentoFamiliar(numeroHijo);
@@ -302,7 +302,7 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
     const estudiante = await prisma.estudiante.upsert({
       where: { email: hijo.email },
       update: {
-        plan_id: hijo.planId,
+        planId: hijo.planId,
         casaId: hijo.casaId,
         estado_acceso: hijo.estadoAcceso,
         notas_plan: hijo.notasPlan,
@@ -318,9 +318,9 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
         edad: hijo.edad,
         nivelEscolar: hijo.nivelEscolar,
         email: hijo.email,
-        password_hash: studentPasswordHash,
-        tutor_id: tutor.id,
-        plan_id: hijo.planId,
+        passwordHash: studentPasswordHash,
+        tutorId: tutor.id,
+        planId: hijo.planId,
         casaId: hijo.casaId,
         estado_acceso: hijo.estadoAcceso,
         notas_plan: hijo.notasPlan,
@@ -334,20 +334,20 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
     // Crear RecursosEstudiante con XP variado
     const xpVariado = 500 + index * 1000 + Math.floor(Math.random() * 2000);
     await prisma.recursosEstudiante.upsert({
-      where: { estudiante_id: estudiante.id },
-      update: { xp_total: xpVariado },
+      where: { estudianteId: estudiante.id },
+      update: { xpTotal: xpVariado },
       create: {
-        estudiante_id: estudiante.id,
-        xp_total: xpVariado,
+        estudianteId: estudiante.id,
+        xpTotal: xpVariado,
       },
     });
 
     // Crear RachaEstudiante
     await prisma.rachaEstudiante.upsert({
-      where: { estudiante_id: estudiante.id },
+      where: { estudianteId: estudiante.id },
       update: {},
       create: {
-        estudiante_id: estudiante.id,
+        estudianteId: estudiante.id,
         racha_actual: Math.floor(Math.random() * 20),
         racha_maxima: 15 + Math.floor(Math.random() * 30),
         total_dias_activos: 20 + Math.floor(Math.random() * 80),
@@ -358,15 +358,15 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
     if (hijo.comisionId && hijo.estadoComision) {
       await prisma.inscripcionComision.upsert({
         where: {
-          comision_id_estudiante_id: {
+          comision_id_estudianteId: {
             comision_id: hijo.comisionId,
-            estudiante_id: estudiante.id,
+            estudianteId: estudiante.id,
           },
         },
         update: { estado: hijo.estadoComision },
         create: {
           comision_id: hijo.comisionId,
-          estudiante_id: estudiante.id,
+          estudianteId: estudiante.id,
           estado: hijo.estadoComision,
           notas:
             hijo.estadoComision === EstadoInscripcionComision.ListaEspera
@@ -389,11 +389,11 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
           create: {
             id: 'seed-comision-algebra-quantum',
             nombre: 'Álgebra QUANTUM - Refuerzo',
-            producto_id: cursoAlgebra.id,
-            docente_id: docente?.id,
+            productoId: cursoAlgebra.id,
+            docenteId: docente?.id,
             casa_id: casaQuantum.id,
             horario: 'Sábados 10:00-12:00',
-            cupo_maximo: 20,
+            cupoMaximo: 20,
             activo: true,
             modalidad: TipoAccesoInscripcion.SINCRONICO,
           },
@@ -401,15 +401,15 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
 
         await prisma.inscripcionComision.upsert({
           where: {
-            comision_id_estudiante_id: {
+            comision_id_estudianteId: {
               comision_id: comisionAlgebra.id,
-              estudiante_id: estudiante.id,
+              estudianteId: estudiante.id,
             },
           },
           update: {},
           create: {
             comision_id: comisionAlgebra.id,
-            estudiante_id: estudiante.id,
+            estudianteId: estudiante.id,
             estado: EstadoInscripcionComision.Confirmada,
             notas: 'Inscripción adicional - Refuerzo matemático',
           },
@@ -482,7 +482,7 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
     config,
   } of estudiantesCreados) {
     const plan = planes.find((p) => p.id === config.planId);
-    const precioBase = Number(plan?.precio_base ?? 0);
+    const precioBase = Number(plan?.precioBase ?? 0);
 
     const detalleCalculo =
       descuentoPorcentaje === 0
@@ -491,33 +491,33 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
 
     await prisma.inscripcionMensual.upsert({
       where: {
-        estudiante_id_producto_id_periodo: {
-          estudiante_id: estudiante.id,
-          producto_id: productoMensual.id,
+        estudianteId_productoId_periodo: {
+          estudianteId: estudiante.id,
+          productoId: productoMensual.id,
           periodo: periodoActual,
         },
       },
       update: {
-        precio_base: precioBase,
+        precioBase: precioBase,
         descuento_aplicado: precioBase - precioFinal,
         precio_final: precioFinal,
         tipo_descuento: tipoDescuento,
         detalle_calculo: detalleCalculo,
-        estado_pago: config.estadoPago,
+        estadoPago: config.estadoPago,
       },
       create: {
-        estudiante_id: estudiante.id,
-        producto_id: productoMensual.id,
-        tutor_id: tutor.id,
+        estudianteId: estudiante.id,
+        productoId: productoMensual.id,
+        tutorId: tutor.id,
         anio: anioActual,
         mes: mesActual,
         periodo: periodoActual,
-        precio_base: precioBase,
+        precioBase: precioBase,
         descuento_aplicado: precioBase - precioFinal,
         precio_final: precioFinal,
         tipo_descuento: tipoDescuento,
         detalle_calculo: detalleCalculo,
-        estado_pago: config.estadoPago,
+        estadoPago: config.estadoPago,
         observaciones: config.notasPlan,
       },
     });
@@ -550,7 +550,7 @@ export async function seedTutorFamilia(prisma: PrismaClient) {
 
   const totalSinDescuento = estudiantesCreados.reduce((sum, e) => {
     const plan = planes.find((p) => p.id === e.config.planId);
-    return sum + Number(plan?.precio_base ?? 0);
+    return sum + Number(plan?.precioBase ?? 0);
   }, 0);
   const totalConDescuento = estudiantesCreados.reduce(
     (sum, e) => sum + e.precioFinal,

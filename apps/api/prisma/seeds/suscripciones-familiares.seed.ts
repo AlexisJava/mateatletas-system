@@ -84,7 +84,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
   const allClubs = [...clubsQuantum, ...clubsVertex, ...clubsPulsar];
   for (const club of allClubs) {
     const claseGrupos = await prisma.claseGrupo.findMany({
-      where: { producto_id: club.id, activo: true },
+      where: { productoId: club.id, activo: true },
       take: 1,
     });
     if (claseGrupos.length > 0) {
@@ -109,10 +109,10 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
   const tutorGarcia = await prisma.tutor.upsert({
     where: { email: 'maria.garcia@suscripcion.test' },
-    update: { password_hash: passwordHash },
+    update: { passwordHash: passwordHash },
     create: {
       email: 'maria.garcia@suscripcion.test',
-      password_hash: passwordHash,
+      passwordHash: passwordHash,
       nombre: 'María',
       apellido: 'García',
       telefono: '+54911234567',
@@ -132,7 +132,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
   const montoGarcia = 95000 * 2 + 95000 * 0.9; // $285,000 - $9,500 = $275,500
 
   const suscripcionGarcia = await prisma.suscripcionFamiliar.upsert({
-    where: { tutor_id: tutorGarcia.id },
+    where: { tutorId: tutorGarcia.id },
     update: {
       estado: EstadoSuscripcionFamiliar.AUTHORIZED,
       tier: TierNombre.STEAM_SINCRONICO,
@@ -140,7 +140,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
       fecha_proximo_cobro: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
     },
     create: {
-      tutor_id: tutorGarcia.id,
+      tutorId: tutorGarcia.id,
       estado: EstadoSuscripcionFamiliar.AUTHORIZED,
       tier: TierNombre.STEAM_SINCRONICO,
       monto_mensual: Math.round(montoGarcia),
@@ -152,7 +152,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
   for (const [index, hijo] of hijosGarcia.entries()) {
     const estudiante = await prisma.estudiante.upsert({
       where: { email: `${hijo.username}@estudiante.test` },
-      update: { tutor_id: tutorGarcia.id, casaId: hijo.casa.id },
+      update: { tutorId: tutorGarcia.id, casaId: hijo.casa.id },
       create: {
         username: hijo.username,
         nombre: hijo.nombre,
@@ -160,8 +160,8 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
         edad: hijo.edad,
         nivelEscolar: hijo.edad < 12 ? 'Primaria' : 'Secundaria',
         email: `${hijo.username}@estudiante.test`,
-        password_hash: studentPasswordHash,
-        tutor_id: tutorGarcia.id,
+        passwordHash: studentPasswordHash,
+        tutorId: tutorGarcia.id,
         casaId: hijo.casa.id,
       },
     });
@@ -179,18 +179,18 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
       await prisma.inscripcionActividad.upsert({
         where: {
-          estudiante_id_producto_id_clase_grupo_id: {
-            estudiante_id: estudiante.id,
-            producto_id: club.id,
-            clase_grupo_id: claseGrupoId ?? '',
+          estudianteId_productoId_claseGrupoId: {
+            estudianteId: estudiante.id,
+            productoId: club.id,
+            claseGrupoId: claseGrupoId ?? '',
           },
         },
         update: { estado: EstadoInscripcionActividad.ACTIVA },
         create: {
-          suscripcion_familiar_id: suscripcionGarcia.id,
-          estudiante_id: estudiante.id,
-          producto_id: club.id,
-          clase_grupo_id: claseGrupoId,
+          suscripcionFamiliarId: suscripcionGarcia.id,
+          estudianteId: estudiante.id,
+          productoId: club.id,
+          claseGrupoId: claseGrupoId,
           tier: TierNombre.STEAM_SINCRONICO,
           estado: EstadoInscripcionActividad.ACTIVA,
         },
@@ -220,10 +220,10 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
   const tutorLopez = await prisma.tutor.upsert({
     where: { email: 'carlos.lopez@suscripcion.test' },
-    update: { password_hash: passwordHash },
+    update: { passwordHash: passwordHash },
     create: {
       email: 'carlos.lopez@suscripcion.test',
-      password_hash: passwordHash,
+      passwordHash: passwordHash,
       nombre: 'Carlos',
       apellido: 'López',
       telefono: '+5491198765',
@@ -255,7 +255,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
   const montoLopez = 65000 + 40000 * 0.9; // $65,000 + $36,000 = $101,000
 
   const suscripcionLopez = await prisma.suscripcionFamiliar.upsert({
-    where: { tutor_id: tutorLopez.id },
+    where: { tutorId: tutorLopez.id },
     update: {
       estado: EstadoSuscripcionFamiliar.AUTHORIZED,
       tier: TierNombre.STEAM_ASINCRONICO,
@@ -263,7 +263,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
       fecha_proximo_cobro: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
     },
     create: {
-      tutor_id: tutorLopez.id,
+      tutorId: tutorLopez.id,
       estado: EstadoSuscripcionFamiliar.AUTHORIZED,
       tier: TierNombre.STEAM_ASINCRONICO,
       monto_mensual: Math.round(montoLopez),
@@ -275,7 +275,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
   for (const hijo of hijosLopez) {
     const estudiante = await prisma.estudiante.upsert({
       where: { email: `${hijo.username}@estudiante.test` },
-      update: { tutor_id: tutorLopez.id, casaId: hijo.casa.id },
+      update: { tutorId: tutorLopez.id, casaId: hijo.casa.id },
       create: {
         username: hijo.username,
         nombre: hijo.nombre,
@@ -283,8 +283,8 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
         edad: hijo.edad,
         nivelEscolar: hijo.edad < 12 ? 'Primaria' : 'Secundaria',
         email: `${hijo.username}@estudiante.test`,
-        password_hash: studentPasswordHash,
-        tutor_id: tutorLopez.id,
+        passwordHash: studentPasswordHash,
+        tutorId: tutorLopez.id,
         casaId: hijo.casa.id,
       },
     });
@@ -296,18 +296,18 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
       await prisma.inscripcionActividad.upsert({
         where: {
-          estudiante_id_producto_id_clase_grupo_id: {
-            estudiante_id: estudiante.id,
-            producto_id: club.id,
-            clase_grupo_id: claseGrupoId ?? '',
+          estudianteId_productoId_claseGrupoId: {
+            estudianteId: estudiante.id,
+            productoId: club.id,
+            claseGrupoId: claseGrupoId ?? '',
           },
         },
         update: { estado: EstadoInscripcionActividad.ACTIVA, tier: hijo.tier },
         create: {
-          suscripcion_familiar_id: suscripcionLopez.id,
-          estudiante_id: estudiante.id,
-          producto_id: club.id,
-          clase_grupo_id: claseGrupoId,
+          suscripcionFamiliarId: suscripcionLopez.id,
+          estudianteId: estudiante.id,
+          productoId: club.id,
+          claseGrupoId: claseGrupoId,
           tier: hijo.tier,
           estado: EstadoInscripcionActividad.ACTIVA,
         },
@@ -337,10 +337,10 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
   const tutorRodriguez = await prisma.tutor.upsert({
     where: { email: 'ana.rodriguez@suscripcion.test' },
-    update: { password_hash: passwordHash },
+    update: { passwordHash: passwordHash },
     create: {
       email: 'ana.rodriguez@suscripcion.test',
-      password_hash: passwordHash,
+      passwordHash: passwordHash,
       nombre: 'Ana',
       apellido: 'Rodríguez',
       telefono: '+5491155667788',
@@ -354,7 +354,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
   const montoRodriguez = 95000 * 2 + 95000 * 0.9; // $275,500
 
   const suscripcionRodriguez = await prisma.suscripcionFamiliar.upsert({
-    where: { tutor_id: tutorRodriguez.id },
+    where: { tutorId: tutorRodriguez.id },
     update: {
       estado: EstadoSuscripcionFamiliar.AUTHORIZED,
       tier: TierNombre.STEAM_SINCRONICO,
@@ -362,7 +362,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
       fecha_proximo_cobro: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
     },
     create: {
-      tutor_id: tutorRodriguez.id,
+      tutorId: tutorRodriguez.id,
       estado: EstadoSuscripcionFamiliar.AUTHORIZED,
       tier: TierNombre.STEAM_SINCRONICO,
       monto_mensual: Math.round(montoRodriguez),
@@ -373,7 +373,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
   const estudianteRodriguez = await prisma.estudiante.upsert({
     where: { email: 'nicolas.rodriguez@estudiante.test' },
-    update: { tutor_id: tutorRodriguez.id, casaId: casaVertex.id },
+    update: { tutorId: tutorRodriguez.id, casaId: casaVertex.id },
     create: {
       username: 'nicolas.rodriguez',
       nombre: 'Nicolás',
@@ -381,8 +381,8 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
       edad: 11,
       nivelEscolar: 'Primaria - 6to grado',
       email: 'nicolas.rodriguez@estudiante.test',
-      password_hash: studentPasswordHash,
-      tutor_id: tutorRodriguez.id,
+      passwordHash: studentPasswordHash,
+      tutorId: tutorRodriguez.id,
       casaId: casaVertex.id,
     },
   });
@@ -396,18 +396,18 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
     await prisma.inscripcionActividad.upsert({
       where: {
-        estudiante_id_producto_id_clase_grupo_id: {
-          estudiante_id: estudianteRodriguez.id,
-          producto_id: club.id,
-          clase_grupo_id: claseGrupoId ?? '',
+        estudianteId_productoId_claseGrupoId: {
+          estudianteId: estudianteRodriguez.id,
+          productoId: club.id,
+          claseGrupoId: claseGrupoId ?? '',
         },
       },
       update: { estado: EstadoInscripcionActividad.ACTIVA },
       create: {
-        suscripcion_familiar_id: suscripcionRodriguez.id,
-        estudiante_id: estudianteRodriguez.id,
-        producto_id: club.id,
-        clase_grupo_id: claseGrupoId,
+        suscripcionFamiliarId: suscripcionRodriguez.id,
+        estudianteId: estudianteRodriguez.id,
+        productoId: club.id,
+        claseGrupoId: claseGrupoId,
         tier: TierNombre.STEAM_SINCRONICO,
         estado: EstadoInscripcionActividad.ACTIVA,
       },
@@ -436,10 +436,10 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
   const tutorFernandez = await prisma.tutor.upsert({
     where: { email: 'jorge.fernandez@suscripcion.test' },
-    update: { password_hash: passwordHash },
+    update: { passwordHash: passwordHash },
     create: {
       email: 'jorge.fernandez@suscripcion.test',
-      password_hash: passwordHash,
+      passwordHash: passwordHash,
       nombre: 'Jorge',
       apellido: 'Fernández',
       telefono: '+5491144556677',
@@ -474,14 +474,14 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
   const montoFernandez = 95000 + 95000 + 65000 + 40000 * 0.9; // $291,000
 
   const suscripcionFernandez = await prisma.suscripcionFamiliar.upsert({
-    where: { tutor_id: tutorFernandez.id },
+    where: { tutorId: tutorFernandez.id },
     update: {
       estado: EstadoSuscripcionFamiliar.PENDING,
       tier: TierNombre.STEAM_SINCRONICO,
       monto_mensual: Math.round(montoFernandez),
     },
     create: {
-      tutor_id: tutorFernandez.id,
+      tutorId: tutorFernandez.id,
       estado: EstadoSuscripcionFamiliar.PENDING,
       tier: TierNombre.STEAM_SINCRONICO,
       monto_mensual: Math.round(montoFernandez),
@@ -495,7 +495,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
     const estudiante = await prisma.estudiante.upsert({
       where: { email: `${username}@estudiante.test` },
-      update: { tutor_id: tutorFernandez.id, casaId: casa.id },
+      update: { tutorId: tutorFernandez.id, casaId: casa.id },
       create: {
         username,
         nombre: hijo.nombre,
@@ -503,8 +503,8 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
         edad: hijo.edad,
         nivelEscolar: hijo.edad < 12 ? 'Primaria' : 'Secundaria',
         email: `${username}@estudiante.test`,
-        password_hash: studentPasswordHash,
-        tutor_id: tutorFernandez.id,
+        passwordHash: studentPasswordHash,
+        tutorId: tutorFernandez.id,
         casaId: casa.id,
       },
     });
@@ -521,18 +521,18 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
       await prisma.inscripcionActividad.upsert({
         where: {
-          estudiante_id_producto_id_clase_grupo_id: {
-            estudiante_id: estudiante.id,
-            producto_id: club.id,
-            clase_grupo_id: claseGrupoId ?? '',
+          estudianteId_productoId_claseGrupoId: {
+            estudianteId: estudiante.id,
+            productoId: club.id,
+            claseGrupoId: claseGrupoId ?? '',
           },
         },
         update: { estado: EstadoInscripcionActividad.ACTIVA, tier: hijo.tier },
         create: {
-          suscripcion_familiar_id: suscripcionFernandez.id,
-          estudiante_id: estudiante.id,
-          producto_id: club.id,
-          clase_grupo_id: claseGrupoId,
+          suscripcionFamiliarId: suscripcionFernandez.id,
+          estudianteId: estudiante.id,
+          productoId: club.id,
+          claseGrupoId: claseGrupoId,
           tier: hijo.tier,
           estado: EstadoInscripcionActividad.ACTIVA,
         },
@@ -562,10 +562,10 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
   const tutorPerez = await prisma.tutor.upsert({
     where: { email: 'laura.perez@suscripcion.test' },
-    update: { password_hash: passwordHash },
+    update: { passwordHash: passwordHash },
     create: {
       email: 'laura.perez@suscripcion.test',
-      password_hash: passwordHash,
+      passwordHash: passwordHash,
       nombre: 'Laura',
       apellido: 'Pérez',
       telefono: '+5491133445566',
@@ -593,7 +593,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
   const montoPerez = 65000 + 65000 * 0.9; // $123,500
 
   const suscripcionPerez = await prisma.suscripcionFamiliar.upsert({
-    where: { tutor_id: tutorPerez.id },
+    where: { tutorId: tutorPerez.id },
     update: {
       estado: EstadoSuscripcionFamiliar.PAUSED,
       tier: TierNombre.STEAM_ASINCRONICO,
@@ -601,7 +601,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
       fecha_gracia: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     },
     create: {
-      tutor_id: tutorPerez.id,
+      tutorId: tutorPerez.id,
       estado: EstadoSuscripcionFamiliar.PAUSED,
       tier: TierNombre.STEAM_ASINCRONICO,
       monto_mensual: Math.round(montoPerez),
@@ -616,7 +616,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
     const estudiante = await prisma.estudiante.upsert({
       where: { email: `${username}@estudiante.test` },
-      update: { tutor_id: tutorPerez.id, casaId: casa.id },
+      update: { tutorId: tutorPerez.id, casaId: casa.id },
       create: {
         username,
         nombre: hijo.nombre,
@@ -624,8 +624,8 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
         edad: hijo.edad,
         nivelEscolar: 'Primaria',
         email: `${username}@estudiante.test`,
-        password_hash: studentPasswordHash,
-        tutor_id: tutorPerez.id,
+        passwordHash: studentPasswordHash,
+        tutorId: tutorPerez.id,
         casaId: casa.id,
       },
     });
@@ -637,18 +637,18 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
       await prisma.inscripcionActividad.upsert({
         where: {
-          estudiante_id_producto_id_clase_grupo_id: {
-            estudiante_id: estudiante.id,
-            producto_id: club.id,
-            clase_grupo_id: claseGrupoId ?? '',
+          estudianteId_productoId_claseGrupoId: {
+            estudianteId: estudiante.id,
+            productoId: club.id,
+            claseGrupoId: claseGrupoId ?? '',
           },
         },
         update: { estado: EstadoInscripcionActividad.PAUSADA, tier: hijo.tier },
         create: {
-          suscripcion_familiar_id: suscripcionPerez.id,
-          estudiante_id: estudiante.id,
-          producto_id: club.id,
-          clase_grupo_id: claseGrupoId,
+          suscripcionFamiliarId: suscripcionPerez.id,
+          estudianteId: estudiante.id,
+          productoId: club.id,
+          claseGrupoId: claseGrupoId,
           tier: hijo.tier,
           estado: EstadoInscripcionActividad.PAUSADA,
         },
@@ -678,10 +678,10 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
   const tutorTorres = await prisma.tutor.upsert({
     where: { email: 'pablo.torres@suscripcion.test' },
-    update: { password_hash: passwordHash },
+    update: { passwordHash: passwordHash },
     create: {
       email: 'pablo.torres@suscripcion.test',
-      password_hash: passwordHash,
+      passwordHash: passwordHash,
       nombre: 'Pablo',
       apellido: 'Torres',
       telefono: '+5491122334455',
@@ -691,14 +691,14 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
   });
 
   const suscripcionTorres = await prisma.suscripcionFamiliar.upsert({
-    where: { tutor_id: tutorTorres.id },
+    where: { tutorId: tutorTorres.id },
     update: {
       estado: EstadoSuscripcionFamiliar.CANCELLED,
       tier: TierNombre.STEAM_LIBROS,
       monto_mensual: 40000,
     },
     create: {
-      tutor_id: tutorTorres.id,
+      tutorId: tutorTorres.id,
       estado: EstadoSuscripcionFamiliar.CANCELLED,
       tier: TierNombre.STEAM_LIBROS,
       monto_mensual: 40000,
@@ -708,7 +708,7 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
   const estudianteTorres = await prisma.estudiante.upsert({
     where: { email: 'julian.torres@estudiante.test' },
-    update: { tutor_id: tutorTorres.id, casaId: casaPulsar.id },
+    update: { tutorId: tutorTorres.id, casaId: casaPulsar.id },
     create: {
       username: 'julian.torres',
       nombre: 'Julián',
@@ -716,8 +716,8 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
       edad: 14,
       nivelEscolar: 'Secundaria - 2do año',
       email: 'julian.torres@estudiante.test',
-      password_hash: studentPasswordHash,
-      tutor_id: tutorTorres.id,
+      passwordHash: studentPasswordHash,
+      tutorId: tutorTorres.id,
       casaId: casaPulsar.id,
     },
   });
@@ -728,10 +728,10 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
 
     await prisma.inscripcionActividad.upsert({
       where: {
-        estudiante_id_producto_id_clase_grupo_id: {
-          estudiante_id: estudianteTorres.id,
-          producto_id: clubTorres.id,
-          clase_grupo_id: claseGrupoId ?? '',
+        estudianteId_productoId_claseGrupoId: {
+          estudianteId: estudianteTorres.id,
+          productoId: clubTorres.id,
+          claseGrupoId: claseGrupoId ?? '',
         },
       },
       update: {
@@ -739,13 +739,13 @@ export async function seedSuscripcionesFamiliares(prisma: PrismaClient) {
         tier: TierNombre.STEAM_LIBROS,
       },
       create: {
-        suscripcion_familiar_id: suscripcionTorres.id,
-        estudiante_id: estudianteTorres.id,
-        producto_id: clubTorres.id,
-        clase_grupo_id: claseGrupoId,
+        suscripcionFamiliarId: suscripcionTorres.id,
+        estudianteId: estudianteTorres.id,
+        productoId: clubTorres.id,
+        claseGrupoId: claseGrupoId,
         tier: TierNombre.STEAM_LIBROS,
         estado: EstadoInscripcionActividad.CANCELADA,
-        fecha_fin: new Date(),
+        fechaFin: new Date(),
       },
     });
   }

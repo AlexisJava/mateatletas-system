@@ -55,31 +55,31 @@ export async function seedInscripcionesMensuales(prisma: PrismaClient) {
 
     const inscripcionActual = await prisma.inscripcionMensual.upsert({
       where: {
-        estudiante_id_producto_id_periodo: {
-          estudiante_id: estudiante.id,
-          producto_id: productoMensual.id,
+        estudianteId_productoId_periodo: {
+          estudianteId: estudiante.id,
+          productoId: productoMensual.id,
           periodo: periodoActual,
         },
       },
       update: {},
       create: {
-        estudiante_id: estudiante.id,
-        producto_id: productoMensual.id,
-        tutor_id: tutor.id,
+        estudianteId: estudiante.id,
+        productoId: productoMensual.id,
+        tutorId: tutor.id,
         anio: anioActual,
         mes: mesActual,
         periodo: periodoActual,
-        precio_base: productoMensual.precio,
+        precioBase: productoMensual.precio,
         descuento_aplicado: 0,
         precio_final: productoMensual.precio,
         tipo_descuento: TipoDescuento.NINGUNO,
         detalle_calculo: 'Precio base sin descuentos aplicables',
-        estado_pago: EstadoPago.Pendiente,
+        estadoPago: EstadoPago.Pendiente,
       },
     });
 
     console.log(
-      `   ✅ ${estudiante.nombre} - ${mesActual}/${anioActual}: $${inscripcionActual.precio_final} (${inscripcionActual.estado_pago})`,
+      `   ✅ ${estudiante.nombre} - ${mesActual}/${anioActual}: $${inscripcionActual.precio_final} (${inscripcionActual.estadoPago})`,
     );
 
     // Crear inscripción del mes pasado (vencida) para probar alertas
@@ -89,31 +89,31 @@ export async function seedInscripcionesMensuales(prisma: PrismaClient) {
 
     const inscripcionVencida = await prisma.inscripcionMensual.upsert({
       where: {
-        estudiante_id_producto_id_periodo: {
-          estudiante_id: estudiante.id,
-          producto_id: productoMensual.id,
+        estudianteId_productoId_periodo: {
+          estudianteId: estudiante.id,
+          productoId: productoMensual.id,
           periodo: periodoPasado,
         },
       },
       update: {},
       create: {
-        estudiante_id: estudiante.id,
-        producto_id: productoMensual.id,
-        tutor_id: tutor.id,
+        estudianteId: estudiante.id,
+        productoId: productoMensual.id,
+        tutorId: tutor.id,
         anio: anioPasado,
         mes: mesPasado,
         periodo: periodoPasado,
-        precio_base: productoMensual.precio,
+        precioBase: productoMensual.precio,
         descuento_aplicado: 0,
         precio_final: productoMensual.precio,
         tipo_descuento: TipoDescuento.NINGUNO,
         detalle_calculo: 'Precio base sin descuentos aplicables',
-        estado_pago: EstadoPago.Vencido,
+        estadoPago: EstadoPago.Vencido,
       },
     });
 
     console.log(
-      `   ⚠️  ${estudiante.nombre} - ${mesPasado}/${anioPasado}: $${inscripcionVencida.precio_final} (${inscripcionVencida.estado_pago})`,
+      `   ⚠️  ${estudiante.nombre} - ${mesPasado}/${anioPasado}: $${inscripcionVencida.precio_final} (${inscripcionVencida.estadoPago})`,
     );
   }
 

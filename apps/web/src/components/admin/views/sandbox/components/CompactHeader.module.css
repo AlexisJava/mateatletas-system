@@ -1,0 +1,199 @@
+/**
+ * CompactHeader.module.css - Frame 3 Header
+ * Dark Glassmorphism Gaming Premium
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   HEADER CONTAINER
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.header {
+  height: var(--sb-header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--sb-space-lg);
+  background: rgba(12, 12, 18, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--sb-border-glass);
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   LEFT SECTION
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-md);
+}
+
+.logo {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--sb-radius-md);
+  background: linear-gradient(135deg, var(--sb-accent-violet), var(--sb-accent-cyan));
+  box-shadow: 0 2px 12px var(--sb-glow-violet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--sb-font-sans);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--sb-text-primary);
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-sm);
+}
+
+.title {
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-base);
+  font-weight: 600;
+  color: var(--sb-text-primary);
+  margin: 0;
+}
+
+.editBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  border-radius: var(--sb-radius-sm);
+  color: var(--sb-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: all var(--sb-transition-fast);
+}
+
+.titleGroup:hover .editBtn {
+  opacity: 1;
+}
+
+.editBtn:hover {
+  color: var(--sb-text-secondary);
+  background: var(--sb-bg-glass);
+}
+
+.editBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   RIGHT SECTION
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-md);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SAVE STATUS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.saveStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-xs);
+  padding: var(--sb-space-xs) var(--sb-space-sm);
+  border-radius: var(--sb-radius-sm);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  font-weight: 500;
+  transition: all var(--sb-transition-fast);
+}
+
+.saveStatus svg {
+  width: 14px;
+  height: 14px;
+}
+
+.saveStatusSaved {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--sb-accent-green);
+}
+
+.saveStatusSaving {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--sb-accent-violet);
+}
+
+.saveStatusSaving svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.saveStatusError {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--sb-accent-red);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CONTENT TYPE BADGE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.typeBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-xs);
+  padding: var(--sb-space-xs) var(--sb-space-sm);
+  border-radius: var(--sb-radius-sm);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-xs);
+  font-weight: 500;
+}
+
+.typeBadge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.typeBadgeMicroleccion {
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--sb-accent-cyan);
+}
+
+.typeBadgePlanificacion {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--sb-accent-violet);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 600px) {
+  .header {
+    padding: 0 var(--sb-space-md);
+  }
+
+  .title {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .typeBadge span {
+    display: none;
+  }
+}

@@ -1,0 +1,288 @@
+/**
+ * SandboxSidebar Styles - Dark Glassmorphism Gaming Premium
+ * Based on frame3EditorPrincipal sidebar design
+ */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background: rgba(12, 12, 18, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  overflow: hidden;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--sb-border-glass);
+}
+
+.section:first-child {
+  flex: 1;
+  min-height: 0;
+}
+
+.section:last-child {
+  flex-shrink: 0;
+  max-height: 40%;
+  border-bottom: none;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 var(--sb-space-sm);
+  border-bottom: 1px solid var(--sb-border-glass);
+  flex-shrink: 0;
+}
+
+.sectionTitle {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--sb-text-muted);
+}
+
+.searchBtn,
+.addBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.04);
+  border: none;
+  border-radius: var(--sb-radius-sm);
+  color: var(--sb-text-muted);
+  cursor: pointer;
+  transition: var(--sb-transition-fast);
+}
+
+.searchBtn:hover,
+.addBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--sb-text-secondary);
+}
+
+.categoriesContainer {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--sb-space-xs);
+}
+
+.categoriesContainer::-webkit-scrollbar {
+  width: 4px;
+}
+
+.categoriesContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.categoriesContainer::-webkit-scrollbar-thumb {
+  background: var(--sb-border-subtle);
+  border-radius: 2px;
+}
+
+.category {
+  margin-bottom: 2px;
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: var(--sb-radius-sm);
+  cursor: pointer;
+  transition: var(--sb-transition-fast);
+}
+
+.categoryHeader:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.categoryEmoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.categoryName {
+  flex: 1;
+  text-align: left;
+  font-size: var(--sb-text-sm);
+  font-weight: 500;
+  color: var(--sb-text-secondary);
+}
+
+.categoryCount {
+  font-size: var(--sb-text-xs);
+  color: var(--sb-text-muted);
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+}
+
+.categoryChevron {
+  color: var(--sb-text-muted);
+  transition: var(--sb-transition-fast);
+}
+
+.intentsList {
+  padding: 4px 0 4px 32px;
+}
+
+.intentItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  border-radius: var(--sb-radius-sm);
+  cursor: pointer;
+  transition: var(--sb-transition-fast);
+}
+
+.intentItem:hover {
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.intentItem.active {
+  background: rgba(139, 92, 246, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.3);
+}
+
+.intentName {
+  font-size: var(--sb-text-sm);
+  color: var(--sb-text-secondary);
+}
+
+.intentItem.active .intentName {
+  color: var(--sb-accent-violet);
+  font-weight: 500;
+}
+
+.treeContainer {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--sb-space-xs);
+}
+
+.treeContainer::-webkit-scrollbar {
+  width: 4px;
+}
+
+.treeContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.treeContainer::-webkit-scrollbar-thumb {
+  background: var(--sb-border-subtle);
+  border-radius: 2px;
+}
+
+.treeNodeContainer {
+  /* Container for node + children */
+}
+
+.treeNode {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  border-radius: var(--sb-radius-sm);
+  cursor: pointer;
+  transition: var(--sb-transition-fast);
+  text-align: left;
+}
+
+.treeNode:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.treeNode.selected {
+  background: rgba(6, 182, 212, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(6, 182, 212, 0.25);
+}
+
+.treeNodeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sb-text-muted);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.treeNode.selected .treeNodeIcon {
+  color: var(--sb-accent-cyan);
+}
+
+.treeNodeLabel {
+  flex: 1;
+  font-size: var(--sb-text-sm);
+  color: var(--sb-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.treeNode.selected .treeNodeLabel {
+  color: var(--sb-accent-cyan);
+  font-weight: 500;
+}
+
+.treeNodeChildren {
+  /* Children are indented by padding-left in JS */
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.emptyState p {
+  font-size: var(--sb-text-sm);
+  color: var(--sb-text-muted);
+  margin: 0;
+}
+
+.addNodeBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: var(--sb-radius-md);
+  color: var(--sb-accent-violet);
+  font-size: var(--sb-text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--sb-transition-fast);
+}
+
+.addNodeBtn:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.4);
+}

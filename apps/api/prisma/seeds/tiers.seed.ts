@@ -19,10 +19,10 @@ export async function seedTiers(prisma: PrismaClient): Promise<void> {
   const tiers = [
     {
       nombre: TierNombre.STEAM_LIBROS,
-      precio_mensual: 40000,
-      mundos_async: 3, // Acceso a todos los mundos (Mate, Progra, Ciencias)
-      mundos_sync: 0,
-      tiene_docente: false,
+      precioMensual: 40000,
+      mundosAsync: 3, // Acceso a todos los mundos (Mate, Progra, Ciencias)
+      mundosSync: 0,
+      tieneDocente: false,
       descripcion:
         'Plataforma completa STEAM: Matemáticas + Programación + Ciencias',
       activo: true,
@@ -30,20 +30,20 @@ export async function seedTiers(prisma: PrismaClient): Promise<void> {
     },
     {
       nombre: TierNombre.STEAM_ASINCRONICO,
-      precio_mensual: 65000,
-      mundos_async: 3,
-      mundos_sync: 0,
-      tiene_docente: false,
+      precioMensual: 65000,
+      mundosAsync: 3,
+      mundosSync: 0,
+      tieneDocente: false,
       descripcion: 'STEAM completo + clases grabadas asincrónicas',
       activo: true,
       orden: 2,
     },
     {
       nombre: TierNombre.STEAM_SINCRONICO,
-      precio_mensual: 95000,
-      mundos_async: 3,
-      mundos_sync: 1,
-      tiene_docente: true,
+      precioMensual: 95000,
+      mundosAsync: 3,
+      mundosSync: 1,
+      tieneDocente: true,
       descripcion: 'STEAM completo + clases en vivo con docente',
       activo: true,
       orden: 3,
@@ -54,10 +54,10 @@ export async function seedTiers(prisma: PrismaClient): Promise<void> {
     await prisma.tier.upsert({
       where: { nombre: tier.nombre },
       update: {
-        precio_mensual: tier.precio_mensual,
-        mundos_async: tier.mundos_async,
-        mundos_sync: tier.mundos_sync,
-        tiene_docente: tier.tiene_docente,
+        precioMensual: tier.precioMensual,
+        mundosAsync: tier.mundosAsync,
+        mundosSync: tier.mundosSync,
+        tieneDocente: tier.tieneDocente,
         descripcion: tier.descripcion,
         activo: tier.activo,
         orden: tier.orden,

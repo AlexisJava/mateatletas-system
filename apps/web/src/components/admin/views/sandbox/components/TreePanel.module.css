@@ -1,88 +1,137 @@
-/* TreePanel.module.css - Árbol de nodos con estilo moderno */
+/**
+ * TreePanel.module.css - Frame 3 Sidebar
+ * Dark Glassmorphism Gaming Premium
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PANEL CONTAINER
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 .panel {
-  padding: 0.75rem 0.5rem;
+  padding: var(--sb-space-sm);
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-space-xs);
 }
 
+.panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.panel::-webkit-scrollbar-thumb {
+  background: var(--sb-border-subtle);
+  border-radius: 3px;
+}
+
+.panel::-webkit-scrollbar-thumb:hover {
+  background: var(--sb-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   EMPTY STATE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
 .empty {
-  color: var(--admin-text-muted);
-  font-size: 0.8125rem;
-  padding: 1.5rem 1rem;
+  color: var(--sb-text-muted);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  padding: var(--sb-space-2xl) var(--sb-space-md);
   text-align: center;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   NODO DEL ÁRBOL
-   ───────────────────────────────────────────────────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sb-space-md);
+  padding: var(--sb-space-2xl) var(--sb-space-md);
+}
+
+.emptyState p {
+  color: var(--sb-text-muted);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TREE NODE
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 .node {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  margin: 0.125rem 0.25rem;
+  gap: var(--sb-space-xs);
+  padding: var(--sb-space-sm) var(--sb-space-md);
+  margin: 0 var(--sb-space-xs);
   cursor: pointer;
-  font-size: 0.8125rem;
-  color: var(--admin-text-secondary);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
+  color: var(--sb-text-secondary);
   user-select: none;
-  border-radius: 8px;
-  transition: all 0.15s ease;
+  border-radius: var(--sb-radius-sm);
+  transition: all var(--sb-transition-fast);
   position: relative;
+  border: 1px solid transparent;
 }
 
 .node:hover {
-  background: var(--admin-surface-2);
-  color: var(--admin-text);
+  background: var(--sb-bg-glass);
+  color: var(--sb-text-primary);
+  border-color: var(--sb-border-glass);
 }
 
 .selected {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%);
-  color: var(--admin-text);
-  box-shadow:
-    inset 0 0 0 1px rgba(16, 185, 129, 0.3),
-    0 0 12px rgba(16, 185, 129, 0.1);
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--sb-text-primary);
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.1);
 }
 
 .selected:hover {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(99, 102, 241, 0.15) 100%);
+  background: rgba(139, 92, 246, 0.2);
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   CHEVRON / INDICADOR
-   ───────────────────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CHEVRON / INDICATOR
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 .chevron {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.625rem;
-  color: var(--admin-text-muted);
+  font-size: 10px;
+  color: var(--sb-text-muted);
   cursor: pointer;
   flex-shrink: 0;
-  border-radius: 4px;
+  border-radius: var(--sb-radius-sm);
   border: none;
   background: transparent;
   padding: 0;
-  transition: all 0.15s ease;
+  transition: all var(--sb-transition-fast);
 }
 
 .chevron:hover {
-  background: var(--admin-surface-3);
-  color: var(--admin-accent);
+  background: var(--sb-bg-elevated);
+  color: var(--sb-accent-violet);
 }
 
 .chevron:focus {
   outline: none;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   LABEL E INPUT
-   ───────────────────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   LABEL & INPUT
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 .label {
   flex: 1;
@@ -90,30 +139,31 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 450;
+  font-weight: 500;
 }
 
 .input {
   flex: 1;
-  background: var(--admin-bg);
-  border: 1px solid var(--admin-accent);
-  color: var(--admin-text);
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8125rem;
+  background: var(--sb-bg-surface);
+  border: 1px solid var(--sb-accent-violet);
+  color: var(--sb-text-primary);
+  padding: var(--sb-space-xs) var(--sb-space-sm);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
   outline: none;
-  border-radius: 6px;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  border-radius: var(--sb-radius-sm);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   ACCIONES (hover)
-   ───────────────────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ACTIONS (hover)
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 .actions {
   display: flex;
-  gap: 0.125rem;
+  gap: 2px;
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--sb-transition-fast);
 }
 
 .actionsVisible {
@@ -123,56 +173,97 @@
 .actionBtn {
   background: transparent;
   border: none;
-  color: var(--admin-text-muted);
+  color: var(--sb-text-muted);
   cursor: pointer;
-  padding: 0.25rem;
-  font-size: 0.875rem;
+  padding: var(--sb-space-xs);
+  font-size: var(--sb-text-base);
   line-height: 1;
-  border-radius: 4px;
-  transition: all 0.15s ease;
+  border-radius: var(--sb-radius-sm);
+  transition: all var(--sb-transition-fast);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 24px;
+  height: 24px;
 }
 
 .actionBtn:hover {
-  background: var(--admin-accent-muted);
-  color: var(--admin-accent);
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--sb-accent-violet);
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   ESTADO VACÍO
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 2rem 1rem;
-  color: var(--admin-text-muted);
-  font-size: 0.8125rem;
-}
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ADD ROOT BUTTON
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 .addRootBtn {
-  background: linear-gradient(135deg, var(--admin-surface-2) 0%, var(--admin-surface-3) 100%);
-  border: 1px dashed var(--admin-border);
-  color: var(--admin-text-muted);
-  padding: 0.625rem 1.25rem;
-  border-radius: 10px;
+  background: var(--sb-bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px dashed var(--sb-border-glass-hover);
+  color: var(--sb-text-muted);
+  padding: var(--sb-space-sm) var(--sb-space-lg);
+  border-radius: var(--sb-radius-md);
   cursor: pointer;
-  font-size: 0.8125rem;
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-sm);
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all var(--sb-transition-normal);
 }
 
 .addRootBtn:hover {
-  background: linear-gradient(135deg, var(--admin-surface-3) 0%, rgba(16, 185, 129, 0.1) 100%);
-  border-color: var(--admin-accent);
+  background: rgba(139, 92, 246, 0.1);
+  border-color: var(--sb-accent-violet);
   border-style: solid;
-  color: var(--admin-text);
+  color: var(--sb-text-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+  box-shadow: var(--sb-shadow-glow-violet);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   SECTION HEADER (for categories)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-space-xs);
+  padding: var(--sb-space-sm) var(--sb-space-md);
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sb-text-muted);
+}
+
+.sectionHeader::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--sb-border-glass);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CLASE ITEM (planificación)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.claseNumber {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--sb-font-sans);
+  font-size: var(--sb-text-xs);
+  font-weight: 600;
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--sb-accent-violet);
+  border-radius: var(--sb-radius-sm);
+  flex-shrink: 0;
+}
+
+.selected .claseNumber {
+  background: var(--sb-accent-violet);
+  color: var(--sb-text-primary);
 }
