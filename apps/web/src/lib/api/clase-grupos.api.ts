@@ -71,15 +71,14 @@ export async function listarClaseGrupos(params?: ListarClaseGruposParams): Promi
   const url = `/admin/clase-grupos${queryString ? `?${queryString}` : ''}`;
 
   try {
-    // El backend retorna { success, data: [...], total }
+    // El backend retorna { success, data: [...] }
+    // El interceptor de axios unwraps automáticamente, así que response es { success, data }
     const response = await axios.get<{
       success: boolean;
       data: Record<string, unknown>[];
-      total: number;
     }>(url);
 
-    // Transformar snake_case a camelCase
-    const rawData = Array.isArray(response) ? response : response?.data || [];
+    const rawData = response.data ?? [];
     const claseGrupos = rawData.map(transformClaseGrupo);
 
     return {

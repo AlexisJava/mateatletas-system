@@ -1,22 +1,40 @@
+/**
+ * API Client para operaciones de docentes
+ *
+ * REGLAS APLICADAS:
+ * ✅ Tipos explícitos importados desde schemas
+ * ✅ Todas las funciones retornan Promise<TipoExplicito>
+ * ✅ Validación con Zod en respuestas críticas
+ * ✅ PROHIBIDO: any, unknown, casts "as"
+ */
+
 import apiClient from '../axios';
+import {
+  docenteSchema,
+  docentesListSchema,
+  dashboardDocenteResponseSchema,
+  notificacionSchema,
+  notificacionesListResponseSchema,
+  notificacionesCountSchema,
+} from '@/lib/schemas/docente.schema';
 
 export interface Docente {
   id: string;
   nombre: string;
   apellido: string;
   email: string;
-  telefono?: string;
-  titulo?: string;
-  tituloProfesional?: string;
-  bio?: string;
-  biografia?: string;
-  especialidades?: string[];
-  experienciaAnos?: number;
-  disponibilidadHoraria?: Record<string, string[]>;
-  nivelEducativo?: string[];
-  estado?: string;
-  createdAt: string;
-  updatedAt: string;
+  telefono?: string | null;
+  titulo?: string | null;
+  tituloProfesional?: string | null;
+  bio?: string | null;
+  biografia?: string | null;
+  especialidades?: string[] | null;
+  experienciaAnos?: number | null;
+  disponibilidadHoraria?: Record<string, string[]> | null;
+  nivelEducativo?: string[] | null;
+  estado?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface UpdateDocenteData {
@@ -426,21 +444,24 @@ export const notificacionesApi = {
     if (params.limit) searchParams.append('limit', params.limit.toString());
     const queryString = searchParams.toString();
     const url = `/notificaciones${queryString ? `?${queryString}` : ''}`;
-    return apiClient.get<NotificacionesListResponse>(url);
+    const response = await apiClient.get<NotificacionesListResponse>(url);
+    return notificacionesListResponseSchema.parse(response);
   },
 
   /**
    * Obtener contador de notificaciones no leídas
    */
   getCountNoLeidas: async (): Promise<{ count: number }> => {
-    return apiClient.get<{ count: number }>('/notificaciones/count');
+    const response = await apiClient.get<{ count: number }>('/notificaciones/count');
+    return notificacionesCountSchema.parse(response);
   },
 
   /**
    * Marcar una notificación como leída
    */
   marcarComoLeida: async (id: string): Promise<Notificacion> => {
-    return apiClient.patch<Notificacion>(`/notificaciones/${id}/leer`);
+    const response = await apiClient.patch<Notificacion>(`/notificaciones/${id}/leer`);
+    return notificacionSchema.parse(response);
   },
 
   /**
@@ -458,7 +479,8 @@ export const docentesApi = {
    */
   getDashboard: async (): Promise<DashboardDocenteResponse> => {
     try {
-      return await apiClient.get<DashboardDocenteResponse>('/docentes/me/dashboard');
+      const response = await apiClient.get<DashboardDocenteResponse>('/docentes/me/dashboard');
+      return dashboardDocenteResponseSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener el dashboard del docente:', error);
       throw error;
@@ -504,7 +526,8 @@ export const docentesApi = {
    */
   getMe: async (): Promise<Docente> => {
     try {
-      return await apiClient.get<Docente>('/docentes/me');
+      const response = await apiClient.get<Docente>('/docentes/me');
+      return docenteSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener el perfil del docente:', error);
       throw error;
@@ -528,7 +551,8 @@ export const docentesApi = {
    */
   getAll: async (): Promise<Docente[]> => {
     try {
-      return await apiClient.get<Docente[]>('/docentes');
+      const response = await apiClient.get<Docente[]>('/docentes');
+      return docentesListSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener la lista de docentes:', error);
       throw error;
@@ -540,7 +564,8 @@ export const docentesApi = {
    */
   getById: async (id: string): Promise<Docente> => {
     try {
-      return await apiClient.get<Docente>(`/docentes/${id}`);
+      const response = await apiClient.get<Docente>(`/docentes/${id}`);
+      return docenteSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener el docente por ID:', error);
       throw error;

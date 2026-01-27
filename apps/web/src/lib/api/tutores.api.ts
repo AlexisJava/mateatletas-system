@@ -1,4 +1,22 @@
+/**
+ * API Client para operaciones de tutores
+ *
+ * REGLAS APLICADAS:
+ * ✅ Tipos explícitos importados desde schemas
+ * ✅ Todas las funciones retornan Promise<TipoExplicito>
+ * ✅ Validación con Zod en respuestas críticas
+ * ✅ PROHIBIDO: any, unknown, casts "as"
+ */
+
 import apiClient from '../axios';
+import {
+  dashboardResumenResponseSchema,
+  proximasClasesResponseSchema,
+  alertasResponseSchema,
+  misInscripcionesResponseSchema,
+  crearHijoResponseSchema,
+  estudianteCreadoSchema,
+} from '@/lib/schemas/tutor.schema';
 
 // ============================================================================
 // TIPOS DE RESPUESTA - Basados en /apps/api/src/tutor/types/tutor-dashboard.types.ts
@@ -209,7 +227,8 @@ export const tutoresApi = {
    * Crear un nuevo hijo (estudiante) asociado al tutor autenticado
    */
   crearHijo: async (data: CrearHijoRequest): Promise<CrearHijoResponse> => {
-    return apiClient.post<CrearHijoResponse>('/estudiantes', data);
+    const response = await apiClient.post<CrearHijoResponse>('/estudiantes', data);
+    return crearHijoResponseSchema.parse(response);
   },
 
   /**
@@ -221,7 +240,8 @@ export const tutoresApi = {
     id: string,
     data: UpdateEstudianteRequest,
   ): Promise<EstudianteCreado> => {
-    return apiClient.patch<EstudianteCreado>(`/estudiantes/${id}`, data);
+    const response = await apiClient.patch<EstudianteCreado>(`/estudiantes/${id}`, data);
+    return estudianteCreadoSchema.parse(response);
   },
 
   /**
@@ -229,7 +249,8 @@ export const tutoresApi = {
    * Dashboard completo: métricas, alertas, pagos pendientes, clases de hoy
    */
   getDashboardResumen: async (): Promise<DashboardResumenResponse> => {
-    return apiClient.get<DashboardResumenResponse>('/tutor/dashboard-resumen');
+    const response = await apiClient.get<DashboardResumenResponse>('/tutor/dashboard-resumen');
+    return dashboardResumenResponseSchema.parse(response);
   },
 
   /**
@@ -237,9 +258,10 @@ export const tutoresApi = {
    * Próximas N clases de todos los hijos
    */
   getProximasClases: async (limit: number = 5): Promise<ProximasClasesResponse> => {
-    return apiClient.get<ProximasClasesResponse>('/tutor/proximas-clases', {
+    const response = await apiClient.get<ProximasClasesResponse>('/tutor/proximas-clases', {
       params: { limit },
     });
+    return proximasClasesResponseSchema.parse(response);
   },
 
   /**
@@ -247,7 +269,8 @@ export const tutoresApi = {
    * Todas las alertas activas
    */
   getAlertas: async (): Promise<AlertasResponse> => {
-    return apiClient.get<AlertasResponse>('/tutor/alertas');
+    const response = await apiClient.get<AlertasResponse>('/tutor/alertas');
+    return alertasResponseSchema.parse(response);
   },
 
   /**
@@ -258,9 +281,10 @@ export const tutoresApi = {
     periodo?: string,
     estadoPago?: EstadoPagoFilter,
   ): Promise<MisInscripcionesResponse> => {
-    return apiClient.get<MisInscripcionesResponse>('/tutor/mis-inscripciones', {
+    const response = await apiClient.get<MisInscripcionesResponse>('/tutor/mis-inscripciones', {
       params: { periodo, estadoPago },
     });
+    return misInscripcionesResponseSchema.parse(response);
   },
 };
 
