@@ -42,8 +42,8 @@ export interface ClasePlanificacion {
   numero: number;
   titulo: string;
   descripcion: string | null;
-  teoriaId: string | null;
-  practicaId: string | null;
+  teoriaId: string;
+  practicaId: string;
 }
 
 export interface Planificacion {
