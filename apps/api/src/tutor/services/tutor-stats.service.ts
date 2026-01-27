@@ -704,7 +704,7 @@ export class TutorStatsService {
 
     for (const inscripcion of inscripciones) {
       const comision = inscripcion.comision;
-      if (comision && !comisionesMap.has(comision.id)) {
+      if (comision && comision.docente && !comisionesMap.has(comision.id)) {
         comisionesMap.set(comision.id, {
           id: comision.id,
           nombre: comision.nombre,
