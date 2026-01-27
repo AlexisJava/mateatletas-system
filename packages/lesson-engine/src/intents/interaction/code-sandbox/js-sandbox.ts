@@ -223,7 +223,6 @@ export async function executeInSandbox(
 export function validateSyntax(code: string): { valid: boolean; error?: string } {
   try {
     // Use Function constructor to parse without executing
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     new Function(code);
     return { valid: true };
   } catch (err) {

@@ -276,7 +276,6 @@ export function RubricIntent({
         >
           {criteria.map((criterion) => {
             const selectedScore = selectedLevels[criterion.id];
-            const isSelected = selectedScore !== undefined;
 
             return (
               <motion.div

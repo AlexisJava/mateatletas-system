@@ -24,3 +24,9 @@ export * from './catalog';
 
 // Validation - Zod schemas and validators
 export * from './validation';
+
+// Hooks - Custom hooks for lesson functionality
+export * from './hooks';
+
+// Components - Reusable UI components
+export * from './components';
