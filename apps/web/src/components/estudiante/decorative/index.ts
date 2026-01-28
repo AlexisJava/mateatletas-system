@@ -3,9 +3,13 @@
  * Efectos visuales y fondos animados
  */
 
-// Export decorative components here as they are created
-// export { VortexEffect } from './VortexEffect';
-// export { NebulaBackground } from './NebulaBackground';
-// export { StarField } from './StarField';
-// export { FloatingParticles } from './FloatingParticles';
-// export { GlowOrbs } from './GlowOrbs';
+// Individual decorative elements
+export { NebulaBackground, DEFAULT_NEBULAS } from './NebulaBackground';
+export { StarField, DEFAULT_STARS } from './StarField';
+export { FloatingParticles, DEFAULT_PARTICLES } from './FloatingParticles';
+export { GlowOrbs, DEFAULT_ORBS } from './GlowOrbs';
+export { VortexEffect } from './VortexEffect';
+export { Vignette } from './Vignette';
+
+// Combined background
+export { CosmicBackground } from './CosmicBackground';
