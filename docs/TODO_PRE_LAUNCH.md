@@ -200,6 +200,48 @@
 
 ---
 
+## 🎮 Portal Estudiante - Refactor 2026
+
+**Estado:** Pendiente (branch: `refactor/frontend-estudiante`)
+
+### Fase 1: Refactor UX/UI (ACTUAL)
+
+- [ ] Auditar estado actual del portal (19 archivos, ~6,500 líneas)
+- [ ] Rediseñar navegación y layouts
+- [ ] Unificar componentes (CandyCard, CandyPill, etc.)
+- [ ] Mejorar responsive y accesibilidad
+- [ ] Optimizar carga y performance
+
+### Fase 2: Integración lesson-engine + game-engine (DESPUÉS del refactor UI)
+
+- [ ] **[PORT-001]** Crear `GameIntent` en lesson-engine
+  - Archivo destino: `packages/lesson-engine/src/intents/gamification/GameIntent.tsx`
+  - Debe importar `PhaserGame` de `@mateatletas/game-engine`
+  - Conectar callbacks de resultado (XP, score) con LessonContext
+
+- [ ] **[PORT-002]** Conectar `/estudiante/jugar` con game-engine real
+  - Archivo: `apps/web/src/app/estudiante/jugar/page.tsx`
+  - Reemplazar placeholder con `PhaserGame` component
+  - Conectar resultado con backend (gamificacionApi)
+
+- [ ] **[PORT-003]** Conectar `/estudiante/explorar` con lesson-engine real
+  - Archivos: `apps/web/src/app/estudiante/explorar/*`
+  - Usar `LessonPlayer` para renderizar microlecciones
+  - Flujo: seleccionar mundo → cargar lección → reproducir slides
+
+- [ ] **[PORT-004]** Flujo completo: Lección → Juego → XP → Backend
+  - Slide de lección con intent `gamification:game`
+  - Al completar juego, XP se suma al LessonContext
+  - Al terminar lección, guardar progreso en backend
+
+### Estado de los Packages
+
+- ✅ `lesson-engine`: Implementado (LessonPlayer, 25+ intents, context)
+- ✅ `game-engine`: Implementado (PhaserGame, 6 templates arcade, EventBus)
+- ❌ Integración: No existe `GameIntent` que conecte ambos
+
+---
+
 ## 📝 Notas
 
 - Los issues CRÍTICOS deben resolverse ANTES del lanzamiento

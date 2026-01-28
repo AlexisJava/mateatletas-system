@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Código
 
 - PROHIBIDO: `any`, `unknown`, `@ts-ignore`, `as`, `!`, `?.` sin justificación documentada
-- PROHIBIDO: Archivos de **lógica de negocio** de más de 300 líneas (God Components/Services)
+- PROHIBIDO: Archivos de **lógica de negocio** de más de 700 líneas (God Components/Services)
   - **Excepción permitida:** Types/DTOs, API clients, test files, game scenes, y schemas Zod pueden exceder el límite si están bien organizados internamente
 - PROHIBIDO: Código duplicado - extraer a función/componente compartido
 - OBLIGATORIO: Tipos explícitos en parámetros y retornos
@@ -1034,7 +1034,7 @@ Ver `apps/api/prisma/migrations/20260118100000_create_inscripciones_unificadas_v
 
 ## ANTI-PATRONES A EVITAR
 
-- God Services/Components (>300 líneas)
+- God Services/Components (>700 líneas)
 - N+1 queries (usar include, groupBy, o batch)
 - Promise.all con loops de queries individuales
 - console.log en producción (usar Logger de NestJS)
