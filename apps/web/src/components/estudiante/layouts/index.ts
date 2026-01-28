@@ -3,7 +3,14 @@
  * Layouts de página y contenedores estructurales
  */
 
-// Export layouts here as they are created
-// export { PortalLayout } from './PortalLayout';
-// export { LessonLayout } from './LessonLayout';
-// export { LiveClassLayout } from './LiveClassLayout';
+// Main portal layout (Main Menu, Mundos, Progreso)
+export { PortalLayout } from './PortalLayout';
+
+// Interactive lesson layout (Blockly, coding lessons)
+export { LessonLayout } from './LessonLayout';
+
+// Live class layout (video, chat, students)
+export { LiveClassLayout } from './LiveClassLayout';
+
+// Games/Arcade layout
+export { GamesLayout } from './GamesLayout';
