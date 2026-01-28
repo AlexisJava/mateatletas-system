@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
@@ -13,12 +13,25 @@ import {
   RefreshCw,
   Radio,
   Play,
+  ClipboardList,
+  Trophy,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Star,
 } from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { toast } from '@/components/ui/Toast';
 import { LoadingSpinner } from '@/components/ui';
 import apiClient from '@/lib/axios';
 import { livekitApi, type EstadoClase } from '@/lib/api/livekit.api';
+import {
+  docentesApi,
+  type HistorialAsistenciaResponse,
+  type HistorialPuntosComisionResponse,
+} from '@/lib/api/docentes.api';
+
+type TabType = 'info' | 'asistencia' | 'puntos';
 
 interface EstudianteInscrito {
   id: string;
@@ -61,6 +74,17 @@ export default function ComisionDetallePage(): React.ReactNode {
   const [isLoading, setIsLoading] = useState(true);
   const [estadoClase, setEstadoClase] = useState<EstadoClase>('Programada');
   const [isLoadingLiveKit, setIsLoadingLiveKit] = useState(false);
+
+  // Tabs state
+  const [activeTab, setActiveTab] = useState<TabType>('info');
+
+  // Historial data
+  const [historialAsistencia, setHistorialAsistencia] =
+    useState<HistorialAsistenciaResponse | null>(null);
+  const [historialPuntos, setHistorialPuntos] = useState<HistorialPuntosComisionResponse | null>(
+    null,
+  );
+  const [isLoadingHistorial, setIsLoadingHistorial] = useState(false);
 
   useEffect(() => {
     if (comisionId) {
@@ -136,6 +160,49 @@ export default function ComisionDetallePage(): React.ReactNode {
       setIsLoading(false);
     }
   };
+
+  const fetchHistorialAsistencia = useCallback(async () => {
+    if (!comisionId) return;
+    try {
+      setIsLoadingHistorial(true);
+      const data = await docentesApi.getHistorialAsistencia(comisionId);
+      setHistorialAsistencia(data);
+    } catch (error) {
+      console.error('Error al cargar historial de asistencia:', error);
+      toast.error('Error al cargar el historial de asistencia');
+    } finally {
+      setIsLoadingHistorial(false);
+    }
+  }, [comisionId]);
+
+  const fetchHistorialPuntos = useCallback(async () => {
+    if (!comisionId) return;
+    try {
+      setIsLoadingHistorial(true);
+      const data = await docentesApi.getHistorialPuntosComision(comisionId);
+      setHistorialPuntos(data);
+    } catch (error) {
+      console.error('Error al cargar historial de puntos:', error);
+      toast.error('Error al cargar el historial de puntos');
+    } finally {
+      setIsLoadingHistorial(false);
+    }
+  }, [comisionId]);
+
+  // Fetch historial data when tab changes
+  useEffect(() => {
+    if (activeTab === 'asistencia' && !historialAsistencia) {
+      fetchHistorialAsistencia();
+    } else if (activeTab === 'puntos' && !historialPuntos) {
+      fetchHistorialPuntos();
+    }
+  }, [
+    activeTab,
+    historialAsistencia,
+    historialPuntos,
+    fetchHistorialAsistencia,
+    fetchHistorialPuntos,
+  ]);
 
   if (isLoading) {
     return (
@@ -344,73 +411,270 @@ export default function ComisionDetallePage(): React.ReactNode {
           </motion.div>
         </div>
 
-        {/* Descripción */}
-        {comision.descripcion && (
+        {/* Tabs */}
+        <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+          <button
+            onClick={() => setActiveTab('info')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-t-lg transition-colors ${
+              activeTab === 'info'
+                ? 'bg-white/10 text-white border-b-2 border-purple-500'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            Información
+          </button>
+          <button
+            onClick={() => setActiveTab('asistencia')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-t-lg transition-colors ${
+              activeTab === 'asistencia'
+                ? 'bg-white/10 text-white border-b-2 border-green-500'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <ClipboardList className="w-4 h-4" />
+            Historial Asistencia
+          </button>
+          <button
+            onClick={() => setActiveTab('puntos')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-t-lg transition-colors ${
+              activeTab === 'puntos'
+                ? 'bg-white/10 text-white border-b-2 border-yellow-500'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Trophy className="w-4 h-4" />
+            Historial Puntos
+          </button>
+        </div>
+
+        {/* Tab Content: Información */}
+        {activeTab === 'info' && (
+          <>
+            {/* Descripción */}
+            {comision.descripcion && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10"
+              >
+                <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-purple-400" />
+                  Descripción
+                </h2>
+                <p className="text-purple-200">{comision.descripcion}</p>
+              </motion.div>
+            )}
+
+            {/* Lista de Estudiantes */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2">
+                <Users className="w-6 h-6 text-blue-400" />
+                ESTUDIANTES INSCRITOS ({comision.estudiantes.length})
+              </h2>
+
+              {comision.estudiantes.length === 0 ? (
+                <div className="bg-white/5 backdrop-blur-xl rounded-xl p-8 border border-white/10 text-center">
+                  <p className="text-purple-300">No hay estudiantes inscritos en esta comisión</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {comision.estudiantes.map((estudiante, index) => (
+                    <motion.div
+                      key={estudiante.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 + index * 0.05 }}
+                      className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-white font-bold">
+                            {estudiante.nombre} {estudiante.apellido}
+                          </p>
+                          {estudiante.email && (
+                            <p className="text-purple-300 text-sm">{estudiante.email}</p>
+                          )}
+                        </div>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-bold ${
+                            estudiante.estado === 'Confirmada'
+                              ? 'bg-green-500/20 text-green-400'
+                              : estudiante.estado === 'Pendiente'
+                                ? 'bg-yellow-500/20 text-yellow-400'
+                                : 'bg-gray-500/20 text-gray-400'
+                          }`}
+                        >
+                          {estudiante.estado}
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
+
+        {/* Tab Content: Historial Asistencia */}
+        {activeTab === 'asistencia' && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10"
+            className="space-y-4"
           >
-            <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-purple-400" />
-              Descripción
-            </h2>
-            <p className="text-purple-200">{comision.descripcion}</p>
+            {isLoadingHistorial ? (
+              <div className="flex items-center justify-center py-12">
+                <LoadingSpinner size="lg" text="Cargando historial..." />
+              </div>
+            ) : !historialAsistencia || historialAsistencia.fechas.length === 0 ? (
+              <div className="bg-white/5 backdrop-blur-xl rounded-xl p-8 border border-white/10 text-center">
+                <ClipboardList className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <p className="text-purple-300">No hay registros de asistencia</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {historialAsistencia.fechas.map((fechaData) => (
+                  <div
+                    key={fechaData.fecha}
+                    className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden"
+                  >
+                    <div className="px-4 py-3 bg-white/5 border-b border-white/10">
+                      <h3 className="text-white font-bold flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-green-400" />
+                        {new Date(fechaData.fecha).toLocaleDateString('es-AR', {
+                          weekday: 'long',
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        })}
+                      </h3>
+                    </div>
+                    <div className="p-4 space-y-2">
+                      {fechaData.asistencias.map((asist) => (
+                        <div
+                          key={asist.estudianteId}
+                          className="flex items-center justify-between p-3 bg-white/5 rounded-lg"
+                        >
+                          <span className="text-white">{asist.nombre}</span>
+                          <div className="flex items-center gap-2">
+                            {asist.observacion && (
+                              <span className="text-xs text-gray-400 max-w-[150px] truncate">
+                                {asist.observacion}
+                              </span>
+                            )}
+                            <span
+                              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${
+                                asist.estado === 'Presente'
+                                  ? 'bg-green-500/20 text-green-400'
+                                  : asist.estado === 'Justificado'
+                                    ? 'bg-yellow-500/20 text-yellow-400'
+                                    : 'bg-red-500/20 text-red-400'
+                              }`}
+                            >
+                              {asist.estado === 'Presente' && <CheckCircle className="w-3 h-3" />}
+                              {asist.estado === 'Ausente' && <XCircle className="w-3 h-3" />}
+                              {asist.estado === 'Justificado' && (
+                                <AlertCircle className="w-3 h-3" />
+                              )}
+                              {asist.estado}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
 
-        {/* Lista de Estudiantes */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2">
-            <Users className="w-6 h-6 text-blue-400" />
-            ESTUDIANTES INSCRITOS ({comision.estudiantes.length})
-          </h2>
-
-          {comision.estudiantes.length === 0 ? (
-            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-8 border border-white/10 text-center">
-              <p className="text-purple-300">No hay estudiantes inscritos en esta comisión</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {comision.estudiantes.map((estudiante, index) => (
-                <motion.div
-                  key={estudiante.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + index * 0.05 }}
-                  className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-white font-bold">
-                        {estudiante.nombre} {estudiante.apellido}
-                      </p>
-                      {estudiante.email && (
-                        <p className="text-purple-300 text-sm">{estudiante.email}</p>
-                      )}
+        {/* Tab Content: Historial Puntos */}
+        {activeTab === 'puntos' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-4"
+          >
+            {isLoadingHistorial ? (
+              <div className="flex items-center justify-center py-12">
+                <LoadingSpinner size="lg" text="Cargando historial..." />
+              </div>
+            ) : !historialPuntos || historialPuntos.puntos.length === 0 ? (
+              <div className="bg-white/5 backdrop-blur-xl rounded-xl p-8 border border-white/10 text-center">
+                <Trophy className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <p className="text-purple-300">No hay puntos otorgados</p>
+              </div>
+            ) : (
+              <>
+                {/* Summary Cards */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="w-5 h-5 text-yellow-400" />
+                      <span className="text-gray-400 text-sm">Total Puntos</span>
                     </div>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-bold ${
-                        estudiante.estado === 'Confirmada'
-                          ? 'bg-green-500/20 text-green-400'
-                          : estudiante.estado === 'Pendiente'
-                            ? 'bg-yellow-500/20 text-yellow-400'
-                            : 'bg-gray-500/20 text-gray-400'
-                      }`}
-                    >
-                      {estudiante.estado}
-                    </span>
+                    <p className="text-2xl font-black text-white">
+                      {historialPuntos.totalPuntos.toLocaleString()}
+                    </p>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </motion.div>
+                  <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Trophy className="w-5 h-5 text-purple-400" />
+                      <span className="text-gray-400 text-sm">Total Registros</span>
+                    </div>
+                    <p className="text-2xl font-black text-white">
+                      {historialPuntos.totalRegistros}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Puntos List */}
+                <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden">
+                  <div className="px-4 py-3 bg-white/5 border-b border-white/10">
+                    <h3 className="text-white font-bold">Historial de Puntos</h3>
+                  </div>
+                  <div className="divide-y divide-white/5">
+                    {historialPuntos.puntos.map((punto) => (
+                      <div
+                        key={punto.id}
+                        className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                      >
+                        <div className="flex-1">
+                          <p className="text-white font-medium">{punto.estudianteNombre}</p>
+                          <p className="text-sm text-gray-400">{punto.tipoAccion}</p>
+                          {punto.contexto && (
+                            <p className="text-xs text-gray-500 mt-1">{punto.contexto}</p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p
+                            className={`text-lg font-bold ${punto.puntos >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                          >
+                            {punto.puntos >= 0 ? '+' : ''}
+                            {punto.puntos}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {new Date(punto.fechaOtorgado).toLocaleDateString('es-AR', {
+                              day: 'numeric',
+                              month: 'short',
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </motion.div>
+        )}
       </div>
     </div>
   );

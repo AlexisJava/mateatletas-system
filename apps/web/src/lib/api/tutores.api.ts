@@ -307,6 +307,201 @@ export const tutoresApi = {
     });
     return misInscripcionesResponseSchema.parse(response);
   },
+
+  // ============================================================================
+  // NOTIFICACIONES
+  // ============================================================================
+
+  /**
+   * GET /tutor/notificaciones
+   * Lista de notificaciones del tutor
+   */
+  getNotificaciones: async (params?: {
+    soloNoLeidas?: boolean;
+    page?: number;
+    limit?: number;
+  }): Promise<NotificacionesTutorResponse> => {
+    return apiClient.get<NotificacionesTutorResponse>('/tutor/notificaciones', { params });
+  },
+
+  /**
+   * GET /tutor/notificaciones/count
+   * Contador de notificaciones no leídas
+   */
+  getNotificacionesCount: async (): Promise<{ count: number }> => {
+    return apiClient.get<{ count: number }>('/tutor/notificaciones/count');
+  },
+
+  /**
+   * PATCH /tutor/notificaciones/:id/leer
+   * Marcar notificación como leída
+   */
+  marcarNotificacionLeida: async (id: string): Promise<NotificacionTutor> => {
+    return apiClient.patch<NotificacionTutor>(`/tutor/notificaciones/${id}/leer`);
+  },
+
+  /**
+   * PATCH /tutor/notificaciones/leer-todas
+   * Marcar todas las notificaciones como leídas
+   */
+  marcarTodasNotificacionesLeidas: async (): Promise<{ updated: number }> => {
+    return apiClient.patch<{ updated: number }>('/tutor/notificaciones/leer-todas');
+  },
+
+  /**
+   * DELETE /tutor/notificaciones/:id
+   * Eliminar una notificación
+   */
+  eliminarNotificacion: async (id: string): Promise<{ message: string }> => {
+    return apiClient.delete<{ message: string }>(`/tutor/notificaciones/${id}`);
+  },
+
+  // ============================================================================
+  // VERANO
+  // ============================================================================
+
+  /**
+   * GET /tutor/verano/estado
+   * Estado de verano: período de decisión y estudiantes
+   */
+  getEstadoVerano: async (): Promise<EstadoVeranoResponse> => {
+    return apiClient.get<EstadoVeranoResponse>('/tutor/verano/estado');
+  },
+
+  /**
+   * POST /tutor/verano/decidir
+   * Tomar decisión de verano para un estudiante
+   */
+  decidirVerano: async (data: DecidirVeranoRequest): Promise<DecidirVeranoResponse> => {
+    return apiClient.post<DecidirVeranoResponse>('/tutor/verano/decidir', data);
+  },
+
+  /**
+   * POST /tutor/verano/solicitar-colonia
+   * Solicitar cambio a Colonia (desde CONTINUIDAD)
+   */
+  solicitarColonia: async (data: SolicitarColoniaRequest): Promise<SolicitarColoniaResponse> => {
+    return apiClient.post<SolicitarColoniaResponse>('/tutor/verano/solicitar-colonia', data);
+  },
+
+  /**
+   * POST /tutor/verano/cancelar-colonia
+   * Cancelar Colonia (volver a CONTINUIDAD, pierde matrícula)
+   */
+  cancelarColonia: async (data: CancelarColoniaRequest): Promise<CancelarColoniaResponse> => {
+    return apiClient.post<CancelarColoniaResponse>('/tutor/verano/cancelar-colonia', data);
+  },
+
+  // ============================================================================
+  // PROGRESO DE CONTENIDOS
+  // ============================================================================
+
+  /**
+   * GET /tutor/estudiantes/:estudianteId/contenidos/progreso
+   * Progreso de contenidos de un hijo
+   */
+  getProgresoContenidosHijo: async (estudianteId: string): Promise<ProgresoContenidoHijo[]> => {
+    return apiClient.get<ProgresoContenidoHijo[]>(
+      `/tutor/estudiantes/${estudianteId}/contenidos/progreso`,
+    );
+  },
 };
+
+// ============================================================================
+// TIPOS ADICIONALES - Notificaciones
+// ============================================================================
+
+export interface NotificacionTutor {
+  id: string;
+  tipo: string;
+  titulo: string;
+  mensaje: string;
+  prioridad: 'BAJA' | 'MEDIA' | 'ALTA' | 'CRITICA';
+  leida: boolean;
+  fechaCreacion: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface NotificacionesTutorResponse {
+  data: NotificacionTutor[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+// ============================================================================
+// TIPOS ADICIONALES - Verano
+// ============================================================================
+
+export type DecisionVerano = 'COLONIA' | 'CONTINUIDAD' | 'BAJA';
+
+export interface EstudianteVerano {
+  id: string;
+  nombre: string;
+  decision: string | null;
+  cuposColoniaDisponibles: number;
+}
+
+export interface EstadoVeranoResponse {
+  puedeDecidir: boolean;
+  fechaLimite: string;
+  estudiantes: EstudianteVerano[];
+}
+
+export interface DecidirVeranoRequest {
+  estudianteId: string;
+  decision: DecisionVerano;
+}
+
+export interface DecidirVeranoResponse {
+  success: boolean;
+  mensaje: string;
+  montoProximoCobro: number;
+}
+
+export interface SolicitarColoniaRequest {
+  estudianteId: string;
+  grupoPreferidoId?: string;
+}
+
+export interface SolicitarColoniaResponse {
+  success: boolean;
+  mensaje: string;
+  cupoAsignado?: string;
+}
+
+export interface CancelarColoniaRequest {
+  estudianteId: string;
+  confirmaPerderMatricula: boolean;
+}
+
+export interface CancelarColoniaResponse {
+  success: boolean;
+  mensaje: string;
+}
+
+// ============================================================================
+// TIPOS ADICIONALES - Progreso de Contenidos
+// ============================================================================
+
+export interface ProgresoContenidoHijo {
+  id: string;
+  contenido: {
+    id: string;
+    titulo: string;
+    mundoTipo: string;
+    imagenPortada: string | null;
+    totalNodos: number;
+  };
+  nodoActual: {
+    id: string;
+    titulo: string;
+    orden: number;
+  } | null;
+  completado: boolean;
+  ultimaActividad: string;
+  porcentaje: number;
+}
 
 export default tutoresApi;
