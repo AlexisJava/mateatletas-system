@@ -8,6 +8,11 @@
 @source "../../packages/ui/src/**/*.tsx";
 
 /* ════════════════════════════════════════════════════════════════════════════
+   PORTAL ESTUDIANTE - Design tokens from Pencil.dev
+   ════════════════════════════════════════════════════════════════════════════ */
+@import './src/styles/estudiante-tokens.css';
+
+/* ════════════════════════════════════════════════════════════════════════════
    MATEATLETAS DESIGN SYSTEM v2.0
    Mission Control Aesthetic - Professional Admin Dashboard
    ════════════════════════════════════════════════════════════════════════════ */
@@ -136,25 +141,11 @@ main {
   --docente-shadow-glow: 0 0 24px rgba(139, 92, 246, 0.15);
 
   /* ─────────────────────────────────────────────
-     PORTAL ESTUDIANTE - Dark Space Candy
-     Fuente de verdad: PORTAL_ESTUDIANTE_DESIGN_SYSTEM.md
+     PORTAL ESTUDIANTE - Dark Glassmorphism Gaming
+     Tokens completos en: src/styles/estudiante-tokens.css
      ───────────────────────────────────────────── */
 
-  /* Base - NUNCA CAMBIAN */
-  --estudiante-bg: #030014;
-  --estudiante-bg-card: rgba(15, 7, 32, 0.6);
-  --estudiante-bg-surface: rgba(30, 27, 75, 0.5);
-  --estudiante-border: rgba(255, 255, 255, 0.05);
-  --estudiante-border-accent: rgba(255, 255, 255, 0.1);
-
-  /* Texto */
-  --estudiante-text-primary: #f1f5f9; /* slate-100 */
-  --estudiante-text-secondary: #e2e8f0; /* slate-200 */
-  --estudiante-text-tertiary: #cbd5e1; /* slate-300 */
-  --estudiante-text-muted: #94a3b8; /* slate-400 */
-  --estudiante-text-subtle: #64748b; /* slate-500 */
-
-  /* House Colors - Se inyectan dinámicamente via JS */
+  /* House Colors - Se inyectan dinámicamente via LessonRenderer/useCasaTheme */
   /* Default: Quantum (Pink) */
   --house-primary: #f472b6;
   --house-secondary: #ec4899;

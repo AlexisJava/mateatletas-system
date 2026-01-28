@@ -1,0 +1,264 @@
+/**
+ * Mateatletas - Portal Estudiante Design Tokens
+ * Extraídos del diseño en Pencil.dev (portal_estudiante.pen)
+ *
+ * Estilo: Dark Glassmorphism Gaming Premium
+ * Inspiración: PS5 UI, Apple Liquid Glass, Microsoft Fluent Design
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════
+     BACKGROUNDS - Fondos oscuros con profundidad
+     ═══════════════════════════════════════════════════════════════ */
+  --estudiante-bg-primary: #030014;
+  --estudiante-bg-secondary: #0f0720;
+  --estudiante-bg-tertiary: #0f0a2e;
+  --estudiante-bg-surface: #1e1b4b;
+  --estudiante-bg-surface-alt: #1e293b;
+  --estudiante-bg-elevated: #0f172a;
+  --estudiante-bg-black: #000000;
+  --estudiante-bg-black-soft: #000008;
+
+  /* ═══════════════════════════════════════════════════════════════
+     TEXT COLORS - Jerarquía de texto
+     ═══════════════════════════════════════════════════════════════ */
+  --estudiante-text-primary: #ffffff;
+  --estudiante-text-secondary: #9ca3af;
+  --estudiante-text-tertiary: #6b7280;
+  --estudiante-text-muted: #4b5563;
+  --estudiante-text-disabled: #374151;
+
+  /* ═══════════════════════════════════════════════════════════════
+     WORLD: MATEMÁTICAS (Purple)
+     ═══════════════════════════════════════════════════════════════ */
+  --math-primary: #a78bfa;
+  --math-secondary: #7c3aed;
+  --math-dark: #5b21b6;
+  --math-darker: #4c1d95;
+  --math-light: #c4b5fd;
+  --math-lightest: #e9d5ff;
+  --math-glow: #a78bfa80;
+  --math-surface: #1e1b4b;
+  --math-surface-dark: #0f0a2e;
+
+  /* ═══════════════════════════════════════════════════════════════
+     WORLD: PROGRAMACIÓN (Green/Emerald)
+     ═══════════════════════════════════════════════════════════════ */
+  --code-primary: #34d399;
+  --code-secondary: #10b981;
+  --code-dark: #059669;
+  --code-darker: #047857;
+  --code-light: #6ee7b7;
+  --code-lightest: #a7f3d0;
+  --code-glow: #34d39980;
+  --code-surface: #064e3b;
+  --code-surface-dark: #022c22;
+
+  /* ═══════════════════════════════════════════════════════════════
+     WORLD: CIENCIAS (Orange)
+     ═══════════════════════════════════════════════════════════════ */
+  --science-primary: #fb923c;
+  --science-secondary: #f97316;
+  --science-dark: #ea580c;
+  --science-darker: #c2410c;
+  --science-light: #fdba74;
+  --science-lightest: #fed7aa;
+  --science-glow: #fb923c80;
+  --science-surface: #7c2d12;
+  --science-surface-dark: #431407;
+
+  /* ═══════════════════════════════════════════════════════════════
+     WORLD: OLIMPIADAS (Gold)
+     ═══════════════════════════════════════════════════════════════ */
+  --olympics-primary: #ffd700;
+  --olympics-secondary: #ffa500;
+  --olympics-dark: #b8860b;
+  --olympics-darker: #8b6914;
+  --olympics-light: #ffe55c;
+  --olympics-lightest: #fff3b0;
+  --olympics-glow: #ffd70080;
+  --olympics-surface: #4a3b1c;
+  --olympics-surface-dark: #2a1f0a;
+
+  /* ═══════════════════════════════════════════════════════════════
+     ACCENT COLORS - Estados y acciones
+     ═══════════════════════════════════════════════════════════════ */
+  --accent-blue: #60a5fa;
+  --accent-blue-light: #93c5fd;
+  --accent-blue-dark: #3b82f6;
+  --accent-blue-glow: #60a5fa80;
+
+  --accent-red: #ef4444;
+  --accent-red-light: #f87171;
+  --accent-red-dark: #dc2626;
+  --accent-red-glow: #ef444480;
+
+  --accent-green: #22c55e;
+  --accent-green-light: #4ade80;
+  --accent-green-dark: #16a34a;
+  --accent-green-glow: #22c55e80;
+
+  --accent-amber: #fbbf24;
+  --accent-amber-light: #fcd34d;
+  --accent-amber-dark: #f59e0b;
+  --accent-amber-glow: #fbbf2480;
+
+  /* ═══════════════════════════════════════════════════════════════
+     BORDERS & STROKES
+     ═══════════════════════════════════════════════════════════════ */
+  --border-subtle: #374151;
+  --border-default: #4b5563;
+  --border-strong: #6b7280;
+  --border-glass: rgba(255, 255, 255, 0.1);
+  --border-glass-strong: rgba(255, 255, 255, 0.2);
+
+  /* ═══════════════════════════════════════════════════════════════
+     GLASSMORPHISM
+     ═══════════════════════════════════════════════════════════════ */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-bg-hover: rgba(255, 255, 255, 0.08);
+  --glass-bg-active: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: rgba(0, 0, 0, 0.36);
+
+  /* ═══════════════════════════════════════════════════════════════
+     SPACING (matching design)
+     ═══════════════════════════════════════════════════════════════ */
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 10px;
+  --space-5: 12px;
+  --space-6: 16px;
+  --space-7: 20px;
+  --space-8: 24px;
+  --space-9: 32px;
+  --space-10: 40px;
+  --space-11: 60px;
+
+  /* ═══════════════════════════════════════════════════════════════
+     BORDER RADIUS
+     ═══════════════════════════════════════════════════════════════ */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
+  --radius-3xl: 16px;
+  --radius-4xl: 18px;
+  --radius-5xl: 20px;
+  --radius-6xl: 24px;
+  --radius-full: 55px;
+
+  /* ═══════════════════════════════════════════════════════════════
+     TYPOGRAPHY - Font sizes
+     ═══════════════════════════════════════════════════════════════ */
+  --text-2xs: 9px;
+  --text-xs: 10px;
+  --text-sm: 11px;
+  --text-base: 12px;
+  --text-md: 13px;
+  --text-lg: 14px;
+  --text-xl: 16px;
+  --text-2xl: 17px;
+  --text-3xl: 18px;
+  --text-4xl: 20px;
+  --text-5xl: 28px;
+  --text-6xl: 38px;
+  --text-7xl: 56px;
+
+  /* ═══════════════════════════════════════════════════════════════
+     SHADOWS & GLOWS
+     ═══════════════════════════════════════════════════════════════ */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.36);
+  --shadow-2xl: 0 16px 48px rgba(0, 0, 0, 0.6);
+
+  /* Glow shadows for each world */
+  --glow-math: 0 0 20px var(--math-glow);
+  --glow-code: 0 0 20px var(--code-glow);
+  --glow-science: 0 0 20px var(--science-glow);
+  --glow-olympics: 0 0 20px var(--olympics-glow);
+  --glow-blue: 0 0 20px var(--accent-blue-glow);
+  --glow-red: 0 0 20px var(--accent-red-glow);
+  --glow-green: 0 0 20px var(--accent-green-glow);
+  --glow-amber: 0 0 20px var(--accent-amber-glow);
+
+  /* ═══════════════════════════════════════════════════════════════
+     TRANSITIONS
+     ═══════════════════════════════════════════════════════════════ */
+  --transition-fast: 150ms ease-out;
+  --transition-base: 200ms ease-out;
+  --transition-slow: 300ms ease-out;
+  --transition-slower: 500ms ease-out;
+
+  /* ═══════════════════════════════════════════════════════════════
+     Z-INDEX LAYERS
+     ═══════════════════════════════════════════════════════════════ */
+  --z-background: -1;
+  --z-base: 0;
+  --z-elevated: 10;
+  --z-sticky: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+  --z-popover: 50;
+  --z-tooltip: 60;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   UTILITY CLASSES - Glassmorphism
+   ═══════════════════════════════════════════════════════════════════ */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-strong {
+  background: var(--glass-bg-active);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass-strong);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   UTILITY CLASSES - World-specific card backgrounds
+   ═══════════════════════════════════════════════════════════════════ */
+.world-math {
+  --world-primary: var(--math-primary);
+  --world-secondary: var(--math-secondary);
+  --world-dark: var(--math-dark);
+  --world-light: var(--math-light);
+  --world-glow: var(--math-glow);
+  --world-surface: var(--math-surface);
+}
+
+.world-code {
+  --world-primary: var(--code-primary);
+  --world-secondary: var(--code-secondary);
+  --world-dark: var(--code-dark);
+  --world-light: var(--code-light);
+  --world-glow: var(--code-glow);
+  --world-surface: var(--code-surface);
+}
+
+.world-science {
+  --world-primary: var(--science-primary);
+  --world-secondary: var(--science-secondary);
+  --world-dark: var(--science-dark);
+  --world-light: var(--science-light);
+  --world-glow: var(--science-glow);
+  --world-surface: var(--science-surface);
+}
+
+.world-olympics {
+  --world-primary: var(--olympics-primary);
+  --world-secondary: var(--olympics-secondary);
+  --world-dark: var(--olympics-dark);
+  --world-light: var(--olympics-light);
+  --world-glow: var(--olympics-glow);
+  --world-surface: var(--olympics-surface);
+}
