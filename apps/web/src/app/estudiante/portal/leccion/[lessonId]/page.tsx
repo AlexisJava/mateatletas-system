@@ -16,12 +16,20 @@ import {
   ZoomIn,
   ZoomOut,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+
+import { usePlanificacionDetalle } from '@/hooks/useEstudiantePortal';
 
 /**
  * Lección Blockly - Portal Estudiante
  *
- * Replica exacta de "9. Slide - Lección Blockly" de portal_estudiante.pen
+ * Conectado parcialmente con backend:
+ * - Datos de la planificación (título) via usePlanificacionDetalle
+ *
+ * TODO: Integración completa con lesson-engine para:
+ * - Renderizado de contenido interactivo
+ * - Tracking de progreso
+ * - Sistema de objetivos dinámico
  */
 
 const OBJECTIVES = [
@@ -76,6 +84,15 @@ function BlockItem({ text, color }: { text: string; color: string }): React.JSX.
 
 export default function LeccionPage(): React.JSX.Element {
   const router = useRouter();
+  const params = useParams();
+  const lessonId = params.lessonId as string;
+
+  // lessonId puede ser un asignacionId de planificación
+  const { data: planificacion } = usePlanificacionDetalle(lessonId);
+
+  // Datos de la lección (con fallbacks para maqueta)
+  const nombreLeccion = planificacion?.planificacion.titulo ?? 'Introducción a Bucles';
+  const tipoLeccion = planificacion?.planificacion.mundoTipo ?? 'Scratch';
 
   return (
     <div className="flex flex-col w-full h-screen" style={{ backgroundColor: '#030014' }}>
@@ -117,7 +134,7 @@ export default function LeccionPage(): React.JSX.Element {
               color: '#FFFFFF',
             }}
           >
-            Introducción a Bucles
+            {nombreLeccion}
           </span>
 
           <div
@@ -133,7 +150,7 @@ export default function LeccionPage(): React.JSX.Element {
                 color: '#F59E0B',
               }}
             >
-              Scratch
+              {tipoLeccion}
             </span>
           </div>
         </div>

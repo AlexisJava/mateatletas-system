@@ -18,11 +18,21 @@ import {
   Smile,
   Send,
 } from 'lucide-react';
+import { useParams } from 'next/navigation';
+
+import { useMisClases } from '@/hooks/useEstudiantePortal';
 
 /**
  * Clase en Vivo - Portal Estudiante
  *
- * Replica exacta de "13. Clase en Vivo" de portal_estudiante.pen
+ * Conectado parcialmente con backend:
+ * - Datos básicos de la clase (nombre, docente) desde useMisClases
+ *
+ * TODO: Integración completa con LiveKit para:
+ * - Video streaming
+ * - Participantes en tiempo real
+ * - Chat en vivo
+ * - Reacciones
  */
 
 const STUDENTS = [
@@ -111,6 +121,16 @@ function StudentVideoCard({
 }
 
 export default function ClaseEnVivoPage(): React.JSX.Element {
+  const params = useParams();
+  const classId = params.classId as string;
+  const { data: clases } = useMisClases();
+
+  // Buscar datos de la clase actual
+  const claseActual = clases?.find((c) => c.id === classId);
+  const nombreClase = claseActual?.nombre ?? 'Clase en Vivo';
+  const nombreDocente = claseActual ? `Prof. ${claseActual.docente.nombre}` : 'Conectando...';
+  const sectorNombre = claseActual?.sector?.nombre ?? 'Matemáticas';
+
   return (
     <div className="flex flex-col w-full h-screen" style={{ backgroundColor: '#030014' }}>
       {/* Top Bar */}
@@ -136,7 +156,7 @@ export default function ClaseEnVivoPage(): React.JSX.Element {
                 color: '#6B7280',
               }}
             >
-              Matemáticas
+              {sectorNombre}
             </span>
             <ChevronRight size={10} color="#4B5563" />
             <span
@@ -190,7 +210,7 @@ export default function ClaseEnVivoPage(): React.JSX.Element {
                 color: '#FFFFFF',
               }}
             >
-              Fracciones Básicas
+              {nombreClase}
             </span>
             <span
               style={{
@@ -200,7 +220,7 @@ export default function ClaseEnVivoPage(): React.JSX.Element {
                 color: '#9CA3AF',
               }}
             >
-              Prof. Carolina
+              {nombreDocente}
             </span>
           </div>
         </div>
