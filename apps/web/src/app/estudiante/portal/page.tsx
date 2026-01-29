@@ -1,6 +1,6 @@
 'use client';
 
-import { Globe, Gamepad2, Trophy, Video, Play, Loader2 } from 'lucide-react';
+import { Globe, Gamepad2, Trophy, Video, Play } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo } from 'react';
 
@@ -10,6 +10,7 @@ import { BentoCard, BENTO_THEMES, ExplorarMundosBottom } from '@/components/estu
 import { ProgressBar } from '@/components/estudiante/molecules/ProgressBar';
 import { useEstudianteRequired } from '@/contexts/EstudianteContext';
 import { useDashboardData, useMiAula } from '@/hooks/useEstudiantePortal';
+import { SkeletonMainMenu, ErrorState } from '@/components/estudiante/feedback';
 
 /**
  * Main Menu - Portal Estudiante
@@ -37,7 +38,7 @@ function isToday(dateString: string): boolean {
 
 export default function MainMenuPage(): React.JSX.Element {
   const estudiante = useEstudianteRequired();
-  const { progreso, clases, isLoading } = useDashboardData();
+  const { progreso, clases, isLoading, error, refetch } = useDashboardData();
   const { data: aula } = useMiAula();
 
   // Contar clases de hoy
@@ -70,13 +71,25 @@ export default function MainMenuPage(): React.JSX.Element {
   const lecciones =
     progreso?.actividadReciente.filter((a) => a.tipo === 'leccion_completada').length ?? 0;
 
-  // Loading state mínimo para nombre (crítico)
+  // Loading state con skeleton
   if (isLoading && !estudiante.nombre) {
     return (
       <PortalLayout>
-        <div className="flex items-center justify-center h-full">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
-        </div>
+        <SkeletonMainMenu />
+      </PortalLayout>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <PortalLayout>
+        <ErrorState
+          title="No pudimos cargar tu portal"
+          message="Hubo un problema al conectar con el servidor. Por favor, intentá de nuevo."
+          onRetry={() => refetch()}
+          showHomeButton={false}
+        />
       </PortalLayout>
     );
   }

@@ -1,12 +1,13 @@
 'use client';
 
-import { ArrowLeft, Loader2, CheckCircle, Zap, Flame, Play, Lock, BookOpen } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Zap, Flame, Play, Lock, BookOpen, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 
 import { CosmicBackground } from '@/components/estudiante/decorative/CosmicBackground';
 import { useMiProgreso, useMiAula } from '@/hooks/useEstudiantePortal';
+import { SkeletonMiProgreso, ErrorState } from '@/components/estudiante/feedback';
 
 /**
  * Mi Progreso - Portal Estudiante
@@ -36,13 +37,11 @@ function StatCard({
   label,
   color,
   icon: Icon,
-  isLoading,
 }: {
   value: string;
   label: string;
   color: string;
-  icon: React.ComponentType<{ size: number; color: string; className?: string }>;
-  isLoading?: boolean;
+  icon: React.ComponentType<{ size: number; color: string }>;
 }): React.JSX.Element {
   return (
     <div
@@ -56,7 +55,7 @@ function StatCard({
         className="flex items-center justify-center rounded-xl"
         style={{ width: 44, height: 44, backgroundColor: color }}
       >
-        <Icon size={24} color="#FFFFFF" className={isLoading ? 'animate-spin' : ''} />
+        <Icon size={24} color="#FFFFFF" />
       </div>
       <div className="flex flex-col gap-0.5">
         <span
@@ -67,7 +66,7 @@ function StatCard({
             color: '#FFFFFF',
           }}
         >
-          {isLoading ? '...' : value}
+          {value}
         </span>
         <span
           style={{
@@ -235,8 +234,18 @@ function EmptyState(): React.JSX.Element {
 
 export default function MiProgresoPage(): React.JSX.Element {
   const router = useRouter();
-  const { data: progreso, isLoading: isLoadingProgreso } = useMiProgreso();
-  const { data: aula, isLoading: isLoadingAula } = useMiAula();
+  const {
+    data: progreso,
+    isLoading: isLoadingProgreso,
+    error: errorProgreso,
+    refetch: refetchProgreso,
+  } = useMiProgreso();
+  const {
+    data: aula,
+    isLoading: isLoadingAula,
+    error: errorAula,
+    refetch: refetchAula,
+  } = useMiAula();
 
   // Calcular estadísticas
   const stats = useMemo(() => {
@@ -268,6 +277,51 @@ export default function MiProgresoPage(): React.JSX.Element {
   }, [aula]);
 
   const isLoading = isLoadingProgreso || isLoadingAula;
+  const error = errorProgreso || errorAula;
+
+  // Loading state con skeleton
+  if (isLoading) {
+    return (
+      <CosmicBackground
+        showNebulas
+        showStars
+        showParticles={false}
+        showOrbs={false}
+        className="min-h-screen"
+      >
+        <div className="relative w-full min-h-screen" style={{ backgroundColor: '#030014' }}>
+          <SkeletonMiProgreso />
+        </div>
+      </CosmicBackground>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <CosmicBackground
+        showNebulas
+        showStars
+        showParticles={false}
+        showOrbs={false}
+        className="min-h-screen"
+      >
+        <div
+          className="relative w-full min-h-screen flex items-center justify-center"
+          style={{ backgroundColor: '#030014' }}
+        >
+          <ErrorState
+            title="No pudimos cargar tu progreso"
+            message="Hubo un problema al conectar con el servidor. Por favor, intentá de nuevo."
+            onRetry={() => {
+              refetchProgreso();
+              refetchAula();
+            }}
+          />
+        </div>
+      </CosmicBackground>
+    );
+  }
 
   return (
     <CosmicBackground
@@ -357,34 +411,15 @@ export default function MiProgresoPage(): React.JSX.Element {
             padding: '0 48px',
           }}
         >
-          <StatCard
-            value={stats.enProgreso}
-            label="En progreso"
-            color="#3B82F6"
-            icon={Loader2}
-            isLoading={isLoading}
-          />
+          <StatCard value={stats.enProgreso} label="En progreso" color="#3B82F6" icon={Loader2} />
           <StatCard
             value={stats.completadas}
             label="Completadas"
             color="#22C55E"
             icon={CheckCircle}
-            isLoading={isLoading}
           />
-          <StatCard
-            value={stats.xp}
-            label="XP ganados"
-            color="#F59E0B"
-            icon={Zap}
-            isLoading={isLoading}
-          />
-          <StatCard
-            value={stats.racha}
-            label="Racha actual"
-            color="#EF4444"
-            icon={Flame}
-            isLoading={isLoading}
-          />
+          <StatCard value={stats.xp} label="XP ganados" color="#F59E0B" icon={Zap} />
+          <StatCard value={stats.racha} label="Racha actual" color="#EF4444" icon={Flame} />
         </div>
 
         {/* Content Area */}
@@ -397,11 +432,7 @@ export default function MiProgresoPage(): React.JSX.Element {
             padding: '0 48px',
           }}
         >
-          {isLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
-            </div>
-          ) : sectoresConProgreso.length === 0 ? (
+          {sectoresConProgreso.length === 0 ? (
             <EmptyState />
           ) : (
             sectoresConProgreso.map((sector) => {

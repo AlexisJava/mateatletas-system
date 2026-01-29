@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { useMiProgreso } from '@/hooks/useEstudiantePortal';
+import { ErrorState } from '@/components/estudiante/feedback';
 
 /**
  * Pantalla de Juegos (Arcade) - Portal Estudiante
@@ -245,10 +246,26 @@ function MiniGameCard({
 export default function JuegosPage(): React.JSX.Element {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('all');
-  const { data: progreso } = useMiProgreso();
+  const { data: progreso, error, refetch } = useMiProgreso();
 
   // XP del estudiante
   const xpTotal = progreso?.gamificacion.xpTotal ?? 0;
+
+  // Error state
+  if (error) {
+    return (
+      <div
+        className="flex items-center justify-center w-full h-screen"
+        style={{ backgroundColor: '#030014' }}
+      >
+        <ErrorState
+          title="No pudimos cargar el Arcade"
+          message="Hubo un problema al conectar con el servidor. Por favor, intentá de nuevo."
+          onRetry={() => refetch()}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full h-screen" style={{ backgroundColor: '#030014' }}>

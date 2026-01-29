@@ -18,6 +18,7 @@ import { CosmicBackground } from '@/components/estudiante/decorative/CosmicBackg
 import { WorldPortalCard, WORLD_PORTAL_THEMES } from '@/components/estudiante/organisms';
 import { VortexEffect } from '@/components/estudiante/decorative/VortexEffect';
 import { useMiAula } from '@/hooks/useEstudiantePortal';
+import { SkeletonWorldCard, ErrorState } from '@/components/estudiante/feedback';
 
 /**
  * Selección de Mundos - Portal Estudiante
@@ -117,7 +118,7 @@ const WORLD_COLORS: Record<string, string> = {
 
 export default function MundosPage(): React.JSX.Element {
   const router = useRouter();
-  const { data: aula } = useMiAula();
+  const { data: aula, isLoading, error, refetch } = useMiAula();
 
   // Calcular progreso por mundo
   const progresoByMundo = useMemo(() => {
@@ -139,6 +140,78 @@ export default function MundosPage(): React.JSX.Element {
 
     return progreso;
   }, [aula]);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <CosmicBackground
+        showNebulas
+        showStars
+        showParticles={false}
+        showOrbs={false}
+        className="min-h-screen"
+      >
+        <div className="flex flex-col w-full min-h-screen">
+          <header className="flex flex-col gap-1.5 w-full" style={{ padding: '20px 40px 12px' }}>
+            <div className="flex flex-col items-center gap-1 mt-10">
+              <span
+                style={{
+                  fontFamily: 'var(--font-inter), Inter, sans-serif',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: 3,
+                  color: '#6B7280',
+                }}
+              >
+                ELIGE TU DESTINO
+              </span>
+              <h1
+                style={{
+                  fontFamily: 'var(--font-inter), Inter, sans-serif',
+                  fontSize: 48,
+                  fontWeight: 900,
+                  letterSpacing: 2,
+                  color: '#FFFFFF',
+                  textShadow: '0 0 40px rgba(167,139,250,0.4)',
+                }}
+              >
+                SELECCIÓN DE MUNDOS
+              </h1>
+            </div>
+          </header>
+          <main
+            className="flex items-center justify-center flex-1"
+            style={{ padding: '12px 60px 24px', gap: 32 }}
+          >
+            {[1, 2, 3, 4].map((i) => (
+              <SkeletonWorldCard key={i} />
+            ))}
+          </main>
+        </div>
+      </CosmicBackground>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <CosmicBackground
+        showNebulas
+        showStars
+        showParticles={false}
+        showOrbs={false}
+        className="min-h-screen"
+      >
+        <div className="flex items-center justify-center w-full min-h-screen">
+          <ErrorState
+            title="No pudimos cargar los mundos"
+            message="Hubo un problema al conectar con el servidor. Por favor, intentá de nuevo."
+            onRetry={() => refetch()}
+          />
+        </div>
+      </CosmicBackground>
+    );
+  }
 
   return (
     <CosmicBackground
