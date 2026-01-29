@@ -16,10 +16,17 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import { useMiProgreso } from '@/hooks/useEstudiantePortal';
+
 /**
  * Pantalla de Juegos (Arcade) - Portal Estudiante
  *
- * Replica exacta de "10. Pantalla de Juegos" de portal_estudiante.pen
+ * Conectado con backend:
+ * - XP total (useMiProgreso)
+ *
+ * TODO Backend:
+ * - Endpoint de tickets del estudiante
+ * - Endpoint de juegos disponibles (actualmente hardcodeados del game-engine)
  */
 
 const TABS = [
@@ -238,6 +245,10 @@ function MiniGameCard({
 export default function JuegosPage(): React.JSX.Element {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('all');
+  const { data: progreso } = useMiProgreso();
+
+  // XP del estudiante
+  const xpTotal = progreso?.gamificacion.xpTotal ?? 0;
 
   return (
     <div className="flex flex-col w-full h-screen" style={{ backgroundColor: '#030014' }}>
@@ -325,7 +336,7 @@ export default function JuegosPage(): React.JSX.Element {
                 color: '#F59E0B',
               }}
             >
-              12
+              {/* TODO: Endpoint de tickets */}∞
             </span>
           </div>
 
@@ -342,7 +353,7 @@ export default function JuegosPage(): React.JSX.Element {
                 color: '#10B981',
               }}
             >
-              2,450
+              {xpTotal.toLocaleString('es-AR')}
             </span>
           </div>
         </div>
