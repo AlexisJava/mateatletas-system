@@ -1,20 +1,86 @@
 'use client';
 
-import { Globe, Gamepad2, Trophy, Video, Play } from 'lucide-react';
+import { Globe, Gamepad2, Trophy, Video, Play, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useMemo } from 'react';
 
 import { PortalLayout } from '@/components/estudiante/layouts/PortalLayout';
 import { GlowText } from '@/components/estudiante/atoms/GlowText';
 import { BentoCard, BENTO_THEMES, ExplorarMundosBottom } from '@/components/estudiante/organisms';
 import { ProgressBar } from '@/components/estudiante/molecules/ProgressBar';
+import { useEstudianteRequired } from '@/contexts/EstudianteContext';
+import { useDashboardData, useMiAula } from '@/hooks/useEstudiantePortal';
 
 /**
  * Main Menu - Portal Estudiante
  *
- * Replica exacta de "1. MAIN MENU" de portal_estudiante.pen
+ * Conectado con backend:
+ * - Nombre del estudiante (EstudianteContext)
+ * - Logros/Trofeos (useMiProgreso)
+ * - Clases de hoy (useMisClases)
+ * - Última lección en progreso (useMiAula)
+ *
+ * TODO Backend:
+ * - Tickets de arcade (no existe endpoint aún)
+ * - Lecciones completadas (agregar a mi-progreso)
  */
 
+function isToday(dateString: string): boolean {
+  const date = new Date(dateString);
+  const today = new Date();
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
+}
+
 export default function MainMenuPage(): React.JSX.Element {
+  const estudiante = useEstudianteRequired();
+  const { progreso, clases, isLoading } = useDashboardData();
+  const { data: aula } = useMiAula();
+
+  // Contar clases de hoy
+  const clasesHoy = useMemo(() => {
+    if (!clases) return 0;
+    return clases.filter((c) => isToday(c.fechaProxima)).length;
+  }, [clases]);
+
+  // Obtener última planificación en progreso
+  const ultimaLeccion = useMemo(() => {
+    if (!aula?.sectores) return null;
+
+    for (const sector of aula.sectores) {
+      for (const plan of sector.planificaciones) {
+        if (plan.progreso.porcentaje > 0 && plan.progreso.porcentaje < 100) {
+          return {
+            nombre: plan.nombre,
+            porcentaje: plan.progreso.porcentaje,
+            asignacionId: plan.asignacionId,
+          };
+        }
+      }
+    }
+    return null;
+  }, [aula]);
+
+  // Datos de progreso
+  const trofeos = progreso?.logros.desbloqueados ?? 0;
+  // TODO: Agregar leccionesCompletadas al endpoint mi-progreso
+  const lecciones =
+    progreso?.actividadReciente.filter((a) => a.tipo === 'leccion_completada').length ?? 0;
+
+  // Loading state mínimo para nombre (crítico)
+  if (isLoading && !estudiante.nombre) {
+    return (
+      <PortalLayout>
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+        </div>
+      </PortalLayout>
+    );
+  }
+
   return (
     <PortalLayout>
       {/* Center Area - Welcome text */}
@@ -38,7 +104,7 @@ export default function MainMenuPage(): React.JSX.Element {
           gradient="linear-gradient(180deg, #FFFFFF 0%, #F0E6FF 40%, #C4B5FD 70%, #A78BFA 100%)"
           glow="0 0 30px rgba(167,139,250,0.8), 0 0 60px rgba(124,58,237,0.5), 0 0 100px rgba(255,255,255,0.19)"
         >
-          HOLA, MATEO
+          HOLA, {estudiante.nombre.toUpperCase()}
         </GlowText>
 
         <GlowText as="p" fontSize={14} fontWeight={500} letterSpacing={0.5} color="#A1A1AA">
@@ -93,7 +159,7 @@ export default function MainMenuPage(): React.JSX.Element {
                       color: '#FBBF24',
                     }}
                   >
-                    5 tickets
+                    {/* TODO: Endpoint para tickets del estudiante */}∞ tickets
                   </span>
                 </div>
               }
@@ -117,7 +183,7 @@ export default function MainMenuPage(): React.JSX.Element {
                         color: '#FFFFFF',
                       }}
                     >
-                      47
+                      {lecciones}
                     </span>
                     <span
                       style={{
@@ -139,7 +205,7 @@ export default function MainMenuPage(): React.JSX.Element {
                         color: '#22C55E',
                       }}
                     >
-                      12
+                      {trofeos}
                     </span>
                     <span
                       style={{
@@ -171,37 +237,77 @@ export default function MainMenuPage(): React.JSX.Element {
                   className="flex items-center gap-2 rounded-xl px-3 py-1.5"
                   style={{ backgroundColor: 'rgba(239,68,68,0.15)' }}
                 >
-                  <div
-                    className="rounded-full"
-                    style={{
-                      width: 10,
-                      height: 10,
-                      backgroundColor: '#EF4444',
-                      boxShadow: '0 0 12px #EF4444, 0 0 24px #EF4444',
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-inter), Inter, sans-serif',
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: '#F87171',
-                    }}
-                  >
-                    2 clases hoy
-                  </span>
+                  {clasesHoy > 0 ? (
+                    <>
+                      <div
+                        className="rounded-full"
+                        style={{
+                          width: 10,
+                          height: 10,
+                          backgroundColor: '#EF4444',
+                          boxShadow: '0 0 12px #EF4444, 0 0 24px #EF4444',
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-inter), Inter, sans-serif',
+                          fontSize: 12,
+                          fontWeight: 600,
+                          color: '#F87171',
+                        }}
+                      >
+                        {clasesHoy} {clasesHoy === 1 ? 'clase' : 'clases'} hoy
+                      </span>
+                    </>
+                  ) : (
+                    <span
+                      style={{
+                        fontFamily: 'var(--font-inter), Inter, sans-serif',
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: '#6B7280',
+                      }}
+                    >
+                      Sin clases hoy
+                    </span>
+                  )}
                 </div>
               }
             />
           </Link>
 
-          <Link href="/estudiante/portal/leccion/algebra-nivel-3" className="flex-1">
+          <Link
+            href={
+              ultimaLeccion
+                ? `/estudiante/portal/leccion/${ultimaLeccion.asignacionId}`
+                : '/estudiante/portal/mundos'
+            }
+            className="flex-1"
+          >
             <BentoCard
               icon={Play}
               title="Continuar"
-              description="Álgebra - Nivel 3"
+              description={ultimaLeccion?.nombre ?? 'Empezá una lección'}
               theme={BENTO_THEMES.continuar}
-              bottomContent={<ProgressBar percent={65} label="65% completado" />}
+              bottomContent={
+                ultimaLeccion ? (
+                  <ProgressBar
+                    percent={ultimaLeccion.porcentaje}
+                    label={`${ultimaLeccion.porcentaje}% completado`}
+                  />
+                ) : (
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-inter), Inter, sans-serif',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: '#6B7280',
+                    }}
+                  >
+                    Explorá los mundos para comenzar
+                  </span>
+                )
+              }
             />
           </Link>
         </div>
