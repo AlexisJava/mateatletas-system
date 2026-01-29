@@ -54,7 +54,7 @@ export default function MainMenuPage(): React.JSX.Element {
       for (const plan of sector.planificaciones) {
         if (plan.progreso.porcentaje > 0 && plan.progreso.porcentaje < 100) {
           return {
-            nombre: plan.nombre,
+            nombre: plan.planificacion.titulo,
             porcentaje: plan.progreso.porcentaje,
             asignacionId: plan.asignacionId,
           };

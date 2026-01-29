@@ -1,61 +1,48 @@
 'use client';
 
-import { ArrowLeft, Loader2, CheckCircle, Zap, Flame, Play, Lock } from 'lucide-react';
+import { ArrowLeft, Loader2, CheckCircle, Zap, Flame, Play, Lock, BookOpen } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 
 import { CosmicBackground } from '@/components/estudiante/decorative/CosmicBackground';
+import { useMiProgreso, useMiAula } from '@/hooks/useEstudiantePortal';
 
 /**
  * Mi Progreso - Portal Estudiante
  *
- * Replica exacta de "6. Mi Progreso" de portal_estudiante.pen
+ * Conectado con backend:
+ * - Stats de gamificación (useMiProgreso)
+ * - Planificaciones en progreso por sector (useMiAula)
  */
 
-const STATS = [
-  { id: 'progress', value: '12', label: 'En progreso', color: '#3B82F6', icon: Loader2 },
-  { id: 'completed', value: '47', label: 'Completadas', color: '#22C55E', icon: CheckCircle },
-  { id: 'xp', value: '2,450', label: 'XP ganados', color: '#F59E0B', icon: Zap },
-  { id: 'streak', value: '7 días', label: 'Racha actual', color: '#EF4444', icon: Flame },
-];
+// Mapeo de colores por sector
+const SECTOR_COLORS: Record<string, string> = {
+  MATEMATICAS: '#3B82F6',
+  PROGRAMACION: '#22C55E',
+  CIENCIAS: '#F59E0B',
+  OLIMPIADAS: '#A855F7',
+};
 
-const SECTIONS = [
-  {
-    id: 'aritmetica',
-    title: 'ARITMÉTICA',
-    color: '#3B82F6',
-    count: '4 lecciones',
-    gradient: { from: '#1E3A5F', to: '#0F172A' },
-    lessons: [
-      { id: 1, title: 'Suma de fracciones', progress: 85, status: 'in-progress' },
-      { id: 2, title: 'Resta con negativos', progress: 60, status: 'in-progress' },
-      { id: 3, title: 'Multiplicación básica', progress: 30, status: 'in-progress' },
-      { id: 4, title: 'División con decimales', progress: 0, status: 'locked' },
-    ],
-  },
-  {
-    id: 'geometria',
-    title: 'GEOMETRÍA',
-    color: '#A855F7',
-    count: '3 lecciones',
-    gradient: { from: '#3D1A5F', to: '#0F172A' },
-    lessons: [
-      { id: 5, title: 'Perímetro y área', progress: 100, status: 'completed' },
-      { id: 6, title: 'Ángulos básicos', progress: 45, status: 'in-progress' },
-      { id: 7, title: 'Figuras 3D', progress: 0, status: 'locked' },
-    ],
-  },
-];
+const SECTOR_GRADIENTS: Record<string, { from: string; to: string }> = {
+  MATEMATICAS: { from: '#1E3A5F', to: '#0F172A' },
+  PROGRAMACION: { from: '#1A3D2E', to: '#0F172A' },
+  CIENCIAS: { from: '#3D2E1A', to: '#0F172A' },
+  OLIMPIADAS: { from: '#3D1A5F', to: '#0F172A' },
+};
 
 function StatCard({
   value,
   label,
   color,
   icon: Icon,
+  isLoading,
 }: {
   value: string;
   label: string;
   color: string;
-  icon: React.ComponentType<{ size: number; color: string }>;
+  icon: React.ComponentType<{ size: number; color: string; className?: string }>;
+  isLoading?: boolean;
 }): React.JSX.Element {
   return (
     <div
@@ -69,7 +56,7 @@ function StatCard({
         className="flex items-center justify-center rounded-xl"
         style={{ width: 44, height: 44, backgroundColor: color }}
       >
-        <Icon size={24} color="#FFFFFF" />
+        <Icon size={24} color="#FFFFFF" className={isLoading ? 'animate-spin' : ''} />
       </div>
       <div className="flex flex-col gap-0.5">
         <span
@@ -80,7 +67,7 @@ function StatCard({
             color: '#FFFFFF',
           }}
         >
-          {value}
+          {isLoading ? '...' : value}
         </span>
         <span
           style={{
@@ -102,20 +89,23 @@ function LessonCard({
   progress,
   status,
   gradient,
+  asignacionId,
 }: {
   title: string;
   progress: number;
   status: 'in-progress' | 'completed' | 'locked';
   gradient: { from: string; to: string };
+  asignacionId: string;
 }): React.JSX.Element {
-  return (
+  const content = (
     <div
-      className="relative rounded-xl p-4"
+      className="relative rounded-xl p-4 transition-transform hover:scale-[1.02]"
       style={{
         width: 280,
         height: 120,
         background: `linear-gradient(180deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
         border: '1px solid #334155',
+        cursor: status === 'locked' ? 'not-allowed' : 'pointer',
       }}
     >
       {/* Title */}
@@ -143,7 +133,7 @@ function LessonCard({
         }}
       >
         <div
-          className="h-full rounded-full"
+          className="h-full rounded-full transition-all"
           style={{
             width: `${progress}%`,
             backgroundColor: status === 'completed' ? '#22C55E' : '#60A5FA',
@@ -185,10 +175,99 @@ function LessonCard({
       </div>
     </div>
   );
+
+  if (status === 'locked') {
+    return content;
+  }
+
+  return <Link href={`/estudiante/portal/leccion/${asignacionId}`}>{content}</Link>;
+}
+
+function EmptyState(): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center justify-center gap-4 py-16">
+      <div
+        className="flex items-center justify-center rounded-full"
+        style={{ width: 80, height: 80, backgroundColor: 'rgba(59,130,246,0.2)' }}
+      >
+        <BookOpen size={40} color="#60A5FA" />
+      </div>
+      <h3
+        style={{
+          fontFamily: 'var(--font-inter), Inter, sans-serif',
+          fontSize: 20,
+          fontWeight: 700,
+          color: '#FFFFFF',
+        }}
+      >
+        No tenés lecciones en progreso
+      </h3>
+      <p
+        style={{
+          fontFamily: 'var(--font-inter), Inter, sans-serif',
+          fontSize: 14,
+          fontWeight: 500,
+          color: '#94A3B8',
+          textAlign: 'center',
+        }}
+      >
+        Explorá los mundos para comenzar tu aventura de aprendizaje
+      </p>
+      <Link
+        href="/estudiante/portal/mundos"
+        className="mt-2 px-6 py-3 rounded-xl transition-transform hover:scale-105"
+        style={{ backgroundColor: '#3B82F6' }}
+      >
+        <span
+          style={{
+            fontFamily: 'var(--font-inter), Inter, sans-serif',
+            fontSize: 14,
+            fontWeight: 600,
+            color: '#FFFFFF',
+          }}
+        >
+          Explorar Mundos
+        </span>
+      </Link>
+    </div>
+  );
 }
 
 export default function MiProgresoPage(): React.JSX.Element {
   const router = useRouter();
+  const { data: progreso, isLoading: isLoadingProgreso } = useMiProgreso();
+  const { data: aula, isLoading: isLoadingAula } = useMiAula();
+
+  // Calcular estadísticas
+  const stats = useMemo(() => {
+    const enProgreso = aula?.resumen.totalClasesActivas ?? 0;
+    const completadas = aula?.resumen.totalClasesCompletadas ?? 0;
+    const xp = progreso?.gamificacion.xpTotal ?? 0;
+    const racha = progreso?.racha.rachaActual ?? 0;
+
+    return {
+      enProgreso: enProgreso.toString(),
+      completadas: completadas.toString(),
+      xp: xp.toLocaleString('es-AR'),
+      racha: `${racha} ${racha === 1 ? 'día' : 'días'}`,
+    };
+  }, [aula, progreso]);
+
+  // Agrupar planificaciones por sector con progreso > 0
+  const sectoresConProgreso = useMemo(() => {
+    if (!aula?.sectores) return [];
+
+    return aula.sectores
+      .map((sector) => ({
+        ...sector,
+        planificaciones: sector.planificaciones.filter(
+          (p) => p.progreso.porcentaje > 0 || p.progreso.clasesActivas > 0,
+        ),
+      }))
+      .filter((sector) => sector.planificaciones.length > 0);
+  }, [aula]);
+
+  const isLoading = isLoadingProgreso || isLoadingAula;
 
   return (
     <CosmicBackground
@@ -278,15 +357,34 @@ export default function MiProgresoPage(): React.JSX.Element {
             padding: '0 48px',
           }}
         >
-          {STATS.map((stat) => (
-            <StatCard
-              key={stat.id}
-              value={stat.value}
-              label={stat.label}
-              color={stat.color}
-              icon={stat.icon}
-            />
-          ))}
+          <StatCard
+            value={stats.enProgreso}
+            label="En progreso"
+            color="#3B82F6"
+            icon={Loader2}
+            isLoading={isLoading}
+          />
+          <StatCard
+            value={stats.completadas}
+            label="Completadas"
+            color="#22C55E"
+            icon={CheckCircle}
+            isLoading={isLoading}
+          />
+          <StatCard
+            value={stats.xp}
+            label="XP ganados"
+            color="#F59E0B"
+            icon={Zap}
+            isLoading={isLoading}
+          />
+          <StatCard
+            value={stats.racha}
+            label="Racha actual"
+            color="#EF4444"
+            icon={Flame}
+            isLoading={isLoading}
+          />
         </div>
 
         {/* Content Area */}
@@ -299,46 +397,74 @@ export default function MiProgresoPage(): React.JSX.Element {
             padding: '0 48px',
           }}
         >
-          {SECTIONS.map((section) => (
-            <div key={section.id} className="flex flex-col gap-3">
-              {/* Section Header */}
-              <div className="flex items-center justify-between h-[30px]">
-                <span
-                  style={{
-                    fontFamily: 'var(--font-inter), Inter, sans-serif',
-                    fontSize: 16,
-                    fontWeight: 800,
-                    color: section.color,
-                  }}
-                >
-                  {section.title}
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-inter), Inter, sans-serif',
-                    fontSize: 14,
-                    fontWeight: 500,
-                    color: '#64748B',
-                  }}
-                >
-                  {section.count}
-                </span>
-              </div>
-
-              {/* Lessons Grid */}
-              <div className="flex gap-4">
-                {section.lessons.map((lesson) => (
-                  <LessonCard
-                    key={lesson.id}
-                    title={lesson.title}
-                    progress={lesson.progress}
-                    status={lesson.status as 'in-progress' | 'completed' | 'locked'}
-                    gradient={section.gradient}
-                  />
-                ))}
-              </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
             </div>
-          ))}
+          ) : sectoresConProgreso.length === 0 ? (
+            <EmptyState />
+          ) : (
+            sectoresConProgreso.map((sector) => {
+              const sectorKey = sector.nombre.toUpperCase().replace(/\s+/g, '_');
+              const sectorColor = SECTOR_COLORS[sectorKey] ?? '#3B82F6';
+              const sectorGradient = SECTOR_GRADIENTS[sectorKey] ?? {
+                from: '#1E3A5F',
+                to: '#0F172A',
+              };
+
+              return (
+                <div key={sector.id} className="flex flex-col gap-3">
+                  {/* Section Header */}
+                  <div className="flex items-center justify-between h-[30px]">
+                    <span
+                      style={{
+                        fontFamily: 'var(--font-inter), Inter, sans-serif',
+                        fontSize: 16,
+                        fontWeight: 800,
+                        color: sectorColor,
+                      }}
+                    >
+                      {sector.nombre.toUpperCase()}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: 'var(--font-inter), Inter, sans-serif',
+                        fontSize: 14,
+                        fontWeight: 500,
+                        color: '#64748B',
+                      }}
+                    >
+                      {sector.planificaciones.length}{' '}
+                      {sector.planificaciones.length === 1 ? 'planificación' : 'planificaciones'}
+                    </span>
+                  </div>
+
+                  {/* Lessons Grid */}
+                  <div className="flex gap-4 flex-wrap">
+                    {sector.planificaciones.map((plan) => {
+                      const status =
+                        plan.progreso.porcentaje >= 100
+                          ? 'completed'
+                          : plan.progreso.porcentaje > 0
+                            ? 'in-progress'
+                            : 'locked';
+
+                      return (
+                        <LessonCard
+                          key={plan.asignacionId}
+                          title={plan.planificacion.titulo}
+                          progress={plan.progreso.porcentaje}
+                          status={status}
+                          gradient={sectorGradient}
+                          asignacionId={plan.asignacionId}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </CosmicBackground>
