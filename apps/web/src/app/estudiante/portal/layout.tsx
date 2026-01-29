@@ -1,14 +1,21 @@
-import type { Metadata } from 'next';
+import { PortalEstudianteClientLayout } from './PortalEstudianteClientLayout';
 
-export const metadata: Metadata = {
-  title: 'Portal Estudiante | Mateatletas',
-  description: 'Tu aventura de aprendizaje comienza aquí',
-};
+/**
+ * Layout Server Component para el Portal Estudiante
+ *
+ * Este es un Server Component que:
+ * 1. Exporta dynamic='force-dynamic' para evitar SSG (el portal usa auth)
+ * 2. Envuelve el Client Layout que maneja autenticación y contexto
+ */
 
-export default function PortalLayout({
+// Forzar renderizado dinámico - evita SSG porque el portal usa
+// sessionStorage y localStorage (Zustand persist) para autenticación
+export const dynamic = 'force-dynamic';
+
+export default function PortalEstudianteLayout({
   children,
 }: {
   children: React.ReactNode;
 }): React.JSX.Element {
-  return <>{children}</>;
+  return <PortalEstudianteClientLayout>{children}</PortalEstudianteClientLayout>;
 }
